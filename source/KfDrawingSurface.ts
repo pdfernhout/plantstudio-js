@@ -43,7 +43,7 @@ export class KfDrawingSurface {
     }
     
     initialize(): void {
-        //backColor := clLtGray;
+        // backColor := clLtGray;
         //  foreColor := clLtGray;
         //  lineColor := clLtGray;
         this.lineWidth = 1.0
@@ -176,12 +176,12 @@ export class KfDrawingSurface {
     
     drawLineFromTo(startPoint: KfPoint3D, endPoint: KfPoint3D): KfTriangle | null {
         if (this.recording) {
-            //store triangle
+            // store triangle
             const triangle = this.allocateTriangle()
             triangle.points[0] = startPoint
             triangle.points[1] = endPoint
             triangle.isLine = true
-            //need to handle drawing surface colors
+            // need to handle drawing surface colors
             triangle.foreColor = this.foreColor
             triangle.backColor = this.backColor
             triangle.lineColor = this.lineColor
@@ -196,10 +196,10 @@ export class KfDrawingSurface {
     
     basicDrawLineFromTo(startPoint: KfPoint3D, endPoint: KfPoint3D): void {
         if (this.pane === null) {
-            //assuming pen color and width is saved and restored elsewhere
+            // assuming pen color and width is saved and restored elsewhere
             return
         }
-        //do nothing if rounding fails
+        // do nothing if rounding fails
         try {
             this.pane.Pen.Width = intround(this.lineWidth) % 1000
             this.pane.Pen.Color = this.lineColor
@@ -216,44 +216,44 @@ export class KfDrawingSurface {
         throw new Error("Problem: draw3DFace method not supported in base class; in method KfDrawingSurface.draw3DFace.")
     }
     
-    //terminology is different: drawing surface frontColor is pen line color 
+    // terminology is different: drawing surface frontColor is pen line color 
     // and drawing surface backColor (which should be back-facing triangle) is fill color
-    //drawing surface draws the last triangle allocated - and deallocates it if needed
+    // drawing surface draws the last triangle allocated - and deallocates it if needed
     drawLastTriangle(): void {
-        //last allocated triangle
+        // last allocated triangle
         const triangle = this.triangles[this.numTrianglesUsed - 1]
         triangle.isLine = false
         triangle.updateGeometry()
-        //PDF FIX - maybe should scale this?
+        // PDF FIX - maybe should scale this?
         triangle.lineWidth = this.lineWidth
         triangle.lineColor = this.lineColor
         triangle.foreColor = this.foreColor
         triangle.backColor = this.backColor
         if (this.recording) {
-            //"store triangle"
-            //do nothing as already stored
+            // "store triangle"
+            // do nothing as already stored
         } else {
             this.basicDrawTriangle(triangle)
-            //deallocate it
+            // deallocate it
             this.numTrianglesUsed -= 1
         }
     }
     
-    //pdf - draw the triangle object - assume it is reasonably flat"
-    //{can only draw triangles for now
-    //needs fixed size for array - would need to allocate for variable sizes
-    //or could use direct windows triangle call and larger array but pass number of points
-    //terminology is different: drawing surface frontColor is pen line color
-    //and drawing surface backColor (which should be back-facing triangle) is fill color"
-    //restricting range of coordingates to 32767 to prevent possible out of range errors when drawing
+    // pdf - draw the triangle object - assume it is reasonably flat"
+    // {can only draw triangles for now
+    // needs fixed size for array - would need to allocate for variable sizes
+    // or could use direct windows triangle call and larger array but pass number of points
+    // terminology is different: drawing surface frontColor is pen line color
+    // and drawing surface backColor (which should be back-facing triangle) is fill color"
+    // restricting range of coordingates to 32767 to prevent possible out of range errors when drawing
     basicDrawTriangle(triangle: KfTriangle): void {
         if (this.pane === null) {
             return
         }
         if ((triangle.isLine)) {
-            //do nothing if round fails or assign to integer fails
+            // do nothing if round fails or assign to integer fails
             try {
-                //draw line
+                // draw line
                 this.pane.Pen.Width = intround(triangle.lineWidth)
                 this.pane.Pen.Color = triangle.lineColor
                 this.pane.Pen.Style = delphi_compatability.TFPPenStyle.psSolid
@@ -282,7 +282,7 @@ export class KfDrawingSurface {
                 pointArray[i].X = intround(aPoint.x) % 32767
                 pointArray[i].Y = intround(aPoint.y) % 32767
             } catch (e) {
-                //maybe could test sign to put in negative big numbers? watch out for NaNs!
+                // maybe could test sign to put in negative big numbers? watch out for NaNs!
                 pointArray[i].X = 32767
                 pointArray[i].Y = 32767
             }
