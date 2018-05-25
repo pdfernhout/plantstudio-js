@@ -1,0 +1,186 @@
+begin TO {
+
+end; TO }
+
+:= TO =
+
+self. TO this.
+
+' TO "
+
+result = TO return
+EXCEPT may be using that as an intermediate variable...
+IN WHICH CASE "let result" and then at end "return result"
+
+{ } TO //
+BY REGEX: {(.*)} TO // $1
+
+FIX if ... then
+BY REGEX: if (.*) then TO if ($1)
+
+<> TO !==
+
+:= TO =
+
+nil TO null
+but may also be undefined...
+
+====
+class definition
+remove prefix on procedures and functions
+EXAMPLE REGEX procedure KfCommandList\.(.*); TO $1(): void
+
+procedures GET empty () added
+
+enums GET enum Type = { one, two, three }
+
+
+while do TO while {
+
+TList TO []
+list.count TO list.length
+
+and TO &&
+
+dec(X) TO X--
+
+case of class names may not be correct
+; TO , IN function parameters
+
+REGEX ;\n TO \n
+
+SEARCH for possible procedure calls without parens:
+\.[^(]
+
+
+======
+
+Automated conversion:
+
+Some type delcarations get confused with variable delclarations: 
+   TSVariableDisplayOptions = boolean[] /* 5 + 1 */
+Should be:
+   export type TSVariableDisplayOptions = boolean[] /* 5 + 1 */
+
+
+When you assign records with "=" like "a = b", Delphi implicitly does a copy from record to record.
+If the records are replaced by objects, to be safe,
+you should assign a with a new object that is a copy of b.
+Otherwise, modifications of a would affect b.
+
+Cooments don;t always end up in the right place.
+Typically they may be a bit lower inside a section if they were before a section.
+But they may also be quite a bit lower in a following section.
+
+TODO Fix TS Inheritance:
+    TSVariable.prototype = new TSDraggableObject()
+    TSVariable.prototype.constructor = TSVariable 
+
+TODO: do not add "// const"
+
+TODO: switch statement missing final closing brace "}"
+
+for functions that return a result, typically redundant code that can be delete.
+Use let or const later in the function's code to clean things up.
+
+TODO: enum variables with be delclared with a new of the type.
+  state: TSVariableState = new TSVariableState()
+
+Convert TList to native array. But should add type to the array.
+Might want to consider emulating Delphi array if had a lot of them.
+
+Need to reason about destroy methods before deletign them (or renaming them).
+They may need to be called manually if they have larger side effects like reference counting.
+Suggest adding "Manually" at end in such cases to have "destroyManually" and then calling it when needed.
+You would need to change ".free" to ".destroyManually()" in such cases.
+
+Delphi type casts need to be removed or converted. Example:
+   TSDesiredStateVariableWrapper(this.requirements[i]).variable.requirementsUseages -= 1
+after delcaring: requirements: TSDesiredStateVariableWrapper[] = []
+   this.requirements[i].variable.requirementsUseages -= 1
+
+Delphi strings are 1-based not 0-based!!!
+
+Failed to put string as return type instead of void:
+   recordReplyMoveChanges(changedVariablesList: TSChangedVariableWrapper[], totalReply: string, contextToFocusTo: TSVariable): void
+Maybe got confused by needing manual fixup for assignment to a parameter?
+
+TODO: need to handle super calls better for TS:
+  TSDraggableObject.prototype.setPosition.call(this, firstPart)
+Becomes:
+  super.setPosition(firstPart)
+
+TODO: double parens on conditional (probably not worth fixing)
+   if ((rule.selected)) {
+
+Watch out for where the converter tries to be helpful by changing case on some variables (incorrectly)
+    if (Rect.bottom < Rect.top) {
+        Rect.top, Rect.bottom = swapIntegers(Rect.top, Rect.bottom)
+    }
+
+Static methods not converted correctly:
+  TSRule.headerForField
+
+TODO: TList .Count should generally become .length
+
+TODO (too hard to do automatically?) <= x - 1 SHOULD BECOME < x
+
+TODO: delphi_compatability.Assigned(...) wrapper can be removed leaving only ...
+
+TODO: Constants on units are reachable through the unit.
+Not sure how to change translation where they are not exported.
+
+Need to rethink UI from independent windows to one or more web pages.
+Need to rethink storage from files to a mix of server calls, local storage, and indexeddb.
+Ideally need to move from classes accesing globals to more testable independent classes (manual DI).
+
+==== UI Form changes moving from Delphi to Mithril
+
+With Mithril, no longer need to name each field.
+
+With Mithril, no longer need to update each component's internal state when other things change (usually).
+
+With Mithril, no longer need to have explicit positions for most components.
+With Mithril, no longer need to do a lot of complex sizing calculaitons.
+
+With Mithril, you do need to rethink component placement and user interactions.
+With Mithril, need to rethink how floating windows are replaced by flowing pages with floating panels.
+
+With Mithril, can use unicode characters instead of custom glyphs (at least to start).
+
+Overall, with Mithril, probably easier to mostly start over with many forms and copy over bits of code as needed --
+rather than try to work from the generated lfm.ts file.
+The exception may be data entry forms like the wizards where there is a lot of text.
+
+It has been very useful (almost essential) to look at screenshots of the previous application
+and also consult the related help documentaiton: http://www.kurtz-fernhout.com/StoryHarp/screens.htm
+
+Scrollbars generally go away as manually managed things to be replaced with HTML "overflow: auto".
+Menus become action buttons and toggle button state indicators.
+Splitters may go away -- or might be kept?
+Try to make the current state of the application and available actions more visible.
+
+To eliminate extra comments in lfm files replace this regex with nothing (without quotes): "^ *// .*\n"
+
+With Mithril, you may need an intermediate state-holding object in forms
+because the state is no held in the UI elements -- unless you want to directly edit your domain objects.
+
+Suprising how it is not easy to access one dynamically created component from a sibling component in Mithril.
+May require application design changes.
+
+Radio button generation is messed up. The button text is not displayed.
+The label text needs to be after the entire radio button input.
+Should also use the general label functionality.
+
+Watch out for checks for null in Delphi where in JavaScript they might also be undefined if not initialized.
+A fix is to initialize the value to null -- or to change the test.
+
+When working on a big file you are subdividing into other class files like, say, the rule editor,
+it would be best to copy the original files into the main source directory and then delete parts as you use them.
+This will make it easier to see what remains to be implemented -- or eventually discarded.
+
+Good idea to create Domain object first and put in stub methods
+if needed. This reduces the need for substantial later re-engineering.
+
+Ideally the top level Domain object should have only data fields -- no behavior.
+If it has pointers to instances of forms or helper classes, those should have all the behavior.
