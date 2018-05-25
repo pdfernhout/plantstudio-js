@@ -23,7 +23,7 @@ let SinCache: float[] = new Array(kFastTrigArraySize)
 let CosCache: float[]  = new Array(kFastTrigArraySize)
 
 
-//if you change this - you need to change angleX etc. functions
+// if you change this - you need to change angleX etc. functions
 // record
 export interface TRealRect {
     top: float
@@ -51,17 +51,17 @@ function fastTrigInitialize(): void {
     let i: int
     
     for (i = 0; i <= kFastTrigArraySize - 1; i++) {
-        //Approach: sine and cosine arrays are used for speed. Angles are 0 - 255 instead of 0 to 359
-        //PDF - maybe want to expand this to 0 - 1023? - would impact rotate callers
+        // Approach: sine and cosine arrays are used for speed. Angles are 0 - 255 instead of 0 to 359
+        // PDF - maybe want to expand this to 0 - 1023? - would impact rotate callers
         SinCache[i] = Math.sin(i * 2 * 3.141592654 / kFastTrigArraySize)
         CosCache[i] = Math.cos(i * 2 * 3.141592654 / kFastTrigArraySize)
     }
 }
 
-//these functions are no longer called here but are available for other uses
-//they were bundled directly into rotate
-//moved bounding angle into cache range into functions to decrease function overhead
-//copied these functions into rotate to decrease overhead there - both of function call and of bounding angle twice
+// these functions are no longer called here but are available for other uses
+// they were bundled directly into rotate
+// moved bounding angle into cache range into functions to decrease function overhead
+// copied these functions into rotate to decrease overhead there - both of function call and of bounding angle twice
 function fastTrigCos(angle: float): float {
     let result = 0.0
     let boundedAngle: int
@@ -195,15 +195,15 @@ export class KfMatrix {
     
     // ---------------------------------------------------------------------------- KfMatrix moving and transforming 
     move(distance: float): void {
-        //pdf - move a distance by multiplying matrix values
+        // pdf - move a distance by multiplying matrix values
         //   movement is along x axis (d, 0, 0, 1);
         this.position.x = this.position.x + distance * this.a0
         this.position.y = this.position.y + distance * this.b0
         this.position.z = this.position.z + distance * this.c0
     }
     
-    //pdf - transform the point, including offsetting it by the current position
-    //Alters the point's contents
+    // pdf - transform the point, including offsetting it by the current position
+    // Alters the point's contents
     transform(aPoint3D: KfPoint3D): void {
         let x: float
         let y: float
@@ -224,15 +224,15 @@ export class KfMatrix {
         let temp1: float
         let boundedAngleIndex: int
         
-        //bound angle and convert to index
-        //not doing try except around round for speed here - could fail ...
+        // bound angle and convert to index
+        // not doing try except around round for speed here - could fail ...
         boundedAngleIndex = intround(angle) % kFastTrigArraySize
         if ((boundedAngleIndex < 0)) {
             boundedAngleIndex = kFastTrigArraySize + boundedAngleIndex
         }
         cosAngle = CosCache[boundedAngleIndex]
         sinAngle = SinCache[boundedAngleIndex]
-        //moved minuses to middle to optimize
+        // moved minuses to middle to optimize
         this.a0 = this.a0
         temp1 = (this.a1 * cosAngle) - (this.a2 * sinAngle)
         this.a2 = (this.a1 * sinAngle) + (this.a2 * cosAngle)
@@ -253,8 +253,8 @@ export class KfMatrix {
         let temp0: float
         let boundedAngleIndex: int
         
-        //bound angle and convert to index
-        //not doing try except around round for speed here - could fail ...
+        // bound angle and convert to index
+        // not doing try except around round for speed here - could fail ...
         boundedAngleIndex = intround(angle) % kFastTrigArraySize
         if ((boundedAngleIndex < 0)) {
             boundedAngleIndex = kFastTrigArraySize + boundedAngleIndex
@@ -263,17 +263,17 @@ export class KfMatrix {
         sinAngle = SinCache[boundedAngleIndex]
         temp0 = (this.a0 * cosAngle) + (this.a2 * sinAngle)
         this.a1 = this.a1
-        //flipped to put minus in middle
+        // flipped to put minus in middle
         this.a2 = (this.a2 * cosAngle) - (this.a0 * sinAngle)
         this.a0 = temp0
         temp0 = (this.b0 * cosAngle) + (this.b2 * sinAngle)
         this.b1 = this.b1
-        //flipped to put minus in middle
+        // flipped to put minus in middle
         this.b2 = (this.b2 * cosAngle) - (this.b0 * sinAngle)
         this.b0 = temp0
         temp0 = (this.c0 * cosAngle) + (this.c2 * sinAngle)
         this.c1 = this.c1
-        //flipped to put minus in middle
+        // flipped to put minus in middle
         this.c2 = (this.c2 * cosAngle) - (this.c0 * sinAngle)
         this.c0 = temp0
     }
@@ -286,11 +286,11 @@ export class KfMatrix {
         
         //
         //  {bound angle and convert to index}
-        //	{not doing try except around round for speed here - could fail ...}
+        //  {not doing try except around round for speed here - could fail ...}
         //  {boundedAngleIndex := round(angle) mod kFastTrigArraySize;
         //  if (boundedAngleIndex  < 0) then
         //  	boundedAngleIndex := kFastTrigArraySize + boundedAngleIndex;
-        //	cosAngle := CosCache[boundedAngleIndex];
+        //  cosAngle := CosCache[boundedAngleIndex];
         //  sinAngle := SinCache[boundedAngleIndex];}
         //                          { cfk try at replacing rounding with using all floating point }
         //  cosAngle := cos(angle * 2.0 * 3.14159 / 256.0);
@@ -309,15 +309,15 @@ export class KfMatrix {
         //  c1 :=  (c0 * sinAngle) + (c1 * cosAngle);
         //  c2 := c2;
         //  c0 := temp0;    
-        //bound angle and convert to index
-        //not doing try except around round for speed here - could fail ...
+        // bound angle and convert to index
+        // not doing try except around round for speed here - could fail ...
         boundedAngleIndex = intround(angle) % kFastTrigArraySize
         if ((boundedAngleIndex < 0)) {
             boundedAngleIndex = kFastTrigArraySize + boundedAngleIndex
         }
         cosAngle = CosCache[boundedAngleIndex]
         sinAngle = SinCache[boundedAngleIndex]
-        //minuses moved to middle to optimize
+        // minuses moved to middle to optimize
         temp0 = (this.a0 * cosAngle) - (this.a1 * sinAngle)
         this.a1 = (this.a0 * sinAngle) + (this.a1 * cosAngle)
         this.a2 = this.a2
@@ -332,9 +332,9 @@ export class KfMatrix {
         this.c0 = temp0
     }
     
-    //class SinCache CosCache
+    // class SinCache CosCache
     // ---------------------------------------------------------------------------------- KfMatrix returning current angles 
-    //PDF FIX - potential bug
+    // PDF FIX - potential bug
     // these do not take in account kFastTrigArraySize could be different from 256
     angleX(): byte {
         let result = 0
@@ -425,7 +425,7 @@ export class KfMatrix {
     
 }
 
-//these can only be triangular
+// these can only be triangular
 export class KfTriangle {
     foreColor: TColor
     backColor: TColor

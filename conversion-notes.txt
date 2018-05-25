@@ -1,0 +1,5 @@
+Conversion notes and tips
+
+Add space after comments with regex:
+//([^ ])
+// $1
