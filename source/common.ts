@@ -5,6 +5,6 @@ export type short = number
 export type byte = number
 export type TColor = number
 
-export function intround(x) {
+export function intround(x: number) {
     return Math.round(x)
 }

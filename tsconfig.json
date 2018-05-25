@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "module": "amd",
+        "target": "es6",
+        "noImplicitAny": true,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "sourceMap": false,
+        "strictNullChecks": true,
+        "outDir": "dist",
+    },
+    "include": [
+        "source/**/*",
+        "tests-interactive/**/*",
+        "tests/**/*"
+    ]
+}
