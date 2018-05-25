@@ -17,9 +17,9 @@ import delphi_compatability
 const kInitialTurtleMatrixStackDepth = 250
 
 
-//OpenGL,
-//if this is defined - turtle will draw axis marks for each line segment
-//put spaces before and after the $ to disable
+// OpenGL,
+// if this is defined - turtle will draw axis marks for each line segment
+// put spaces before and after the $ to disable
 // $ DEFINE DEBUG_TURTLE
 // general options 
 // record
@@ -45,7 +45,7 @@ let gDefaultTurtle: KfTurtle
 let gDefaultTurtleInUse: boolean
 
 
-//if the DEBUG_TURTLE flag is defined then draw axis information
+// if the DEBUG_TURTLE flag is defined then draw axis information
 // PDF PORT Issue
 function debugDrawInMillimeters(turtle: KfTurtle, mm: float): void {
     let oldPosition: KfPoint3d
@@ -71,7 +71,7 @@ function debugDrawAxis(turtle: KfTurtle, pixels: float): void {
 
 
 // speed optimizations 
-//PDF FIX - may want to think about size of recorded points
+// PDF FIX - may want to think about size of recorded points
 export class KfTurtle {
     matrixStack: TListCollection = new TListCollection()
     numMatrixesUsed: long = 0
@@ -85,8 +85,8 @@ export class KfTurtle {
     drawOptions: PlantDrawOptionsStructure = new PlantDrawOptionsStructure()
     writingTo: short = 0
     
-    //for darkerColor
-    //temp
+    // for darkerColor
+    // temp
     // ---------------------------------------------------------------------------------- *KfTurtle creating/destroying 
     create(): void {
         let i: long
@@ -102,7 +102,7 @@ export class KfTurtle {
         this.matrixStack.Add(this.currentMatrix)
         this.numMatrixesUsed = 1
         for (i = 0; i <= kInitialTurtleMatrixStackDepth; i++) {
-            //start with a bunch of matrixes
+            // start with a bunch of matrixes
             this.matrixStack.Add(u3dsupport.KfMatrix.create)
         }
         this.recordedPointsInUse = 0
@@ -121,7 +121,7 @@ export class KfTurtle {
     // 3d file export
     createFor3DOutput(anOutputType: short, aFileName: string): void {
         this.create()
-        //already created
+        // already created
         this.drawingSurface.free
         this.drawingSurface = null
         switch (anOutputType) {
@@ -240,7 +240,7 @@ export class KfTurtle {
     
     positionCopy(): KfPoint3D {
         let result = new KfPoint3D()
-        //suspicious things that call this may not clean up copy
+        // suspicious things that call this may not clean up copy
         result = this.currentMatrix.position
         return result
     }
@@ -431,7 +431,7 @@ export class KfTurtle {
             result.Bottom = intround(this.realBoundsRect.bottom)
             result.Right = intround(this.realBoundsRect.right)
         } catch (e) {
-            //might want to be more precise in assigning a rect
+            // might want to be more precise in assigning a rect
             result.Top = -32767
             result.Left = -32767
             result.Bottom = 32767
@@ -473,7 +473,7 @@ export class KfTurtle {
     
     transformAndRecord(originalPoint3D: KfPoint3D, theScale_pixelsPerMm: float): KfPoint3d {
         let result = new KfPoint3d()
-        //transform and scale point and record the new location without moving
+        // transform and scale point and record the new location without moving
         result = originalPoint3D
         utdo.KfPoint3D_scaleBy(result, theScale_pixelsPerMm * this.scale_pixelsPerMm)
         this.currentMatrix.transform(result)
@@ -535,14 +535,14 @@ export class KfTurtle {
         this.drawingSurface.lineWidth = 2
         this.drawingSurface.lineColor = delphi_compatability.clRed
         this.push()
-        //will flip so draw Y (sic)
+        // will flip so draw Y (sic)
         this.rotateZ(64)
         debugDrawAxis(this, 100.0)
         this.pop()
         this.drawingSurface.lineWidth = 1
         this.drawingSurface.lineColor = delphi_compatability.clBlue
         this.push()
-        //will flip so draw Z (sic)
+        // will flip so draw Z (sic)
         this.rotateY(64)
         debugDrawAxis(this, 100.0)
         this.pop()
@@ -572,7 +572,7 @@ export class KfTurtle {
     
     drawTriangleFromIndexes(aPointIndex: long, bPointIndex: long, cPointIndex: long, partID: long): KfTriangle {
         let result = new KfTriangle()
-        //drawing surface takes over ownership of triangle
+        // drawing surface takes over ownership of triangle
         result = this.drawingSurface.allocateTriangle()
         this.drawingSurface.lineWidth = 1.0
         result.points[0] = this.recordedPoints[aPointIndex - 1]
@@ -586,7 +586,7 @@ export class KfTurtle {
     drawTrianglesFromBoundsRect(boundsRect: TRect): void {
         let aTriangle: KfTriangle
         
-        //drawing surface takes over ownership of triangle
+        // drawing surface takes over ownership of triangle
         this.drawingSurface.lineWidth = 1.0
         aTriangle = this.drawingSurface.allocateTriangle()
         aTriangle.points[0].x = boundsRect.Left
@@ -612,7 +612,7 @@ export class KfTurtle {
         if (this.recordedPointsInUse !== 3) {
             throw new GeneralException.create("Problem: Triangle made without three points in method KfTurtle.drawTriangle.")
         }
-        //drawing surface owns triangle
+        // drawing surface owns triangle
         triangle = this.drawingSurface.allocateTriangle()
         triangle.points[0] = this.recordedPoints[0]
         triangle.points[1] = this.recordedPoints[1]
@@ -673,8 +673,8 @@ export class KfTurtle {
     }
     
     // ---------------------------------------------------------------------------------- KfTurtle defaulting 
-    //where the default turtle is used need a try..finally
-    //to ensure defaultStopUsing is called no matter what
+    // where the default turtle is used need a try..finally
+    // to ensure defaultStopUsing is called no matter what
     defaultStartUsing(): KfTurtle {
         let result = new KfTurtle()
         if (gDefaultTurtleInUse) {
@@ -702,4 +702,4 @@ export class KfTurtle {
     
 }
 
-//need to default free somewhere in project
+// need to default free somewhere in project
