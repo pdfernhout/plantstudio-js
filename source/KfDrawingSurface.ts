@@ -60,45 +60,29 @@ export class KfDrawingSurface {
     
     // ----------------------------------------------------------------------------- KfDrawingSurface managing triangles 
     clearTriangles(): void {
-        let i: long
-        
-        for (i = 0; i < this.numTrianglesUsed; i++) {
+        for (let i = 0; i < this.numTrianglesUsed; i++) {
             this.triangles[i].tdo = null
         }
         this.numTrianglesUsed = 0
     }
     
     plantPartIDForPoint(point: TPoint): long {
-        let result = 0
-        let i: long
-        let triangle: KfTriangle
-        let points: TPoint[] = [new TPoint(), new TPoint(), new TPoint()]
-        let widenedPoints: TPoint[] = [new TPoint(), new TPoint(), new TPoint()]
-        let width: int
-        let thisDistance: float
-        let closestDistanceSoFar: float
-        let closestPartID: long
-        let centerX: float
-        let centerY: float
-        let x: float
-        let y: float
-        
-        x = point.X
-        y = point.Y
-        result = -1
-        closestDistanceSoFar = 0
-        closestPartID = -1
-        for (i = 0; i < this.triangles.length; i++) {
-            triangle = this.triangles[i]
+        let closestDistanceSoFar = 0
+        let closestPartID = -1
+        for (let i = 0; i < this.triangles.length; i++) {
+            const triangle = this.triangles[i]
             if (triangle.isLine) {
-                centerX = (triangle.points[0].x + triangle.points[1].x) / 2.0
-                centerY = (triangle.points[0].y + triangle.points[1].y) / 2.0
-                thisDistance = (centerX - x) * (centerX - x) + (centerY - y) * (centerY - y)
+                const centerX = (triangle.points[0].x + triangle.points[1].x) / 2.0
+                const centerY = (triangle.points[0].y + triangle.points[1].y) / 2.0
+                const x = point.X
+                const y = point.Y
+                const thisDistance = (centerX - x) * (centerX - x) + (centerY - y) * (centerY - y)
                 if ((closestPartID === -1) || (thisDistance < closestDistanceSoFar)) {
                     closestDistanceSoFar = thisDistance
                     closestPartID = triangle.plantPartID
                 }
             } else {
+                const points: TPoint[] = [new TPoint(), new TPoint(), new TPoint()]
                 points[0].X = intround(triangle.points[0].x)
                 points[0].Y = intround(triangle.points[0].y)
                 points[1].X = intround(triangle.points[1].x)
@@ -106,13 +90,11 @@ export class KfDrawingSurface {
                 points[2].X = intround(triangle.points[2].x)
                 points[2].Y = intround(triangle.points[2].y)
                 if (pointInTriangle(point, points)) {
-                    result = triangle.plantPartID
-                    return result
+                    return triangle.plantPartID
                 }
             }
         }
-        result = closestPartID
-        return result
+        return closestPartID
     }
     
     allocateTriangle(): KfTriangle {
@@ -128,18 +110,14 @@ export class KfDrawingSurface {
     }
     
     sortTrianglesConsideringTdos(): void {
-        let i: long
-        let triangle: KfTriangle
-        let oldValue: float
-        
         if (this.numTrianglesUsed <= 1) {
             return
         }
         if (this.sortTdosAsOneItem) {
-            for (i = 0; i <= this.numTrianglesUsed - 1; i++) {
-                triangle = this.triangles[i]
+            for (let i = 0; i < this.numTrianglesUsed; i++) {
+                const triangle = this.triangles[i]
                 if (!triangle.isLine) {
-                    oldValue = triangle.zForSorting
+                    const oldValue = triangle.zForSorting
                     if (triangle.tdo !== null) {
                         try {
                             // the 0.01 is to keep the polygons inside the tdo in order but still (usually) separate from other tdos
@@ -158,10 +136,6 @@ export class KfDrawingSurface {
     }
     
     sortTriangles(left: int, right: int): void {
-        let i: int
-        let j: int
-        let z: float
-
         function exchange(triangles: KfTriangle[], i: number, j: number) {
             const a = triangles[i]
             const b = triangles[j]
@@ -170,9 +144,9 @@ export class KfDrawingSurface {
         }
         
         if (right > left) {
-            z = this.triangles[right].zForSorting
-            i = left - 1
-            j = right
+            const z = this.triangles[right].zForSorting
+            let i = left - 1
+            let j = right
             while (true) {
                 do {
                     i = i + 1
@@ -193,10 +167,8 @@ export class KfDrawingSurface {
     
     // ----------------------------------------------------------------------------- KfDrawingSurface drawing 
     trianglesDraw(): void {
-        let i: int
-        
         if (this.numTrianglesUsed > 0) {
-            for (i = 0; i <= this.numTrianglesUsed - 1; i++) {
+            for (let i = 0; i < this.numTrianglesUsed; i++) {
                 this.basicDrawTriangle(this.triangles[i])
             }
         }
@@ -275,11 +247,6 @@ export class KfDrawingSurface {
     //and drawing surface backColor (which should be back-facing triangle) is fill color"
     //restricting range of coordingates to 32767 to prevent possible out of range errors when drawing
     basicDrawTriangle(triangle: KfTriangle): void {
-        let startPoint: KfPoint3D
-        let endPoint: KfPoint3D
-        let aPoint: KfPoint3D
-        let i: int
-        
         if (this.pane === null) {
             return
         }
@@ -290,8 +257,8 @@ export class KfDrawingSurface {
                 this.pane.Pen.Width = intround(triangle.lineWidth)
                 this.pane.Pen.Color = triangle.lineColor
                 this.pane.Pen.Style = delphi_compatability.TFPPenStyle.psSolid
-                startPoint = triangle.points[0]
-                endPoint = triangle.points[1]
+                const startPoint = triangle.points[0]
+                const endPoint = triangle.points[1]
                 this.pane.MoveTo(intround(startPoint.x) % 32767, intround(startPoint.y) % 32767)
                 this.pane.LineTo(intround(endPoint.x) % 32767, intround(endPoint.y) % 32767)
             } catch (e) {
@@ -303,7 +270,8 @@ export class KfDrawingSurface {
         // Make an array of four points
         const pointArray: TPoint[] = [new TPoint(), new TPoint(), new TPoint(), new TPoint()]
 
-        for (i = 0; i <= 3; i++) {
+        for (let i = 0; i <= 3; i++) {
+            let aPoint: KfPoint3D
             if (i < 3) {
                 // make last point same as first for drawing lines around whole polygon
                 aPoint = triangle.points[i]
@@ -339,7 +307,7 @@ export class KfDrawingSurface {
         if (this.circlingPoints) {
             this.pane.Pen.Color = this.circleColor
             this.pane.Brush.Color = this.circleColor
-            for (i = 0; i <= 2; i++) {
+            for (let i = 0; i <= 2; i++) {
                 this.pane.Ellipse(pointArray[i].X - this.circlePointRadius, pointArray[i].Y - this.circlePointRadius, pointArray[i].X + this.circlePointRadius, pointArray[i].Y + this.circlePointRadius)
             }
         }
