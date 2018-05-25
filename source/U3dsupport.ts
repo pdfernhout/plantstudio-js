@@ -58,11 +58,13 @@ function fastTrigInitialize(): void {
     }
 }
 
+fastTrigInitialize()
+
 // these functions are no longer called here but are available for other uses
 // they were bundled directly into rotate
 // moved bounding angle into cache range into functions to decrease function overhead
 // copied these functions into rotate to decrease overhead there - both of function call and of bounding angle twice
-function fastTrigCos(angle: float): float {
+export function fastTrigCos(angle: float): float {
     let result = 0.0
     let boundedAngle: int
     
@@ -78,7 +80,7 @@ function fastTrigCos(angle: float): float {
     return result
 }
 
-function fastTrigSin(angle: float): float {
+export function fastTrigSin(angle: float): float {
     let result = 0.0
     let boundedAngle: int
     
