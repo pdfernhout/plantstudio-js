@@ -437,7 +437,7 @@ export class KfTriangle {
     lineWidth: float = 0.0
     isLine: boolean = false
     points: KfPoint3D[] = [new KfPoint3D(), new KfPoint3D(), new KfPoint3D()]
-    tdo: Object | null // TODO: Should be: KfObject3D when that is defined and importable
+    tdo: { zForSorting: number } | null // TODO: Should be: KfObject3D when that is defined and importable
     plantPartID: long = 0
     
     // ---------------------------------------------------------------------------------- KfTriangle updating 

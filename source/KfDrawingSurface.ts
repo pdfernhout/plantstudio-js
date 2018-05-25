@@ -1,4 +1,4 @@
-// KfDrawingSurface was unit Udrawingsurface
+// KfDrawingSurface -- was unit Udrawingsurface
 
 import { TColor, short, long, float, int, intround } from "./common";
 import { KfPoint3D } from "./temporary";
@@ -16,8 +16,21 @@ import delphi_compatability
 // const
 const kInitialDrawingSurfaceTriangles = 1000
 
+// TODO: Optimize convertColor to bemore efficient; maybe add cache of common colors?
+function convertColor(color: number) {
+    var r = (color >> 16) & 255;
+    var g = (color >> 8) & 255
+    var b = color & 255
+    return "#" + "00" + hexForValue(r) + hexForValue(g) + hexForValue(b)
+}
+
+function hexForValue(c: number) {
+    var hex = c.toString(16)
+    return hex.length == 1 ? "0" + hex : hex
+}
+
 export class KfDrawingSurface {
-    pane: TCanvas = new TCanvas()
+    pane: CanvasRenderingContext2D | null
     lineContrastIndex: short = 0
     drawingLines: boolean = false
     fillingTriangles: boolean = true
@@ -33,8 +46,10 @@ export class KfDrawingSurface {
     circlePointRadius: short = 0
     sortTdosAsOneItem: boolean = false
     
-    // ----------------------------------------------------------------------------- *KfDrawingSurface creating/destroying 
-    constructor() {
+    // ----------------------- KfDrawingSurface creating/destroying 
+
+    constructor(context: CanvasRenderingContext2D | null) {
+        this.pane = context
         this.initialize()
         for (let i = 0; i <= kInitialDrawingSurfaceTriangles; i++) {
             // start with a bunch of triangles 
@@ -49,6 +64,7 @@ export class KfDrawingSurface {
         this.lineWidth = 1.0
         this.recording = false
         this.clearTriangles()
+        /* TODO: Maybe not needed as fillingTriangles is used when drawing
         if (this.pane !== null) {
             if (this.fillingTriangles) {
                 this.pane.Brush.Style = delphi_compatability.TFPBrushStyle.bsSolid
@@ -56,9 +72,11 @@ export class KfDrawingSurface {
                 this.pane.Brush.Style = delphi_compatability.TFPBrushStyle.bsClear
             }
         }
+        */
     }
     
-    // ----------------------------------------------------------------------------- KfDrawingSurface managing triangles 
+    // ----------------------- KfDrawingSurface managing triangles
+
     clearTriangles(): void {
         for (let i = 0; i < this.numTrianglesUsed; i++) {
             this.triangles[i].tdo = null
@@ -165,7 +183,8 @@ export class KfDrawingSurface {
         }
     }
     
-    // ----------------------------------------------------------------------------- KfDrawingSurface drawing 
+    // ----------------------- KfDrawingSurface drawing
+
     trianglesDraw(): void {
         if (this.numTrianglesUsed > 0) {
             for (let i = 0; i < this.numTrianglesUsed; i++) {
@@ -201,11 +220,14 @@ export class KfDrawingSurface {
         }
         // do nothing if rounding fails
         try {
-            this.pane.Pen.Width = intround(this.lineWidth) % 1000
-            this.pane.Pen.Color = this.lineColor
-            this.pane.Pen.Style = delphi_compatability.TFPPenStyle.psSolid
-            this.pane.MoveTo(intround(startPoint.x) % 32767, intround(startPoint.y) % 32767)
-            this.pane.LineTo(intround(endPoint.x) % 32767, intround(endPoint.y) % 32767)
+            this.pane.lineWidth = intround(this.lineWidth) % 1000
+            this.pane.strokeStyle = convertColor(this.lineColor)
+            // TODO: Use or remove: this.pane.Pen.Style = delphi_compatability.TFPPenStyle.psSolid
+
+            this.pane.beginPath()
+            this.pane.moveTo(intround(startPoint.x) % 32767, intround(startPoint.y) % 32767)
+            this.pane.lineTo(intround(endPoint.x) % 32767, intround(endPoint.y) % 32767)
+            this.pane.stroke()
         } catch (e) {
             // pass
         }
@@ -254,13 +276,17 @@ export class KfDrawingSurface {
             // do nothing if round fails or assign to integer fails
             try {
                 // draw line
-                this.pane.Pen.Width = intround(triangle.lineWidth)
-                this.pane.Pen.Color = triangle.lineColor
-                this.pane.Pen.Style = delphi_compatability.TFPPenStyle.psSolid
+                this.pane.lineWidth = intround(triangle.lineWidth)
+                this.pane.strokeStyle = convertColor(triangle.lineColor)
+                // TODO: Use or remove: this.pane.Pen.Style = delphi_compatability.TFPPenStyle.psSolid
+
                 const startPoint = triangle.points[0]
                 const endPoint = triangle.points[1]
-                this.pane.MoveTo(intround(startPoint.x) % 32767, intround(startPoint.y) % 32767)
-                this.pane.LineTo(intround(endPoint.x) % 32767, intround(endPoint.y) % 32767)
+                this.pane.beginPath()
+                this.pane.moveTo(intround(startPoint.x) % 32767, intround(startPoint.y) % 32767)
+                this.pane.lineTo(intround(endPoint.x) % 32767, intround(endPoint.y) % 32767)
+                this.pane.stroke()
+
             } catch (e) {
                 // pass
             }
@@ -269,6 +295,8 @@ export class KfDrawingSurface {
 
         // Make an array of four points
         const pointArray: TPoint[] = [new TPoint(), new TPoint(), new TPoint(), new TPoint()]
+
+        // TODO: Can probably drop last extra duplicate point because JavaScritp drawing will close polygon
 
         for (let i = 0; i <= 3; i++) {
             let aPoint: KfPoint3D
@@ -287,33 +315,44 @@ export class KfDrawingSurface {
                 pointArray[i].Y = 32767
             }
         }
-        this.pane.Pen.Style = delphi_compatability.TFPPenStyle.psSolid
-        this.pane.Brush.Color = triangle.visibleSurfaceColor()
+        // TODO: Use or remove: this.pane.Pen.Style = delphi_compatability.TFPPenStyle.psSolid
+        this.pane.fillStyle = convertColor(triangle.visibleSurfaceColor())
         if (this.drawingLines) {
             if (this.fillingTriangles) {
-                this.pane.Pen.Color = triangle.drawLinesColor(this.lineContrastIndex)
+                this.pane.strokeStyle = convertColor(triangle.drawLinesColor(this.lineContrastIndex))
             } else {
-                this.pane.Pen.Color = triangle.visibleSurfaceColor()
+                this.pane.strokeStyle = convertColor(triangle.visibleSurfaceColor())
             }
         } else {
-            this.pane.Pen.Color = triangle.visibleSurfaceColor()
+            this.pane.strokeStyle = convertColor(triangle.visibleSurfaceColor())
         }
-        this.pane.Pen.Width = 1
+        this.pane.lineWidth = 1
+
+        // Draw polygon or polyline
+        this.pane.beginPath()
+        this.pane.moveTo(pointArray[0].X, pointArray[0].Y)
+        // TODO: Could simplify because we know there are three points of interest in the triangle
+        for (let i = 1; i < pointArray.length; i++) {
+            this.pane.lineTo(pointArray[i].X, pointArray[i].Y)
+        }
+        this.pane.closePath()
         if (this.fillingTriangles) {
-            this.pane.Polygon(pointArray)
+            this.pane.fill()
         } else {
-            this.pane.Polyline(pointArray)
+            this.pane.stroke()
         }
+
         if (this.circlingPoints) {
-            this.pane.Pen.Color = this.circleColor
-            this.pane.Brush.Color = this.circleColor
+            this.pane.strokeStyle = convertColor(this.circleColor)
+            this.pane.fillStyle = convertColor(this.circleColor)
             for (let i = 0; i <= 2; i++) {
-                this.pane.Ellipse(pointArray[i].X - this.circlePointRadius, pointArray[i].Y - this.circlePointRadius, pointArray[i].X + this.circlePointRadius, pointArray[i].Y + this.circlePointRadius)
+                this.pane.arc(pointArray[i].X, pointArray[i].Y, this.circlePointRadius, 0, 2 * Math.PI);
             }
         }
     }
     
-    // ----------------------------------------------------------------------------- KfDrawingSurface recording 
+    // ----------------------- KfDrawingSurface recording
+
     recordingStart(): void {
         this.clearTriangles()
         this.recording = true
