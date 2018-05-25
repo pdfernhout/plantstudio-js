@@ -13,9 +13,6 @@ import ucollect
 import delphi_compatability
 */
 
-// const
-const kInitialDrawingSurfaceTriangles = 1000
-
 // TODO: Optimize convertColor to bemore efficient; maybe add cache of common colors?
 function convertColor(color: number) {
     var r = (color >> 16) & 255;
@@ -28,6 +25,8 @@ function hexForValue(c: number) {
     var hex = c.toString(16)
     return hex.length == 1 ? "0" + hex : hex
 }
+
+const kInitialDrawingSurfaceTriangles = 1000
 
 export class KfDrawingSurface {
     pane: CanvasRenderingContext2D | null
@@ -368,4 +367,3 @@ export class KfDrawingSurface {
     }
     
 }
-
