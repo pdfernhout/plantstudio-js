@@ -13,12 +13,14 @@ import ucollect
 import delphi_compatability
 */
 
-// TODO: Optimize convertColor to bemore efficient; maybe add cache of common colors?
+// TODO: Optimize convertColor to be more efficient; maybe add cache of common colors?
 function convertColor(color: number) {
     var r = (color >> 16) & 255;
     var g = (color >> 8) & 255
     var b = color & 255
-    return "#" + "00" + hexForValue(r) + hexForValue(g) + hexForValue(b)
+    const result = "#" + hexForValue(r) + hexForValue(g) + hexForValue(b)
+    console.log("convertColor", result, color)
+    return result
 }
 
 function hexForValue(c: number) {
@@ -345,7 +347,9 @@ export class KfDrawingSurface {
             this.pane.strokeStyle = convertColor(this.circleColor)
             this.pane.fillStyle = convertColor(this.circleColor)
             for (let i = 0; i <= 2; i++) {
+                this.pane.beginPath()
                 this.pane.arc(pointArray[i].X, pointArray[i].Y, this.circlePointRadius, 0, 2 * Math.PI);
+                this.pane.fill()
             }
         }
     }

@@ -4,31 +4,40 @@ import { TPoint } from "../source/TPoint"
 import { KfPoint3D } from "../source/temporary";
 
 const drawingSurface = new KfDrawingSurface(null)
-drawingSurface.backColor = 255
-drawingSurface.foreColor = 255 * 256
-drawingSurface.lineColor = 255 * 256 * 256
-drawingSurface.recordingStart()
-// drawing surface takes over ownership of triangle
-const triangle = drawingSurface.allocateTriangle()
-drawingSurface.lineWidth = 1.0
-const p1 = new KfPoint3D()
-p1.x = 0
-p1.y = 0
-p1.z = 0
-const p2 = new KfPoint3D()
-p2.x = 100
-p2.y = 0
-p2.z = 0
-const p3 = new KfPoint3D()
-p3.x = 50
-p3.y = 100
-p3.z = 0
-triangle.points[0] = p2
-triangle.points[1] = p1
-triangle.points[2] = p3
-triangle.plantPartID = 0
-drawingSurface.drawLastTriangle()
-drawingSurface.recordingStop()
+
+function drawATriangle() {
+    drawingSurface.backColor = 255
+    drawingSurface.foreColor = 255 * 256
+    drawingSurface.circleColor = 128 * 256 * 256
+    drawingSurface.lineColor = 255 * 256 * 256
+    drawingSurface.lineWidth = 1.0
+    drawingSurface.drawingLines = true
+    drawingSurface.circlePointRadius = 5
+    drawingSurface.circlingPoints = true
+    const p1 = new KfPoint3D()
+    p1.x = 40
+    p1.y = 40
+    p1.z = 0
+    const p2 = new KfPoint3D()
+    p2.x = 140
+    p2.y = 40
+    p2.z = 0
+    const p3 = new KfPoint3D()
+    p3.x = 90
+    p3.y = 140
+    p3.z = 0
+    drawingSurface.recordingStart()
+    // drawing surface takes over ownership of triangle
+    const triangle = drawingSurface.allocateTriangle()
+    triangle.points[0] = p1
+    triangle.points[1] = p2
+    triangle.points[2] = p3
+    triangle.plantPartID = 0
+    drawingSurface.drawLastTriangle()
+    drawingSurface.recordingStop()
+}
+
+drawATriangle()
 
 const MyComponent = { 
     view: () => m("div", 
@@ -46,6 +55,12 @@ const MyComponent = {
 
                 /*
                 context.beginPath()
+                context.arc(300, 300, 30, 0, 2 * Math.PI)
+                context.stroke()
+                */
+
+                /*
+                context.beginPath()
                 context.moveTo(0, 0)
                 context.lineTo(300, 100)
                 context.closePath()
@@ -53,6 +68,7 @@ const MyComponent = {
                 context.stroke()
                 */
                 drawingSurface.pane = context
+                // drawATriangle()
                 drawingSurface.recordingDraw()
                 console.log("drawingSurface", drawingSurface)
 
