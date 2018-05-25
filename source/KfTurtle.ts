@@ -151,7 +151,7 @@ export class KfTurtle {
     // -------------------------------------------------------------------------- KfTurtle initializing and setting values 
     reset(): void {
         this.numMatrixesUsed = 1
-        this.currentMatrix = this.matrixStack.Items[0]
+        this.currentMatrix = this.matrixStack[0]
         this.currentMatrix.initializeAsUnitMatrix()
         this.recordedPointsInUse = 0
         this.scale_pixelsPerMm = 1.0
@@ -233,46 +233,32 @@ export class KfTurtle {
     }
     
     exportingToFile(): boolean {
-        let result = false
         // cfk update this if create any mode that is NOT screen and NOT file
-        result = this.writingTo !== u3dexport.kScreen
-        return result
+        return this.writingTo !== u3dexport.kScreen
     }
     
     writingToDXF(): boolean {
-        let result = false
-        result = this.writingTo === u3dexport.kDXF
-        return result
+        return this.writingTo === u3dexport.kDXF
     }
     
     writingToPOV(): boolean {
-        let result = false
-        result = this.writingTo === u3dexport.kPOV
-        return result
+        return this.writingTo === u3dexport.kPOV
     }
     
     writingTo3DS(): boolean {
-        let result = false
-        result = this.writingTo === u3dexport.k3DS
-        return result
+        return this.writingTo === u3dexport.k3DS
     }
     
     writingToOBJ(): boolean {
-        let result = false
-        result = this.writingTo === u3dexport.kOBJ
-        return result
+        return this.writingTo === u3dexport.kOBJ
     }
     
     writingToVRML(): boolean {
-        let result = false
-        result = this.writingTo === u3dexport.kVRML
-        return result
+        return this.writingTo === u3dexport.kVRML
     }
     
     writingToLWO(): boolean {
-        let result = false
-        result = this.writingTo === u3dexport.kLWO
-        return result
+        return this.writingTo === u3dexport.kLWO
     }
     
     fileExportSurface(): KfFileExportSurface {
