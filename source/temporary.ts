@@ -7,6 +7,14 @@ export class KfPoint3D {
     x: float
     y: float
     z: float
+
+    constructor(point?: KfPoint3D) {
+        if (point) {
+            this.x = point.x
+            this.y = point.y
+            this.z = point.z
+        }
+    }
 }
 
 // TODO: Implement darkerColorWithSubtraction from usupport

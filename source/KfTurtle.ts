@@ -1,5 +1,13 @@
-// unit Uturtle
+// KfTurtle derived from unit Uturtle
 
+import { short, float, long, intround, byte, TColor } from "./common";
+import { KfPoint3D } from "./temporary";
+import { KfMatrix, TRealRect, KfTriangle } from "./U3dsupport";
+import { KfDrawingSurface } from "./KfDrawingSurface";
+import { TPoint } from "./TPoint";
+import { TRect } from "./TRect";
+
+/* TODO: Remove unused imports
 from conversion_common import *
 import udebug
 import umain
@@ -12,6 +20,7 @@ import udrawingsurface
 import utdo
 import ucollect
 import delphi_compatability
+*/
 
 // const
 const kInitialTurtleMatrixStackDepth = 250
@@ -23,7 +32,7 @@ const kInitialTurtleMatrixStackDepth = 250
 // $ DEFINE DEBUG_TURTLE
 // general options 
 // record
-export interface PlantDrawOptionsStructure {
+export class PlantDrawOptionsStructure {
     sortPolygons: boolean
     drawLines: boolean
     lineContrastIndex: short
@@ -41,29 +50,23 @@ export interface PlantDrawOptionsStructure {
 }
 
 // var
-let gDefaultTurtle: KfTurtle
-let gDefaultTurtleInUse: boolean
+let gDefaultTurtle: KfTurtle | null = null
+let gDefaultTurtleInUse: boolean = false
 
 
 // if the DEBUG_TURTLE flag is defined then draw axis information
 // PDF PORT Issue
 function debugDrawInMillimeters(turtle: KfTurtle, mm: float): void {
-    let oldPosition: KfPoint3d
-    let newPosition: KfPoint3d
-    
-    oldPosition = turtle.currentMatrix.position
+    const oldPosition = turtle.currentMatrix.position
     turtle.currentMatrix.move(turtle.millimetersToPixels(mm))
-    newPosition = turtle.currentMatrix.position
+    const newPosition = turtle.currentMatrix.position
     turtle.addToRealBoundsRect(newPosition)
 }
 
-function debugDrawAxis(turtle: KfTurtle, pixels: float): void {
-    let oldPosition: KfPoint3d
-    let newPosition: KfPoint3d
-    
-    oldPosition = turtle.currentMatrix.position
+function debugDrawAxis(turtle: KfTurtle, pixels: float): void { 
+    const oldPosition = turtle.currentMatrix.position
     turtle.currentMatrix.move(pixels)
-    newPosition = turtle.currentMatrix.position
+    const newPosition = turtle.currentMatrix.position
     if (turtle.drawOptions.drawStems) {
         turtle.drawingSurface.drawLineFromTo(oldPosition, newPosition)
     }
@@ -73,14 +76,13 @@ function debugDrawAxis(turtle: KfTurtle, pixels: float): void {
 // speed optimizations 
 // PDF FIX - may want to think about size of recorded points
 export class KfTurtle {
-    matrixStack: TListCollection = new TListCollection()
+    matrixStack: KfMatrix[] = []
     numMatrixesUsed: long = 0
     currentMatrix: KfMatrix = new KfMatrix()
-    recordedPoints: KfPoint3d[] /* kMaximumRecordedPoints + 1 */ = Array(kMaximumRecordedPoints + 1)
+    recordedPoints: KfPoint3D[] /* kMaximumRecordedPoints + 1 */ = Array(kMaximumRecordedPoints + 1)
     recordedPointsInUse: long = 0
-    scale_pixelsPerMm: float = 0.0
-    drawingSurface: KfDrawingSurface = new KfDrawingSurface()
-    tempPosition: KfPoint3d = new KfPoint3d()
+    scale_pixelsPerMm: float = 1.0
+    drawingSurface: KfDrawingSurface = new KfDrawingSurface(null)
     realBoundsRect: TRealRect = new TRealRect()
     drawOptions: PlantDrawOptionsStructure = new PlantDrawOptionsStructure()
     writingTo: short = 0
@@ -88,34 +90,20 @@ export class KfTurtle {
     // for darkerColor
     // temp
     // ---------------------------------------------------------------------------------- *KfTurtle creating/destroying 
-    create(): void {
-        let i: long
-        
-        TObject.prototype.create.call(this)
+    constructor() {
         // v1.60final looked at giving hint with plant part name again; still has problem
         // that what you record is only points, and what you need to record is rects
         // it can be done, but the plant parts have to change to record rects, and they
         // have to deal with all their different ways of drawing. not worth doing at this time.
-        this.matrixStack = ucollect.TListCollection().Create()
-        this.currentMatrix = u3dsupport.KfMatrix.create
         this.currentMatrix.initializeAsUnitMatrix()
-        this.matrixStack.Add(this.currentMatrix)
+        // TODO: Does the current matrix need to be copied before beign put on stack?
+        this.matrixStack.push(this.currentMatrix)
         this.numMatrixesUsed = 1
-        for (i = 0; i <= kInitialTurtleMatrixStackDepth; i++) {
+        // TODO: Is this one too many matrixes -- or two with initial matrix?
+        for (let i = 0; i <= kInitialTurtleMatrixStackDepth; i++) {
             // start with a bunch of matrixes
-            this.matrixStack.Add(u3dsupport.KfMatrix.create)
+            this.matrixStack.push(new KfMatrix())
         }
-        this.recordedPointsInUse = 0
-        this.drawingSurface = udrawingsurface.KfDrawingSurface().create()
-        this.scale_pixelsPerMm = 1.0
-    }
-    
-    destroy(): void {
-        this.matrixStack.free
-        this.matrixStack = null
-        this.drawingSurface.free
-        this.drawingSurface = null
-        TObject.prototype.destroy.call(this)
     }
     
     // 3d file export
@@ -230,8 +218,7 @@ export class KfTurtle {
     }
     
     newTriangleTriangle(aPointIndex: long, bPointIndex: long, cPointIndex: long): KfTriangle {
-        let result = new KfTriangle()
-        result = u3dsupport.KfTriangle.create
+        const result = new KfTriangle()
         result.points[0] = this.recordedPoints[aPointIndex]
         result.points[1] = this.recordedPoints[bPointIndex]
         result.points[2] = this.recordedPoints[cPointIndex]
@@ -326,7 +313,7 @@ export class KfTurtle {
         let result = false
         result = false
         if ((this.drawingSurface instanceof u3dexport.KfDrawingSurfaceForPOV)) {
-            result = (len <= (this.drawingSurface).options.pov_minLineLengthToWrite)
+            result = (length <= (this.drawingSurface).options.pov_minLineLengthToWrite)
         }
         return result
     }
@@ -405,22 +392,16 @@ export class KfTurtle {
     }
     
     lineColor(): TColor {
-        let result = new TColor()
-        result = this.drawingSurface.lineColor
-        return result
+        return this.drawingSurface.lineColor
     }
     
     lineWidth(): float {
-        let result = 0.0
-        result = this.drawingSurface.lineWidth
-        return result
+        return this.drawingSurface.lineWidth
     }
     
-    position(): KfPoint3d {
-        let result = new KfPoint3d()
-        this.tempPosition = this.currentMatrix.position
-        result = this.tempPosition
-        return result
+    position(): KfPoint3D {
+        // TODO: Is this defendive copy of KfPoint3D needed? 
+        return new KfPoint3D(this.currentMatrix.position)
     }
     
     boundsRect(): TRect {
@@ -471,8 +452,8 @@ export class KfTurtle {
         this.addToRealBoundsRect(aPoint)
     }
     
-    transformAndRecord(originalPoint3D: KfPoint3D, theScale_pixelsPerMm: float): KfPoint3d {
-        let result = new KfPoint3d()
+    transformAndRecord(originalPoint3D: KfPoint3D, theScale_pixelsPerMm: float): KfPoint3D {
+        let result = new KfPoint3D()
         // transform and scale point and record the new location without moving
         result = originalPoint3D
         utdo.KfPoint3D_scaleBy(result, theScale_pixelsPerMm * this.scale_pixelsPerMm)
@@ -512,8 +493,8 @@ export class KfTurtle {
     
     // ---------------------------------------------------------------------------------- KfTurtle drawing 
     drawInPixels(pixels: float): void {
-        let oldPosition: KfPoint3d
-        let newPosition: KfPoint3d
+        let oldPosition: KfPoint3D
+        let newPosition: KfPoint3D
         
         oldPosition = this.currentMatrix.position
         this.currentMatrix.move(pixels)
@@ -551,15 +532,11 @@ export class KfTurtle {
         debugDrawInMillimeters(this, mm)
     }
     
-    drawInMillimeters(mm: float, partID: long): KfTriangle {
-        let result = new KfTriangle()
-        let oldPosition: KfPoint3d
-        let newPosition: KfPoint3d
-        
-        result = null
-        oldPosition = this.currentMatrix.position
+    drawInMillimeters(mm: float, partID: long): KfTriangle | null {
+        let result: KfTriangle | null = null
+        const oldPosition = this.currentMatrix.position
         this.currentMatrix.move(this.millimetersToPixels(mm))
-        newPosition = this.currentMatrix.position
+        const newPosition = this.currentMatrix.position
         if (this.drawOptions.drawStems) {
             result = this.drawingSurface.drawLineFromTo(oldPosition, newPosition)
             if (result !== null) {
@@ -610,7 +587,7 @@ export class KfTurtle {
         let triangle: KfTriangle
         
         if (this.recordedPointsInUse !== 3) {
-            throw new GeneralException.create("Problem: Triangle made without three points in method KfTurtle.drawTriangle.")
+            throw new Error("Problem: Triangle made without three points in method KfTurtle.drawTriangle.")
         }
         // drawing surface owns triangle
         triangle = this.drawingSurface.allocateTriangle()
@@ -621,7 +598,7 @@ export class KfTurtle {
         this.recordedPointsInUse = 0
     }
     
-    addToRealBoundsRect(aPoint: KfPoint3d): void {
+    addToRealBoundsRect(aPoint: KfPoint3D): void {
         if (aPoint.x < this.realBoundsRect.left) {
             this.realBoundsRect.left = aPoint.x
         } else if (aPoint.x > this.realBoundsRect.right) {
@@ -636,13 +613,13 @@ export class KfTurtle {
     
     // ---------------------------------------------------------------------------------- KfTurtle stack 
     push(): void {
-        if (this.numMatrixesUsed >= this.matrixStack.Count) {
-            this.matrixStack.Add(this.currentMatrix.deepCopy())
+        if (this.numMatrixesUsed >= this.matrixStack.length) {
+            this.matrixStack.push(this.currentMatrix.deepCopy())
         } else {
-            this.currentMatrix.copyTo(u3dsupport.KfMatrix(this.matrixStack.Items[this.numMatrixesUsed]))
+            this.currentMatrix.copyTo(this.matrixStack[this.numMatrixesUsed])
         }
         this.numMatrixesUsed += 1
-        this.currentMatrix = this.matrixStack.Items[this.numMatrixesUsed - 1]
+        this.currentMatrix = this.matrixStack[this.numMatrixesUsed - 1]
     }
     
     pop(): void {
@@ -650,7 +627,7 @@ export class KfTurtle {
             return
         }
         this.numMatrixesUsed -= 1
-        this.currentMatrix = this.matrixStack.Items[this.numMatrixesUsed - 1]
+        this.currentMatrix = this.matrixStack[this.numMatrixesUsed - 1]
     }
     
     stackSize(): long {
@@ -676,13 +653,14 @@ export class KfTurtle {
     // where the default turtle is used need a try..finally
     // to ensure defaultStopUsing is called no matter what
     defaultStartUsing(): KfTurtle {
-        let result = new KfTurtle()
         if (gDefaultTurtleInUse) {
-            throw new GeneralException.create("Problem: turtle is already in use; in method KfTurtle.defaultStartUsing.")
+            throw new Error("Problem: turtle is already in use; in method KfTurtle.defaultStartUsing.")
+        }
+        if (!gDefaultTurtle) {
+            throw new Error("Problem: gDefaultTurtle is null.")
         }
         gDefaultTurtleInUse = true
-        result = gDefaultTurtle
-        return result
+        return gDefaultTurtle
     }
     
     defaultStopUsing(): void {
@@ -691,12 +669,11 @@ export class KfTurtle {
     
     defaultAllocate(): void {
         gDefaultTurtle = null
-        gDefaultTurtle = KfTurtle().create()
+        gDefaultTurtle = new KfTurtle()
         gDefaultTurtleInUse = false
     }
     
     defaultFree(): void {
-        gDefaultTurtle.free
         gDefaultTurtle = null
     }
     

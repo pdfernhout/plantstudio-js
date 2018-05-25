@@ -96,7 +96,7 @@ You would need to change ".free" to ".destroyManually()" in such cases.
 
 Delphi type casts need to be removed or converted. Example:
    TSDesiredStateVariableWrapper(this.requirements[i]).variable.requirementsUseages -= 1
-after delcaring: requirements: TSDesiredStateVariableWrapper[] = []
+after declaring: requirements: TSDesiredStateVariableWrapper[] = []
    this.requirements[i].variable.requirementsUseages -= 1
 
 Delphi strings are 1-based not 0-based!!!
