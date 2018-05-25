@@ -1,9 +1,14 @@
 // unit U3dsupport
 
+import { float, int, intround, byte, TColor, short } from "./common";
+import { TPoint } from "./TPoint";
+
+/*
 from conversion_common import *
 import usupport
 import utdo
 import delphi_compatability
+*/
 
 // const
 const kFastTrigArraySize = 256
@@ -47,8 +52,8 @@ function fastTrigInitialize(): void {
     for (i = 0; i <= kFastTrigArraySize - 1; i++) {
         //Approach: sine and cosine arrays are used for speed. Angles are 0 - 255 instead of 0 to 359
         //PDF - maybe want to expand this to 0 - 1023? - would impact rotate callers
-        SinCache[i] = sin(i * 2 * 3.141592654 / kFastTrigArraySize)
-        CosCache[i] = cos(i * 2 * 3.141592654 / kFastTrigArraySize)
+        SinCache[i] = Math.sin(i * 2 * 3.141592654 / kFastTrigArraySize)
+        CosCache[i] = Math.cos(i * 2 * 3.141592654 / kFastTrigArraySize)
     }
 }
 
@@ -62,7 +67,7 @@ function fastTrigCos(angle: float): float {
     
     try {
         boundedAngle = intround(angle) % kFastTrigArraySize
-    } catch (Exception e) {
+    } catch (e) {
         boundedAngle = 0
     }
     if ((boundedAngle < 0)) {
@@ -78,7 +83,7 @@ function fastTrigSin(angle: float): float {
     
     try {
         boundedAngle = intround(angle) % kFastTrigArraySize
-    } catch (Exception e) {
+    } catch (e) {
         boundedAngle = 0
     }
     if ((boundedAngle < 0)) {
@@ -161,8 +166,6 @@ export class KfMatrix {
     
     deepCopy(): KfMatrix {
         let result = new KfMatrix()
-        result = null
-        result = KfMatrix.create
         result.position = this.position
         result.a0 = this.a0
         result.a1 = this.a1
@@ -343,7 +346,7 @@ export class KfMatrix {
             if ((temp < 0.0)) {
                 temp = 0.0
             }
-            temp = sqrt(temp)
+            temp = Math.sqrt(temp)
             if ((temp === 0.0)) {
                 if ((this.b2 < 0)) {
                     result = 64
@@ -352,10 +355,10 @@ export class KfMatrix {
                 }
             } else {
                 temp = this.b2 / temp
-                temp = arctan(temp)
+                temp = Math.atan(temp)
                 result = intround(-temp * 256 / (2 * 3.1415926))
             }
-        } catch (Exception e) {
+        } catch (e) {
             result = 0
         }
         return result
@@ -372,7 +375,7 @@ export class KfMatrix {
             if ((temp < 0.0)) {
                 temp = 0.0
             }
-            temp = sqrt(temp)
+            temp = Math.sqrt(temp)
             if ((temp === 0.0)) {
                 if ((this.b0 < 0)) {
                     result = 64
@@ -381,10 +384,10 @@ export class KfMatrix {
                 }
             } else {
                 temp = this.b0 / temp
-                temp = arctan(temp)
+                temp = Math.atan(temp)
                 result = intround(-temp * 256 / (2 * 3.1415926))
             }
-        } catch (Exception e) {
+        } catch (e) {
             result = 0
         }
         return result
@@ -401,7 +404,7 @@ export class KfMatrix {
             if ((temp < 0.0)) {
                 temp = 0.0
             }
-            temp = sqrt(temp)
+            temp = Math.sqrt(temp)
             if ((temp === 0.0)) {
                 if ((this.b1 < 0)) {
                     result = 64
@@ -410,10 +413,10 @@ export class KfMatrix {
                 }
             } else {
                 temp = this.b1 / temp
-                temp = arctan(temp)
+                temp = Math.atan(temp)
                 result = intround(-temp * 256 / (2 * 3.1415926))
             }
-        } catch (Exception e) {
+        } catch (e) {
             result = 0
         }
         return result
@@ -423,9 +426,9 @@ export class KfMatrix {
 
 //these can only be triangular
 export class KfTriangle {
-    foreColor: TColor = new TColor()
-    backColor: TColor = new TColor()
-    lineColor: TColor = new TColor()
+    foreColor: TColor
+    backColor: TColor
+    lineColor: TColor
     zForSorting: float = 0.0
     backFacing: boolean = false
     lineWidth: float = 0.0
@@ -478,7 +481,7 @@ export class KfTriangle {
     }
     
     visibleSurfaceColor(): TColor {
-        let result = new TColor()
+        let result: TColor
         if (this.backFacing) {
             result = this.backColor
         } else {
@@ -488,7 +491,7 @@ export class KfTriangle {
     }
     
     invisibleSurfaceColor(): TColor {
-        let result = new TColor()
+        let result: TColor
         if (this.backFacing) {
             result = this.foreColor
         } else {
@@ -498,7 +501,7 @@ export class KfTriangle {
     }
     
     drawLinesColor(lineContrastIndex: short): TColor {
-        let result = new TColor()
+        let result: TColor
         if (this.backFacing) {
             result = this.backColor
         } else {
