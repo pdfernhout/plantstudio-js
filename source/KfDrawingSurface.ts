@@ -1,51 +1,45 @@
-// unit Udrawingsurface
+// KfDrawingSurface was unit Udrawingsurface
 
+import { TColor, short, long, float, int, intround } from "./common";
+import { KfPoint3D } from "./temporary";
+import { KfTriangle, pointInTriangle } from "./U3dsupport";
+import { TPoint } from "./TPoint";
+
+/* TODO: Remove these imports
 from conversion_common import *
 import u3dsupport
 import utdo
 import ucollect
 import delphi_compatability
+*/
 
 // const
 const kInitialDrawingSurfaceTriangles = 1000
-
-
 
 export class KfDrawingSurface {
     pane: TCanvas = new TCanvas()
     lineContrastIndex: short = 0
     drawingLines: boolean = false
-    fillingTriangles: boolean = false
+    fillingTriangles: boolean = true
     circlingPoints: boolean = false
-    foreColor: TColor = new TColor()
-    backColor: TColor = new TColor()
-    lineColor: TColor = new TColor()
-    circleColor: TColor = new TColor()
+    foreColor: TColor
+    backColor: TColor
+    lineColor: TColor
+    circleColor: TColor
     numTrianglesUsed: long = 0
-    triangles: TListCollection = new TListCollection()
+    triangles: KfTriangle[] = []
     recording: boolean = false
     lineWidth: float = 0.0
     circlePointRadius: short = 0
     sortTdosAsOneItem: boolean = false
     
     // ----------------------------------------------------------------------------- *KfDrawingSurface creating/destroying 
-    create(): void {
-        let i: long
-        
-        TObject.prototype.create.call(this)
-        this.triangles = ucollect.TListCollection().Create()
-        this.numTrianglesUsed = 0
-        this.fillingTriangles = true
+    constructor() {
         this.initialize()
-        for (i = 0; i <= kInitialDrawingSurfaceTriangles; i++) {
+        for (let i = 0; i <= kInitialDrawingSurfaceTriangles; i++) {
             // start with a bunch of triangles 
-            this.triangles.Add(u3dsupport.KfTriangle.create)
+            this.triangles.push(new KfTriangle())
         }
-    }
-    
-    destroy(): void {
-        this.triangles.free
-        TObject.prototype.destroy.call(this)
     }
     
     initialize(): void {
@@ -68,8 +62,8 @@ export class KfDrawingSurface {
     clearTriangles(): void {
         let i: long
         
-        for (i = 0; i <= this.numTrianglesUsed - 1; i++) {
-            u3dsupport.KfTriangle(this.triangles.Items[i]).tdo = null
+        for (i = 0; i < this.numTrianglesUsed; i++) {
+            this.triangles[i].tdo = null
         }
         this.numTrianglesUsed = 0
     }
@@ -78,8 +72,8 @@ export class KfDrawingSurface {
         let result = 0
         let i: long
         let triangle: KfTriangle
-        let points: TPoint[] /* 2 + 1 */
-        let widenedPoints: TPoint[] /* 2 + 1 */
+        let points: TPoint[] = [new TPoint(), new TPoint(), new TPoint()]
+        let widenedPoints: TPoint[] = [new TPoint(), new TPoint(), new TPoint()]
         let width: int
         let thisDistance: float
         let closestDistanceSoFar: float
@@ -89,13 +83,13 @@ export class KfDrawingSurface {
         let x: float
         let y: float
         
-        x = point.x
-        y = point.y
+        x = point.X
+        y = point.Y
         result = -1
         closestDistanceSoFar = 0
         closestPartID = -1
-        for (i = 0; i <= this.triangles.Count - 1; i++) {
-            triangle = u3dsupport.KfTriangle(this.triangles.Items[i])
+        for (i = 0; i < this.triangles.length; i++) {
+            triangle = this.triangles[i]
             if (triangle.isLine) {
                 centerX = (triangle.points[0].x + triangle.points[1].x) / 2.0
                 centerY = (triangle.points[0].y + triangle.points[1].y) / 2.0
@@ -111,7 +105,7 @@ export class KfDrawingSurface {
                 points[1].Y = intround(triangle.points[1].y)
                 points[2].X = intround(triangle.points[2].x)
                 points[2].Y = intround(triangle.points[2].y)
-                if (u3dsupport.pointInTriangle(point, points)) {
+                if (pointInTriangle(point, points)) {
                     result = triangle.plantPartID
                     return result
                 }
@@ -122,13 +116,12 @@ export class KfDrawingSurface {
     }
     
     allocateTriangle(): KfTriangle {
-        let result = new KfTriangle()
-        result = null
-        if (this.numTrianglesUsed < this.triangles.Count) {
-            result = this.triangles.Items[this.numTrianglesUsed]
+        let result: KfTriangle
+        if (this.numTrianglesUsed < this.triangles.length) {
+            result = this.triangles[this.numTrianglesUsed]
         } else {
-            result = u3dsupport.KfTriangle.create
-            this.triangles.Add(result)
+            result = new KfTriangle()
+            this.triangles.push(result)
         }
         this.numTrianglesUsed += 1
         return result
@@ -144,7 +137,7 @@ export class KfDrawingSurface {
         }
         if (this.sortTdosAsOneItem) {
             for (i = 0; i <= this.numTrianglesUsed - 1; i++) {
-                triangle = u3dsupport.KfTriangle(this.triangles.Items[i])
+                triangle = this.triangles[i]
                 if (!triangle.isLine) {
                     oldValue = triangle.zForSorting
                     if (triangle.tdo !== null) {
@@ -168,24 +161,31 @@ export class KfDrawingSurface {
         let i: int
         let j: int
         let z: float
+
+        function exchange(triangles: KfTriangle[], i: number, j: number) {
+            const a = triangles[i]
+            const b = triangles[j]
+            triangles[i] = b
+            triangles[j] = a
+        }
         
         if (right > left) {
-            z = u3dsupport.KfTriangle(this.triangles.Items[right]).zForSorting
+            z = this.triangles[right].zForSorting
             i = left - 1
             j = right
             while (true) {
                 do {
                     i = i + 1
-                } while (!(!(u3dsupport.KfTriangle(this.triangles.Items[i]).zForSorting < z)))
+                } while (!(!(this.triangles[i].zForSorting < z)))
                 do {
                     j = j - 1
-                } while (!((j < i) || (!(u3dsupport.KfTriangle(this.triangles.Items[j]).zForSorting > z))))
+                } while (!((j < i) || (!(this.triangles[j].zForSorting > z))))
                 if (i >= j) {
                     break
                 }
-                this.triangles.Exchange(i, j)
+                exchange(this.triangles, i, j)
             }
-            this.triangles.Exchange(i, right)
+            exchange(this.triangles, i, right)
             this.sortTriangles(left, j)
             this.sortTriangles(i + 1, right)
         }
@@ -197,19 +197,15 @@ export class KfDrawingSurface {
         
         if (this.numTrianglesUsed > 0) {
             for (i = 0; i <= this.numTrianglesUsed - 1; i++) {
-                this.basicDrawTriangle(this.triangles.Items[i])
+                this.basicDrawTriangle(this.triangles[i])
             }
         }
     }
     
-    drawLineFromTo(startPoint: KfPoint3D, endPoint: KfPoint3D): KfTriangle {
-        let result = new KfTriangle()
-        let triangle: KfTriangle
-        
-        result = null
+    drawLineFromTo(startPoint: KfPoint3D, endPoint: KfPoint3D): KfTriangle | null {
         if (this.recording) {
             //store triangle
-            triangle = this.allocateTriangle()
+            const triangle = this.allocateTriangle()
             triangle.points[0] = startPoint
             triangle.points[1] = endPoint
             triangle.isLine = true
@@ -219,11 +215,11 @@ export class KfDrawingSurface {
             triangle.lineColor = this.lineColor
             triangle.lineWidth = this.lineWidth
             triangle.computeZ()
-            result = triangle
+            return triangle
         } else {
             this.basicDrawLineFromTo(startPoint, endPoint)
         }
-        return result
+        return null
     }
     
     basicDrawLineFromTo(startPoint: KfPoint3D, endPoint: KfPoint3D): void {
@@ -245,17 +241,15 @@ export class KfDrawingSurface {
     
     draw3DFace(point1: KfPoint3D, point2: KfPoint3D, point3: KfPoint3D, point4: KfPoint3D): void {
         // subclasses must override
-        throw new GeneralException.create("Problem: draw3DFace method not supported in base class; in method KfDrawingSurface.draw3DFace.")
+        throw new Error("Problem: draw3DFace method not supported in base class; in method KfDrawingSurface.draw3DFace.")
     }
     
     //terminology is different: drawing surface frontColor is pen line color 
     // and drawing surface backColor (which should be back-facing triangle) is fill color
     //drawing surface draws the last triangle allocated - and deallocates it if needed
     drawLastTriangle(): void {
-        let triangle: KfTriangle
-        
         //last allocated triangle
-        triangle = this.triangles.Items[this.numTrianglesUsed - 1]
+        const triangle = this.triangles[this.numTrianglesUsed - 1]
         triangle.isLine = false
         triangle.updateGeometry()
         //PDF FIX - maybe should scale this?
@@ -284,7 +278,6 @@ export class KfDrawingSurface {
         let startPoint: KfPoint3D
         let endPoint: KfPoint3D
         let aPoint: KfPoint3D
-        let pointArray: TPoint[] /* 3 + 1 */
         let i: int
         
         if (this.pane === null) {
@@ -306,6 +299,10 @@ export class KfDrawingSurface {
             }
             return
         }
+
+        // Make an array of four points
+        const pointArray: TPoint[] = [new TPoint(), new TPoint(), new TPoint(), new TPoint()]
+
         for (i = 0; i <= 3; i++) {
             if (i < 3) {
                 // make last point same as first for drawing lines around whole polygon

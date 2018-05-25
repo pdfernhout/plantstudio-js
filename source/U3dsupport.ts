@@ -121,7 +121,7 @@ function clockwise(point0: TPoint, point1: TPoint, point2: TPoint): int {
     return result
 }
 
-function pointInTriangle(point: TPoint, triangle: TPoint[]): boolean {
+export function pointInTriangle(point: TPoint, triangle: TPoint[]): boolean {
     let result = false
     let first: int
     let second: int
@@ -436,8 +436,8 @@ export class KfTriangle {
     backFacing: boolean = false
     lineWidth: float = 0.0
     isLine: boolean = false
-    points: KfPoint3D[] /* 2 + 1 */ = Array(2+ 1)
-    tdo: Object // TODO: Should be: KfObject3D when that is defined and importable
+    points: KfPoint3D[] = [new KfPoint3D(), new KfPoint3D(), new KfPoint3D()]
+    tdo: Object | null // TODO: Should be: KfObject3D when that is defined and importable
     plantPartID: long = 0
     
     // ---------------------------------------------------------------------------------- KfTriangle updating 
