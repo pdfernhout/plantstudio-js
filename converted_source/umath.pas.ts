@@ -91,7 +91,7 @@ function pow(number: double, exponent: double): double {
     let result = 0.0
     try {
         result = safeExp(exponent * safeLn(number))
-    } catch (Exception e) {
+    } catch (e) {
         ErrorMessage("Invalid number for power function: " + FloatToStr(number) + " to the power " + FloatToStr(exponent))
         result = 1.0
         throw new Exception()
@@ -119,7 +119,7 @@ function power(number: double, exponent: double): double {
             result = 0.0
             throw new GeneralException.create("Problem: Negative number to non-integer power: " + FloatToStr(number) + " to " + FloatToStr(exponent))
         }
-    } catch (Exception e) {
+    } catch (e) {
         result = ErrorMessage("Problem: Uncaught error in power function: " + FloatToStr(number) + " to " + FloatToStr(exponent))
         throw new Exception()
     }
@@ -131,7 +131,7 @@ function tan(x: double): double {
     let result = 0.0
     try {
         result = sin(x) / cos(x)
-    } catch (Exception e) {
+    } catch (e) {
         result = ErrorMessage("Uncaught error in tangent function: " + FloatToStr(x))
         throw new Exception()
     }
@@ -146,7 +146,7 @@ function arcCos(x: double): double {
         // result := arcTan(sqrt(1.0 - sqr(x)) / x); 
         // from Smalltalk/V 
         result = kPi / 2.0 - arcSin(x)
-    } catch (Exception e) {
+    } catch (e) {
         result = ErrorMessage("Invalid number for arcCos: " + FloatToStr(x))
         throw new Exception()
     }
@@ -158,7 +158,7 @@ function arcSin(x: double): double {
     let result = 0.0
     try {
         result = arctan(x / sqrt(1.0 - sqr(x)))
-    } catch (Exception e) {
+    } catch (e) {
         result = ErrorMessage("Invalid number for arcSin: " + FloatToStr(x))
         throw new Exception()
     }
@@ -180,7 +180,7 @@ function log10(x: double): double {
             result = -1
             throw new GeneralException.create("Problem: Tried to take log (base 10) of zero or negative number.")
         }
-    } catch (Exception e) {
+    } catch (e) {
         result = ErrorMessage("Problem: Invalid number for log (base 10): " + FloatToStr(x) + ".")
         throw new Exception()
     }
@@ -194,7 +194,7 @@ function safeLn(x: double): double {
         try {
             // PDF PORT added semicolon
             result = UNRESOLVED.ln(x)
-        } catch (Exception e) {
+        } catch (e) {
             ErrorMessage("Invalid number for natural log: " + FloatToStr(x))
             result = 1.0
             throw new Exception()
@@ -220,7 +220,7 @@ function safeLnWithResult(x: double, failed: boolean): double {
     }
     try {
         temp = UNRESOLVED.ln(x)
-    } catch (Exception e) {
+    } catch (e) {
         result = 1.0
         return result, failed
     }
@@ -235,7 +235,7 @@ function safeExp(x: double): double {
     try {
         // PDF PORT added semicolon
         result = UNRESOLVED.exp(x)
-    } catch (Exception e) {
+    } catch (e) {
         result = ErrorMessage("Invalid number for exponential function: " + FloatToStr(x))
         throw new Exception()
     }
@@ -254,7 +254,7 @@ function safeExpWithResult(x: double, failed: boolean): double {
     temp = 0.0
     try {
         temp = UNRESOLVED.exp(x)
-    } catch (Exception e) {
+    } catch (e) {
         return result, failed
     }
     result = temp
@@ -276,7 +276,7 @@ function safediv(x: float, y: float): float {
             result = 0.0
             throw new GeneralException.create("Problem: Divide by zero.")
         }
-    } catch (Exception e) {
+    } catch (e) {
         result = ErrorMessage("Problem: Unspecified problem with dividing " + FloatToStr(x) + " by " + FloatToStr(y) + ".")
         throw new Exception()
     }
@@ -293,7 +293,7 @@ function safedivExcept(x: float, y: float, exceptionResult: float): float {
         } else {
             result = exceptionResult
         }
-    } catch (Exception e) {
+    } catch (e) {
         result = ErrorMessage("Problem in dividing " + FloatToStr(x) + " by " + FloatToStr(y))
         throw new Exception()
     }
@@ -315,7 +315,7 @@ function safedivWithResult(x: float, y: float, failed: boolean): float {
     }
     try {
         temp = x / y
-    } catch (Exception e) {
+    } catch (e) {
         return result, failed
     }
     result = temp
@@ -337,7 +337,7 @@ function scurve(x: double, c1: double, c2: double): double {
             throw new GeneralException.create("Problem: Exponent of number would have gone out of float range.")
         }
         result = safediv(x, x + safeExp(temp))
-    } catch (Exception e) {
+    } catch (e) {
         result = ErrorMessage("Problem in s curve: numbers are " + FloatToStr(x) + ", " + FloatToStr(c1) + ", and " + FloatToStr(c2))
         throw new Exception()
     }
@@ -367,7 +367,7 @@ function scurveWithResult(x: double, c1: double, c2: double, failed: boolean): d
         if (failed) {
             return result, failed
         }
-    } catch (Exception e) {
+    } catch (e) {
         return result, failed
     }
     failed = false
@@ -436,7 +436,7 @@ function calcSCurveCoeffsWithResult(sCurve: SCurveStructure, failed: boolean): v
             return failed
         }
         c1temp = lnQuotientX1Y1MinusX1 + sCurve.x1 * c2temp
-    } catch (Exception e) {
+    } catch (e) {
         return failed
     }
     sCurve.c1 = c1temp

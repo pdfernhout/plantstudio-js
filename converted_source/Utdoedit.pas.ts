@@ -997,7 +997,7 @@ export class TTdoEditorForm {
             try {
                 aPaintBox.bitmap.Width = aPaintBox.Width
                 aPaintBox.bitmap.Height = aPaintBox.Height
-            } catch (Exception e) {
+            } catch (e) {
                 aPaintBox.bitmap.Width = 1
                 aPaintBox.bitmap.Height = 1
             }

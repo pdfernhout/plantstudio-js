@@ -127,7 +127,7 @@ export class PdStatsPanel {
         try {
             this.drawBitmap.Width = this.ClientWidth
             this.drawBitmap.Height = this.ClientHeight
-        } catch (Exception e) {
+        } catch (e) {
             this.drawBitmap.Width = 1
             this.drawBitmap.Height = 1
         }

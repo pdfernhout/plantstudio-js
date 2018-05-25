@@ -62,7 +62,7 @@ function fastTrigCos(angle: float): float {
     
     try {
         boundedAngle = intround(angle) % kFastTrigArraySize
-    } catch (Exception e) {
+    } catch (e) {
         boundedAngle = 0
     }
     if ((boundedAngle < 0)) {
@@ -78,7 +78,7 @@ function fastTrigSin(angle: float): float {
     
     try {
         boundedAngle = intround(angle) % kFastTrigArraySize
-    } catch (Exception e) {
+    } catch (e) {
         boundedAngle = 0
     }
     if ((boundedAngle < 0)) {
@@ -355,7 +355,7 @@ export class KfMatrix {
                 temp = arctan(temp)
                 result = intround(-temp * 256 / (2 * 3.1415926))
             }
-        } catch (Exception e) {
+        } catch (e) {
             result = 0
         }
         return result
@@ -384,7 +384,7 @@ export class KfMatrix {
                 temp = arctan(temp)
                 result = intround(-temp * 256 / (2 * 3.1415926))
             }
-        } catch (Exception e) {
+        } catch (e) {
             result = 0
         }
         return result
@@ -413,7 +413,7 @@ export class KfMatrix {
                 temp = arctan(temp)
                 result = intround(-temp * 256 / (2 * 3.1415926))
             }
-        } catch (Exception e) {
+        } catch (e) {
             result = 0
         }
         return result

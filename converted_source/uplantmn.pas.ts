@@ -178,7 +178,7 @@ export class PdPlantManager {
                 } else if (UNRESOLVED.pos("scale=", aLine) === 1) {
                     try {
                         this.plantDrawScale_PixelsPerMm = intround(StrToFloat(usupport.stringBeyond(aLine, "=")) * 100.0) / 100.0
-                    } catch (Exception e) {
+                    } catch (e) {
                         this.plantDrawScale_PixelsPerMm = 1.0
                     }
                 } else if (UNRESOLVED.pos("concentrated=", aLine) === 1) {

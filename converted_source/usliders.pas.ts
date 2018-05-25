@@ -214,7 +214,7 @@ export class KfSlider {
         proportion = (this.currentValue - this.minValue) / (this.maxValue - this.minValue)
         try {
             result = intround(proportion * distanceInPixels)
-        } catch (Exception e) {
+        } catch (e) {
             result = 0
         }
         return result

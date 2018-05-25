@@ -11,7 +11,7 @@ function resizeBitmap(bitmap: TBitmap, newSize: TPoint): void {
     try {
         bitmap.Width = newSize.X
         bitmap.Height = newSize.Y
-    } catch (Exception e) {
+    } catch (e) {
         bitmap.Width = 1
         bitmap.Height = 1
     }

@@ -881,7 +881,7 @@ export class PdDomain {
                             param.upperBoundOverride = usupport.strToFloatWithCommaCheck(stream.nextToken())
                             param.defaultValueStringOverride = usupport.stringBetween("(", ")", stream.remainder)
                             param.isOverridden = true
-                        } catch (Exception e) {
+                        } catch (e) {
                             param.isOverridden = false
                         }
                     } finally {
@@ -1234,7 +1234,7 @@ export class PdDomain {
                 // v1.60
                 this.updateRecentFileNames(this.lastOpenedPlantFileName)
             }
-        } catch (Exception e) {
+        } catch (e) {
             this.plantFileLoaded = false
             //callers need exception
             throw new Exception()

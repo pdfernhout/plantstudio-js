@@ -152,7 +152,7 @@ export class KfDrawingSurface {
                             // the 0.01 is to keep the polygons inside the tdo in order but still (usually) separate from other tdos
                             // could produce errors if the z value is really small already
                             triangle.zForSorting = triangle.tdo.zForSorting + triangle.zForSorting * 0.01
-                        } catch (Exception e) {
+                        } catch (e) {
                             triangle.zForSorting = oldValue
                         }
                     }
@@ -238,7 +238,7 @@ export class KfDrawingSurface {
             this.pane.Pen.Style = delphi_compatability.TFPPenStyle.psSolid
             this.pane.MoveTo(intround(startPoint.x) % 32767, intround(startPoint.y) % 32767)
             this.pane.LineTo(intround(endPoint.x) % 32767, intround(endPoint.y) % 32767)
-        } catch (Exception e) {
+        } catch (e) {
             // pass
         }
     }
@@ -301,7 +301,7 @@ export class KfDrawingSurface {
                 endPoint = triangle.points[1]
                 this.pane.MoveTo(intround(startPoint.x) % 32767, intround(startPoint.y) % 32767)
                 this.pane.LineTo(intround(endPoint.x) % 32767, intround(endPoint.y) % 32767)
-            } catch (Exception e) {
+            } catch (e) {
                 // pass
             }
             return
@@ -316,7 +316,7 @@ export class KfDrawingSurface {
             try {
                 pointArray[i].X = intround(aPoint.x) % 32767
                 pointArray[i].Y = intround(aPoint.y) % 32767
-            } catch (Exception e) {
+            } catch (e) {
                 //maybe could test sign to put in negative big numbers? watch out for NaNs!
                 pointArray[i].X = 32767
                 pointArray[i].Y = 32767

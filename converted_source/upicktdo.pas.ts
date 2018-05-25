@@ -278,7 +278,7 @@ export class TPickTdoForm {
         try {
             bitmap.Width = this.grid.DefaultColWidth
             bitmap.Height = this.grid.DefaultRowHeight
-        } catch (Exception e) {
+        } catch (e) {
             bitmap.Width = 1
             bitmap.Height = 1
         }

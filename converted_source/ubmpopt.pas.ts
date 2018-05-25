@@ -383,7 +383,7 @@ export class TBitmapOptionsForm {
             try {
                 this.wholePageImage.Picture.Bitmap.Width = this.wholePageImage.Width
                 this.wholePageImage.Picture.Bitmap.Height = this.wholePageImage.Height
-            } catch (Exception e) {
+            } catch (e) {
                 this.wholePageImage.Picture.Bitmap.Width = 1
                 this.wholePageImage.Picture.Bitmap.Height = 1
             }
@@ -1022,7 +1022,7 @@ export class TBitmapOptionsForm {
         } else if (this.transferDirection === kTransferSave) {
             try {
                 newValue = StrToFloat(editBox.Text)
-            } catch (Exception e) {
+            } catch (e) {
                 newValue = value
             }
             if (newValue !== value) {

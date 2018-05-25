@@ -1168,7 +1168,7 @@ export class TTdoMoverForm {
         try {
             this.previewImage.Picture.Bitmap.Height = this.previewImage.Height
             this.previewImage.Picture.Bitmap.Width = this.previewImage.Width
-        } catch (Exception e) {
+        } catch (e) {
             this.previewImage.Picture.Bitmap.Height = 1
             this.previewImage.Picture.Bitmap.Width = 1
         }

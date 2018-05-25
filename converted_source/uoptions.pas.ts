@@ -177,7 +177,7 @@ export class TOptionsForm {
             oldValue = value
             try {
                 newValue = StrToFloat(editBox.Text)
-            } catch (Exception e) {
+            } catch (e) {
                 newValue = oldValue
             }
             if (value !== newValue) {

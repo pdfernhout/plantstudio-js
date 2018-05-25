@@ -115,7 +115,7 @@ export class TAnimationFilesOptionsForm {
             } else {
                 this.options.xRotationIncrement = this.incrementEdit.Value
             }
-        } catch (Exception e) {
+        } catch (e) {
             if (this.animateByAge.Checked) {
                 this.options.ageIncrement = oldValue
             } else {
@@ -134,7 +134,7 @@ export class TAnimationFilesOptionsForm {
         oldValue = this.options.resolution_pixelsPerInch
         try {
             this.options.resolution_pixelsPerInch = this.resolution.Value
-        } catch (Exception e) {
+        } catch (e) {
             this.options.resolution_pixelsPerInch = oldValue
         }
         this.calculateNumberOfFrames()

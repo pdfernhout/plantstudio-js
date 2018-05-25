@@ -4,8 +4,8 @@ from conversion_common import *
 import ufiler
 import delphi_compatability
 
-export type TFirstLastFunc = (each: TObject, data: TObject) => boolean
 export type TForEachProc = (each: TObject, data: TObject) => void
+export type TFirstLastFunc = (each: TObject, data: TObject) => boolean
 function addToListIfAbsent(list: TList, item: TObject): void {
     if (item === null) {
         return

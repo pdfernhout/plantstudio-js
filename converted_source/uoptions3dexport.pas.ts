@@ -576,7 +576,7 @@ export class TGeneric3DOptionsForm {
         } else if (this.transferDirection === kTransferSave) {
             try {
                 newValue = StrToFloat(editBox.Text)
-            } catch (Exception e) {
+            } catch (e) {
                 newValue = value
             }
             if (newValue !== value) {

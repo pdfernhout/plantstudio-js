@@ -203,7 +203,7 @@ export class KfWinSlider {
         proportion = (this.CurrentValue - this.MinValue) / (this.MaxValue - this.MinValue)
         try {
             result = intround(proportion * distanceInPixels)
-        } catch (Exception e) {
+        } catch (e) {
             result = 0
         }
         return result

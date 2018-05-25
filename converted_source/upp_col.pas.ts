@@ -481,7 +481,7 @@ export class PdColorParameterPanel {
             try {
                 bitmap.Width = usupport.rWidth(aRect)
                 bitmap.Height = usupport.rHeight(aRect)
-            } catch (Exception e) {
+            } catch (e) {
                 bitmap.Width = 1
                 bitmap.Height = 1
             }

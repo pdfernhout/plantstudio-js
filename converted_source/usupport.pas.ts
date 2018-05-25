@@ -806,7 +806,7 @@ function stringToSinglePoint(aString: string): SinglePoint {
         } else {
             try {
                 result.x = StrToFloat(token)
-            } catch (Exception e) {
+            } catch (e) {
                 result.x = 0.0
             }
         }
@@ -816,7 +816,7 @@ function stringToSinglePoint(aString: string): SinglePoint {
         } else {
             try {
                 result.y = StrToFloat(token)
-            } catch (Exception e) {
+            } catch (e) {
                 result.y = 0.0
             }
         }
@@ -1268,7 +1268,7 @@ function getFileSaveInfo(fileType: short, askForFileName: boolean, suggestedFile
         // includes dot 
         extension = ExtractFileExt(fileInfo.newFile)
         extension = ".~" + UNRESOLVED.copy(extension, 2, 2)
-    } catch (Exception e) {
+    } catch (e) {
         extension = ".bak"
     }
     tryBackupName = ChangeFileExt(fileInfo.newFile, extension)

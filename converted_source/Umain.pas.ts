@@ -1036,7 +1036,7 @@ export class TMainForm {
             try {
                 udomain.domain.storeProfileInformation()
                 fileSavedOK = true
-            } catch (Exception e) {
+            } catch (e) {
                 fileSavedOK = false
             }
             if (!fileSavedOK) {
@@ -4725,7 +4725,7 @@ export class TMainForm {
                 this.magnificationPercent.Text = IntToStr(intResult) + "%"
             }
             result = intResult / 100.0
-        } catch (Exception e) {
+        } catch (e) {
             result = 1.0
         }
         return result
@@ -5006,7 +5006,7 @@ export class TMainForm {
         oldValue = this.focusedPlant().drawingScale_PixelsPerMm
         try {
             newValue = StrToFloat(this.drawingScaleEdit.Text)
-        } catch (Exception e) {
+        } catch (e) {
             newValue = oldValue
         }
         if (newValue !== oldValue) {
@@ -5709,7 +5709,7 @@ export class TMainForm {
                 y = 0.0
                 try {
                     x = 1.0 * i / numPoints
-                } catch (Exception e) {
+                } catch (e) {
                     return failed
                 }
                 y = umath.scurveWithResult(x, curve.c1, curve.c2, failed)
@@ -5726,7 +5726,7 @@ export class TMainForm {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (e) {
             return failed
         }
         failed = false
@@ -6973,7 +6973,7 @@ export class TMainForm {
         if (firstPlant !== null) {
             try {
                 fractionOfMaxAge = firstPlant.age / firstPlant.pGeneral.ageAtMaturity
-            } catch (Exception e) {
+            } catch (e) {
                 fractionOfMaxAge = 0.0
             }
         }

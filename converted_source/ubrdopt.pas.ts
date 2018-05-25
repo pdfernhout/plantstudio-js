@@ -519,7 +519,7 @@ export class TBreedingOptionsForm {
         oldValue = this.options.plantsPerGeneration
         try {
             this.options.plantsPerGeneration = this.plantsPerGeneration.Value
-        } catch (Exception e) {
+        } catch (e) {
             this.options.plantsPerGeneration = oldValue
         }
     }
@@ -530,7 +530,7 @@ export class TBreedingOptionsForm {
         oldValue = this.options.thumbnailWidth
         try {
             this.options.thumbnailWidth = this.thumbnailWidth.Value
-        } catch (Exception e) {
+        } catch (e) {
             this.options.thumbnailWidth = oldValue
         }
     }
@@ -541,7 +541,7 @@ export class TBreedingOptionsForm {
         oldValue = this.options.thumbnailHeight
         try {
             this.options.thumbnailHeight = this.thumbnailHeight.Value
-        } catch (Exception e) {
+        } catch (e) {
             this.options.thumbnailHeight = oldValue
         }
     }
@@ -552,7 +552,7 @@ export class TBreedingOptionsForm {
         oldValue = this.options.maxGenerations
         try {
             this.options.maxGenerations = this.maxGenerations.Value
-        } catch (Exception e) {
+        } catch (e) {
             this.options.maxGenerations = oldValue
         }
     }
@@ -563,7 +563,7 @@ export class TBreedingOptionsForm {
         oldValue = this.options.numTimeSeriesStages
         try {
             this.options.numTimeSeriesStages = this.numTimeSeriesStages.Value
-        } catch (Exception e) {
+        } catch (e) {
             this.options.numTimeSeriesStages = oldValue
         }
     }
@@ -574,7 +574,7 @@ export class TBreedingOptionsForm {
         oldValue = this.options.percentMaxAge
         try {
             this.options.percentMaxAge = this.percentMaxAge.Value
-        } catch (Exception e) {
+        } catch (e) {
             this.options.percentMaxAge = oldValue
         }
     }
@@ -585,7 +585,7 @@ export class TBreedingOptionsForm {
         oldValue = this.domainOptions.maxPartsPerPlant_thousands
         try {
             this.domainOptions.maxPartsPerPlant_thousands = this.maxPartsPerPlant_thousands.Value
-        } catch (Exception e) {
+        } catch (e) {
             this.domainOptions.maxPartsPerPlant_thousands = oldValue
         }
     }

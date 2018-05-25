@@ -430,7 +430,7 @@ export class KfTurtle {
             result.Left = intround(this.realBoundsRect.left)
             result.Bottom = intround(this.realBoundsRect.bottom)
             result.Right = intround(this.realBoundsRect.right)
-        } catch (Exception e) {
+        } catch (e) {
             //might want to be more precise in assigning a rect
             result.Top = -32767
             result.Left = -32767

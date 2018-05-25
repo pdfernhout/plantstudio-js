@@ -59,7 +59,7 @@ function CopyBitmapToClipboard(bitmap: TBitmap): void {
             // the clipboard wants the handle to be unlocked
             UNRESOLVED.GlobalUnlock(imageHandle)
         }
-    } catch (Exception e) {
+    } catch (e) {
         // we are not supposed to free this handle unless there is a problem, because
         // the clipboard takes ownership of it
         UNRESOLVED.GlobalFree(imageHandle)

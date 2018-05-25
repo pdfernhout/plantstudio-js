@@ -80,12 +80,12 @@ function KfPoint3D_addPointToBoundsRect(boundsRect: TRect, aPoint: KfPoint3d): v
     
     try {
         x = intround(aPoint.x)
-    } catch (Exception e) {
+    } catch (e) {
         x = 0
     }
     try {
         y = intround(aPoint.y)
-    } catch (Exception e) {
+    } catch (e) {
         y = 0
     }
     if ((boundsRect.Left === 0) && (boundsRect.Right === 0) && (boundsRect.Top === 0) && (boundsRect.Bottom === 0)) {

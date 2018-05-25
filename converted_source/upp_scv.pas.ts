@@ -132,7 +132,7 @@ export class PdSCurveParameterPanel {
             }
             // whole 
             this.Invalidate()
-        } catch (Exception e) {
+        } catch (e) {
             // pass
         }
     }
@@ -327,7 +327,7 @@ export class PdSCurveParameterPanel {
                     this.currentValues[1] = newValues.y1
                     this.currentValues[2] = newValues.x2
                     this.currentValues[3] = newValues.y2
-                } catch (Exception e) {
+                } catch (e) {
                     failed = true
                 }
                 if (!failed) {
@@ -702,7 +702,7 @@ export class PdSCurveParameterPanel {
                 y = 0.0
                 try {
                     x = this.minXValue + (1.0 * i / numPoints) * (this.maxXValue - this.minXValue)
-                } catch (Exception e) {
+                } catch (e) {
                     return failed
                 }
                 y = umath.scurveWithResult(x, curve.c1, curve.c2, failed)
@@ -718,7 +718,7 @@ export class PdSCurveParameterPanel {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (e) {
             return failed
         }
         failed = false

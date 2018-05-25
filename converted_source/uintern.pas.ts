@@ -146,13 +146,13 @@ export class PdInternode {
                     // must bound these because some accounting error is causing problems that should be fixed later 
                     tryExpansion = umath.max(0.0, umath.min(500.0, umath.safedivExcept(this.liveBiomass_pctMPB - this.newBiomassForDay_pctMPB, this.liveBiomass_pctMPB, 0) * this.lengthExpansion + umath.safedivExcept(this.newBiomassForDay_pctMPB, this.liveBiomass_pctMPB, 0) * 1.0))
                     this.lengthExpansion = tryExpansion
-                } catch (Exception e) {
+                } catch (e) {
                     // pass
                 }
                 try {
                     tryExpansion = umath.max(0.0, umath.min(50.0, umath.safedivExcept(this.liveBiomass_pctMPB - this.newBiomassForDay_pctMPB, this.liveBiomass_pctMPB, 0) * this.widthExpansion + umath.safedivExcept(this.newBiomassForDay_pctMPB, this.liveBiomass_pctMPB, 0) * 1.0))
                     this.widthExpansion = tryExpansion
-                } catch (Exception e) {
+                } catch (e) {
                     // pass
                 }
                 if (this.plant.floweringHasStarted) {

@@ -981,7 +981,7 @@ export class PdPlant {
                 //nothing-messes up paint
                 try {
                     this.draw()
-                } catch (Exception e) {
+                } catch (e) {
                     // pass
                 }
                 this.setBoundsRect_pixels(this.getTurtleBoundsRect())
@@ -1012,7 +1012,7 @@ export class PdPlant {
                 //nothing-messes up paint
                 try {
                     this.draw()
-                } catch (Exception e) {
+                } catch (e) {
                     // pass
                 }
                 this.setBoundsRect_pixels(this.getTurtleBoundsRect())
@@ -1033,7 +1033,7 @@ export class PdPlant {
                 //nothing-messes up paint
                 try {
                     this.draw()
-                } catch (Exception e) {
+                } catch (e) {
                     // pass
                 }
             }
@@ -1099,7 +1099,7 @@ export class PdPlant {
                 if ((inMainWindow) && (cache === this.previewCache)) {
                     umain.MainForm.updateForChangeToPlantBitmaps()
                 }
-            } catch (Exception e) {
+            } catch (e) {
                 cache.Width = 1
                 cache.Height = 1
                 if ((inMainWindow) && (cache === this.previewCache)) {
