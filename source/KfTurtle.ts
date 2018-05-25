@@ -1,7 +1,7 @@
 // KfTurtle derived from unit Uturtle
 
-import { short, float, long, intround, byte, TColor } from "./common";
-import { KfPoint3D } from "./temporary";
+import { short, float, long, intround, byte, TColor, ColorDefs } from "./common";
+import { KfPoint3D, kTdoBackColor, kTdoForeColor, kTdoLineContrastIndex, kMaximumRecordedPoints, KfPoint3D_scaleBy } from "./temporary";
 import { KfMatrix, TRealRect, KfTriangle } from "./U3dsupport";
 import { KfDrawingSurface } from "./KfDrawingSurface";
 import { TPoint } from "./TPoint";
@@ -83,7 +83,7 @@ export class KfTurtle {
     recordedPointsInUse: long = 0
     scale_pixelsPerMm: float = 1.0
     drawingSurface: KfDrawingSurface = new KfDrawingSurface(null)
-    realBoundsRect: TRealRect = new TRealRect()
+    realBoundsRect: TRealRect = { top: 0, left: 0, bottom: 0, right: 0 }
     drawOptions: PlantDrawOptionsStructure = new PlantDrawOptionsStructure()
     writingTo: short = 0
     
@@ -106,6 +106,8 @@ export class KfTurtle {
         }
     }
     
+    /* TODO -- Finish export
+
     // 3d file export
     createFor3DOutput(anOutputType: short, aFileName: string): void {
         this.create()
@@ -147,6 +149,8 @@ export class KfTurtle {
             (this.drawingSurface).endFile
         }
     }
+
+    */
     
     // -------------------------------------------------------------------------- KfTurtle initializing and setting values 
     reset(): void {
@@ -170,7 +174,7 @@ export class KfTurtle {
         this.drawOptions.draw3DObjects = true
         this.drawOptions.draw3DObjectsAsRects = false
         this.drawOptions.drawLines = true
-        this.drawOptions.lineContrastIndex = utdo.kTdoLineContrastIndex
+        this.drawOptions.lineContrastIndex = kTdoLineContrastIndex
         this.drawOptions.wireFrame = false
         this.drawOptions.sortPolygons = true
         this.drawOptions.sortTdosAsOneItem = false
@@ -179,9 +183,9 @@ export class KfTurtle {
         //    because the tdo multiplies the turtle scale by its own scale (which you are giving it
         //    in the call to draw) 
         // self.setScale_pixelsPerMm(1.0);  actually, this gets done in the reset method
-        this.drawingSurface.foreColor = utdo.kTdoForeColor
-        this.drawingSurface.backColor = utdo.kTdoBackColor
-        this.drawingSurface.lineColor = delphi_compatability.clBlack
+        this.drawingSurface.foreColor = kTdoForeColor
+        this.drawingSurface.backColor = kTdoBackColor
+        this.drawingSurface.lineColor = ColorDefs.clBlack
     }
     
     resetBoundsRect(basePoint: TPoint): void {
@@ -232,6 +236,8 @@ export class KfTurtle {
         return result
     }
     
+    /* TODO -- Finish export 
+
     exportingToFile(): boolean {
         // cfk update this if create any mode that is NOT screen and NOT file
         return this.writingTo !== u3dexport.kScreen
@@ -351,6 +357,8 @@ export class KfTurtle {
             (this.drawingSurface).end3DObject
         }
     }
+
+    */
     
     // ---------------------------------------------------------------------------------- KfTurtle returning values 
     millimetersToPixels(mm: float): float {
@@ -420,7 +428,7 @@ export class KfTurtle {
     recordPosition(): void {
         let newPoint: KfPoint3D
         
-        if (this.recordedPointsInUse >= utdo.kMaximumRecordedPoints) {
+        if (this.recordedPointsInUse >= kMaximumRecordedPoints) {
             return
         }
         newPoint = this.currentMatrix.position
@@ -430,7 +438,7 @@ export class KfTurtle {
     }
     
     recordPositionPoint(aPoint: KfPoint3D): void {
-        if (this.recordedPointsInUse >= utdo.kMaximumRecordedPoints) {
+        if (this.recordedPointsInUse >= kMaximumRecordedPoints) {
             return
         }
         this.recordedPoints[this.recordedPointsInUse] = aPoint
@@ -439,20 +447,19 @@ export class KfTurtle {
     }
     
     transformAndRecord(originalPoint3D: KfPoint3D, theScale_pixelsPerMm: float): KfPoint3D {
-        let result = new KfPoint3D()
+        // TODO: Is defensive copy made here required?
+        const result = new KfPoint3D(originalPoint3D)
         // transform and scale point and record the new location without moving
-        result = originalPoint3D
-        utdo.KfPoint3D_scaleBy(result, theScale_pixelsPerMm * this.scale_pixelsPerMm)
+        KfPoint3D_scaleBy(result, theScale_pixelsPerMm * this.scale_pixelsPerMm)
         this.currentMatrix.transform(result)
         this.recordPositionPoint(result)
         return result
     }
     
     moveAndRecordScale(originalPoint3D: KfPoint3D, theScale_pixelsPerMm: float): void {
-        let aPoint3d: KfPoint3D
-        
-        aPoint3d = originalPoint3D
-        utdo.KfPoint3D_scaleBy(aPoint3d, theScale_pixelsPerMm * this.scale_pixelsPerMm)
+        // TODO: Is defensive copy made here required?
+        const aPoint3d: KfPoint3D = new KfPoint3D(originalPoint3D)
+        KfPoint3D_scaleBy(aPoint3d, theScale_pixelsPerMm * this.scale_pixelsPerMm)
         this.currentMatrix.transform(aPoint3d)
         this.currentMatrix.position = aPoint3d
         this.recordPositionPoint(aPoint3d)
@@ -494,20 +501,17 @@ export class KfTurtle {
     // PDF PORT added to deal with alternatives
     // PDF PORT --Alternative -- changed name of alternative function -- Will not be called
     drawInMillimeters_debug(mm: float): void {
-        let oldColor: TColorRef
-        let oldWidth: float
-        
-        oldColor = this.drawingSurface.lineColor
-        oldWidth = this.drawingSurface.lineWidth
+        const oldColor = this.drawingSurface.lineColor
+        const oldWidth = this.drawingSurface.lineWidth
         this.drawingSurface.lineWidth = 2
-        this.drawingSurface.lineColor = delphi_compatability.clRed
+        this.drawingSurface.lineColor = ColorDefs.clRed
         this.push()
         // will flip so draw Y (sic)
         this.rotateZ(64)
         debugDrawAxis(this, 100.0)
         this.pop()
         this.drawingSurface.lineWidth = 1
-        this.drawingSurface.lineColor = delphi_compatability.clBlue
+        this.drawingSurface.lineColor = ColorDefs.clBlue
         this.push()
         // will flip so draw Z (sic)
         this.rotateY(64)
