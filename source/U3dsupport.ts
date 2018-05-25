@@ -1,9 +1,10 @@
 // unit U3dsupport
 
-import { float, int, intround, byte, TColor, short } from "./common";
+import { float, int, intround, byte, TColor, short, long } from "./common";
 import { TPoint } from "./TPoint";
+import { darkerColorWithSubtraction, KfPoint3D } from "./temporary";
 
-/*
+/* TODO: Remove these imports
 from conversion_common import *
 import usupport
 import utdo
@@ -18,8 +19,8 @@ const kDirectionUnknown = 0
 
 
 // var
-let SinCache: float[] /* kFastTrigArraySize - 1 + 1 */
-let CosCache: float[] /* kFastTrigArraySize - 1 + 1 */
+let SinCache: float[] = new Array(kFastTrigArraySize)
+let CosCache: float[]  = new Array(kFastTrigArraySize)
 
 
 //if you change this - you need to change angleX etc. functions
@@ -434,7 +435,7 @@ export class KfTriangle {
     lineWidth: float = 0.0
     isLine: boolean = false
     points: KfPoint3D[] /* 2 + 1 */ = Array(2+ 1)
-    tdo: KfObject3D = new KfObject3D()
+    tdo: Object // TODO: Should be: KfObject3D when that is defined and importable
     plantPartID: long = 0
     
     // ---------------------------------------------------------------------------------- KfTriangle updating 
@@ -444,9 +445,9 @@ export class KfTriangle {
     }
     
     computeBackFacing(): void {
-        let point0: KfPoint3d
-        let point1: KfPoint3d
-        let point2: KfPoint3d
+        let point0: KfPoint3D
+        let point1: KfPoint3D
+        let point2: KfPoint3D
         let backfacingResult: float
         
         this.backFacing = false
@@ -508,10 +509,9 @@ export class KfTriangle {
             result = this.foreColor
         }
         if (lineContrastIndex > 0) {
-            result = usupport.darkerColorWithSubtraction(result, 10 * lineContrastIndex)
+            result = darkerColorWithSubtraction(result, 10 * lineContrastIndex)
         }
         return result
     }
     
 }
-
