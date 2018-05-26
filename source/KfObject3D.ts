@@ -8,6 +8,7 @@ import { KfTriangle } from "./KfTriangle";
 import { TRect } from "./TRect";
 import { TPoint } from "./TPoint";
 import { KfTurtle } from "./KfTurtle";
+import { KfStringStream } from "./KfStringStream";
 
 /* TODO: Remove unused imports 
 from conversion_common import *
@@ -58,7 +59,7 @@ export class KfObject3D extends PdStreamableObject {
     originPointIndex: long = 0
     triangles: KfIndexTriangle[] = []
     name: string = ""
-    originalIfCopy: KfObject3D = new KfObject3D()
+    originalIfCopy: KfObject3D | null = null
     inUse: boolean = false
     zForSorting: float = 0.0
     indexWhenRemoved: short = 0
@@ -573,7 +574,8 @@ export class KfObject3D extends PdStreamableObject {
         p2 = stream.nextInteger()
         p3 = stream.nextInteger()
         if ((p1 === 0) || (p2 === 0) || (p3 === 0) || (p1 > this.pointsInUse) || (p2 > this.pointsInUse) || (p3 > this.pointsInUse)) {
-            MessageDialog("Bad triangle: " + IntToStr(p1) + " " + IntToStr(p2) + " " + IntToStr(p3) + ". Point indexes must be between 1 and " + IntToStr(this.pointsInUse) + ".", delphi_compatability.TMsgDlgType.mtError, {mbOK, }, 0)
+            // TODO: Fix MessageDialog parameters
+            MessageDialog("Bad triangle: " + IntToStr(p1) + " " + IntToStr(p2) + " " + IntToStr(p3) + ". Point indexes must be between 1 and " + IntToStr(this.pointsInUse) + ".", "delphi_compatability.TMsgDlgType.mtError", { mbOK: true }, 0)
         } else {
             this.addTriangle(new KfIndexTriangle().createABC(p1, p2, p3))
         }
@@ -825,45 +827,42 @@ export class KfObject3D extends PdStreamableObject {
         if (!compareTextIgnoreCase(kStartTdoString, inputLine)) {
             throw new Error("Problem: Expected start of 3D object.")
         }
-        stream = null
-        try {
-            // read info for 3D object from file at current position
-            stream = usstream.KfStringStream.create
-            while (readingMemoLine < aMemo.length) {
-                inputLine = aMemo[readingMemoLine]
-                readingMemoLine += 1
-                if (inputLine.trim() === "") {
-                    // cfk change v1.60final added '' case
-                    continue
-                }
-                // TODO: Seems like comparison with ORIGIN is unneeded here?
-                if ((inputLine.substring(0, 1) === ";") && (!compareTextIgnoreCase("ORIGIN", inputLine))) {
-                    // cfk change for v1.6b2 mistake with origin, placed with comment
-                    // skip commented lines 
-                    continue
-                }
-                stream.onStringSeparator(inputLine, "=")
-                const fieldType: string = stream.nextToken()
-                stream.spaceSeparator()
-                if (compareTextIgnoreCase("POINT", fieldType)) {
-                    this.addPointString(stream)
-                } else if (compareTextIgnoreCase("ORIGIN", fieldType)) {
-                    this.setOriginPointIndex(StrToIntDef(stream.remainder, 0))
-                } else if (compareTextIgnoreCase("TRIANGLE", fieldType)) {
-                    this.addTriangleString(stream)
-                } else if (compareTextIgnoreCase("NAME", fieldType)) {
-                    this.setName(stream.remainder)
-                } else {
-                    break
-                }
+
+        // read info for 3D object from file at current position
+        while (readingMemoLine < aMemo.length) {
+            inputLine = aMemo[readingMemoLine]
+            readingMemoLine += 1
+            if (inputLine.trim() === "") {
+                // cfk change v1.60final added '' case
+                continue
             }
-            this.adjustForOrigin()
-            if (!compareTextIgnoreCase(kEndTdoString, inputLine)) {
-                throw new Error("Problem: Expected end of 3D object.")
+            // TODO: Seems like comparison with ORIGIN is unneeded here?
+            if ((inputLine.substring(0, 1) === ";") && (!compareTextIgnoreCase("ORIGIN", inputLine))) {
+                // cfk change for v1.6b2 mistake with origin, placed with comment
+                // skip commented lines 
+                continue
             }
-        } finally {
-            stream.free
+            const stream = new KfStringStream()
+            stream.onStringSeparator(inputLine, "=")
+            const fieldType: string = stream.nextToken()
+            stream.spaceSeparator()
+            if (compareTextIgnoreCase("POINT", fieldType)) {
+                this.addPointString(stream)
+            } else if (compareTextIgnoreCase("ORIGIN", fieldType)) {
+                this.setOriginPointIndex(StrToIntDef(stream.remainder, 0))
+            } else if (compareTextIgnoreCase("TRIANGLE", fieldType)) {
+                this.addTriangleString(stream)
+            } else if (compareTextIgnoreCase("NAME", fieldType)) {
+                this.setName(stream.remainder)
+            } else {
+                break
+            }
         }
+        this.adjustForOrigin()
+        if (!compareTextIgnoreCase(kEndTdoString, inputLine)) {
+            throw new Error("Problem: Expected end of 3D object.")
+        }
+        
         return readingMemoLine
     }
 
