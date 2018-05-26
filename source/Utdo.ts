@@ -1,6 +1,8 @@
 // unit Utdo
 
-import { float } from "./common"
+import { float, long } from "./common"
+import { PdStreamableObject, PdClassAndVersionInformationRecord, PdFiler } from "./temporary";
+import { KfPoint3D } from "./KfPoint3D";
 
 /* TODO: Remove unised imports 
 from conversion_common import *
@@ -36,37 +38,30 @@ const kEndTdoString = "end 3D object"
 // v1.11 moved up here
 
 // PKfPoint3DArray = 
-TKfPoint3DArray = KfPoint3D[] /* delphi_compatability.MaxListSize - 1 + 1 */
+// TODO: Remove this if really unused: TKfPoint3DArray = KfPoint3D[] /* delphi_compatability.MaxListSize - 1 + 1 */
 
 // const
 const kPointAllocationIncrement = 8
 
 
 function betweenBrackets(aString: string): string {
-    let result = ""
     // lose letter and [ on front, lose ] on back 
-    result = UNRESOLVED.copy(aString, 3, len(aString) - 3)
-    return result
+    return aString.substring(2, aString.length - 2)
 }
 
 
-export class KfIndexTriangle {
-    pointIndexes: long[] /* 2 + 1 */ = Array(2+ 1)
-    KfIndexTriangle.prototype = new PdStreamableObject()
-    KfIndexTriangle.prototype.constructor = KfIndexTriangle
-    
-    // ---------------------------------------------------------------------------------- KfIndexTriangle 
+export class KfIndexTriangle extends PdStreamableObject {
+    pointIndexes: long[] = Array(3)
+
+    // TODO: Update references to KfIndexTriangle.createABC() now that this is not an alternative constructor
     createABC(a: long, b: long, c: long): void {
-        this.create()
         this.pointIndexes[0] = a
         this.pointIndexes[1] = b
         this.pointIndexes[2] = c
     }
     
     flip(): void {
-        let savePoint: long
-        
-        savePoint = this.pointIndexes[0]
+        const savePoint = this.pointIndexes[0]
         this.pointIndexes[0] = this.pointIndexes[2]
         this.pointIndexes[2] = savePoint
     }
