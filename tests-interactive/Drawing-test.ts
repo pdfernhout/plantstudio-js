@@ -56,6 +56,15 @@ function drawWithTurtle() {
     const rect = new TRect(50, 50, 150, 150)
     drawingSurface.recordingStart()
     turtle.drawTrianglesFromBoundsRect(rect)
+    drawingSurface.backColor = 128
+    drawingSurface.foreColor = 128 * 256
+    turtle.xyz(300, 300, 0)
+    turtle.moveInPixelsAndRecord(100)
+    turtle.rotateZ(64);
+    turtle.moveInPixelsAndRecord(100)
+    turtle.rotateZ(64);
+    turtle.moveInPixelsAndRecord(100)
+    turtle.drawTriangleFromIndexes(1, 2, 3, 0)
     drawingSurface.recordingStop()
 }
 

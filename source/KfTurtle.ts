@@ -57,16 +57,16 @@ let gDefaultTurtleInUse: boolean = false
 // if the DEBUG_TURTLE flag is defined then draw axis information
 // PDF PORT Issue
 function debugDrawInMillimeters(turtle: KfTurtle, mm: float): void {
-    const oldPosition = turtle.currentMatrix.position
+    const oldPosition = turtle.positionCopy()
     turtle.currentMatrix.move(turtle.millimetersToPixels(mm))
-    const newPosition = turtle.currentMatrix.position
+    const newPosition = turtle.positionCopy()
     turtle.addToRealBoundsRect(newPosition)
 }
 
 function debugDrawAxis(turtle: KfTurtle, pixels: float): void { 
-    const oldPosition = turtle.currentMatrix.position
+    const oldPosition = turtle.positionCopy()
     turtle.currentMatrix.move(pixels)
-    const newPosition = turtle.currentMatrix.position
+    const newPosition = turtle.positionCopy()
     if (turtle.drawOptions.drawStems) {
         turtle.drawingSurface.drawLineFromTo(oldPosition, newPosition)
     }
