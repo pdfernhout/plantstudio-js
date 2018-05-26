@@ -15,6 +15,9 @@ export const kTdoBackColor = ColorDefs.clGray
 
 // TODO: Implement PdStreamableObject
 export class PdStreamableObject {
+    streamDataWithFiler(filer: PdFiler, cvir: PdClassAndVersionInformationRecord): void {
+        throw new Error("TODO")
+    }
 }
 
 // TODO: Replace PdClassAndVersionInformationRecord from Ufiler
@@ -26,4 +29,11 @@ export interface PdClassAndVersionInformationRecord {
 
 // TODO: Replace PdFiler from Ufiler
 export class PdFiler {
+    streamBytes(object: any, size: number): any {
+        return object
+    }
+}
+
+export function FIX_sizeof(object: Object): number {
+    return 0
 }
