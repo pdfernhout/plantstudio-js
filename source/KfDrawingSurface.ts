@@ -28,7 +28,8 @@ function hexForValue(c: number) {
     return hex.length == 1 ? "0" + hex : hex
 }
 
-const kInitialDrawingSurfaceTriangles = 1000
+// TODO: Determine if kInitialDrawingSurfaceTriangles shoudl really be 0 or as previously 1000 with JavaScript
+const kInitialDrawingSurfaceTriangles = 0
 
 export class KfDrawingSurface {
     pane: CanvasRenderingContext2D | null

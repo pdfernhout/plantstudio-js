@@ -2,6 +2,8 @@ import * as m from "mithril"
 import { KfDrawingSurface } from "../source/KfDrawingSurface"
 import { TPoint } from "../source/TPoint"
 import { KfPoint3D } from "../source/temporary";
+import { KfTurtle } from "../source/KfTurtle";
+import { TRect } from "../source/TRect";
 
 const drawingSurface = new KfDrawingSurface(null)
 
@@ -37,7 +39,27 @@ function drawATriangle() {
     drawingSurface.recordingStop()
 }
 
-drawATriangle()
+// drawATriangle()
+
+const turtle = new KfTurtle()
+turtle.drawingSurface = drawingSurface
+
+function drawWithTurtle() {
+    drawingSurface.backColor = 255
+    drawingSurface.foreColor = 255 * 256
+    drawingSurface.circleColor = 128 * 256 * 256
+    drawingSurface.lineColor = 255 * 256 * 256
+    drawingSurface.lineWidth = 1.0
+    drawingSurface.drawingLines = true
+    drawingSurface.circlePointRadius = 5
+    drawingSurface.circlingPoints = true
+    const rect = new TRect(50, 50, 150, 150)
+    drawingSurface.recordingStart()
+    turtle.drawTrianglesFromBoundsRect(rect)
+    drawingSurface.recordingStop()
+}
+
+drawWithTurtle()
 
 const MyComponent = { 
     view: () => m("div", 
