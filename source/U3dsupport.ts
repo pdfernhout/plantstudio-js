@@ -48,9 +48,7 @@ export interface VertexTriangle {
 
 // ------------------------------------------------------------------- global functions 
 function fastTrigInitialize(): void {
-    let i: int
-    
-    for (i = 0; i <= kFastTrigArraySize - 1; i++) {
+    for (let i = 0; i < kFastTrigArraySize; i++) {
         // Approach: sine and cosine arrays are used for speed. Angles are 0 - 255 instead of 0 to 359
         // PDF - maybe want to expand this to 0 - 1023? - would impact rotate callers
         SinCache[i] = Math.sin(i * 2 * 3.141592654 / kFastTrigArraySize)
@@ -65,7 +63,6 @@ fastTrigInitialize()
 // moved bounding angle into cache range into functions to decrease function overhead
 // copied these functions into rotate to decrease overhead there - both of function call and of bounding angle twice
 export function fastTrigCos(angle: float): float {
-    let result = 0.0
     let boundedAngle: int
     
     try {
@@ -73,15 +70,13 @@ export function fastTrigCos(angle: float): float {
     } catch (e) {
         boundedAngle = 0
     }
-    if ((boundedAngle < 0)) {
+    if (boundedAngle < 0) {
         boundedAngle = kFastTrigArraySize + boundedAngle
     }
-    result = CosCache[boundedAngle]
-    return result
+    return CosCache[boundedAngle]
 }
 
 export function fastTrigSin(angle: float): float {
-    let result = 0.0
     let boundedAngle: int
     
     try {
@@ -92,21 +87,16 @@ export function fastTrigSin(angle: float): float {
     if ((boundedAngle < 0)) {
         boundedAngle = kFastTrigArraySize + boundedAngle
     }
-    result = SinCache[boundedAngle]
-    return result
+    return SinCache[boundedAngle]
 }
 
 function clockwise(point0: TPoint, point1: TPoint, point2: TPoint): int {
     let result = 0
-    let dx1: float
-    let dy1: float
-    let dx2: float
-    let dy2: float
     
-    dx1 = point1.X - point0.X
-    dy1 = point1.Y - point0.Y
-    dx2 = point2.X - point0.X
-    dy2 = point2.Y - point0.Y
+    const dx1 = point1.X - point0.X
+    const dy1 = point1.Y - point0.Y
+    const dx2 = point2.X - point0.X
+    const dy2 = point2.Y - point0.Y
     if ((dx1 * dy2) > (dy1 * dx2)) {
         result = kDirectionClockwise
     } else if ((dx1 * dy2) < (dy1 * dx2)) {
@@ -123,17 +113,12 @@ function clockwise(point0: TPoint, point1: TPoint, point2: TPoint): int {
 
 export function pointInTriangle(point: TPoint, triangle: TPoint[]): boolean {
     let result = false
-    let first: int
-    let second: int
-    let third: int
-    
-    result = false
     if ((triangle[0].X === triangle[1].X) && (triangle[1].X === triangle[2].X) && (triangle[0].Y === triangle[1].Y) && (triangle[1].Y === triangle[2].Y)) {
         return result
     }
-    first = clockwise(point, triangle[0], triangle[1])
-    second = clockwise(point, triangle[1], triangle[2])
-    third = clockwise(point, triangle[2], triangle[0])
+    const first = clockwise(point, triangle[0], triangle[1])
+    const second = clockwise(point, triangle[1], triangle[2])
+    const third = clockwise(point, triangle[2], triangle[0])
     result = (first === second) && (second === third)
     return result
 }
@@ -169,7 +154,7 @@ export class KfMatrix {
     
     deepCopy(): KfMatrix {
         let result = new KfMatrix()
-        result.position = this.position
+        result.position = new KfPoint3D(this.position)
         result.a0 = this.a0
         result.a1 = this.a1
         result.a2 = this.a2
@@ -183,7 +168,7 @@ export class KfMatrix {
     }
     
     copyTo(otherMatrix: KfMatrix): void {
-        otherMatrix.position = this.position
+        otherMatrix.position = new KfPoint3D(this.position)
         otherMatrix.a0 = this.a0
         otherMatrix.a1 = this.a1
         otherMatrix.a2 = this.a2
@@ -207,13 +192,9 @@ export class KfMatrix {
     // pdf - transform the point, including offsetting it by the current position
     // Alters the point's contents
     transform(aPoint3D: KfPoint3D): void {
-        let x: float
-        let y: float
-        let z: float
-        
-        x = aPoint3D.x
-        y = aPoint3D.y
-        z = aPoint3D.z
+        const x = aPoint3D.x
+        const y = aPoint3D.y
+        const z = aPoint3D.z
         aPoint3D.x = (x * this.a0) + (y * this.a1) + (z * this.a2) + this.position.x
         aPoint3D.y = (x * this.b0) + (y * this.b1) + (z * this.b2) + this.position.y
         aPoint3D.z = (x * this.c0) + (y * this.c1) + (z * this.c2) + this.position.z
@@ -221,22 +202,17 @@ export class KfMatrix {
     
     // ---------------------------------------------------------------------------------- KfMatrix rotating 
     rotateX(angle: float): void {
-        let cosAngle: float
-        let sinAngle: float
-        let temp1: float
-        let boundedAngleIndex: int
-        
         // bound angle and convert to index
         // not doing try except around round for speed here - could fail ...
-        boundedAngleIndex = intround(angle) % kFastTrigArraySize
+        let boundedAngleIndex = intround(angle) % kFastTrigArraySize
         if ((boundedAngleIndex < 0)) {
             boundedAngleIndex = kFastTrigArraySize + boundedAngleIndex
         }
-        cosAngle = CosCache[boundedAngleIndex]
-        sinAngle = SinCache[boundedAngleIndex]
+        const cosAngle = CosCache[boundedAngleIndex]
+        const sinAngle = SinCache[boundedAngleIndex]
         // moved minuses to middle to optimize
         this.a0 = this.a0
-        temp1 = (this.a1 * cosAngle) - (this.a2 * sinAngle)
+        let temp1 = (this.a1 * cosAngle) - (this.a2 * sinAngle)
         this.a2 = (this.a1 * sinAngle) + (this.a2 * cosAngle)
         this.a1 = temp1
         this.b0 = this.b0
@@ -250,20 +226,15 @@ export class KfMatrix {
     }
     
     rotateY(angle: float): void {
-        let cosAngle: float
-        let sinAngle: float
-        let temp0: float
-        let boundedAngleIndex: int
-        
         // bound angle and convert to index
         // not doing try except around round for speed here - could fail ...
-        boundedAngleIndex = intround(angle) % kFastTrigArraySize
+        let boundedAngleIndex = intround(angle) % kFastTrigArraySize
         if ((boundedAngleIndex < 0)) {
             boundedAngleIndex = kFastTrigArraySize + boundedAngleIndex
         }
-        cosAngle = CosCache[boundedAngleIndex]
-        sinAngle = SinCache[boundedAngleIndex]
-        temp0 = (this.a0 * cosAngle) + (this.a2 * sinAngle)
+        const cosAngle = CosCache[boundedAngleIndex]
+        const sinAngle = SinCache[boundedAngleIndex]
+        let temp0 = (this.a0 * cosAngle) + (this.a2 * sinAngle)
         this.a1 = this.a1
         // flipped to put minus in middle
         this.a2 = (this.a2 * cosAngle) - (this.a0 * sinAngle)
@@ -281,11 +252,6 @@ export class KfMatrix {
     }
     
     rotateZ(angle: float): void {
-        let cosAngle: float
-        let sinAngle: float
-        let temp0: float
-        let boundedAngleIndex: int
-        
         //
         //  {bound angle and convert to index}
         //  {not doing try except around round for speed here - could fail ...}
@@ -313,14 +279,14 @@ export class KfMatrix {
         //  c0 := temp0;    
         // bound angle and convert to index
         // not doing try except around round for speed here - could fail ...
-        boundedAngleIndex = intround(angle) % kFastTrigArraySize
+        let boundedAngleIndex = intround(angle) % kFastTrigArraySize
         if ((boundedAngleIndex < 0)) {
             boundedAngleIndex = kFastTrigArraySize + boundedAngleIndex
         }
-        cosAngle = CosCache[boundedAngleIndex]
-        sinAngle = SinCache[boundedAngleIndex]
+        const cosAngle = CosCache[boundedAngleIndex]
+        const sinAngle = SinCache[boundedAngleIndex]
         // minuses moved to middle to optimize
-        temp0 = (this.a0 * cosAngle) - (this.a1 * sinAngle)
+        let temp0 = (this.a0 * cosAngle) - (this.a1 * sinAngle)
         this.a1 = (this.a0 * sinAngle) + (this.a1 * cosAngle)
         this.a2 = this.a2
         this.a0 = temp0
@@ -340,12 +306,10 @@ export class KfMatrix {
     // these do not take in account kFastTrigArraySize could be different from 256
     angleX(): byte {
         let result = 0
-        let temp: float
-        
+
         try {
             result = 0
-            temp = 0.0
-            temp = (this.a2 * this.a2) + (this.c2 * this.c2)
+            let temp = (this.a2 * this.a2) + (this.c2 * this.c2)
             if ((temp < 0.0)) {
                 temp = 0.0
             }
@@ -369,12 +333,10 @@ export class KfMatrix {
     
     angleY(): byte {
         let result = 0
-        let temp: float
         
         try {
             result = 0
-            temp = 0.0
-            temp = (this.a0 * this.a0) + (this.c0 * this.c0)
+            let temp = (this.a0 * this.a0) + (this.c0 * this.c0)
             if ((temp < 0.0)) {
                 temp = 0.0
             }
@@ -398,12 +360,10 @@ export class KfMatrix {
     
     angleZ(): byte {
         let result = 0
-        let temp: float
-        
+ 
         try {
             result = 0
-            temp = 0.0
-            temp = (this.a1 * this.a1) + (this.c1 * this.c1)
+            let temp = (this.a1 * this.a1) + (this.c1 * this.c1)
             if ((temp < 0.0)) {
                 temp = 0.0
             }
@@ -447,19 +407,14 @@ export class KfTriangle {
     }
     
     computeBackFacing(): void {
-        let point0: KfPoint3D
-        let point1: KfPoint3D
-        let point2: KfPoint3D
-        let backfacingResult: float
-        
         this.backFacing = false
         if (this.isLine) {
             return
         }
-        point0 = this.points[0]
-        point1 = this.points[1]
-        point2 = this.points[2]
-        backfacingResult = ((point1.x - point0.x) * (point2.y - point0.y)) - ((point1.y - point0.y) * (point2.x - point0.x))
+        const point0 = this.points[0]
+        const point1 = this.points[1]
+        const point2 = this.points[2]
+        const backfacingResult = ((point1.x - point0.x) * (point2.y - point0.y)) - ((point1.y - point0.y) * (point2.x - point0.x))
         this.backFacing = (backfacingResult < 0)
     }
     
