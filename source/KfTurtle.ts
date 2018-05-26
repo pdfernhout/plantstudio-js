@@ -2,7 +2,7 @@
 
 import { short, float, long, intround, byte, TColor, ColorDefs } from "./common"
 import { KfPoint3D, KfPoint3D_scaleBy } from "./KfPoint3D"
-import { kTdoBackColor, kTdoForeColor, kTdoLineContrastIndex, kMaximumRecordedPoints } from "./temporary"
+import { kTdoBackColor, kTdoForeColor, kTdoLineContrastIndex, kMaximumRecordedPoints, ExportFormats } from "./temporary"
 import { TRealRect } from "./U3dsupport"
 import { KfDrawingSurface } from "./KfDrawingSurface"
 import { TPoint } from "./TPoint"
@@ -236,37 +236,37 @@ export class KfTurtle {
         return new KfPoint3D(this.position())
     }
     
-    /* TODO -- Finish export 
-
     exportingToFile(): boolean {
         // cfk update this if create any mode that is NOT screen and NOT file
-        return this.writingTo !== u3dexport.kScreen
+        return this.writingTo !== ExportFormats.kScreen
     }
     
     writingToDXF(): boolean {
-        return this.writingTo === u3dexport.kDXF
+        return this.writingTo === ExportFormats.kDXF
     }
     
     writingToPOV(): boolean {
-        return this.writingTo === u3dexport.kPOV
+        return this.writingTo === ExportFormats.kPOV
     }
     
     writingTo3DS(): boolean {
-        return this.writingTo === u3dexport.k3DS
+        return this.writingTo === ExportFormats.k3DS
     }
     
     writingToOBJ(): boolean {
-        return this.writingTo === u3dexport.kOBJ
+        return this.writingTo === ExportFormats.kOBJ
     }
     
     writingToVRML(): boolean {
-        return this.writingTo === u3dexport.kVRML
+        return this.writingTo === ExportFormats.kVRML
     }
     
     writingToLWO(): boolean {
-        return this.writingTo === u3dexport.kLWO
+        return this.writingTo === ExportFormats.kLWO
     }
     
+    /* TODO -- Finish export 
+
     fileExportSurface(): KfFileExportSurface {
         let result = new KfFileExportSurface()
         if ((this.drawingSurface instanceof u3dexport.KfFileExportSurface)) {

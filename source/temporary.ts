@@ -37,3 +37,15 @@ export class PdFiler {
 export function FIX_sizeof(object: Object): number {
     return 0
 }
+
+// TODO: Fix constants copied from U3dexport
+export enum ExportFormats {
+    kScreen = 0,
+    kDXF = 1,
+    kPOV = 2,
+    k3DS = 3,
+    kOBJ = 4,
+    kVRML = 5,
+    kLWO = 6,
+    k3DExportTypeLast = 6
+}

@@ -1,7 +1,7 @@
 // KfObject3D was unit Utdo
 
 import { float, long, ColorDefs, int, IntToStr, short, StrToFloat, intround } from "./common"
-import { PdStreamableObject, PdClassAndVersionInformationRecord, PdFiler } from "./temporary";
+import { PdStreamableObject, PdClassAndVersionInformationRecord, PdFiler, ExportFormats } from "./temporary";
 import { KfPoint3D, KfPoint3D_matchXYZ, KfPoint3D_setXYZ, KfPoint3D_addPointToBoundsRect, KfPoint3D_subtract } from "./KfPoint3D";
 import { KfIndexTriangle } from "./KfIndexTriangle";
 import { KfTriangle } from "./KfTriangle";
@@ -96,7 +96,7 @@ export class KfObject3D extends PdStreamableObject {
     clearPoints(): void {
         this.pointsInUse = 0
         this.originPointIndex = 0
-        this.triangles.clear()
+        this.triangles = []
     }
     
     copyFrom(original: KfObject3D): void { 
@@ -112,7 +112,7 @@ export class KfObject3D extends PdStreamableObject {
         }
         this.pointsInUse = original.pointsInUse
         this.originPointIndex = original.originPointIndex
-        this.triangles.clear()
+        this.triangles = []
         if (original.triangles.length > 0) {
             for (let i = 0; i < original.triangles.length; i++) {
                 const theTriangle: KfIndexTriangle = original.triangles[i]
@@ -381,7 +381,7 @@ export class KfObject3D extends PdStreamableObject {
             throw new Error("Problem: No 3D drawing surface in method KfObject3D.write3DExportElements.")
         }
         switch (turtle.writingTo) {
-            case u3dexport.k3DS:
+            case ExportFormats.k3DS:
                 fileExportSurface.startVerticesAndTriangles()
                 if (turtle.writingToLWO()) {
                     firstPtIndex = fileExportSurface.numPoints
@@ -403,7 +403,7 @@ export class KfObject3D extends PdStreamableObject {
                 fileExportSurface.endVerticesAndTriangles()
                 // PDF PORT -- added semicolon
                 break
-            case u3dexport.kOBJ:
+            case ExportFormats.kOBJ:
                 fileExportSurface.startVerticesAndTriangles()
                 if (turtle.writingToLWO()) {
                     firstPtIndex = fileExportSurface.numPoints
@@ -425,7 +425,7 @@ export class KfObject3D extends PdStreamableObject {
                 fileExportSurface.endVerticesAndTriangles()
                 // PDF PORT -- added semicolon
                 break
-            case u3dexport.kVRML:
+            case ExportFormats.kVRML:
                 fileExportSurface.startVerticesAndTriangles()
                 if (turtle.writingToLWO()) {
                     firstPtIndex = fileExportSurface.numPoints
@@ -447,7 +447,7 @@ export class KfObject3D extends PdStreamableObject {
                 fileExportSurface.endVerticesAndTriangles()
                 // PDF PORT -- added semicolon
                 break
-            case u3dexport.kLWO:
+            case ExportFormats.kLWO:
                 fileExportSurface.startVerticesAndTriangles()
                 if (turtle.writingToLWO()) {
                     firstPtIndex = fileExportSurface.numPoints
@@ -651,7 +651,7 @@ export class KfObject3D extends PdStreamableObject {
         
         this.pointsInUse = 0
         this.originPointIndex = 0
-        this.triangles.clear()
+        this.triangles = []
         if (embeddedInPlant) {
             UNRESOLVED.readln(inputFile, inputLine)
             if ((embeddedInPlant) && (trim(inputLine) === "")) {
@@ -720,7 +720,7 @@ export class KfObject3D extends PdStreamableObject {
         this.pointsInUse = 0
         this.originPointIndex = 0
         pointsRead = 0
-        this.triangles.clear()
+        this.triangles = []
         newPoints[0].x = 0
         newPoints[0].y = 0
         newPoints[0].z = 0
@@ -796,7 +796,7 @@ export class KfObject3D extends PdStreamableObject {
         
         this.pointsInUse = 0
         this.originPointIndex = 0
-        this.triangles.clear()
+        this.triangles = []
         inputLine = aMemo.Lines.Strings[readingMemoLine]
         readingMemoLine += 1
         if (trim(inputLine) === "") {
@@ -864,7 +864,7 @@ export class KfObject3D extends PdStreamableObject {
         // format is n[name],p[# # #],p[# # #],p[# # #],t[# # #],t[# # #],t[# # #] 
         this.pointsInUse = 0
         this.originPointIndex = 0
-        this.triangles.clear()
+        this.triangles = []
         stream = usstream.KfStringStream.create
         partStream = usstream.KfStringStream.create
         try {
@@ -920,7 +920,7 @@ export class KfObject3D extends PdStreamableObject {
         }
         if (filer.isReading()) {
             //may have triangles already, because we are keeping them around now
-            this.triangles.clear()
+            this.triangles = []
         }
         this.triangles.streamUsingFiler(filer, KfIndexTriangle)
     }
