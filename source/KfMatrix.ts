@@ -1,6 +1,6 @@
-import { float, intround, byte } from "./common";
-import { KfPoint3D } from "./temporary";
-import { CosCache, SinCache, kFastTrigArraySize } from "./U3dsupport";
+import { float, intround, byte } from "./common"
+import { KfPoint3D } from "./KfPoint3D"
+import { CosCache, SinCache, kFastTrigArraySize } from "./U3dsupport"
 
 export class KfMatrix {
     a0: float = 0.0

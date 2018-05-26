@@ -1,5 +1,8 @@
 // unit Utdo
 
+import { float } from "./common"
+
+/* TODO: Remove unised imports 
 from conversion_common import *
 import u3dexport
 import u3dsupport
@@ -12,6 +15,7 @@ import ufiler
 import usstream
 import ucollect
 import delphi_compatability
+*/
 
 // const
 const kMaximumRecordedPoints = 10000
@@ -30,12 +34,6 @@ const kEndTdoString = "end 3D object"
 // v1.6b2 changed from 200 to 1000 ; v2.0 changed to 10000 (not in tdo anymore)
 // v1.11 moved up here
 // v1.11 moved up here
-// record
-export interface KfPoint3D {
-    x: float
-    y: float
-    z: float
-}
 
 // PKfPoint3DArray = 
 TKfPoint3DArray = KfPoint3D[] /* delphi_compatability.MaxListSize - 1 + 1 */

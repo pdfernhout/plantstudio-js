@@ -1,5 +1,6 @@
-import { long, float, TColor, short } from "./common";
-import { KfPoint3D, darkerColorWithSubtraction } from "./temporary";
+import { long, float, TColor, short } from "./common"
+import { KfPoint3D } from "./KfPoint3D"
+import { darkerColorWithSubtraction } from "./temporary"
 
 // these can only be triangular
 export class KfTriangle {

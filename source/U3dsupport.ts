@@ -1,8 +1,9 @@
 // unit U3dsupport
 
-import { float, int, intround, byte, TColor, short, long } from "./common";
-import { TPoint } from "./TPoint";
-import { darkerColorWithSubtraction, KfPoint3D } from "./temporary";
+import { float, int, intround, byte, TColor, short, long } from "./common"
+import { TPoint } from "./TPoint"
+import { KfPoint3D } from "./KfPoint3D"
+import { darkerColorWithSubtraction } from "./temporary"
 
 /* TODO: Remove these imports
 from conversion_common import *
