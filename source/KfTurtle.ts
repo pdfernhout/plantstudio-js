@@ -230,10 +230,7 @@ export class KfTurtle {
     }
     
     positionCopy(): KfPoint3D {
-        let result = new KfPoint3D()
-        // suspicious things that call this may not clean up copy
-        result = this.currentMatrix.position
-        return result
+        return new KfPoint3D(this.position())
     }
     
     /* TODO -- Finish export 
@@ -394,8 +391,7 @@ export class KfTurtle {
     }
     
     position(): KfPoint3D {
-        // TODO: Is this defendive copy of KfPoint3D needed? 
-        return new KfPoint3D(this.currentMatrix.position)
+        return this.currentMatrix.position
     }
     
     boundsRect(): TRect {
@@ -426,12 +422,11 @@ export class KfTurtle {
     }
     
     recordPosition(): void {
-        let newPoint: KfPoint3D
-        
         if (this.recordedPointsInUse >= kMaximumRecordedPoints) {
+            // TODO: Maybe signal this error situation of too many points somehow?
             return
         }
-        newPoint = this.currentMatrix.position
+        const newPoint = this.positionCopy()
         this.recordedPoints[this.recordedPointsInUse] = newPoint
         this.recordedPointsInUse += 1
         this.addToRealBoundsRect(newPoint)
@@ -441,7 +436,7 @@ export class KfTurtle {
         if (this.recordedPointsInUse >= kMaximumRecordedPoints) {
             return
         }
-        this.recordedPoints[this.recordedPointsInUse] = aPoint
+        this.recordedPoints[this.recordedPointsInUse] = new KfPoint3D(aPoint)
         this.recordedPointsInUse += 1
         this.addToRealBoundsRect(aPoint)
     }
@@ -486,12 +481,9 @@ export class KfTurtle {
     
     // ---------------------------------------------------------------------------------- KfTurtle drawing 
     drawInPixels(pixels: float): void {
-        let oldPosition: KfPoint3D
-        let newPosition: KfPoint3D
-        
-        oldPosition = this.currentMatrix.position
+        const oldPosition = this.positionCopy()
         this.currentMatrix.move(pixels)
-        newPosition = this.currentMatrix.position
+        const newPosition = this.positionCopy()
         if (this.drawOptions.drawStems) {
             this.drawingSurface.drawLineFromTo(oldPosition, newPosition)
         }
@@ -524,9 +516,9 @@ export class KfTurtle {
     
     drawInMillimeters(mm: float, partID: long): KfTriangle | null {
         let result: KfTriangle | null = null
-        const oldPosition = this.currentMatrix.position
+        const oldPosition = this.positionCopy()
         this.currentMatrix.move(this.millimetersToPixels(mm))
-        const newPosition = this.currentMatrix.position
+        const newPosition = this.positionCopy()
         if (this.drawOptions.drawStems) {
             result = this.drawingSurface.drawLineFromTo(oldPosition, newPosition)
             if (result !== null) {
