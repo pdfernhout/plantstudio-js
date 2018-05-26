@@ -265,6 +265,15 @@ export class KfTurtle {
         return this.writingTo === ExportFormats.kLWO
     }
     
+    // TODO: Remove thse stub methods
+    ifExporting_exclude3DObject(scale: float): boolean {
+        return false;
+    }
+    ifExporting_start3DObject(aLongName: string, aShortName: string, color: any, index: short): void {
+    }
+    ifExporting_end3DObject(): void {
+    }
+
     /* TODO -- Finish export 
 
     fileExportSurface(): KfFileExportSurface {

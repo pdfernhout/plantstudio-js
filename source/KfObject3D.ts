@@ -1,6 +1,6 @@
 // KfObject3D was unit Utdo
 
-import { float, long, ColorDefs, int, IntToStr, short, StrToFloat, intround } from "./common"
+import { float, long, ColorDefs, int, IntToStr, short, StrToFloat, intround, arrayRemove } from "./common"
 import { PdStreamableObject, PdClassAndVersionInformationRecord, PdFiler, ExportFormats } from "./temporary";
 import { KfPoint3D, KfPoint3D_matchXYZ, KfPoint3D_setXYZ, KfPoint3D_addPointToBoundsRect, KfPoint3D_subtract } from "./KfPoint3D";
 import { KfIndexTriangle } from "./KfIndexTriangle";
@@ -199,7 +199,7 @@ export class KfObject3D extends PdStreamableObject {
         if (this.pointsInUse > 0) {
             for (let i = 0; i < this.pointsInUse; i++) {
                 if (KfPoint3D_matchXYZ(aPoint, this.points[i], matchDistance)) {
-                    //add 1 because triangle indexes start at 1
+                    // add 1 because triangle indexes start at 1
                     return i + 1
                 }
             }
@@ -207,7 +207,7 @@ export class KfObject3D extends PdStreamableObject {
         return this.addPoint(aPoint)
     }
     
-    //PDF FIX - may want to optimize this to use var to pass around result rather than assign
+    // PDF FIX - may want to optimize this to use var to pass around result rather than assign
     pointForIndex(anIndex: long): KfPoint3D {
         let result = new KfPoint3D()
         if ((anIndex < 1) || (anIndex > this.pointsInUse)) {
@@ -229,9 +229,9 @@ export class KfObject3D extends PdStreamableObject {
         return this.triangles[anIndex - 1]
     }
     
-    //adjust all points for origin, which is assumed to be at the first point
-    //in terms of plant organs, this means the first point is
-    //where the organ is attached to the plant
+    // adjust all points for origin, which is assumed to be at the first point
+    // in terms of plant organs, this means the first point is
+    // where the organ is attached to the plant
     adjustForOrigin(): void {
         let i: long
         let tempPoint: KfPoint3D
@@ -254,7 +254,7 @@ export class KfObject3D extends PdStreamableObject {
                 }
             }
         }
-        //makes the first point zero
+        // makes the first point zero
         tempPoint = this.points[this.originPointIndex]
         KfPoint3D_setXYZ(tempPoint, 0.0, 0.0, 0.0)
         this.points[this.originPointIndex] = tempPoint
@@ -310,8 +310,8 @@ export class KfObject3D extends PdStreamableObject {
                 KfPoint3D_addPointToBoundsRect(this.boundsRect, turtle.transformAndRecord(this.points[i], scale))
             }
         }
-        result.X = origin.X + bitmapSize.X / 2 - usupport.rWidth(this.boundsRect) / 2 - this.boundsRect.Left
-        result.Y = origin.Y + bitmapSize.Y / 2 - usupport.rHeight(this.boundsRect) / 2 - this.boundsRect.Top
+        result.X = origin.X + bitmapSize.X / 2 - this.boundsRect.width / 2 - this.boundsRect.Left
+        result.Y = origin.Y + bitmapSize.Y / 2 - this.boundsRect.height / 2 - this.boundsRect.Top
         return result
     }
     
@@ -369,6 +369,12 @@ export class KfObject3D extends PdStreamableObject {
         turtle.drawingSurface.fillingTriangles = oldSetting
     }
     
+    // TODO: Remove stub write3DExportElements
+    write3DExportElements(turtle: KfTurtle, scale: float, partID: short): void {
+    }
+
+    /* TODO: Implement write3DExportElements
+
     write3DExportElements(turtle: KfTurtle, scale: float, partID: short): void {
         let fileExportSurface: KfFileExportSurface
         let triangle: KfIndexTriangle
@@ -481,12 +487,14 @@ export class KfObject3D extends PdStreamableObject {
             }
     }
     
+    */
+
     addTriangleWithVerticesABC(a: long, b: long, c: long): void {
         this.addTriangle(new KfIndexTriangle().createABC(a, b, c))
     }
     
     removeTriangle(aTriangle: KfIndexTriangle): void {
-        this.triangles.Remove(aTriangle)
+        arrayRemove(this.triangles, aTriangle)
         this.removePointsNotInUse()
     }
     
@@ -542,7 +550,9 @@ export class KfObject3D extends PdStreamableObject {
         }
     }
     
-    //parse string into xyz positions and add point to collection
+    /* TODO: Make import/export for for KfObject3D
+
+    // parse string into xyz positions and add point to collection
     addPointString(stream: KfStringStream): void {
         let aPoint3D: KfPoint3D = new KfPoint3D()
         const x: int = stream.nextInteger()
@@ -552,7 +562,7 @@ export class KfObject3D extends PdStreamableObject {
         this.addPoint(aPoint3D)
     }
     
-    //parse string into three point indexes and add triangle to collection
+    // parse string into three point indexes and add triangle to collection
     addTriangleString(stream: KfStringStream): void {
         let p1: int
         let p2: int
@@ -668,7 +678,7 @@ export class KfObject3D extends PdStreamableObject {
         }
         stream = null
         try {
-            //read info for 3D object from file at current position
+            // read info for 3D object from file at current position
             stream = usstream.KfStringStream.create
             while (!UNRESOLVED.eof(inputFile)) {
                 UNRESOLVED.readln(inputFile, inputLine)
@@ -681,7 +691,7 @@ export class KfObject3D extends PdStreamableObject {
                     continue
                 }
                 if ((!embeddedInPlant) && (UNRESOLVED.pos("[", inputLine) === 1)) {
-                    //ignore old thing in brackets
+                    // ignore old thing in brackets
                     continue
                 }
                 stream.onStringSeparator(inputLine, "=")
@@ -773,7 +783,7 @@ export class KfObject3D extends PdStreamableObject {
                 newTriangleIndexes[0] = this.addPointIfNoMatch(newPoints[0], 0.1)
                 newTriangleIndexes[1] = this.addPointIfNoMatch(newPoints[1], 0.1)
                 newTriangleIndexes[2] = this.addPointIfNoMatch(newPoints[2], 0.1)
-                this.addTriangle(KfIndexTriangle().createABC(newTriangleIndexes[0], newTriangleIndexes[1], newTriangleIndexes[2]))
+                this.addTriangle(new KfIndexTriangle().createABC(newTriangleIndexes[0], newTriangleIndexes[1], newTriangleIndexes[2]))
                 // reset points for next time
                 newPoints[0].x = 0
                 newPoints[0].y = 0
@@ -816,7 +826,7 @@ export class KfObject3D extends PdStreamableObject {
         }
         stream = null
         try {
-            //read info for 3D object from file at current position
+            // read info for 3D object from file at current position
             stream = usstream.KfStringStream.create
             while (readingMemoLine < aMemo.Lines.length) {
                 inputLine = aMemo.Lines.Strings[readingMemoLine]
@@ -919,7 +929,7 @@ export class KfObject3D extends PdStreamableObject {
             }
         }
         if (filer.isReading()) {
-            //may have triangles already, because we are keeping them around now
+            // may have triangles already, because we are keeping them around now
             this.triangles = []
         }
         this.triangles.streamUsingFiler(filer, KfIndexTriangle)
@@ -1073,11 +1083,13 @@ export class KfObject3D extends PdStreamableObject {
         result = (backfacingResult < 0)
         return result
     }
+
+    */
     
 }
 
 // not using
-//procedure KfObject3D.insertPoint(newPointIndex: smallint; newPoint: KfPoint3D);
+// procedure KfObject3D.insertPoint(newPointIndex: smallint; newPoint: KfPoint3D);
 //  var
 //    i: smallint;
 //  begin

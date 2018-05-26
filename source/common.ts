@@ -24,3 +24,10 @@ export function IntToStr(value: int) {
 export function StrToFloat(value: string) {
     return parseFloat(value)
 }
+
+export function arrayRemove(theArray: Array<any>, item: any) {
+    const index = theArray.indexOf(item)
+    if (index !== -1) {
+        theArray.splice(index, 1)
+    }
+}
