@@ -7,6 +7,7 @@ import { KfIndexTriangle } from "./KfIndexTriangle";
 import { KfTriangle } from "./KfTriangle";
 import { TRect } from "./TRect";
 import { TPoint } from "./TPoint";
+import { KfTurtle } from "./KfTurtle";
 
 /* TODO: Remove unused imports 
 from conversion_common import *
@@ -299,11 +300,9 @@ export class KfObject3D extends PdStreamableObject {
         }
     }
     
-    bestPointForDrawingAtScale(turtleProxy: TObject, origin: TPoint, bitmapSize: TPoint, scale: float): TPoint {
+    bestPointForDrawingAtScale(turtle: KfTurtle, origin: TPoint, bitmapSize: TPoint, scale: float): TPoint {
         const result = new TPoint()
-        let turtle: KfTurtle
         
-        turtle = uturtle.KfTurtle(turtleProxy)
         this.boundsRect = new TRect(0, 0, 0, 0)
         turtle.reset()
         if (this.pointsInUse > 0) {
@@ -316,13 +315,11 @@ export class KfObject3D extends PdStreamableObject {
         return result
     }
     
-    draw(turtleProxy: TObject, scale: float, longName: string, shortName: string, dxfIndex: short, partID: long): TRect {
-        let turtle: KfTurtle
-        
+    draw(turtle: KfTurtle, scale: float, longName: string, shortName: string, dxfIndex: short, partID: long): TRect {  
         let result = new TRect(0, 0, 0, 0)
         let minZ = 0
         this.zForSorting = 0
-        turtle = uturtle.KfTurtle(turtleProxy)
+
         if (turtle.ifExporting_exclude3DObject(scale)) {
             return result
         }
@@ -365,28 +362,20 @@ export class KfObject3D extends PdStreamableObject {
         return result
     }
     
-    overlayBoundsRect(turtleProxy: TObject, scale: float): void {
-        let i: long
-        let turtle: KfTurtle
-        let oldSetting: boolean
-        
-        turtle = uturtle.KfTurtle(turtleProxy)
-        oldSetting = turtle.drawingSurface.fillingTriangles
+    overlayBoundsRect(turtle: KfTurtle, scale: float): void {
+        const oldSetting: boolean = turtle.drawingSurface.fillingTriangles
         turtle.drawingSurface.fillingTriangles = false
         turtle.drawTrianglesFromBoundsRect(this.boundsRect)
         turtle.drawingSurface.fillingTriangles = oldSetting
     }
     
-    write3DExportElements(turtleProxy: TObject, scale: float, partID: short): void {
+    write3DExportElements(turtle: KfTurtle, scale: float, partID: short): void {
         let fileExportSurface: KfFileExportSurface
-        let i: short
-        let turtle: KfTurtle
         let triangle: KfIndexTriangle
         let firstPtIndex: long
         
         // do NOT pass the array on because a tdo could be really big
         // some write out lists of points then triangles; some draw each triangle
-        turtle = uturtle.KfTurtle(turtleProxy)
         fileExportSurface = turtle.fileExportSurface()
         if (fileExportSurface === null) {
             throw new Error("Problem: No 3D drawing surface in method KfObject3D.write3DExportElements.")
@@ -400,11 +389,11 @@ export class KfObject3D extends PdStreamableObject {
                     firstPtIndex = 0
                 }
                 if (this.pointsInUse > 0) {
-                    for (i = 0; i < this.pointsInUse; i++) {
+                    for (let i = 0; i < this.pointsInUse; i++) {
                         fileExportSurface.addPoint(turtle.transformAndRecord(this.points[i], scale))
                     }
                 }
-                for (i = 1; i <= this.triangles.length; i++) {
+                for (let i = 1; i <= this.triangles.length; i++) {
                     triangle = this.triangleForIndex(i)
                     fileExportSurface.addTriangle(firstPtIndex + triangle.pointIndexes[0] - 1, firstPtIndex + triangle.pointIndexes[1] - 1, firstPtIndex + triangle.pointIndexes[2] - 1)
                     if (fileExportSurface.options.makeTrianglesDoubleSided) {
@@ -422,11 +411,11 @@ export class KfObject3D extends PdStreamableObject {
                     firstPtIndex = 0
                 }
                 if (this.pointsInUse > 0) {
-                    for (i = 0; i < this.pointsInUse; i++) {
+                    for (let i = 0; i < this.pointsInUse; i++) {
                         fileExportSurface.addPoint(turtle.transformAndRecord(this.points[i], scale))
                     }
                 }
-                for (i = 1; i <= this.triangles.length; i++) {
+                for (let i = 1; i <= this.triangles.length; i++) {
                     triangle = this.triangleForIndex(i)
                     fileExportSurface.addTriangle(firstPtIndex + triangle.pointIndexes[0] - 1, firstPtIndex + triangle.pointIndexes[1] - 1, firstPtIndex + triangle.pointIndexes[2] - 1)
                     if (fileExportSurface.options.makeTrianglesDoubleSided) {
@@ -444,11 +433,11 @@ export class KfObject3D extends PdStreamableObject {
                     firstPtIndex = 0
                 }
                 if (this.pointsInUse > 0) {
-                    for (i = 0; i < this.pointsInUse; i++) {
+                    for (let i = 0; i < this.pointsInUse; i++) {
                         fileExportSurface.addPoint(turtle.transformAndRecord(this.points[i], scale))
                     }
                 }
-                for (i = 1; i <= this.triangles.length; i++) {
+                for (let i = 1; i <= this.triangles.length; i++) {
                     triangle = this.triangleForIndex(i)
                     fileExportSurface.addTriangle(firstPtIndex + triangle.pointIndexes[0] - 1, firstPtIndex + triangle.pointIndexes[1] - 1, firstPtIndex + triangle.pointIndexes[2] - 1)
                     if (fileExportSurface.options.makeTrianglesDoubleSided) {
@@ -466,11 +455,11 @@ export class KfObject3D extends PdStreamableObject {
                     firstPtIndex = 0
                 }
                 if (this.pointsInUse > 0) {
-                    for (i = 0; i < this.pointsInUse; i++) {
+                    for (let i = 0; i < this.pointsInUse; i++) {
                         fileExportSurface.addPoint(turtle.transformAndRecord(this.points[i], scale))
                     }
                 }
-                for (i = 1; i <= this.triangles.length; i++) {
+                for (let i = 1; i <= this.triangles.length; i++) {
                     triangle = this.triangleForIndex(i)
                     fileExportSurface.addTriangle(firstPtIndex + triangle.pointIndexes[0] - 1, firstPtIndex + triangle.pointIndexes[1] - 1, firstPtIndex + triangle.pointIndexes[2] - 1)
                     if (fileExportSurface.options.makeTrianglesDoubleSided) {
@@ -481,7 +470,7 @@ export class KfObject3D extends PdStreamableObject {
                 // PDF PORT -- added semicolon
                 break
             default:
-                for (i = 1; i <= this.triangles.length; i++) {
+                for (let i = 1; i <= this.triangles.length; i++) {
                     triangle = this.triangleForIndex(i)
                     turtle.drawTriangleFromIndexes(triangle.pointIndexes[0], triangle.pointIndexes[1], triangle.pointIndexes[2], partID)
                     if (fileExportSurface.options.makeTrianglesDoubleSided) {
@@ -1043,7 +1032,7 @@ export class KfObject3D extends PdStreamableObject {
             writeln(outputFile, "#declare " + nameString + "=mesh {")
             for (let i = 0; i < this.triangles.length; i++) {
                 const triangle: KfIndexTriangle = this.triangles[i]
-                this.writeTriangleToPOV_INCFIle(outputFile, this.points[triangle.pointIndexes[0] - 1], this.points[triangle.pointIndexes[1] - 1], this.points[triangle.pointIndexes[2] - 1])
+                this.writeTriangleToPOV_INCFile(outputFile, this.points[triangle.pointIndexes[0] - 1], this.points[triangle.pointIndexes[1] - 1], this.points[triangle.pointIndexes[2] - 1])
             }
             writeln(outputFile, chr(9) + "pigment { color rgb <" + usupport.digitValueString(UNRESOLVED.getRValue(frontFaceColor) / 256.0) + ", " + usupport.digitValueString(UNRESOLVED.getGValue(frontFaceColor) / 256.0) + ", " + usupport.digitValueString(UNRESOLVED.getBValue(frontFaceColor) / 256.0) + "> }")
             writeln(outputFile, "}")
@@ -1061,7 +1050,7 @@ export class KfObject3D extends PdStreamableObject {
         }
     }
     
-    writeTriangleToPOV_INCFIle(outputFile: TextFile, p1: KfPoint3D, p2: KfPoint3D, p3: KfPoint3D): void {
+    writeTriangleToPOV_INCFile(outputFile: TextFile, p1: KfPoint3D, p2: KfPoint3D, p3: KfPoint3D): void {
         write(outputFile, chr(9) + "triangle { <")
         // all y values must be negative because it seems our coordinate systems are different
         write(outputFile, IntToStr(intround(p1.x)) + ", " + IntToStr(-intround(p1.y)) + ", " + IntToStr(intround(p1.z)) + ">, <")
