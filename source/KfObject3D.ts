@@ -825,7 +825,7 @@ export class KfObject3D extends PdStreamableObject {
             readingMemoLine += 1
         }
         if (!compareTextIgnoreCase(kStartTdoString, inputLine)) {
-            throw new Error("Problem: Expected start of 3D object.")
+            throw new Error("Problem: Expected start of 3D object." + "\nGot: " + inputLine)
         }
 
         // read info for 3D object from file at current position

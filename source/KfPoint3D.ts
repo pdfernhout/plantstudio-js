@@ -13,6 +13,14 @@ export class KfPoint3D {
             this.z = point.z
         }
     }
+
+    // TODO: Remove setXYZ if not needed
+    setXYZ(x: float, y: float, z: float): KfPoint3D {
+        this.x = x
+        this.y = y
+        this.z = z
+        return this
+    }
 }
 
 export function KfPoint3D_setXYZ(thePoint: KfPoint3D, aX: float, aY: float, aZ: float): void {
