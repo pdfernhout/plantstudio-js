@@ -1,6 +1,6 @@
 // unit Utdo
 
-import { float, long } from "./common"
+import { float, long, ColorDefs } from "./common"
 import { PdStreamableObject, PdClassAndVersionInformationRecord, PdFiler } from "./temporary";
 import { KfPoint3D } from "./KfPoint3D";
 
@@ -26,8 +26,8 @@ const kDontAdjustForOrigin = false
 const kEmbeddedInPlant = true
 const kInTdoLibrary = false
 const kStandAloneFile = false
-const kTdoForeColor = delphi_compatability.clSilver
-const kTdoBackColor = delphi_compatability.clGray
+const kTdoForeColor = ColorDefs.clSilver
+const kTdoBackColor = ColorDefs.clGray
 const kTdoLineContrastIndex = 10
 const kStartTdoString = "start 3D object"
 const kEndTdoString = "end 3D object"
