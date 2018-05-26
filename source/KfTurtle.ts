@@ -2,10 +2,12 @@
 
 import { short, float, long, intround, byte, TColor, ColorDefs } from "./common";
 import { KfPoint3D, kTdoBackColor, kTdoForeColor, kTdoLineContrastIndex, kMaximumRecordedPoints, KfPoint3D_scaleBy } from "./temporary";
-import { KfMatrix, TRealRect, KfTriangle } from "./U3dsupport";
+import { TRealRect } from "./U3dsupport";
 import { KfDrawingSurface } from "./KfDrawingSurface";
 import { TPoint } from "./TPoint";
 import { TRect } from "./TRect";
+import { KfMatrix } from "./KfMatrix";
+import { KfTriangle } from "./KfTriangle";
 
 /* TODO: Remove unused imports
 from conversion_common import *

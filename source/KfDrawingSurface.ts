@@ -2,8 +2,9 @@
 
 import { TColor, short, long, float, int, intround } from "./common";
 import { KfPoint3D } from "./temporary";
-import { KfTriangle, pointInTriangle } from "./U3dsupport";
+import { pointInTriangle } from "./U3dsupport";
 import { TPoint } from "./TPoint";
+import { KfTriangle } from "./KfTriangle";
 
 /* TODO: Remove these imports
 from conversion_common import *
