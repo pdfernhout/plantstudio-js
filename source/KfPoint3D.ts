@@ -43,9 +43,11 @@ export function KfPoint3D_subtract(thePoint: KfPoint3D, aPoint: KfPoint3D): void
 }
 
 export function KfPoint3D_matchXYZ(pointOne: KfPoint3D, pointTwo: KfPoint3D, matchDistance: float): boolean {
-    let result = false
     // v1.6b1 added
-    result = (Math.abs(pointOne.x - pointTwo.x) <= matchDistance) && (Math.abs(pointOne.y - pointTwo.y) <= matchDistance) && (Math.abs(pointOne.z - pointTwo.z) <= matchDistance)
+    const result = 
+        (Math.abs(pointOne.x - pointTwo.x) <= matchDistance) &&
+        (Math.abs(pointOne.y - pointTwo.y) <= matchDistance) &&
+        (Math.abs(pointOne.z - pointTwo.z) <= matchDistance)
     return result
 }
 
