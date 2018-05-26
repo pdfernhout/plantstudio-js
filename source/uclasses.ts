@@ -1,41 +1,34 @@
 // unit Uclasses
 
-from conversion_common import *
-import ufiler
-import delphi_compatability
+import { PdClassAndVersionInformationRecord, PdStreamableObject } from "./temporary";
 
 // const
-const kTNil = 14501
-const kPdStreamableObject = 14502
-const kPdPlant = 14503
-const kPdPlantPart = 14505
-const kPdInternode = 14506
-const kPdLeaf = 14507
-const kPdMeristem = 14508
-const kPdInflorescence = 14509
-const kPdFlowerFruit = 14510
-const kKfObject3D = 14511
-const kKfIndexTriangle = 14512
-const KPdRandom = 14513
-const kPdBreedingStrategy = 14514
-const kPdPlantDrawingAmendment = 14515
-
+export const kTNil = 14501
+export const kPdStreamableObject = 14502
+export const kPdPlant = 14503
+export const kPdPlantPart = 14505
+export const kPdInternode = 14506
+export const kPdLeaf = 14507
+export const kPdMeristem = 14508
+export const kPdInflorescence = 14509
+export const kPdFlowerFruit = 14510
+export const kKfObject3D = 14511
+export const kKfIndexTriangle = 14512
+export const KPdRandom = 14513
+export const kPdBreedingStrategy = 14514
+export const kPdPlantDrawingAmendment = 14515
 
 // kPdDayPlant = 14504;
-function CreateStreamableObjectFromClassAndVersionInformation(cvir: PdClassAndVersionInformationRecord): PdStreamableObject {
-    let result = new PdStreamableObject()
+function CreateStreamableObjectFromClassAndVersionInformation(cvir: PdClassAndVersionInformationRecord): PdStreamableObject | null {
     switch (cvir.classNumber) {
         case kTNil:
-            result = null
-            break
+            return null
         case kPdStreamableObject:
-            throw new GeneralException.create("Problem: Should not stream PdStreamableObject abstract class " + IntToStr(cvir.classNumber))
-            break
+            throw new Error("Problem: Should not stream PdStreamableObject abstract class " + cvir.classNumber)
         default:
-            throw new GeneralException.create("Problem: Unknown class " + IntToStr(cvir.classNumber))
-            result = null
-            break
-    return result
+            throw new Error("Problem: Unknown class " + cvir.classNumber)
+    }
+    // TODO: This function seems incomplete if actually had a real object -- return new PdStreamableObject()
 }
 
 
