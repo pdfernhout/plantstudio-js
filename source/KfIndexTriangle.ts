@@ -6,10 +6,11 @@ export class KfIndexTriangle extends PdStreamableObject {
     pointIndexes: long[] = [0, 0, 0]
 
     // TODO: Update references to KfIndexTriangle.createABC() now that this is not an alternative constructor
-    createABC(a: long, b: long, c: long): void {
+    createABC(a: long, b: long, c: long): KfIndexTriangle {
         this.pointIndexes[0] = a
         this.pointIndexes[1] = b
         this.pointIndexes[2] = c
+        return this
     }
     
     flip(): void {

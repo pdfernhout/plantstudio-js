@@ -5,3 +5,6 @@ Add space after comments with regex:
 // $1
 
 Incorrectly converted length to len when a parameter (when maybe doing that expecting length to be a function)
+
+Looks like no conversion for property 
+  e.g. from utdo.pas: points[index: integer]: KfPoint3d read getPoint write setPoint;

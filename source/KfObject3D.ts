@@ -1,8 +1,12 @@
-// unit Utdo
+// KfObject3D was unit Utdo
 
-import { float, long, ColorDefs } from "./common"
+import { float, long, ColorDefs, int, IntToStr, short, StrToFloat, intround } from "./common"
 import { PdStreamableObject, PdClassAndVersionInformationRecord, PdFiler } from "./temporary";
-import { KfPoint3D } from "./KfPoint3D";
+import { KfPoint3D, KfPoint3D_matchXYZ, KfPoint3D_setXYZ, KfPoint3D_addPointToBoundsRect, KfPoint3D_subtract } from "./KfPoint3D";
+import { KfIndexTriangle } from "./KfIndexTriangle";
+import { KfTriangle } from "./KfTriangle";
+import { TRect } from "./TRect";
+import { TPoint } from "./TPoint";
 
 /* TODO: Remove unused imports 
 from conversion_common import *
@@ -37,9 +41,6 @@ const kEndTdoString = "end 3D object"
 // v1.11 moved up here
 // v1.11 moved up here
 
-// PKfPoint3DArray = 
-// TODO: Remove this if really unused: TKfPoint3DArray = KfPoint3D[] /* delphi_compatability.MaxListSize - 1 + 1 */
-
 // const
 const kPointAllocationIncrement = 8
 
@@ -49,12 +50,12 @@ function betweenBrackets(aString: string): string {
     return aString.substring(2, aString.length - 2)
 }
 
-export class KfObject3D {
-    pointData: PKfPoint3DArray = new PKfPoint3DArray()
+export class KfObject3D extends PdStreamableObject {
+    points: KfPoint3D[] = [] // delphi_compatability.MaxListSize ??
     pointsInUse: long = 0
     pointsAllocated: long = 0
     originPointIndex: long = 0
-    triangles: TListCollection = new TListCollection()
+    triangles: KfIndexTriangle[] = []
     name: string = ""
     originalIfCopy: KfObject3D = new KfObject3D()
     inUse: boolean = false
@@ -62,56 +63,28 @@ export class KfObject3D {
     indexWhenRemoved: short = 0
     selectedIndexWhenRemoved: short = 0
     boundsRect: TRect = new TRect()
-    KfObject3D.prototype = new PdStreamableObject()
-    KfObject3D.prototype.constructor = KfObject3D
     
     // doesn't need to be streamed, only used while drawing
-    // ---------------------------------------------------------------------------------- KfObject3D 
-    create(): void {
-        PdStreamableObject.prototype.create.call(this)
-        this.triangles = ucollect.TListCollection().Create()
-    }
-    
-    destroy(): void {
-        this.triangles.free
-        this.triangles = null
-        if (this.pointData !== null) {
-            UNRESOLVED.FreeMem(this.pointData)
-        }
-        PdStreamableObject.prototype.destroy.call(this)
-    }
-    
+
     ensureEnoughSpaceForNewPointData(totalNumberOfPointsToBeUsed: long): void {
         if (this.pointsAllocated >= totalNumberOfPointsToBeUsed) {
             return
         }
-        if (this.pointData === null) {
-            if (totalNumberOfPointsToBeUsed < kPointAllocationIncrement) {
-                totalNumberOfPointsToBeUsed = kPointAllocationIncrement
-            }
-            // assuming this throws its own memory exception
-            UNRESOLVED.GetMem(this.pointData, totalNumberOfPointsToBeUsed * FIX_sizeof(KfPoint3D))
-        } else {
-            if (totalNumberOfPointsToBeUsed % kPointAllocationIncrement !== 0) {
-                totalNumberOfPointsToBeUsed = totalNumberOfPointsToBeUsed + kPointAllocationIncrement - (totalNumberOfPointsToBeUsed % kPointAllocationIncrement)
-            }
-            UNRESOLVED.ReallocMem(this.pointData, totalNumberOfPointsToBeUsed * FIX_sizeof(KfPoint3D))
-            // assuming this throws its own memory exception
+        while (this.points.length < totalNumberOfPointsToBeUsed) {
+            this.points.push(new KfPoint3D())
         }
         this.pointsAllocated = totalNumberOfPointsToBeUsed
     }
     
-    getPoint(index: int): KfPoint3d {
-        let result = new KfPoint3d()
-        result = this.pointData.PDF_FIX_POINTER_ACCESS[index]
-        return result
+    getPoint(index: int): KfPoint3D {
+        return this.points[index]
     }
     
-    setPoint(index: int, aPoint: KfPoint3d): void {
-        if (this.pointData === null) {
-            throw new GeneralException.create("Problem: Nil pointer in method KfObject3D.setPoint.")
+    setPoint(index: int, aPoint: KfPoint3D): void {
+        if (this.points === null) {
+            throw new Error("Problem: Nil pointer in method KfObject3D.setPoint.")
         }
-        this.pointData.PDF_FIX_POINTER_ACCESS[index] = aPoint
+        this.points[index] = aPoint
     }
     
     clear(): void {
@@ -125,109 +98,91 @@ export class KfObject3D {
         this.triangles.clear()
     }
     
-    copyFrom(original: KfObject3D): void {
-        let i: int
-        let theTriangle: KfIndexTriangle
-        
+    copyFrom(original: KfObject3D): void { 
         if (original === null) {
             return
         }
         this.setName(original.name)
         this.ensureEnoughSpaceForNewPointData(original.pointsInUse)
         if (original.pointsInUse > 0) {
-            for (i = 0; i <= original.pointsInUse - 1; i++) {
+            for (let i = 0; i < original.pointsInUse; i++) {
                 this.points[i] = original.points[i]
             }
         }
         this.pointsInUse = original.pointsInUse
         this.originPointIndex = original.originPointIndex
         this.triangles.clear()
-        if (original.triangles.Count > 0) {
-            for (i = 0; i <= original.triangles.Count - 1; i++) {
-                theTriangle = original.triangles.Items[i]
-                this.addTriangle(KfIndexTriangle().createABC(theTriangle.pointIndexes[0], theTriangle.pointIndexes[1], theTriangle.pointIndexes[2]))
+        if (original.triangles.length > 0) {
+            for (let i = 0; i < original.triangles.length; i++) {
+                const theTriangle: KfIndexTriangle = original.triangles[i]
+                this.addTriangle(new KfIndexTriangle().createABC(theTriangle.pointIndexes[0], theTriangle.pointIndexes[1], theTriangle.pointIndexes[2]))
             }
         }
         this.inUse = original.inUse
     }
     
-    isSameAs(other: KfObject3D): boolean {
-        let result = false
-        let i: long
-        let j: long
-        let thePoint: KfPoint3d
-        let theTriangle: KfIndexTriangle
-        let otherPoint: KfPoint3d
-        let otherTriangle: KfIndexTriangle
-        
-        //false if fails any test
-        result = false
+    isSameAs(other: KfObject3D): boolean { 
+        // false if fails any test
         if (this.name !== other.name) {
-            return result
+            return false
         }
         if (this.pointsInUse !== other.pointsInUse) {
-            return result
+            return false
         }
         if (this.originPointIndex !== other.originPointIndex) {
-            return result
+            return false
         }
-        if (this.triangles.Count !== other.triangles.Count) {
-            return result
+        if (this.triangles.length !== other.triangles.length) {
+            return false
         }
         if (this.pointsInUse > 0) {
-            for (i = 0; i <= this.pointsInUse - 1; i++) {
-                thePoint = this.points[i]
-                otherPoint = other.points[i]
+            for (let i = 0; i < this.pointsInUse; i++) {
+                const thePoint = this.points[i]
+                const otherPoint = other.points[i]
                 if ((intround(thePoint.x) !== intround(otherPoint.x)) || (intround(thePoint.y) !== intround(otherPoint.y)) || (intround(thePoint.z) !== intround(otherPoint.z))) {
                     // round these because otherwise i/o inaccuracies could make a tdo seem different when it isn't,
                     // and most numbers are far enough to be integers anyway
-                    return result
+                    return false
                 }
             }
         }
-        if (this.triangles.Count > 0) {
-            for (i = 0; i <= this.triangles.Count - 1; i++) {
-                theTriangle = this.triangles.Items[i]
-                otherTriangle = other.triangles.Items[i]
-                for (j = 0; j <= 2; j++) {
+        if (this.triangles.length > 0) {
+            for (let i = 0; i < this.triangles.length; i++) {
+                const theTriangle = this.triangles[i]
+                const otherTriangle = other.triangles[i]
+                for (let j = 0; j <= 2; j++) {
                     if (theTriangle.pointIndexes[j] !== otherTriangle.pointIndexes[j]) {
-                        return result
+                        return false
                     }
                 }
             }
         }
-        //passed all the tests
-        result = true
-        return result
+        // passed all the tests
+        return true
     }
     
     getName(): string {
-        let result = ""
-        result = this.name
-        return result
+        return this.name
     }
     
     setName(newName: string): void {
-        this.name = UNRESOLVED.copy(newName, 1, 80)
+        // TODO: does name still have to be limited to 80 characters under JavaScript?
+        this.name = newName.substring(0, 80)
     }
     
-    addPoint(aPoint: KfPoint3d): short {
-        let result = 0
+    addPoint(aPoint: KfPoint3D): short {
         // v2.0 removed this check
-        //if pointsInUse >= kMaximumRecordedPoints then
+        // if pointsInUse >= kMaximumRecordedPoints then
         //  raise Exception.create('Problem: Too many points in 3D object.');
         this.ensureEnoughSpaceForNewPointData(this.pointsInUse + 1)
         this.points[this.pointsInUse] = aPoint
         this.pointsInUse += 1
-        result = this.pointsInUse
-        return result
+        return this.pointsInUse
     }
     
     removePoint(point: short): void {
-        let i: short
-        
-        if (point <= this.pointsInUse - 2) {
-            for (i = point; i <= this.pointsInUse - 2; i++) {
+        if (point < this.pointsInUse - 1) {
+            for (let i = point; i < this.pointsInUse - 1; i++) {
                 this.points[i] = this.points[i + 1]
             }
         }
@@ -239,44 +194,38 @@ export class KfObject3D {
         }
     }
     
-    addPointIfNoMatch(aPoint: KfPoint3d, matchDistance: float): short {
-        let result = 0
-        let i: short
-        
+    addPointIfNoMatch(aPoint: KfPoint3D, matchDistance: float): short {
         if (this.pointsInUse > 0) {
-            for (i = 0; i <= this.pointsInUse - 1; i++) {
+            for (let i = 0; i < this.pointsInUse; i++) {
                 if (KfPoint3D_matchXYZ(aPoint, this.points[i], matchDistance)) {
                     //add 1 because triangle indexes start at 1
-                    result = i + 1
-                    return result
+                    return i + 1
                 }
             }
         }
-        result = this.addPoint(aPoint)
-        return result
+        return this.addPoint(aPoint)
     }
     
     //PDF FIX - may want to optimize this to use var to pass around result rather than assign
     pointForIndex(anIndex: long): KfPoint3D {
         let result = new KfPoint3D()
         if ((anIndex < 1) || (anIndex > this.pointsInUse)) {
-            throw new GeneralException.create("Problem: Point index out of range in method KfObject3D.pointForIndex.")
+            throw new Error("Problem: Point index out of range in method KfObject3D.pointForIndex.")
         }
         result = this.points[anIndex - 1]
         return result
     }
     
     addTriangle(aTriangle: KfIndexTriangle): void {
-        this.triangles.Add(aTriangle)
+        this.triangles.push(aTriangle)
     }
     
+    // TODO: Maybe rmeove triangleForIndex or at least adjust it to be zero-based index
     triangleForIndex(anIndex: long): KfIndexTriangle {
-        let result = new KfIndexTriangle()
-        if ((anIndex < 1) || (anIndex > this.triangles.Count)) {
-            throw new GeneralException.create("Problem: Triangle index out of range in method KfObject3D.triangleForIndex.")
+        if ((anIndex < 1) || (anIndex > this.triangles.length)) {
+            throw new Error("Problem: Triangle index out of range in method KfObject3D.triangleForIndex.")
         }
-        result = this.triangles.Items[anIndex - 1]
-        return result
+        return this.triangles[anIndex - 1]
     }
     
     //adjust all points for origin, which is assumed to be at the first point
@@ -284,7 +233,7 @@ export class KfObject3D {
     //where the organ is attached to the plant
     adjustForOrigin(): void {
         let i: long
-        let tempPoint: KfPoint3d
+        let tempPoint: KfPoint3D
         
         if (this.pointsInUse < 1) {
             return
@@ -296,7 +245,7 @@ export class KfObject3D {
             this.originPointIndex = this.pointsInUse - 1
         }
         if (this.pointsInUse > 1) {
-            for (i = 0; i <= this.pointsInUse - 1; i++) {
+            for (i = 0; i < this.pointsInUse; i++) {
                 if (i !== this.originPointIndex) {
                     tempPoint = this.points[i]
                     KfPoint3D_subtract(tempPoint, this.points[this.originPointIndex])
@@ -311,9 +260,7 @@ export class KfObject3D {
     }
     
     setOriginPointIndex(newOriginPointIndex: int): void {
-        let changed: boolean
-        
-        changed = (this.originPointIndex !== newOriginPointIndex)
+        const changed = (this.originPointIndex !== newOriginPointIndex)
         this.originPointIndex = newOriginPointIndex
         if (changed) {
             this.adjustForOrigin()
@@ -321,36 +268,30 @@ export class KfObject3D {
     }
     
     makeMirrorTriangles(): void {
-        let triangleCountAtStart: short
-        let newPointIndexes: short[] /* 2 + 1 */
-        let i: short
-        let j: short
-        let aPoint: KfPoint3D
-        let triangle: KfIndexTriangle
-        
         this.adjustForOrigin()
-        triangleCountAtStart = this.triangles.Count
+        const triangleCountAtStart = this.triangles.length
         if (triangleCountAtStart > 0) {
-            for (i = 0; i <= triangleCountAtStart - 1; i++) {
-                triangle = KfIndexTriangle(this.triangles[i])
-                for (j = 0; j <= 2; j++) {
-                    aPoint = this.pointForIndex(triangle.pointIndexes[j])
+            for (let i = 0; i < triangleCountAtStart; i++) {
+                const triangle = this.triangles[i]
+                const newPointIndexes: short[] = [0, 0, 0]
+                for (let j = 0; j <= 2; j++) {
+                    const aPoint = this.pointForIndex(triangle.pointIndexes[j])
                     aPoint.x = -1 * aPoint.x
                     newPointIndexes[j] = this.addPointIfNoMatch(aPoint, 1.0)
                 }
                 // reversing order of points makes triangle have correct facing for opposite side
-                this.addTriangle(KfIndexTriangle().createABC(newPointIndexes[2], newPointIndexes[1], newPointIndexes[0]))
+                this.addTriangle(new KfIndexTriangle().createABC(newPointIndexes[2], newPointIndexes[1], newPointIndexes[0]))
             }
         }
     }
     
     reverseZValues(): void {
         let i: short
-        let tempPoint: KfPoint3d
+        let tempPoint: KfPoint3D
         
         this.adjustForOrigin()
         if (this.pointsInUse > 0) {
-            for (i = 0; i <= this.pointsInUse - 1; i++) {
+            for (i = 0; i < this.pointsInUse; i++) {
                 tempPoint = this.points[i]
                 tempPoint.z = -1 * tempPoint.z
                 this.points[i] = tempPoint
@@ -359,15 +300,14 @@ export class KfObject3D {
     }
     
     bestPointForDrawingAtScale(turtleProxy: TObject, origin: TPoint, bitmapSize: TPoint, scale: float): TPoint {
-        let result = new TPoint()
-        let i: long
+        const result = new TPoint()
         let turtle: KfTurtle
         
         turtle = uturtle.KfTurtle(turtleProxy)
-        this.boundsRect = Rect(0, 0, 0, 0)
+        this.boundsRect = new TRect(0, 0, 0, 0)
         turtle.reset()
         if (this.pointsInUse > 0) {
-            for (i = 0; i <= this.pointsInUse - 1; i++) {
+            for (let i = 0; i < this.pointsInUse; i++) {
                 KfPoint3D_addPointToBoundsRect(this.boundsRect, turtle.transformAndRecord(this.points[i], scale))
             }
         }
@@ -377,24 +317,19 @@ export class KfObject3D {
     }
     
     draw(turtleProxy: TObject, scale: float, longName: string, shortName: string, dxfIndex: short, partID: long): TRect {
-        let result = new TRect()
-        let i: long
-        let triangle: KfIndexTriangle
-        let realTriangle: KfTriangle
         let turtle: KfTurtle
-        let minZ: float
         
-        result = Rect(0, 0, 0, 0)
-        minZ = 0
+        let result = new TRect(0, 0, 0, 0)
+        let minZ = 0
         this.zForSorting = 0
         turtle = uturtle.KfTurtle(turtleProxy)
         if (turtle.ifExporting_exclude3DObject(scale)) {
             return result
         }
         turtle.clearRecording()
-        this.boundsRect = Rect(0, 0, 0, 0)
+        this.boundsRect = new TRect(0, 0, 0, 0)
         if (this.pointsInUse > 0) {
-            for (i = 0; i <= this.pointsInUse - 1; i++) {
+            for (let i = 0; i < this.pointsInUse; i++) {
                 KfPoint3D_addPointToBoundsRect(this.boundsRect, turtle.transformAndRecord(this.points[i], scale))
             }
         }
@@ -411,10 +346,10 @@ export class KfObject3D {
         if (turtle.exportingToFile()) {
             // draw
             this.write3DExportElements(turtle, scale, partID)
-        } else if (this.triangles.Count > 0) {
-            for (i = 1; i <= this.triangles.Count; i++) {
-                triangle = this.triangleForIndex(i)
-                realTriangle = turtle.drawTriangleFromIndexes(triangle.pointIndexes[0], triangle.pointIndexes[1], triangle.pointIndexes[2], partID)
+        } else if (this.triangles.length > 0) {
+            for (let i = 1; i <= this.triangles.length; i++) {
+                const triangle: KfIndexTriangle = this.triangleForIndex(i)
+                const realTriangle: KfTriangle = turtle.drawTriangleFromIndexes(triangle.pointIndexes[0], triangle.pointIndexes[1], triangle.pointIndexes[2], partID)
                 if ((turtle.drawOptions.sortPolygons) && (turtle.drawOptions.sortTdosAsOneItem) && (realTriangle !== null)) {
                     if (i === 1) {
                         minZ = realTriangle.zForSorting
@@ -454,7 +389,7 @@ export class KfObject3D {
         turtle = uturtle.KfTurtle(turtleProxy)
         fileExportSurface = turtle.fileExportSurface()
         if (fileExportSurface === null) {
-            throw new GeneralException.create("Problem: No 3D drawing surface in method KfObject3D.write3DExportElements.")
+            throw new Error("Problem: No 3D drawing surface in method KfObject3D.write3DExportElements.")
         }
         switch (turtle.writingTo) {
             case u3dexport.k3DS:
@@ -465,11 +400,11 @@ export class KfObject3D {
                     firstPtIndex = 0
                 }
                 if (this.pointsInUse > 0) {
-                    for (i = 0; i <= this.pointsInUse - 1; i++) {
+                    for (i = 0; i < this.pointsInUse; i++) {
                         fileExportSurface.addPoint(turtle.transformAndRecord(this.points[i], scale))
                     }
                 }
-                for (i = 1; i <= this.triangles.Count; i++) {
+                for (i = 1; i <= this.triangles.length; i++) {
                     triangle = this.triangleForIndex(i)
                     fileExportSurface.addTriangle(firstPtIndex + triangle.pointIndexes[0] - 1, firstPtIndex + triangle.pointIndexes[1] - 1, firstPtIndex + triangle.pointIndexes[2] - 1)
                     if (fileExportSurface.options.makeTrianglesDoubleSided) {
@@ -487,11 +422,11 @@ export class KfObject3D {
                     firstPtIndex = 0
                 }
                 if (this.pointsInUse > 0) {
-                    for (i = 0; i <= this.pointsInUse - 1; i++) {
+                    for (i = 0; i < this.pointsInUse; i++) {
                         fileExportSurface.addPoint(turtle.transformAndRecord(this.points[i], scale))
                     }
                 }
-                for (i = 1; i <= this.triangles.Count; i++) {
+                for (i = 1; i <= this.triangles.length; i++) {
                     triangle = this.triangleForIndex(i)
                     fileExportSurface.addTriangle(firstPtIndex + triangle.pointIndexes[0] - 1, firstPtIndex + triangle.pointIndexes[1] - 1, firstPtIndex + triangle.pointIndexes[2] - 1)
                     if (fileExportSurface.options.makeTrianglesDoubleSided) {
@@ -509,11 +444,11 @@ export class KfObject3D {
                     firstPtIndex = 0
                 }
                 if (this.pointsInUse > 0) {
-                    for (i = 0; i <= this.pointsInUse - 1; i++) {
+                    for (i = 0; i < this.pointsInUse; i++) {
                         fileExportSurface.addPoint(turtle.transformAndRecord(this.points[i], scale))
                     }
                 }
-                for (i = 1; i <= this.triangles.Count; i++) {
+                for (i = 1; i <= this.triangles.length; i++) {
                     triangle = this.triangleForIndex(i)
                     fileExportSurface.addTriangle(firstPtIndex + triangle.pointIndexes[0] - 1, firstPtIndex + triangle.pointIndexes[1] - 1, firstPtIndex + triangle.pointIndexes[2] - 1)
                     if (fileExportSurface.options.makeTrianglesDoubleSided) {
@@ -531,11 +466,11 @@ export class KfObject3D {
                     firstPtIndex = 0
                 }
                 if (this.pointsInUse > 0) {
-                    for (i = 0; i <= this.pointsInUse - 1; i++) {
+                    for (i = 0; i < this.pointsInUse; i++) {
                         fileExportSurface.addPoint(turtle.transformAndRecord(this.points[i], scale))
                     }
                 }
-                for (i = 1; i <= this.triangles.Count; i++) {
+                for (i = 1; i <= this.triangles.length; i++) {
                     triangle = this.triangleForIndex(i)
                     fileExportSurface.addTriangle(firstPtIndex + triangle.pointIndexes[0] - 1, firstPtIndex + triangle.pointIndexes[1] - 1, firstPtIndex + triangle.pointIndexes[2] - 1)
                     if (fileExportSurface.options.makeTrianglesDoubleSided) {
@@ -546,7 +481,7 @@ export class KfObject3D {
                 // PDF PORT -- added semicolon
                 break
             default:
-                for (i = 1; i <= this.triangles.Count; i++) {
+                for (i = 1; i <= this.triangles.length; i++) {
                     triangle = this.triangleForIndex(i)
                     turtle.drawTriangleFromIndexes(triangle.pointIndexes[0], triangle.pointIndexes[1], triangle.pointIndexes[2], partID)
                     if (fileExportSurface.options.makeTrianglesDoubleSided) {
@@ -554,10 +489,11 @@ export class KfObject3D {
                     }
                 }
                 break
+            }
     }
     
     addTriangleWithVerticesABC(a: long, b: long, c: long): void {
-        this.addTriangle(KfIndexTriangle().createABC(a, b, c))
+        this.addTriangle(new KfIndexTriangle().createABC(a, b, c))
     }
     
     removeTriangle(aTriangle: KfIndexTriangle): void {
@@ -566,17 +502,13 @@ export class KfObject3D {
     }
     
     removePointsNotInUse(): void {
-        let i: short
-        let pointToRemove: short
-        let done: boolean
-        
         if (this.pointsInUse <= 0) {
             return
         }
-        done = false
+        let done = false
         while (!done) {
-            pointToRemove = -1
-            for (i = 0; i <= this.pointsInUse - 1; i++) {
+            let pointToRemove = -1
+            for (let i = 0; i < this.pointsInUse; i++) {
                 if (!this.pointIsReallyInUse(i)) {
                     pointToRemove = i
                     break
@@ -591,41 +523,28 @@ export class KfObject3D {
     }
     
     pointIsReallyInUse(point: short): boolean {
-        let result = false
-        let triangle: KfIndexTriangle
-        let i: short
-        let j: short
-        let adjustedPoint: short
-        
-        result = false
         // triangle indexes start at 1, not 0 
-        adjustedPoint = point + 1
-        if (this.triangles.Count > 0) {
-            for (i = 0; i <= this.triangles.Count - 1; i++) {
-                triangle = KfIndexTriangle(this.triangles.Items[i])
-                for (j = 0; j <= 2; j++) {
+        const adjustedPoint = point + 1
+        if (this.triangles.length > 0) {
+            for (let i = 0; i < this.triangles.length; i++) {
+                const triangle: KfIndexTriangle = this.triangles[i]
+                for (let j = 0; j <= 2; j++) {
                     if (triangle.pointIndexes[j] === adjustedPoint) {
-                        result = true
-                        return result
+                        return true
                     }
                 }
             }
         }
-        return result
+        return false
     }
     
-    deletePointIndexInTriangles(oldPointIndex: short): void {
-        let triangle: KfIndexTriangle
-        let i: short
-        let j: short
-        let adjustedOldPointIndex: short
-        
+    deletePointIndexInTriangles(oldPointIndex: short): void { 
         // triangle indexes start at 1, not 0 
-        adjustedOldPointIndex = oldPointIndex + 1
-        if (this.triangles.Count > 0) {
-            for (i = 0; i <= this.triangles.Count - 1; i++) {
-                triangle = KfIndexTriangle(this.triangles.Items[i])
-                for (j = 0; j <= 2; j++) {
+        const adjustedOldPointIndex = oldPointIndex + 1
+        if (this.triangles.length > 0) {
+            for (let i = 0; i < this.triangles.length; i++) {
+                const triangle: KfIndexTriangle = this.triangles[i]
+                for (let j = 0; j <= 2; j++) {
                     if (triangle.pointIndexes[j] > adjustedOldPointIndex) {
                         triangle.pointIndexes[j] = triangle.pointIndexes[j] - 1
                     }
@@ -636,17 +555,10 @@ export class KfObject3D {
     
     //parse string into xyz positions and add point to collection
     addPointString(stream: KfStringStream): void {
-        let aPoint3D: KfPoint3D
-        let x: int
-        let y: int
-        let z: int
-        
-        x = 0
-        y = 0
-        z = 0
-        x = stream.nextInteger()
-        y = stream.nextInteger()
-        z = stream.nextInteger()
+        let aPoint3D: KfPoint3D = new KfPoint3D()
+        const x: int = stream.nextInteger()
+        const y: int = stream.nextInteger()
+        const z: int = stream.nextInteger()
         KfPoint3D_setXYZ(aPoint3D, x, y, z)
         this.addPoint(aPoint3D)
     }
@@ -666,7 +578,7 @@ export class KfObject3D {
         if ((p1 === 0) || (p2 === 0) || (p3 === 0) || (p1 > this.pointsInUse) || (p2 > this.pointsInUse) || (p3 > this.pointsInUse)) {
             MessageDialog("Bad triangle: " + IntToStr(p1) + " " + IntToStr(p2) + " " + IntToStr(p3) + ". Point indexes must be between 1 and " + IntToStr(this.pointsInUse) + ".", delphi_compatability.TMsgDlgType.mtError, {mbOK, }, 0)
         } else {
-            this.addTriangle(KfIndexTriangle().createABC(p1, p2, p3))
+            this.addTriangle(new KfIndexTriangle().createABC(p1, p2, p3))
         }
     }
     
@@ -699,20 +611,17 @@ export class KfObject3D {
     }
     
     writeToMemo(aMemo: TMemo): void {
-        let i: short
-        let triangle: KfIndexTriangle
-        
         aMemo.Lines.Add("  " + kStartTdoString)
         aMemo.Lines.Add("  Name=" + this.getName())
         if (this.pointsInUse > 0) {
-            for (i = 0; i <= this.pointsInUse - 1; i++) {
+            for (let i = 0; i < this.pointsInUse; i++) {
                 aMemo.Lines.Add("  Point=" + IntToStr(intround(this.points[i].x)) + " " + IntToStr(intround(this.points[i].y)) + " " + IntToStr(intround(this.points[i].z)))
             }
         }
         aMemo.Lines.Add("; Origin=" + IntToStr(this.originPointIndex))
-        if (this.triangles.Count > 0) {
-            for (i = 0; i <= this.triangles.Count - 1; i++) {
-                triangle = KfIndexTriangle(this.triangles[i])
+        if (this.triangles.length > 0) {
+            for (let i = 0; i < this.triangles.length; i++) {
+                const triangle: KfIndexTriangle = this.triangles[i]
                 aMemo.Lines.Add("  Triangle=" + IntToStr(triangle.pointIndexes[0]) + " " + IntToStr(triangle.pointIndexes[1]) + " " + IntToStr(triangle.pointIndexes[2]))
             }
         }
@@ -720,9 +629,6 @@ export class KfObject3D {
     }
     
     writeToFileStream(outputFile: TextFile, embeddedInPlant: boolean): void {
-        let i: short
-        let triangle: KfIndexTriangle
-        
         if (embeddedInPlant) {
             writeln(outputFile, "  " + kStartTdoString)
         }
@@ -731,14 +637,14 @@ export class KfObject3D {
         }
         writeln(outputFile, "Name=" + this.getName())
         if (this.pointsInUse > 0) {
-            for (i = 0; i <= this.pointsInUse - 1; i++) {
+            for (let i = 0; i < this.pointsInUse; i++) {
                 writeln(outputFile, "  Point=" + IntToStr(intround(this.points[i].x)) + " " + IntToStr(intround(this.points[i].y)) + " " + IntToStr(intround(this.points[i].z)))
             }
         }
         writeln(outputFile, "; Origin=" + IntToStr(this.originPointIndex))
-        if (this.triangles.Count > 0) {
-            for (i = 0; i <= this.triangles.Count - 1; i++) {
-                triangle = KfIndexTriangle(this.triangles[i])
+        if (this.triangles.length > 0) {
+            for (let i = 0; i < this.triangles.length; i++) {
+                const triangle: KfIndexTriangle = this.triangles[i]
                 writeln(outputFile, "  Triangle=" + IntToStr(triangle.pointIndexes[0]) + " " + IntToStr(triangle.pointIndexes[1]) + " " + IntToStr(triangle.pointIndexes[2]))
             }
         }
@@ -768,7 +674,7 @@ export class KfObject3D {
                 UNRESOLVED.readln(inputFile, inputLine)
             }
             if (UNRESOLVED.pos(uppercase(kStartTdoString), uppercase(inputLine)) <= 0) {
-                throw new GeneralException.create("Problem: Expected start of 3D object.")
+                throw new Error("Problem: Expected start of 3D object.")
             }
         }
         stream = null
@@ -807,7 +713,7 @@ export class KfObject3D {
             this.adjustForOrigin()
             if (embeddedInPlant) {
                 if (UNRESOLVED.pos(uppercase(kEndTdoString), uppercase(inputLine)) <= 0) {
-                    throw new GeneralException.create("Problem: Expected end of 3D object.")
+                    throw new Error("Problem: Expected end of 3D object.")
                 }
             }
         } finally {
@@ -818,8 +724,8 @@ export class KfObject3D {
     readFromDXFFile(inputFile: TextFile): void {
         let identifierLine: string
         let valueLine: string
-        let newPoints: KfPoint3D[] /* 2 + 1 */
-        let newTriangleIndexes: int[] /* 2 + 1 */
+        let newPoints: KfPoint3D[] = [new KfPoint3D(), new KfPoint3D(), new KfPoint3D()]
+        let newTriangleIndexes: int[] = [0, 0, 0]
         let pointsRead: int
         
         this.pointsInUse = 0
@@ -917,13 +823,13 @@ export class KfObject3D {
             readingMemoLine += 1
         }
         if (UNRESOLVED.pos(uppercase(kStartTdoString), uppercase(inputLine)) <= 0) {
-            throw new GeneralException.create("Problem: Expected start of 3D object.")
+            throw new Error("Problem: Expected start of 3D object.")
         }
         stream = null
         try {
             //read info for 3D object from file at current position
             stream = usstream.KfStringStream.create
-            while (readingMemoLine <= aMemo.Lines.Count - 1) {
+            while (readingMemoLine < aMemo.Lines.length) {
                 inputLine = aMemo.Lines.Strings[readingMemoLine]
                 readingMemoLine += 1
                 if (trim(inputLine) === "") {
@@ -952,7 +858,7 @@ export class KfObject3D {
             }
             this.adjustForOrigin()
             if (UNRESOLVED.pos(uppercase(kEndTdoString), uppercase(inputLine)) <= 0) {
-                throw new GeneralException.create("Problem: Expected end of 3D object.")
+                throw new Error("Problem: Expected end of 3D object.")
             }
         } finally {
             stream.free
@@ -1005,8 +911,7 @@ export class KfObject3D {
     }
     
     streamDataWithFiler(filer: PdFiler, cvir: PdClassAndVersionInformationRecord): void {
-        let i: short
-        let tempPoint: KfPoint3d
+        let tempPoint: KfPoint3D = new KfPoint3D()
         
         PdStreamableObject.prototype.streamDataWithFiler.call(this, filer, cvir)
         this.name = filer.streamShortString(this.name)
@@ -1014,7 +919,7 @@ export class KfObject3D {
         this.originPointIndex = filer.streamLongint(this.originPointIndex)
         this.ensureEnoughSpaceForNewPointData(this.pointsInUse)
         if (this.pointsInUse > 0) {
-            for (i = 0; i <= this.pointsInUse - 1; i++) {
+            for (let i = 0; i < this.pointsInUse; i++) {
                 if (filer.isWriting()) {
                     tempPoint = this.points[i]
                 }
@@ -1033,13 +938,12 @@ export class KfObject3D {
     
     totalMemorySize(): long {
         let result = 0
-        let i: long
-        
+
         result = this.instanceSize
         result = result + this.triangles.instanceSize
-        if (this.triangles.Count > 0) {
-            for (i = 0; i <= this.triangles.Count - 1; i++) {
-                result = result + KfIndexTriangle(this.triangles.Items[i]).instanceSize
+        if (this.triangles.length > 0) {
+            for (let i = 0; i < this.triangles.length; i++) {
+                result = result + this.triangles[i].instanceSize
             }
         }
         result = result + this.pointsAllocated * FIX_sizeof(KfPoint3D)
@@ -1048,8 +952,6 @@ export class KfObject3D {
     
     writeToDXFFile(fileName: string, frontFaceColor: TColorRef, backFaceColor: TColorRef): void {
         let outputFile: TextFile
-        let i: short
-        let triangle: KfIndexTriangle
         let colorToDraw: TColorRef
         
         AssignFile(outputFile, fileName)
@@ -1061,8 +963,8 @@ export class KfObject3D {
             writeln(outputFile, "SECTION")
             writeln(outputFile, "2")
             writeln(outputFile, "ENTITIES")
-            for (i = 0; i <= this.triangles.Count - 1; i++) {
-                triangle = KfIndexTriangle(this.triangles.Items[i])
+            for (let i = 0; i < this.triangles.length; i++) {
+                const triangle: KfIndexTriangle = this.triangles[i]
                 if (this.triangleIsBackFacing(triangle)) {
                     colorToDraw = backFaceColor
                 } else {
@@ -1117,8 +1019,6 @@ export class KfObject3D {
     
     writeToPOV_INCFile(fileName: string, frontFaceColor: TColorRef, embeddedInPlant: boolean, rotateCount: int): void {
         let outputFile: TextFile
-        let i: short
-        let triangle: KfIndexTriangle
         let colorToDraw: TColorRef
         let nameString: string
         
@@ -1141,8 +1041,8 @@ export class KfObject3D {
                 writeln(outputFile)
             }
             writeln(outputFile, "#declare " + nameString + "=mesh {")
-            for (i = 0; i <= this.triangles.Count - 1; i++) {
-                triangle = KfIndexTriangle(this.triangles.Items[i])
+            for (let i = 0; i < this.triangles.length; i++) {
+                const triangle: KfIndexTriangle = this.triangles[i]
                 this.writeTriangleToPOV_INCFIle(outputFile, this.points[triangle.pointIndexes[0] - 1], this.points[triangle.pointIndexes[1] - 1], this.points[triangle.pointIndexes[2] - 1])
             }
             writeln(outputFile, chr(9) + "pigment { color rgb <" + usupport.digitValueString(UNRESOLVED.getRValue(frontFaceColor) / 256.0) + ", " + usupport.digitValueString(UNRESOLVED.getGValue(frontFaceColor) / 256.0) + ", " + usupport.digitValueString(UNRESOLVED.getBValue(frontFaceColor) / 256.0) + "> }")
@@ -1151,7 +1051,7 @@ export class KfObject3D {
                 writeln(outputFile)
                 writeln(outputFile, "#declare " + nameString + "_rotated=union {")
                 writeln(outputFile, chr(9) + "object { " + nameString + " }")
-                for (i = 1; i <= rotateCount - 1; i++) {
+                for (let i = 1; i < rotateCount; i++) {
                     writeln(outputFile, chr(9) + "object { " + nameString + " rotate " + IntToStr(i) + "*365/" + IntToStr(rotateCount) + "*y }")
                 }
                 writeln(outputFile, "}")
@@ -1171,9 +1071,9 @@ export class KfObject3D {
     
     triangleIsBackFacing(aTriangle: KfIndexTriangle): boolean {
         let result = false
-        let point0: KfPoint3d
-        let point1: KfPoint3d
-        let point2: KfPoint3d
+        let point0: KfPoint3D
+        let point1: KfPoint3D
+        let point2: KfPoint3D
         let backfacingResult: float
         
         result = false
@@ -1188,7 +1088,7 @@ export class KfObject3D {
 }
 
 // not using
-//procedure KfObject3D.insertPoint(newPointIndex: smallint; newPoint: KfPoint3d);
+//procedure KfObject3D.insertPoint(newPointIndex: smallint; newPoint: KfPoint3D);
 //  var
 //    i: smallint;
 //  begin

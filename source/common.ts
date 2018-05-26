@@ -16,3 +16,11 @@ export const ColorDefs = {
     clRed: 0xFF0000,
     clSilver: 0xC0C0C0
 }
+
+export function IntToStr(value: int) {
+    return "" + value
+}
+
+export function StrToFloat(value: string) {
+    return parseFloat(value)
+}
