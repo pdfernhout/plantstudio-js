@@ -1,6 +1,6 @@
 // KfObject3D was unit Utdo
 
-import { float, long, ColorDefs, int, IntToStr, short, StrToFloat, intround, arrayRemove } from "./common"
+import { float, long, ColorDefs, int, IntToStr, short, StrToFloat, intround, arrayRemove, compareTextIgnoreCase, StrToIntDef, MessageDialog } from "./common"
 import { PdStreamableObject, PdClassAndVersionInformationRecord, PdFiler, ExportFormats } from "./temporary";
 import { KfPoint3D, KfPoint3D_matchXYZ, KfPoint3D_setXYZ, KfPoint3D_addPointToBoundsRect, KfPoint3D_subtract } from "./KfPoint3D";
 import { KfIndexTriangle } from "./KfIndexTriangle";
@@ -550,8 +550,6 @@ export class KfObject3D extends PdStreamableObject {
         }
     }
     
-    /* TODO: Make import/export for for KfObject3D
-
     // parse string into xyz positions and add point to collection
     addPointString(stream: KfStringStream): void {
         let aPoint3D: KfPoint3D = new KfPoint3D()
@@ -581,6 +579,8 @@ export class KfObject3D extends PdStreamableObject {
         }
     }
     
+    /* TODO: Make import/export for for KfObject3D
+
     writeToFile(fileName: string): void {
         let outputFile: TextFile
         
@@ -799,64 +799,66 @@ export class KfObject3D extends PdStreamableObject {
         this.adjustForOrigin()
     }
     
-    readFromMemo(aMemo: TMemo, readingMemoLine: long): void {
-        let inputLine: string
-        let fieldType: string
+    */
+
+    readFromMemo(aMemo: string[], readingMemoLine: long): number {
         let stream: KfStringStream
         
         this.pointsInUse = 0
         this.originPointIndex = 0
         this.triangles = []
-        inputLine = aMemo.Lines.Strings[readingMemoLine]
+        let inputLine: string = aMemo[readingMemoLine]
         readingMemoLine += 1
-        if (trim(inputLine) === "") {
+        if (inputLine.trim() === "") {
             // cfk change v1.60final added '' case
             // skip commented lines 
-            inputLine = aMemo.Lines.Strings[readingMemoLine]
+            inputLine = aMemo[readingMemoLine]
             readingMemoLine += 1
         }
-        if ((UNRESOLVED.copy(inputLine, 1, 1) === ";") && (UNRESOLVED.pos("ORIGIN", uppercase(inputLine)) <= 0)) {
+        // TODO: Seems like comparison with ORIGIN is unneeded here?
+        if ((inputLine.substring(0, 1) === ";") && (!compareTextIgnoreCase("ORIGIN", inputLine))) {
             // cfk change for v1.6b2 mistake with origin, placed with comment
             // skip commented lines 
-            inputLine = aMemo.Lines.Strings[readingMemoLine]
+            inputLine = aMemo[readingMemoLine]
             readingMemoLine += 1
         }
-        if (UNRESOLVED.pos(uppercase(kStartTdoString), uppercase(inputLine)) <= 0) {
+        if (!compareTextIgnoreCase(kStartTdoString, inputLine)) {
             throw new Error("Problem: Expected start of 3D object.")
         }
         stream = null
         try {
             // read info for 3D object from file at current position
             stream = usstream.KfStringStream.create
-            while (readingMemoLine < aMemo.Lines.length) {
-                inputLine = aMemo.Lines.Strings[readingMemoLine]
+            while (readingMemoLine < aMemo.length) {
+                inputLine = aMemo[readingMemoLine]
                 readingMemoLine += 1
-                if (trim(inputLine) === "") {
+                if (inputLine.trim() === "") {
                     // cfk change v1.60final added '' case
                     continue
                 }
-                if ((UNRESOLVED.copy(inputLine, 1, 1) === ";") && (UNRESOLVED.pos("ORIGIN", uppercase(inputLine)) <= 0)) {
+                // TODO: Seems like comparison with ORIGIN is unneeded here?
+                if ((inputLine.substring(0, 1) === ";") && (!compareTextIgnoreCase("ORIGIN", inputLine))) {
                     // cfk change for v1.6b2 mistake with origin, placed with comment
                     // skip commented lines 
                     continue
                 }
                 stream.onStringSeparator(inputLine, "=")
-                fieldType = stream.nextToken()
+                const fieldType: string = stream.nextToken()
                 stream.spaceSeparator()
-                if (UNRESOLVED.pos("POINT", uppercase(fieldType)) > 0) {
+                if (compareTextIgnoreCase("POINT", fieldType)) {
                     this.addPointString(stream)
-                } else if (UNRESOLVED.pos("ORIGIN", uppercase(fieldType)) > 0) {
+                } else if (compareTextIgnoreCase("ORIGIN", fieldType)) {
                     this.setOriginPointIndex(StrToIntDef(stream.remainder, 0))
-                } else if (UNRESOLVED.pos("TRIANGLE", uppercase(fieldType)) > 0) {
+                } else if (compareTextIgnoreCase("TRIANGLE", fieldType)) {
                     this.addTriangleString(stream)
-                } else if (UNRESOLVED.pos("NAME", uppercase(fieldType)) > 0) {
+                } else if (compareTextIgnoreCase("NAME", fieldType)) {
                     this.setName(stream.remainder)
                 } else {
                     break
                 }
             }
             this.adjustForOrigin()
-            if (UNRESOLVED.pos(uppercase(kEndTdoString), uppercase(inputLine)) <= 0) {
+            if (!compareTextIgnoreCase(kEndTdoString, inputLine)) {
                 throw new Error("Problem: Expected end of 3D object.")
             }
         } finally {
@@ -864,6 +866,8 @@ export class KfObject3D extends PdStreamableObject {
         }
         return readingMemoLine
     }
+
+    /*
     
     readFromInputString(aString: string, doAdjustForOrigin: boolean): void {
         let part: string

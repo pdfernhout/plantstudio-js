@@ -31,3 +31,17 @@ export function arrayRemove(theArray: Array<any>, item: any) {
         theArray.splice(index, 1)
     }
 }
+
+export function compareTextIgnoreCase(a: string, b: string): boolean {
+    return a.toUpperCase() === b.toUpperCase()
+}
+
+export function StrToIntDef(value: string, defaultValue: number) {
+    const result = parseInt(value, 10)
+    if (isNaN(result)) { return defaultValue }
+    return result
+}
+
+export function MessageDialog(text: string, ignore1: any, ignore2: any, ignore3: any) {
+    alert(text)
+}
