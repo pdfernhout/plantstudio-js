@@ -1,5 +1,10 @@
 // unit umath
 
+import { float, int, double } from "./common";
+import { ifError } from "assert";
+import { TPoint } from "./TPoint";
+
+/* TODO: Remove unnedded imports
 from conversion_common import *
 import uparams
 import usstream
@@ -7,6 +12,7 @@ import udebug
 import uunits
 import usupport
 import delphi_compatability
+*/
 
 // record
 export interface SCurveStructure {
@@ -94,7 +100,7 @@ function pow(number: double, exponent: double): double {
     } catch (e) {
         ErrorMessage("Invalid number for power function: " + FloatToStr(number) + " to the power " + FloatToStr(exponent))
         result = 1.0
-        throw new Exception()
+        throw new Error("Exception in umath")
     }
     return result
 }
@@ -111,17 +117,17 @@ function power(number: double, exponent: double): double {
         } else if ((number === 0.0)) {
             if (exponent === 0.0) {
                 result = 1.0
-                throw new GeneralException.create("Problem: Zero raised to zero power.")
+                throw new Error("Problem: Zero raised to zero power.")
             } else {
                 result = 0.0
             }
         } else {
             result = 0.0
-            throw new GeneralException.create("Problem: Negative number to non-integer power: " + FloatToStr(number) + " to " + FloatToStr(exponent))
+            throw new Error("Problem: Negative number to non-integer power: " + FloatToStr(number) + " to " + FloatToStr(exponent))
         }
     } catch (e) {
         result = ErrorMessage("Problem: Uncaught error in power function: " + FloatToStr(number) + " to " + FloatToStr(exponent))
-        throw new Exception()
+        throw new Error("Exception in umath")
     }
     return result
 }
@@ -133,7 +139,7 @@ function tan(x: double): double {
         result = sin(x) / cos(x)
     } catch (e) {
         result = ErrorMessage("Uncaught error in tangent function: " + FloatToStr(x))
-        throw new Exception()
+        throw new Error("Exception in umath")
     }
     return result
 }
@@ -148,7 +154,7 @@ function arcCos(x: double): double {
         result = kPi / 2.0 - arcSin(x)
     } catch (e) {
         result = ErrorMessage("Invalid number for arcCos: " + FloatToStr(x))
-        throw new Exception()
+        throw new Error("Exception in umath")
     }
     return result
 }
@@ -160,7 +166,7 @@ function arcSin(x: double): double {
         result = arctan(x / sqrt(1.0 - sqr(x)))
     } catch (e) {
         result = ErrorMessage("Invalid number for arcSin: " + FloatToStr(x))
-        throw new Exception()
+        throw new Error("Exception in umath")
     }
     return result
 }
@@ -178,11 +184,11 @@ function log10(x: double): double {
             result = oneOverNaturalLogOfTen * safeLn(x)
         } else {
             result = -1
-            throw new GeneralException.create("Problem: Tried to take log (base 10) of zero or negative number.")
+            throw new Error("Problem: Tried to take log (base 10) of zero or negative number.")
         }
     } catch (e) {
         result = ErrorMessage("Problem: Invalid number for log (base 10): " + FloatToStr(x) + ".")
-        throw new Exception()
+        throw new Error("Exception in umath")
     }
     return result
 }
@@ -197,10 +203,10 @@ function safeLn(x: double): double {
         } catch (e) {
             ErrorMessage("Invalid number for natural log: " + FloatToStr(x))
             result = 1.0
-            throw new Exception()
+            throw new Error("Exception in umath")
         }
     } else {
-        throw new GeneralException.create("Problem: Tried to take ln of zero or negative number: " + FloatToStr(x) + ".")
+        throw new Error("Problem: Tried to take ln of zero or negative number: " + FloatToStr(x) + ".")
     }
     return result
 }
@@ -237,7 +243,7 @@ function safeExp(x: double): double {
         result = UNRESOLVED.exp(x)
     } catch (e) {
         result = ErrorMessage("Invalid number for exponential function: " + FloatToStr(x))
-        throw new Exception()
+        throw new Error("Exception in umath")
     }
     return result
 }
@@ -274,11 +280,11 @@ function safediv(x: float, y: float): float {
             result = x / y
         } else {
             result = 0.0
-            throw new GeneralException.create("Problem: Divide by zero.")
+            throw new Error("Problem: Divide by zero.")
         }
     } catch (e) {
         result = ErrorMessage("Problem: Unspecified problem with dividing " + FloatToStr(x) + " by " + FloatToStr(y) + ".")
-        throw new Exception()
+        throw new Error("Exception in umath")
     }
     return result
 }
@@ -295,7 +301,7 @@ function safedivExcept(x: float, y: float, exceptionResult: float): float {
         }
     } catch (e) {
         result = ErrorMessage("Problem in dividing " + FloatToStr(x) + " by " + FloatToStr(y))
-        throw new Exception()
+        throw new Error("Exception in umath")
     }
     return result
 }
@@ -334,12 +340,12 @@ function scurve(x: double, c1: double, c2: double): double {
         temp = c1 - c2 * x
         if (temp > 85.0) {
             temp = 85.0
-            throw new GeneralException.create("Problem: Exponent of number would have gone out of float range.")
+            throw new Error("Problem: Exponent of number would have gone out of float range.")
         }
         result = safediv(x, x + safeExp(temp))
     } catch (e) {
         result = ErrorMessage("Problem in s curve: numbers are " + FloatToStr(x) + ", " + FloatToStr(c1) + ", and " + FloatToStr(c2))
-        throw new Exception()
+        throw new Error("Exception in umath")
     }
     return result
 }
@@ -399,7 +405,7 @@ function calcSCurveCoeffs(sCurve: SCurveStructure): void {
         sCurve.y1 = 0.1
         sCurve.x2 = 0.65
         sCurve.y2 = 0.85
-        throw new Exception()
+        throw new Error("Exception in umath")
     }
 }
 
@@ -483,7 +489,6 @@ function transferSCurveValue(direction: int, param: sCurveStructure, index: int,
 
 function stringToSCurve(aString: string): SCurveStructure {
     let result = new SCurveStructure()
-    let stream: KfStringStream
     
     result.x1 = 0
     result.y1 = 0
@@ -492,16 +497,13 @@ function stringToSCurve(aString: string): SCurveStructure {
     result.c1 = 0
     result.c2 = 0
     // format is x1 y1 x2 y2 
-    stream = usstream.KfStringStream.create
-    try {
-        stream.onStringSeparator(aString, " ")
-        result.x1 = usupport.boundForString(stream.nextToken(), uparams.kFieldFloat, result.x1)
-        result.y1 = usupport.boundForString(stream.nextToken(), uparams.kFieldFloat, result.y1)
-        result.x2 = usupport.boundForString(stream.nextToken(), uparams.kFieldFloat, result.x2)
-        result.y2 = usupport.boundForString(stream.nextToken(), uparams.kFieldFloat, result.y2)
-    } finally {
-        stream.free
-    }
+    const stream = new KfStringStream()
+    stream.onStringSeparator(aString, " ")
+    result.x1 = usupport.boundForString(stream.nextToken(), uparams.kFieldFloat, result.x1)
+    result.y1 = usupport.boundForString(stream.nextToken(), uparams.kFieldFloat, result.y1)
+    result.x2 = usupport.boundForString(stream.nextToken(), uparams.kFieldFloat, result.x2)
+    result.y2 = usupport.boundForString(stream.nextToken(), uparams.kFieldFloat, result.y2)
+
     return result
 }
 
@@ -521,8 +523,6 @@ const kPlantProximityNeeded = 4
 // this is not being used to select plant parts, the drawing surface is doing it
 function pointsAreCloseEnough(point1: TPoint, point2: TPoint): boolean {
     let result = false
-    result = (abs(point1.X - point2.X) < kPlantProximityNeeded) && (abs(point1.Y - point2.Y) < kPlantProximityNeeded)
+    result = (Math.abs(point1.X - point2.X) < kPlantProximityNeeded) && (Math.abs(point1.Y - point2.Y) < kPlantProximityNeeded)
     return result
 }
-
-
