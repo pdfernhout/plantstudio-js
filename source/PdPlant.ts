@@ -6,11 +6,11 @@ import { KfObject3D } from "./KfObject3D";
 import { TPoint } from "./TPoint";
 import { TRect } from "./TRect";
 import { KfTurtle } from "./KfTurtle";
-import { SCurveStructure, intMin, intMax, safedivExcept, min, stringToSCurve, calcSCurveCoeffs } from "./umath";
+import { SCurveStructure, intMin, intMax, safedivExcept, min, stringToSCurve, calcSCurveCoeffs, max } from "./umath";
 import { KfPoint3D } from "./KfPoint3D";
 import { PdRandom } from "./PdRandom";
 import { domain, DrawMode } from "./PdDomain";
-import { PdTraverser, Activity } from "./PdTraverser";
+import { PdTraverser, Activity, TraverserGlobals } from "./PdTraverser";
 import { ClassId } from "./uclasses";
 
 /* Remove unused imports
@@ -537,7 +537,7 @@ export class PdPlant extends PdStreamableObject {
     
     // ---------------------------------------------------------------------------------------  drawing and graphics 
     draw(): void {
-        utravers.cancelDrawing = false
+        TraverserGlobals.cancelDrawing = false
         if (this.turtle === null) {
             throw new Error("Problem: Nil turtle in method PdPlant.draw.")
         }
@@ -784,7 +784,7 @@ export class PdPlant extends PdStreamableObject {
             return
         }
         if (domain.options.cachePlantBitmaps) {
-            drawingRect = new TRect(0, 0, MainForm.drawingPaintBox.Width, MainForm.drawingPaintBox.Height)
+            drawingRect = new TRect(0, 0, MainForm.drawingPaintBox.width, MainForm.drawingPaintBox.height)
             intersectResult = delphi_compatability.IntersectRect(intersectRect_pixels, this.boundsRect_pixels(), drawingRect)
             if ((intersectResult) && (!this.hidden) && (this.previewCache.Width < 5)) {
                 this.recalculateBounds(kDrawNow)
@@ -2209,7 +2209,7 @@ export class PdPlant extends PdStreamableObject {
                                 // extra limit on mutation to stop exceptions
                                 stdDev = 0.5 * newFloat * options.mutationStrengths[sectionIndex] / 100.0
                                 newFloat = this.breedingGenerator.randomNormalWithStdDev(newFloat * 1.0, stdDev)
-                                newFloat = umath.min(param.upperBound(), umath.max(param.lowerBound(), newFloat))
+                                newFloat = min(param.upperBound(), max(param.lowerBound(), newFloat))
                                 // for now, don't let float get to zero because it causes problems 
                                 // newFloat := max(0.0001, newFloat);  v2.0 removed this to enable breeding with no variation
                                 newFloat = this.transferField(kSetField, newFloat, param.fieldNumber, param.fieldType, 0, false, null)

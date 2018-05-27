@@ -82,10 +82,12 @@ const kStatisticsPartTypeLast = 19
 
 
 // var
-let cancelDrawing: boolean
-let worstNStressColor: TColorRef
-let worstPStressColor: TColorRef
-let worstDeadColor: TColorRef
+export const TraverserGlobals = {
+    cancelDrawing: false,
+    worstNStressColor: 0,
+    worstPStressColor: 0,
+    worstDeadColor: 0,
+}
 
 
 // -------------------------------------------------------------------------- linear growth functions 

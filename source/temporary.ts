@@ -33,12 +33,33 @@ export interface PdClassAndVersionInformationRecord {
 
 // TODO: Replace PdFiler from Ufiler
 export class PdFiler {
-    streamBytes(object: any, size: number): any {
-        return object
+    isReading() {
+        return true
     }
-    streamLongint(object: any): any {
-        return object
+    streamBytes(bytes: any, size: number): any {
+        return bytes
     }
+    streamLongint(value: any): any {
+        return value
+    }
+    streamShortString(text: string): string {
+        return text
+    }
+    streamSmallint(value: any): any {
+        return value
+    }
+    streamSingle(value: any): any {
+        return value
+    }
+    streamSinglePoint(point: SinglePoint): void {
+    }
+    streamRect(rect: TRect): void {
+    }
+    streamBoolean(value: boolean): boolean {
+        return value
+    }
+
+
 }
 
 export function FIX_sizeof(object: Object): number {
