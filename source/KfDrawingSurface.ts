@@ -20,7 +20,6 @@ function convertColor(color: number) {
     var g = (color >> 8) & 255
     var b = color & 255
     const result = "#" + hexForValue(r) + hexForValue(g) + hexForValue(b)
-    console.log("convertColor", result, color)
     return result
 }
 

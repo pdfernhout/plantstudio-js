@@ -6,6 +6,8 @@ import { KfTurtle } from "../source/KfTurtle";
 import { TRect } from "../source/TRect";
 import { KfObject3D } from "../source/KfObject3D";
 
+let yAngle = 0
+
 const drawingSurface = new KfDrawingSurface(null)
 drawingSurface.recordingStart()
 
@@ -51,7 +53,7 @@ function drawWithTurtle() {
     drawingSurface.lineColor = 255 * 256 * 256
     drawingSurface.lineWidth = 1.0
     drawingSurface.drawingLines = true
-    drawingSurface.circlePointRadius = 5
+    drawingSurface.circlePointRadius = 2
     drawingSurface.circlingPoints = true
     const rect = new TRect(50, 50, 150, 150)
     turtle.drawTrianglesFromBoundsRect(rect)
@@ -93,6 +95,7 @@ end 3D object`.split("\n")
     tdo.readFromMemo(exampleTDOMemo, 0)
 
     turtle.drawOptions.draw3DObjects = true
+    turtle.rotateY(yAngle)
     tdo.draw(turtle, 1.0, "test", "test", 0, 0)
 }
 
@@ -136,8 +139,18 @@ const MyComponent = {
                 // TODO: Do something with drawingSurface here
                 
             },
-            // onclick: () => mapDrawer.scroll.X -= 20,
+            onclick: () => {
+                console.log("onclick")
+                yAngle += 4
+                turtle.reset()
+                drawingSurface.recordingStart()
+                drawWithTurtle()
+                drawWithTDO()
+                drawingSurface.recordingStop()
+                drawingSurface.recordingDraw()
+            }
         }),
+        m("div", { style: "user-select: none" }, "Click canvas to rotate leaf"),
     )
 }
 
