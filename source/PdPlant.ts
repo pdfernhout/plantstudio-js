@@ -1,6 +1,6 @@
 // PdPlant was unit Uplant
 
-import { PdStreamableObject, ExportFormats, messageForExceptionType, boundForString, DebugPrint, FieldType, IndexType, SinglePoint } from "./temporary";
+import { PdStreamableObject, ExportFormats, messageForExceptionType, boundForString, DebugPrint, FieldType, IndexType, SinglePoint, ucursor, MainForm } from "./temporary";
 import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor, ColorDefs, StrToIntDef, IntToStr, compareTextIgnoreCase } from "./common";
 import { KfObject3D } from "./KfObject3D";
 import { TPoint } from "./TPoint";
@@ -815,7 +815,7 @@ export class PdPlant extends PdStreamableObject {
             return
         }
         if (domain.options.cachePlantBitmaps) {
-            drawingRect = new TRect(0, 0, umain.MainForm.drawingPaintBox.Width, umain.MainForm.drawingPaintBox.Height)
+            drawingRect = new TRect(0, 0, MainForm.drawingPaintBox.Width, MainForm.drawingPaintBox.Height)
             intersectResult = delphi_compatability.IntersectRect(intersectRect_pixels, this.boundsRect_pixels(), drawingRect)
             if ((intersectResult) && (!this.hidden) && (this.previewCache.Width < 5)) {
                 this.recalculateBounds(kDrawNow)
@@ -836,7 +836,7 @@ export class PdPlant extends PdStreamableObject {
         if (!domain.options.cachePlantBitmaps) {
             if (this.previewCache.Width > 5) {
                 this.shrinkPreviewCache()
-                umain.MainForm.updateForChangeToPlantBitmaps()
+                MainForm.updateForChangeToPlantBitmaps()
             }
             return
         }
@@ -845,19 +845,19 @@ export class PdPlant extends PdStreamableObject {
         }
         if (this.hidden) {
             this.shrinkPreviewCache()
-            umain.MainForm.updateForChangeToPlantBitmaps()
+            MainForm.updateForChangeToPlantBitmaps()
             return
         }
-        drawingRect = new TRect(0, 0, umain.MainForm.drawingPaintBox.Width, umain.MainForm.drawingPaintBox.Height)
+        drawingRect = new TRect(0, 0, MainForm.drawingPaintBox.Width, MainForm.drawingPaintBox.Height)
         // on opening file at first, force redraw of cache because drawingPaintBox size might be wrong
-        intersectResult = umain.MainForm.inFormCreation || umain.MainForm.inFileOpen || delphi_compatability.IntersectRect(intersectRect_pixels, this.boundsRect_pixels(), drawingRect)
+        intersectResult = MainForm.inFormCreation || MainForm.inFileOpen || delphi_compatability.IntersectRect(intersectRect_pixels, this.boundsRect_pixels(), drawingRect)
         if (!intersectResult) {
             this.shrinkPreviewCache()
-            umain.MainForm.updateForChangeToPlantBitmaps()
+            MainForm.updateForChangeToPlantBitmaps()
             return
         }
-        bytesThisBitmapWillBe = intround(this.boundsRect_pixels().width * this.boundsRect_pixels().height * umain.MainForm.screenBytesPerPixel())
-        if (!umain.MainForm.roomForPlantBitmap(this, bytesThisBitmapWillBe)) {
+        bytesThisBitmapWillBe = intround(this.boundsRect_pixels().width * this.boundsRect_pixels().height * MainForm.screenBytesPerPixel())
+        if (!MainForm.roomForPlantBitmap(this, bytesThisBitmapWillBe)) {
             return
         }
         oldBasePoint = this.basePoint_pixels()
@@ -867,13 +867,13 @@ export class PdPlant extends PdStreamableObject {
             this.previewCache.TransparentColor = domain.options.transparentColor
             ubmpsupport.fillBitmap(this.previewCache, domain.options.transparentColor)
             // showing progress here is mainly for really complicated plants; most plants won't need it
-            showProgress = (!umain.MainForm.drawing) && (domain.options.showPlantDrawingProgress)
+            showProgress = (!MainForm.drawing) && (domain.options.showPlantDrawingProgress)
             if (showProgress) {
                 this.plantPartsDrawnAtStart = 0
                 this.countPlantParts()
                 showProgress = this.totalPlantParts > 50
                 if (showProgress) {
-                    umain.MainForm.startDrawProgress(this.totalPlantParts)
+                    MainForm.startDrawProgress(this.totalPlantParts)
                 }
             }
             try {
@@ -882,7 +882,7 @@ export class PdPlant extends PdStreamableObject {
             } finally {
                 this.computeBounds = false
                 if (showProgress) {
-                    umain.MainForm.finishDrawProgress()
+                    MainForm.finishDrawProgress()
                 }
             }
         } finally {
@@ -1062,13 +1062,13 @@ export class PdPlant extends PdStreamableObject {
                 cache.Width = size.X
                 cache.Height = size.Y
                 if ((inMainWindow) && (cache === this.previewCache)) {
-                    umain.MainForm.updateForChangeToPlantBitmaps()
+                    MainForm.updateForChangeToPlantBitmaps()
                 }
             } catch (e) {
                 cache.Width = 1
                 cache.Height = 1
                 if ((inMainWindow) && (cache === this.previewCache)) {
-                    umain.MainForm.exceptionResizingPlantBitmap()
+                    MainForm.exceptionResizingPlantBitmap()
                 } else {
                     ShowMessage("Problem creating bitmap; probably not enough memory.")
                 }
@@ -1139,7 +1139,7 @@ export class PdPlant extends PdStreamableObject {
         let turtle: KfTurtle
         
         result = this.getName()
-        if ((umain.MainForm.cursorModeForDrawing === umain.kCursorModePosingSelect) && (umain.MainForm.focusedPlant() === this)) {
+        if ((MainForm.cursorModeForDrawing === umain.kCursorModePosingSelect) && (MainForm.focusedPlant() === this)) {
             plantPart = null
             plantPart = this.findPlantPartAtPositionByTestingPolygons(point)
             if ((plantPart !== null) && (plantPart instanceof upart.PdPlantPart)) {
@@ -1582,7 +1582,7 @@ export class PdPlant extends PdStreamableObject {
     
     writeLine(plantFile: TextFile, aString: string): void {
         if (this.writingToMemo) {
-            umain.MainForm.plantsAsTextMemo.Lines.Add(aString)
+            MainForm.plantsAsTextMemo.Lines.Add(aString)
         } else {
             writeln(plantFile, aString)
         }
@@ -1603,9 +1603,9 @@ export class PdPlant extends PdStreamableObject {
         let start: string
         let stop: string
         
-        if (umain.MainForm !== null) {
+        if (MainForm !== null) {
             // v2.0 saving selection state in main window
-            this.selectedWhenLastSaved = umain.MainForm.isSelected(this)
+            this.selectedWhenLastSaved = MainForm.isSelected(this)
         } else {
             this.selectedWhenLastSaved = false
         }
@@ -1674,7 +1674,7 @@ export class PdPlant extends PdStreamableObject {
                                 tempTdo = this.transferField(kGetField, tempTdo, param.fieldNumber, param.fieldType, 0, false, null)
                                 this.writeLine(plantFile, param.name + start + param.fieldID + stop + tempTdo.name)
                                 if (this.writingToMemo) {
-                                    tempTdo.writeToMemo(umain.MainForm.plantsAsTextMemo)
+                                    tempTdo.writeToMemo(MainForm.plantsAsTextMemo)
                                 } else {
                                     tempTdo.writeToFileStream(plantFile, utdo.kEmbeddedInPlant)
                                 }
@@ -1690,7 +1690,7 @@ export class PdPlant extends PdStreamableObject {
         if (this.amendments.Count > 0) {
             for (i = 0; i <= this.amendments.Count - 1; i++) {
                 if (this.writingToMemo) {
-                    uamendmt.PdPlantDrawingAmendment(this.amendments.Items[i]).writeToMemo(umain.MainForm.plantsAsTextMemo)
+                    uamendmt.PdPlantDrawingAmendment(this.amendments.Items[i]).writeToMemo(MainForm.plantsAsTextMemo)
                 } else {
                     uamendmt.PdPlantDrawingAmendment(this.amendments.Items[i]).writeToTextFile(plantFile)
                 }
@@ -1738,7 +1738,7 @@ export class PdPlant extends PdStreamableObject {
             // read amendment if line is an amendment - v2.0
             newAmendment = uamendmt.PdPlantDrawingAmendment().create()
             if (this.readingFromMemo) {
-                this.readingMemoLine = newAmendment.readFromMemo(umain.MainForm.plantsAsTextMemo, this.readingMemoLine)
+                this.readingMemoLine = newAmendment.readFromMemo(MainForm.plantsAsTextMemo, this.readingMemoLine)
             } else {
                 newAmendment.readFromTextFile(plantFile)
             }
@@ -1749,7 +1749,7 @@ export class PdPlant extends PdStreamableObject {
             if (this.readingFromMemo) {
                 // v2.0 fix lines broken before [ or = (does NOT fix lines broken within strings)
                 // this has to come AFTER we deal with notes and amendments; it applies to parameters only
-                secondLine = umain.MainForm.plantsAsTextMemo.Lines.Strings[this.readingMemoLine]
+                secondLine = MainForm.plantsAsTextMemo.Lines.Strings[this.readingMemoLine]
             } else {
                 secondLine = usupport.tolerantReadln(plantFile, secondLine)
             }
@@ -1875,7 +1875,7 @@ export class PdPlant extends PdStreamableObject {
                 try {
                     tempTdo.setName(usupport.trimLeftAndRight(paramValue))
                     if (this.readingFromMemo) {
-                        this.readingMemoLine = tempTdo.readFromMemo(umain.MainForm.plantsAsTextMemo, this.readingMemoLine)
+                        this.readingMemoLine = tempTdo.readFromMemo(MainForm.plantsAsTextMemo, this.readingMemoLine)
                     } else {
                         tempTdo.readFromFileStream(plantFile, utdo.kEmbeddedInPlant)
                     }
@@ -1924,7 +1924,7 @@ export class PdPlant extends PdStreamableObject {
             try {
                 value = this.transferField(d, value, fieldID, fieldType, fieldIndex, regrow, updateList)
                 if (updateList.Count > 0) {
-                    umain.MainForm.updateParameterValuesWithUpdateListForPlant(this, updateList)
+                    MainForm.updateParameterValuesWithUpdateListForPlant(this, updateList)
                     if ((domain.options.updateTimeSeriesPlantsOnParameterChange) && (utimeser.TimeSeriesForm !== null)) {
                         utimeser.TimeSeriesForm.updatePlantsFromParent(this)
                     }
@@ -2638,7 +2638,7 @@ export class PdPlant extends PdStreamableObject {
             // hard-coded
             updateEvent.fieldID = utransfr.kGeneralStartingSeedForRandomNumberGenerator
             updateList.Add(updateEvent)
-            umain.MainForm.updateParameterValuesWithUpdateListForPlant(this, updateList)
+            MainForm.updateParameterValuesWithUpdateListForPlant(this, updateList)
         } finally {
             updateList.free
             updateList = null

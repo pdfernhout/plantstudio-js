@@ -1,6 +1,7 @@
 // TODO: Temporary definitions that belong elsewhere used to get code to compile
 
 import { float, ColorDefs, short, int, StrToFloat } from "./common"
+import { TRect } from "./TRect";
 
 // TODO: Implement darkerColorWithSubtraction from usupport
 export function darkerColorWithSubtraction(a: number, b: number) {
@@ -109,4 +110,29 @@ export enum IndexType {
     kIndexTypeUndefined = 0,
     kIndexTypeNone = 1,
     kIndexTypeSCurve = 3,
+}
+
+// TODO: Fix ucursor stub from ucursor
+export const ucursor = {
+    cursor_startWait: () => {},
+    cursor_stopWait: () => {},
+}
+
+// TODO: Fix MainForm stub from umain
+export const MainForm = {
+    updateForChangeToPlantBitmaps: () => {},
+    cursorModeForDrawing: null,
+    exceptionResizingPlantBitmap: () => { throw new Error("exceptionResizingPlantBitmap") },
+    screenBytesPerPixel: () => 4,
+    drawingPaintBox: new TRect(),
+    inFileOpen: false,
+    inFormCreation: false,
+    drawing: false,
+    roomForPlantBitmap: (something: any, bytesThisBitmapWillBe: number) => true,
+    startDrawProgress: (totalPlantParts: number) => {},
+    finishDrawProgress: () => {},
+    isSelected: (something: any) => false,
+    focusedPlant: () => null,
+    plantsAsTextMemo: [],
+    updateParameterValuesWithUpdateListForPlant: (something: any, updateList: any[]) => {}
 }
