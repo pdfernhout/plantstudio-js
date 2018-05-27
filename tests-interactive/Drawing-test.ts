@@ -103,6 +103,15 @@ drawWithTDO()
 
 drawingSurface.recordingStop()
 
+function redrawEverything() {
+    turtle.reset()
+    drawingSurface.recordingStart()
+    drawWithTurtle()
+    drawWithTDO()
+    drawingSurface.recordingStop()
+    drawingSurface.recordingDraw()
+}
+
 const MyComponent = { 
     view: () => m("div", 
         m("canvas.ba", {
@@ -142,15 +151,15 @@ const MyComponent = {
             onclick: () => {
                 console.log("onclick")
                 yAngle += 4
-                turtle.reset()
-                drawingSurface.recordingStart()
-                drawWithTurtle()
-                drawWithTDO()
-                drawingSurface.recordingStop()
-                drawingSurface.recordingDraw()
+                redrawEverything()
             }
         }),
         m("div", { style: "user-select: none" }, "Click canvas to rotate leaf"),
+        m("input[type=range]", { min: 0, max: 256, value: yAngle, oninput: (event: any) => {
+            console.log("slider", event, event.target.value)
+            yAngle = parseInt(event.target.value)
+            redrawEverything()
+        }})
     )
 }
 
