@@ -8,3 +8,5 @@ Incorrectly converted length to len when a parameter (when maybe doing that expe
 
 Looks like no conversion for property 
   e.g. from utdo.pas: points[index: integer]: KfPoint3d read getPoint write setPoint;
+
+switch missing final close brace
