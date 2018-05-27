@@ -1,6 +1,6 @@
 // TODO: Temporary definitions that belong elsewhere used to get code to compile
 
-import { float, ColorDefs, short } from "./common"
+import { float, ColorDefs, short, int, StrToFloat } from "./common"
 
 // TODO: Implement darkerColorWithSubtraction from usupport
 export function darkerColorWithSubtraction(a: number, b: number) {
@@ -53,4 +53,17 @@ export enum ExportFormats {
 // TODO: Fix DebugPrint from udebug that should have result stored somewhere
 export function DebugPrint(aMessage: string): void {
     console.log("DebugPrint: " + aMessage)
+}
+
+// TODO: Fix digitValueString stub from usupport
+export function digitValueString(value: float) {
+    return "" + value
+}
+
+// TODO: Fix kFieldFloat
+export const kFieldFloat = 1
+
+// TODO: Fix boundForString stub from usupport
+export function boundForString(boundString: string, fieldType: int): [number, boolean] {
+    return [StrToFloat(boundString), true]
 }

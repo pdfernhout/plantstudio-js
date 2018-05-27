@@ -4,7 +4,7 @@ import { float, int, double, FloatToStr } from "./common";
 import { ifError } from "assert";
 import { TPoint } from "./TPoint";
 import { KfStringStream } from "./KfStringStream";
-import { DebugPrint } from "./temporary";
+import { DebugPrint, digitValueString, boundForString, kFieldFloat } from "./temporary";
 
 /* TODO: Remove unnedded imports
 from conversion_common import *
@@ -500,17 +500,18 @@ function stringToSCurve(aString: string): SCurveStructure {
     result.c2 = 0
     // format is x1 y1 x2 y2 
     const stream = new KfStringStream(aString, " ")
-    result.x1 = usupport.boundForString(stream.nextToken(), uparams.kFieldFloat, result.x1)
-    result.y1 = usupport.boundForString(stream.nextToken(), uparams.kFieldFloat, result.y1)
-    result.x2 = usupport.boundForString(stream.nextToken(), uparams.kFieldFloat, result.x2)
-    result.y2 = usupport.boundForString(stream.nextToken(), uparams.kFieldFloat, result.y2)
+    let success
+    ;[result.x1, success] = boundForString(stream.nextToken(), kFieldFloat)
+    ;[result.y1, success] = boundForString(stream.nextToken(), kFieldFloat)
+    ;[result.x2, success] = boundForString(stream.nextToken(), kFieldFloat)
+    ;[result.y2, success] = boundForString(stream.nextToken(), kFieldFloat)
 
     return result
 }
 
 function sCurveToString(sCurve: SCurveStructure): string {
     let result = ""
-    result = usupport.digitValueString(sCurve.x1) + " " + usupport.digitValueString(sCurve.y1) + " " + usupport.digitValueString(sCurve.x2) + " " + usupport.digitValueString(sCurve.y2)
+    result = digitValueString(sCurve.x1) + " " + digitValueString(sCurve.y1) + " " + digitValueString(sCurve.x2) + " " + digitValueString(sCurve.y2)
     return result
 }
 
