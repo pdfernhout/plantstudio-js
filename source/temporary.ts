@@ -15,6 +15,8 @@ export const kTdoBackColor = ColorDefs.clGray
 
 // TODO: Implement PdStreamableObject
 export class PdStreamableObject {
+    instanceSize = 0
+
     streamDataWithFiler(filer: PdFiler, cvir: PdClassAndVersionInformationRecord): void {
         throw new Error("TODO")
     }
@@ -75,4 +77,11 @@ export function boundForString(boundString: string, fieldType: int): [number, bo
 export function messageForExceptionType(e: Error, methodName: string): void {
     console.log("Exception", e);
     DebugPrint("Exception in " + methodName + " with " + e)
+}
+
+// TODO: Fix SinglePoint from usupport
+export class SinglePoint {
+    x: float
+    y: float
+    reservedZ: float
 }

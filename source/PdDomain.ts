@@ -1,5 +1,11 @@
+import { short, float, TColorRef, long } from "./common";
+import { TPoint } from "./TPoint";
+import { TRect } from "./TRect";
+import { SinglePoint } from "./temporary";
+
 // unit Udomain
 
+/* TODO: Remove unused imports
 from conversion_common import *
 import uwait
 import usstream
@@ -17,6 +23,7 @@ import uparams
 import uplant
 import uplantmn
 import delphi_compatability
+*/
 
 // const
 const kMaxWizardQuestions = 30
@@ -54,10 +61,14 @@ const kIncludeNonSelectedPlants = false
 const kMaxCustomColors = 16
 const kAnimateByXRotation = 0
 const kAnimateByAge = 1
-const kDrawFast = 0
-const kDrawMedium = 1
-const kDrawBest = 2
-const kDrawCustom = 3
+
+export enum DrawMode {
+    kDrawFast = 0,
+    kDrawMedium = 1,
+    kDrawBest = 2,
+    kDrawCustom = 3,
+}
+
 const kMinOutputCylinderFaces = 3
 const kMaxOutputCylinderFaces = 20
 const kDefaultV1IniFileName = "PlantStudio.ini"
@@ -71,11 +82,13 @@ const kMaxUnregExportsPerSessionAfterMaxReached = 2
 const kInPlantMover = true
 const kNotInPlantMover = false
 
+// TODO: Fix TPixelFormat
+type TPixelFormat = number
 
 //pf32bit 
 // v1.60
 // record
-export interface BitmapOptionsStructure {
+export class BitmapOptionsStructure {
     exportType: short
     colorType: TPixelFormat
     resolution_pixelsPerInch: short
@@ -105,7 +118,7 @@ export interface BitmapOptionsStructure {
 // 1 to 100
 // don't save these, they are for storing to use during printing only
 // record
-export interface NozzleOptionsStructure {
+export class NozzleOptionsStructure {
     exportType: short
     resolution_pixelsPerInch: short
     colorType: TPixelFormat
@@ -117,7 +130,7 @@ export interface NozzleOptionsStructure {
 // don't save in settings
 // don't save in settings
 // record
-export interface NumberedAnimationOptionsStructure {
+export class NumberedAnimationOptionsStructure {
     animateBy: short
     xRotationIncrement: short
     ageIncrement: short
@@ -132,7 +145,7 @@ export interface NumberedAnimationOptionsStructure {
 // don't save in settings
 // don't save in settings
 // record
-export interface DomainOptionsStructure {
+export class DomainOptionsStructure {
     hideWelcomeForm: boolean
     openMostRecentFileAtStart: boolean
     ignoreWindowSettingsInFile: boolean
@@ -193,7 +206,7 @@ export interface DomainOptionsStructure {
 }
 
 // var
-let domain: PdDomain
+export let domain: PdDomain
 
 
 // const
@@ -240,23 +253,23 @@ export class PdDomain {
     lastOpenedPlantFileName: string = ""
     plantFileLoaded: boolean = false
     options: DomainOptionsStructure = new DomainOptionsStructure()
-    breedingAndTimeSeriesOptions: BreedingAndTimeSeriesOptionsStructure = new BreedingAndTimeSeriesOptionsStructure()
+    // TODO: FIX breedingAndTimeSeriesOptions: BreedingAndTimeSeriesOptionsStructure = new BreedingAndTimeSeriesOptionsStructure()
     bitmapOptions: BitmapOptionsStructure = new BitmapOptionsStructure()
-    exportOptionsFor3D: FileExport3DOptionsStructure[] /* k3DExportTypeLast + 1 */ = Array(k3DExportTypeLast + 1)
+    // TODO: FIX exportOptionsFor3D: FileExport3DOptionsStructure[] /* k3DExportTypeLast + 1 */ = Array(k3DExportTypeLast + 1)
     nozzleOptions: NozzleOptionsStructure = new NozzleOptionsStructure()
     animationOptions: NumberedAnimationOptionsStructure = new NumberedAnimationOptionsStructure()
     registered: boolean = false
     justRegistered: boolean = false
-    startTimeThisSession: TDateTime = new TDateTime()
-    accumulatedUnregisteredTime: TDateTime = new TDateTime()
+    // TODO: FIX startTimeThisSession: TDateTime = new TDateTime()
+    // TODO: FIX accumulatedUnregisteredTime: TDateTime = new TDateTime()
     registrationName: string = ""
     registrationCode: string = ""
     unregisteredExportCountBeforeThisSession: short = 0
     unregisteredExportCountThisSession: short = 0
-    plantManager: PdPlantManager = new PdPlantManager()
-    parameterManager: PdParameterManager = new PdParameterManager()
-    sectionManager: PdSectionManager = new PdSectionManager()
-    hintManager: PdHintManager = new PdHintManager()
+    // TODO: FIX plantManager: PdPlantManager = new PdPlantManager()
+    // TODO: FIX parameterManager: PdParameterManager = new PdParameterManager()
+    // TODO: FIX sectionManager: PdSectionManager = new PdSectionManager()
+    // TODO: FIX hintManager: PdHintManager = new PdHintManager()
     iniFileName: string = ""
     iniFileBackupName: string = ""
     useIniFile: boolean = false
@@ -273,7 +286,7 @@ export class PdDomain {
     drawingToMakeCopyBitmap: boolean = false
     plantDrawScaleWhenDrawingCopy_PixelsPerMm: float = 0.0
     plantDrawOffsetWhenDrawingCopy_mm: SinglePoint = new SinglePoint()
-    iniLines: TStringList = new TStringList()
+    // TODO: FIX iniLines: TStringList = new TStringList()
     gotInfoFromV1IniFile: boolean = false
     
     // registration
@@ -283,50 +296,32 @@ export class PdDomain {
     // for temporary use while drawing 
     // for making copy bitmap with different resolution than screen 
     // ------------------------------------------------------------------------------- creation/destruction
-    createDefault(): boolean {
+    static createDefault(): boolean {
         let result = false
-        domain = PdDomain().create()
-        result = domain.startupLoading()
+        domain = new PdDomain()
+        // TODO: FIX result = domain.startupLoading()
         return result
     }
     
-    destroyDefault(): void {
-        domain.free
-        domain = null
-    }
-    
-    create(): void {
-        TObject.prototype.create.call(this)
+    constructor() {
         // v1.5
-        usupport.setDecimalSeparator()
+        // TODO: FIX usupport.setDecimalSeparator()
         // create empty managers 
-        this.plantManager = uplantmn.PdPlantManager().create()
-        this.parameterManager = uparams.PdParameterManager().create()
-        this.sectionManager = usection.PdSectionManager().create()
-        this.hintManager = uhints.PdHintManager().create()
-        this.iniLines = delphi_compatability.TStringList.create
+        // TODO: FIX this.plantManager = uplantmn.PdPlantManager().create()
+        // TODO: FIX this.parameterManager = uparams.PdParameterManager().create()
+        // TODO: FIX this.sectionManager = usection.PdSectionManager().create()
+        // TODO: FIX this.hintManager = uhints.PdHintManager().create()
+        // TODO: FIX this.iniLines = delphi_compatability.TStringList.create
         // non-standard defaults 
-        this.plantManager.plantDrawScale_PixelsPerMm = 1.0
+        // TODO: FIX this.plantManager.plantDrawScale_PixelsPerMm = 1.0
         this.plantDrawScaleWhenDrawingCopy_PixelsPerMm = 1.0
     }
-    
-    destroy(): void {
-        this.plantManager.free
-        this.plantManager = null
-        this.parameterManager.free
-        this.parameterManager = null
-        this.sectionManager.free
-        this.sectionManager = null
-        this.hintManager.free
-        this.hintManager = null
-        this.iniLines.free
-        this.iniLines = null
-        TObject.prototype.destroy.call(this)
-    }
+
+    /* TODO Implement PdDomain methods
     
     windowsDirectory(): string {
         let result = ""
-        let cString: char[] /* 255 + 1 */
+        let cString: char[] // 255 + 1
         
         result = ""
         UNRESOLVED.getWindowsDirectory(cString, 256)
@@ -1495,6 +1490,9 @@ export class PdDomain {
         result = this.options.mainWindowViewMode === kViewPlantsInMainWindowOneAtATime
         return result
     }
+
+    */
     
 }
 
+PdDomain.createDefault()
