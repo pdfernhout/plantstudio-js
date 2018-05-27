@@ -32,6 +32,9 @@ export class PdFiler {
     streamBytes(object: any, size: number): any {
         return object
     }
+    streamLongint(object: any): any {
+        return object
+    }
 }
 
 export function FIX_sizeof(object: Object): number {

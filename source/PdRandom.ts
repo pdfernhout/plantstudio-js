@@ -1,16 +1,20 @@
-// unit Urandom
+// PdRandom from unit Urandom
 
+import { PdStreamableObject, PdClassAndVersionInformationRecord, PdFiler } from "./temporary";
+import { long, short, byte, float, int, intround } from "./common";
+import { max, min } from "./umath";
+import { ClassId } from "./uclasses";
+
+/* TODO: Remove unused imports
 from conversion_common import *
 import uclasses
 import umath
 import ufiler
 import delphi_compatability
+*/
 
-
-export class PdRandom {
+export class PdRandom extends PdStreamableObject {
     seed: long = 0
-    PdRandom.prototype = new PdStreamableObject()
-    PdRandom.prototype.constructor = PdRandom
     
     createFromTime(): void {
         this.create()
@@ -103,14 +107,14 @@ export class PdRandom {
     randomNormalBoundedZeroToOne(mean: float): float {
         let result = 0.0
         //return normal random number based on mean (and std dev of half mean)
-        result = umath.max(0.0, (umath.min(1.0, (this.randomNormal(mean)))))
+        result = max(0.0, (min(1.0, (this.randomNormal(mean)))))
         return result
     }
     
     randomNormalPercent(mean: float): float {
         let result = 0.0
         //return normal random number based on mean (and std dev of half mean) bounded at 0 and 100
-        result = umath.max(0, (umath.min(100, intround(this.randomNormal(mean / 100.0) * 100.0))))
+        result = max(0, (min(100, intround(this.randomNormal(mean / 100.0) * 100.0))))
         return result
     }
     
@@ -123,7 +127,7 @@ export class PdRandom {
         if ((this.seed < 0.0)) {
             this.seed = this.seed + 2147483647
         }
-        result = intround(umath.max(0, (umath.min(100, (this.seed * 0.0000000004656612875 * 100.0)))))
+        result = intround(max(0, (min(100, (this.seed * 0.0000000004656612875 * 100.0)))))
         return result
     }
     
@@ -136,12 +140,12 @@ export class PdRandom {
         if ((this.seed < 0.0)) {
             this.seed = this.seed + 2147483647
         }
-        result = (umath.max(0.0, (umath.min(1.0, (this.seed * 0.0000000004656612875))))) * 1.0
+        result = (max(0.0, (min(1.0, (this.seed * 0.0000000004656612875))))) * 1.0
         return result
     }
     
     classAndVersionInformation(cvir: PdClassAndVersionInformationRecord): void {
-        cvir.classNumber = uclasses.KPdRandom
+        cvir.classNumber = ClassId.KPdRandom
         cvir.versionNumber = 0
         cvir.additionNumber = 0
     }
