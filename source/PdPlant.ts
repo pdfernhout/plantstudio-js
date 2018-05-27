@@ -1,6 +1,11 @@
-import { PdStreamableObject } from "./temporary";
-
 // PdPlant was unit Uplant
+
+import { PdStreamableObject } from "./temporary";
+import { short, float, double, long, intround } from "./common";
+import { KfObject3D } from "./KfObject3D";
+import { TPoint } from "./TPoint";
+import { TRect } from "./TRect";
+import { KfTurtle } from "./KfTurtle";
 
 /* Remove unused imports
 from conversion_common import *
@@ -2757,7 +2762,7 @@ export class PdPlant extends PdStreamableObject {
                 traverser = null
                 this.needToRecalculateColors = true
             }
-        } catch (Exception e) {
+        } catch (e) {
             usupport.messageForExceptionType(e, "PdPlant.nextDay")
         }
     }
@@ -2839,7 +2844,7 @@ export class PdPlant extends PdStreamableObject {
                 // no demand 
                 undistributedBiomass_pctMPB = undistributedBiomass_pctMPB + biomassToAddOrRemove_pctMPB
             }
-        } catch (Exception e) {
+        } catch (e) {
             usupport.messageForExceptionType(e, "PdPlant.allocateOrRemoveParticularBiomass")
         }
         return undistributedBiomass_pctMPB
