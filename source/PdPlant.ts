@@ -1,7 +1,7 @@
 // PdPlant was unit Uplant
 
 import { PdStreamableObject, ExportFormats, messageForExceptionType, boundForString } from "./temporary";
-import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor, ColorDefs, StrToIntDef } from "./common";
+import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor, ColorDefs, StrToIntDef, IntToStr } from "./common";
 import { KfObject3D } from "./KfObject3D";
 import { TPoint } from "./TPoint";
 import { TRect } from "./TRect";
@@ -99,7 +99,7 @@ const kExactAge = true
 
 
 // record
-export interface BreedingAndTimeSeriesOptionsStructure {
+export class BreedingAndTimeSeriesOptionsStructure {
     mutationStrengths: short[] /* kMaxBreedingSections + 1 */
     firstPlantWeights: short[] /* kMaxBreedingSections + 1 */
     getNonNumericalParametersFrom: short
@@ -116,7 +116,7 @@ export interface BreedingAndTimeSeriesOptionsStructure {
 
 // v2.0
 // record
-export interface TdoParamsStructure {
+export class TdoParamsStructure {
     object3D: KfObject3D
     xRotationBeforeDraw: float
     yRotationBeforeDraw: float
@@ -135,7 +135,7 @@ export interface TdoParamsStructure {
 // params->start 
 // access->pGeneral 
 // record
-export interface ParamsGeneral {
+export class ParamsGeneral {
     randomSway: float
     startingSeedForRandomNumberGenerator: short
     numApicalInflors: short
@@ -156,7 +156,7 @@ export interface ParamsGeneral {
 // not using yet
 // access->pLeaf 
 // record
-export interface ParamsLeaf {
+export class ParamsLeaf {
     leafTdoParams: TdoParamsStructure
     stipuleTdoParams: TdoParamsStructure
     sCurveParams: SCurveStructure
@@ -181,14 +181,14 @@ export interface ParamsLeaf {
 // ENUM
 // access->pSeedlingLeaf 
 // record
-export interface ParamsSeedlingLeaf {
+export class ParamsSeedlingLeaf {
     leafTdoParams: TdoParamsStructure
     nodesOnStemWhenFallsOff: short
 }
 
 // access->pInternode 
 // record
-export interface ParamsInternode {
+export class ParamsInternode {
     faceColor: TColorRef
     backfaceColor: TColorRef
     curvingIndex: float
@@ -219,7 +219,7 @@ export interface ParamsInternode {
 // access->pFlower 
 // kBud = 0; kPistil = 1; kStamens = 2; kFirstPetals = 3; kSecondPetals = 4; kThirdPetals = 5; kSepals = 6;
 // record
-export interface ParamsFlower {
+export class ParamsFlower {
     tdoParams: TdoParamsStructure[] /* kSepals + 1 */
     budDrawingOption: short
     optimalBiomass_pctMPB: float
@@ -247,7 +247,7 @@ export interface ParamsFlower {
 
 // access->pInflor 
 // record
-export interface ParamsInflorescence {
+export class ParamsInflorescence {
     bractTdoParams: TdoParamsStructure
     optimalBiomass_pctMPB: float
     minFractionOfOptimalBiomassToCreateInflorescence_frn: float
@@ -282,13 +282,13 @@ export interface ParamsInflorescence {
 
 // access->pAxillaryBud 
 // record
-export interface ParamsAxillaryBud {
+export class ParamsAxillaryBud {
     tdoParams: TdoParamsStructure
 }
 
 // access->pMeristem 
 // record
-export interface ParamsMeristem {
+export class ParamsMeristem {
     branchingIndex: float
     branchingDistance: float
     branchingAngle: float
@@ -300,7 +300,7 @@ export interface ParamsMeristem {
 
 // access->pFruit 
 // record
-export interface ParamsFruit {
+export class ParamsFruit {
     tdoParams: TdoParamsStructure
     sCurveParams: SCurveStructure
     optimalBiomass_pctMPB: float
@@ -312,7 +312,7 @@ export interface ParamsFruit {
 
 // access->pRoot 
 // record
-export interface ParamsRoot {
+export class ParamsRoot {
     tdoParams: TdoParamsStructure
     showsAboveGround: boolean
 }
@@ -444,34 +444,18 @@ export class PdPlant extends PdStreamableObject {
         let partType: int
         
         // i think it is best to create these at plant creation, then read into existing ones. 
-        this.pSeedlingLeaf.leafTdoParams.object3D = utdo.KfObject3D().create()
-        this.pLeaf.leafTdoParams.object3D = utdo.KfObject3D().create()
-        this.pLeaf.stipuleTdoParams.object3D = utdo.KfObject3D().create()
-        this.pInflor[kGenderFemale].bractTdoParams.object3D = utdo.KfObject3D().create()
-        this.pInflor[kGenderMale].bractTdoParams.object3D = utdo.KfObject3D().create()
+        this.pSeedlingLeaf.leafTdoParams.object3D = new KfObject3D()
+        this.pLeaf.leafTdoParams.object3D = new KfObject3D()
+        this.pLeaf.stipuleTdoParams.object3D = new KfObject3D()
+        this.pInflor[kGenderFemale].bractTdoParams.object3D = new KfObject3D()
+        this.pInflor[kGenderMale].bractTdoParams.object3D = new KfObject3D()
         for (partType = 0; partType <= kHighestFloralPartConstant; partType++) {
-            this.pFlower[kGenderFemale].tdoParams[partType].object3D = utdo.KfObject3D().create()
-            this.pFlower[kGenderMale].tdoParams[partType].object3D = utdo.KfObject3D().create()
+            this.pFlower[kGenderFemale].tdoParams[partType].object3D = new KfObject3D()
+            this.pFlower[kGenderMale].tdoParams[partType].object3D = new KfObject3D()
         }
-        this.pAxillaryBud.tdoParams.object3D = utdo.KfObject3D().create()
-        this.pFruit.tdoParams.object3D = utdo.KfObject3D().create()
-        this.pRoot.tdoParams.object3D = utdo.KfObject3D().create()
-    }
-    
-    destroy(): void {
-        this.previewCache.free
-        this.previewCache = null
-        this.randomNumberGenerator.free
-        this.randomNumberGenerator = null
-        this.breedingGenerator.free
-        this.breedingGenerator = null
-        this.amendments.free
-        this.amendments = null
-        this.noteLines.free
-        this.noteLines = null
-        this.free3DObjects()
-        this.freeAllDrawingPlantParts()
-        PdStreamableObject.prototype.destroy.call(this)
+        this.pAxillaryBud.tdoParams.object3D = new KfObject3D()
+        this.pFruit.tdoParams.object3D = new KfObject3D()
+        this.pRoot.tdoParams.object3D = new KfObject3D()
     }
     
     freeAllDrawingPlantParts(): void {
@@ -495,33 +479,6 @@ export class PdPlant extends PdStreamableObject {
         cache.Transparent = true
         cache.TransparentMode = delphi_compatability.TTransparentMode.tmFixed
         cache.TransparentColor = udomain.domain.options.backgroundColor
-    }
-    
-    free3DObjects(): void {
-        let partType: int
-        
-        this.pSeedlingLeaf.leafTdoParams.object3D.free
-        this.pSeedlingLeaf.leafTdoParams.object3D = null
-        this.pLeaf.leafTdoParams.object3D.free
-        this.pLeaf.leafTdoParams.object3D = null
-        this.pLeaf.stipuleTdoParams.object3D.free
-        this.pLeaf.stipuleTdoParams.object3D = null
-        this.pInflor[kGenderFemale].bractTdoParams.object3D.free
-        this.pInflor[kGenderFemale].bractTdoParams.object3D = null
-        this.pInflor[kGenderMale].bractTdoParams.object3D.free
-        this.pInflor[kGenderMale].bractTdoParams.object3D = null
-        for (partType = 0; partType <= kHighestFloralPartConstant; partType++) {
-            this.pFlower[kGenderFemale].tdoParams[partType].object3D.free
-            this.pFlower[kGenderFemale].tdoParams[partType].object3D = null
-            this.pFlower[kGenderMale].tdoParams[partType].object3D.free
-            this.pFlower[kGenderMale].tdoParams[partType].object3D = null
-        }
-        this.pAxillaryBud.tdoParams.object3D.free
-        this.pAxillaryBud.tdoParams.object3D = null
-        this.pFruit.tdoParams.object3D.free
-        this.pFruit.tdoParams.object3D = null
-        this.pRoot.tdoParams.object3D.free
-        this.pRoot.tdoParams.object3D = null
     }
     
     getName(): string {
@@ -1597,7 +1554,7 @@ export class PdPlant extends PdStreamableObject {
                 }
                 break
             case uparams.kFieldThreeDObject:
-                tempTdo = utdo.KfObject3D().create()
+                tempTdo = new KfObject3D()
                 try {
                     tempTdo.readFromInputString(param.defaultValueString(), utdo.kAdjustForOrigin)
                     tempTdo = this.transferField(kSetField, tempTdo, param.fieldNumber, param.fieldType, 0, false, null)
@@ -1712,7 +1669,7 @@ export class PdPlant extends PdStreamableObject {
                             }
                             break
                         case uparams.kFieldThreeDObject:
-                            tempTdo = utdo.KfObject3D().create()
+                            tempTdo = new KfObject3D()
                             try {
                                 tempTdo = this.transferField(kGetField, tempTdo, param.fieldNumber, param.fieldType, 0, false, null)
                                 this.writeLine(plantFile, param.name + start + param.fieldID + stop + tempTdo.name)
@@ -1914,7 +1871,7 @@ export class PdPlant extends PdStreamableObject {
                 }
                 break
             case uparams.kFieldThreeDObject:
-                tempTdo = utdo.KfObject3D().create()
+                tempTdo = new KfObject3D()
                 try {
                     tempTdo.setName(usupport.trimLeftAndRight(paramValue))
                     if (this.readingFromMemo) {
@@ -2322,9 +2279,9 @@ export class PdPlant extends PdStreamableObject {
                             break
                         case uparams.kFieldThreeDObject:
                             // non-numeric
-                            firstTdo = utdo.KfObject3D().create()
-                            secondTdo = utdo.KfObject3D().create()
-                            newTdo = utdo.KfObject3D().create()
+                            firstTdo = new KfObject3D()
+                            secondTdo = new KfObject3D()
+                            newTdo = new KfObject3D()
                             try {
                                 firstTdo = firstPlant.transferField(kGetField, firstTdo, param.fieldNumber, param.fieldType, 0, false, null)
                                 if (secondPlant === null) {
