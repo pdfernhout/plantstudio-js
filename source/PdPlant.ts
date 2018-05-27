@@ -1,12 +1,12 @@
 // PdPlant was unit Uplant
 
-import { PdStreamableObject, ExportFormats, messageForExceptionType, boundForString, DebugPrint } from "./temporary";
+import { PdStreamableObject, ExportFormats, messageForExceptionType, boundForString, DebugPrint, FieldType, IndexType } from "./temporary";
 import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor, ColorDefs, StrToIntDef, IntToStr } from "./common";
 import { KfObject3D } from "./KfObject3D";
 import { TPoint } from "./TPoint";
 import { TRect } from "./TRect";
 import { KfTurtle } from "./KfTurtle";
-import { SCurveStructure, intMin, intMax, safedivExcept, min, stringToSCurve } from "./umath";
+import { SCurveStructure, intMin, intMax, safedivExcept, min, stringToSCurve, calcSCurveCoeffs } from "./umath";
 import { KfPoint3D } from "./KfPoint3D";
 import { PdRandom } from "./PdRandom";
 import { domain, DrawMode } from "./PdDomain";
@@ -1501,7 +1501,7 @@ export class PdPlant extends PdStreamableObject {
         if (domain.parameterManager.parameters.Count > 0) {
             for (let i = 0; i < domain.parameterManager.parameters.Count; i++) {
                 param = uparams.PdParameter(domain.parameterManager.parameters.Items[i])
-                if (param.fieldType !== uparams.kFieldHeader) {
+                if (param.fieldType !== FieldType.kFieldHeader) {
                     this.defaultParameter(param, kDontCheckForUnreadParams)
                 }
             }
@@ -1522,27 +1522,27 @@ export class PdPlant extends PdStreamableObject {
             return
         }
         switch (param.fieldType) {
-            case uparams.kFieldBoolean:
+            case FieldType.kFieldBoolean:
                 tempBoolean = usupport.strToBool(param.defaultValueString())
                 tempBoolean = this.transferField(kSetField, tempBoolean, param.fieldNumber, param.fieldType, 0, false, null)
                 break
-            case uparams.kFieldSmallint:
+            case FieldType.kFieldSmallint:
                 tempSmallint = StrToIntDef(usupport.stringUpTo(param.defaultValueString(), " "), 0)
                 tempSmallint = this.transferField(kSetField, tempSmallint, param.fieldNumber, param.fieldType, 0, false, null)
                 break
-            case uparams.kFieldEnumeratedList:
+            case FieldType.kFieldEnumeratedList:
                 tempSmallint = StrToIntDef(usupport.stringUpTo(param.defaultValueString(), " "), 0)
                 tempSmallint = this.transferField(kSetField, tempSmallint, param.fieldNumber, param.fieldType, 0, false, null)
                 break
-            case uparams.kFieldLongint:
+            case FieldType.kFieldLongint:
                 tempLongint = StrToIntDef(param.defaultValueString(), 0)
                 tempLongint = this.transferField(kSetField, tempLongint, param.fieldNumber, param.fieldType, 0, false, null)
                 break
-            case uparams.kFieldColor:
+            case FieldType.kFieldColor:
                 tempColorRef = usupport.rgbStringToColor(param.defaultValueString())
                 tempColorRef = this.transferField(kSetField, tempColorRef, param.fieldNumber, param.fieldType, 0, false, null)
                 break
-            case uparams.kFieldFloat:
+            case FieldType.kFieldFloat:
                 if (param.indexType === uparams.kIndexTypeSCurve) {
                     // this is the only array
                     this.changingWholeSCurves = true
@@ -1550,11 +1550,11 @@ export class PdPlant extends PdStreamableObject {
                     this.transferWholeSCurve(kSetField, tempSCurve, param.fieldNumber, param.fieldType, false, null)
                     this.changingWholeSCurves = false
                 } else {
-                    tempFloat = boundForString(param.defaultValueString(), uparams.kFieldFloat)
+                    tempFloat = boundForString(param.defaultValueString(), FieldType.kFieldFloat)
                     tempFloat = this.transferField(kSetField, tempFloat, param.fieldNumber, param.fieldType, 0, false, null)
                 }
                 break
-            case uparams.kFieldThreeDObject:
+            case FieldType.kFieldThreeDObject:
                 tempTdo = new KfObject3D()
                 try {
                     tempTdo.readFromInputString(param.defaultValueString(), utdo.kAdjustForOrigin)
@@ -1636,30 +1636,30 @@ export class PdPlant extends PdStreamableObject {
                         continue
                     }
                     switch (param.fieldType) {
-                        case uparams.kFieldHeader:
+                        case FieldType.kFieldHeader:
                             break
-                        case uparams.kFieldBoolean:
+                        case FieldType.kFieldBoolean:
                             // skip
                             tempBoolean = this.transferField(kGetField, tempBoolean, param.fieldNumber, param.fieldType, 0, false, null)
                             this.writeLine(plantFile, param.name + start + param.fieldID + stop + usupport.boolToStr(tempBoolean))
                             break
-                        case uparams.kFieldSmallint:
+                        case FieldType.kFieldSmallint:
                             tempSmallint = this.transferField(kGetField, tempSmallint, param.fieldNumber, param.fieldType, 0, false, null)
                             this.writeLine(plantFile, param.name + start + param.fieldID + stop + IntToStr(tempSmallint))
                             break
-                        case uparams.kFieldEnumeratedList:
+                        case FieldType.kFieldEnumeratedList:
                             tempSmallint = this.transferField(kGetField, tempSmallint, param.fieldNumber, param.fieldType, 0, false, null)
                             this.writeLine(plantFile, param.name + start + param.fieldID + stop + IntToStr(tempSmallint))
                             break
-                        case uparams.kFieldLongint:
+                        case FieldType.kFieldLongint:
                             tempLongint = this.transferField(kGetField, tempLongint, param.fieldNumber, param.fieldType, 0, false, null)
                             this.writeLine(plantFile, param.name + start + param.fieldID + stop + IntToStr(tempLongint))
                             break
-                        case uparams.kFieldColor:
+                        case FieldType.kFieldColor:
                             tempColorRef = this.transferField(kGetField, tempColorRef, param.fieldNumber, param.fieldType, 0, false, null)
                             this.writeLine(plantFile, param.name + start + param.fieldID + stop + IntToStr(tempColorRef))
                             break
-                        case uparams.kFieldFloat:
+                        case FieldType.kFieldFloat:
                             if (param.indexType === uparams.kIndexTypeSCurve) {
                                 // this is the only array
                                 this.transferWholeSCurve(kGetField, tempSCurve, param.fieldNumber, param.fieldType, false, null)
@@ -1669,7 +1669,7 @@ export class PdPlant extends PdStreamableObject {
                                 this.writeLine(plantFile, param.name + start + param.fieldID + stop + usupport.digitValueString(tempFloat))
                             }
                             break
-                        case uparams.kFieldThreeDObject:
+                        case FieldType.kFieldThreeDObject:
                             tempTdo = new KfObject3D()
                             try {
                                 tempTdo = this.transferField(kGetField, tempTdo, param.fieldNumber, param.fieldType, 0, false, null)
@@ -1783,14 +1783,14 @@ export class PdPlant extends PdStreamableObject {
             return
         }
         switch (param.fieldType) {
-            case uparams.kFieldHeader:
+            case FieldType.kFieldHeader:
                 break
-            case uparams.kFieldBoolean:
+            case FieldType.kFieldBoolean:
                 // skip
                 tempBoolean = usupport.strToBool(paramValue)
                 tempBoolean = this.transferField(kSetField, tempBoolean, param.fieldNumber, param.fieldType, 0, false, null)
                 break
-            case uparams.kFieldSmallint:
+            case FieldType.kFieldSmallint:
                 tempSmallint = StrToIntDef(paramValue, 0)
                 if ((param.lowerBound() !== 0) || (param.upperBound() !== 0)) {
                     if (tempSmallint < intround(param.lowerBound())) {
@@ -1803,7 +1803,7 @@ export class PdPlant extends PdStreamableObject {
                 }
                 tempSmallint = this.transferField(kSetField, tempSmallint, param.fieldNumber, param.fieldType, 0, false, null)
                 break
-            case uparams.kFieldEnumeratedList:
+            case FieldType.kFieldEnumeratedList:
                 tempSmallint = StrToIntDef(paramValue, 0)
                 if ((param.lowerBound() !== 0) || (param.upperBound() !== 0)) {
                     if (tempSmallint < intround(param.lowerBound())) {
@@ -1816,7 +1816,7 @@ export class PdPlant extends PdStreamableObject {
                 }
                 tempSmallint = this.transferField(kSetField, tempSmallint, param.fieldNumber, param.fieldType, 0, false, null)
                 break
-            case uparams.kFieldLongint:
+            case FieldType.kFieldLongint:
                 tempLongint = StrToIntDef(paramValue, 0)
                 if ((param.lowerBound() !== 0) || (param.upperBound() !== 0)) {
                     if (tempLongint < intround(param.lowerBound())) {
@@ -1832,12 +1832,12 @@ export class PdPlant extends PdStreamableObject {
                 }
                 tempLongint = this.transferField(kSetField, tempLongint, param.fieldNumber, param.fieldType, 0, false, null)
                 break
-            case uparams.kFieldColor:
+            case FieldType.kFieldColor:
                 tempColorRef = StrToIntDef(paramValue, 0)
                 tempColorRef = this.transferField(kSetField, tempColorRef, param.fieldNumber, param.fieldType, 0, false, null)
                 break
-            case uparams.kFieldFloat:
-                if (param.indexType === uparams.kIndexTypeSCurve) {
+            case FieldType.kFieldFloat:
+                if (param.indexType === IndexType.kIndexTypeSCurve) {
                     // this is the only array
                     this.changingWholeSCurves = true
                     tempSCurve = umath.stringToSCurve(paramValue)
@@ -1855,7 +1855,7 @@ export class PdPlant extends PdStreamableObject {
                     this.transferWholeSCurve(kSetField, tempSCurve, param.fieldNumber, param.fieldType, false, null)
                     this.changingWholeSCurves = false
                 } else {
-                    tempFloat = usupport.boundForString(paramValue, uparams.kFieldFloat, tempFloat)
+                    tempFloat = usupport.boundForString(paramValue, FieldType.kFieldFloat, tempFloat)
                     if (UNRESOLVED.pos("Drawing scale", param.name) > 0) {
                         tempTdo = null
                     }
@@ -1871,7 +1871,7 @@ export class PdPlant extends PdStreamableObject {
                     tempFloat = this.transferField(kSetField, tempFloat, param.fieldNumber, param.fieldType, 0, false, null)
                 }
                 break
-            case uparams.kFieldThreeDObject:
+            case FieldType.kFieldThreeDObject:
                 tempTdo = new KfObject3D()
                 try {
                     tempTdo.setName(usupport.trimLeftAndRight(paramValue))
@@ -1898,24 +1898,24 @@ export class PdPlant extends PdStreamableObject {
             if (domain.parameterManager.parameters.Count > 0) {
                 for (i = 0; i <= domain.parameterManager.parameters.Count - 1; i++) {
                     param = uparams.PdParameter(domain.parameterManager.parameters.Items[i])
-                    if ((!param.valueHasBeenReadForCurrentPlant) && (param.fieldType !== uparams.kFieldHeader)) {
+                    if ((!param.valueHasBeenReadForCurrentPlant) && (param.fieldType !== FieldType.kFieldHeader)) {
                         this.defaultParameter(param, checkForUnreadParams)
                     }
                 }
             }
         }
-        this.pGeneral.ageAtWhichFloweringStarts = umath.intMin(this.pGeneral.ageAtWhichFloweringStarts, this.pGeneral.ageAtMaturity)
-        this.age = umath.intMin(this.age, this.pGeneral.ageAtMaturity)
-        umath.calcSCurveCoeffs(this.pGeneral.growthSCurve)
-        umath.calcSCurveCoeffs(this.pFruit.sCurveParams)
-        umath.calcSCurveCoeffs(this.pLeaf.sCurveParams)
+        this.pGeneral.ageAtWhichFloweringStarts = intMin(this.pGeneral.ageAtWhichFloweringStarts, this.pGeneral.ageAtMaturity)
+        this.age = intMin(this.age, this.pGeneral.ageAtMaturity)
+        calcSCurveCoeffs(this.pGeneral.growthSCurve)
+        calcSCurveCoeffs(this.pFruit.sCurveParams)
+        calcSCurveCoeffs(this.pLeaf.sCurveParams)
         this.regrow()
     }
     
     editTransferField(d: int, value: FIX_MISSING_ARG_TYPE, fieldID: int, fieldType: int, fieldIndex: int, regrow: boolean): void {
         let updateList: TListCollection
         
-        if (fieldType === uparams.kFieldHeader) {
+        if (fieldType === FieldType.kFieldHeader) {
             return value
         }
         if ((d === kGetField)) {
@@ -1942,7 +1942,7 @@ export class PdPlant extends PdStreamableObject {
     }
     
     transferField(d: int, v: FIX_MISSING_ARG_TYPE, fieldID: short, ft: short, index: short, regrow: boolean, updateList: TListCollection): void {
-        if (ft === uparams.kFieldHeader) {
+        if (ft === FieldType.kFieldHeader) {
             return v
         }
         v = this.directTransferField(d, v, fieldID, ft, index, updateList)
@@ -1951,17 +1951,17 @@ export class PdPlant extends PdStreamableObject {
                 case utransfr.kFruitSCurve:
                     if (!this.changingWholeSCurves) {
                         // cfk fix: should be not allowing to change these to values that don't work 
-                        umath.calcSCurveCoeffs(this.pFruit.sCurveParams)
+                        calcSCurveCoeffs(this.pFruit.sCurveParams)
                     }
                     break
                 case utransfr.kGeneralGrowthSCurve:
                     if (!this.changingWholeSCurves) {
-                        umath.calcSCurveCoeffs(this.pGeneral.growthSCurve)
+                        calcSCurveCoeffs(this.pGeneral.growthSCurve)
                     }
                     break
                 case utransfr.kLeafSCurve:
                     if (!this.changingWholeSCurves) {
-                        umath.calcSCurveCoeffs(this.pLeaf.sCurveParams)
+                        calcSCurveCoeffs(this.pLeaf.sCurveParams)
                     }
                     break
                 case utransfr.kGeneralAgeAtMaturity:
@@ -1970,7 +1970,7 @@ export class PdPlant extends PdStreamableObject {
                     }
                     break
             }
-            if ((ft === uparams.kFieldColor)) {
+            if ((ft === FieldType.kFieldColor)) {
                 this.needToRecalculateColors = true
             }
         }
@@ -2062,23 +2062,23 @@ export class PdPlant extends PdStreamableObject {
     MFD(objectValue: FIX_MISSING_ARG_TYPE, value: FIX_MISSING_ARG_TYPE, fieldType: int, direction: int): void {
         if (direction === kGetField) {
             switch (fieldType) {
-                case uparams.kFieldFloat:
+                case FieldType.kFieldFloat:
                     // MFD = MoveFieldData
                     value = objectValue
                     break
-                case uparams.kFieldSmallint:
+                case FieldType.kFieldSmallint:
                     value = objectValue
                     break
-                case uparams.kFieldLongint:
+                case FieldType.kFieldLongint:
                     value = objectValue
                     break
-                case uparams.kFieldColor:
+                case FieldType.kFieldColor:
                     delphi_compatability.TColorRef(value) = delphi_compatability.TColorRef(objectValue)
                     break
-                case uparams.kFieldBoolean:
+                case FieldType.kFieldBoolean:
                     value = objectValue
                     break
-                case uparams.kFieldEnumeratedList:
+                case FieldType.kFieldEnumeratedList:
                     value = objectValue
                     break
                 default:
@@ -2087,22 +2087,22 @@ export class PdPlant extends PdStreamableObject {
             }
         } else if (direction === kSetField) {
             switch (fieldType) {
-                case uparams.kFieldFloat:
+                case FieldType.kFieldFloat:
                     objectValue = value
                     break
-                case uparams.kFieldSmallint:
+                case FieldType.kFieldSmallint:
                     objectValue = value
                     break
-                case uparams.kFieldLongint:
+                case FieldType.kFieldLongint:
                     objectValue = value
                     break
-                case uparams.kFieldColor:
+                case FieldType.kFieldColor:
                     delphi_compatability.TColorRef(objectValue) = delphi_compatability.TColorRef(value)
                     break
-                case uparams.kFieldBoolean:
+                case FieldType.kFieldBoolean:
                     objectValue = value
                     break
-                case uparams.kFieldEnumeratedList:
+                case FieldType.kFieldEnumeratedList:
                     objectValue = value
                     break
                 default:
@@ -2155,12 +2155,12 @@ export class PdPlant extends PdStreamableObject {
                 }
                 for (paramIndex = 0; paramIndex <= section.numSectionItems - 1; paramIndex++) {
                     param = domain.parameterManager.parameterForFieldNumber(section.sectionItems[paramIndex])
-                    if ((param === null) || (param.fieldType === uparams.kFieldHeader)) {
+                    if ((param === null) || (param.fieldType === FieldType.kFieldHeader)) {
                         continue
                     }
                     // case
                     switch (param.fieldType) {
-                        case uparams.kFieldBoolean:
+                        case FieldType.kFieldBoolean:
                             // non-numeric
                             firstBoolean = firstPlant.transferField(kGetField, firstBoolean, param.fieldNumber, param.fieldType, 0, false, null)
                             if (secondPlant === null) {
@@ -2175,7 +2175,7 @@ export class PdPlant extends PdStreamableObject {
                             }
                             newBoolean = this.transferField(kSetField, newBoolean, param.fieldNumber, param.fieldType, 0, false, null)
                             break
-                        case uparams.kFieldSmallint:
+                        case FieldType.kFieldSmallint:
                             // numeric
                             newInteger = 0
                             firstInteger = firstPlant.transferField(kGetField, firstInteger, param.fieldNumber, param.fieldType, 0, false, null)
@@ -2196,9 +2196,9 @@ export class PdPlant extends PdStreamableObject {
                             newInteger = intround(umath.min(param.upperBound(), umath.max(param.lowerBound(), 1.0 * newInteger)))
                             newInteger = this.transferField(kSetField, newInteger, param.fieldNumber, param.fieldType, 0, false, null)
                             break
-                        case uparams.kFieldLongint:
+                        case FieldType.kFieldLongint:
                             break
-                        case uparams.kFieldEnumeratedList:
+                        case FieldType.kFieldEnumeratedList:
                             // the only numeric fields so far are the plant's position x and y (which is redone anyway)
                             //            and the random number seed, which shouldn't really be bred anyway, so we will do nothing
                             //            here. if you want to add longint parameters later, you will have to copy the smallint stuff
@@ -2217,7 +2217,7 @@ export class PdPlant extends PdStreamableObject {
                             }
                             newInteger = this.transferField(kSetField, newInteger, param.fieldNumber, param.fieldType, 0, false, null)
                             break
-                        case uparams.kFieldColor:
+                        case FieldType.kFieldColor:
                             // numeric if option is set, otherwise non-numeric
                             firstColor = firstPlant.transferField(kGetField, firstColor, param.fieldNumber, param.fieldType, 0, false, null)
                             if (secondPlant === null) {
@@ -2237,7 +2237,7 @@ export class PdPlant extends PdStreamableObject {
                             }
                             newColor = this.transferField(kSetField, newColor, param.fieldNumber, param.fieldType, 0, false, null)
                             break
-                        case uparams.kFieldFloat:
+                        case FieldType.kFieldFloat:
                             if (param.indexType === uparams.kIndexTypeSCurve) {
                                 // considering s curve non-numeric, too much trouble to make sure it is all right, and there are only two 
                                 this.changingWholeSCurves = true
@@ -2278,7 +2278,7 @@ export class PdPlant extends PdStreamableObject {
                                 newFloat = this.transferField(kSetField, newFloat, param.fieldNumber, param.fieldType, 0, false, null)
                             }
                             break
-                        case uparams.kFieldThreeDObject:
+                        case FieldType.kFieldThreeDObject:
                             // non-numeric
                             firstTdo = new KfObject3D()
                             secondTdo = new KfObject3D()
