@@ -200,7 +200,6 @@ function safeLn(x: double): double {
     let result = 0.0
     if (x > 0.0) {
         try {
-            // PDF PORT added semicolon
             result = Math.log(x)
         } catch (e) {
             ErrorMessage("Invalid number for natural log: " + FloatToStr(x))
@@ -215,33 +214,24 @@ function safeLn(x: double): double {
 
 // same as safeLn but does not show an errorMessage or re-raise the exception; just returns whether it failed;
 //  used inside paint methods where you don't want error dialogs popping up 
-function safeLnWithResult(x: double, failed: boolean): double {
-    raise "method safeLnWithResult with preexisting function result had var parameters added to return -- fixup manually"
-    let result = 0.0
-    let temp: double
-    
-    failed = true
-    result = 0.0
-    temp = 0.0
+function safeLnWithResult(x: double): [double, boolean] {
+    // Second item in array (boolean) is whether it failed
     if (x <= 0.0) {
-        return result, failed
+        return [0.0, true]
     }
+    let temp = 0.0
     try {
         temp = Math.log(x)
     } catch (e) {
-        result = 1.0
-        return result, failed
+        return [1.0, true]
     }
-    result = temp
-    failed = false
-    return result, failed
+    return [temp, false]
 }
 
 // RE-RAISES EXCEPTION 
 function safeExp(x: double): double {
     let result = 0.0
     try {
-        // PDF PORT added semicolon
         result = Math.exp(x)
     } catch (e) {
         result = ErrorMessage("Invalid number for exponential function: " + FloatToStr(x))
@@ -252,22 +242,14 @@ function safeExp(x: double): double {
 
 // same as safeExp but does not show an errorMessage or re-raise the exception; just returns whether it failed;
 //  used inside paint methods where you don't want error dialogs popping up 
-function safeExpWithResult(x: double, failed: boolean): double {
-    raise "method safeExpWithResult with preexisting function result had var parameters added to return -- fixup manually"
-    let result = 0.0
-    let temp: double
-    
-    failed = true
-    result = 0.0
-    temp = 0.0
+function safeExpWithResult(x: double): [double, boolean] {
+    let temp = 0.0
     try {
         temp = Math.exp(x)
     } catch (e) {
-        return result, failed
+        return [0.0, true]
     }
-    result = temp
-    failed = false
-    return result, failed
+    return [temp, false]
 }
 
 // this function catches a divide by zero before it produces a not-a-number.
@@ -310,25 +292,17 @@ function safedivExcept(x: float, y: float, exceptionResult: float): float {
 
 // same as safediv but does not show an errorMessage or re-raise the exception; just returns whether it failed;
 //  used inside paint methods where you don't want error dialogs popping up 
-function safedivWithResult(x: float, y: float, failed: boolean): float {
-    raise "method safedivWithResult with preexisting function result had var parameters added to return -- fixup manually"
-    let result = 0.0
-    let temp: double
-    
-    failed = true
-    result = 0.0
-    temp = 0.0
+function safedivWithResult(x: float, y: float): [float, boolean] {
+    let temp = 0.0
     if (y === 0.0) {
-        return result, failed
+        return [0.0, true]
     }
     try {
         temp = x / y
     } catch (e) {
-        return result, failed
+        return [0.0, true]
     }
-    result = temp
-    failed = false
-    return result, failed
+    return [temp, false]
 }
 
 // s curves 
@@ -354,33 +328,29 @@ function scurve(x: double, c1: double, c2: double): double {
 
 // same as scurve but does not show an errorMessage or re-raise the exception; just returns whether it failed;
 //  used inside paint methods where you don't want error dialogs popping up 
-function scurveWithResult(x: double, c1: double, c2: double, failed: boolean): double {
-    raise "method scurveWithResult with preexisting function result had var parameters added to return -- fixup manually"
+function scurveWithResult(x: double, c1: double, c2: double): [double, boolean] {
+    let failed = true
     let result = 0.0
-    let temp: double
-    
-    failed = true
-    result = 0.0
-    temp = 0.0
+    let temp = 0.0
     try {
         temp = c1 - c2 * x
         if (temp > 85.0) {
-            return result, failed
+            return [result, failed]
         }
-        temp = safeExpWithResult(temp, failed)
+        [temp, failed] = safeExpWithResult(temp)
         if (failed) {
-            return result, failed
+            return [result, failed]
         }
-        temp = safedivWithResult(x, x + temp, failed)
+        [temp, failed] = safedivWithResult(x, x + temp)
         if (failed) {
-            return result, failed
+            return [result, failed]
         }
     } catch (e) {
-        return result, failed
+        return [result, failed]
     }
     failed = false
     result = temp
-    return result, failed
+    return [result, failed]
 }
 
 // s curve params 
@@ -413,7 +383,7 @@ function calcSCurveCoeffs(sCurve: SCurveStructure): void {
 
 // same as Utils_CalcSCurveCoeffs but does not show an errorMessage or re-raise the exception;
 //  just returns whether it failed; used inside paint methods where you don't want error dialogs popping up 
-function calcSCurveCoeffsWithResult(sCurve: SCurveStructure, failed: boolean): void {
+function calcSCurveCoeffsWithResult(sCurve: SCurveStructure): boolean {
     let quotientX1Y1: double
     let lnQuotientX1Y1MinusX1: double
     let quotientX2Y2: double
@@ -421,25 +391,25 @@ function calcSCurveCoeffsWithResult(sCurve: SCurveStructure, failed: boolean): v
     let c1temp: double
     let c2temp: double
     
-    failed = true
+    let failed = true
     try {
-        quotientX1Y1 = safedivWithResult(sCurve.x1, sCurve.y1, failed)
+        [quotientX1Y1, failed] = safedivWithResult(sCurve.x1, sCurve.y1)
         if (failed) {
             return failed
         }
-        lnQuotientX1Y1MinusX1 = safeLnWithResult(quotientX1Y1 - sCurve.x1, failed)
+        [lnQuotientX1Y1MinusX1, failed] = safeLnWithResult(quotientX1Y1 - sCurve.x1)
         if (failed) {
             return failed
         }
-        quotientX2Y2 = safedivWithResult(sCurve.x2, sCurve.y2, failed)
+        [quotientX2Y2, failed] = safedivWithResult(sCurve.x2, sCurve.y2)
         if (failed) {
             return failed
         }
-        lnQuotientX2Y2MinusX2 = safeLnWithResult(quotientX2Y2 - sCurve.x2, failed)
+        [lnQuotientX2Y2MinusX2, failed] = safeLnWithResult(quotientX2Y2 - sCurve.x2)
         if (failed) {
             return failed
         }
-        c2temp = safedivWithResult(lnQuotientX1Y1MinusX1 - lnQuotientX2Y2MinusX2, sCurve.x2 - sCurve.x1, failed)
+        [c2temp, failed] = safedivWithResult(lnQuotientX1Y1MinusX1 - lnQuotientX2Y2MinusX2, sCurve.x2 - sCurve.x1)
         if (failed) {
             return failed
         }
