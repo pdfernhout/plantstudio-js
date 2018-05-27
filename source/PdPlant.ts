@@ -1,12 +1,12 @@
 // PdPlant was unit Uplant
 
-import { PdStreamableObject, ExportFormats } from "./temporary";
-import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor } from "./common";
+import { PdStreamableObject, ExportFormats, messageForExceptionType, boundForString } from "./temporary";
+import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor, ColorDefs, StrToIntDef } from "./common";
 import { KfObject3D } from "./KfObject3D";
 import { TPoint } from "./TPoint";
 import { TRect } from "./TRect";
 import { KfTurtle } from "./KfTurtle";
-import { SCurveStructure, intMin, intMax, safedivExcept, min } from "./umath";
+import { SCurveStructure, intMin, intMax, safedivExcept, min, stringToSCurve } from "./umath";
 import { KfPoint3D } from "./KfPoint3D";
 
 /* Remove unused imports
@@ -378,7 +378,7 @@ export class PdPlant extends PdStreamableObject {
     readingFromMemo: boolean = false
     readingMemoLine: long = 0
     useBestDrawingForPreview: boolean = false
-    turtle: KfTurtle = new KfTurtle()
+    turtle: KfTurtle | null = null
     firstPhytomer: TObject = new TObject()
     totalBiomass_pctMPB: float = 0.0
     reproBiomass_pctMPB: float = 0.0
@@ -582,7 +582,7 @@ export class PdPlant extends PdStreamableObject {
         let traverser: PdTraverser
         
         utravers.cancelDrawing = false
-        if ((this.turtle === null)) {
+        if (this.turtle === null) {
             throw new Error("Problem: Nil turtle in method PdPlant.draw.")
         }
         if (this.turtle.drawingSurface.pane !== null) {
@@ -744,16 +744,16 @@ export class PdPlant extends PdStreamableObject {
     drawOn(destCanvas: TCanvas): void {
         let realBasePoint_pixels: TPoint
         
-        this.turtle = uturtle.KfTurtle.defaultStartUsing()
+        this.turtle = KfTurtle.defaultStartUsing()
         try {
             this.turtle.drawingSurface.pane = destCanvas
             this.setTurtleDrawOptionsForNormalDraw(this.turtle)
             // must be after pane and draw options set 
             this.turtle.reset()
             this.turtle.setScale_pixelsPerMm(this.realDrawingScale_pixelsPerMm())
-            this.turtle.drawingSurface.foreColor = delphi_compatability.clGreen
-            this.turtle.drawingSurface.backColor = delphi_compatability.clRed
-            this.turtle.drawingSurface.lineColor = delphi_compatability.clBlue
+            this.turtle.drawingSurface.foreColor = ColorDefs.clGreen
+            this.turtle.drawingSurface.backColor = ColorDefs.clRed
+            this.turtle.drawingSurface.lineColor = ColorDefs.clBlue
             realBasePoint_pixels = this.basePoint_pixels()
             this.turtle.xyz(realBasePoint_pixels.X, realBasePoint_pixels.Y, 0)
             this.turtle.resetBoundsRect(realBasePoint_pixels)
@@ -772,11 +772,11 @@ export class PdPlant extends PdStreamableObject {
                     this.enforceMinimumBoundsRect()
                     this.expandBoundsRectForLineWidth()
                 }
-            } catch (Exception e) {
-                usupport.messageForExceptionType(e, "PdPlant.drawOn")
+            } catch (e) {
+                messageForExceptionType(e, "PdPlant.drawOn")
             }
         } finally {
-            uturtle.KfTurtle.defaultStopUsing()
+            KfTurtle.defaultStopUsing()
             this.turtle = null
         }
     }
@@ -842,13 +842,8 @@ export class PdPlant extends PdStreamableObject {
     }
     
     pointIsInResizingRect(point: TPoint): boolean {
-        let result = false
-        let theRect: TRect
-        
-        result = false
-        theRect = this.resizingRect()
-        result = (point.x >= theRect.Left) && (point.x <= theRect.Right) && (point.y >= theRect.Top) && (point.y <= theRect.Bottom)
-        return result
+        const theRect = this.resizingRect()
+        return (point.X >= theRect.Left) && (point.X <= theRect.Right) && (point.Y >= theRect.Top) && (point.Y <= theRect.Bottom)
     }
     
     recalculateBoundsForOffsetChange(): void {
@@ -894,7 +889,7 @@ export class PdPlant extends PdStreamableObject {
             umain.MainForm.updateForChangeToPlantBitmaps()
             return
         }
-        drawingRect = Rect(0, 0, umain.MainForm.drawingPaintBox.Width, umain.MainForm.drawingPaintBox.Height)
+        drawingRect = new TRect(0, 0, umain.MainForm.drawingPaintBox.Width, umain.MainForm.drawingPaintBox.Height)
         // on opening file at first, force redraw of cache because drawingPaintBox size might be wrong
         intersectResult = umain.MainForm.inFormCreation || umain.MainForm.inFileOpen || delphi_compatability.IntersectRect(intersectRect_pixels, this.boundsRect_pixels(), drawingRect)
         if (!intersectResult) {
@@ -908,8 +903,8 @@ export class PdPlant extends PdStreamableObject {
         }
         oldBasePoint = this.basePoint_pixels()
         try {
-            this.setBasePoint_pixels(Point(this.basePoint_pixels().X - this.boundsRect_pixels().Left, this.basePoint_pixels().Y - this.boundsRect_pixels().Top))
-            this.resizeCacheIfNecessary(this.previewCache, Point(this.boundsRect_pixels().width, this.boundsRect_pixels().height), kInMainWindow)
+            this.setBasePoint_pixels(new TPoint(this.basePoint_pixels().X - this.boundsRect_pixels().Left, this.basePoint_pixels().Y - this.boundsRect_pixels().Top))
+            this.resizeCacheIfNecessary(this.previewCache, new TPoint(this.boundsRect_pixels().width, this.boundsRect_pixels().height), kInMainWindow)
             this.previewCache.TransparentColor = udomain.domain.options.transparentColor
             ubmpsupport.fillBitmap(this.previewCache, udomain.domain.options.transparentColor)
             // showing progress here is mainly for really complicated plants; most plants won't need it
@@ -940,7 +935,7 @@ export class PdPlant extends PdStreamableObject {
     
     fakeDrawToGetBounds(): void {
         this.computeBounds = true
-        this.turtle = uturtle.KfTurtle.defaultStartUsing()
+        this.turtle = KfTurtle.defaultStartUsing()
         try {
             this.turtle.drawingSurface.pane = null
             this.turtle.drawOptions.drawStems = false
@@ -952,14 +947,14 @@ export class PdPlant extends PdStreamableObject {
             this.turtle.resetBoundsRect(this.basePoint_pixels())
             try {
                 this.draw()
-            } catch (Exception e) {
-                usupport.messageForExceptionType(e, "PdPlant.fakeDrawToGetBounds")
+            } catch (e) {
+                messageForExceptionType(e, "PdPlant.fakeDrawToGetBounds")
             }
             this.setBoundsRect_pixels(this.getTurtleBoundsRect())
             this.enforceMinimumBoundsRect()
             this.expandBoundsRectForLineWidth()
         } finally {
-            uturtle.KfTurtle.defaultStopUsing()
+            KfTurtle.defaultStopUsing()
             this.turtle = null
             this.computeBounds = false
         }
@@ -980,7 +975,7 @@ export class PdPlant extends PdStreamableObject {
         if (immediate) {
             ubmpsupport.fillBitmap(cache, udomain.domain.options.backgroundColor)
         }
-        this.turtle = uturtle.KfTurtle.defaultStartUsing()
+        this.turtle = KfTurtle.defaultStartUsing()
         try {
             // set starting values 
             this.turtle.drawingSurface.pane = cache.Canvas
@@ -1050,7 +1045,7 @@ export class PdPlant extends PdStreamableObject {
             }
         } finally {
             // self.previewCacheUpToDate := true;
-            uturtle.KfTurtle.defaultStopUsing()
+            KfTurtle.defaultStopUsing()
             this.turtle = null
             this.useBestDrawingForPreview = false
         }
@@ -1124,6 +1119,9 @@ export class PdPlant extends PdStreamableObject {
     
     getTurtleBoundsRect(): TRect {
         let result = new TRect()
+        if (this.turtle === null) {
+            throw new Error("null turtle in PdPlant.getTurtleBoundsRect")
+        }
         result = this.turtle.boundsRect()
         if (this.pRoot.showsAboveGround) {
             result.Bottom = result.Bottom + kExtraForRootTopProblem
@@ -1168,9 +1166,9 @@ export class PdPlant extends PdStreamableObject {
         }
         // must be after pane and draw options set 
         this.turtle.reset()
-        this.turtle.drawingSurface.foreColor = delphi_compatability.clGreen
-        this.turtle.drawingSurface.backColor = delphi_compatability.clRed
-        this.turtle.drawingSurface.lineColor = delphi_compatability.clBlue
+        this.turtle.drawingSurface.foreColor = ColorDefs.clGreen
+        this.turtle.drawingSurface.backColor = ColorDefs.clRed
+        this.turtle.drawingSurface.lineColor = ColorDefs.clBlue
         this.turtle.setScale_pixelsPerMm(scale)
         this.turtle.xyz(drawPosition.X, drawPosition.Y, 0)
         this.turtle.resetBoundsRect(drawPosition)
@@ -1200,7 +1198,7 @@ export class PdPlant extends PdStreamableObject {
         result = null
         // if you give it no drawing surface pane, everything happens but the actual drawing
         this.drawOn(null)
-        turtle = uturtle.KfTurtle.defaultStartUsing()
+        turtle = KfTurtle.defaultStartUsing()
         if (turtle === null) {
             return result
         }
@@ -1213,7 +1211,7 @@ export class PdPlant extends PdStreamableObject {
                 result = this.plantPartForPartID(partID)
             }
         } finally {
-            uturtle.KfTurtle.defaultStopUsing()
+            KfTurtle.defaultStopUsing()
         }
         return result
     }
@@ -1270,12 +1268,8 @@ export class PdPlant extends PdStreamableObject {
     }
     
     expandBoundsRectForLineWidth(): void {
-        let extra: short
-        let theRect: TRect
-        
-        extra = intround(this.maximumLineWidth() * this.realDrawingScale_pixelsPerMm()) + 1
-        theRect = this.boundsRect_pixels()
-        UNRESOLVED.inflateRect(theRect, extra, extra)
+        const extra = intround(this.maximumLineWidth() * this.realDrawingScale_pixelsPerMm()) + 1
+        const theRect = this.boundsRect_pixels().inflate(extra, extra)
         this.setBoundsRect_pixels(theRect)
     }
     
@@ -1337,9 +1331,9 @@ export class PdPlant extends PdStreamableObject {
         let yPixel: long
         let i: long
         
-        result = delphi_compatability.PtInRect(boundsRect, aPoint)
+        result = boundsRect.contains(aPoint)
         if (result && udomain.domain.options.cachePlantBitmaps) {
-            if (checkResizeRect && delphi_compatability.PtInRect(this.resizingRect(), aPoint)) {
+            if (checkResizeRect && this.resizingRect().contains(aPoint)) {
                 result = true
             } else {
                 xPixel = aPoint.X - boundsRect.Left
@@ -1360,7 +1354,7 @@ export class PdPlant extends PdStreamableObject {
     
     pointInBoundsRect(aPoint: TPoint): boolean {
         let result = false
-        result = delphi_compatability.PtInRect(this.normalBoundsRect_pixels, aPoint)
+        result = this.normalBoundsRect_pixels.contains(aPoint)
         return result
     }
     
@@ -1522,6 +1516,7 @@ export class PdPlant extends PdStreamableObject {
     }
     
     setUpTurtleFor3DOutput(): void {
+        if (!this.turtle) throw new Error("turtle is null")
         this.turtle.drawOptions.sortPolygons = false
         this.turtle.drawOptions.drawLines = false
         this.turtle.drawOptions.lineContrastIndex = 0
@@ -1533,9 +1528,9 @@ export class PdPlant extends PdStreamableObject {
         // must be after pane and draw options set 
         this.turtle.reset()
         this.turtle.setScale_pixelsPerMm(this.realDrawingScale_pixelsPerMm())
-        this.turtle.drawingSurface.foreColor = delphi_compatability.clGreen
-        this.turtle.drawingSurface.backColor = delphi_compatability.clRed
-        this.turtle.drawingSurface.lineColor = delphi_compatability.clBlue
+        this.turtle.drawingSurface.foreColor = ColorDefs.clGreen
+        this.turtle.drawingSurface.backColor = ColorDefs.clRed
+        this.turtle.drawingSurface.lineColor = ColorDefs.clBlue
         this.turtle.xyz(0, 0, 0)
         this.turtle.resetBoundsRect(new TPoint(0, 0))
     }
@@ -1593,11 +1588,11 @@ export class PdPlant extends PdStreamableObject {
                 if (param.indexType === uparams.kIndexTypeSCurve) {
                     // this is the only array
                     this.changingWholeSCurves = true
-                    tempSCurve = umath.stringToSCurve(param.defaultValueString())
+                    tempSCurve = stringToSCurve(param.defaultValueString())
                     this.transferWholeSCurve(kSetField, tempSCurve, param.fieldNumber, param.fieldType, false, null)
                     this.changingWholeSCurves = false
                 } else {
-                    tempFloat = usupport.boundForString(param.defaultValueString(), uparams.kFieldFloat, tempFloat)
+                    tempFloat = boundForString(param.defaultValueString(), uparams.kFieldFloat)
                     tempFloat = this.transferField(kSetField, tempFloat, param.fieldNumber, param.fieldType, 0, false, null)
                 }
                 break
@@ -2765,7 +2760,7 @@ export class PdPlant extends PdStreamableObject {
                 this.needToRecalculateColors = true
             }
         } catch (e) {
-            usupport.messageForExceptionType(e, "PdPlant.nextDay")
+            messageForExceptionType(e, "PdPlant.nextDay")
         }
     }
     
@@ -2847,7 +2842,7 @@ export class PdPlant extends PdStreamableObject {
                 undistributedBiomass_pctMPB = undistributedBiomass_pctMPB + biomassToAddOrRemove_pctMPB
             }
         } catch (e) {
-            usupport.messageForExceptionType(e, "PdPlant.allocateOrRemoveParticularBiomass")
+            messageForExceptionType(e, "PdPlant.allocateOrRemoveParticularBiomass")
         }
         return undistributedBiomass_pctMPB
     }

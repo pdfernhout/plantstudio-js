@@ -369,6 +369,11 @@ export class KfObject3D extends PdStreamableObject {
         turtle.drawTrianglesFromBoundsRect(this.boundsRect)
         turtle.drawingSurface.fillingTriangles = oldSetting
     }
+
+    // TODO: Removed stub totalMemorySize
+    totalMemorySize(): long {
+        return 0
+    }
     
     // TODO: Remove stub write3DExportElements
     write3DExportElements(turtle: KfTurtle, scale: float, partID: short): void {

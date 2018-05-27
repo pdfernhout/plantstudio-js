@@ -33,18 +33,14 @@ const kLowestQuantityFloat = 10e-6
 
 
 // const
+// these consts are really defined in uplant.pas but we don't want to include it - keep current
 const kGetField = 0
 const kSetField = 1
 
-
-// returns zero for convenience
-// these consts are really defined in uplant.pas but we don't want to include it - keep current
 // error message - returns zero for convenience
-function ErrorMessage(errorString: string): float {
-    let result = 0.0
-    result = 0.0
+export function ErrorMessage(errorString: string): float {
     DebugPrint(errorString)
-    return result
+    return 0.0
 }
 
 // ---------------------------------------------------------------------------------------------- math functions 

@@ -67,3 +67,9 @@ export const kFieldFloat = 1
 export function boundForString(boundString: string, fieldType: int): [number, boolean] {
     return [StrToFloat(boundString), true]
 }
+
+// TODO: Fix messageForExceptionType stub from usupport
+export function messageForExceptionType(e: Error, methodName: string): void {
+    console.log("Exception", e);
+    DebugPrint("Exception in " + methodName + " with " + e)
+}

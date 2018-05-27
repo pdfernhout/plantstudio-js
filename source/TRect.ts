@@ -52,4 +52,8 @@ export class TRect {
     scale(scale: number) {
         return new TRect(this.Left * scale, this.Top * scale, this.Right * scale, this.Bottom * scale)
     }
+
+    inflate(width: number, height: number) {
+        return new TRect(this.Left - width, this.Top - height, this.Right + width, this.Bottom + height)
+    }
 }

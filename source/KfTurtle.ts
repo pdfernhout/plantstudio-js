@@ -646,7 +646,7 @@ export class KfTurtle {
     // ---------------------------------------------------------------------------------- KfTurtle defaulting 
     // where the default turtle is used need a try..finally
     // to ensure defaultStopUsing is called no matter what
-    defaultStartUsing(): KfTurtle {
+    static defaultStartUsing(): KfTurtle {
         if (gDefaultTurtleInUse) {
             throw new Error("Problem: turtle is already in use; in method KfTurtle.defaultStartUsing.")
         }
@@ -657,20 +657,20 @@ export class KfTurtle {
         return gDefaultTurtle
     }
     
-    defaultStopUsing(): void {
+    static defaultStopUsing(): void {
         gDefaultTurtleInUse = false
     }
     
-    defaultAllocate(): void {
+    static defaultAllocate(): void {
         gDefaultTurtle = null
         gDefaultTurtle = new KfTurtle()
         gDefaultTurtleInUse = false
     }
     
-    defaultFree(): void {
+    static defaultFree(): void {
         gDefaultTurtle = null
     }
     
 }
 
-// need to default free somewhere in project
+KfTurtle.defaultAllocate()
