@@ -84,6 +84,11 @@ export class SinglePoint {
     x: float
     y: float
     reservedZ: float
+
+    constructor(x = 0.0, y = 0.0) {
+        this.x = x
+        this.y = y
+    }
 }
 
 // TODO: Fix FieldType from Uparams

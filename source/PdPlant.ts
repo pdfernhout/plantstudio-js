@@ -1,7 +1,7 @@
 // PdPlant was unit Uplant
 
-import { PdStreamableObject, ExportFormats, messageForExceptionType, boundForString, DebugPrint, FieldType, IndexType } from "./temporary";
-import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor, ColorDefs, StrToIntDef, IntToStr } from "./common";
+import { PdStreamableObject, ExportFormats, messageForExceptionType, boundForString, DebugPrint, FieldType, IndexType, SinglePoint } from "./temporary";
+import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor, ColorDefs, StrToIntDef, IntToStr, compareTextIgnoreCase } from "./common";
 import { KfObject3D } from "./KfObject3D";
 import { TPoint } from "./TPoint";
 import { TRect } from "./TRect";
@@ -599,7 +599,7 @@ export class PdPlant extends PdStreamableObject {
                 traverser.traverseWholePlant(utravers.kActivityCountPointsAndTrianglesFor3DExport)
                 this.totalPlantParts = traverser.totalPlantParts
                 switch (outputType) {
-                    case u3dexport.kPOV:
+                    case ExportFormats.kPOV:
                         // POV does not use polygon cylinders for lines; it draws them directly
                         this.total3DExportPoints = traverser.total3DExportPointsIn3DObjects + traverser.total3DExportStemSegments * this.pGeneral.lineDivisions * 2
                         this.total3DExportTriangles = traverser.total3DExportTrianglesIn3DObjects
@@ -1251,14 +1251,13 @@ export class PdPlant extends PdStreamableObject {
     }
     
     moveBy(delta_pixels: TPoint): void {
-        let delta_mm: SinglePoint
-        let theRect: TRect
-        
-        theRect = this.boundsRect_pixels()
+        const theRect = this.boundsRect_pixels()
         theRect.Left = theRect.Left + delta_pixels.X
         theRect.Right = theRect.Right + delta_pixels.X
         theRect.Top = theRect.Top + delta_pixels.Y
         theRect.Bottom = theRect.Bottom + delta_pixels.Y
+
+        const delta_mm: SinglePoint = new SinglePoint()
         delta_mm.x = safedivExcept(delta_pixels.X, domain.plantDrawScale_PixelsPerMm(), 0)
         delta_mm.y = safedivExcept(delta_pixels.Y, domain.plantDrawScale_PixelsPerMm(), 0)
         this.basePoint_mm.x = this.basePoint_mm.x + delta_mm.x
@@ -1381,7 +1380,7 @@ export class PdPlant extends PdStreamableObject {
         let remPoints: KfPoint3D[] = [new KfPoint3D(), new KfPoint3D(), new KfPoint3D(), new KfPoint3D()]
         let remWidth: float
         let fileExportSurface: KfFileExportSurface
-        let relativeBasePoint_mm: SinglePoint
+        let relativeBasePoint_mm: SinglePoint = new SinglePoint()
         let i: int
         let fixRotation: short
         
@@ -1543,7 +1542,7 @@ export class PdPlant extends PdStreamableObject {
                 tempColorRef = this.transferField(kSetField, tempColorRef, param.fieldNumber, param.fieldType, 0, false, null)
                 break
             case FieldType.kFieldFloat:
-                if (param.indexType === uparams.kIndexTypeSCurve) {
+                if (param.indexType === IndexType.kIndexTypeSCurve) {
                     // this is the only array
                     this.changingWholeSCurves = true
                     tempSCurve = stringToSCurve(param.defaultValueString())
@@ -1660,7 +1659,7 @@ export class PdPlant extends PdStreamableObject {
                             this.writeLine(plantFile, param.name + start + param.fieldID + stop + IntToStr(tempColorRef))
                             break
                         case FieldType.kFieldFloat:
-                            if (param.indexType === uparams.kIndexTypeSCurve) {
+                            if (param.indexType === IndexType.kIndexTypeSCurve) {
                                 // this is the only array
                                 this.transferWholeSCurve(kGetField, tempSCurve, param.fieldNumber, param.fieldType, false, null)
                                 this.writeLine(plantFile, param.name + start + param.fieldID + stop + umath.sCurveToString(tempSCurve))
@@ -1716,17 +1715,17 @@ export class PdPlant extends PdStreamableObject {
         let nameAndFieldID: string
         let fieldID: string
         let paramValue: string
-        let tempTdo: KfObject3d
+        let tempTdo: KfObject3D
         let found: boolean
         let newAmendment: PdPlantDrawingAmendment
         
-        if (UNRESOLVED.pos(uppercase(kStartNoteString), uppercase(aLine)) > 0) {
+        if (compareTextIgnoreCase(kStartNoteString, aLine)) {
             // read note if this line starts it
             // this only will happen if in file
             this.noteLines.Clear()
             while (!UNRESOLVED.eof(plantFile)) {
                 noteLine = usupport.tolerantReadln(plantFile, noteLine)
-                if ((UNRESOLVED.pos(uppercase(kEndNoteString), uppercase(noteLine)) > 0) && (this.noteLines.Count < 5000)) {
+                if (compareTextIgnoreCase(kEndNoteString, noteLine) && (this.noteLines.Count < 5000)) {
                     break
                 } else {
                     this.noteLines.Add(noteLine)
@@ -2238,7 +2237,7 @@ export class PdPlant extends PdStreamableObject {
                             newColor = this.transferField(kSetField, newColor, param.fieldNumber, param.fieldType, 0, false, null)
                             break
                         case FieldType.kFieldFloat:
-                            if (param.indexType === uparams.kIndexTypeSCurve) {
+                            if (param.indexType === IndexType.kIndexTypeSCurve) {
                                 // considering s curve non-numeric, too much trouble to make sure it is all right, and there are only two 
                                 this.changingWholeSCurves = true
                                 firstPlant.transferWholeSCurve(kGetField, firstSCurve, param.fieldNumber, param.fieldType, false, null)
@@ -2438,16 +2437,16 @@ export class PdPlant extends PdStreamableObject {
     }
     
     streamDataWithFiler(filer: PdFiler, cvir: PdClassAndVersionInformationRecord): void {
-        let tdoSeedlingLeaf: KfObject3d
-        let tdoLeaf: KfObject3d
-        let tdoStipule: KfObject3d
-        let tdoAxillaryBud: KfObject3d
-        let tdoInflorBractFemale: KfObject3d
-        let tdoInflorBractMale: KfObject3d
-        let tdoFruit: KfObject3d
-        let tdoRoot: KfObject3d
-        let femaleFlowerTdos: KfObject3d[] /* kHighestFloralPartConstant + 1 */
-        let maleFlowerTdos: KfObject3d[] /* kHighestFloralPartConstant + 1 */
+        let tdoSeedlingLeaf: KfObject3D
+        let tdoLeaf: KfObject3D
+        let tdoStipule: KfObject3D
+        let tdoAxillaryBud: KfObject3D
+        let tdoInflorBractFemale: KfObject3D
+        let tdoInflorBractMale: KfObject3D
+        let tdoFruit: KfObject3D
+        let tdoRoot: KfObject3D
+        let femaleFlowerTdos: KfObject3D[] /* kHighestFloralPartConstant + 1 */
+        let maleFlowerTdos: KfObject3D[] /* kHighestFloralPartConstant + 1 */
         let traverser: PdTraverser
         let hasFirstPhytomer: boolean
         let partType: int

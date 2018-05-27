@@ -317,6 +317,17 @@ export class PdDomain {
         this.plantDrawScaleWhenDrawingCopy_PixelsPerMm = 1.0
     }
 
+    // TODO: Remove stub plantDrawOffset_mm
+    plantDrawOffset_mm(): SinglePoint {
+        return new SinglePoint(0, 0)
+    }
+    
+    // TODO: Remove stub plantDrawScale_PixelsPerMm
+    plantDrawScale_PixelsPerMm(): float {
+        return 1.0
+    }
+    
+
     /* TODO Implement PdDomain methods
     
     windowsDirectory(): string {
