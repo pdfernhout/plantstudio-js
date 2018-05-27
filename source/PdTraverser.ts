@@ -1,5 +1,12 @@
-// unit Utravers
+// PdTraverser was unit Utravers
 
+import { float, int, TColorRef, short, long } from "./common";
+import { max, safedivExcept, min } from "./umath";
+import { messageForExceptionType, PdFiler, MainForm, PdInternode, PdPlantPart, kExportPartLast } from "./temporary";
+import { PdPlant } from "./PdPlant";
+import { TPoint } from "./TPoint";
+
+/* TODO: Remove unneeded imports
 from conversion_common import *
 import ubreedr
 import utimeser
@@ -13,6 +20,7 @@ import ufiler
 import upart
 import uplant
 import delphi_compatability
+*/
 
 // const
 const kTraverseNone = 0
@@ -86,26 +94,26 @@ function linearGrowthWithFactorResult(current: float, optimal: float, minDays: i
     result = 0.0
     try {
         amountNeeded = optimal - current
-        maxPossible = umath.safedivExcept(optimal, minDays, optimal)
-        amountNeeded = umath.max(0.0, umath.min(amountNeeded, maxPossible))
+        maxPossible = safedivExcept(optimal, minDays, optimal)
+        amountNeeded = max(0.0, min(amountNeeded, maxPossible))
         result = amountNeeded * growthFactor
-    } catch (Exception e) {
-        usupport.messageForExceptionType(e, "linearGrowthWithFactorResult")
+    } catch (e) {
+        messageForExceptionType(e, "linearGrowthWithFactorResult")
     }
     return result
 }
 
-function linearGrowthWithFactor(current: float, optimal: float, minDays: int, growthFactor: float): void {
+function linearGrowthWithFactor(current: float, optimal: float, minDays: int, growthFactor: float): float {
     let amountNeeded: float
     let maxPossible: float
     
     try {
         amountNeeded = optimal - current
-        maxPossible = umath.safedivExcept(optimal, minDays, optimal)
-        amountNeeded = umath.max(0.0, umath.min(amountNeeded, maxPossible))
+        maxPossible = safedivExcept(optimal, minDays, optimal)
+        amountNeeded = max(0.0, min(amountNeeded, maxPossible))
         current = current + amountNeeded * growthFactor
-    } catch (Exception e) {
-        usupport.messageForExceptionType(e, "linearGrowthWithFactor")
+    } catch (e) {
+        messageForExceptionType(e, "linearGrowthWithFactor")
     }
     return current
 }
@@ -118,26 +126,26 @@ function linearGrowthResult(current: float, optimal: float, minDays: int): float
     result = 0.0
     try {
         amountNeeded = optimal - current
-        maxPossible = umath.safedivExcept(optimal, minDays, optimal)
-        amountNeeded = umath.max(0.0, umath.min(amountNeeded, maxPossible))
+        maxPossible = safedivExcept(optimal, minDays, optimal)
+        amountNeeded = max(0.0, min(amountNeeded, maxPossible))
         result = amountNeeded
-    } catch (Exception e) {
-        usupport.messageForExceptionType(e, "linearGrowthResult")
+    } catch (e) {
+        messageForExceptionType(e, "linearGrowthResult")
     }
     return result
 }
 
-function linearGrowth(current: float, optimal: float, minDays: int): void {
+function linearGrowth(current: float, optimal: float, minDays: int): float {
     let amountNeeded: float
     let maxPossible: float
     
     try {
         amountNeeded = optimal - current
-        maxPossible = umath.safedivExcept(optimal, minDays, optimal)
-        amountNeeded = umath.max(0.0, umath.min(amountNeeded, maxPossible))
+        maxPossible = safedivExcept(optimal, minDays, optimal)
+        amountNeeded = max(0.0, min(amountNeeded, maxPossible))
         current = current + amountNeeded
-    } catch (Exception e) {
-        usupport.messageForExceptionType(e, "linearGrowth")
+    } catch (e) {
+        messageForExceptionType(e, "linearGrowth")
     }
     return current
 }
@@ -150,10 +158,8 @@ export class PdPlantStatistics {
     deadBiomass_pctMPB: float[] /* kStatisticsPartTypeLast + 1 */ = Array(kStatisticsPartTypeLast + 1)
     
     // ---------------------------------------------------------------------------------- statistics object 
-    zeroAllFields(): void {
-        let i: short
-        
-        for (i = 0; i <= kStatisticsPartTypeLast; i++) {
+    zeroAllFields(): void {   
+        for (let i = 0; i <= kStatisticsPartTypeLast; i++) {
             this.count[i] = 0
             this.liveBiomass_pctMPB[i] = 0.0
             this.deadBiomass_pctMPB[i] = 0.0
@@ -175,17 +181,19 @@ export class PdPlantStatistics {
 }
 
 export class PdTraverser {
-    plant: PdPlant = new PdPlant()
-    filer: PdFiler = new PdFiler()
-    currentPhytomer: TObject = new TObject()
+    plant: PdPlant
+    filer: PdFiler
+    // TODO: currentPhytomer was TObject -- is typing as PdInternode OK here?
+    currentPhytomer: PdInternode
     point: TPoint = new TPoint()
     total: float = 0.0
     fractionOfPotentialBiomass: float = 0.0
     ageOfYoungestPhytomer: long = 0
     mode: short = 0
     finished: boolean = false
-    foundPlantPart: PdPlantPart = new PdPlantPart()
-    foundList: TList = new TList()
+    foundPlantPart: PdPlantPart | null = null
+    // TODO: improve typing for foundList 
+    foundList: any[] = []
     statistics: PdPlantStatistics = new PdPlantStatistics()
     totalPlantParts: long = 0
     total3DExportPointsIn3DObjects: long = 0
@@ -195,11 +203,10 @@ export class PdTraverser {
     plantPartsDrawnAtStart: long = 0
     partID: long = 0
     totalMemorySize: long = 0
-    exportTypeCounts: long[] /* kExportPartLast + 1 */ = Array(kExportPartLast + 1)
+    exportTypeCounts: long[] = Array(kExportPartLast + 1)
     
     // ---------------------------------------------------------------------------------- traversing object 
-    createWithPlant(thePlant: PdPlant): void {
-        this.create
+    constructor(thePlant: PdPlant) {
         this.plant = thePlant
     }
     
@@ -211,10 +218,10 @@ export class PdTraverser {
         this.foundPlantPart = null
         this.totalPlantParts = 0
         if (this.currentPhytomer !== null) {
-            uintern.PdInternode(this.currentPhytomer).traversingDirection = kTraverseLeft
-            uintern.PdInternode(this.currentPhytomer).traverseActivity(this.mode, this)
+            this.currentPhytomer.traversingDirection = kTraverseLeft
+            this.currentPhytomer.traverseActivity(this.mode, this)
             //reset afterwards in case read in differently
-            uintern.PdInternode(this.currentPhytomer).traversingDirection = kTraverseLeft
+            this.currentPhytomer.traversingDirection = kTraverseLeft
         }
     }
     
@@ -224,15 +231,14 @@ export class PdTraverser {
     }
     
     traversePlant(traversalCount: long): void {
-        let i: long
-        let lastPhytomer: PdInternode
-        let phytomerTraversing: PdInternode
-        
         if ((this.currentPhytomer === null)) {
             return
         }
-        phytomerTraversing = uintern.PdInternode(this.currentPhytomer)
-        i = 0
+        if (!this.plant.turtle) {
+            throw new Error("null turtle in traversePlant")
+        }
+        let phytomerTraversing: PdInternode = this.currentPhytomer
+        let i = 0
         while (i <= traversalCount) {
             if (this.finished) {
                 return
@@ -246,7 +252,7 @@ export class PdTraverser {
                         }
                         phytomerTraversing.leftBranchPlantPart.traverseActivity(this.mode, this)
                         if ((phytomerTraversing.leftBranchPlantPart.isPhytomer())) {
-                            phytomerTraversing = uintern.PdInternode(phytomerTraversing.leftBranchPlantPart)
+                            phytomerTraversing = phytomerTraversing.leftBranchPlantPart
                             phytomerTraversing.traversingDirection = kTraverseLeft
                         } else if ((this.mode === kActivityDraw)) {
                             this.plant.turtle.pop()
@@ -261,7 +267,7 @@ export class PdTraverser {
                         }
                         phytomerTraversing.rightBranchPlantPart.traverseActivity(this.mode, this)
                         if ((phytomerTraversing.rightBranchPlantPart.isPhytomer())) {
-                            phytomerTraversing = uintern.PdInternode(phytomerTraversing.rightBranchPlantPart)
+                            phytomerTraversing = phytomerTraversing.rightBranchPlantPart
                             phytomerTraversing.traversingDirection = kTraverseLeft
                         } else if ((this.mode === kActivityDraw)) {
                             this.plant.turtle.pop()
@@ -277,7 +283,7 @@ export class PdTraverser {
                         }
                         phytomerTraversing.nextPlantPart.traverseActivity(this.mode, this)
                         if ((phytomerTraversing.nextPlantPart.isPhytomer())) {
-                            phytomerTraversing = uintern.PdInternode(phytomerTraversing.nextPlantPart)
+                            phytomerTraversing = phytomerTraversing.nextPlantPart
                             phytomerTraversing.traversingDirection = kTraverseLeft
                         } else if ((this.mode === kActivityDraw)) {
                             this.plant.turtle.pop()
@@ -286,10 +292,10 @@ export class PdTraverser {
                     break
                 case kTraverseDone:
                     phytomerTraversing.traversingDirection = kTraverseNone
-                    lastPhytomer = phytomerTraversing
+                    const lastPhytomer: PdInternode = phytomerTraversing
                     phytomerTraversing = phytomerTraversing.phytomerAttachedTo
                     if ((this.mode === kActivityFree)) {
-                        lastPhytomer.free
+                        // TODO: Use or remove: lastPhytomer.free
                         if (phytomerTraversing !== null) {
                             if ((phytomerTraversing.traversingDirection === kTraverseLeft + 1)) {
                                 phytomerTraversing.leftBranchPlantPart = null
@@ -314,8 +320,7 @@ export class PdTraverser {
                     }
                     break
                 case kTraverseNone:
-                    throw new GeneralException.create("Problem: kTraverseNone encountered in method PdTraverser.traversePlant.")
-                    break
+                    throw new Error("Problem: kTraverseNone encountered in method PdTraverser.traversePlant.")
             }
             if ((traversalCount !== 0)) {
                 i += 1
@@ -324,8 +329,8 @@ export class PdTraverser {
                 if (this.totalPlantParts % 4 !== 0) {
                     continue
                 }
-                if ((umain.MainForm !== null) && (umain.MainForm.drawing)) {
-                    umain.MainForm.showDrawProgress(this.plantPartsDrawnAtStart + this.totalPlantParts)
+                if ((MainForm !== null) && (MainForm.drawing)) {
+                    MainForm.showDrawProgress(this.plantPartsDrawnAtStart + this.totalPlantParts)
                 }
             }
         }

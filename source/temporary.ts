@@ -2,6 +2,7 @@
 
 import { float, ColorDefs, short, int, StrToFloat } from "./common"
 import { TRect } from "./TRect";
+import { PdTraverser } from "./PdTraverser";
 
 // TODO: Implement darkerColorWithSubtraction from usupport
 export function darkerColorWithSubtraction(a: number, b: number) {
@@ -134,7 +135,8 @@ export const MainForm = {
     isSelected: (something: any) => false,
     focusedPlant: () => null,
     plantsAsTextMemo: [],
-    updateParameterValuesWithUpdateListForPlant: (something: any, updateList: any[]) => {}
+    updateParameterValuesWithUpdateListForPlant: (something: any, updateList: any[]) => {},
+    showDrawProgress: (value: number) => {},
 }
 
 // TOFO: Fix PdBitmap stub
@@ -145,3 +147,22 @@ export class PdBitmap {
     TransparentMode = <any>null // delphi_compatability.TTransparentMode.tmFixed
     TransparentColor = ColorDefs.clBlack // domain.options.backgroundColor
 }
+
+// TODO: Fix PdInternode stub
+export class PdInternode {
+    traversingDirection: number
+    phytomerAttachedTo: PdInternode
+    leftBranchPlantPart: PdInternode | null
+    rightBranchPlantPart: PdInternode | null
+    nextPlantPart: PdInternode | null
+    isPhytomer() { return true }
+    traverseActivity(mode: number, traverser: PdTraverser) {}
+}
+
+// TODO: Fix PdPlantPart stub
+export class PdPlantPart {
+    
+}
+
+// TODO: Fix kExportPartLast copied from U3dexport
+export const kExportPartLast = 33
