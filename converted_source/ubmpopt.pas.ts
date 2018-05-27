@@ -198,6 +198,7 @@ export class TBitmapOptionsForm {
             case kSavingDrawingToJpeg:
                 this.Close.Caption = "&Save"
                 break
+        }
         this.helpButton.Hint = "Get help with setting " + lowercase(displayString) + " picture options."
         this.cancel.Hint = "Close this window and don't " + lowercase(displayString) + " a picture."
         this.Close.Hint = displayString + " the selected picture using the options specified in this window."
@@ -346,6 +347,7 @@ export class TBitmapOptionsForm {
             case delphi_compatability.TPixelFormat.pf32bit:
                 colorBits = 32
                 break
+        }
         this.megabytesOfMemoryNeeded = (1.0 * outputPixelWidth * outputPixelHeight * (colorBits / 8) + FIX_sizeof(delphi_compatability.TBitmapInfo)) / (1024 * 1024)
     }
     
@@ -441,6 +443,7 @@ export class TBitmapOptionsForm {
                 case udomain.kIncludeDrawingAreaContents:
                     this.useDrawingAreaContents.Checked = true
                     break
+            }
         } else if (this.transferDirection === kTransferSave) {
             this.options.exportType = this.currentExportOption()
         }
@@ -691,6 +694,7 @@ export class TBitmapOptionsForm {
                     newHeight_in = umath.safedivExcept(newWidth_in, this.aspectRatio, newHeight_in)
                 }
                 break
+        }
         // bound size at page, using left/top margins already set
         maxWidth_in = this.wholePageWidth_in - this.printLeftMargin_in - this.printMinMarginRight_in
         maxHeight_in = this.wholePageHeight_in - this.printTopMargin_in - this.printMinMarginBottom_in
@@ -839,6 +843,7 @@ export class TBitmapOptionsForm {
                     case kSavingDrawingToBmp:
                         insertString = "save"
                         break
+                }
                 if (MessageDialog("You are about to " + insertString + " a " + usupport.digitValueString(this.megabytesOfMemoryNeeded) + " MB bitmap." + chr(13) + "This could place stress on your system." + chr(13) + "We recommend closing any non-essential programs." + chr(13) + "Also, choosing fewer colors or a smaller picture will use less memory." + chr(13) + chr(13) + "To proceed, click OK. To go back and make changes, click Cancel.", mtWarning, {mbOK, mbCancel, }, 0) === delphi_compatability.IDCANCEL) {
                     return
                 }
@@ -985,6 +990,7 @@ export class TBitmapOptionsForm {
             case kSavingDrawingToJpeg:
                 result = "Save"
                 break
+        }
         return result
     }
     
@@ -1100,6 +1106,7 @@ export class TBitmapOptionsForm {
             case kSavingDrawingToJpeg:
                 delphi_compatability.Application.HelpJump("Saving_pictures")
                 break
+        }
     }
     
     FormKeyPress(Sender: TObject, Key: char): void {

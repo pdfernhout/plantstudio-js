@@ -321,6 +321,7 @@ export class PdInternode {
                 default:
                     throw new GeneralException.create("Problem: Unhandled mode in method PdInternode.traverseActivity.")
                     break
+            }
         } catch (Exception e) {
             usupport.messageForExceptionType(e, "PdInternode.traverseActivity")
         }
@@ -653,6 +654,7 @@ export class PdInternode {
                 case uplant.kPartTypeLeaf:
                     plantPart.streamUsingFiler(filer)
                     break
+            }
         } else if (filer.isReading()) {
             partType = filer.streamSmallint(partType)
             switch (partType) {
@@ -686,6 +688,7 @@ export class PdInternode {
                 default:
                     GeneralException.create("PdInternode: unknown plant part type " + IntToStr(partType))
                     break
+            }
         }
     }
     

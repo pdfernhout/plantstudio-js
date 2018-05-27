@@ -1460,6 +1460,7 @@ export class PdDomain {
             default:
                 throw new GeneralException.create("Problem: Invalid type in PdDomain.sectionNumberFor3DExportType.")
                 break
+        }
         return result
     }
     

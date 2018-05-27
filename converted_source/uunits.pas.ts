@@ -483,6 +483,7 @@ function Convert(unitSet: int, unitFrom: int, unitTo: int, value: float): float 
                     case kLengthMiles:
                         base = value * mi_to_ft * ft_to_in * in_to_cm * cm_to_m
                         break
+                }
                 switch (unitTo) {
                     case kLengthMicrons:
                         result = base * m_to_microns
@@ -511,6 +512,7 @@ function Convert(unitSet: int, unitFrom: int, unitTo: int, value: float): float 
                     case kLengthMiles:
                         result = base * m_to_cm * cm_to_in * in_to_ft * ft_to_mi
                         break
+                }
                 break
             case kAngle:
                 switch (unitFrom) {
@@ -521,6 +523,7 @@ function Convert(unitSet: int, unitFrom: int, unitTo: int, value: float): float 
                     case kAngleDegrees:
                         base = value * deg_to_rad
                         break
+                }
                 switch (unitTo) {
                     case kAngleRadians:
                         result = base
@@ -528,6 +531,7 @@ function Convert(unitSet: int, unitFrom: int, unitTo: int, value: float): float 
                     case kAngleDegrees:
                         result = base * rad_to_deg
                         break
+                }
                 break
             case kTemperature:
                 switch (unitFrom) {
@@ -538,6 +542,7 @@ function Convert(unitSet: int, unitFrom: int, unitTo: int, value: float): float 
                     case kTemperatureDegreesF:
                         base = (value - 32.0) / 1.8
                         break
+                }
                 switch (unitTo) {
                     case kTemperatureDegreesC:
                         result = base
@@ -545,6 +550,7 @@ function Convert(unitSet: int, unitFrom: int, unitTo: int, value: float): float 
                     case kTemperatureDegreesF:
                         result = base * 1.8 + 32.0
                         break
+                }
                 break
             case kMass:
                 switch (unitFrom) {
@@ -570,6 +576,7 @@ function Convert(unitSet: int, unitFrom: int, unitTo: int, value: float): float 
                     case kMassEnglishTons:
                         base = value * T_to_lb * lb_to_oz * oz_to_g * g_to_kg
                         break
+                }
                 switch (unitTo) {
                     case kMassMilligrams:
                         result = base * kg_to_g * g_to_mg
@@ -592,6 +599,7 @@ function Convert(unitSet: int, unitFrom: int, unitTo: int, value: float): float 
                     case kMassEnglishTons:
                         result = base * kg_to_g * g_to_oz * oz_to_lb * lb_to_T
                         break
+                }
                 break
             case kArea:
                 switch (unitFrom) {
@@ -617,6 +625,7 @@ function Convert(unitSet: int, unitFrom: int, unitTo: int, value: float): float 
                     case kAreaSquareMiles:
                         base = value * mi2_to_ac * ac_to_ft2 * ft2_to_m2
                         break
+                }
                 switch (unitTo) {
                     case kAreaSquareMeters:
                         result = base
@@ -639,6 +648,7 @@ function Convert(unitSet: int, unitFrom: int, unitTo: int, value: float): float 
                     case kAreaSquareMiles:
                         result = base * m2_to_ft2 * ft2_to_ac * ac_to_mi2
                         break
+                }
                 break
             case kMassOverArea:
                 switch (unitFrom) {
@@ -673,6 +683,7 @@ function Convert(unitSet: int, unitFrom: int, unitTo: int, value: float): float 
                     case kMassOverAreaOuncesPSquareFoot:
                         base = value * (oz_to_g * g_to_kg) / (ft2_to_m2 * m2_to_ha)
                         break
+                }
                 switch (unitTo) {
                     case kMassOverAreaKilogramsPHectare:
                         result = base
@@ -704,6 +715,7 @@ function Convert(unitSet: int, unitFrom: int, unitTo: int, value: float): float 
                     case kMassOverAreaOuncesPSquareFoot:
                         result = base * (kg_to_g * g_to_oz) / (ha_to_m2 * m2_to_ft2)
                         break
+                }
                 break
             case kRadiation:
                 switch (unitFrom) {
@@ -729,6 +741,7 @@ function Convert(unitSet: int, unitFrom: int, unitTo: int, value: float): float 
                     case kRadiationCaloriesPerSquareFoot:
                         base = value * cal_to_joule * joule_to_MJ / (ft2_to_m2)
                         break
+                }
                 switch (unitTo) {
                     case kRadiationMegaJoulesPSquareMeter:
                         result = base
@@ -751,6 +764,7 @@ function Convert(unitSet: int, unitFrom: int, unitTo: int, value: float): float 
                     case kRadiationCaloriesPerSquareFoot:
                         result = base * MJ_to_joule * joule_to_cal / (m2_to_ft2)
                         break
+                }
                 break
             case kVolume:
                 switch (unitFrom) {
@@ -773,6 +787,7 @@ function Convert(unitSet: int, unitFrom: int, unitTo: int, value: float): float 
                     case kVolumeOunces:
                         base = value * floz_to_qt * qt_to_l
                         break
+                }
                 switch (unitTo) {
                     case kVolumeLiters:
                         result = base
@@ -792,6 +807,7 @@ function Convert(unitSet: int, unitFrom: int, unitTo: int, value: float): float 
                     case kVolumeOunces:
                         result = base * l_to_qt * qt_to_floz
                         break
+                }
                 break
             case kDepthOfWater:
                 switch (unitFrom) {
@@ -802,6 +818,7 @@ function Convert(unitSet: int, unitFrom: int, unitTo: int, value: float): float 
                     case kDepthOfWaterInches:
                         base = value * in_to_cm * cm_to_mm
                         break
+                }
                 switch (unitTo) {
                     case kDepthOfWaterMillimeters:
                         result = base
@@ -809,6 +826,7 @@ function Convert(unitSet: int, unitFrom: int, unitTo: int, value: float): float 
                     case kDepthOfWaterInches:
                         result = base * mm_to_cm * cm_to_in
                         break
+                }
                 break
             case kVelocity:
                 switch (unitFrom) {
@@ -828,6 +846,7 @@ function Convert(unitSet: int, unitFrom: int, unitTo: int, value: float): float 
                     case kVelocityInchesPHour:
                         base = value * (in_to_cm * cm_to_m) / (hr_to_min * min_to_sec)
                         break
+                }
                 switch (unitTo) {
                     case kVelocityMetersPSecond:
                         result = base
@@ -844,6 +863,7 @@ function Convert(unitSet: int, unitFrom: int, unitTo: int, value: float): float 
                     case kVelocityInchesPHour:
                         result = base * (m_to_cm * cm_to_in) / (sec_to_min * min_to_hr)
                         break
+                }
                 break
             case kPressure:
                 switch (unitFrom) {
@@ -869,6 +889,7 @@ function Convert(unitSet: int, unitFrom: int, unitTo: int, value: float): float 
                     case kPressurePoundsPSquareInch:
                         base = value * psi_to_pa
                         break
+                }
                 switch (unitTo) {
                     case kPressurePascals:
                         result = base
@@ -891,6 +912,7 @@ function Convert(unitSet: int, unitFrom: int, unitTo: int, value: float): float 
                     case kPressurePoundsPSquareInch:
                         result = base * pa_to_psi
                         break
+                }
                 break
             case kDensity:
                 switch (unitFrom) {
@@ -910,6 +932,7 @@ function Convert(unitSet: int, unitFrom: int, unitTo: int, value: float): float 
                     case kDensityPoundsPAcreFoot:
                         base = value * (lb_to_oz * oz_to_g * g_to_kg * kg_to_t) / (acft_to_ft3 * ft3_to_m3)
                         break
+                }
                 switch (unitTo) {
                     case kDensityMetricTonsPCubicMeter:
                         result = base
@@ -926,6 +949,7 @@ function Convert(unitSet: int, unitFrom: int, unitTo: int, value: float): float 
                     case kDensityPoundsPAcreFoot:
                         result = base * (t_to_kg * kg_to_g * g_to_oz * oz_to_lb) / (m3_to_ft3 * ft3_to_acft)
                         break
+                }
                 break
             case kConcentration:
                 switch (unitFrom) {
@@ -945,6 +969,7 @@ function Convert(unitSet: int, unitFrom: int, unitTo: int, value: float): float 
                     case kConcentrationOuncesPEnglishTon:
                         base = value * (oz_to_g) / (T_to_lb * lb_to_oz * oz_to_g * g_to_kg * kg_to_t)
                         break
+                }
                 switch (unitTo) {
                     case kConcentrationGramsPMetricTon:
                         result = base
@@ -961,11 +986,13 @@ function Convert(unitSet: int, unitFrom: int, unitTo: int, value: float): float 
                     case kConcentrationOuncesPEnglishTon:
                         result = base * (g_to_oz) / (t_to_kg * kg_to_g * g_to_oz * oz_to_lb * lb_to_T)
                         break
+                }
                 break
             default:
                 //non changing unit
                 result = value
                 break
+        }
     } catch (EOverflow e) {
         result = usupport.kMaxSingle
     } catch (EUnderflow e) {
@@ -1040,6 +1067,7 @@ function UnitStringForEnum(unitSetEnum: int, unitEnum: int): string {
                 default:
                     problem = true
                     break
+            }
             break
         case kAngle:
             switch (unitEnum) {
@@ -1052,6 +1080,7 @@ function UnitStringForEnum(unitSetEnum: int, unitEnum: int): string {
                 default:
                     problem = true
                     break
+            }
             break
         case kTemperature:
             switch (unitEnum) {
@@ -1064,6 +1093,7 @@ function UnitStringForEnum(unitSetEnum: int, unitEnum: int): string {
                 default:
                     problem = true
                     break
+            }
             break
         case kMass:
             switch (unitEnum) {
@@ -1091,6 +1121,7 @@ function UnitStringForEnum(unitSetEnum: int, unitEnum: int): string {
                 default:
                     problem = true
                     break
+            }
             break
         case kArea:
             switch (unitEnum) {
@@ -1119,6 +1150,7 @@ function UnitStringForEnum(unitSetEnum: int, unitEnum: int): string {
                 default:
                     problem = true
                     break
+            }
             break
         case kMassOverArea:
             switch (unitEnum) {
@@ -1155,6 +1187,7 @@ function UnitStringForEnum(unitSetEnum: int, unitEnum: int): string {
                 default:
                     problem = true
                     break
+            }
             break
         case kRadiation:
             switch (unitEnum) {
@@ -1182,6 +1215,7 @@ function UnitStringForEnum(unitSetEnum: int, unitEnum: int): string {
                 default:
                     problem = true
                     break
+            }
             break
         case kVolume:
             switch (unitEnum) {
@@ -1206,6 +1240,7 @@ function UnitStringForEnum(unitSetEnum: int, unitEnum: int): string {
                 default:
                     problem = true
                     break
+            }
             break
         case kDepthOfWater:
             switch (unitEnum) {
@@ -1218,6 +1253,7 @@ function UnitStringForEnum(unitSetEnum: int, unitEnum: int): string {
                 default:
                     problem = true
                     break
+            }
             break
         case kVelocity:
             switch (unitEnum) {
@@ -1239,6 +1275,7 @@ function UnitStringForEnum(unitSetEnum: int, unitEnum: int): string {
                 default:
                     problem = true
                     break
+            }
             break
         case kPressure:
             switch (unitEnum) {
@@ -1266,6 +1303,7 @@ function UnitStringForEnum(unitSetEnum: int, unitEnum: int): string {
                 default:
                     problem = true
                     break
+            }
             break
         case kDensity:
             switch (unitEnum) {
@@ -1287,6 +1325,7 @@ function UnitStringForEnum(unitSetEnum: int, unitEnum: int): string {
                 default:
                     problem = true
                     break
+            }
             break
         case kConcentration:
             switch (unitEnum) {
@@ -1308,6 +1347,7 @@ function UnitStringForEnum(unitSetEnum: int, unitEnum: int): string {
                 default:
                     problem = true
                     break
+            }
             break
         case kNonChangingUnitHundredsOfMolesPKilogram:
             result = "cmol/kg"
@@ -1358,6 +1398,7 @@ function UnitStringForEnum(unitSetEnum: int, unitEnum: int): string {
             result = "(no unit)"
             //  raise Exception.create('Unsupported unit set: ' + intToStr(unitSetEnum));  
             break
+    }
     if (problem) {
         //  raise Exception.create('Unsupported unit ' + intToStr(unitEnum)
         //      + ' for unit set ' + intToStr(unitSetEnum)); 
@@ -1528,6 +1569,7 @@ function GetNextUnitEnumInUnitSet(unitSet: int, currentUnit: int): int {
             // non-changing unit set 
             result = currentUnit
             break
+    }
     return result
 }
 
@@ -1635,6 +1677,7 @@ function GetPreviousUnitEnumInUnitSet(unitSet: int, currentUnit: int): int {
             // non-changing unit set 
             result = currentUnit
             break
+    }
     return result
 }
 
@@ -1738,6 +1781,7 @@ function GetUnitSetString(unitSet: int): string {
             result = ""
             throw new GeneralException.create("Problem: Unsupported unit set " + IntToStr(unitSet) + " in method GetUnitSetString.")
             break
+    }
     return result
 }
 
@@ -1841,6 +1885,7 @@ function DisplayUnitSetString(unitSet: int): string {
             result = ""
             throw new GeneralException.create("Problem: Unsupported unit set " + IntToStr(unitSet) + " in method DisplayUnitSetString.")
             break
+    }
     return result
 }
 
@@ -1898,6 +1943,7 @@ function GetLastUnitEnumInUnitSet(unitSet: int): int {
         default:
             result = 2
             break
+    }
     return result
 }
 
@@ -1925,6 +1971,7 @@ function unitIsMetric(unitSetEnum: int, unitEnum: int): boolean {
                 case kLengthKilometers:
                     result = true
                     break
+            }
             break
         case kAngle:
             result = true
@@ -1948,6 +1995,7 @@ function unitIsMetric(unitSetEnum: int, unitEnum: int): boolean {
                 case kMassMetricTons:
                     result = true
                     break
+            }
             break
         case kArea:
             switch (unitEnum) {
@@ -1960,6 +2008,7 @@ function unitIsMetric(unitSetEnum: int, unitEnum: int): boolean {
                 case kAreaSquareKilometers:
                     result = true
                     break
+            }
             break
         case kMassOverArea:
             switch (unitEnum) {
@@ -1978,6 +2027,7 @@ function unitIsMetric(unitSetEnum: int, unitEnum: int): boolean {
                 case kMassOverAreaGramsPSquareCentimeter:
                     result = true
                     break
+            }
             break
         case kRadiation:
             switch (unitEnum) {
@@ -1993,6 +2043,7 @@ function unitIsMetric(unitSetEnum: int, unitEnum: int): boolean {
                 case kRadiationLangleys:
                     result = true
                     break
+            }
             break
         case kVolume:
             switch (unitEnum) {
@@ -2005,6 +2056,7 @@ function unitIsMetric(unitSetEnum: int, unitEnum: int): boolean {
                 case kVolumeCubicMeters:
                     result = true
                     break
+            }
             break
         case kDepthOfWater:
             if (unitEnum === kDepthOfWaterMillimeters) {
@@ -2019,6 +2071,7 @@ function unitIsMetric(unitSetEnum: int, unitEnum: int): boolean {
                 case kVelocityMillimetersPHour:
                     result = true
                     break
+            }
             break
         case kPressure:
             switch (unitEnum) {
@@ -2034,6 +2087,7 @@ function unitIsMetric(unitSetEnum: int, unitEnum: int): boolean {
                 case kPressureKilogramsPSquareCentimeter:
                     result = true
                     break
+            }
             break
         case kDensity:
             switch (unitEnum) {
@@ -2046,6 +2100,7 @@ function unitIsMetric(unitSetEnum: int, unitEnum: int): boolean {
                 case kDensityMetricTonsPCubicMeter:
                     result = true
                     break
+            }
             break
         case kConcentration:
             switch (unitEnum) {
@@ -2058,6 +2113,7 @@ function unitIsMetric(unitSetEnum: int, unitEnum: int): boolean {
                 case kConcentrationMilligramsPMetricTon:
                     result = true
                     break
+            }
             break
         case kNonChangingUnitHundredsOfMolesPKilogram:
             result = true
@@ -2083,6 +2139,7 @@ function unitIsMetric(unitSetEnum: int, unitEnum: int): boolean {
         case kNonChangingUnitCubicMetersPSecond:
             result = true
             break
+    }
     return result
 }
 

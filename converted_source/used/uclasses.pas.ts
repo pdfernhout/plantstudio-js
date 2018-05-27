@@ -35,6 +35,7 @@ function CreateStreamableObjectFromClassAndVersionInformation(cvir: PdClassAndVe
             throw new GeneralException.create("Problem: Unknown class " + IntToStr(cvir.classNumber))
             result = null
             break
+    }
     return result
 }
 

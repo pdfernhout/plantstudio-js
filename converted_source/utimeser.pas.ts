@@ -111,6 +111,7 @@ export class TTimeSeriesForm {
             case udomain.kDrawCustom:
                 this.TimeSeriesMenuOptionsCustomDraw.checked = true
                 break
+        }
         //to get redo messages
         umain.MainForm.updateMenusForUndoRedo()
         this.updateForChangeToDomainOptions()

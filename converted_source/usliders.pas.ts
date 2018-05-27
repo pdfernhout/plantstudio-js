@@ -131,6 +131,7 @@ export class KfSlider {
             default:
                 newValue = this.currentValue
                 break
+        }
         this.Invalidate()
         this.Refresh()
         if (this.setValue(newValue) && delphi_compatability.Assigned(this.FOnKeyDown)) {

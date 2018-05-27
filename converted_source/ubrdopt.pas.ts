@@ -161,6 +161,7 @@ export class TBreedingOptionsForm {
             case ubrstrat.kFromPlantWithGreaterWeightForSectionIfEqualChooseRandomly:
                 result = this.copyBasedOnWeightsIfEqualChooseRandomly
                 break
+        }
         return result
     }
     

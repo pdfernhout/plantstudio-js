@@ -316,6 +316,7 @@ export class PdTraverser {
                 case kTraverseNone:
                     throw new GeneralException.create("Problem: kTraverseNone encountered in method PdTraverser.traversePlant.")
                     break
+            }
             if ((traversalCount !== 0)) {
                 i += 1
             }

@@ -114,6 +114,7 @@ export class PdParameter {
             default:
                 throw new GeneralException.create("Problem: Unexpected index type in method PdParameter.indexCount.")
                 break
+        }
         return result
     }
     
@@ -249,6 +250,7 @@ export class PdParameterManager {
             default:
                 result = "not in list"
                 break
+        }
         return result
     }
     
@@ -267,6 +269,7 @@ export class PdParameterManager {
             default:
                 result = "not in list"
                 break
+        }
         return result
     }
     

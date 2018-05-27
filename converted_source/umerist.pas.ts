@@ -404,6 +404,7 @@ export class PdMeristem {
                 default:
                     throw new GeneralException.create("Problem: Unhandled mode in method PdMeristem.traverseActivity.")
                     break
+            }
         } catch (Exception e) {
             usupport.messageForExceptionType(e, "PdMeristem.traverseActivity")
         }

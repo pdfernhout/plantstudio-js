@@ -138,6 +138,7 @@ export class PdSmallintParameterPanel {
                         return key
                     }
                     break
+            }
         }
         if ((this.selectedItemIndex === kItemValueText) && (key === delphi_compatability.VK_RETURN)) {
             key = 0

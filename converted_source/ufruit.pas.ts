@@ -111,6 +111,7 @@ export class PdFlowerFruit {
                     }
                     this.daysAccumulatingFruitBiomass += 1
                     break
+            }
         } catch (Exception e) {
             usupport.messageForExceptionType(e, "PdFlowerFruit.nextDay")
         }
@@ -179,6 +180,7 @@ export class PdFlowerFruit {
                                 traverser.total = traverser.total + this.biomassDemand_pctMPB
                             }
                             break
+                    }
                     break
                 case utravers.kActivityGrowVegetative:
                     break
@@ -200,6 +202,7 @@ export class PdFlowerFruit {
                         case uplant.kStageRipeFruit:
                             this.propFullSize = (umath.min(1.0, umath.safedivExcept(this.totalBiomass_pctMPB(), this.plant.pFruit.optimalBiomass_pctMPB, 0.0)))
                             break
+                    }
                     break
                 case utravers.kActivityStartReproduction:
                     break
@@ -292,6 +295,7 @@ export class PdFlowerFruit {
                         default:
                             throw new GeneralException.create("Problem: Invalid fruit stage in method PdFlowerFruit.traverseActivity.")
                             break
+                    }
                     this.addToStatistics(traverser.statistics, utravers.kStatisticsPartTypeAllReproductive)
                     break
                 case utravers.kActivityCountPlantParts:
@@ -309,6 +313,7 @@ export class PdFlowerFruit {
                 default:
                     throw new GeneralException.create("Problem: Unhandled mode for plant draw activity in method PdFlowerFruit.traverseActivity.")
                     break
+            }
         } catch (Exception e) {
             usupport.messageForExceptionType(e, "PdFlowerFruit.traverseActivity")
         }
@@ -358,6 +363,7 @@ export class PdFlowerFruit {
             case uplant.kSepals:
                 result = u3dexport.kExportPartSepalsFemale
                 break
+        }
         return result
     }
     
@@ -401,6 +407,7 @@ export class PdFlowerFruit {
                         case uplant.kDrawOpeningFlower:
                             this.drawFlower(kDrawFlowerAsOpening)
                             break
+                    }
                     break
                 case uplant.kStageOpenFlower:
                     this.drawFlower(kDontDrawFlowerAsOpening)
@@ -420,6 +427,7 @@ export class PdFlowerFruit {
                     turtle.rotateZ(this.angleWithSway(this.plant.pFruit.tdoParams.zRotationBeforeDraw))
                     this.drawCircleOfTdos(this.plant.pFruit.tdoParams.object3D, this.plant.pFruit.tdoParams.faceColor, this.plant.pFruit.tdoParams.backfaceColor, this.plant.pFruit.tdoParams.pullBackAngle, scale, this.plant.pFruit.tdoParams.repetitions, this.plant.pFruit.tdoParams.radiallyArranged, kDrawTDOClosed, u3dexport.kExportPartRipeFruit)
                     break
+            }
             this.hasBeenDrawn = true
             turtle.pop()
         } catch (Exception e) {
@@ -591,6 +599,7 @@ export class PdFlowerFruit {
                     case uplant.kDrawOpeningFlower:
                         this.addFloralPartsCountsToTraverser(traverser)
                         break
+                }
                 break
             case uplant.kStageOpenFlower:
                 this.addFloralPartsCountsToTraverser(traverser)
@@ -617,6 +626,7 @@ export class PdFlowerFruit {
                     }
                 }
                 break
+        }
         // pedicel handled by inflorescence
     }
     
@@ -657,6 +667,7 @@ export class PdFlowerFruit {
                         case uplant.kSepals:
                             this.addExportMaterial(traverser, u3dexport.kExportPartSepalsFemale, u3dexport.kExportPartSepalsMale)
                             break
+                    }
                 }
             }
         }
@@ -703,6 +714,7 @@ export class PdFlowerFruit {
             case uplant.kStageRipeFruit:
                 result = this.plant.pFruit.tdoParams.object3D
                 break
+        }
         return result
     }
     

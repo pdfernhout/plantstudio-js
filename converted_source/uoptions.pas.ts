@@ -269,6 +269,7 @@ export class TOptionsForm {
             case 6:
                 ShowMessage("And thank YOU for trying PlantStudio!")
                 break
+        }
         this.messageShown += 1
     }
     

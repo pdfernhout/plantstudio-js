@@ -216,6 +216,7 @@ export class PdSCurveParameterPanel {
                 case kItemSCurveUnitText:
                     this.selectNextUnitInSet(delphi_compatability.TShiftStateEnum.ssShift in shift)
                     break
+            }
         } else if ((this.selectedItemIndex === kItemPoint1) || (this.selectedItemIndex === kItemPoint2)) {
             index = this.selectedItemIndex - kItemPoint1
             switch (key) {
@@ -231,6 +232,7 @@ export class PdSCurveParameterPanel {
                 case delphi_compatability.VK_UP:
                     this.adjustValueByPixels(index, 0, -increment)
                     break
+            }
         }
         return key
     }
@@ -809,6 +811,7 @@ export class PdSCurveParameterPanel {
             case 3:
                 result = "y2"
                 break
+        }
         return result
     }
     
@@ -883,6 +886,7 @@ export class PdSCurveParameterPanel {
                     result = 1.0
                 }
                 break
+        }
         return result
     }
     

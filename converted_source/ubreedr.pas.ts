@@ -147,6 +147,7 @@ export class TBreederForm {
             case udomain.kDrawCustom:
                 this.BreederMenuOptionsCustomDraw.checked = true
                 break
+        }
         this.updateForChangeToDomainOptions()
         this.updateMenusForChangeToGenerations()
         //to get redo messages
@@ -211,6 +212,7 @@ export class TBreederForm {
                 this.BreederMenuVariationNone.checked = true
                 this.variationNoneNumeric.Down = true
                 break
+        }
         this.BreederMenuVaryColors.checked = udomain.domain.breedingAndTimeSeriesOptions.mutateAndBlendColorValues
         this.varyColors.Down = udomain.domain.breedingAndTimeSeriesOptions.mutateAndBlendColorValues
         this.BreederMenuVary3DObjects.checked = udomain.domain.breedingAndTimeSeriesOptions.chooseTdosRandomlyFromCurrentLibrary

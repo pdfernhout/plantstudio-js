@@ -668,6 +668,7 @@ export class KfObject3D {
                     }
                 }
                 break
+        }
     }
     
     addTriangleWithVerticesABC(a: long, b: long, c: long): void {

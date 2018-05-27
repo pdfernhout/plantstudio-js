@@ -111,6 +111,7 @@ export class PdBooleanParameterPanel {
                 case kItemNo:
                     newValue = false
                     break
+            }
             if ((newValue !== this.currentValue)) {
                 this.negateValue()
             }

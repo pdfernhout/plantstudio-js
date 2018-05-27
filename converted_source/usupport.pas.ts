@@ -187,6 +187,7 @@ function bitsPerPixelForColorType(colorType: TPixelFormat): short {
             // just use largest
             result = 32
             break
+    }
     return result
 }
 
@@ -1061,6 +1062,7 @@ function nameStringForFileType(fileType: short): string {
         case kFileTypeLWO:
             result = "LWO"
             break
+    }
     return result
 }
 
@@ -1119,6 +1121,7 @@ function extensionForFileType(fileType: short): string {
         case kFileTypeLWO:
             result = "lwo"
             break
+    }
     return result
 }
 
@@ -1343,6 +1346,7 @@ function fileIsExportFile(fileType: short): boolean {
         case kFileTypeLWO:
             result = true
             break
+    }
     return result
 }
 

@@ -49,6 +49,7 @@ export class TNozzleOptionsForm {
             case udomain.kIncludeAllPlants:
                 this.useAllPlants.Checked = true
                 break
+        }
         this.resolutionEdit.Text = IntToStr(intround(this.options.resolution_pixelsPerInch))
         this.backgroundColorPanel.Color = this.options.backgroundColor
         this.colorType.ItemIndex = ord(this.options.colorType)

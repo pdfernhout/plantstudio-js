@@ -85,6 +85,7 @@ export class PdColorParameterPanel {
                         case kItemColorRect:
                             this.doMouseUp(this, delphi_compatability.TMouseButton.mbLeft, {}, this.colorRect.Left + 1, this.colorRect.Top + 1)
                             break
+                    }
                     break
                 case delphi_compatability.VK_END:
                     switch (this.selectedItemIndex) {
@@ -104,6 +105,7 @@ export class PdColorParameterPanel {
                         case kItemColorRect:
                             this.doMouseUp(this, delphi_compatability.TMouseButton.mbLeft, {}, this.colorRect.Left + 1, this.colorRect.Top + 1)
                             break
+                    }
                     break
                 case delphi_compatability.VK_DOWN:
                     switch (this.selectedItemIndex) {
@@ -123,6 +125,7 @@ export class PdColorParameterPanel {
                         case kItemColorRect:
                             this.doMouseUp(this, delphi_compatability.TMouseButton.mbLeft, {}, this.colorRect.Left + 1, this.colorRect.Top + 1)
                             break
+                    }
                     break
                 case delphi_compatability.VK_LEFT:
                     switch (this.selectedItemIndex) {
@@ -142,6 +145,7 @@ export class PdColorParameterPanel {
                         case kItemColorRect:
                             this.doMouseUp(this, delphi_compatability.TMouseButton.mbLeft, {}, this.colorRect.Left + 1, this.colorRect.Top + 1)
                             break
+                    }
                     break
                 case delphi_compatability.VK_UP:
                     switch (this.selectedItemIndex) {
@@ -161,6 +165,7 @@ export class PdColorParameterPanel {
                         case kItemColorRect:
                             this.doMouseUp(this, delphi_compatability.TMouseButton.mbLeft, {}, this.colorRect.Left + 1, this.colorRect.Top + 1)
                             break
+                    }
                     break
                 case delphi_compatability.VK_RIGHT:
                     switch (this.selectedItemIndex) {
@@ -180,6 +185,7 @@ export class PdColorParameterPanel {
                         case kItemColorRect:
                             this.doMouseUp(this, delphi_compatability.TMouseButton.mbLeft, {}, this.colorRect.Left + 1, this.colorRect.Top + 1)
                             break
+                    }
                     break
                 case delphi_compatability.VK_NEXT:
                     switch (this.selectedItemIndex) {
@@ -199,6 +205,7 @@ export class PdColorParameterPanel {
                         case kItemColorRect:
                             this.doMouseUp(this, delphi_compatability.TMouseButton.mbLeft, {}, this.colorRect.Left + 1, this.colorRect.Top + 1)
                             break
+                    }
                     break
                 case delphi_compatability.VK_PRIOR:
                     switch (this.selectedItemIndex) {
@@ -218,6 +225,7 @@ export class PdColorParameterPanel {
                         case kItemColorRect:
                             this.doMouseUp(this, delphi_compatability.TMouseButton.mbLeft, {}, this.colorRect.Left + 1, this.colorRect.Top + 1)
                             break
+                    }
                     break
                 case delphi_compatability.VK_RETURN:
                     switch (this.selectedItemIndex) {
@@ -237,7 +245,9 @@ export class PdColorParameterPanel {
                         case kItemColorRect:
                             this.doMouseUp(this, delphi_compatability.TMouseButton.mbLeft, {}, this.colorRect.Left + 1, this.colorRect.Top + 1)
                             break
+                    }
                     break
+            }
         }
         PdParameterPanel.prototype.doKeyDown.call(this, sender, key, shift)
         return key

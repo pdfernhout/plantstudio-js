@@ -175,6 +175,7 @@ function fileTypeFor3DExportType(outputType: short): short {
         default:
             throw new GeneralException.create("Problem: Invalid export type in TMainForm.fileTypeFor3DExportType.")
             break
+    }
     return result
 }
 
@@ -202,6 +203,7 @@ function nameFor3DExportType(anOutputType: short): string {
         default:
             throw new GeneralException.create("Problem: Invalid type in PdDomain.sectionNumberFor3DExportType.")
             break
+    }
     return result
 }
 
@@ -366,6 +368,7 @@ function getInfoForDXFPartType(index: short, longName: string, shortName: string
         default:
             throw new GeneralException.create("Problem: Invalid part type in method getInfoForDXFPartType.")
             break
+    }
     return longName, shortName
 }
 
@@ -505,6 +508,7 @@ export class KfFileExportSurface {
                 this.plantPartCounts[index] += 1
                 this.currentGroupingString = this.currentPlantNameShort + "_" + IntToStr(this.plantPartCounts[index]) + "_" + aShortName
                 break
+        }
     }
     
     endStemSegment(): void {
@@ -816,6 +820,7 @@ export class KfDrawingSurfaceForPOV {
             default:
                 throw new GeneralException.create("Problem: Unrecognized nesting type in KfDrawingSurfaceForPOV.startNestedGroupOfPlantParts.")
                 break
+        }
         this.startUnion(groupName)
     }
     
@@ -849,6 +854,7 @@ export class KfDrawingSurfaceForPOV {
             default:
                 throw new GeneralException.create("Problem: Unrecognized nesting type in KfDrawingSurfaceForPOV.startNestedGroupOfPlantParts.")
                 break
+        }
         this.endBrace(kDontWriteColor)
     }
     
@@ -1010,6 +1016,7 @@ export class KfDrawingSurfaceForVRML {
                 writeln(this.outputFile, "#Created by PlantStudio http://www.kurtz-fernhout.com")
                 writeln(this.outputFile)
                 break
+        }
     }
     
     startPlant(aLongName: string, aPlantIndex: short): void {
@@ -1025,6 +1032,7 @@ export class KfDrawingSurfaceForVRML {
                 this.writeThenIndent("DEF " + this.currentPlantNameShort + " Group {")
                 this.writeThenIndent("children [")
                 break
+        }
     }
     
     endPlant(): void {
@@ -1038,6 +1046,7 @@ export class KfDrawingSurfaceForVRML {
                 this.endBrace("plant " + this.currentPlantNameLong)
                 writeln(this.outputFile)
                 break
+        }
         this.currentIndentLevel = 0
         KfTextFileExportSurface.prototype.endPlant.call(this)
     }
@@ -1073,6 +1082,7 @@ export class KfDrawingSurfaceForVRML {
             default:
                 throw new GeneralException.create("Problem: Unrecognized nesting type in KfDrawingSurfaceForVRML.startNestedGroupOfPlantParts.")
                 break
+        }
         switch (this.options.vrml_version) {
             case kVRMLVersionOne:
                 this.writeThenIndent("DEF " + shortName + " Group {")
@@ -1081,6 +1091,7 @@ export class KfDrawingSurfaceForVRML {
                 this.writeThenIndent("DEF " + shortName + " Group {")
                 this.writeThenIndent("children [")
                 break
+        }
     }
     
     endNestedGroupOfPlantParts(nestingType: short): void {
@@ -1113,6 +1124,7 @@ export class KfDrawingSurfaceForVRML {
             default:
                 throw new GeneralException.create("Problem: Unrecognized nesting type in KfDrawingSurfaceForVRML.endNestedGroupOfPlantParts.")
                 break
+        }
         switch (this.options.vrml_version) {
             case kVRMLVersionOne:
                 this.endBrace("nested group")
@@ -1123,6 +1135,7 @@ export class KfDrawingSurfaceForVRML {
                 this.endBrace("nested group")
                 writeln(this.outputFile)
                 break
+        }
     }
     
     startPlantPart(aLongName: string, aShortName: string): void {
@@ -1137,6 +1150,7 @@ export class KfDrawingSurfaceForVRML {
                 this.writeThenIndent("DEF " + shortName + " Group {")
                 this.writeThenIndent("children [")
                 break
+        }
         this.lastPlantPartName = shortName
     }
     
@@ -1151,6 +1165,7 @@ export class KfDrawingSurfaceForVRML {
                 this.endBrace("plant part " + this.lastPlantPartName)
                 writeln(this.outputFile)
                 break
+        }
     }
     
     startStemSegment(aLongName: string, aShortName: string, color: TColorRef, width: float, index: short): void {
@@ -1185,6 +1200,7 @@ export class KfDrawingSurfaceForVRML {
                     this.writeConsideringIndenting("appearance Appearance { material Material { diffuseColor " + usupport.valueString(UNRESOLVED.getRValue(this.currentColor) / 256.0) + " " + usupport.valueString(UNRESOLVED.getGValue(this.currentColor) / 256.0) + " " + usupport.valueString(UNRESOLVED.getBValue(this.currentColor) / 256.0) + " } }")
                 }
                 break
+        }
         this.lastMeshName = this.currentGroupingString
     }
     
@@ -1199,6 +1215,7 @@ export class KfDrawingSurfaceForVRML {
                 this.endBrace("shape " + this.lastMeshName)
                 writeln(this.outputFile)
                 break
+        }
     }
     
     writePointsAndTriangles(): void {
@@ -1295,6 +1312,7 @@ export class KfDrawingSurfaceForVRML {
                 this.writeConsideringIndenting("solid FALSE")
                 this.endBrace("IndexedFaceSet")
                 break
+        }
         this.numPoints = 0
         this.numFaces = 0
     }

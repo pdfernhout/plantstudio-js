@@ -205,6 +205,7 @@ export class PdRealParameterPanel {
                         return key
                     }
                     break
+            }
         }
         PdParameterPanel.prototype.doKeyDown.call(this, sender, key, shift)
         if ((key === delphi_compatability.VK_RETURN)) {
@@ -222,6 +223,7 @@ export class PdRealParameterPanel {
                 case kItemUnitText:
                     this.selectNextUnitInSet(delphi_compatability.TShiftStateEnum.ssShift in shift, delphi_compatability.TShiftStateEnum.ssCtrl in shift)
                     break
+            }
         }
         return key
     }
@@ -428,6 +430,7 @@ export class PdRealParameterPanel {
                     result = kItemValueText
                 }
                 break
+        }
         return result
     }
     

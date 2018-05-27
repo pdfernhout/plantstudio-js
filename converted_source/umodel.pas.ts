@@ -101,6 +101,7 @@ export class PdModel {
                 default:
                     throw new GeneralException.create("Unsupported model transfer to field " + IntToStr(fieldType))
                     break
+            }
         } else if (direction === kSetField) {
             switch (fieldType) {
                 case UNRESOLVED.kFieldFloat:
@@ -134,6 +135,7 @@ export class PdModel {
                 default:
                     throw new GeneralException.create("Unsupported model transfer to field " + IntToStr(fieldType))
                     break
+            }
         }
         return objectValue, value
     }

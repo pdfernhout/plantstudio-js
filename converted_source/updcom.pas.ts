@@ -86,6 +86,7 @@ function nameForDirection(direction: short): string {
         case kRotateZ:
             result = "Z"
             break
+    }
     return result
 }
 
@@ -1815,6 +1816,7 @@ export class PdChangeMainWindowViewingOptionCommand {
                     this.newScale_pixelsPerMm = udomain.domain.plantDrawScale_PixelsPerMm()
                     this.newOffset_mm = udomain.domain.plantDrawOffset_mm()
                     break
+            }
             umain.MainForm.updateMenusForChangeToViewingOption()
         } finally {
             ucursor.cursor_stopWait()
@@ -1862,6 +1864,7 @@ export class PdChangeMainWindowViewingOptionCommand {
                     umain.MainForm.invalidateEntireDrawing()
                     umain.MainForm.updateForChangeToPlantSelections()
                     break
+            }
             umain.MainForm.updateMenusForChangeToViewingOption()
         } finally {
             ucursor.cursor_stopWait()
@@ -2114,6 +2117,7 @@ export class PdAlignPlantsCommand {
                     case kRight:
                         newPoint.X = this.focusRect.Right - (usupport.rWidth(this.plant.boundsRect_pixels()) - offset.X)
                         break
+                }
                 this.plant.moveTo(newPoint)
                 this.newPoints.Add(PdPointValue().createWithPoint(this.plant.basePoint_pixels()))
                 if (udomain.domain.options.cachePlantBitmaps) {
@@ -2204,6 +2208,7 @@ export class PdRotateCommand {
                     case kRotateZ:
                         this.values.Add(PdSingleValue().createWithSingle(this.plant.zRotation))
                         break
+                }
             }
         }
     }
@@ -2242,6 +2247,7 @@ export class PdRotateCommand {
                             case kRotateZ:
                                 this.values.Add(PdSingleValue().createWithSingle(this.plant.zRotation))
                                 break
+                        }
                     }
                 }
             }
@@ -2256,6 +2262,7 @@ export class PdRotateCommand {
                 case kRotateZ:
                     this.offsetRotation = (nextPoint.X - this.startDragPoint.X) * 0.5
                     break
+            }
             if (this.plantList.Count > 0) {
                 for (i = 0; i <= this.plantList.Count - 1; i++) {
                     this.plant = uplant.PdPlant(this.plantList.Items[i])
@@ -2276,6 +2283,7 @@ export class PdRotateCommand {
                         case kRotateZ:
                             this.plant.zRotation = newRotation
                             break
+                    }
                     this.plant.recalculateBounds(umain.kDrawNow)
                 }
             }
@@ -2354,6 +2362,7 @@ export class PdRotateCommand {
                             this.plant.zRotation = this.newRotation
                         }
                         break
+                }
                 this.plant.recalculateBounds(umain.kDrawNow)
             }
         }
@@ -2379,6 +2388,7 @@ export class PdRotateCommand {
                     case kRotateZ:
                         this.plant.zRotation = PdSingleValue(this.values.Items[i]).saveSingle
                         break
+                }
                 this.plant.recalculateBounds(umain.kDrawNow)
             }
         }

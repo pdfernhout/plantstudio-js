@@ -267,6 +267,7 @@ export class PdInflorescence {
                 default:
                     throw new GeneralException.create("Problem: Unhandled mode in method PdInflorescence.traverseActivity.")
                     break
+            }
         } catch (Exception e) {
             usupport.messageForExceptionType(e, "PdInflorescence.traverseActivity")
         }

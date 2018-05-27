@@ -383,6 +383,7 @@ export class TPickTdoForm {
                     case delphi_compatability.IDCANCEL:
                         Action = delphi_compatability.TCloseAction.caNone
                         break
+                }
             }
         }
     }
@@ -550,6 +551,7 @@ export class TPickTdoForm {
                     break
                 case delphi_compatability.IDNO:
                     break
+            }
         }
         tdoMoverForm = utdomove.TTdoMoverForm().create(this)
         if (tdoMoverForm === null) {

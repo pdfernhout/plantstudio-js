@@ -585,6 +585,7 @@ export class TTdoEditorForm {
                     this.updateForChangeToTdo()
                 }
                 break
+        }
     }
     
     imagesMouseMove(Sender: TObject, Shift: TShiftState, X: int, Y: int): void {
@@ -609,6 +610,7 @@ export class TTdoEditorForm {
                 case kCursorModeFlipTriangles:
                     this.lightUpTriangleAtMouse(X, Y)
                     break
+            }
         }
         if (this.paintBoxClickedIn === null) {
             return
@@ -645,6 +647,7 @@ export class TTdoEditorForm {
                     this.updateForChangeToTdo()
                 }
                 break
+        }
     }
     
     imagesMouseUp(Sender: TObject, Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
@@ -707,6 +710,7 @@ export class TTdoEditorForm {
                         this.updateForChangeToTdo()
                     }
                     break
+            }
         } finally {
             this.scrolling = false
             this.rotating = false
@@ -862,6 +866,7 @@ export class TTdoEditorForm {
                 case updcom.kRotateZ:
                     this.rotateStartAngle = this.paintBoxClickedIn.zRotation
                     break
+            }
         }
         switch (this.rotateDirection) {
             case updcom.kRotateX:
@@ -873,6 +878,7 @@ export class TTdoEditorForm {
             case updcom.kRotateZ:
                 this.paintBoxClickedIn.zRotation = umath.min(360, umath.max(-360, this.rotateStartAngle + (this.startDragPoint.X - x) * 0.5))
                 break
+        }
         this.updateForChangeToClickedOnPaintBox()
     }
     
@@ -972,6 +978,7 @@ export class TTdoEditorForm {
                     result = PdDragTdoPointCommand().createWithTdoAndScale(this.tdo, this.paintBoxClickedIn.scale)
                 }
                 break
+        }
         return result
     }
     

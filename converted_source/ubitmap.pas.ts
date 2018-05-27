@@ -20,6 +20,7 @@ function RequiresPalette(bitmap: TBitmap): boolean {
         case delphi_compatability.TPixelFormat.pf8bit:
             result = true
             break
+    }
     return result
 }
 

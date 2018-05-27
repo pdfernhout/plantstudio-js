@@ -75,6 +75,7 @@ export class TAboutForm {
                 this.registerIt.Top = 4
                 this.close.Top = this.registerIt.Top + this.registerIt.Height + 3
                 break
+        }
         this.hoursLabel.Caption = "You have been evaluating PlantStudio for "
         timeBetween = umath.max((UNRESOLVED.Now - udomain.domain.startTimeThisSession), 0) + udomain.domain.accumulatedUnregisteredTime
         UNRESOLVED.DecodeTime(timeBetween, smallHours, minutes, seconds, milliseconds)

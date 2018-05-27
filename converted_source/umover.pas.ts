@@ -133,6 +133,7 @@ export class TMoverForm {
             case delphi_compatability.VK_DELETE:
                 this.deleteClick(this)
                 break
+        }
         if (!(delphi_compatability.TShiftStateEnum.ssCtrl in Shift)) {
             return Key
         }
@@ -177,6 +178,7 @@ export class TMoverForm {
                 }
                 Key = 0
                 break
+        }
         return Key
     }
     
@@ -612,6 +614,7 @@ export class TMoverForm {
                 Key = 0
                 this.renameClick(this)
                 break
+        }
         return Key
     }
     
@@ -1079,6 +1082,7 @@ export class TMoverForm {
             case mrCancel:
                 result = false
                 break
+        }
         return result
     }
     

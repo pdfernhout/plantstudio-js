@@ -144,6 +144,7 @@ export class KfWinSlider {
                 default:
                     return Key
                     break
+            }
             this.Invalidate()
             this.Refresh()
             this.setValue(newValue)

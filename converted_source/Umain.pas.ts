@@ -587,6 +587,7 @@ export class TMainForm {
                 case udomain.kDrawCustom:
                     this.MenuOptionsCustomDraw.checked = true
                     break
+            }
             this.updateMenusForUndoRedo()
             this.updatePasteMenuForClipboardContents()
             if (this.sectionsComboBox.Items.Count > 0) {
@@ -683,6 +684,7 @@ export class TMainForm {
                         break
                     case uwelcome.kStartUsingProgram:
                         break
+                }
             }
             udomain.domain.options.hideWelcomeForm = welcomeForm.hideWelcomeForm.Checked
         } finally {
@@ -813,6 +815,7 @@ export class TMainForm {
                 ShowMessage("Error with save request dialog.")
                 result = true
                 break
+        }
         return result
     }
     
@@ -893,6 +896,7 @@ export class TMainForm {
                     break
                 case delphi_compatability.IDNO:
                     break
+            }
         }
         mover = umover.TMoverForm().create(this)
         if (mover === null) {
@@ -1068,6 +1072,7 @@ export class TMainForm {
                         result = false
                         return result
                         break
+                }
             }
         }
         if (fileSavedOK && choseAnotherFileName) {
@@ -1516,6 +1521,7 @@ export class TMainForm {
                 excludeNonSelectedPlants = false
                 combinedBoundsRect = Rect(0, 0, this.drawingBitmap.Width, this.drawingBitmap.Height)
                 break
+        }
         rectToDrawIn = Rect(0, 0, options.width_pixels, options.height_pixels)
         if ((plantsToDraw === null) || (plantsToDraw.Count <= 0)) {
             return
@@ -1883,6 +1889,7 @@ export class TMainForm {
                 case udomain.kIncludeVisiblePlants:
                     excludeInvisiblePlants = true
                     break
+            }
             udomain.domain.plantManager.write3DOutputFileToFileName(this.selectedPlants, excludeInvisiblePlants, excludeNonSelectedPlants, fileInfo.tempFile, outputType)
             fileInfo.writingWasSuccessful = true
         } finally {
@@ -4148,6 +4155,7 @@ export class TMainForm {
                 Key = 0
                 this.MenuPlantRenameClick(this)
                 break
+        }
         return Key
     }
     
@@ -4228,6 +4236,7 @@ export class TMainForm {
                     return
                 }
                 break
+        }
         anchorPoint = Point(X, Y)
         // makes shift-click work as right-click
         this.commandList.rightButtonDown = (Button === delphi_compatability.TMouseButton.mbRight) || (delphi_compatability.TShiftStateEnum.ssShift in Shift)
@@ -4403,6 +4412,7 @@ export class TMainForm {
             case kCursorModePosingSelect:
                 result = updcom.PdSelectPosingPartCommand().createWithPlantAndPartIDsAndTypes(this.focusedPlant(), this.mouseDownSelectedPlantPartID, this.selectedPlantPartID, this.mouseDownSelectedPlantPartType, this.selectedPlantPartType)
                 break
+        }
         return result
     }
     
@@ -5167,6 +5177,7 @@ export class TMainForm {
             default:
                 return
                 break
+        }
         this.nudgeSelectedPlantsByPixelsAndDirection(udomain.domain.options.nudgeDistance, direction)
     }
     
@@ -5191,6 +5202,7 @@ export class TMainForm {
             case utdomove.kRight:
                 movePoint.X = pixels
                 break
+        }
         newCommand = updcom.PdDragCommand().createWithListOfPlantsAndDragOffset(this.selectedPlants, movePoint)
         this.doCommand(newCommand)
     }
@@ -5327,6 +5339,7 @@ export class TMainForm {
             case kTabPosing:
                 this.updatePosingForFirstSelectedPlant()
                 break
+        }
     }
     
     textColorToRepresentPlantSelection(payAttentionToMultiSelect: boolean): TColorRef {
@@ -5470,6 +5483,7 @@ export class TMainForm {
                 payAttentionToOtherPlants = false
                 prefix = "Note for "
                 break
+        }
         if ((handlingDifferently) || (labelToChange === null)) {
             return
         }
@@ -5978,6 +5992,7 @@ export class TMainForm {
                         default:
                             throw new GeneralException.create("Problem: Unsupported parameter type in method TMainForm.updateParameterPanelsForSectionChange.")
                             break
+                    }
                     if (paramPanel !== null) {
                         paramPanel.Parent = this.parametersScrollBox
                         //9 +
@@ -6161,6 +6176,7 @@ export class TMainForm {
             case kExpandOrCollapse:
                 section.expanded = !section.expanded
                 break
+        }
         if (this.parametersScrollBox.ControlCount > 0) {
             for (i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
                 paramPanel = uppanel.PdParameterPanel(this.parametersScrollBox.Controls[i])
@@ -7178,6 +7194,7 @@ export class TMainForm {
                     break
                 case delphi_compatability.IDNO:
                     break
+            }
         }
         if (!udomain.domain.checkForExistingDefaultTdoLibrary()) {
             return

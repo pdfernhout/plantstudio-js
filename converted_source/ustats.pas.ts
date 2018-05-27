@@ -172,6 +172,7 @@ export class PdStatsPanel {
             case kBothLiveAndDead:
                 result = this.statistics.liveBiomass_pctMPB[partType] + this.statistics.deadBiomass_pctMPB[partType]
                 break
+        }
         result = umath.min(100.0, umath.max(0.0, 100.0 * result / total_pctMPB))
         return result
     }
@@ -484,6 +485,7 @@ export class PdStatsPanel {
             default:
                 result = ""
                 break
+        }
         return result
     }
     
@@ -555,6 +557,7 @@ export class PdStatsPanel {
                 // called by paint method, so do not raise exception 
                 result = 0
                 break
+        }
         return result
     }
     

@@ -129,6 +129,7 @@ export class TGeneric3DOptionsForm {
                     }
                 }
                 break
+        }
         this.transferDirection = kTransferSave
         this.transferFields()
         this.ModalResult = mrOK
@@ -195,6 +196,7 @@ export class TGeneric3DOptionsForm {
             case u3dexport.kLWO:
                 this.Caption = "Save Lightwave LWO File"
                 break
+        }
     }
     
     transferFields(): void {
@@ -212,6 +214,7 @@ export class TGeneric3DOptionsForm {
                 case udomain.kIncludeAllPlants:
                     this.useAllPlants.Checked = true
                     break
+            }
         } else {
             oldExportType = this.options.exportType
             if (this.useSelectedPlants.Checked) {
@@ -279,6 +282,7 @@ export class TGeneric3DOptionsForm {
                 break
             case u3dexport.kLWO:
                 break
+        }
     }
     
     updatePredictedSizeDisplay(): void {
@@ -364,6 +368,7 @@ export class TGeneric3DOptionsForm {
             default:
                 throw new GeneralException.create("Problem: Invalid 3d export type for size estimation.")
                 break
+        }
         return result
     }
     

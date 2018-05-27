@@ -430,6 +430,7 @@ export class TWizardForm {
                 case kFinish:
                     result = "finish"
                     break
+            }
         } else {
             tdo = this.tdoForIndex(col)
             if (tdo === null) {
@@ -1222,6 +1223,7 @@ export class TWizardForm {
                         this.plant.pInflor[uplant.kGenderFemale].numFlowersPerBranch = 4
                         this.plant.pInflor[uplant.kGenderFemale].numBranches = 4
                         break
+                }
                 this.plant.pInflor[uplant.kGenderFemale].pedicelLength_mm = 15
                 this.plant.pInflor[uplant.kGenderFemale].pedicelAngle = 30
                 this.plant.pInflor[uplant.kGenderFemale].branchAngle = 35
@@ -1489,6 +1491,7 @@ export class TWizardForm {
                 case delphi_compatability.IDCANCEL:
                     Action = delphi_compatability.TCloseAction.caNone
                     break
+            }
         }
     }
     
@@ -1574,6 +1577,7 @@ export class TWizardForm {
             case kFinish:
                 result = this.finishPageImage.Picture.Bitmap
                 break
+        }
         return result
     }
     
@@ -1603,6 +1607,7 @@ export class TWizardForm {
                 this.next.Enabled = true
                 this.next.Caption = "&Next >"
                 break
+        }
     }
     
     petalColorMouseUp(Sender: TObject, Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {

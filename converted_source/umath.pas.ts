@@ -460,6 +460,7 @@ function transferSCurveValue(direction: int, param: sCurveStructure, index: int,
             case 3:
                 value = param.y2
                 break
+        }
     } else {
         switch (index) {
             case 0:
@@ -475,6 +476,7 @@ function transferSCurveValue(direction: int, param: sCurveStructure, index: int,
             case 3:
                 param.y2 = value
                 break
+        }
     }
     return value
 }

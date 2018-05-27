@@ -885,6 +885,7 @@ function Plant_directTransferField(plantProxy: TObject, v: FIX_MISSING_ARG_TYPE,
         case kFlowerNumPetalsMale:
             plant.pFlower[uplant.kGenderMale].tdoParams[uplant.kFirstPetals].repetitions, v = plant.MFD(plant.pFlower[uplant.kGenderMale].tdoParams[uplant.kFirstPetals].repetitions, v, ft, d)
             break
+    }
     return v
 }
 
@@ -1439,6 +1440,7 @@ function Plant_directTransferField_SecondPart(plantProxy: TObject, v: FIX_MISSIN
         case kFlowerBudFemaleObject3DPullbackAngle:
             plant.pFlower[uplant.kGenderFemale].tdoParams[uplant.kBud].pullBackAngle, v = plant.MFD(plant.pFlower[uplant.kGenderFemale].tdoParams[uplant.kBud].pullBackAngle, v, ft, d)
             break
+    }
     return v
 }
 

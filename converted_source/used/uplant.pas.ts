@@ -641,6 +641,7 @@ export class PdPlant {
                         this.total3DExportPoints = traverser.total3DExportPointsIn3DObjects + (traverser.total3DExportStemSegments * (this.pGeneral.lineDivisions + 1) * stemCylinderFaces)
                         this.total3DExportTriangles = traverser.total3DExportTrianglesIn3DObjects + (traverser.total3DExportStemSegments * this.pGeneral.lineDivisions * stemCylinderFaces * 2)
                         break
+                }
                 // this is only important for LWO and OBJ, but people will like to see it anyway
                 this.total3DExportMaterials = 0
                 for (i = 0; i <= u3dexport.kExportPartLast; i++) {
@@ -813,6 +814,7 @@ export class PdPlant {
                 turtle.drawOptions.drawLines = udomain.domain.options.drawLinesBetweenPolygons
                 turtle.drawOptions.lineContrastIndex = udomain.domain.options.lineContrastIndex
                 break
+        }
     }
     
     resizingRect(): TRect {
@@ -1407,6 +1409,7 @@ export class PdPlant {
                 x = xPixel + 1
                 y = yPixel + 1
                 break
+        }
         testPixelColor = this.previewCache.Canvas.Pixels[x, y]
         result = testPixelColor !== udomain.domain.options.transparentColor
         return result
@@ -1482,6 +1485,7 @@ export class PdPlant {
             default:
                 throw new GeneralException.create("Problem: Invalid export type in PdPlant.saveToGlobal3DOutputFile.")
                 break
+        }
         this.turtle.rotateX(fixRotation)
         // this is a user-specified turn on top of the default
         this.turtle.rotateX(udomain.domain.exportOptionsFor3D[outputType].xRotationBeforeDraw * 256.0 / 360.0)
@@ -1598,6 +1602,7 @@ export class PdPlant {
                     tempTdo = null
                 }
                 break
+        }
         if (writeDebugMessage) {
             udebug.DebugPrint("Plant <" + this.name + "> parameter <" + param.name + "> defaulted to <" + param.defaultValueString() + ">")
         }
@@ -1717,6 +1722,7 @@ export class PdPlant {
                                 tempTdo = null
                             }
                             break
+                    }
                 }
             }
         }
@@ -1918,6 +1924,7 @@ export class PdPlant {
                     tempTdo = null
                 }
                 break
+        }
         param.valueHasBeenReadForCurrentPlant = true
     }
     
@@ -2000,6 +2007,7 @@ export class PdPlant {
                         this.setAge(v)
                     }
                     break
+            }
             if ((ft === uparams.kFieldColor)) {
                 this.needToRecalculateColors = true
             }
@@ -2066,6 +2074,7 @@ export class PdPlant {
             default:
                 throw new GeneralException.create("Problem: Unknown field for plant string list " + IntToStr(fieldID) + " in method PdPlant.fillEnumStringList.")
                 break
+        }
         return hasRadioButtons
     }
     
@@ -2113,6 +2122,7 @@ export class PdPlant {
                 default:
                     throw new GeneralException.create("Problem: Unsupported transfer from field " + IntToStr(fieldType) + " in method PdPlant.MFD.")
                     break
+            }
         } else if (direction === kSetField) {
             switch (fieldType) {
                 case uparams.kFieldFloat:
@@ -2136,6 +2146,7 @@ export class PdPlant {
                 default:
                     throw new GeneralException.create("Problem: Unsupported transfer to field " + IntToStr(fieldType) + " in method PdPlant.MFD.")
                     break
+            }
         }
         return objectValue, value
     }
@@ -2350,6 +2361,7 @@ export class PdPlant {
                             //            and not for normal parameters 
                             throw new GeneralException.create("Problem: Invalid parameter type in method PdPlant.useBreedingOptionsAndPlantsToSetParameters.")
                             break
+                    }
                     //param loop
                 }
                 //section loop
@@ -2404,6 +2416,7 @@ export class PdPlant {
                     }
                 }
                 break
+        }
         return result
     }
     
@@ -3056,6 +3069,7 @@ export class PdPlant {
             default:
                 throw new GeneralException.create("Problem: Invalid part type in method colorForDXFPartType.")
                 break
+        }
         return result
     }
     

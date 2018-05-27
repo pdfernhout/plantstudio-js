@@ -205,6 +205,7 @@ export class PdGeneration {
                     localOptions.mutationStrengths[i] = udomain.kNoMutation
                 }
                 break
+        }
     }
     
     plantForIndex(index: short): PdPlant {

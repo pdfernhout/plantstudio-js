@@ -179,6 +179,7 @@ export class PdTdoParameterPanel {
                 case kItemTdo:
                     this.pickTdo()
                     break
+            }
         }
         return key
     }

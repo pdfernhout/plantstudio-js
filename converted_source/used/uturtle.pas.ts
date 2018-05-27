@@ -146,6 +146,7 @@ export class KfTurtle {
             default:
                 throw new GeneralException.create("KfTurtle.createFor3DOutput: Unrecognized output type")
                 break
+        }
     }
     
     start3DExportFile(): void {

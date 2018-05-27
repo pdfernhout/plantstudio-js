@@ -171,6 +171,7 @@ export class PdFiler {
             case PdFilerMode.filerModeCounting:
                 this.bytesStreamed = this.bytesStreamed + size
                 break
+        }
         return bytes
     }
     
@@ -185,6 +186,7 @@ export class PdFiler {
             case PdFilerMode.filerModeCounting:
                 this.bytesStreamed = this.bytesStreamed + FIX_sizeof(PdClassAndVersionInformationRecord)
                 break
+        }
     }
     
     streamShortString(aString: string): void {
@@ -199,6 +201,7 @@ export class PdFiler {
             case PdFilerMode.filerModeCounting:
                 this.bytesStreamed = this.bytesStreamed + len(aString) + 1
                 break
+        }
         return aString
     }
     
@@ -224,6 +227,7 @@ export class PdFiler {
             case PdFilerMode.filerModeCounting:
                 this.bytesStreamed = this.bytesStreamed + len(aString) + 1
                 break
+        }
     }
     
     //maybe problem in 32 bits - depends how big a string string alloc can return
@@ -261,6 +265,7 @@ export class PdFiler {
             case PdFilerMode.filerModeCounting:
                 this.bytesStreamed = this.bytesStreamed + FIX_sizeof(longint) + len(aPChar) + 1
                 break
+        }
         return aPChar
     }
     

@@ -179,6 +179,7 @@ export class PdLeaf {
                 default:
                     throw new GeneralException.create("Problem: Unhandled mode in method PdLeaf.traverseActivity.")
                     break
+            }
         } catch (Exception e) {
             usupport.messageForExceptionType(e, "PdLeaf.traverseActivity")
         }

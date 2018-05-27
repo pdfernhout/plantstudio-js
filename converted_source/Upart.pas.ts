@@ -164,6 +164,7 @@ export class PdPlantPart {
             default:
                 throw new GeneralException.create("Problem: Unhandled mode in method PdPlantPart.traverseActivity.")
                 break
+        }
     }
     
     // procedure fillInInfoForDXFPart(index: smallint; var realIndex: smallint; var longName: string; var shortName: string);
@@ -279,6 +280,7 @@ export class PdPlantPart {
             case uplant.kPartTypeLeaf:
                 partName = "leaf"
                 break
+        }
         udebug.DebugPrint("Part " + IntToStr(this.partID) + ", " + partName)
     }
     
@@ -618,6 +620,7 @@ export class PdPlantPart {
                 case kRotateZ:
                     result = angle + this.amendment.zRotation * 256 / 360
                     break
+            }
         }
         return result
     }
@@ -793,6 +796,7 @@ export class PdPlantPart {
                     result = u3dexport.kExportPartSepalsMale
                 }
                 break
+        }
         return result
     }
     

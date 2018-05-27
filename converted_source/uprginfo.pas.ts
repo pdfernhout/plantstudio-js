@@ -242,6 +242,7 @@ export class TProgramInfoForm {
                 Platform = "Windows"
                 BuildNumber = 0
                 break
+        }
         if ((UNRESOLVED.Win32Platform === UNRESOLVED.VER_PLATFORM_WIN32_WINDOWS) || (UNRESOLVED.Win32Platform === UNRESOLVED.VER_PLATFORM_WIN32_NT)) {
             if (UNRESOLVED.Win32CSDVersion === "") {
                 this.infoList.Lines.Add(UNRESOLVED.Format("%s %d.%d (Build %d)", {Platform, UNRESOLVED.Win32MajorVersion, UNRESOLVED.Win32MinorVersion, BuildNumber, }))
