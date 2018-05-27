@@ -1,6 +1,6 @@
 // PdPlant was unit Uplant
 
-import { PdStreamableObject, ExportFormats, messageForExceptionType, boundForString } from "./temporary";
+import { PdStreamableObject, ExportFormats, messageForExceptionType, boundForString, DebugPrint } from "./temporary";
 import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor, ColorDefs, StrToIntDef, IntToStr } from "./common";
 import { KfObject3D } from "./KfObject3D";
 import { TPoint } from "./TPoint";
@@ -8,6 +8,7 @@ import { TRect } from "./TRect";
 import { KfTurtle } from "./KfTurtle";
 import { SCurveStructure, intMin, intMax, safedivExcept, min, stringToSCurve } from "./umath";
 import { KfPoint3D } from "./KfPoint3D";
+import { PdRandom } from "./PdRandom";
 
 /* Remove unused imports
 from conversion_common import *
@@ -423,8 +424,8 @@ export class PdPlant extends PdStreamableObject {
         this.firstPhytomer = null
         this.previewCache = ubitmap.PdBitmap().Create()
         this.initializeCache(this.previewCache)
-        this.randomNumberGenerator = urandom.PdRandom().create()
-        this.breedingGenerator = urandom.PdRandom().create()
+        this.randomNumberGenerator = new PdRandom()
+        this.breedingGenerator = new PdRandom()
         this.amendments = ucollect.TListCollection().Create()
         this.breedingGenerator.setSeed(this.breedingGenerator.randomSeedFromTime())
         this.noteLines = delphi_compatability.TStringList.create
@@ -553,7 +554,7 @@ export class PdPlant extends PdStreamableObject {
         // convert here from 360 degrees to 256 turtle degrees 
         this.turtle.rotateY(this.yRotation * 256 / 360)
         this.turtle.rotateZ(this.zRotation * 256 / 360)
-        this.turtle.drawingSurface.lineColor = delphi_compatability.clGreen
+        this.turtle.drawingSurface.lineColor = ColorDefs.clGreen
         if ((this.firstPhytomer !== null)) {
             traverser = utravers.PdTraverser().createWithPlant(this)
             try {
@@ -1495,10 +1496,9 @@ export class PdPlant extends PdStreamableObject {
     // ----------------------------------------------------------------------------------  i/o and data transfer 
     defaultAllParameters(): void {
         let param: PdParameter
-        let i: short
-        
+
         if (udomain.domain.parameterManager.parameters.Count > 0) {
-            for (i = 0; i <= udomain.domain.parameterManager.parameters.Count - 1; i++) {
+            for (let i = 0; i < udomain.domain.parameterManager.parameters.Count; i++) {
                 param = uparams.PdParameter(udomain.domain.parameterManager.parameters.Items[i])
                 if (param.fieldType !== uparams.kFieldHeader) {
                     this.defaultParameter(param, kDontCheckForUnreadParams)
@@ -1565,7 +1565,7 @@ export class PdPlant extends PdStreamableObject {
                 break
         }
         if (writeDebugMessage) {
-            udebug.DebugPrint("Plant <" + this.name + "> parameter <" + param.name + "> defaulted to <" + param.defaultValueString() + ">")
+            DebugPrint("Plant <" + this.name + "> parameter <" + param.name + "> defaulted to <" + param.defaultValueString() + ">")
         }
     }
     
@@ -1754,7 +1754,7 @@ export class PdPlant extends PdStreamableObject {
                 secondLine = usupport.tolerantReadln(plantFile, secondLine)
             }
             this.readingMemoLine += 1
-            udebug.DebugPrint("plant <" + this.name + "> line <" + aLine + "> merged with <" + secondLine + ">")
+            DebugPrint("plant <" + this.name + "> line <" + aLine + "> merged with <" + secondLine + ">")
             aLine = aLine + " " + secondLine
         }
         nameAndFieldID = usupport.stringUpTo(aLine, "=")
@@ -2830,14 +2830,14 @@ export class PdPlant extends PdStreamableObject {
         let traverser: PdTraverser
         
         if ((this.firstPhytomer !== null)) {
-            udebug.DebugPrint("---------------------- Start plant report")
+            DebugPrint("---------------------- Start plant report")
             traverser = utravers.PdTraverser().createWithPlant(this)
             try {
                 traverser.traverseWholePlant(utravers.kActivityReport)
             } finally {
                 traverser.free
             }
-            udebug.DebugPrint("---------------------- End plant report")
+            DebugPrint("---------------------- End plant report")
         }
     }
     
@@ -3042,4 +3042,3 @@ export class PdPlantUpdateEvent {
     fieldIndex: int = 0
     
 }
-
