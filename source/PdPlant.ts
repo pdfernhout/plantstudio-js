@@ -1,5 +1,6 @@
-// unit Uplant
+// PdPlant was unit Uplant
 
+/* Remove unused imports
 from conversion_common import *
 import ubmpsupport
 import ucursor
@@ -26,6 +27,7 @@ import ucollect
 import urandom
 import utdo
 import delphi_compatability
+*/
 
 // const
 const kGenderMale = 0
@@ -140,9 +142,9 @@ export interface ParamsGeneral {
     phyllotacticRotationAngle: float
 }
 
-//was longint, but want it in a param panel
-//NA
-//not using yet
+// was longint, but want it in a param panel
+// NA
+// not using yet
 // access->pLeaf 
 // record
 export interface ParamsLeaf {
@@ -167,7 +169,7 @@ export interface ParamsLeaf {
     compoundPinnateLeafletArrangement: short
 }
 
-//ENUM
+// ENUM
 // access->pSeedlingLeaf 
 // record
 export interface ParamsSeedlingLeaf {
@@ -206,7 +208,7 @@ export interface ParamsInternode {
 // growth and expansion 
 // bolting 
 // access->pFlower 
-//kBud = 0; kPistil = 1; kStamens = 2; kFirstPetals = 3; kSecondPetals = 4; kThirdPetals = 5; kSepals = 6;
+// kBud = 0; kPistil = 1; kStamens = 2; kFirstPetals = 3; kSecondPetals = 4; kThirdPetals = 5; kSepals = 6;
 // record
 export interface ParamsFlower {
     tdoParams: TdoParamsStructure[] /* kSepals + 1 */
@@ -858,7 +860,7 @@ export class PdPlant {
         }
     }
     
-    //procedure drawOnUsingOpenGL(turtle: KfTurtle; selected, firstSelected: boolean);
+    // procedure drawOnUsingOpenGL(turtle: KfTurtle; selected, firstSelected: boolean);
     recalculateBounds(drawNow: boolean): void {
         let oldBasePoint: TPoint
         let drawingRect: TRect
@@ -978,7 +980,7 @@ export class PdPlant {
                 drawPosition = Point(cache.Width / 2, cache.Height - 5)
                 // 1. draw to figure scale to center boundsRect in cache size 
                 this.setTurtleUpForPreviewScratch(this.drawingScale_PixelsPerMm, drawPosition)
-                //nothing-messes up paint
+                // nothing-messes up paint
                 try {
                     this.draw()
                 } catch (e) {
@@ -1009,7 +1011,7 @@ export class PdPlant {
                 // draw to find drawPosition that will center new boundsrect in cache 
                 drawPosition = Point(cache.Width / 2, cache.Height - 5)
                 this.setTurtleUpForPreviewScratch(this.drawingScale_PixelsPerMm, drawPosition)
-                //nothing-messes up paint
+                // nothing-messes up paint
                 try {
                     this.draw()
                 } catch (e) {
@@ -1030,7 +1032,7 @@ export class PdPlant {
                 // final drawing 
                 ubmpsupport.fillBitmap(cache, udomain.domain.options.backgroundColor)
                 this.setTurtleUpForPreview(this.drawingScale_PixelsPerMm, drawPosition)
-                //nothing-messes up paint
+                // nothing-messes up paint
                 try {
                     this.draw()
                 } catch (e) {
@@ -1038,7 +1040,7 @@ export class PdPlant {
                 }
             }
         } finally {
-            //self.previewCacheUpToDate := true;
+            // self.previewCacheUpToDate := true;
             uturtle.KfTurtle.defaultStopUsing()
             this.turtle = null
             this.useBestDrawingForPreview = false
@@ -1578,7 +1580,7 @@ export class PdPlant {
                 break
             case uparams.kFieldFloat:
                 if (param.indexType === uparams.kIndexTypeSCurve) {
-                    //this is the only array
+                    // this is the only array
                     this.changingWholeSCurves = true
                     tempSCurve = umath.stringToSCurve(param.defaultValueString())
                     this.transferWholeSCurve(kSetField, tempSCurve, param.fieldNumber, param.fieldType, false, null)
@@ -1672,7 +1674,7 @@ export class PdPlant {
                         case uparams.kFieldHeader:
                             break
                         case uparams.kFieldBoolean:
-                            //skip
+                            // skip
                             tempBoolean = this.transferField(kGetField, tempBoolean, param.fieldNumber, param.fieldType, 0, false, null)
                             this.writeLine(plantFile, param.name + start + param.fieldID + stop + usupport.boolToStr(tempBoolean))
                             break
@@ -1694,7 +1696,7 @@ export class PdPlant {
                             break
                         case uparams.kFieldFloat:
                             if (param.indexType === uparams.kIndexTypeSCurve) {
-                                //this is the only array
+                                // this is the only array
                                 this.transferWholeSCurve(kGetField, tempSCurve, param.fieldNumber, param.fieldType, false, null)
                                 this.writeLine(plantFile, param.name + start + param.fieldID + stop + umath.sCurveToString(tempSCurve))
                             } else {
@@ -1729,7 +1731,7 @@ export class PdPlant {
                 }
             }
         }
-        //v2.0
+        // v2.0
         this.writeLine(plantFile, "; ------------------------- " + kPlantAsTextEndString + " " + this.getName() + " <v2.0>")
         this.writeLine(plantFile, "")
     }
@@ -1818,7 +1820,7 @@ export class PdPlant {
             case uparams.kFieldHeader:
                 break
             case uparams.kFieldBoolean:
-                //skip
+                // skip
                 tempBoolean = usupport.strToBool(paramValue)
                 tempBoolean = this.transferField(kSetField, tempBoolean, param.fieldNumber, param.fieldType, 0, false, null)
                 break
@@ -1870,7 +1872,7 @@ export class PdPlant {
                 break
             case uparams.kFieldFloat:
                 if (param.indexType === uparams.kIndexTypeSCurve) {
-                    //this is the only array
+                    // this is the only array
                     this.changingWholeSCurves = true
                     tempSCurve = umath.stringToSCurve(paramValue)
                     if ((tempSCurve.x1 <= 0.0) || (tempSCurve.y1 <= 0.0) || (tempSCurve.x2 <= 0.0) || (tempSCurve.y2 <= 0.0) || (tempSCurve.x1 >= 1.0) || (tempSCurve.y1 >= 1.0) || (tempSCurve.x2 >= 1.0) || (tempSCurve.y2 >= 1.0)) {
@@ -2092,7 +2094,7 @@ export class PdPlant {
         if (direction === kGetField) {
             switch (fieldType) {
                 case uparams.kFieldFloat:
-                    //MFD = MoveFieldData
+                    // MFD = MoveFieldData
                     value = objectValue
                     break
                 case uparams.kFieldSmallint:
@@ -2185,10 +2187,10 @@ export class PdPlant {
                     if ((param === null) || (param.fieldType === uparams.kFieldHeader)) {
                         continue
                     }
-                    //case
+                    // case
                     switch (param.fieldType) {
                         case uparams.kFieldBoolean:
-                            //non-numeric
+                            // non-numeric
                             firstBoolean = firstPlant.transferField(kGetField, firstBoolean, param.fieldNumber, param.fieldType, 0, false, null)
                             if (secondPlant === null) {
                                 newBoolean = firstBoolean
@@ -2203,7 +2205,7 @@ export class PdPlant {
                             newBoolean = this.transferField(kSetField, newBoolean, param.fieldNumber, param.fieldType, 0, false, null)
                             break
                         case uparams.kFieldSmallint:
-                            //numeric
+                            // numeric
                             newInteger = 0
                             firstInteger = firstPlant.transferField(kGetField, firstInteger, param.fieldNumber, param.fieldType, 0, false, null)
                             if (secondPlant === null) {
@@ -2230,7 +2232,7 @@ export class PdPlant {
                             //            and the random number seed, which shouldn't really be bred anyway, so we will do nothing
                             //            here. if you want to add longint parameters later, you will have to copy the smallint stuff
                             //            to put here. 
-                            //non-numeric
+                            // non-numeric
                             firstInteger = firstPlant.transferField(kGetField, firstInteger, param.fieldNumber, param.fieldType, 0, false, null)
                             if (secondPlant === null) {
                                 newInteger = firstInteger
@@ -2245,7 +2247,7 @@ export class PdPlant {
                             newInteger = this.transferField(kSetField, newInteger, param.fieldNumber, param.fieldType, 0, false, null)
                             break
                         case uparams.kFieldColor:
-                            //numeric if option is set, otherwise non-numeric
+                            // numeric if option is set, otherwise non-numeric
                             firstColor = firstPlant.transferField(kGetField, firstColor, param.fieldNumber, param.fieldType, 0, false, null)
                             if (secondPlant === null) {
                                 newColor = firstColor
@@ -2281,7 +2283,7 @@ export class PdPlant {
                                 }
                                 this.transferWholeSCurve(kSetField, newSCurve, param.fieldNumber, param.fieldType, false, null)
                                 this.changingWholeSCurves = false
-                                //plain float - numeric
+                                // plain float - numeric
                             } else {
                                 // newFloat := 0.0001;  v2.0 removed this
                                 firstFloat = firstPlant.transferField(kGetField, firstFloat, param.fieldNumber, param.fieldType, 0, false, null)
@@ -2306,7 +2308,7 @@ export class PdPlant {
                             }
                             break
                         case uparams.kFieldThreeDObject:
-                            //non-numeric
+                            // non-numeric
                             firstTdo = utdo.KfObject3D().create()
                             secondTdo = utdo.KfObject3D().create()
                             newTdo = utdo.KfObject3D().create()
@@ -2350,9 +2352,9 @@ export class PdPlant {
                             //            and not for normal parameters 
                             throw new GeneralException.create("Problem: Invalid parameter type in method PdPlant.useBreedingOptionsAndPlantsToSetParameters.")
                             break
-                    //param loop
+                    // param loop
                 }
-                //section loop
+                // section loop
             }
         }
         this.finishLoadingOrDefaulting(kDontCheckForUnreadParams)
@@ -2394,7 +2396,7 @@ export class PdPlant {
                 if (options.firstPlantWeights[sectionIndex] > 50) {
                     result = kFromFirstPlant
                 } else if (options.firstPlantWeights[sectionIndex] < 50) {
-                    //50/50
+                    // 50/50
                     result = kFromSecondPlant
                 } else {
                     if (this.breedingGenerator.zeroToOne() <= 0.5) {
@@ -2599,7 +2601,7 @@ export class PdPlant {
         if (filer.isReading()) {
             hasFirstPhytomer = filer.streamBoolean(hasFirstPhytomer)
             if (this.firstPhytomer !== null) {
-                //don't want to create if not written
+                // don't want to create if not written
                 this.freeAllDrawingPlantParts()
             }
             if (hasFirstPhytomer) {
@@ -2661,7 +2663,7 @@ export class PdPlant {
         updateEvent = PdPlantUpdateEvent.create
         try {
             updateEvent.plant = this
-            //hard-coded
+            // hard-coded
             updateEvent.fieldID = utransfr.kGeneralStartingSeedForRandomNumberGenerator
             updateList.Add(updateEvent)
             umain.MainForm.updateParameterValuesWithUpdateListForPlant(this, updateList)
@@ -2709,11 +2711,11 @@ export class PdPlant {
             traverser = utravers.PdTraverser().createWithPlant(this)
             try {
                 if ((this.firstPhytomer === null)) {
-                    //If first day, create first phytomer. Assume seed reserves are placed into this phytomer.
+                    // If first day, create first phytomer. Assume seed reserves are placed into this phytomer.
                     firstMeristem = umerist.PdMeristem().newWithPlant(this)
                     this.firstPhytomer = firstMeristem.createFirstPhytomer()
                     if (this.firstPhytomer === null) {
-                        //Must tell firstPhytomer to recalculate internode angle because it did not know it was the
+                        // Must tell firstPhytomer to recalculate internode angle because it did not know it was the
                         //      first phytomer until after drawing plant got this pointer back.
                         return
                     }
