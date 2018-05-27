@@ -28,30 +28,33 @@ const kTraverseLeft = 1
 const kTraverseRight = 2
 const kTraverseNext = 3
 const kTraverseDone = 4
-const kActivityNone = 0
-const kActivityNextDay = 1
-const kActivityDemandVegetative = 2
-const kActivityDemandReproductive = 3
-const kActivityGrowVegetative = 4
-const kActivityGrowReproductive = 5
-const kActivityStartReproduction = 6
-const kActivityFindPlantPartAtPosition = 7
-const kActivityDraw = 8
-const kActivityReport = 9
-const kActivityStream = 10
-const kActivityFree = 11
-const kActivityVegetativeBiomassThatCanBeRemoved = 12
-const kActivityRemoveVegetativeBiomass = 13
-const kActivityReproductiveBiomassThatCanBeRemoved = 14
-const kActivityRemoveReproductiveBiomass = 15
-const kActivityGatherStatistics = 16
-const kActivityStandingDeadBiomassThatCanBeRemoved = 17
-const kActivityRemoveStandingDeadBiomass = 18
-const kActivityCountPlantParts = 19
-const kActivityFindPartForPartID = 20
-const kActivityCountTotalMemoryUse = 21
-const kActivityCalculateBiomassForGravity = 22
-const kActivityCountPointsAndTrianglesFor3DExport = 23
+
+export enum Activity {
+    kActivityNone = 0,
+    kActivityNextDay = 1,
+    kActivityDemandVegetative = 2,
+    kActivityDemandReproductive = 3,
+    kActivityGrowVegetative = 4,
+    kActivityGrowReproductive = 5,
+    kActivityStartReproduction = 6,
+    kActivityFindPlantPartAtPosition = 7,
+    kActivityDraw = 8,
+    kActivityReport = 9,
+    kActivityStream = 10,
+    kActivityFree = 11,
+    kActivityVegetativeBiomassThatCanBeRemoved = 12,
+    kActivityRemoveVegetativeBiomass = 13,
+    kActivityReproductiveBiomassThatCanBeRemoved = 14,
+    kActivityRemoveReproductiveBiomass = 15,
+    kActivityGatherStatistics = 16,
+    kActivityStandingDeadBiomassThatCanBeRemoved = 17,
+    kActivityRemoveStandingDeadBiomass = 18,
+    kActivityCountPlantParts = 19,
+    kActivityFindPartForPartID = 20,
+    kActivityCountTotalMemoryUse = 21,
+    kActivityCalculateBiomassForGravity = 22,
+    kActivityCountPointsAndTrianglesFor3DExport = 23,
+}
 
 
 // const
@@ -247,14 +250,14 @@ export class PdTraverser {
                 case kTraverseLeft:
                     phytomerTraversing.traversingDirection += 1
                     if (phytomerTraversing.leftBranchPlantPart !== null) {
-                        if ((this.mode === kActivityDraw)) {
+                        if ((this.mode === Activity.kActivityDraw)) {
                             this.plant.turtle.push()
                         }
                         phytomerTraversing.leftBranchPlantPart.traverseActivity(this.mode, this)
                         if ((phytomerTraversing.leftBranchPlantPart.isPhytomer())) {
                             phytomerTraversing = phytomerTraversing.leftBranchPlantPart
                             phytomerTraversing.traversingDirection = kTraverseLeft
-                        } else if ((this.mode === kActivityDraw)) {
+                        } else if ((this.mode === Activity.kActivityDraw)) {
                             this.plant.turtle.pop()
                         }
                     }
@@ -262,14 +265,14 @@ export class PdTraverser {
                 case kTraverseRight:
                     phytomerTraversing.traversingDirection += 1
                     if (phytomerTraversing.rightBranchPlantPart !== null) {
-                        if ((this.mode === kActivityDraw)) {
+                        if ((this.mode === Activity.kActivityDraw)) {
                             this.plant.turtle.push()
                         }
                         phytomerTraversing.rightBranchPlantPart.traverseActivity(this.mode, this)
                         if ((phytomerTraversing.rightBranchPlantPart.isPhytomer())) {
                             phytomerTraversing = phytomerTraversing.rightBranchPlantPart
                             phytomerTraversing.traversingDirection = kTraverseLeft
-                        } else if ((this.mode === kActivityDraw)) {
+                        } else if ((this.mode === Activity.kActivityDraw)) {
                             this.plant.turtle.pop()
                         }
                     }
@@ -277,7 +280,7 @@ export class PdTraverser {
                 case kTraverseNext:
                     phytomerTraversing.traversingDirection += 1
                     if (phytomerTraversing.nextPlantPart !== null) {
-                        if ((this.mode === kActivityDraw)) {
+                        if ((this.mode === Activity.kActivityDraw)) {
                             this.plant.turtle.push()
                             this.plant.turtle.rotateX(this.plant.pGeneral.phyllotacticRotationAngle * 256 / 360)
                         }
@@ -285,7 +288,7 @@ export class PdTraverser {
                         if ((phytomerTraversing.nextPlantPart.isPhytomer())) {
                             phytomerTraversing = phytomerTraversing.nextPlantPart
                             phytomerTraversing.traversingDirection = kTraverseLeft
-                        } else if ((this.mode === kActivityDraw)) {
+                        } else if ((this.mode === Activity.kActivityDraw)) {
                             this.plant.turtle.pop()
                         }
                     }
@@ -294,7 +297,7 @@ export class PdTraverser {
                     phytomerTraversing.traversingDirection = kTraverseNone
                     const lastPhytomer: PdInternode = phytomerTraversing
                     phytomerTraversing = phytomerTraversing.phytomerAttachedTo
-                    if ((this.mode === kActivityFree)) {
+                    if ((this.mode === Activity.kActivityFree)) {
                         // TODO: Use or remove: lastPhytomer.free
                         if (phytomerTraversing !== null) {
                             if ((phytomerTraversing.traversingDirection === kTraverseLeft + 1)) {
@@ -309,13 +312,13 @@ export class PdTraverser {
                     if (phytomerTraversing === null) {
                         break
                     }
-                    if ((this.mode === kActivityDraw)) {
+                    if ((this.mode === Activity.kActivityDraw)) {
                         //special drawing stuff - if returning from left or right branch draw, pop turtle
                         //	if (phytomerTraversing.traversingDirection = kTraverseLeft + 1)
                         //           or (phytomerTraversing.traversingDirection =  kTraverseRight + 1)  then 
                         this.plant.turtle.pop()
                     }
-                    if ((this.mode === kActivityCalculateBiomassForGravity)) {
+                    if ((this.mode === Activity.kActivityCalculateBiomassForGravity)) {
                         phytomerTraversing.traverseActivity(this.mode, this)
                     }
                     break
@@ -325,7 +328,7 @@ export class PdTraverser {
             if ((traversalCount !== 0)) {
                 i += 1
             }
-            if ((this.mode === kActivityDraw) && (this.showDrawingProgress)) {
+            if ((this.mode === Activity.kActivityDraw) && (this.showDrawingProgress)) {
                 if (this.totalPlantParts % 4 !== 0) {
                     continue
                 }

@@ -1,6 +1,6 @@
 // PdPlant was unit Uplant
 
-import { PdStreamableObject, ExportFormats, messageForExceptionType, boundForString, DebugPrint, FieldType, IndexType, SinglePoint, ucursor, MainForm, PdBitmap } from "./temporary";
+import { PdStreamableObject, ExportFormats, messageForExceptionType, boundForString, DebugPrint, FieldType, IndexType, SinglePoint, ucursor, MainForm, PdBitmap, kExportPartLast, PdClassAndVersionInformationRecord, PdFiler } from "./temporary";
 import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor, ColorDefs, StrToIntDef, IntToStr, compareTextIgnoreCase } from "./common";
 import { KfObject3D } from "./KfObject3D";
 import { TPoint } from "./TPoint";
@@ -10,6 +10,8 @@ import { SCurveStructure, intMin, intMax, safedivExcept, min, stringToSCurve, ca
 import { KfPoint3D } from "./KfPoint3D";
 import { PdRandom } from "./PdRandom";
 import { domain, DrawMode } from "./PdDomain";
+import { PdTraverser, Activity } from "./PdTraverser";
+import { ClassId } from "./uclasses";
 
 /* Remove unused imports
 from conversion_common import *
@@ -419,7 +421,7 @@ export class PdPlant extends PdStreamableObject {
     // accounting variables 
     // used in parameter changes 
     // -------------------------------------------------------------------------------------- creation/destruction 
-    constructor(): void {
+    constructor() {
         super()
         this.turtle = null
         this.firstPhytomer = null
@@ -462,8 +464,8 @@ export class PdPlant extends PdStreamableObject {
     
     freeAllDrawingPlantParts(): void {
         if ((this.firstPhytomer !== null)) {
-            const traverser: PdTraverser = utravers.PdTraverser().createWithPlant(this)
-            traverser.traverseWholePlant(utravers.kActivityFree)
+            const traverser: PdTraverser = new PdTraverser(this)
+            traverser.traverseWholePlant(Activity.kActivityFree)
             this.firstPhytomer = null
             // v1.6b1
             this.partsCreated = 0
@@ -543,7 +545,7 @@ export class PdPlant extends PdStreamableObject {
             this.turtle.drawingSurface.pane.Brush.Style = delphi_compatability.TFPBrushStyle.bsSolid
             this.turtle.drawingSurface.pane.Pen.Style = delphi_compatability.TFPPenStyle.psSolid
         }
-        this.turtle.setLineColor(delphi_compatability.clGreen)
+        this.turtle.setLineColor(ColorDefs.clGreen)
         this.turtle.push()
         this.turtle.rotateZ(64)
         this.turtle.rotateX(this.xRotation * 256 / 360)
@@ -552,11 +554,11 @@ export class PdPlant extends PdStreamableObject {
         this.turtle.rotateZ(this.zRotation * 256 / 360)
         this.turtle.drawingSurface.lineColor = ColorDefs.clGreen
         if ((this.firstPhytomer !== null)) {
-            const traverser: PdTraverser = utravers.PdTraverser().createWithPlant(this)
+            const traverser: PdTraverser = new PdTraverser(this)
             traverser.plantPartsDrawnAtStart = this.plantPartsDrawnAtStart
             // if not drawing 3D objects, probably drawing just to get bounds
             traverser.showDrawingProgress = this.turtle.drawOptions.draw3DObjects
-            traverser.traverseWholePlant(utravers.kActivityDraw)
+            traverser.traverseWholePlant(Activity.kActivityDraw)
         }
         this.turtle.pop()
         // recalculating colors occurs during drawing of leaves and internodes if necessary 
@@ -566,16 +568,16 @@ export class PdPlant extends PdStreamableObject {
     countPlantParts(): void {
         this.totalPlantParts = 0
         if ((this.firstPhytomer !== null)) {
-            const traverser: PdTraverser = utravers.PdTraverser().createWithPlant(this)
-            traverser.traverseWholePlant(utravers.kActivityCountPlantParts)
+            const traverser: PdTraverser = new PdTraverser(this)
+            traverser.traverseWholePlant(Activity.kActivityCountPlantParts)
             this.totalPlantParts = traverser.totalPlantParts
         }
     }
     
     countPlantPartsFor3DOutput(outputType: short, stemCylinderFaces: short): void { 
         if ((this.firstPhytomer !== null)) {
-            const traverser: PdTraverser = utravers.PdTraverser().createWithPlant(this)
-            traverser.traverseWholePlant(utravers.kActivityCountPointsAndTrianglesFor3DExport)
+            const traverser: PdTraverser = new PdTraverser(this)
+            traverser.traverseWholePlant(Activity.kActivityCountPointsAndTrianglesFor3DExport)
             this.totalPlantParts = traverser.totalPlantParts
             switch (outputType) {
                 case ExportFormats.kPOV:
@@ -591,7 +593,7 @@ export class PdPlant extends PdStreamableObject {
             }
             // this is only important for LWO and OBJ, but people will like to see it anyway
             this.total3DExportMaterials = 0
-            for (let i = 0; i <= u3dexport.kExportPartLast; i++) {
+            for (let i = 0; i <= kExportPartLast; i++) {
                 if (traverser.exportTypeCounts[i] > 0) {
                     this.total3DExportMaterials += 1
                 }
@@ -610,8 +612,8 @@ export class PdPlant extends PdStreamableObject {
         this.totalMemoryUsed_K = result
         if ((this.firstPhytomer !== null)) {
             // plant parts
-            const traverser: PdTraverser = utravers.PdTraverser().createWithPlant(this)
-            traverser.traverseWholePlant(utravers.kActivityCountTotalMemoryUse)
+            const traverser: PdTraverser = new PdTraverser(this)
+            traverser.traverseWholePlant(Activity.kActivityCountTotalMemoryUse)
             result = result + traverser.totalMemorySize / 1024.0
             this.totalMemoryUsed_K = result
         }
@@ -1348,7 +1350,6 @@ export class PdPlant extends PdStreamableObject {
         let remWidth: float
         let fileExportSurface: KfFileExportSurface
         let relativeBasePoint_mm: SinglePoint = new SinglePoint()
-        let i: int
         let fixRotation: short
         
         if (this.firstPhytomer === null) {
@@ -1376,7 +1377,7 @@ export class PdPlant extends PdStreamableObject {
         this.turtle.writingTo = outputType
         fileExportSurface.startPlant(this.name, indexOfPlant)
         if (outputType === ExportFormats.k3DS) {
-            for (i = 0; i <= u3dexport.kExportPartLast; i++) {
+            for (let i = 0; i <= kExportPartLast; i++) {
                 // for 3DS need to write out all colors in front especially; must be done before reminder
                 (fileExportSurface).writeMaterialDescription(i, this.colorForDXFPartType(i))
             }
@@ -1462,11 +1463,9 @@ export class PdPlant extends PdStreamableObject {
     
     // ----------------------------------------------------------------------------------  i/o and data transfer 
     defaultAllParameters(): void {
-        let param: PdParameter
-
         if (domain.parameterManager.parameters.Count > 0) {
             for (let i = 0; i < domain.parameterManager.parameters.Count; i++) {
-                param = uparams.PdParameter(domain.parameterManager.parameters.Items[i])
+                const param: PdParameter = uparams.PdParameter(domain.parameterManager.parameters.Items[i])
                 if (param.fieldType !== FieldType.kFieldHeader) {
                     this.defaultParameter(param, kDontCheckForUnreadParams)
                 }
@@ -1841,12 +1840,11 @@ export class PdPlant extends PdStreamableObject {
     
     finishLoadingOrDefaulting(checkForUnreadParams: boolean): void {
         let param: PdParameter
-        let i: short
         
         if (checkForUnreadParams) {
             if (domain.parameterManager.parameters.Count > 0) {
-                for (i = 0; i <= domain.parameterManager.parameters.Count - 1; i++) {
-                    param = uparams.PdParameter(domain.parameterManager.parameters.Items[i])
+                for (let i = 0; i < domain.parameterManager.parameters.length; i++) {
+                    param = uparams.PdParameter(domain.parameterManager.parameters[i])
                     if ((!param.valueHasBeenReadForCurrentPlant) && (param.fieldType !== FieldType.kFieldHeader)) {
                         this.defaultParameter(param, checkForUnreadParams)
                     }
@@ -2342,20 +2340,15 @@ export class PdPlant extends PdStreamableObject {
         return result
     }
     
-    tdoRandomlyPickedFromCurrentLibrary(tdos: TListCollection): KfObject3D {
-        let result = new KfObject3D()
-        let index: short
-        
-        result = null
+    tdoRandomlyPickedFromCurrentLibrary(tdos: KfObject3D[]): KfObject3D | null {
         if (tdos === null) {
-            return result
+            return null
         }
-        if (tdos.Count <= 0) {
-            return result
+        if (tdos.length <= 0) {
+            return null
         }
-        index = umath.intMax(0, umath.intMin(tdos.Count - 1, intround(this.breedingGenerator.zeroToOne() * tdos.Count)))
-        result = tdos.Items[index]
-        return result
+        const index = intMax(0, intMin(tdos.length - 1, intround(this.breedingGenerator.zeroToOne() * tdos.length)))
+        return tdos[index]
     }
     
     // -------------------------------------------------------------------------------  data transfer for binary copy 
@@ -2518,9 +2511,9 @@ export class PdPlant extends PdStreamableObject {
             hasFirstPhytomer = filer.streamBoolean(hasFirstPhytomer)
         }
         if (hasFirstPhytomer) {
-            const traverser: PdTraverser = utravers.PdTraverser().createWithPlant(this)
+            const traverser: PdTraverser = new PdTraverser(this)
             traverser.filer = filer
-            traverser.traverseWholePlant(utravers.kActivityStream)
+            traverser.traverseWholePlant(Activity.kActivityStream)
         }
         this.previewCache.streamUsingFiler(filer)
         if (filer.isReading()) {
@@ -2597,7 +2590,7 @@ export class PdPlant extends PdStreamableObject {
             if (this.shootBiomass_pctMPB + this.reproBiomass_pctMPB > 100.0) {
                 this.shootBiomass_pctMPB = this.shootBiomass_pctMPB
             }
-            const traverser: PdTraverser = utravers.PdTraverser().createWithPlant(this)
+            const traverser: PdTraverser = new PdTraverser(this)
             try {
                 if ((this.firstPhytomer === null)) {
                     // If first day, create first phytomer. Assume seed reserves are placed into this phytomer.
@@ -2617,7 +2610,7 @@ export class PdPlant extends PdStreamableObject {
                     this.floweringHasStarted = true
                     this.ageAtWhichFloweringStarted = this.age
                     // tell all meristems to switch over 
-                    traverser.traverseWholePlant(utravers.kActivityStartReproduction)
+                    traverser.traverseWholePlant(Activity.kActivityStartReproduction)
                 }
                 this.allocateOrRemoveBiomassWithTraverser(traverser)
                 if (this.firstPhytomer !== null) {
@@ -2625,7 +2618,7 @@ export class PdPlant extends PdStreamableObject {
                 } else {
                     traverser.ageOfYoungestPhytomer = 0
                 }
-                traverser.traverseWholePlant(utravers.kActivityNextDay)
+                traverser.traverseWholePlant(Activity.kActivityNextDay)
                 this.ageOfYoungestPhytomer = traverser.ageOfYoungestPhytomer
                 this.age += 1
             } finally {
@@ -2674,19 +2667,19 @@ export class PdPlant extends PdStreamableObject {
         reproAddition_pctMPB, reproReduction_pctMPB = cancelOutOppositeAmounts(reproAddition_pctMPB, reproReduction_pctMPB)
         if (shootAddition_pctMPB > 0.0) {
             // allocate new shoot biomass 
-            this.unallocatedNewVegetativeBiomass_pctMPB = this.allocateOrRemoveParticularBiomass(shootAddition_pctMPB, this.unallocatedNewVegetativeBiomass_pctMPB, utravers.kActivityDemandVegetative, utravers.kActivityGrowVegetative, traverser)
+            this.unallocatedNewVegetativeBiomass_pctMPB = this.allocateOrRemoveParticularBiomass(shootAddition_pctMPB, this.unallocatedNewVegetativeBiomass_pctMPB, Activity.kActivityDemandVegetative, Activity.kActivityGrowVegetative, traverser)
         }
         if (shootReduction_pctMPB > 0.0) {
             // remove dead shoot biomass 
-            this.unremovedDeadVegetativeBiomass_pctMPB = this.allocateOrRemoveParticularBiomass(shootReduction_pctMPB, this.unremovedDeadVegetativeBiomass_pctMPB, utravers.kActivityVegetativeBiomassThatCanBeRemoved, utravers.kActivityRemoveVegetativeBiomass, traverser)
+            this.unremovedDeadVegetativeBiomass_pctMPB = this.allocateOrRemoveParticularBiomass(shootReduction_pctMPB, this.unremovedDeadVegetativeBiomass_pctMPB, Activity.kActivityVegetativeBiomassThatCanBeRemoved, Activity.kActivityRemoveVegetativeBiomass, traverser)
         }
         if (reproAddition_pctMPB > 0.0) {
             // allocate new fruit biomass 
-            this.unallocatedNewReproductiveBiomass_pctMPB = this.allocateOrRemoveParticularBiomass(reproAddition_pctMPB, this.unallocatedNewReproductiveBiomass_pctMPB, utravers.kActivityDemandReproductive, utravers.kActivityGrowReproductive, traverser)
+            this.unallocatedNewReproductiveBiomass_pctMPB = this.allocateOrRemoveParticularBiomass(reproAddition_pctMPB, this.unallocatedNewReproductiveBiomass_pctMPB, Activity.kActivityDemandReproductive, Activity.kActivityGrowReproductive, traverser)
         }
         if (reproReduction_pctMPB > 0.0) {
             // remove dead fruit biomass 
-            this.unremovedDeadReproductiveBiomass_pctMPB = this.allocateOrRemoveParticularBiomass(reproReduction_pctMPB, this.unremovedDeadReproductiveBiomass_pctMPB, utravers.kActivityReproductiveBiomassThatCanBeRemoved, utravers.kActivityRemoveReproductiveBiomass, traverser)
+            this.unremovedDeadReproductiveBiomass_pctMPB = this.allocateOrRemoveParticularBiomass(reproReduction_pctMPB, this.unremovedDeadReproductiveBiomass_pctMPB, Activity.kActivityReproductiveBiomassThatCanBeRemoved, Activity.kActivityRemoveReproductiveBiomass, traverser)
         }
     }
     
@@ -2726,9 +2719,9 @@ export class PdPlant extends PdStreamableObject {
         if (statistics === null) {
             return
         }
-        const traverser: PdTraverser = utravers.PdTraverser().createWithPlant(this)
+        const traverser: PdTraverser = new PdTraverser(this)
         traverser.statistics = statistics
-        traverser.traverseWholePlant(utravers.kActivityGatherStatistics)
+        traverser.traverseWholePlant(Activity.kActivityGatherStatistics)
 
         // set undistributed amounts in statistics 
         statistics.liveBiomass_pctMPB[utravers.kStatisticsPartTypeUnallocatedNewVegetativeBiomass] = this.unallocatedNewVegetativeBiomass_pctMPB
@@ -2740,8 +2733,8 @@ export class PdPlant extends PdStreamableObject {
     report(): void {
         if ((this.firstPhytomer !== null)) {
             DebugPrint("---------------------- Start plant report")
-            const traverser: PdTraverser = utravers.PdTraverser().createWithPlant(this)
-            traverser.traverseWholePlant(utravers.kActivityReport)
+            const traverser: PdTraverser = new PdTraverser(this)
+            traverser.traverseWholePlant(Activity.kActivityReport)
             DebugPrint("---------------------- End plant report")
         }
     }
@@ -2795,10 +2788,10 @@ export class PdPlant extends PdStreamableObject {
     plantPartForPartID(partID: long): TObject | null {
         let result: TObject | null = null
         if (this.firstPhytomer !== null) {
-            const traverser: PdTraverser = utravers.PdTraverser().createWithPlant(this)
+            const traverser: PdTraverser = new PdTraverser(this)
             traverser.foundPlantPart = null
             traverser.partID = partID
-            traverser.traverseWholePlant(utravers.kActivityFindPartForPartID)
+            traverser.traverseWholePlant(Activity.kActivityFindPartForPartID)
             result = traverser.foundPlantPart
         }
         return result
