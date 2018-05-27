@@ -1,11 +1,13 @@
 // PdPlant was unit Uplant
 
-import { PdStreamableObject } from "./temporary";
-import { short, float, double, long, intround } from "./common";
+import { PdStreamableObject, ExportFormats } from "./temporary";
+import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor } from "./common";
 import { KfObject3D } from "./KfObject3D";
 import { TPoint } from "./TPoint";
 import { TRect } from "./TRect";
 import { KfTurtle } from "./KfTurtle";
+import { SCurveStructure, intMin, intMax, safedivExcept, min } from "./umath";
+import { KfPoint3D } from "./KfPoint3D";
 
 /* Remove unused imports
 from conversion_common import *
@@ -319,7 +321,7 @@ export interface ParamsRoot {
 const kExtraForRootTopProblem = 2
 
 
-function cancelOutOppositeAmounts(amountAdded: float, amountTakenAway: float): void {
+function cancelOutOppositeAmounts(amountAdded: float, amountTakenAway: float): [float, float] {
     if ((amountAdded > 0.0) && (amountTakenAway > 0.0)) {
         if (amountAdded === amountTakenAway) {
             amountAdded = 0.0
@@ -332,7 +334,7 @@ function cancelOutOppositeAmounts(amountAdded: float, amountTakenAway: float): v
             amountAdded = 0.0
         }
     }
-    return amountAdded, amountTakenAway
+    return [amountAdded, amountTakenAway]
 }
 
 
@@ -529,7 +531,7 @@ export class PdPlant extends PdStreamableObject {
     }
     
     setName(newName: string): void {
-        this.name = UNRESOLVED.copy(newName, 1, kPlantNameLength)
+        this.name = newName.substring(0, kPlantNameLength)
     }
     
     // ----------------------------------------------------------------------------------------- age management 
@@ -563,7 +565,7 @@ export class PdPlant extends PdStreamableObject {
     }
     
     setAge(newAge: short): void {
-        newAge = umath.intMax(0, umath.intMin(this.pGeneral.ageAtMaturity, newAge))
+        newAge = intMax(0, intMin(this.pGeneral.ageAtMaturity, newAge))
         try {
             ucursor.cursor_startWait()
             this.reset()
@@ -581,7 +583,7 @@ export class PdPlant extends PdStreamableObject {
         
         utravers.cancelDrawing = false
         if ((this.turtle === null)) {
-            throw new GeneralException.create("Problem: Nil turtle in method PdPlant.draw.")
+            throw new Error("Problem: Nil turtle in method PdPlant.draw.")
         }
         if (this.turtle.drawingSurface.pane !== null) {
             this.turtle.drawingSurface.pane.Brush.Style = delphi_compatability.TFPBrushStyle.bsSolid
@@ -859,7 +861,7 @@ export class PdPlant extends PdStreamableObject {
             return
         }
         if (udomain.domain.options.cachePlantBitmaps) {
-            drawingRect = Rect(0, 0, umain.MainForm.drawingPaintBox.Width, umain.MainForm.drawingPaintBox.Height)
+            drawingRect = new TRect(0, 0, umain.MainForm.drawingPaintBox.Width, umain.MainForm.drawingPaintBox.Height)
             intersectResult = delphi_compatability.IntersectRect(intersectRect_pixels, this.boundsRect_pixels(), drawingRect)
             if ((intersectResult) && (!this.hidden) && (this.previewCache.Width < 5)) {
                 this.recalculateBounds(kDrawNow)
@@ -900,14 +902,14 @@ export class PdPlant extends PdStreamableObject {
             umain.MainForm.updateForChangeToPlantBitmaps()
             return
         }
-        bytesThisBitmapWillBe = intround(usupport.rWidth(this.boundsRect_pixels()) * usupport.rHeight(this.boundsRect_pixels()) * umain.MainForm.screenBytesPerPixel())
+        bytesThisBitmapWillBe = intround(this.boundsRect_pixels().width * this.boundsRect_pixels().height * umain.MainForm.screenBytesPerPixel())
         if (!umain.MainForm.roomForPlantBitmap(this, bytesThisBitmapWillBe)) {
             return
         }
         oldBasePoint = this.basePoint_pixels()
         try {
             this.setBasePoint_pixels(Point(this.basePoint_pixels().X - this.boundsRect_pixels().Left, this.basePoint_pixels().Y - this.boundsRect_pixels().Top))
-            this.resizeCacheIfNecessary(this.previewCache, Point(usupport.rWidth(this.boundsRect_pixels()), usupport.rHeight(this.boundsRect_pixels())), kInMainWindow)
+            this.resizeCacheIfNecessary(this.previewCache, Point(this.boundsRect_pixels().width, this.boundsRect_pixels().height), kInMainWindow)
             this.previewCache.TransparentColor = udomain.domain.options.transparentColor
             ubmpsupport.fillBitmap(this.previewCache, udomain.domain.options.transparentColor)
             // showing progress here is mainly for really complicated plants; most plants won't need it
@@ -984,7 +986,7 @@ export class PdPlant extends PdStreamableObject {
             this.turtle.drawingSurface.pane = cache.Canvas
             if (!this.fixedPreviewScale) {
                 this.drawingScale_PixelsPerMm = 10.0
-                drawPosition = Point(cache.Width / 2, cache.Height - 5)
+                drawPosition = new TPoint(cache.Width / 2, cache.Height - 5)
                 // 1. draw to figure scale to center boundsRect in cache size 
                 this.setTurtleUpForPreviewScratch(this.drawingScale_PixelsPerMm, drawPosition)
                 // nothing-messes up paint
@@ -995,28 +997,28 @@ export class PdPlant extends PdStreamableObject {
                 }
                 this.setBoundsRect_pixels(this.getTurtleBoundsRect())
                 // now change the scale to make the boundsRect fit the drawRect 
-                drawnWidth = usupport.rWidth(this.boundsRect_pixels())
-                drawnHeight = usupport.rHeight(this.boundsRect_pixels())
+                drawnWidth = this.boundsRect_pixels().width
+                drawnHeight = this.boundsRect_pixels().height
                 if ((drawnWidth > 0) && (drawnHeight > 0)) {
-                    newScaleX = umath.safedivExcept(this.drawingScale_PixelsPerMm * size.X, drawnWidth, 0.1)
+                    newScaleX = safedivExcept(this.drawingScale_PixelsPerMm * size.X, drawnWidth, 0.1)
                     if (considerDomainScale) {
-                        newScaleX = umath.safedivExcept(newScaleX, udomain.domain.plantDrawScale_PixelsPerMm(), newScaleX)
+                        newScaleX = safedivExcept(newScaleX, udomain.domain.plantDrawScale_PixelsPerMm(), newScaleX)
                     } else {
                         newScaleX = newScaleX * 0.9
                     }
-                    newScaleY = umath.safedivExcept(this.drawingScale_PixelsPerMm * size.Y, drawnHeight, 0.1)
+                    newScaleY = safedivExcept(this.drawingScale_PixelsPerMm * size.Y, drawnHeight, 0.1)
                     if (considerDomainScale) {
-                        newScaleY = umath.safedivExcept(newScaleY, udomain.domain.plantDrawScale_PixelsPerMm(), newScaleY)
+                        newScaleY = safedivExcept(newScaleY, udomain.domain.plantDrawScale_PixelsPerMm(), newScaleY)
                     } else {
                         newScaleY = newScaleY * 0.9
                     }
-                    this.drawingScale_PixelsPerMm = umath.min(newScaleX, newScaleY)
+                    this.drawingScale_PixelsPerMm = min(newScaleX, newScaleY)
                     changed = this.drawingScale_PixelsPerMm !== 1.0
                 }
             }
             if (!this.fixedDrawPosition) {
                 // draw to find drawPosition that will center new boundsrect in cache 
-                drawPosition = Point(cache.Width / 2, cache.Height - 5)
+                drawPosition = new TPoint(cache.Width / 2, cache.Height - 5)
                 this.setTurtleUpForPreviewScratch(this.drawingScale_PixelsPerMm, drawPosition)
                 // nothing-messes up paint
                 try {
@@ -1025,8 +1027,8 @@ export class PdPlant extends PdStreamableObject {
                     // pass
                 }
                 this.setBoundsRect_pixels(this.getTurtleBoundsRect())
-                bestLeft = cache.Width / 2 - usupport.rWidth(this.boundsRect_pixels()) / 2
-                bestTop = cache.Height / 2 - usupport.rHeight(this.boundsRect_pixels()) / 2
+                bestLeft = cache.Width / 2 - this.boundsRect_pixels().width / 2
+                bestTop = cache.Height / 2 - this.boundsRect_pixels().height / 2
                 drawPosition.X = drawPosition.X - (this.boundsRect_pixels().Left - bestLeft)
                 drawPosition.Y = drawPosition.Y - (this.boundsRect_pixels().Top - bestTop)
                 this.drawPositionIfFixed = drawPosition
@@ -1070,7 +1072,7 @@ export class PdPlant extends PdStreamableObject {
     }
     
     calculateDrawingScaleToLookTheSameWithDomainScale(): void {
-        this.drawingScale_PixelsPerMm = umath.safedivExcept(this.drawingScale_PixelsPerMm, udomain.domain.plantManager.plantDrawScale_PixelsPerMm, 0)
+        this.drawingScale_PixelsPerMm = safedivExcept(this.drawingScale_PixelsPerMm, udomain.domain.plantManager.plantDrawScale_PixelsPerMm, 0)
     }
     
     shrinkPreviewCache(): void {
@@ -1239,8 +1241,8 @@ export class PdPlant extends PdStreamableObject {
     }
     
     setBasePoint_pixels(aPoint_pixels: TPoint): void {
-        this.basePoint_mm.x = umath.safedivExcept(aPoint_pixels.X, udomain.domain.plantDrawScale_PixelsPerMm(), 0) - udomain.domain.plantDrawOffset_mm().x
-        this.basePoint_mm.y = umath.safedivExcept(aPoint_pixels.Y, udomain.domain.plantDrawScale_PixelsPerMm(), 0) - udomain.domain.plantDrawOffset_mm().y
+        this.basePoint_mm.x = safedivExcept(aPoint_pixels.X, udomain.domain.plantDrawScale_PixelsPerMm(), 0) - udomain.domain.plantDrawOffset_mm().x
+        this.basePoint_mm.y = safedivExcept(aPoint_pixels.Y, udomain.domain.plantDrawScale_PixelsPerMm(), 0) - udomain.domain.plantDrawOffset_mm().y
     }
     
     setBoundsRect_pixels(aRect_pixels: TRect): void {
@@ -1304,8 +1306,8 @@ export class PdPlant extends PdStreamableObject {
         theRect.Right = theRect.Right + delta_pixels.X
         theRect.Top = theRect.Top + delta_pixels.Y
         theRect.Bottom = theRect.Bottom + delta_pixels.Y
-        delta_mm.x = umath.safedivExcept(delta_pixels.X, udomain.domain.plantDrawScale_PixelsPerMm(), 0)
-        delta_mm.y = umath.safedivExcept(delta_pixels.Y, udomain.domain.plantDrawScale_PixelsPerMm(), 0)
+        delta_mm.x = safedivExcept(delta_pixels.X, udomain.domain.plantDrawScale_PixelsPerMm(), 0)
+        delta_mm.y = safedivExcept(delta_pixels.Y, udomain.domain.plantDrawScale_PixelsPerMm(), 0)
         this.basePoint_mm.x = this.basePoint_mm.x + delta_mm.x
         this.basePoint_mm.y = this.basePoint_mm.y + delta_mm.y
     }
@@ -1423,7 +1425,7 @@ export class PdPlant extends PdStreamableObject {
     }
     
     saveToGlobal3DOutputFile(indexOfPlant: short, translate: boolean, rectWithAllPlants: TRect, outputType: short, aTurtle: KfTurtle): void {
-        let remPoints: KfPoint3D[] /* 3 + 1 */
+        let remPoints: KfPoint3D[] = [new KfPoint3D(), new KfPoint3D(), new KfPoint3D(), new KfPoint3D()]
         let remWidth: float
         let fileExportSurface: KfFileExportSurface
         let relativeBasePoint_mm: SinglePoint
@@ -1435,17 +1437,17 @@ export class PdPlant extends PdStreamableObject {
         }
         this.turtle = aTurtle
         if (this.turtle === null) {
-            GeneralException.create("Problem: Nil turtle in PdPlant.saveToGlobal3DOutputFile.")
+            throw new Error("Problem: Nil turtle in PdPlant.saveToGlobal3DOutputFile.")
         }
         fileExportSurface = this.turtle.fileExportSurface()
         if (this.turtle === null) {
-            GeneralException.create("Problem: Nil export surface in PdPlant.saveToGlobal3DOutputFile.")
+            throw new Error("Problem: Nil export surface in PdPlant.saveToGlobal3DOutputFile.")
         }
         this.setUpTurtleFor3DOutput()
         if (translate) {
-            relativeBasePoint_mm.x = umath.safedivExcept(this.basePoint_pixels().X - rectWithAllPlants.Left, udomain.domain.plantDrawScale_PixelsPerMm(), 0) - udomain.domain.plantDrawOffset_mm().x
-            relativeBasePoint_mm.y = umath.safedivExcept(this.basePoint_pixels().Y - rectWithAllPlants.Top, udomain.domain.plantDrawScale_PixelsPerMm(), 0) - udomain.domain.plantDrawOffset_mm().y
-            if (outputType !== u3dexport.kPOV) {
+            relativeBasePoint_mm.x = safedivExcept(this.basePoint_pixels().X - rectWithAllPlants.Left, udomain.domain.plantDrawScale_PixelsPerMm(), 0) - udomain.domain.plantDrawOffset_mm().x
+            relativeBasePoint_mm.y = safedivExcept(this.basePoint_pixels().Y - rectWithAllPlants.Top, udomain.domain.plantDrawScale_PixelsPerMm(), 0) - udomain.domain.plantDrawOffset_mm().y
+            if (outputType !== ExportFormats.kPOV) {
                 // move plant to translate, except for for POV, where you translate and scale afterward
                 this.turtle.xyz(relativeBasePoint_mm.x, relativeBasePoint_mm.y, 0)
             } else {
@@ -1454,7 +1456,7 @@ export class PdPlant extends PdStreamableObject {
         }
         this.turtle.writingTo = outputType
         fileExportSurface.startPlant(this.name, indexOfPlant)
-        if (outputType === u3dexport.k3DS) {
+        if (outputType === ExportFormats.k3DS) {
             for (i = 0; i <= u3dexport.kExportPartLast; i++) {
                 // for 3DS need to write out all colors in front especially; must be done before reminder
                 (fileExportSurface).writeMaterialDescription(i, this.colorForDXFPartType(i))
@@ -1464,33 +1466,33 @@ export class PdPlant extends PdStreamableObject {
             }
         }
         switch (outputType) {
-            case u3dexport.kDXF:
+            case ExportFormats.kDXF:
                 // these rotations are to fix consistent misrotations - the option sits on top of them
                 // comes out sideways
                 fixRotation = 64
                 break
-            case u3dexport.kPOV:
+            case ExportFormats.kPOV:
                 // okay
                 fixRotation = 0
                 break
-            case u3dexport.k3DS:
+            case ExportFormats.k3DS:
                 // comes out sideways
                 fixRotation = 64
                 break
-            case u3dexport.kOBJ:
+            case ExportFormats.kOBJ:
                 // okay
                 fixRotation = 0
                 break
-            case u3dexport.kVRML:
+            case ExportFormats.kVRML:
                 // okay
                 fixRotation = 0
                 break
-            case u3dexport.kLWO:
+            case ExportFormats.kLWO:
                 // comes out upside down
                 fixRotation = 128
                 break
             default:
-                throw new GeneralException.create("Problem: Invalid export type in PdPlant.saveToGlobal3DOutputFile.")
+                throw new Error("Problem: Invalid export type in PdPlant.saveToGlobal3DOutputFile.")
                 break
         }
         this.turtle.rotateX(fixRotation)
@@ -1535,7 +1537,7 @@ export class PdPlant extends PdStreamableObject {
         this.turtle.drawingSurface.backColor = delphi_compatability.clRed
         this.turtle.drawingSurface.lineColor = delphi_compatability.clBlue
         this.turtle.xyz(0, 0, 0)
-        this.turtle.resetBoundsRect(Point(0, 0))
+        this.turtle.resetBoundsRect(new TPoint(0, 0))
     }
     
     // ----------------------------------------------------------------------------------  i/o and data transfer 
@@ -2079,7 +2081,7 @@ export class PdPlant extends PdStreamableObject {
                 hasRadioButtons = true
                 break
             default:
-                throw new GeneralException.create("Problem: Unknown field for plant string list " + IntToStr(fieldID) + " in method PdPlant.fillEnumStringList.")
+                throw new Error("Problem: Unknown field for plant string list " + IntToStr(fieldID) + " in method PdPlant.fillEnumStringList.")
                 break
         }
         return hasRadioButtons
@@ -2088,7 +2090,7 @@ export class PdPlant extends PdStreamableObject {
     transferObject3D(direction: int, myTdo: KfObject3D, otherTdo: KfObject3D): void {
         if ((myTdo === null) || (otherTdo === null)) {
             // assumption: both tdos exist 
-            throw new GeneralException.create("Problem: Nil 3D object in method PdPlant.transferObject3D.")
+            throw new Error("Problem: Nil 3D object in method PdPlant.transferObject3D.")
         }
         if (direction === kSetField) {
             myTdo.copyFrom(otherTdo)
@@ -2127,7 +2129,7 @@ export class PdPlant extends PdStreamableObject {
                     value = objectValue
                     break
                 default:
-                    throw new GeneralException.create("Problem: Unsupported transfer from field " + IntToStr(fieldType) + " in method PdPlant.MFD.")
+                    throw new Error("Problem: Unsupported transfer from field " + IntToStr(fieldType) + " in method PdPlant.MFD.")
                     break
             }
         } else if (direction === kSetField) {
@@ -2151,7 +2153,7 @@ export class PdPlant extends PdStreamableObject {
                     objectValue = value
                     break
                 default:
-                    throw new GeneralException.create("Problem: Unsupported transfer to field " + IntToStr(fieldType) + " in method PdPlant.MFD.")
+                    throw new Error("Problem: Unsupported transfer to field " + IntToStr(fieldType) + " in method PdPlant.MFD.")
                     break
             }
         }
@@ -2366,7 +2368,7 @@ export class PdPlant extends PdStreamableObject {
                         default:
                             // note that longints are not handled here - they are used only for position information
                             //            and not for normal parameters 
-                            throw new GeneralException.create("Problem: Invalid parameter type in method PdPlant.useBreedingOptionsAndPlantsToSetParameters.")
+                            throw new Error("Problem: Invalid parameter type in method PdPlant.useBreedingOptionsAndPlantsToSetParameters.")
                             break
                     // param loop
                     }
@@ -2628,7 +2630,7 @@ export class PdPlant extends PdStreamableObject {
                 if (this.firstPhytomer !== null) {
                     uintern.PdInternode(this.firstPhytomer).plant = this
                 } else {
-                    throw new GeneralException.create("Problem: Could not create first internode in method PdPlant.streamDataWithFiler.")
+                    throw new Error("Problem: Could not create first internode in method PdPlant.streamDataWithFiler.")
                 }
             }
         } else if (filer.isWriting()) {
@@ -2704,13 +2706,13 @@ export class PdPlant extends PdStreamableObject {
         
         try {
             // calculate overall biomass change using s curve 
-            fractionToMaturity_frn = umath.safedivExcept(this.age, this.pGeneral.ageAtMaturity, 0)
+            fractionToMaturity_frn = safedivExcept(this.age, this.pGeneral.ageAtMaturity, 0)
             newTotalBiomass_pctMPB = umath.max(0.0, umath.min(100.0, 100.0 * umath.scurve(fractionToMaturity_frn, this.pGeneral.growthSCurve.c1, this.pGeneral.growthSCurve.c2)))
             changeInTotalBiomassTodayAsPercentOfMPB_pct = newTotalBiomass_pctMPB - this.totalBiomass_pctMPB
             this.totalBiomass_pctMPB = newTotalBiomass_pctMPB
             if (this.floweringHasStarted) {
                 // divide up change into shoot and fruit, make changes to total shoot/fruit 
-                fractionReproBiomassToday_frn = umath.max(0, this.pGeneral.fractionReproductiveAllocationAtMaturity_frn * umath.safedivExcept(this.age - this.ageAtWhichFloweringStarted, this.pGeneral.ageAtMaturity - this.ageAtWhichFloweringStarted, 0))
+                fractionReproBiomassToday_frn = umath.max(0, this.pGeneral.fractionReproductiveAllocationAtMaturity_frn * safedivExcept(this.age - this.ageAtWhichFloweringStarted, this.pGeneral.ageAtMaturity - this.ageAtWhichFloweringStarted, 0))
                 newReproBiomass_pctMPB = fractionReproBiomassToday_frn * this.totalBiomass_pctMPB
                 this.changeInReproBiomassToday_pctMPB = newReproBiomass_pctMPB - this.reproBiomass_pctMPB
                 this.reproBiomass_pctMPB = newReproBiomass_pctMPB
@@ -2837,7 +2839,7 @@ export class PdPlant extends PdStreamableObject {
                     undistributedBiomass_pctMPB = biomassToAddOrRemove_pctMPB - totalDemandOrAvailableBiomass_pctMPB
                     traverser.fractionOfPotentialBiomass = 1.0
                 } else {
-                    traverser.fractionOfPotentialBiomass = umath.safedivExcept(biomassToAddOrRemove_pctMPB, totalDemandOrAvailableBiomass_pctMPB, 0)
+                    traverser.fractionOfPotentialBiomass = safedivExcept(biomassToAddOrRemove_pctMPB, totalDemandOrAvailableBiomass_pctMPB, 0)
                 }
                 traverser.traverseWholePlant(tellingMode)
             } else {
@@ -3074,7 +3076,7 @@ export class PdPlant extends PdStreamableObject {
                 result = this.pRoot.tdoParams.faceColor
                 break
             default:
-                throw new GeneralException.create("Problem: Invalid part type in method colorForDXFPartType.")
+                throw new Error("Problem: Invalid part type in method colorForDXFPartType.")
                 break
         }
         return result

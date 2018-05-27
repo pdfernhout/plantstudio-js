@@ -5,6 +5,7 @@ export type int = number
 export type short = number
 export type byte = number
 export type TColor = number
+export type TColorRef = number
 
 export function intround(x: number) {
     return Math.round(x)
@@ -48,5 +49,9 @@ export function StrToIntDef(value: string, defaultValue: number) {
 }
 
 export function MessageDialog(text: string, ignore1: any, ignore2: any, ignore3: any) {
+    alert(text)
+}
+
+export function ShowMessage(text: string) {
     alert(text)
 }
