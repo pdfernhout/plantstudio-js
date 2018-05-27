@@ -49,3 +49,8 @@ export enum ExportFormats {
     kLWO = 6,
     k3DExportTypeLast = 6
 }
+
+// TODO: Fix DebugPrint from udebug that should have result stored somewhere
+export function DebugPrint(aMessage: string): void {
+    console.log("DebugPrint: " + aMessage)
+}

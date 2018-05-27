@@ -1,8 +1,10 @@
 // unit umath
 
-import { float, int, double } from "./common";
+import { float, int, double, FloatToStr } from "./common";
 import { ifError } from "assert";
 import { TPoint } from "./TPoint";
+import { KfStringStream } from "./KfStringStream";
+import { DebugPrint } from "./temporary";
 
 /* TODO: Remove unnedded imports
 from conversion_common import *
@@ -15,7 +17,7 @@ import delphi_compatability
 */
 
 // record
-export interface SCurveStructure {
+export class SCurveStructure {
     x1: float
     y1: float
     x2: float
@@ -35,13 +37,13 @@ const kGetField = 0
 const kSetField = 1
 
 
-//returns zero for convenience
-//these consts are really defined in uplant.pas but we don't want to include it - keep current
+// returns zero for convenience
+// these consts are really defined in uplant.pas but we don't want to include it - keep current
 // error message - returns zero for convenience
 function ErrorMessage(errorString: string): float {
     let result = 0.0
     result = 0.0
-    udebug.DebugPrint(errorString)
+    DebugPrint(errorString)
     return result
 }
 
@@ -106,8 +108,8 @@ function pow(number: double, exponent: double): double {
 }
 
 // this function is needed to get around a bug in the development environment: if a negative
-//number is raised to a non-integer power, an exception should be raised but the environment
-//instead crashes. 
+// number is raised to a non-integer power, an exception should be raised but the environment
+// instead crashes. 
 // RE-RAISES EXCEPTION 
 function power(number: double, exponent: double): double {
     let result = 0.0
@@ -136,7 +138,7 @@ function power(number: double, exponent: double): double {
 function tan(x: double): double {
     let result = 0.0
     try {
-        result = sin(x) / cos(x)
+        result = Math.sin(x) / Math.cos(x)
     } catch (e) {
         result = ErrorMessage("Uncaught error in tangent function: " + FloatToStr(x))
         throw new Error("Exception in umath")
@@ -163,7 +165,7 @@ function arcCos(x: double): double {
 function arcSin(x: double): double {
     let result = 0.0
     try {
-        result = arctan(x / sqrt(1.0 - sqr(x)))
+        result = Math.atan(x / Math.sqrt(1.0 - sqr(x)))
     } catch (e) {
         result = ErrorMessage("Invalid number for arcSin: " + FloatToStr(x))
         throw new Error("Exception in umath")
@@ -199,7 +201,7 @@ function safeLn(x: double): double {
     if (x > 0.0) {
         try {
             // PDF PORT added semicolon
-            result = UNRESOLVED.ln(x)
+            result = Math.log(x)
         } catch (e) {
             ErrorMessage("Invalid number for natural log: " + FloatToStr(x))
             result = 1.0
@@ -225,7 +227,7 @@ function safeLnWithResult(x: double, failed: boolean): double {
         return result, failed
     }
     try {
-        temp = UNRESOLVED.ln(x)
+        temp = Math.log(x)
     } catch (e) {
         result = 1.0
         return result, failed
@@ -240,7 +242,7 @@ function safeExp(x: double): double {
     let result = 0.0
     try {
         // PDF PORT added semicolon
-        result = UNRESOLVED.exp(x)
+        result = Math.exp(x)
     } catch (e) {
         result = ErrorMessage("Invalid number for exponential function: " + FloatToStr(x))
         throw new Error("Exception in umath")
@@ -259,7 +261,7 @@ function safeExpWithResult(x: double, failed: boolean): double {
     result = 0.0
     temp = 0.0
     try {
-        temp = UNRESOLVED.exp(x)
+        temp = Math.exp(x)
     } catch (e) {
         return result, failed
     }
@@ -268,10 +270,10 @@ function safeExpWithResult(x: double, failed: boolean): double {
     return result, failed
 }
 
-//this function catches a divide by zero before it produces a not-a-number.
-//this can happen because of an underflow, an error in the code, or an unexpected condition.
-//this is a different approach than EPIC's which is basically to divide by the number plus a tiny float
-//for all cases (like 1e-20 or 1e-10)
+// this function catches a divide by zero before it produces a not-a-number.
+// this can happen because of an underflow, an error in the code, or an unexpected condition.
+// this is a different approach than EPIC's which is basically to divide by the number plus a tiny float
+// for all cases (like 1e-20 or 1e-10)
 // RE-RAISES EXCEPTION 
 function safediv(x: float, y: float): float {
     let result = 0.0
@@ -399,7 +401,7 @@ function calcSCurveCoeffs(sCurve: SCurveStructure): void {
         xx = safeLn(safediv(sCurve.x1, sCurve.y1) - sCurve.x1)
         sCurve.c2 = safediv((xx - safeLn(safediv(sCurve.x2, sCurve.y2) - sCurve.x2)), sCurve.x2 - sCurve.x1)
         sCurve.c1 = xx + sCurve.x1 * sCurve.c2
-    } catch (Exception e) {
+    } catch (e) {
         // set s curve to all acceptable values - safest 
         sCurve.x1 = 0.25
         sCurve.y1 = 0.1
@@ -451,7 +453,7 @@ function calcSCurveCoeffsWithResult(sCurve: SCurveStructure, failed: boolean): v
     return failed
 }
 
-function transferSCurveValue(direction: int, param: sCurveStructure, index: int, value: FIX_MISSING_ARG_TYPE): void {
+function transferSCurveValue(direction: int, param: SCurveStructure, index: int, value: FIX_MISSING_ARG_TYPE): void {
     if ((direction === kGetField)) {
         switch (index) {
             case 0:
@@ -497,8 +499,7 @@ function stringToSCurve(aString: string): SCurveStructure {
     result.c1 = 0
     result.c2 = 0
     // format is x1 y1 x2 y2 
-    const stream = new KfStringStream()
-    stream.onStringSeparator(aString, " ")
+    const stream = new KfStringStream(aString, " ")
     result.x1 = usupport.boundForString(stream.nextToken(), uparams.kFieldFloat, result.x1)
     result.y1 = usupport.boundForString(stream.nextToken(), uparams.kFieldFloat, result.y1)
     result.x2 = usupport.boundForString(stream.nextToken(), uparams.kFieldFloat, result.x2)
@@ -518,7 +519,7 @@ const kPlantProximityNeeded = 4
 
 
 // graphics 
-//CFK NOTE you may want to change this if you use this function
+// CFK NOTE you may want to change this if you use this function
 //  to actually click on plant parts 
 // this is not being used to select plant parts, the drawing surface is doing it
 function pointsAreCloseEnough(point1: TPoint, point2: TPoint): boolean {

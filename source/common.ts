@@ -26,6 +26,10 @@ export function StrToFloat(value: string) {
     return parseFloat(value)
 }
 
+export function FloatToStr(value: float) {
+    return "" + value
+}
+
 export function arrayRemove(theArray: Array<any>, item: any) {
     const index = theArray.indexOf(item)
     if (index !== -1) {
