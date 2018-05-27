@@ -9,6 +9,7 @@ import { KfTurtle } from "./KfTurtle";
 import { SCurveStructure, intMin, intMax, safedivExcept, min, stringToSCurve } from "./umath";
 import { KfPoint3D } from "./KfPoint3D";
 import { PdRandom } from "./PdRandom";
+import { domain, DrawMode } from "./PdDomain";
 
 /* Remove unused imports
 from conversion_common import *
@@ -479,7 +480,7 @@ export class PdPlant extends PdStreamableObject {
         cache.Height = 1
         cache.Transparent = true
         cache.TransparentMode = delphi_compatability.TTransparentMode.tmFixed
-        cache.TransparentColor = udomain.domain.options.backgroundColor
+        cache.TransparentColor = domain.options.backgroundColor
     }
     
     getName(): string {
@@ -725,7 +726,7 @@ export class PdPlant extends PdStreamableObject {
                 } else {
                     this.draw()
                 }
-                if ((this.computeBounds) && (!udomain.domain.drawingToMakeCopyBitmap)) {
+                if ((this.computeBounds) && (!domain.drawingToMakeCopyBitmap)) {
                     this.setBoundsRect_pixels(this.getTurtleBoundsRect())
                     this.enforceMinimumBoundsRect()
                     this.expandBoundsRectForLineWidth()
@@ -744,8 +745,8 @@ export class PdPlant extends PdStreamableObject {
             return
         }
         turtle.drawOptions.circlePoints = false
-        switch (udomain.domain.options.drawSpeed) {
-            case udomain.kDrawFast:
+        switch (domain.options.drawSpeed) {
+            case DrawMode.kDrawFast:
                 turtle.drawOptions.draw3DObjects = true
                 turtle.drawOptions.draw3DObjectsAsRects = true
                 turtle.drawOptions.drawStems = true
@@ -753,7 +754,7 @@ export class PdPlant extends PdStreamableObject {
                 turtle.drawOptions.sortPolygons = false
                 turtle.drawOptions.sortTdosAsOneItem = false
                 break
-            case udomain.kDrawMedium:
+            case DrawMode.kDrawMedium:
                 turtle.drawOptions.draw3DObjects = true
                 turtle.drawOptions.draw3DObjectsAsRects = false
                 turtle.drawOptions.drawStems = true
@@ -761,7 +762,7 @@ export class PdPlant extends PdStreamableObject {
                 turtle.drawOptions.sortPolygons = false
                 turtle.drawOptions.sortTdosAsOneItem = false
                 break
-            case udomain.kDrawBest:
+            case DrawMode.kDrawBest:
                 turtle.drawOptions.draw3DObjects = true
                 turtle.drawOptions.draw3DObjectsAsRects = false
                 turtle.drawOptions.drawStems = true
@@ -771,15 +772,15 @@ export class PdPlant extends PdStreamableObject {
                 turtle.drawOptions.drawLines = true
                 turtle.drawOptions.lineContrastIndex = 3
                 break
-            case udomain.kDrawCustom:
-                turtle.drawOptions.draw3DObjects = udomain.domain.options.draw3DObjects
-                turtle.drawOptions.draw3DObjectsAsRects = udomain.domain.options.draw3DObjectsAsBoundingRectsOnly
-                turtle.drawOptions.drawStems = udomain.domain.options.drawStems
-                turtle.drawOptions.wireFrame = !udomain.domain.options.fillPolygons
-                turtle.drawOptions.sortPolygons = udomain.domain.options.sortPolygons
-                turtle.drawOptions.sortTdosAsOneItem = udomain.domain.options.sortTdosAsOneItem
-                turtle.drawOptions.drawLines = udomain.domain.options.drawLinesBetweenPolygons
-                turtle.drawOptions.lineContrastIndex = udomain.domain.options.lineContrastIndex
+            case DrawMode.kDrawCustom:
+                turtle.drawOptions.draw3DObjects = domain.options.draw3DObjects
+                turtle.drawOptions.draw3DObjectsAsRects = domain.options.draw3DObjectsAsBoundingRectsOnly
+                turtle.drawOptions.drawStems = domain.options.drawStems
+                turtle.drawOptions.wireFrame = !domain.options.fillPolygons
+                turtle.drawOptions.sortPolygons = domain.options.sortPolygons
+                turtle.drawOptions.sortTdosAsOneItem = domain.options.sortTdosAsOneItem
+                turtle.drawOptions.drawLines = domain.options.drawLinesBetweenPolygons
+                turtle.drawOptions.lineContrastIndex = domain.options.lineContrastIndex
                 break
         }
     }
@@ -789,7 +790,7 @@ export class PdPlant extends PdStreamableObject {
         let theRect: TRect
         
         theRect = this.boundsRect_pixels()
-        result = Rect(theRect.Right - udomain.domain.options.resizeRectSize, theRect.Top, theRect.Right, theRect.Top + udomain.domain.options.resizeRectSize)
+        result = new TRect(theRect.Right - domain.options.resizeRectSize, theRect.Top, theRect.Right, theRect.Top + domain.options.resizeRectSize)
         if (result.Left < theRect.Left) {
             result.Left = theRect.Left
         }
@@ -813,7 +814,7 @@ export class PdPlant extends PdStreamableObject {
         if (this.hidden) {
             return
         }
-        if (udomain.domain.options.cachePlantBitmaps) {
+        if (domain.options.cachePlantBitmaps) {
             drawingRect = new TRect(0, 0, umain.MainForm.drawingPaintBox.Width, umain.MainForm.drawingPaintBox.Height)
             intersectResult = delphi_compatability.IntersectRect(intersectRect_pixels, this.boundsRect_pixels(), drawingRect)
             if ((intersectResult) && (!this.hidden) && (this.previewCache.Width < 5)) {
@@ -832,7 +833,7 @@ export class PdPlant extends PdStreamableObject {
         let bytesThisBitmapWillBe: long
         
         this.fakeDrawToGetBounds()
-        if (!udomain.domain.options.cachePlantBitmaps) {
+        if (!domain.options.cachePlantBitmaps) {
             if (this.previewCache.Width > 5) {
                 this.shrinkPreviewCache()
                 umain.MainForm.updateForChangeToPlantBitmaps()
@@ -863,10 +864,10 @@ export class PdPlant extends PdStreamableObject {
         try {
             this.setBasePoint_pixels(new TPoint(this.basePoint_pixels().X - this.boundsRect_pixels().Left, this.basePoint_pixels().Y - this.boundsRect_pixels().Top))
             this.resizeCacheIfNecessary(this.previewCache, new TPoint(this.boundsRect_pixels().width, this.boundsRect_pixels().height), kInMainWindow)
-            this.previewCache.TransparentColor = udomain.domain.options.transparentColor
-            ubmpsupport.fillBitmap(this.previewCache, udomain.domain.options.transparentColor)
+            this.previewCache.TransparentColor = domain.options.transparentColor
+            ubmpsupport.fillBitmap(this.previewCache, domain.options.transparentColor)
             // showing progress here is mainly for really complicated plants; most plants won't need it
-            showProgress = (!umain.MainForm.drawing) && (udomain.domain.options.showPlantDrawingProgress)
+            showProgress = (!umain.MainForm.drawing) && (domain.options.showPlantDrawingProgress)
             if (showProgress) {
                 this.plantPartsDrawnAtStart = 0
                 this.countPlantParts()
@@ -931,7 +932,7 @@ export class PdPlant extends PdStreamableObject {
         changed = false
         this.resizeCacheIfNecessary(cache, size, kNotInMainWindow)
         if (immediate) {
-            ubmpsupport.fillBitmap(cache, udomain.domain.options.backgroundColor)
+            ubmpsupport.fillBitmap(cache, domain.options.backgroundColor)
         }
         this.turtle = KfTurtle.defaultStartUsing()
         try {
@@ -955,13 +956,13 @@ export class PdPlant extends PdStreamableObject {
                 if ((drawnWidth > 0) && (drawnHeight > 0)) {
                     newScaleX = safedivExcept(this.drawingScale_PixelsPerMm * size.X, drawnWidth, 0.1)
                     if (considerDomainScale) {
-                        newScaleX = safedivExcept(newScaleX, udomain.domain.plantDrawScale_PixelsPerMm(), newScaleX)
+                        newScaleX = safedivExcept(newScaleX, domain.plantDrawScale_PixelsPerMm(), newScaleX)
                     } else {
                         newScaleX = newScaleX * 0.9
                     }
                     newScaleY = safedivExcept(this.drawingScale_PixelsPerMm * size.Y, drawnHeight, 0.1)
                     if (considerDomainScale) {
-                        newScaleY = safedivExcept(newScaleY, udomain.domain.plantDrawScale_PixelsPerMm(), newScaleY)
+                        newScaleY = safedivExcept(newScaleY, domain.plantDrawScale_PixelsPerMm(), newScaleY)
                     } else {
                         newScaleY = newScaleY * 0.9
                     }
@@ -992,7 +993,7 @@ export class PdPlant extends PdStreamableObject {
             }
             if ((this.fixedPreviewScale || this.fixedDrawPosition || changed) && (immediate)) {
                 // final drawing 
-                ubmpsupport.fillBitmap(cache, udomain.domain.options.backgroundColor)
+                ubmpsupport.fillBitmap(cache, domain.options.backgroundColor)
                 this.setTurtleUpForPreview(this.drawingScale_PixelsPerMm, drawPosition)
                 // nothing-messes up paint
                 try {
@@ -1025,7 +1026,7 @@ export class PdPlant extends PdStreamableObject {
     }
     
     calculateDrawingScaleToLookTheSameWithDomainScale(): void {
-        this.drawingScale_PixelsPerMm = safedivExcept(this.drawingScale_PixelsPerMm, udomain.domain.plantManager.plantDrawScale_PixelsPerMm, 0)
+        this.drawingScale_PixelsPerMm = safedivExcept(this.drawingScale_PixelsPerMm, domain.plantManager.plantDrawScale_PixelsPerMm, 0)
     }
     
     shrinkPreviewCache(): void {
@@ -1040,7 +1041,7 @@ export class PdPlant extends PdStreamableObject {
             this.previewCache.Height = 1
             this.previewCache.Transparent = true
             this.previewCache.TransparentMode = delphi_compatability.TTransparentMode.tmFixed
-            this.previewCache.TransparentColor = udomain.domain.options.backgroundColor
+            this.previewCache.TransparentColor = domain.options.backgroundColor
         }
     }
     
@@ -1176,29 +1177,29 @@ export class PdPlant extends PdStreamableObject {
     
     realDrawingScale_pixelsPerMm(): float {
         let result = 0.0
-        if (udomain.domain.drawingToMakeCopyBitmap) {
-            result = this.drawingScale_PixelsPerMm * udomain.domain.plantDrawScaleWhenDrawingCopy_PixelsPerMm
+        if (domain.drawingToMakeCopyBitmap) {
+            result = this.drawingScale_PixelsPerMm * domain.plantDrawScaleWhenDrawingCopy_PixelsPerMm
         } else {
-            result = this.drawingScale_PixelsPerMm * udomain.domain.plantDrawScale_PixelsPerMm()
+            result = this.drawingScale_PixelsPerMm * domain.plantDrawScale_PixelsPerMm()
         }
         return result
     }
     
     basePoint_pixels(): TPoint {
         let result = new TPoint()
-        if (!udomain.domain.drawingToMakeCopyBitmap) {
-            result.X = intround((this.basePoint_mm.x + udomain.domain.plantDrawOffset_mm().x) * udomain.domain.plantDrawScale_PixelsPerMm())
-            result.Y = intround((this.basePoint_mm.y + udomain.domain.plantDrawOffset_mm().y) * udomain.domain.plantDrawScale_PixelsPerMm())
+        if (!domain.drawingToMakeCopyBitmap) {
+            result.X = intround((this.basePoint_mm.x + domain.plantDrawOffset_mm().x) * domain.plantDrawScale_PixelsPerMm())
+            result.Y = intround((this.basePoint_mm.y + domain.plantDrawOffset_mm().y) * domain.plantDrawScale_PixelsPerMm())
         } else {
-            result.X = intround((this.basePoint_mm.x + udomain.domain.plantDrawOffsetWhenDrawingCopy_mm.x) * udomain.domain.plantDrawScaleWhenDrawingCopy_PixelsPerMm)
-            result.Y = intround((this.basePoint_mm.y + udomain.domain.plantDrawOffsetWhenDrawingCopy_mm.y) * udomain.domain.plantDrawScaleWhenDrawingCopy_PixelsPerMm)
+            result.X = intround((this.basePoint_mm.x + domain.plantDrawOffsetWhenDrawingCopy_mm.x) * domain.plantDrawScaleWhenDrawingCopy_PixelsPerMm)
+            result.Y = intround((this.basePoint_mm.y + domain.plantDrawOffsetWhenDrawingCopy_mm.y) * domain.plantDrawScaleWhenDrawingCopy_PixelsPerMm)
         }
         return result
     }
     
     setBasePoint_pixels(aPoint_pixels: TPoint): void {
-        this.basePoint_mm.x = safedivExcept(aPoint_pixels.X, udomain.domain.plantDrawScale_PixelsPerMm(), 0) - udomain.domain.plantDrawOffset_mm().x
-        this.basePoint_mm.y = safedivExcept(aPoint_pixels.Y, udomain.domain.plantDrawScale_PixelsPerMm(), 0) - udomain.domain.plantDrawOffset_mm().y
+        this.basePoint_mm.x = safedivExcept(aPoint_pixels.X, domain.plantDrawScale_PixelsPerMm(), 0) - domain.plantDrawOffset_mm().x
+        this.basePoint_mm.y = safedivExcept(aPoint_pixels.Y, domain.plantDrawScale_PixelsPerMm(), 0) - domain.plantDrawOffset_mm().y
     }
     
     setBoundsRect_pixels(aRect_pixels: TRect): void {
@@ -1258,8 +1259,8 @@ export class PdPlant extends PdStreamableObject {
         theRect.Right = theRect.Right + delta_pixels.X
         theRect.Top = theRect.Top + delta_pixels.Y
         theRect.Bottom = theRect.Bottom + delta_pixels.Y
-        delta_mm.x = safedivExcept(delta_pixels.X, udomain.domain.plantDrawScale_PixelsPerMm(), 0)
-        delta_mm.y = safedivExcept(delta_pixels.Y, udomain.domain.plantDrawScale_PixelsPerMm(), 0)
+        delta_mm.x = safedivExcept(delta_pixels.X, domain.plantDrawScale_PixelsPerMm(), 0)
+        delta_mm.y = safedivExcept(delta_pixels.Y, domain.plantDrawScale_PixelsPerMm(), 0)
         this.basePoint_mm.x = this.basePoint_mm.x + delta_mm.x
         this.basePoint_mm.y = this.basePoint_mm.y + delta_mm.y
     }
@@ -1290,14 +1291,14 @@ export class PdPlant extends PdStreamableObject {
         let i: long
         
         result = boundsRect.contains(aPoint)
-        if (result && udomain.domain.options.cachePlantBitmaps) {
+        if (result && domain.options.cachePlantBitmaps) {
             if (checkResizeRect && this.resizingRect().contains(aPoint)) {
                 result = true
             } else {
                 xPixel = aPoint.X - boundsRect.Left
                 yPixel = aPoint.Y - boundsRect.Top
                 result = this.pointColorMatch(xPixel, yPixel)
-                if ((!result) && (udomain.domain.options.cachePlantBitmaps)) {
+                if ((!result) && (domain.options.cachePlantBitmaps)) {
                     for (i = 0; i <= 7; i++) {
                         if (this.pointColorAdjacentMatch(xPixel, yPixel, i)) {
                             result = true
@@ -1321,7 +1322,7 @@ export class PdPlant extends PdStreamableObject {
         let testPixelColor: TColor
         
         testPixelColor = this.previewCache.Canvas.Pixels[xPixel, yPixel]
-        result = testPixelColor !== udomain.domain.options.transparentColor
+        result = testPixelColor !== domain.options.transparentColor
         return result
     }
     
@@ -1372,7 +1373,7 @@ export class PdPlant extends PdStreamableObject {
                 break
         }
         testPixelColor = this.previewCache.Canvas.Pixels[x, y]
-        result = testPixelColor !== udomain.domain.options.transparentColor
+        result = testPixelColor !== domain.options.transparentColor
         return result
     }
     
@@ -1397,8 +1398,8 @@ export class PdPlant extends PdStreamableObject {
         }
         this.setUpTurtleFor3DOutput()
         if (translate) {
-            relativeBasePoint_mm.x = safedivExcept(this.basePoint_pixels().X - rectWithAllPlants.Left, udomain.domain.plantDrawScale_PixelsPerMm(), 0) - udomain.domain.plantDrawOffset_mm().x
-            relativeBasePoint_mm.y = safedivExcept(this.basePoint_pixels().Y - rectWithAllPlants.Top, udomain.domain.plantDrawScale_PixelsPerMm(), 0) - udomain.domain.plantDrawOffset_mm().y
+            relativeBasePoint_mm.x = safedivExcept(this.basePoint_pixels().X - rectWithAllPlants.Left, domain.plantDrawScale_PixelsPerMm(), 0) - domain.plantDrawOffset_mm().x
+            relativeBasePoint_mm.y = safedivExcept(this.basePoint_pixels().Y - rectWithAllPlants.Top, domain.plantDrawScale_PixelsPerMm(), 0) - domain.plantDrawOffset_mm().y
             if (outputType !== ExportFormats.kPOV) {
                 // move plant to translate, except for for POV, where you translate and scale afterward
                 this.turtle.xyz(relativeBasePoint_mm.x, relativeBasePoint_mm.y, 0)
@@ -1413,7 +1414,7 @@ export class PdPlant extends PdStreamableObject {
                 // for 3DS need to write out all colors in front especially; must be done before reminder
                 (fileExportSurface).writeMaterialDescription(i, this.colorForDXFPartType(i))
             }
-            if (!udomain.domain.registered) {
+            if (!domain.registered) {
                 (fileExportSurface).writeMaterialDescription(-1, UNRESOLVED.rgb(100, 100, 100))
             }
         }
@@ -1449,8 +1450,8 @@ export class PdPlant extends PdStreamableObject {
         }
         this.turtle.rotateX(fixRotation)
         // this is a user-specified turn on top of the default
-        this.turtle.rotateX(udomain.domain.exportOptionsFor3D[outputType].xRotationBeforeDraw * 256.0 / 360.0)
-        if (!udomain.domain.registered) {
+        this.turtle.rotateX(domain.exportOptionsFor3D[outputType].xRotationBeforeDraw * 256.0 / 360.0)
+        if (!domain.registered) {
             remWidth = this.realDrawingScale_pixelsPerMm() * 5.0
             this.turtle.push()
             this.turtle.moveInMillimeters(remWidth / 2)
@@ -1497,9 +1498,9 @@ export class PdPlant extends PdStreamableObject {
     defaultAllParameters(): void {
         let param: PdParameter
 
-        if (udomain.domain.parameterManager.parameters.Count > 0) {
-            for (let i = 0; i < udomain.domain.parameterManager.parameters.Count; i++) {
-                param = uparams.PdParameter(udomain.domain.parameterManager.parameters.Items[i])
+        if (domain.parameterManager.parameters.Count > 0) {
+            for (let i = 0; i < domain.parameterManager.parameters.Count; i++) {
+                param = uparams.PdParameter(domain.parameterManager.parameters.Items[i])
                 if (param.fieldType !== uparams.kFieldHeader) {
                     this.defaultParameter(param, kDontCheckForUnreadParams)
                 }
@@ -1620,9 +1621,9 @@ export class PdPlant extends PdStreamableObject {
             }
             this.writeLine(plantFile, kEndNoteString)
         }
-        if (udomain.domain.sectionManager.sections.Count > 0) {
-            for (i = 0; i <= udomain.domain.sectionManager.sections.Count - 1; i++) {
-                section = usection.PdSection(udomain.domain.sectionManager.sections.Items[i])
+        if (domain.sectionManager.sections.Count > 0) {
+            for (i = 0; i <= domain.sectionManager.sections.Count - 1; i++) {
+                section = usection.PdSection(domain.sectionManager.sections.Items[i])
                 if (section === null) {
                     continue
                 }
@@ -1630,7 +1631,7 @@ export class PdPlant extends PdStreamableObject {
                 this.writeLine(plantFile, "; ------------------------- " + section.getName())
                 for (j = 0; j <= section.numSectionItems - 1; j++) {
                     // write out params 
-                    param = udomain.domain.parameterManager.parameterForFieldNumber(section.sectionItems[j])
+                    param = domain.parameterManager.parameterForFieldNumber(section.sectionItems[j])
                     if (param === null) {
                         continue
                     }
@@ -1766,9 +1767,9 @@ export class PdPlant extends PdStreamableObject {
         paramValue = usupport.stringBeyond(aLine, "=")
         found = false
         param = null
-        if (udomain.domain.parameterManager.parameters.Count > 0) {
-            for (i = 0; i <= udomain.domain.parameterManager.parameters.Count - 1; i++) {
-                param = uparams.PdParameter(udomain.domain.parameterManager.parameters.Items[i])
+        if (domain.parameterManager.parameters.Count > 0) {
+            for (i = 0; i <= domain.parameterManager.parameters.Count - 1; i++) {
+                param = uparams.PdParameter(domain.parameterManager.parameters.Items[i])
                 if (param === null) {
                     return
                 }
@@ -1894,9 +1895,9 @@ export class PdPlant extends PdStreamableObject {
         let i: short
         
         if (checkForUnreadParams) {
-            if (udomain.domain.parameterManager.parameters.Count > 0) {
-                for (i = 0; i <= udomain.domain.parameterManager.parameters.Count - 1; i++) {
-                    param = uparams.PdParameter(udomain.domain.parameterManager.parameters.Items[i])
+            if (domain.parameterManager.parameters.Count > 0) {
+                for (i = 0; i <= domain.parameterManager.parameters.Count - 1; i++) {
+                    param = uparams.PdParameter(domain.parameterManager.parameters.Items[i])
                     if ((!param.valueHasBeenReadForCurrentPlant) && (param.fieldType !== uparams.kFieldHeader)) {
                         this.defaultParameter(param, checkForUnreadParams)
                     }
@@ -1925,7 +1926,7 @@ export class PdPlant extends PdStreamableObject {
                 value = this.transferField(d, value, fieldID, fieldType, fieldIndex, regrow, updateList)
                 if (updateList.Count > 0) {
                     umain.MainForm.updateParameterValuesWithUpdateListForPlant(this, updateList)
-                    if ((udomain.domain.options.updateTimeSeriesPlantsOnParameterChange) && (utimeser.TimeSeriesForm !== null)) {
+                    if ((domain.options.updateTimeSeriesPlantsOnParameterChange) && (utimeser.TimeSeriesForm !== null)) {
                         utimeser.TimeSeriesForm.updatePlantsFromParent(this)
                     }
                 }
@@ -2146,14 +2147,14 @@ export class PdPlant extends PdStreamableObject {
         }
         saveAge = this.age
         this.reset()
-        if (udomain.domain.sectionManager.sections.Count > 0) {
-            for (sectionIndex = 0; sectionIndex <= udomain.domain.sectionManager.sections.Count - 1; sectionIndex++) {
-                section = usection.PdSection(udomain.domain.sectionManager.sections.Items[sectionIndex])
+        if (domain.sectionManager.sections.Count > 0) {
+            for (sectionIndex = 0; sectionIndex <= domain.sectionManager.sections.Count - 1; sectionIndex++) {
+                section = usection.PdSection(domain.sectionManager.sections.Items[sectionIndex])
                 if (section === null) {
                     continue
                 }
                 for (paramIndex = 0; paramIndex <= section.numSectionItems - 1; paramIndex++) {
-                    param = udomain.domain.parameterManager.parameterForFieldNumber(section.sectionItems[paramIndex])
+                    param = domain.parameterManager.parameterForFieldNumber(section.sectionItems[paramIndex])
                     if ((param === null) || (param.fieldType === uparams.kFieldHeader)) {
                         continue
                     }
