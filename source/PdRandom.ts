@@ -17,7 +17,8 @@ export class PdRandom extends PdStreamableObject {
     // long type is a 32-bit signed Integer -2147483648 to 2147483647
     seed: long = 0
     
-    createFromTime(): void {
+    constructor() {
+        super()
         this.seed = this.randomSeedFromTime()
     }
     
