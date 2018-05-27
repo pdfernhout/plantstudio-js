@@ -842,8 +842,7 @@ export class KfObject3D extends PdStreamableObject {
                 // skip commented lines 
                 continue
             }
-            const stream = new KfStringStream()
-            stream.onStringSeparator(inputLine, "=")
+            const stream = new KfStringStream(inputLine, "=")
             const fieldType: string = stream.nextToken()
             stream.spaceSeparator()
             if (compareTextIgnoreCase("POINT", fieldType)) {

@@ -35,11 +35,10 @@ function skipToProfileSection(fileStream: TextFile, section: string): boolean {
 export class KfStringStream {
     source: string = ""
     remainder: string = ""
-    separator: string = ""
+    separator: string = " "
     
-    constructor(aString?: string) {
-        if (!aString) aString = ""
-        this.onStringSeparator(aString, " ")
+    constructor(aString: string = "", separator = " ") {
+        this.onStringSeparator(aString, separator)
     }
     
     onString(aString: string): void {
