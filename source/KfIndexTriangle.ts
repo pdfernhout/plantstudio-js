@@ -1,6 +1,5 @@
 import { long } from "./common";
 import { PdStreamableObject, PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof } from "./temporary";
-import { kKfIndexTriangle } from "./uclasses";
 
 export class KfIndexTriangle extends PdStreamableObject {
     pointIndexes: long[] = [0, 0, 0]
@@ -29,7 +28,7 @@ export class KfIndexTriangle extends PdStreamableObject {
     }
     
     classAndVersionInformation(cvir: PdClassAndVersionInformationRecord): void {
-        cvir.classNumber = kKfIndexTriangle
+        cvir.classNumber = ClassId.kKfIndexTriangle
         cvir.versionNumber = 0
         cvir.additionNumber = 0
     }

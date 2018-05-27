@@ -911,7 +911,7 @@ export class KfObject3D extends PdStreamableObject {
     
     // ------------------------------------------------------------------------- data transfer for binary copy 
     classAndVersionInformation(cvir: PdClassAndVersionInformationRecord): void {
-        cvir.classNumber = uclasses.kKfObject3D
+        cvir.classNumber = ClassId.kKfObject3D
         cvir.versionNumber = 0
         cvir.additionNumber = 0
     }

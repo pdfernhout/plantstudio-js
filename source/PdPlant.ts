@@ -2431,7 +2431,7 @@ export class PdPlant extends PdStreamableObject {
     
     // -------------------------------------------------------------------------------  data transfer for binary copy 
     classAndVersionInformation(cvir: PdClassAndVersionInformationRecord): void {
-        cvir.classNumber = uclasses.kPdPlant
+        cvir.classNumber = ClassId.kPdPlant
         cvir.versionNumber = 2
         cvir.additionNumber = 0
     }
