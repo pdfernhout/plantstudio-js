@@ -136,3 +136,12 @@ export const MainForm = {
     plantsAsTextMemo: [],
     updateParameterValuesWithUpdateListForPlant: (something: any, updateList: any[]) => {}
 }
+
+// TOFO: Fix PdBitmap stub
+export class PdBitmap {
+    Width = 1
+    Height = 1
+    Transparent = true
+    TransparentMode = <any>null // delphi_compatability.TTransparentMode.tmFixed
+    TransparentColor = ColorDefs.clBlack // domain.options.backgroundColor
+}
