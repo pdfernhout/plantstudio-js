@@ -54,9 +54,11 @@ function sqr(x: float): float {
     return result
 }
 
-function min(a: float, b: float): float {
+// TODO: optimize min and max to use existing Math functions
+
+export function min(a: float, b: float): float {
     let result = 0.0
-    if ((a < b)) {
+    if (a < b) {
         result = a
     } else {
         result = b
@@ -64,9 +66,9 @@ function min(a: float, b: float): float {
     return result
 }
 
-function max(a: float, b: float): float {
+export function max(a: float, b: float): float {
     let result = 0.0
-    if ((a > b)) {
+    if (a > b) {
         result = a
     } else {
         result = b
@@ -74,9 +76,9 @@ function max(a: float, b: float): float {
     return result
 }
 
-function intMin(a: int, b: int): int {
+export function intMin(a: int, b: int): int {
     let result = 0
-    if ((a < b)) {
+    if (a < b) {
         result = a
     } else {
         result = b
@@ -84,9 +86,9 @@ function intMin(a: int, b: int): int {
     return result
 }
 
-function intMax(a: int, b: int): int {
+export function intMax(a: int, b: int): int {
     let result = 0
-    if ((a > b)) {
+    if (a > b) {
         result = a
     } else {
         result = b
@@ -111,7 +113,7 @@ function pow(number: double, exponent: double): double {
 // number is raised to a non-integer power, an exception should be raised but the environment
 // instead crashes. 
 // RE-RAISES EXCEPTION 
-function power(number: double, exponent: double): double {
+export function power(number: double, exponent: double): double {
     let result = 0.0
     try {
         if ((number > 0.0)) {
@@ -275,7 +277,7 @@ function safediv(x: float, y: float): float {
 
 // RE-RAISES EXCEPTION 
 // same as safediv except that the user specifies what to return if the denominator is zero 
-function safedivExcept(x: float, y: float, exceptionResult: float): float {
+export function safedivExcept(x: float, y: float, exceptionResult: float): float {
     let result = 0.0
     try {
         if ((y !== 0.0)) {
@@ -308,7 +310,7 @@ function safedivWithResult(x: float, y: float): [float, boolean] {
 // s curves 
 // RE-RAISES EXCEPTION 
 // this function carries out a structure found in many EPIC equations. 
-function scurve(x: double, c1: double, c2: double): double {
+export function scurve(x: double, c1: double, c2: double): double {
     let result = 0.0
     let temp: double
     
@@ -328,7 +330,7 @@ function scurve(x: double, c1: double, c2: double): double {
 
 // same as scurve but does not show an errorMessage or re-raise the exception; just returns whether it failed;
 //  used inside paint methods where you don't want error dialogs popping up 
-function scurveWithResult(x: double, c1: double, c2: double): [double, boolean] {
+export function scurveWithResult(x: double, c1: double, c2: double): [double, boolean] {
     let failed = true
     let result = 0.0
     let temp = 0.0
@@ -356,7 +358,7 @@ function scurveWithResult(x: double, c1: double, c2: double): [double, boolean] 
 // s curve params 
 // RE-RAISES EXCEPTION 
 // deal with zero s curve values by defaulting whole curve to hard-coded values
-function calcSCurveCoeffs(sCurve: SCurveStructure): void {
+export function calcSCurveCoeffs(sCurve: SCurveStructure): void {
     let xx: double
     
     try {
@@ -383,7 +385,7 @@ function calcSCurveCoeffs(sCurve: SCurveStructure): void {
 
 // same as Utils_CalcSCurveCoeffs but does not show an errorMessage or re-raise the exception;
 //  just returns whether it failed; used inside paint methods where you don't want error dialogs popping up 
-function calcSCurveCoeffsWithResult(sCurve: SCurveStructure): boolean {
+export function calcSCurveCoeffsWithResult(sCurve: SCurveStructure): boolean {
     let quotientX1Y1: double
     let lnQuotientX1Y1MinusX1: double
     let quotientX2Y2: double
@@ -423,7 +425,7 @@ function calcSCurveCoeffsWithResult(sCurve: SCurveStructure): boolean {
     return failed
 }
 
-function transferSCurveValue(direction: int, param: SCurveStructure, index: int, value: FIX_MISSING_ARG_TYPE): void {
+export function transferSCurveValue(direction: int, param: SCurveStructure, index: int, value: number): number {
     if ((direction === kGetField)) {
         switch (index) {
             case 0:
@@ -459,7 +461,7 @@ function transferSCurveValue(direction: int, param: SCurveStructure, index: int,
     return value
 }
 
-function stringToSCurve(aString: string): SCurveStructure {
+export function stringToSCurve(aString: string): SCurveStructure {
     let result = new SCurveStructure()
     
     result.x1 = 0
@@ -479,7 +481,7 @@ function stringToSCurve(aString: string): SCurveStructure {
     return result
 }
 
-function sCurveToString(sCurve: SCurveStructure): string {
+export function sCurveToString(sCurve: SCurveStructure): string {
     let result = ""
     result = digitValueString(sCurve.x1) + " " + digitValueString(sCurve.y1) + " " + digitValueString(sCurve.x2) + " " + digitValueString(sCurve.y2)
     return result
@@ -493,7 +495,7 @@ const kPlantProximityNeeded = 4
 // CFK NOTE you may want to change this if you use this function
 //  to actually click on plant parts 
 // this is not being used to select plant parts, the drawing surface is doing it
-function pointsAreCloseEnough(point1: TPoint, point2: TPoint): boolean {
+export function pointsAreCloseEnough(point1: TPoint, point2: TPoint): boolean {
     let result = false
     result = (Math.abs(point1.X - point2.X) < kPlantProximityNeeded) && (Math.abs(point1.Y - point2.Y) < kPlantProximityNeeded)
     return result
