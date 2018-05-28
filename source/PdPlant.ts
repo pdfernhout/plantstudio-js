@@ -1,7 +1,7 @@
 // PdPlant was unit Uplant
 
-import { PdStreamableObject, ExportFormats, messageForExceptionType, boundForString, DebugPrint, SinglePoint, ucursor, MainForm, PdBitmap, PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof, PdInternode, TListCollection_streamUsingFiler, PdPlantPart, ExportPart } from "./temporary"
-import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor, ColorDefs, StrToIntDef, IntToStr, compareTextIgnoreCase, arrayRemove } from "./common"
+import { PdStreamableObject, ExportFormats, messageForExceptionType, boundForString, DebugPrint, SinglePoint, ucursor, MainForm, PdBitmap, PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof, PdInternode, TListCollection_streamUsingFiler, ExportPart } from "./temporary"
+import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor, ColorDefs, StrToIntDef, IntToStr, compareTextIgnoreCase, arrayRemove, TextFile } from "./common"
 import { KfObject3D } from "./KfObject3D"
 import { TPoint } from "./TPoint"
 import { TRect } from "./TRect"
@@ -15,6 +15,7 @@ import { ClassId } from "./uclasses"
 import { PdParameter, FieldType, IndexType } from "./PdParameter"
 import { PdSection } from "./PdSection"
 import { PdPlantDrawingAmendment, kStartAmendmentString } from "./PdPlantDrawingAmendment"
+import { PdPlantPart } from "./PdPlantPart";
 
 /* Remove unused imports
 from conversion_common import *
@@ -1104,30 +1105,21 @@ export class PdPlant extends PdStreamableObject {
     }
     
     getHint(point: TPoint): string {
-        let result = ""
-        let plantPart: TObject
-        let turtle: KfTurtle
-        
-        result = this.getName()
+        let result = this.getName()
         if ((MainForm.cursorModeForDrawing === umain.kCursorModePosingSelect) && (MainForm.focusedPlant() === this)) {
-            plantPart = null
-            plantPart = this.findPlantPartAtPositionByTestingPolygons(point)
-            if ((plantPart !== null) && (plantPart instanceof upart.PdPlantPart)) {
-                result = (plantPart).getFullName
+            const plantPart = this.findPlantPartAtPositionByTestingPolygons(point)
+            if ((plantPart !== null) && (plantPart instanceof PdPlantPart)) {
+                result = plantPart.getFullName()
             }
         }
         return result
     }
     
-    findPlantPartAtPositionByTestingPolygons(point: TPoint): TObject {
-        let result = new TObject()
-        let turtle: KfTurtle
-        let partID: long
-        
-        result = null
+    findPlantPartAtPositionByTestingPolygons(point: TPoint): PdPlantPart | null {
+        let result: PdPlantPart | null = null
         // if you give it no drawing surface pane, everything happens but the actual drawing
         this.drawOn(null)
-        turtle = KfTurtle.defaultStartUsing()
+        const turtle = KfTurtle.defaultStartUsing()
         if (turtle === null) {
             return result
         }
@@ -1135,7 +1127,7 @@ export class PdPlant extends PdStreamableObject {
             return result
         }
         try {
-            partID = turtle.drawingSurface.plantPartIDForPoint(point)
+            const partID = turtle.drawingSurface.plantPartIDForPoint(point)
             if (partID >= 0) {
                 result = this.plantPartForPartID(partID)
             }
@@ -1530,7 +1522,7 @@ export class PdPlant extends PdStreamableObject {
     }
     
     writeToMainFormMemoAsText(): void {
-        let fakeTextFile: TextFile
+        let fakeTextFile: TextFile = new TextFile()
         
         this.writingToMemo = true
         try {
@@ -1933,34 +1925,34 @@ export class PdPlant extends PdStreamableObject {
         updateList.push(updateEvent)
     }
     
-    fillEnumStringList(list: TStringList, fieldID: int, hasRadioButtons: boolean): void {
+    fillEnumStringList(list: string[], fieldID: int, hasRadioButtons: boolean): void {
         switch (fieldID) {
             case utransfr.kLeafCompoundPinnateOrPalmate:
                 // assumes list being given to it is empty 
-                list.Add("pinnate (feather-like)")
-                list.Add("palmate (hand-like)")
+                list.push("pinnate (feather-like)")
+                list.push("palmate (hand-like)")
                 hasRadioButtons = true
                 break
             case utransfr.kMeristemAndLeafArrangement:
-                list.Add("alternate (one per node)")
-                list.Add("opposite (two per node)")
+                list.push("alternate (one per node)")
+                list.push("opposite (two per node)")
                 hasRadioButtons = true
                 break
             case utransfr.kLeafCompoundPinnateArrangement:
-                list.Add("alternate")
-                list.Add("opposite")
+                list.push("alternate")
+                list.push("opposite")
                 hasRadioButtons = true
                 break
             case utransfr.kFlowerFemaleBudOption:
-                list.Add("no bud")
-                list.Add("single 3D object bud (old style)")
-                list.Add("unfolding flower (new style)")
+                list.push("no bud")
+                list.push("single 3D object bud (old style)")
+                list.push("unfolding flower (new style)")
                 hasRadioButtons = true
                 break
             case utransfr.kFlowerMaleBudOption:
-                list.Add("no bud")
-                list.Add("single 3D object bud (old style)")
-                list.Add("unfolding flower (new style)")
+                list.push("no bud")
+                list.push("single 3D object bud (old style)")
+                list.push("unfolding flower (new style)")
                 hasRadioButtons = true
                 break
             default:
@@ -2042,23 +2034,22 @@ export class PdPlant extends PdStreamableObject {
     
     // ------------------------------------------------------------------------------- breeding 
     useBreedingOptionsAndPlantsToSetParameters(options: BreedingAndTimeSeriesOptionsStructure, firstPlant: PdPlant, secondPlant: PdPlant, tdos: TListCollection): void {
-        let firstBoolean: boolean
-        let secondBoolean: boolean
-        let newBoolean: boolean
-        let firstInteger: short
-        let secondInteger: short
-        let newInteger: short
-        let firstFloat: float
-        let secondFloat: float
-        let newFloat: float
-        let firstColor: TColorRef
-        let secondColor: TColorRef
-        let newColor: TColorRef
+        let firstBoolean: boolean = false
+        let secondBoolean: boolean = false
+        let newBoolean: boolean = false
+        let firstInteger: short = 0
+        let secondInteger: short = 0
+        let newInteger: short = 0
+        let firstFloat: float = 0
+        let secondFloat: float = 0
+        let newFloat: float = 0
+        let firstColor: TColorRef = 0
+        let secondColor: TColorRef = 0
+        let newColor: TColorRef = 0
         let firstSCurve: SCurveStructure
         let secondSCurve: SCurveStructure
         let newSCurve: SCurveStructure
         let randomTdo: KfObject3D
-        let saveAge: short
         let weight: float
         let stdDev: float
         let param: PdParameter
@@ -2067,7 +2058,7 @@ export class PdPlant extends PdStreamableObject {
         if (firstPlant === null) {
             return
         }
-        saveAge = this.age
+        const saveAge = this.age
         this.reset()
         if (domain.sectionManager.sections.length > 0) {
             for (let sectionIndex = 0; sectionIndex < domain.sectionManager.sections.length; sectionIndex++) {
@@ -2596,7 +2587,7 @@ export class PdPlant extends PdStreamableObject {
                 }
                 this.allocateOrRemoveBiomassWithTraverser(traverser)
                 if (this.firstPhytomer !== null) {
-                    traverser.ageOfYoungestPhytomer = UNRESOLVED.maxLongInt
+                    traverser.ageOfYoungestPhytomer = Number.MAX_SAFE_INTEGER
                 } else {
                     traverser.ageOfYoungestPhytomer = 0
                 }
@@ -2643,8 +2634,8 @@ export class PdPlant extends PdStreamableObject {
             reproAddition_pctMPB = 0.0
         }
         // see if amounts can cancel out to any extent 
-        shootAddition_pctMPB, shootReduction_pctMPB = cancelOutOppositeAmounts(shootAddition_pctMPB, shootReduction_pctMPB)
-        reproAddition_pctMPB, reproReduction_pctMPB = cancelOutOppositeAmounts(reproAddition_pctMPB, reproReduction_pctMPB)
+        ;[shootAddition_pctMPB, shootReduction_pctMPB] = cancelOutOppositeAmounts(shootAddition_pctMPB, shootReduction_pctMPB)
+        ;[reproAddition_pctMPB, reproReduction_pctMPB] = cancelOutOppositeAmounts(reproAddition_pctMPB, reproReduction_pctMPB)
         if (shootAddition_pctMPB > 0.0) {
             // allocate new shoot biomass 
             this.unallocatedNewVegetativeBiomass_pctMPB = this.allocateOrRemoveParticularBiomass(shootAddition_pctMPB, this.unallocatedNewVegetativeBiomass_pctMPB, Activity.kActivityDemandVegetative, Activity.kActivityGrowVegetative, traverser)
@@ -2663,12 +2654,10 @@ export class PdPlant extends PdStreamableObject {
         }
     }
     
-    allocateOrRemoveParticularBiomass(biomassToAddOrRemove_pctMPB: float, undistributedBiomass_pctMPB: float, askingMode: int, tellingMode: int, traverserProxy: TObject): void {
-        let traverser: PdTraverser
+    allocateOrRemoveParticularBiomass(biomassToAddOrRemove_pctMPB: float, undistributedBiomass_pctMPB: float, askingMode: int, tellingMode: int, traverser: PdTraverser): number {
         let totalDemandOrAvailableBiomass_pctMPB: float
         
         try {
-            traverser = traverserProxy
             if (traverser === null) {
                 return undistributedBiomass_pctMPB
             }
@@ -2767,16 +2756,16 @@ export class PdPlant extends PdStreamableObject {
         return null
     }
     
-    getInfoForPlantPartAtPoint(point: TPoint, partID: long, partType: string): void {
-        partID = -1
-        partType = ""
-        const part: PdPlantPart = this.findPlantPartAtPositionByTestingPolygons(point)
+    getInfoForPlantPartAtPoint(point: TPoint): [number, string] {
+        let partID = -1
+        let partType = ""
+        const part: PdPlantPart | null = this.findPlantPartAtPositionByTestingPolygons(point)
         if (part === null) {
-            return partID, partType
+            return [partID, partType]
         }
         partID = part.partID
         partType = part.getName()
-        return partID, partType
+        return [partID, partType]
     }
     
     colorForDXFPartType(index: short): TColorRef {

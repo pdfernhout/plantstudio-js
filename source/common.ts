@@ -56,3 +56,7 @@ export function MessageDialog(text: string, ignore1: any, ignore2: any, ignore3:
 export function ShowMessage(text: string) {
     alert(text)
 }
+
+export class TextFile {
+    lines: string[] = []
+}

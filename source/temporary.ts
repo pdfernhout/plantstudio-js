@@ -4,6 +4,7 @@ import { float, ColorDefs, short, int, StrToFloat, byte, long } from "./common"
 import { TRect } from "./TRect"
 import { PdTraverser } from "./PdTraverser"
 import { PdPlant } from "./PdPlant"
+import { PdPlantPart } from "./PdPlantPart";
 
 // TODO: Implement darkerColorWithSubtraction from usupport
 export function darkerColorWithSubtraction(a: number, b: number) {
@@ -163,12 +164,6 @@ export class PdBitmap extends PdStreamableObject {
     Transparent = true
     TransparentMode = <any>null // delphi_compatability.TTransparentMode.tmFixed
     TransparentColor = ColorDefs.clBlack // domain.options.backgroundColor
-}
-
-
-// TODO: Fix PdPlantPart stub
-export class PdPlantPart extends PdStreamableObject {
-    plant: PdPlant
 }
 
 // TODO: Fix PdInternode stub
