@@ -1,6 +1,6 @@
 // PdPlant was unit Uplant
 
-import { PdStreamableObject, ExportFormats, messageForExceptionType, boundForString, DebugPrint, FieldType, IndexType, SinglePoint, ucursor, MainForm, PdBitmap, kExportPartLast, PdClassAndVersionInformationRecord, PdFiler } from "./temporary";
+import { PdStreamableObject, ExportFormats, messageForExceptionType, boundForString, DebugPrint, FieldType, IndexType, SinglePoint, ucursor, MainForm, PdBitmap, kExportPartLast, PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof } from "./temporary";
 import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor, ColorDefs, StrToIntDef, IntToStr, compareTextIgnoreCase } from "./common";
 import { KfObject3D } from "./KfObject3D";
 import { TPoint } from "./TPoint";
@@ -12,6 +12,8 @@ import { PdRandom } from "./PdRandom";
 import { domain, DrawMode } from "./PdDomain";
 import { PdTraverser, Activity, TraverserGlobals } from "./PdTraverser";
 import { ClassId } from "./uclasses";
+import { PdParameter } from "./Uparams";
+import { PdSection } from "./usection";
 
 /* Remove unused imports
 from conversion_common import *
@@ -1463,9 +1465,9 @@ export class PdPlant extends PdStreamableObject {
     
     // ----------------------------------------------------------------------------------  i/o and data transfer 
     defaultAllParameters(): void {
-        if (domain.parameterManager.parameters.Count > 0) {
-            for (let i = 0; i < domain.parameterManager.parameters.Count; i++) {
-                const param: PdParameter = uparams.PdParameter(domain.parameterManager.parameters.Items[i])
+        if (domain.parameterManager.parameters.length > 0) {
+            for (let i = 0; i < domain.parameterManager.parameters.length; i++) {
+                const param: PdParameter = domain.parameterManager.parameters[i]
                 if (param.fieldType !== FieldType.kFieldHeader) {
                     this.defaultParameter(param, kDontCheckForUnreadParams)
                 }
@@ -1551,8 +1553,6 @@ export class PdPlant extends PdStreamableObject {
     writeToPlantFile(plantFile: TextFile): void {
         let section: PdSection
         let param: PdParameter
-        let i: short
-        let j: short
         let tempBoolean: boolean
         let tempSmallint: short
         let tempLongint: long
@@ -1560,8 +1560,6 @@ export class PdPlant extends PdStreamableObject {
         let tempColorRef: TColorRef
         let tempSCurve: SCurveStructure
         let tempTdo: KfObject3D
-        let start: string
-        let stop: string
         
         if (MainForm !== null) {
             // v2.0 saving selection state in main window
@@ -1569,26 +1567,26 @@ export class PdPlant extends PdStreamableObject {
         } else {
             this.selectedWhenLastSaved = false
         }
-        start = " ["
-        stop = "] ="
+        const start = " ["
+        const stop = "] ="
         // v2.0
         this.writeLine(plantFile, "[" + this.name + "] " + kPlantAsTextStartString + " <v2.0>")
         if (this.noteLines.Count > 0) {
             this.writeLine(plantFile, kStartNoteString)
-            for (i = 0; i <= this.noteLines.Count - 1; i++) {
+            for (let i = 0; i < this.noteLines.length; i++) {
                 this.writeLine(plantFile, this.noteLines.Strings[i])
             }
             this.writeLine(plantFile, kEndNoteString)
         }
-        if (domain.sectionManager.sections.Count > 0) {
-            for (i = 0; i <= domain.sectionManager.sections.Count - 1; i++) {
-                section = usection.PdSection(domain.sectionManager.sections.Items[i])
+        if (domain.sectionManager.sections.length > 0) {
+            for (let i = 0; i < domain.sectionManager.sections.length; i++) {
+                section = domain.sectionManager.sections[i]
                 if (section === null) {
                     continue
                 }
                 // write out section header with name 
                 this.writeLine(plantFile, "; ------------------------- " + section.getName())
-                for (j = 0; j <= section.numSectionItems - 1; j++) {
+                for (let j = 0; j < section.numSectionItems; j++) {
                     // write out params 
                     param = domain.parameterManager.parameterForFieldNumber(section.sectionItems[j])
                     if (param === null) {
@@ -1642,7 +1640,7 @@ export class PdPlant extends PdStreamableObject {
             }
         }
         if (this.amendments.Count > 0) {
-            for (i = 0; i <= this.amendments.Count - 1; i++) {
+            for (let i = 0; i < this.amendments.length; i++) {
                 if (this.writingToMemo) {
                     uamendmt.PdPlantDrawingAmendment(this.amendments.Items[i]).writeToMemo(MainForm.plantsAsTextMemo)
                 } else {
@@ -1839,12 +1837,10 @@ export class PdPlant extends PdStreamableObject {
     }
     
     finishLoadingOrDefaulting(checkForUnreadParams: boolean): void {
-        let param: PdParameter
-        
         if (checkForUnreadParams) {
-            if (domain.parameterManager.parameters.Count > 0) {
+            if (domain.parameterManager.parameters.length > 0) {
                 for (let i = 0; i < domain.parameterManager.parameters.length; i++) {
-                    param = uparams.PdParameter(domain.parameterManager.parameters[i])
+                    const param = domain.parameterManager.parameters[i]
                     if ((!param.valueHasBeenReadForCurrentPlant) && (param.fieldType !== FieldType.kFieldHeader)) {
                         this.defaultParameter(param, checkForUnreadParams)
                     }
@@ -2928,6 +2924,5 @@ export class PdPlant extends PdStreamableObject {
 export class PdPlantUpdateEvent {
     plant: PdPlant = new PdPlant()
     fieldID: int = 0
-    fieldIndex: int = 0
-    
+    fieldIndex: int = 0s
 }
