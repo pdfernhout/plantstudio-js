@@ -1407,7 +1407,6 @@ export class PdPlant extends PdStreamableObject {
                 break
             default:
                 throw new Error("Problem: Invalid export type in PdPlant.saveToGlobal3DOutputFile.")
-                break
         }
         this.turtle.rotateX(fixRotation)
         // this is a user-specified turn on top of the default
@@ -1959,7 +1958,6 @@ export class PdPlant extends PdStreamableObject {
                 break
             default:
                 throw new Error("Problem: Unknown field for plant string list " + IntToStr(fieldID) + " in method PdPlant.fillEnumStringList.")
-                break
         }
         return hasRadioButtons
     }
@@ -2007,7 +2005,6 @@ export class PdPlant extends PdStreamableObject {
                     break
                 default:
                     throw new Error("Problem: Unsupported transfer from field " + IntToStr(fieldType) + " in method PdPlant.MFD.")
-                    break
             }
         } else if (direction === kSetField) {
             switch (fieldType) {
@@ -2031,7 +2028,6 @@ export class PdPlant extends PdStreamableObject {
                     break
                 default:
                     throw new Error("Problem: Unsupported transfer to field " + IntToStr(fieldType) + " in method PdPlant.MFD.")
-                    break
             }
         }
         return objectValue, value
@@ -2230,7 +2226,6 @@ export class PdPlant extends PdStreamableObject {
                             // note that longints are not handled here - they are used only for position information
                             //            and not for normal parameters 
                             throw new Error("Problem: Invalid parameter type in method PdPlant.useBreedingOptionsAndPlantsToSetParameters.")
-                            break
                     // param loop
                     }
                 }
@@ -2766,11 +2761,9 @@ export class PdPlant extends PdStreamableObject {
     }
     
     getInfoForPlantPartAtPoint(point: TPoint, partID: long, partType: string): void {
-        let part: PdPlantPart
-        
         partID = -1
         partType = ""
-        part = this.findPlantPartAtPositionByTestingPolygons(Point)
+        const part: PdPlantPart = this.findPlantPartAtPositionByTestingPolygons(point)
         if (part === null) {
             return partID, partType
         }
@@ -2780,7 +2773,7 @@ export class PdPlant extends PdStreamableObject {
     }
     
     colorForDXFPartType(index: short): TColorRef {
-        let result = new TColorRef()
+        let result: TColorRef
         switch (index) {
             case ExportPart.kExportPartMeristem:
                 result = this.pAxillaryBud.tdoParams.faceColor
@@ -2886,7 +2879,6 @@ export class PdPlant extends PdStreamableObject {
                 break
             default:
                 throw new Error("Problem: Invalid part type in method colorForDXFPartType.")
-                break
         }
         return result
     }
