@@ -6,6 +6,7 @@ export type short = number
 export type byte = number
 export type TColor = number
 export type TColorRef = number
+export type TMemo = string[]
 
 export function intround(x: number) {
     return Math.round(x)
@@ -70,4 +71,27 @@ export class TextFile {
 export function writeln(file: TextFile, line: string) {
     file.contents = file.contents + line + "\n"
     file.position = file.contents.length
+}
+
+export function eof(file: TextFile) {
+    return file.position >= file.contents.length
+}
+
+export function readln(file: TextFile) {
+    // TODO: Very inefficient readln
+    let result = ""
+    while (file.position < file.contents.length) {
+        const nextCharacter = file.contents[file.position++]
+        if (nextCharacter === "\r") {
+            if (file.contents[file.position] === "\n") {
+                file.position++
+            }
+            return result
+        }
+        if (nextCharacter === "\n") {
+            return result
+        }
+        result += nextCharacter
+    }
+    return result
 }

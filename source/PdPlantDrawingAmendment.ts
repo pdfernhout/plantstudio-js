@@ -1,9 +1,9 @@
 // PdPlantDrawingAmendment was unit uamendmt
 
-import { long, float, TColorRef, short, IntToStr, intround, StrToIntDef, TextFile, StrToInt, writeln } from "./common"
+import { long, float, TColorRef, short, IntToStr, intround, StrToIntDef, TextFile, StrToInt, writeln, TMemo, compareTextIgnoreCase, eof, readln } from "./common"
 import { PdStreamableObject, PdClassAndVersionInformationRecord, PdFiler } from "./temporary";
 import { ClassId } from "./uclasses";
-import { support_rgb } from "./usupport";
+import { support_rgb, strToBool, boolToStr, stringBeyond, stringUpTo } from "./usupport";
 
 // const
 export const kStartAmendmentString = "start posing change"
@@ -30,18 +30,16 @@ export class PdPlantDrawingAmendment extends PdStreamableObject {
     applyAtAge: short = 0
 
     readFromTextFile(inputFile: TextFile): void {
-        let inputLine: string
-        let varName: string
-        let varValue: string
+        let inputLine: string = ""
         
-        while (!UNRESOLVED.eof(inputFile)) {
+        while (!eof(inputFile)) {
             // plant reads start line; just continue from there
-            UNRESOLVED.readln(inputFile, inputLine)
-            if ((trim(inputLine) === "")) {
+            const inputLine = readln(inputFile)
+            if (inputLine.trim() === "") {
                 continue
             }
-            varName = usupport.stringUpTo(inputLine, "=")
-            varValue = usupport.stringBeyond(inputLine, "=")
+            const varName = stringUpTo(inputLine, "=")
+            const varValue = stringBeyond(inputLine, "=")
             if (!this.setField(varName, varValue)) {
                 break
             }
@@ -51,19 +49,16 @@ export class PdPlantDrawingAmendment extends PdStreamableObject {
         }
     }
     
-    readFromMemo(aMemo: TMemo, readingMemoLine: long): void {
-        let inputLine: string
-        let varName: string
-        let varValue: string
-        
-        while (readingMemoLine <= aMemo.Lines.Count - 1) {
+    readFromMemo(aMemo: TMemo, readingMemoLine: long): number {
+        let inputLine: string = ""
+        while (readingMemoLine < aMemo.length) {
             // plant reads start line; just continue from there
-            inputLine = aMemo.Lines.Strings[readingMemoLine]
-            if ((trim(inputLine) === "")) {
+            inputLine = aMemo[readingMemoLine]
+            if (inputLine.trim() === "") {
                 continue
             }
-            varName = usupport.stringUpTo(inputLine, "=")
-            varValue = usupport.stringBeyond(inputLine, "=")
+            const varName = stringUpTo(inputLine, "=")
+            const varValue = stringBeyond(inputLine, "=")
             if (!this.setField(varName, varValue)) {
                 break
             }
@@ -84,7 +79,7 @@ export class PdPlantDrawingAmendment extends PdStreamableObject {
         } else if (varName.includes("part type")) {
             this.typeOfPart = varValue
         } else if (varName.includes("hide")) {
-            this.hide = usupport.strToBool(varValue)
+            this.hide = strToBool(varValue)
         } else if (varName.includes("change colors")) {
             // read these for possible backward compatibility later, but don't do anything with them
             // self.changeColors := strToBool(varValue)
@@ -102,7 +97,7 @@ export class PdPlantDrawingAmendment extends PdStreamableObject {
             // self.lineColor := strToIntDef(varValue, 0)
             result = true
         } else if (varName.includes("rotate")) {
-            this.addRotations = usupport.strToBool(varValue)
+            this.addRotations = strToBool(varValue)
         } else if (varName.includes("x rotation")) {
             this.xRotation = StrToInt(varValue) * 1.0
         } else if (varName.includes("y rotation")) {
@@ -110,9 +105,9 @@ export class PdPlantDrawingAmendment extends PdStreamableObject {
         } else if (varName.includes("z rotation")) {
             this.zRotation = StrToInt(varValue) * 1.0
         } else if (varName.includes("change scale")) {
-            this.multiplyScale = usupport.strToBool(varValue)
+            this.multiplyScale = strToBool(varValue)
         } else if (varName.includes("propagate scale change up stem")) {
-            this.propagateScale = usupport.strToBool(varValue)
+            this.propagateScale = strToBool(varValue)
         } else if (varName.includes("3d object scale multiplier")) {
             this.scaleMultiplier_pct = StrToIntDef(varValue, 100)
         } else if (varName.includes("line length multiplier")) {
@@ -133,7 +128,7 @@ export class PdPlantDrawingAmendment extends PdStreamableObject {
         writeln(outputFile, kStartAmendmentString)
         writeln(outputFile, "  part number =" + IntToStr(this.partID))
         writeln(outputFile, "  part type =" + this.typeOfPart)
-        writeln(outputFile, "  hide =" + usupport.boolToStr(this.hide))
+        writeln(outputFile, "  hide =" + boolToStr(this.hide))
         //
         //  writeln(outputFile, '  change colors =' + boolToStr(changeColors));
         //  writeln(outputFile, '  propagate colors up stem =' + boolToStr(propagateColors));
@@ -141,12 +136,12 @@ export class PdPlantDrawingAmendment extends PdStreamableObject {
         //  writeln(outputFile, '  back face color =' + intToStr(backfaceColor));
         //  writeln(outputFile, '  line color =' + intToStr(lineColor));
         //  
-        writeln(outputFile, "  rotate =" + usupport.boolToStr(this.addRotations))
+        writeln(outputFile, "  rotate =" + boolToStr(this.addRotations))
         writeln(outputFile, "  x rotation =" + IntToStr(intround(this.xRotation)))
         writeln(outputFile, "  y rotation =" + IntToStr(intround(this.yRotation)))
         writeln(outputFile, "  z rotation =" + IntToStr(intround(this.zRotation)))
-        writeln(outputFile, "  change scale =" + usupport.boolToStr(this.multiplyScale))
-        writeln(outputFile, "  propagate scale change up stem =" + usupport.boolToStr(this.propagateScale))
+        writeln(outputFile, "  change scale =" + boolToStr(this.multiplyScale))
+        writeln(outputFile, "  propagate scale change up stem =" + boolToStr(this.propagateScale))
         writeln(outputFile, "  3d object scale multiplier =" + IntToStr(this.scaleMultiplier_pct))
         writeln(outputFile, "  line length multiplier =" + IntToStr(this.lengthMultiplier_pct))
         writeln(outputFile, "  line width multiplier =" + IntToStr(this.widthMultiplier_pct))
@@ -157,30 +152,30 @@ export class PdPlantDrawingAmendment extends PdStreamableObject {
     }
     
     writeToMemo(aMemo: TMemo): void {
-        aMemo.Lines.Add(kStartAmendmentString)
-        aMemo.Lines.Add("  part number =" + IntToStr(this.partID))
-        aMemo.Lines.Add("  part type =" + this.typeOfPart)
-        aMemo.Lines.Add("  hide =" + usupport.boolToStr(this.hide))
+        aMemo.push(kStartAmendmentString)
+        aMemo.push("  part number =" + IntToStr(this.partID))
+        aMemo.push("  part type =" + this.typeOfPart)
+        aMemo.push("  hide =" + boolToStr(this.hide))
         //
-        //  aMemo.lines.add('  change colors =' + boolToStr(changeColors));
-        //  aMemo.lines.add('  propagate colors up stem =' + boolToStr(propagateColors));
-        //  aMemo.lines.add('  front face color =' + intToStr(faceColor));
-        //  aMemo.lines.add('  back face color =' + intToStr(backfaceColor));
-        //  aMemo.lines.add('  line color =' + intToStr(lineColor));
+        //  aMemo.push('  change colors =' + boolToStr(changeColors));
+        //  aMemo.push('  propagate colors up stem =' + boolToStr(propagateColors));
+        //  aMemo.push('  front face color =' + intToStr(faceColor));
+        //  aMemo.push('  back face color =' + intToStr(backfaceColor));
+        //  aMemo.push('  line color =' + intToStr(lineColor));
         //  
-        aMemo.Lines.Add("  rotate =" + usupport.boolToStr(this.addRotations))
-        aMemo.Lines.Add("  x rotation =" + IntToStr(intround(this.xRotation)))
-        aMemo.Lines.Add("  y rotation =" + IntToStr(intround(this.yRotation)))
-        aMemo.Lines.Add("  z rotation =" + IntToStr(intround(this.zRotation)))
-        aMemo.Lines.Add("  change scale =" + usupport.boolToStr(this.multiplyScale))
-        aMemo.Lines.Add("  propagate scale change up stem =" + usupport.boolToStr(this.propagateScale))
-        aMemo.Lines.Add("  3d object scale multiplier =" + IntToStr(this.scaleMultiplier_pct))
-        aMemo.Lines.Add("  line length multiplier =" + IntToStr(this.lengthMultiplier_pct))
-        aMemo.Lines.Add("  line width multiplier =" + IntToStr(this.widthMultiplier_pct))
+        aMemo.push("  rotate =" + boolToStr(this.addRotations))
+        aMemo.push("  x rotation =" + IntToStr(intround(this.xRotation)))
+        aMemo.push("  y rotation =" + IntToStr(intround(this.yRotation)))
+        aMemo.push("  z rotation =" + IntToStr(intround(this.zRotation)))
+        aMemo.push("  change scale =" + boolToStr(this.multiplyScale))
+        aMemo.push("  propagate scale change up stem =" + boolToStr(this.propagateScale))
+        aMemo.push("  3d object scale multiplier =" + IntToStr(this.scaleMultiplier_pct))
+        aMemo.push("  line length multiplier =" + IntToStr(this.lengthMultiplier_pct))
+        aMemo.push("  line width multiplier =" + IntToStr(this.widthMultiplier_pct))
         //
-        //  aMemo.lines.add('  apply at age =' + intToStr(applyAtAge));
+        //  aMemo.push('  apply at age =' + intToStr(applyAtAge));
         //  
-        aMemo.Lines.Add(kEndAmendmentString)
+        aMemo.push(kEndAmendmentString)
     }
    
     getFullName(): string {

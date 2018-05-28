@@ -1,4 +1,4 @@
-import { float, StrToFloat, int, byte, long } from "./common";
+import { float, StrToFloat, int, byte, long, compareTextIgnoreCase, short } from "./common";
 import { DebugPrint } from "./temporary";
 
 // unit Usupport
@@ -524,43 +524,42 @@ function trimLeftAndRight(theString: string): string {
     return result
 }
 
-function stringUpTo(aString: string, aDelimiter: string): string {
-    let result = ""
-    let delimiterPos: short
-    
-    if (len(aString) === 0) {
-        result = ""
-        return result
+*/
+
+export function stringUpTo(aString: string, aDelimiter: string): string {
+    if (aString.length === 0) {
+        return ""
     }
-    delimiterPos = UNRESOLVED.pos(aDelimiter, aString)
-    if (delimiterPos === 0) {
+    const delimiterPos = aString.indexOf(aDelimiter)
+    let result = ""
+    if (delimiterPos === -1) {
         result = aString
-    } else if (delimiterPos === 1) {
+    } else if (delimiterPos === 0) {
         result = ""
     } else {
-        result = UNRESOLVED.copy(aString, 1, delimiterPos - 1)
+        result = aString.substring(0, delimiterPos)
     }
     return result
 }
 
-function stringBeyond(aString: string, aDelimiter: string): string {
-    let result = ""
-    let delimiterPos: short
-    
-    if (len(aString) === 0) {
-        result = ""
-        return result
+export function stringBeyond(aString: string, aDelimiter: string): string {
+    if (aString.length === 0) {
+        return ""
     }
-    delimiterPos = UNRESOLVED.pos(aDelimiter, aString)
-    if (delimiterPos === 0) {
+    const delimiterPos = aString.indexOf(aDelimiter)
+    let result = ""
+    // TODO: Logic here seems problemtaitcal if deleimiter is missing -- maybe want to return empty string?
+    if (delimiterPos === -1) {
         result = aString
-    } else if (delimiterPos === len(aString)) {
+    } else if (delimiterPos === aString.length - 1) {
         result = ""
     } else {
-        result = UNRESOLVED.copy(aString, delimiterPos + 1, len(aString) - delimiterPos)
+        result = aString.substring(delimiterPos + aDelimiter.length)
     }
     return result
 }
+
+/*
 
 function stringBetween(startString: string, endString: string, wholeString: string): string {
     let result = ""
@@ -580,8 +579,11 @@ function stringBetween(startString: string, endString: string, wholeString: stri
 //    result.add(token);
 //    end;
 //  end;
-//     
-function boolToStr(value: boolean): string {
+//
+
+*/
+
+export function boolToStr(value: boolean): string {
     let result = ""
     if (value) {
         result = "true"
@@ -591,19 +593,20 @@ function boolToStr(value: boolean): string {
     return result
 }
 
-function strToBool(booleanString: string): boolean {
+export function strToBool(booleanString: string): boolean {
     let result = false
-    result = false
     if (booleanString === "") {
         return result
     }
-    if ((uppercase(booleanString) === "TRUE")) {
+    if (compareTextIgnoreCase(booleanString, "TRUE")) {
         result = true
-    } else if ((uppercase(booleanString) === "FALSE")) {
+    } else if (compareTextIgnoreCase(booleanString, "FALSE")) {
         result = false
     }
     return result
 }
+
+/*
 
 function messageForExceptionType(e: Exception, methodName: string): void {
     let errorString: string
