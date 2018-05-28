@@ -1,19 +1,19 @@
 // PdPlantPart from unit upart
 
-import { PdPlant, Gender } from "./PdPlant";
-import { float, short, long, IntToStr, int, TColorRef } from "./common";
-import { TRect } from "./TRect";
-import { PdPlantDrawingAmendment } from "./PdPlantDrawingAmendment";
-import { PdStreamableObject, messageForExceptionType, DebugPrint, MainForm, PdClassAndVersionInformationRecord, PdFiler, ExportPart } from "./temporary";
-import { PdTraverser, Activity, PdPlantStatistics } from "./PdTraverser";
-import { safedivExcept } from "./umath";
-import { KfObject3D } from "./KfObject3D";
-import { KfTurtle } from "./KfTurtle";
-import { KfTriangle } from "./KfTriangle";
-import { KfPoint3D } from "./KfPoint3D";
-import { domain } from "./PdDomain";
-import { ClassId } from "./uclasses";
-import { TPoint } from "./TPoint";
+import { PdPlant, Gender, PartType } from "./PdPlant"
+import { float, short, long, IntToStr, int, TColorRef } from "./common"
+import { TRect } from "./TRect"
+import { PdPlantDrawingAmendment } from "./PdPlantDrawingAmendment"
+import { PdStreamableObject, messageForExceptionType, DebugPrint, MainForm, PdClassAndVersionInformationRecord, PdFiler, ExportPart, ExportFormats, darkerColor, longNameForDXFPartType, shortNameForDXFPartType } from "./temporary"
+import { PdTraverser, Activity, PdPlantStatistics } from "./PdTraverser"
+import { safedivExcept } from "./umath"
+import { KfObject3D } from "./KfObject3D"
+import { KfTurtle } from "./KfTurtle"
+import { KfTriangle } from "./KfTriangle"
+import { KfPoint3D } from "./KfPoint3D"
+import { domain } from "./PdDomain"
+import { ClassId } from "./uclasses"
+import { TPoint } from "./TPoint"
 
 /* TODO: Remove unused imports
 from conversion_common import *
@@ -63,8 +63,8 @@ export class PdPlantPart extends PdStreamableObject {
     isSeedlingLeaf: boolean = false
     partID: long = 0
     boundsRect: TRect = new TRect()
-    amendment: PdPlantDrawingAmendment = new PdPlantDrawingAmendment()
-    parentAmendment: PdPlantDrawingAmendment = new PdPlantDrawingAmendment()
+    amendment: PdPlantDrawingAmendment | null = null
+    parentAmendment: PdPlantDrawingAmendment | null = null
     biomassOfMeAndAllPartsAboveMe_pctMPB: float = 0.0
     
     // ---------------------------------------------------------------------------------- initialize 
@@ -263,21 +263,23 @@ export class PdPlantPart extends PdStreamableObject {
         let partName: string
         
         switch (this.partType()) {
-            case uplant.kPartTypeFlowerFruit:
+            case PartType.kPartTypeFlowerFruit:
                 partName = "flower/fruit"
                 break
-            case uplant.kPartTypeInflorescence:
+            case PartType.kPartTypeInflorescence:
                 partName = "inflorescence"
                 break
-            case uplant.kPartTypeMeristem:
+            case PartType.kPartTypeMeristem:
                 partName = "meristem"
                 break
-            case uplant.kPartTypePhytomer:
+            case PartType.kPartTypePhytomer:
                 partName = "internode"
                 break
-            case uplant.kPartTypeLeaf:
+            case PartType.kPartTypeLeaf:
                 partName = "leaf"
                 break
+            default:
+                throw new Error("Unexpected partType: " + this.partType())
         }
         DebugPrint("Part " + IntToStr(this.partID) + ", " + partName)
     }
@@ -296,7 +298,7 @@ export class PdPlantPart extends PdStreamableObject {
         turtle = this.plant.turtle
         if (this.setColorsWithAmendmentAndReturnTrueIfNoOverrides(kDrawingTdo)) {
             turtle.setForeColorBackColor(faceColor, backfaceColor)
-            turtle.setLineColor(usupport.darkerColor(faceColor))
+            turtle.setLineColor(darkerColor(faceColor))
         }
         realScale = scale * this.scaleMultiplierConsideringAmendments()
         turtle.setLineWidth(1.0)
@@ -315,8 +317,6 @@ export class PdPlantPart extends PdStreamableObject {
         let realAngleY: float
         let realAngleZ: float
         let lineDivisions: short
-        let i: short
-        let triangleMade: KfTriangle
         let startWidth: float
         let endWidth: float
         let startPortionWidth: float
@@ -329,7 +329,7 @@ export class PdPlantPart extends PdStreamableObject {
             return
         }
         turtle = this.plant.turtle
-        if (turtle.ifExporting_excludeStem(len)) {
+        if (turtle.ifExporting_excludeStem(length)) {
             return
         }
         if (this.setColorsWithAmendmentAndReturnTrueIfNoOverrides(kDrawingLine)) {
@@ -371,7 +371,7 @@ export class PdPlantPart extends PdStreamableObject {
         if (realAngleX !== 0) {
             turtle.rotateX(realAngleX)
         }
-        for (i = 0; i <= lineDivisions - 1; i++) {
+        for (let i = 0; i <= lineDivisions - 1; i++) {
             isLastSegment = (i >= lineDivisions - 1)
             if (!isLastSegment) {
                 // because of rounding, last segment uses leftover, not equal portion
@@ -400,7 +400,7 @@ export class PdPlantPart extends PdStreamableObject {
             if (turtle.exportingToFile()) {
                 this.write3DExportLine(this.partID, segmentLength, startPortionWidth, endPortionWidth, i)
             } else {
-                triangleMade = turtle.drawInMillimeters(segmentLength, this.partID)
+                const triangleMade = turtle.drawInMillimeters(segmentLength, this.partID)
                 if ((turtle.drawOptions.sortTdosAsOneItem) && (triangleMade !== null)) {
                     triangleMade.tdo = this.tdoToSortLinesWith()
                 }
@@ -414,9 +414,9 @@ export class PdPlantPart extends PdStreamableObject {
         let angle: float
         let pipeRadius: float
         let faceWidth: float
-        let faces: short
-        let startPoints: KfPoint3D[] /* kMaxLineOutputPoints + 1 */
-        let endPoints: KfPoint3D[] /* kMaxLineOutputPoints + 1 */
+        // TODO: Maybe do not need +1 or even entire allocation for startPOints and endPoints?
+        let startPoints: KfPoint3D[] = new Array(kMaxLineOutputPoints + 1)
+        let endPoints: KfPoint3D[] = new Array(kMaxLineOutputPoints + 1)
         
         if (this.plant.turtle === null) {
             return
@@ -424,10 +424,10 @@ export class PdPlantPart extends PdStreamableObject {
         turtle = this.plant.turtle
         if (turtle.writingToPOV()) {
             // POV draws cylinders directly, not with faces
-            turtle.drawInMillimeters(len, partID)
+            turtle.drawInMillimeters(length, partID)
             return
         }
-        faces = turtle.ifExporting_stemCylinderFaces()
+        const faces = turtle.ifExporting_stemCylinderFaces()
         if (faces === 0) {
             return
         }
@@ -447,7 +447,7 @@ export class PdPlantPart extends PdStreamableObject {
                 startPoints[i] = endPoints[i]
             }
         }
-        turtle.moveInMillimeters(len)
+        turtle.moveInMillimeters(length)
         // get endWidth points
         pipeRadius = 0.5 * endWidth
         for (let i = 0; i < faces; i++) {
@@ -507,7 +507,7 @@ export class PdPlantPart extends PdStreamableObject {
         myParentHasAnAmendment = this.parentAmendment !== null
         myAmendmentSaysIAmHidden = (this.amendment !== null) && (this.amendment.hide)
         myParentsAmendmentSaysIAmHidden = (this.parentAmendment !== null) && (this.parentAmendment.hide)
-        drawingToMainWindow = (this.plant.turtle.writingTo === u3dexport.kScreen) && (!domain.drawingToMakeCopyBitmap)
+        drawingToMainWindow = (this.plant.turtle.writingTo === ExportFormats.kScreen) && (!domain.drawingToMakeCopyBitmap)
         if ((iHaveAnAmendment && myAmendmentSaysIAmHidden) || (iDontHaveAnAmendment && myParentHasAnAmendment && myParentsAmendmentSaysIAmHidden)) {
             if (drawingToMainWindow) {
                 result = !domain.options.showGhostingForHiddenParts
@@ -519,7 +519,7 @@ export class PdPlantPart extends PdStreamableObject {
     }
     
     applyAmendmentRotations(): void {
-        if ((this.amendment !== null) && (this.amendment.addRotations) && (domain.options.showPosingAtAll)) {
+        if (this.plant.turtle && (this.amendment !== null) && (this.amendment.addRotations) && (domain.options.showPosingAtAll)) {
             this.plant.turtle.rotateX(this.amendment.xRotation * 256 / 360)
             this.plant.turtle.rotateY(this.amendment.yRotation * 256 / 360)
             this.plant.turtle.rotateZ(this.amendment.zRotation * 256 / 360)
@@ -556,7 +556,7 @@ export class PdPlantPart extends PdStreamableObject {
         myAmendmentSaysIAmHidden = (this.amendment !== null) && (this.amendment.hide)
         myParentsAmendmentSaysIAmHidden = (this.parentAmendment !== null) && (this.parentAmendment.hide)
         iAmSelectedInTheMainWindow = (this.partID === MainForm.selectedPlantPartID) && (MainForm.focusedPlant() === this.plant)
-        showHighlights = domain.options.showHighlightingForNonHiddenPosedParts && (this.plant.turtle.writingTo === u3dexport.kScreen) && (!domain.drawingToMakeCopyBitmap) && (!this.plant.drawingIntoPreviewCache)
+        showHighlights = domain.options.showHighlightingForNonHiddenPosedParts && (this.plant.turtle.writingTo === ExportFormats.kScreen) && (!domain.drawingToMakeCopyBitmap) && (!this.plant.drawingIntoPreviewCache)
         if (iHaveAnAmendment || myParentHasAnAmendment) {
             result = false
             if ((iHaveAnAmendment && iAmSelectedInTheMainWindow && showHighlights)) {
@@ -578,7 +578,7 @@ export class PdPlantPart extends PdStreamableObject {
             }
             if (drawingTdo) {
                 this.plant.turtle.setForeColorBackColor(color, backfaceColor)
-                this.plant.turtle.setLineColor(usupport.darkerColor(color))
+                this.plant.turtle.setLineColor(darkerColor(color))
             } else {
                 this.plant.turtle.setLineColor(lineColor)
             }
@@ -619,7 +619,7 @@ export class PdPlantPart extends PdStreamableObject {
     
     scaleMultiplierConsideringAmendments(): float {
         let result = 0.0
-        let amendmentToUse: PdPlantDrawingAmendment
+        let amendmentToUse: PdPlantDrawingAmendment | null
         
         result = 1.0
         if (!domain.options.showPosingAtAll) {
@@ -632,17 +632,18 @@ export class PdPlantPart extends PdStreamableObject {
                 } else {
                     amendmentToUse = this.parentAmendment
                 }
-                result = 1.0 * amendmentToUse.scaleMultiplier_pct / 100.0
+                if (amendmentToUse) {
+                    result = 1.0 * amendmentToUse.scaleMultiplier_pct / 100.0
+                }
             }
         }
         return result
     }
     
     lengthMultiplierConsideringAmendments(): float {
-        let result = 0.0
-        let amendmentToUse: PdPlantDrawingAmendment
+        let amendmentToUse: PdPlantDrawingAmendment | null
         
-        result = 1.0
+        let result = 1.0
         if (!domain.options.showPosingAtAll) {
             return result
         }
@@ -653,17 +654,18 @@ export class PdPlantPart extends PdStreamableObject {
                 } else {
                     amendmentToUse = this.parentAmendment
                 }
-                result = 1.0 * amendmentToUse.lengthMultiplier_pct / 100.0
+                if (amendmentToUse) {
+                    result = 1.0 * amendmentToUse.lengthMultiplier_pct / 100.0
+                }
             }
         }
         return result
     }
     
     widthMultiplierConsideringAmendments(): float {
-        let result = 0.0
-        let amendmentToUse: PdPlantDrawingAmendment
+        let amendmentToUse: PdPlantDrawingAmendment | null
         
-        result = 1.0
+        let result = 1.0
         if (!domain.options.showPosingAtAll) {
             return result
         }
@@ -674,7 +676,9 @@ export class PdPlantPart extends PdStreamableObject {
                 } else {
                     amendmentToUse = this.parentAmendment
                 }
-                result = 1.0 * amendmentToUse.widthMultiplier_pct / 100.0
+                if (amendmentToUse) {
+                    result = 1.0 * amendmentToUse.widthMultiplier_pct / 100.0
+                }
             }
         }
         return result
@@ -719,13 +723,13 @@ export class PdPlantPart extends PdStreamableObject {
     
     longNameForDXFPartConsideringGenderEtc(index: short): string {
         let result = ""
-        result = u3dexport.longNameForDXFPartType(this.realDxfIndexForBaseDXFPart(index))
+        result = longNameForDXFPartType(this.realDxfIndexForBaseDXFPart(index))
         return result
     }
     
     shortNameForDXFPartConsideringGenderEtc(index: short): string {
         let result = ""
-        result = u3dexport.shortNameForDXFPartType(this.realDxfIndexForBaseDXFPart(index))
+        result = shortNameForDXFPartType(this.realDxfIndexForBaseDXFPart(index))
         return result
     }
     

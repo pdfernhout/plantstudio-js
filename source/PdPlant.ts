@@ -1,20 +1,20 @@
 // PdPlant was unit Uplant
 
-import { PdStreamableObject, ExportFormats, messageForExceptionType, boundForString, DebugPrint, SinglePoint, ucursor, MainForm, PdBitmap, PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof, PdInternode, TListCollection_streamUsingFiler, PdPlantPart, ExportPart } from "./temporary";
-import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor, ColorDefs, StrToIntDef, IntToStr, compareTextIgnoreCase, arrayRemove } from "./common";
-import { KfObject3D } from "./KfObject3D";
-import { TPoint } from "./TPoint";
-import { TRect } from "./TRect";
-import { KfTurtle } from "./KfTurtle";
-import { SCurveStructure, intMin, intMax, safedivExcept, min, stringToSCurve, calcSCurveCoeffs, max, scurve } from "./umath";
-import { KfPoint3D } from "./KfPoint3D";
-import { PdRandom } from "./PdRandom";
-import { domain, DrawMode, MutationRate } from "./PdDomain";
-import { PdTraverser, Activity, TraverserGlobals, PdPlantStatistics, Statistics } from "./PdTraverser";
-import { ClassId } from "./uclasses";
-import { PdParameter, FieldType, IndexType } from "./PdParameter";
-import { PdSection } from "./PdSection";
-import { PdPlantDrawingAmendment, kStartAmendmentString } from "./PdPlantDrawingAmendment";
+import { PdStreamableObject, ExportFormats, messageForExceptionType, boundForString, DebugPrint, SinglePoint, ucursor, MainForm, PdBitmap, PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof, PdInternode, TListCollection_streamUsingFiler, PdPlantPart, ExportPart } from "./temporary"
+import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor, ColorDefs, StrToIntDef, IntToStr, compareTextIgnoreCase, arrayRemove } from "./common"
+import { KfObject3D } from "./KfObject3D"
+import { TPoint } from "./TPoint"
+import { TRect } from "./TRect"
+import { KfTurtle } from "./KfTurtle"
+import { SCurveStructure, intMin, intMax, safedivExcept, min, stringToSCurve, calcSCurveCoeffs, max, scurve } from "./umath"
+import { KfPoint3D } from "./KfPoint3D"
+import { PdRandom } from "./PdRandom"
+import { domain, DrawMode, MutationRate } from "./PdDomain"
+import { PdTraverser, Activity, TraverserGlobals, PdPlantStatistics, Statistics } from "./PdTraverser"
+import { ClassId } from "./uclasses"
+import { PdParameter, FieldType, IndexType } from "./PdParameter"
+import { PdSection } from "./PdSection"
+import { PdPlantDrawingAmendment, kStartAmendmentString } from "./PdPlantDrawingAmendment"
 
 /* Remove unused imports
 from conversion_common import *
@@ -59,12 +59,16 @@ const kStageFlowerBud = 1
 const kStageOpenFlower = 2
 const kStageUnripeFruit = 3
 const kStageRipeFruit = 4
-const kPartTypeNone = 0
-const kPartTypeFlowerFruit = 1
-const kPartTypeInflorescence = 2
-const kPartTypeMeristem = 3
-const kPartTypePhytomer = 4
-const kPartTypeLeaf = 5
+
+export enum PartType {
+    kPartTypeNone = 0,
+    kPartTypeFlowerFruit = 1,
+    kPartTypeInflorescence = 2,
+    kPartTypeMeristem = 3,
+    kPartTypePhytomer = 4,
+    kPartTypeLeaf = 5,
+}
+
 const kDirectionLeft = 0
 const kDirectionRight = 1
 const kGetField = 0

@@ -1,6 +1,6 @@
 // KfTurtle derived from unit Uturtle
 
-import { short, float, long, intround, byte, TColor, ColorDefs } from "./common"
+import { short, float, long, intround, byte, TColor, ColorDefs, TColorRef } from "./common"
 import { KfPoint3D, KfPoint3D_scaleBy } from "./KfPoint3D"
 import { kTdoBackColor, kTdoForeColor, kTdoLineContrastIndex, kMaximumRecordedPoints, ExportFormats } from "./temporary"
 import { TRealRect } from "./U3dsupport"
@@ -265,13 +265,25 @@ export class KfTurtle {
         return this.writingTo === ExportFormats.kLWO
     }
     
-    // TODO: Remove thse stub methods
+    // TODO: Remove thse stub ifExporting methods
     ifExporting_exclude3DObject(scale: float): boolean {
         return false;
     }
     ifExporting_start3DObject(aLongName: string, aShortName: string, color: any, index: short): void {
     }
     ifExporting_end3DObject(): void {
+    }
+    ifExporting_startStemSegment(aLongName: string, aShortName: string, color: TColorRef, width: float, index: short): void {
+    }
+    ifExporting_endStemSegment(): void {
+    }
+    ifExporting_stemCylinderFaces(): number {
+        return 0
+    }
+    ifExporting_excludeStem(value: number): boolean {
+        return false
+    }
+    drawFileExportPipeFaces(startPoints: KfPoint3D[], endPoints: KfPoint3D[], faces: short, segmentNumber: short): void {
     }
 
     /* TODO -- Finish export 

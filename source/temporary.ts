@@ -1,12 +1,17 @@
 // TODO: Temporary definitions that belong elsewhere used to get code to compile
 
 import { float, ColorDefs, short, int, StrToFloat, byte, long } from "./common"
-import { TRect } from "./TRect";
-import { PdTraverser } from "./PdTraverser";
-import { PdPlant } from "./PdPlant";
+import { TRect } from "./TRect"
+import { PdTraverser } from "./PdTraverser"
+import { PdPlant } from "./PdPlant"
 
 // TODO: Implement darkerColorWithSubtraction from usupport
 export function darkerColorWithSubtraction(a: number, b: number) {
+    return a
+}
+
+// TODO: Implement darkerColor from usupport
+export function darkerColor(a: number) {
     return a
 }
 
@@ -246,4 +251,14 @@ export enum ExportPart {
     kExportPartRipeFruit = 32,
     kExportPartRootTop = 33,
     kExportPartLast = 33,
+}
+
+// TODO: Fix longNameForDXFPartType from u3dexport
+export function longNameForDXFPartType(index: number): string {
+    return "TODO longNameForDXFPartType"
+}
+
+// TODO: Fix shortNameForDXFPartType from u3dexport
+export function shortNameForDXFPartType(index: short): string {
+    return "TODO shortNameForDXFPartType"
 }
