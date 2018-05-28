@@ -1,27 +1,22 @@
-// unit uamendmt
+// PdPlantDrawingAmendment was unit uamendmt
 
-from conversion_common import *
-import uclasses
-import usupport
-import uplant
-import ufiler
-import delphi_compatability
+import { long, float, TColorRef, short, IntToStr, intround, StrToIntDef } from "./common"
+import { PdStreamableObject, PdClassAndVersionInformationRecord, support_rgb, PdFiler } from "./temporary";
+import { ClassId } from "./uclasses";
 
 // const
 const kStartAmendmentString = "start posing change"
 const kEndAmendmentString = "end posing change"
 
-
-
-export class PdPlantDrawingAmendment {
+export class PdPlantDrawingAmendment extends PdStreamableObject {
     partID: long = 0
     typeOfPart: string = ""
     hide: boolean = false
     changeColors: boolean = false
     propagateColors: boolean = false
-    faceColor: TColorRef = new TColorRef()
-    backfaceColor: TColorRef = new TColorRef()
-    lineColor: TColorRef = new TColorRef()
+    faceColor: TColorRef = support_rgb(50, 200, 50)
+    backfaceColor: TColorRef = support_rgb(20, 150, 20)
+    lineColor: TColorRef = support_rgb(40, 100, 40)
     addRotations: boolean = false
     xRotation: float = 0.0
     yRotation: float = 0.0
@@ -32,20 +27,8 @@ export class PdPlantDrawingAmendment {
     lengthMultiplier_pct: short = 0
     widthMultiplier_pct: short = 0
     applyAtAge: short = 0
-    PdPlantDrawingAmendment.prototype = new PdStreamableObject()
-    PdPlantDrawingAmendment.prototype.constructor = PdPlantDrawingAmendment
-    
-    create(): void {
-        this.scaleMultiplier_pct = 100
-        this.lengthMultiplier_pct = 100
-        this.widthMultiplier_pct = 100
-        this.xRotation = 0
-        this.yRotation = 0
-        this.zRotation = 0
-        this.faceColor = usupport.support_rgb(50, 200, 50)
-        this.backfaceColor = usupport.support_rgb(20, 150, 20)
-        this.lineColor = usupport.support_rgb(40, 100, 40)
-    }
+
+    /* TODO: Implement rest of PdPlantDrawingAmendment
     
     readFromTextFile(inputFile: TextFile): void {
         let inputLine: string
@@ -65,7 +48,7 @@ export class PdPlantDrawingAmendment {
             }
         }
         if (UNRESOLVED.pos(uppercase(kEndAmendmentString), uppercase(inputLine)) <= 0) {
-            throw new GeneralException.create("Problem: Expected end of posing change.")
+            throw new Error("Problem: Expected end of posing change.")
         }
     }
     
@@ -88,7 +71,7 @@ export class PdPlantDrawingAmendment {
             readingMemoLine += 1
         }
         if (UNRESOLVED.pos(uppercase(kEndAmendmentString), uppercase(inputLine)) <= 0) {
-            throw new GeneralException.create("Problem: Expected end of posing change.")
+            throw new Error("Problem: Expected end of posing change.")
         }
         return readingMemoLine
     }
@@ -201,6 +184,8 @@ export class PdPlantDrawingAmendment {
         aMemo.Lines.Add(kEndAmendmentString)
     }
     
+    */
+   
     getFullName(): string {
         let result = ""
         result = IntToStr(this.partID) + " (" + this.typeOfPart + ")"
@@ -245,7 +230,7 @@ export class PdPlantDrawingAmendment {
     }
     
     classAndVersionInformation(cvir: PdClassAndVersionInformationRecord): void {
-        cvir.classNumber = uclasses.kPdPlantDrawingAmendment
+        cvir.classNumber = ClassId.kPdPlantDrawingAmendment
         cvir.versionNumber = 0
         cvir.additionNumber = 0
     }

@@ -1,6 +1,6 @@
 // TODO: Temporary definitions that belong elsewhere used to get code to compile
 
-import { float, ColorDefs, short, int, StrToFloat } from "./common"
+import { float, ColorDefs, short, int, StrToFloat, byte, long } from "./common"
 import { TRect } from "./TRect";
 import { PdTraverser } from "./PdTraverser";
 
@@ -58,7 +58,9 @@ export class PdFiler {
     streamBoolean(value: boolean): boolean {
         return value
     }
-
+    streamColorRef(value: number): number {
+        return value
+    }
 
 }
 
@@ -167,3 +169,8 @@ export class PdPlantPart {
 
 // TODO: Fix kExportPartLast copied from U3dexport
 export const kExportPartLast = 33
+
+// TODO: Fix support_rgb from usupport
+export function support_rgb(R: byte, G: byte, B: byte): long {
+    return R << 16 + G << 8 + B 
+}
