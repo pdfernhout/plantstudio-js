@@ -10,3 +10,8 @@ Looks like no conversion for property
   e.g. from utdo.pas: points[index: integer]: KfPoint3d read getPoint write setPoint;
 
 switch missing final close brace
+
+if there is an "exit" in a Delphi constructor (but not a regular function),
+there will be a missing return in that code.
+Exmaple: Uparams constructor PdParameter.make
+  if fieldType = kFieldHeader then exit;

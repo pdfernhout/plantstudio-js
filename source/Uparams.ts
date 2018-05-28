@@ -1,5 +1,8 @@
+import { short, float, int, long, IntToStr, compareTextIgnoreCase } from "./common";
+
 // unit Uparams
 
+/* TODO: Remove unused imports
 from conversion_common import *
 import udomain
 import umakepm
@@ -9,6 +12,7 @@ import usupport
 import uexcept
 import ucollect
 import delphi_compatability
+*/
 
 // const
 const kFieldUndefined = 0
@@ -76,12 +80,14 @@ export class PdParameter {
     make(aFieldNumber: short, aFieldID: string, aName: string, aFieldType: short, anIndexType: short, aUnitSet: short, aUnitModel: short, aUnitMetric: short, aUnitEnglish: short, aLowerBound: float, anUpperBound: float, aDefaultValueString: string, aRegrow: boolean, aReadOnly: boolean, anAccessString: string, aTransferType: short, aHint: string): void {
         this.create()
         this.fieldNumber = aFieldNumber
-        this.fieldID = UNRESOLVED.copy(aFieldID, 1, 80)
-        this.name = UNRESOLVED.copy(aName, 1, 80)
+        // TODO: Are these strign limites for fieldID and name and accessString still needed?
+        this.fieldID = aFieldID.substring(0, 80)
+        this.name = aName.substring(0, 80)
         this.fieldType = aFieldType
         // v2.0 headers can have hints
         this.hint = aHint
         if (this.fieldType === kFieldHeader) {
+            return
         }
         this.indexType = anIndexType
         this.unitSet = aUnitSet
@@ -93,9 +99,9 @@ export class PdParameter {
         this.defaultValueStringOriginal = aDefaultValueString
         this.regrow = aRegrow
         this.readOnly = aReadOnly
-        this.accessString = UNRESOLVED.copy(anAccessString, 1, 80)
+        this.accessString = anAccessString.substring(0, 80)
         this.transferType = aTransferType
-        //hint := aHint;
+        // hint := aHint;
     }
     
     indexCount(): int {
@@ -112,20 +118,17 @@ export class PdParameter {
                 result = 4
                 break
             default:
-                throw new GeneralException.create("Problem: Unexpected index type in method PdParameter.indexCount.")
-                break
+                throw new Error("Problem: Unexpected index type in method PdParameter.indexCount.")
         }
         return result
     }
     
     getName(): string {
-        let result = ""
-        result = this.name
-        return result
+        return this.name
     }
     
     setName(newName: string): void {
-        this.name = UNRESOLVED.copy(newName, 1, 80)
+        this.name = newName.substring(0, 80)
     }
     
     lowerBound(): float {
@@ -159,31 +162,17 @@ export class PdParameter {
     }
     
     getHint(): string {
-        let result = ""
-        result = this.hint
-        return result
+        return this.hint
     }
     
 }
 
 export class PdParameterManager {
-    parameters: TListCollection = new TListCollection()
-    
-    // ---------------------------------------------------- PdParameterManager 
-    create(): void {
-        TObject.prototype.create.call(this)
-        this.parameters = ucollect.TListCollection().Create()
-    }
-    
-    destroy(): void {
-        this.parameters.free
-        this.parameters = null
-        TObject.prototype.destroy.call(this)
-    }
+    parameters: PdParameter[] = []
     
     addParameter(newParameter: PdParameter): void {
         if (newParameter !== null) {
-            this.parameters.Add(newParameter)
+            this.parameters.push(newParameter)
         }
     }
     
@@ -195,7 +184,7 @@ export class PdParameterManager {
         if (section === null) {
             section = udomain.domain.sectionManager.addSection(sectionName)
             // the 'no section' section is hidden from the parameters window but we still want the section for writing out 
-            section.showInParametersWindow = !(uppercase(sectionName) === uppercase("(no section)"))
+            section.showInParametersWindow = !compareTextIgnoreCase(sectionName, "(no section)")
         }
         this.addParameter(newParameter)
         if (section !== null) {
@@ -205,7 +194,7 @@ export class PdParameterManager {
         // v2.1 orthogonal sections
         // limitation - each param can only have one orthogonal section specified
         // if want to add more later, use delimiter and parse
-        orthogonalSectionName = trim(orthogonalSectionName)
+        orthogonalSectionName = orthogonalSectionName.trim()
         if (orthogonalSectionName !== "") {
             section = null
             section = udomain.domain.sectionManager.sectionForName(orthogonalSectionName)
@@ -274,118 +263,79 @@ export class PdParameterManager {
     }
     
     parameterForIndex(index: long): PdParameter {
-        let result = new PdParameter()
-        result = this.parameters.Items[index]
-        return result
+        return this.parameters[index]
     }
     
     clearParameters(): void {
-        this.parameters.clear()
+        this.parameters = []
     }
     
     setAllReadFlagsToFalse(): void {
-        let i: short
-        
-        if (this.parameters.Count > 0) {
-            for (i = 0; i <= this.parameters.Count - 1; i++) {
-                PdParameter(this.parameters.Items[i]).valueHasBeenReadForCurrentPlant = false
+        if (this.parameters.length > 0) {
+            for (let i = 0; i < this.parameters.length; i++) {
+                this.parameters[i].valueHasBeenReadForCurrentPlant = false
             }
         }
     }
     
     parameterForFieldNumber(fieldNumber: long): PdParameter {
-        let result = new PdParameter()
-        let i: short
-        let parameter: PdParameter
-        
-        result = null
-        if (this.parameters.Count > 0) {
-            for (i = 0; i <= this.parameters.Count - 1; i++) {
-                parameter = PdParameter(this.parameters.Items[i])
+        if (this.parameters.length > 0) {
+            for (let i = 0; i < this.parameters.length; i++) {
+                const parameter = this.parameters[i]
                 if (fieldNumber === parameter.fieldNumber) {
-                    result = parameter
-                    return result
+                    return parameter
                 }
             }
         }
-        throw new GeneralException.create("Problem: Parameter not found for field number " + IntToStr(fieldNumber) + " in method PdParameterManager.parameterForFieldNumber.")
-        return result
+        throw new Error("Problem: Parameter not found for field number " + IntToStr(fieldNumber) + " in method PdParameterManager.parameterForFieldNumber.")
     }
     
     parameterForFieldID(fieldID: string): PdParameter {
-        let result = new PdParameter()
-        let i: short
-        let parameter: PdParameter
-        
-        result = null
-        if (this.parameters.Count > 0) {
-            for (i = 0; i <= this.parameters.Count - 1; i++) {
-                parameter = PdParameter(this.parameters.Items[i])
-                if (trim(uppercase(fieldID)) === trim(uppercase(parameter.fieldID))) {
-                    result = parameter
-                    return result
+        if (this.parameters.length > 0) {
+            for (let i = 0; i < this.parameters.length; i++) {
+                const parameter = this.parameters[i]
+                if (compareTextIgnoreCase(fieldID.trim(), parameter.fieldID.trim())) {
+                    return parameter
                 }
             }
         }
-        throw new GeneralException.create("Problem: Parameter not found for field ID " + fieldID + " in method PdParameterManager.parameterForFieldID.")
-        return result
+        throw new Error("Problem: Parameter not found for field ID " + fieldID + " in method PdParameterManager.parameterForFieldID.")
     }
     
     parameterForName(name: string): PdParameter {
-        let result = new PdParameter()
-        let i: short
-        let parameter: PdParameter
-        
-        result = null
-        if (this.parameters.Count > 0) {
-            for (i = 0; i <= this.parameters.Count - 1; i++) {
-                parameter = PdParameter(this.parameters.Items[i])
-                if (trim(uppercase(name)) === trim(uppercase(parameter.name))) {
-                    result = parameter
-                    return result
+        if (this.parameters.length > 0) {
+            for (let i = 0; i < this.parameters.length; i++) {
+                const parameter = this.parameters[i]
+                if (compareTextIgnoreCase(name.trim(), parameter.name.trim())) {
+                    return parameter
                 }
             }
         }
-        throw new GeneralException.create("Problem: Parameter not found for name " + name + " in method PdParameterManager.parameterForName.")
-        return result
+        throw new Error("Problem: Parameter not found for name " + name + " in method PdParameterManager.parameterForName.")
     }
     
     parameterIndexForFieldNumber(fieldNumber: long): int {
-        let result = 0
-        let i: short
-        let parameter: PdParameter
-        
-        result = 0
-        if (this.parameters.Count > 0) {
-            for (i = 0; i <= this.parameters.Count - 1; i++) {
-                parameter = PdParameter(this.parameters.Items[i])
+        if (this.parameters.length > 0) {
+            for (let i = 0; i < this.parameters.length; i++) {
+                const parameter = this.parameters[i]
                 if (fieldNumber === parameter.fieldNumber) {
-                    result = i
-                    return result
+                    return i
                 }
             }
         }
-        throw new GeneralException.create("Problem: Parameter index not found for field number " + IntToStr(fieldNumber) + " in method PdParameterManager.parameterIndexForFieldNumber.")
-        return result
+        throw new Error("Problem: Parameter index not found for field number " + IntToStr(fieldNumber) + " in method PdParameterManager.parameterIndexForFieldNumber.")
     }
     
     parameterIndexForFieldID(fieldID: string): int {
-        let result = 0
-        let i: short
-        let parameter: PdParameter
-        
-        result = 0
-        if (this.parameters.Count > 0) {
-            for (i = 0; i <= this.parameters.Count - 1; i++) {
-                parameter = PdParameter(this.parameters.Items[i])
-                if (trim(uppercase(fieldID)) === trim(uppercase(parameter.fieldID))) {
-                    result = i
-                    return result
+        if (this.parameters.length > 0) {
+            for (let i = 0; i <= this.parameters.length; i++) {
+                const parameter = this.parameters[i]
+                if (compareTextIgnoreCase(fieldID.trim(), parameter.fieldID.trim())) {
+                    return i
                 }
             }
         }
-        throw new GeneralException.create("Problem: Parameter index not found for field ID " + fieldID + " in method PdParameterManager.parameterIndexForFieldID.")
-        return result
+        throw new Error("Problem: Parameter index not found for field ID " + fieldID + " in method PdParameterManager.parameterIndexForFieldID.")
     }
     
     makeParameters(): void {
