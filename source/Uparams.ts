@@ -1,4 +1,5 @@
 import { short, float, int, long, IntToStr, compareTextIgnoreCase } from "./common";
+import { domain } from "./PdDomain";
 
 // unit Uparams
 
@@ -73,12 +74,11 @@ export class PdParameter {
     //must be whole string to allow for tdos
     // v2.1
     // ---------------------------------------------------------- PdParameter 
-    create(): void {
+    constructor() {
         this.collapsed = true
     }
     
     make(aFieldNumber: short, aFieldID: string, aName: string, aFieldType: short, anIndexType: short, aUnitSet: short, aUnitModel: short, aUnitMetric: short, aUnitEnglish: short, aLowerBound: float, anUpperBound: float, aDefaultValueString: string, aRegrow: boolean, aReadOnly: boolean, anAccessString: string, aTransferType: short, aHint: string): void {
-        this.create()
         this.fieldNumber = aFieldNumber
         // TODO: Are these strign limites for fieldID and name and accessString still needed?
         this.fieldID = aFieldID.substring(0, 80)
@@ -177,16 +177,14 @@ export class PdParameterManager {
     }
     
     addParameterForSection(sectionName: string, orthogonalSectionName: string, newParameter: PdParameter): void {
-        let section: PdSection
-        
-        section = null
-        section = udomain.domain.sectionManager.sectionForName(sectionName)
+        let section = domain.sectionManager.sectionForName(sectionName)
         if (section === null) {
-            section = udomain.domain.sectionManager.addSection(sectionName)
+            section = domain.sectionManager.addSection(sectionName)
             // the 'no section' section is hidden from the parameters window but we still want the section for writing out 
             section.showInParametersWindow = !compareTextIgnoreCase(sectionName, "(no section)")
         }
         this.addParameter(newParameter)
+        // TODO: superfluous test -- section can't be null at this point
         if (section !== null) {
             newParameter.originalSectionName = sectionName
             section.addSectionItem(newParameter.fieldNumber)
@@ -196,15 +194,15 @@ export class PdParameterManager {
         // if want to add more later, use delimiter and parse
         orthogonalSectionName = orthogonalSectionName.trim()
         if (orthogonalSectionName !== "") {
-            section = null
-            section = udomain.domain.sectionManager.sectionForName(orthogonalSectionName)
-            if (section === null) {
-                section = udomain.domain.sectionManager.addOrthogonalSection(orthogonalSectionName)
-                section.showInParametersWindow = true
-                section.isOrthogonal = true
+            let orthogonalSection = domain.sectionManager.sectionForName(orthogonalSectionName)
+            if (orthogonalSection === null) {
+                orthogonalSection = domain.sectionManager.addOrthogonalSection(orthogonalSectionName)
+                orthogonalSection.showInParametersWindow = true
+                orthogonalSection.isOrthogonal = true
             }
-            if (section !== null) {
-                section.addSectionItem(newParameter.fieldNumber)
+            // TODO: superfluous test -- orthogonalSection can't be null at this point
+            if (orthogonalSection !== null) {
+                orthogonalSection.addSectionItem(newParameter.fieldNumber)
             }
         }
     }
