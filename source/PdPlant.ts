@@ -2067,8 +2067,6 @@ export class PdPlant extends PdStreamableObject {
         let secondSCurve: SCurveStructure
         let newSCurve: SCurveStructure
         let randomTdo: KfObject3D
-        let sectionIndex: short
-        let paramIndex: short
         let saveAge: short
         let weight: float
         let stdDev: float
@@ -2080,13 +2078,13 @@ export class PdPlant extends PdStreamableObject {
         }
         saveAge = this.age
         this.reset()
-        if (domain.sectionManager.sections.Count > 0) {
-            for (sectionIndex = 0; sectionIndex <= domain.sectionManager.sections.Count - 1; sectionIndex++) {
-                section = usection.PdSection(domain.sectionManager.sections.Items[sectionIndex])
+        if (domain.sectionManager.sections.length > 0) {
+            for (let sectionIndex = 0; sectionIndex < domain.sectionManager.sections.length; sectionIndex++) {
+                section = domain.sectionManager.sections[sectionIndex]
                 if (section === null) {
                     continue
                 }
-                for (paramIndex = 0; paramIndex <= section.numSectionItems - 1; paramIndex++) {
+                for (let paramIndex = 0; paramIndex < section.numSectionItems; paramIndex++) {
                     param = domain.parameterManager.parameterForFieldNumber(section.sectionItems[paramIndex])
                     if ((param === null) || (param.fieldType === FieldType.kFieldHeader)) {
                         continue
@@ -2924,5 +2922,5 @@ export class PdPlant extends PdStreamableObject {
 export class PdPlantUpdateEvent {
     plant: PdPlant = new PdPlant()
     fieldID: int = 0
-    fieldIndex: int = 0s
+    fieldIndex: int = 0
 }
