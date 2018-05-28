@@ -1,5 +1,6 @@
 import { short, float, int, long, IntToStr, compareTextIgnoreCase } from "./common";
 import { domain } from "./PdDomain";
+import { CreateParameters, CreateParameters_SecondHalf } from "./umakepm";
 
 // unit Uparams
 
@@ -338,9 +339,8 @@ export class PdParameterManager {
     }
     
     makeParameters(): void {
-        umakepm.CreateParameters(this)
-        umakepm.CreateParameters_SecondHalf(this)
+        CreateParameters(this)
+        CreateParameters_SecondHalf(this)
     }
     
 }
-
