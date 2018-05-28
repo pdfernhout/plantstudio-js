@@ -5,8 +5,8 @@ import { PdStreamableObject, PdClassAndVersionInformationRecord, support_rgb, Pd
 import { ClassId } from "./uclasses";
 
 // const
-const kStartAmendmentString = "start posing change"
-const kEndAmendmentString = "end posing change"
+export const kStartAmendmentString = "start posing change"
+export const kEndAmendmentString = "end posing change"
 
 export class PdPlantDrawingAmendment extends PdStreamableObject {
     partID: long = 0

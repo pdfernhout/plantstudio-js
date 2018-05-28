@@ -22,6 +22,10 @@ export class PdStreamableObject {
     streamDataWithFiler(filer: PdFiler, cvir: PdClassAndVersionInformationRecord): void {
         throw new Error("TODO")
     }
+
+    streamUsingFiler(filer: PdFiler) {
+        throw new Error("TODO")
+    }
 }
 
 // TODO: Replace PdClassAndVersionInformationRecord from Ufiler
@@ -35,6 +39,9 @@ export interface PdClassAndVersionInformationRecord {
 export class PdFiler {
     isReading() {
         return true
+    }
+    isWriting() {
+        return false
     }
     streamBytes(bytes: any, size: number): any {
         return bytes
@@ -173,4 +180,31 @@ export const kExportPartLast = 33
 // TODO: Fix support_rgb from usupport
 export function support_rgb(R: byte, G: byte, B: byte): long {
     return R << 16 + G << 8 + B 
+}
+
+// Fix TListCollection_streamUsingFiler derived From ucollect -- not sure where to put code
+export function TListCollection_streamUsingFiler(list: PdStreamableObject[], filer: PdFiler, functionForCreating: () => PdStreamableObject): void {
+    let countOnStream: long = 0
+
+    if (filer.isReading()) {
+        list.length = 0
+        countOnStream = filer.streamLongint(countOnStream)
+        if (countOnStream > 0) {
+            for (let i = 0; i < countOnStream; i++) {
+                const streamableObject: PdStreamableObject = functionForCreating()
+                streamableObject.streamUsingFiler(filer)
+                list.push(streamableObject)
+            }
+        }
+    } else {
+        // filer is writing or counting
+        countOnStream = list.length
+        countOnStream = filer.streamLongint(countOnStream)
+        if (countOnStream > 0) {
+            for (let i = 0; i < countOnStream; i++) {
+                const streamableObject: PdStreamableObject = list[i]
+                streamableObject.streamUsingFiler(filer)
+            }
+        }
+    }
 }

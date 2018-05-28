@@ -1,6 +1,6 @@
 // PdPlant was unit Uplant
 
-import { PdStreamableObject, ExportFormats, messageForExceptionType, boundForString, DebugPrint, SinglePoint, ucursor, MainForm, PdBitmap, kExportPartLast, PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof } from "./temporary";
+import { PdStreamableObject, ExportFormats, messageForExceptionType, boundForString, DebugPrint, SinglePoint, ucursor, MainForm, PdBitmap, kExportPartLast, PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof, PdInternode, TListCollection_streamUsingFiler } from "./temporary";
 import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor, ColorDefs, StrToIntDef, IntToStr, compareTextIgnoreCase } from "./common";
 import { KfObject3D } from "./KfObject3D";
 import { TPoint } from "./TPoint";
@@ -14,6 +14,7 @@ import { PdTraverser, Activity, TraverserGlobals } from "./PdTraverser";
 import { ClassId } from "./uclasses";
 import { PdParameter, FieldType, IndexType } from "./PdParameter";
 import { PdSection } from "./PdSection";
+import { PdPlantDrawingAmendment, kStartAmendmentString } from "./PdPlantDrawingAmendment";
 
 /* Remove unused imports
 from conversion_common import *
@@ -352,7 +353,7 @@ export class PdPlant extends PdStreamableObject {
     xRotation: float = 0.0
     yRotation: float = 0.0
     zRotation: float = 0.0
-    drawingScale_PixelsPerMm: float = 0.0
+    drawingScale_PixelsPerMm: float = 1.0
     previewCache: PdBitmap = new PdBitmap()
     drawingIntoPreviewCache: boolean = false
     previewCacheUpToDate: boolean = false
@@ -385,7 +386,7 @@ export class PdPlant extends PdStreamableObject {
     readingMemoLine: long = 0
     useBestDrawingForPreview: boolean = false
     turtle: KfTurtle | null = null
-    firstPhytomer: TObject = new TObject()
+    firstPhytomer: PdInternode | null = null
     totalBiomass_pctMPB: float = 0.0
     reproBiomass_pctMPB: float = 0.0
     shootBiomass_pctMPB: float = 0.0
@@ -394,6 +395,7 @@ export class PdPlant extends PdStreamableObject {
     ageAtWhichFloweringStarted: short = 0
     floweringHasStarted: boolean = false
     totalPlantParts: long = 0
+    // v1.6b1
     partsCreated: long = 0
     total3DExportPoints: long = 0
     total3DExportTriangles: long = 0
@@ -410,8 +412,8 @@ export class PdPlant extends PdStreamableObject {
     wholePlantUpdateNeeded: boolean = false
     plantPartsDrawnAtStart: long = 0
     changingWholeSCurves: boolean = false
-    noteLines: TStringList = new TStringList()
-    amendments: TListCollection = new TListCollection()
+    noteLines: string[] = []
+    amendments: PdPlantDrawingAmendment[] = []
     totalMemoryUsed_K: double = 0.0
     
     // graphical 
@@ -425,25 +427,15 @@ export class PdPlant extends PdStreamableObject {
     // -------------------------------------------------------------------------------------- creation/destruction 
     constructor() {
         super()
-        this.turtle = null
-        this.firstPhytomer = null
-        this.previewCache = new PdBitmap()
         this.initializeCache(this.previewCache)
-        this.randomNumberGenerator = new PdRandom()
-        this.breedingGenerator = new PdRandom()
-        this.amendments = ucollect.TListCollection().Create()
         this.breedingGenerator.setSeed(this.breedingGenerator.randomSeedFromTime())
-        this.noteLines = delphi_compatability.TStringList.create
         this.initialize3DObjects()
-        this.drawingScale_PixelsPerMm = 1.0
         // not using the internode water expansion code this version, meaningless, no water stress, need these
         // these twos mean internodes are hard-coded to increase in width and height twice (from defaults in params.tab)
         this.pInternode.lengthMultiplierDueToBiomassAccretion = 2.0
         this.pInternode.widthMultiplierDueToBiomassAccretion = 2.0
         this.pInternode.lengthMultiplierDueToExpansion = 1.0
         this.pInternode.widthMultiplierDueToExpansion = 1.0
-        // v1.6b1
-        this.partsCreated = 0
     }
     
     initialize3DObjects(): void {
@@ -624,7 +616,6 @@ export class PdPlant extends PdStreamableObject {
     
     hangingObjectsMemoryUse_K(): double {
         let result = 0.0
-        let i: short
         
         result = 0
         if (this.randomNumberGenerator !== null) {
@@ -636,14 +627,14 @@ export class PdPlant extends PdStreamableObject {
         }
         if (this.noteLines !== null) {
             // note
-            result = result + this.noteLines.instanceSize / 1024.0
+            // TODO: Improve size calculation: result = result + this.noteLines.instanceSize / 1024.0
         }
         if (this.amendments !== null) {
             // amendments
-            result = result + this.amendments.instanceSize / 1024.0
-            if (this.amendments.Count > 0) {
-                for (i = 0; i <= this.amendments.Count - 1; i++) {
-                    result = result + uamendmt.PdPlantDrawingAmendment(this.amendments.Items[i]).instanceSize / 1024.0
+            // TODO: Improve size calculation: result = result + this.amendments.instanceSize / 1024.0
+            if (this.amendments.length > 0) {
+                for (let i = 0; i < this.amendments.length; i++) {
+                    result = result + this.amendments[i].instanceSize / 1024.0
                 }
             }
         }
@@ -1571,10 +1562,10 @@ export class PdPlant extends PdStreamableObject {
         const stop = "] ="
         // v2.0
         this.writeLine(plantFile, "[" + this.name + "] " + kPlantAsTextStartString + " <v2.0>")
-        if (this.noteLines.Count > 0) {
+        if (this.noteLines.length > 0) {
             this.writeLine(plantFile, kStartNoteString)
             for (let i = 0; i < this.noteLines.length; i++) {
-                this.writeLine(plantFile, this.noteLines.Strings[i])
+                this.writeLine(plantFile, this.noteLines[i])
             }
             this.writeLine(plantFile, kEndNoteString)
         }
@@ -1639,12 +1630,12 @@ export class PdPlant extends PdStreamableObject {
                 }
             }
         }
-        if (this.amendments.Count > 0) {
+        if (this.amendments.length > 0) {
             for (let i = 0; i < this.amendments.length; i++) {
                 if (this.writingToMemo) {
-                    uamendmt.PdPlantDrawingAmendment(this.amendments.Items[i]).writeToMemo(MainForm.plantsAsTextMemo)
+                    this.amendments[i].writeToMemo(MainForm.plantsAsTextMemo)
                 } else {
-                    uamendmt.PdPlantDrawingAmendment(this.amendments.Items[i]).writeToTextFile(plantFile)
+                    this.amendments[i].writeToTextFile(plantFile)
                 }
             }
         }
@@ -1660,7 +1651,6 @@ export class PdPlant extends PdStreamableObject {
         let tempFloat: float
         let tempColorRef: TColorRef
         let tempSCurve: SCurveStructure
-        let i: short
         let param: PdParameter
         let secondLine: string
         let noteLine: string
@@ -1669,26 +1659,25 @@ export class PdPlant extends PdStreamableObject {
         let paramValue: string
         let tempTdo: KfObject3D
         let found: boolean
-        let newAmendment: PdPlantDrawingAmendment
         
         if (compareTextIgnoreCase(kStartNoteString, aLine)) {
             // read note if this line starts it
             // this only will happen if in file
-            this.noteLines.Clear()
+            this.noteLines = []
             while (!UNRESOLVED.eof(plantFile)) {
                 noteLine = usupport.tolerantReadln(plantFile, noteLine)
-                if (compareTextIgnoreCase(kEndNoteString, noteLine) && (this.noteLines.Count < 5000)) {
+                if (compareTextIgnoreCase(kEndNoteString, noteLine) && (this.noteLines.length < 5000)) {
                     break
                 } else {
-                    this.noteLines.Add(noteLine)
+                    this.noteLines.push(noteLine)
                 }
             }
             // added v2.0, no use reading other stuff when finished with note
             return
         }
-        if (UNRESOLVED.pos(uamendmt.kStartAmendmentString, aLine) > 0) {
+        if (aLine.includes(kStartAmendmentString)) {
             // read amendment if line is an amendment - v2.0
-            newAmendment = uamendmt.PdPlantDrawingAmendment().create()
+            const newAmendment = new PdPlantDrawingAmendment()
             if (this.readingFromMemo) {
                 this.readingMemoLine = newAmendment.readFromMemo(MainForm.plantsAsTextMemo, this.readingMemoLine)
             } else {
@@ -1718,9 +1707,9 @@ export class PdPlant extends PdStreamableObject {
         paramValue = usupport.stringBeyond(aLine, "=")
         found = false
         param = null
-        if (domain.parameterManager.parameters.Count > 0) {
-            for (i = 0; i <= domain.parameterManager.parameters.Count - 1; i++) {
-                param = uparams.PdParameter(domain.parameterManager.parameters.Items[i])
+        if (domain.parameterManager.parameters.length > 0) {
+            for (let i = 0; i < domain.parameterManager.parameters.length; i++) {
+                param = domain.parameterManager.parameters[i]
                 if (param === null) {
                     return
                 }
@@ -2511,11 +2500,11 @@ export class PdPlant extends PdStreamableObject {
         }
         this.previewCache.streamUsingFiler(filer)
         if (filer.isReading()) {
-            umath.calcSCurveCoeffs(this.pFruit.sCurveParams)
-            umath.calcSCurveCoeffs(this.pGeneral.growthSCurve)
-            umath.calcSCurveCoeffs(this.pLeaf.sCurveParams)
+            calcSCurveCoeffs(this.pFruit.sCurveParams)
+            calcSCurveCoeffs(this.pGeneral.growthSCurve)
+            calcSCurveCoeffs(this.pLeaf.sCurveParams)
         }
-        this.amendments.streamUsingFiler(filer, uamendmt.PdPlantDrawingAmendment)
+        TListCollection_streamUsingFiler(this.amendments, filer, () => new PdPlantDrawingAmendment())
     }
     
     // --------------------------------------------------------------------------------  command-related 
