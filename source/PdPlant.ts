@@ -46,8 +46,11 @@ import delphi_compatability
 */
 
 // const
-const kGenderMale = 0
-const kGenderFemale = 1
+export enum Gender {
+    kGenderMale = 0,
+    kGenderFemale = 1,
+}
+
 const kCompoundLeafPinnate = 0
 const kCompoundLeafPalmate = 1
 const kArrangementAlternate = 0
@@ -446,11 +449,11 @@ export class PdPlant extends PdStreamableObject {
         this.pSeedlingLeaf.leafTdoParams.object3D = new KfObject3D()
         this.pLeaf.leafTdoParams.object3D = new KfObject3D()
         this.pLeaf.stipuleTdoParams.object3D = new KfObject3D()
-        this.pInflor[kGenderFemale].bractTdoParams.object3D = new KfObject3D()
-        this.pInflor[kGenderMale].bractTdoParams.object3D = new KfObject3D()
+        this.pInflor[Gender.kGenderFemale].bractTdoParams.object3D = new KfObject3D()
+        this.pInflor[Gender.kGenderMale].bractTdoParams.object3D = new KfObject3D()
         for (partType = 0; partType <= kHighestFloralPartConstant; partType++) {
-            this.pFlower[kGenderFemale].tdoParams[partType].object3D = new KfObject3D()
-            this.pFlower[kGenderMale].tdoParams[partType].object3D = new KfObject3D()
+            this.pFlower[Gender.kGenderFemale].tdoParams[partType].object3D = new KfObject3D()
+            this.pFlower[Gender.kGenderMale].tdoParams[partType].object3D = new KfObject3D()
         }
         this.pAxillaryBud.tdoParams.object3D = new KfObject3D()
         this.pFruit.tdoParams.object3D = new KfObject3D()
@@ -651,11 +654,11 @@ export class PdPlant extends PdStreamableObject {
         result = result + this.pSeedlingLeaf.leafTdoParams.object3D.totalMemorySize() / 1024.0
         result = result + this.pLeaf.leafTdoParams.object3D.totalMemorySize() / 1024.0
         result = result + this.pLeaf.stipuleTdoParams.object3D.totalMemorySize() / 1024.0
-        result = result + this.pInflor[kGenderFemale].bractTdoParams.object3D.totalMemorySize() / 1024.0
-        result = result + this.pInflor[kGenderMale].bractTdoParams.object3D.totalMemorySize() / 1024.0
+        result = result + this.pInflor[Gender.kGenderFemale].bractTdoParams.object3D.totalMemorySize() / 1024.0
+        result = result + this.pInflor[Gender.kGenderMale].bractTdoParams.object3D.totalMemorySize() / 1024.0
         for (partType = 0; partType <= kHighestFloralPartConstant; partType++) {
-            result = result + this.pFlower[kGenderFemale].tdoParams[partType].object3D.totalMemorySize() / 1024.0
-            result = result + this.pFlower[kGenderMale].tdoParams[partType].object3D.totalMemorySize() / 1024.0
+            result = result + this.pFlower[Gender.kGenderFemale].tdoParams[partType].object3D.totalMemorySize() / 1024.0
+            result = result + this.pFlower[Gender.kGenderMale].tdoParams[partType].object3D.totalMemorySize() / 1024.0
         }
         result = result + this.pAxillaryBud.tdoParams.object3D.totalMemorySize() / 1024.0
         result = result + this.pFruit.tdoParams.object3D.totalMemorySize() / 1024.0
@@ -1204,11 +1207,11 @@ export class PdPlant extends PdStreamableObject {
         if (this.pInternode.widthAtOptimalFinalBiomassAndExpansion_mm > result) {
             result = this.pInternode.widthAtOptimalFinalBiomassAndExpansion_mm
         }
-        if (this.pInflor[kGenderMale].internodeWidth_mm > result) {
-            result = this.pInflor[kGenderMale].internodeWidth_mm
+        if (this.pInflor[Gender.kGenderMale].internodeWidth_mm > result) {
+            result = this.pInflor[Gender.kGenderMale].internodeWidth_mm
         }
-        if (this.pInflor[kGenderFemale].internodeWidth_mm > result) {
-            result = this.pInflor[kGenderFemale].internodeWidth_mm
+        if (this.pInflor[Gender.kGenderFemale].internodeWidth_mm > result) {
+            result = this.pInflor[Gender.kGenderFemale].internodeWidth_mm
         }
         return result
     }
@@ -2367,11 +2370,11 @@ export class PdPlant extends PdStreamableObject {
             tdoSeedlingLeaf = this.pSeedlingLeaf.leafTdoParams.object3D
             tdoLeaf = this.pLeaf.leafTdoParams.object3D
             tdoStipule = this.pLeaf.stipuleTdoParams.object3D
-            tdoInflorBractFemale = this.pInflor[kGenderFemale].bractTdoParams.object3D
-            tdoInflorBractMale = this.pInflor[kGenderMale].bractTdoParams.object3D
+            tdoInflorBractFemale = this.pInflor[Gender.kGenderFemale].bractTdoParams.object3D
+            tdoInflorBractMale = this.pInflor[Gender.kGenderMale].bractTdoParams.object3D
             for (partType = 0; partType <= kHighestFloralPartConstant; partType++) {
-                femaleFlowerTdos[partType] = this.pFlower[kGenderFemale].tdoParams[partType].object3D
-                maleFlowerTdos[partType] = this.pFlower[kGenderMale].tdoParams[partType].object3D
+                femaleFlowerTdos[partType] = this.pFlower[Gender.kGenderFemale].tdoParams[partType].object3D
+                maleFlowerTdos[partType] = this.pFlower[Gender.kGenderMale].tdoParams[partType].object3D
             }
             tdoAxillaryBud = this.pAxillaryBud.tdoParams.object3D
             tdoFruit = this.pFruit.tdoParams.object3D
@@ -2396,10 +2399,10 @@ export class PdPlant extends PdStreamableObject {
         this.pLeaf = filer.streamBytes(this.pLeaf, FIX_sizeof(this.pLeaf))
         this.pSeedlingLeaf = filer.streamBytes(this.pSeedlingLeaf, FIX_sizeof(this.pSeedlingLeaf))
         this.pAxillaryBud = filer.streamBytes(this.pAxillaryBud, FIX_sizeof(this.pAxillaryBud))
-        this.pInflor[kGenderMale] = filer.streamBytes(this.pInflor[kGenderMale], FIX_sizeof(this.pInflor))
-        this.pInflor[kGenderFemale] = filer.streamBytes(this.pInflor[kGenderFemale], FIX_sizeof(this.pInflor))
-        this.pFlower[kGenderMale] = filer.streamBytes(this.pFlower[kGenderMale], FIX_sizeof(this.pFlower))
-        this.pFlower[kGenderFemale] = filer.streamBytes(this.pFlower[kGenderFemale], FIX_sizeof(this.pFlower))
+        this.pInflor[Gender.kGenderMale] = filer.streamBytes(this.pInflor[Gender.kGenderMale], FIX_sizeof(this.pInflor))
+        this.pInflor[Gender.kGenderFemale] = filer.streamBytes(this.pInflor[Gender.kGenderFemale], FIX_sizeof(this.pInflor))
+        this.pFlower[Gender.kGenderMale] = filer.streamBytes(this.pFlower[Gender.kGenderMale], FIX_sizeof(this.pFlower))
+        this.pFlower[Gender.kGenderFemale] = filer.streamBytes(this.pFlower[Gender.kGenderFemale], FIX_sizeof(this.pFlower))
         this.pFruit = filer.streamBytes(this.pFruit, FIX_sizeof(this.pFruit))
         this.pRoot = filer.streamBytes(this.pRoot, FIX_sizeof(this.pRoot))
         if (filer.isReading()) {
@@ -2416,22 +2419,22 @@ export class PdPlant extends PdStreamableObject {
         }
         this.pLeaf.stipuleTdoParams.object3D.streamUsingFiler(filer)
         if (filer.isReading()) {
-            this.pInflor[kGenderFemale].bractTdoParams.object3D = tdoInflorBractFemale
+            this.pInflor[Gender.kGenderFemale].bractTdoParams.object3D = tdoInflorBractFemale
         }
-        this.pInflor[kGenderFemale].bractTdoParams.object3D.streamUsingFiler(filer)
+        this.pInflor[Gender.kGenderFemale].bractTdoParams.object3D.streamUsingFiler(filer)
         if (filer.isReading()) {
-            this.pInflor[kGenderMale].bractTdoParams.object3D = tdoInflorBractMale
+            this.pInflor[Gender.kGenderMale].bractTdoParams.object3D = tdoInflorBractMale
         }
-        this.pInflor[kGenderMale].bractTdoParams.object3D.streamUsingFiler(filer)
+        this.pInflor[Gender.kGenderMale].bractTdoParams.object3D.streamUsingFiler(filer)
         for (partType = 0; partType <= kHighestFloralPartConstant; partType++) {
             if (filer.isReading()) {
-                this.pFlower[kGenderFemale].tdoParams[partType].object3D = femaleFlowerTdos[partType]
+                this.pFlower[Gender.kGenderFemale].tdoParams[partType].object3D = femaleFlowerTdos[partType]
             }
-            this.pFlower[kGenderFemale].tdoParams[partType].object3D.streamUsingFiler(filer)
+            this.pFlower[Gender.kGenderFemale].tdoParams[partType].object3D.streamUsingFiler(filer)
             if (filer.isReading()) {
-                this.pFlower[kGenderMale].tdoParams[partType].object3D = maleFlowerTdos[partType]
+                this.pFlower[Gender.kGenderMale].tdoParams[partType].object3D = maleFlowerTdos[partType]
             }
-            this.pFlower[kGenderMale].tdoParams[partType].object3D.streamUsingFiler(filer)
+            this.pFlower[Gender.kGenderMale].tdoParams[partType].object3D.streamUsingFiler(filer)
         }
         if (filer.isReading()) {
             this.pAxillaryBud.tdoParams.object3D = tdoAxillaryBud
@@ -2797,76 +2800,76 @@ export class PdPlant extends PdStreamableObject {
                 result = this.pLeaf.stipuleTdoParams.faceColor
                 break
             case ExportPart.kExportPartInflorescenceStalkFemale:
-                result = this.pInflor[kGenderFemale].stalkColor
+                result = this.pInflor[Gender.kGenderFemale].stalkColor
                 break
             case ExportPart.kExportPartInflorescenceInternodeFemale:
-                result = this.pInflor[kGenderFemale].stalkColor
+                result = this.pInflor[Gender.kGenderFemale].stalkColor
                 break
             case ExportPart.kExportPartInflorescenceBractFemale:
-                result = this.pInflor[kGenderFemale].bractTdoParams.faceColor
+                result = this.pInflor[Gender.kGenderFemale].bractTdoParams.faceColor
                 break
             case ExportPart.kExportPartInflorescenceStalkMale:
-                result = this.pInflor[kGenderMale].stalkColor
+                result = this.pInflor[Gender.kGenderMale].stalkColor
                 break
             case ExportPart.kExportPartInflorescenceInternodeMale:
-                result = this.pInflor[kGenderMale].stalkColor
+                result = this.pInflor[Gender.kGenderMale].stalkColor
                 break
             case ExportPart.kExportPartInflorescenceBractMale:
-                result = this.pInflor[kGenderMale].bractTdoParams.faceColor
+                result = this.pInflor[Gender.kGenderMale].bractTdoParams.faceColor
                 break
             case ExportPart.kExportPartPedicelFemale:
-                result = this.pInflor[kGenderFemale].pedicelColor
+                result = this.pInflor[Gender.kGenderFemale].pedicelColor
                 break
             case ExportPart.kExportPartFlowerBudFemale:
-                result = this.pFlower[kGenderFemale].tdoParams[kBud].faceColor
+                result = this.pFlower[Gender.kGenderFemale].tdoParams[kBud].faceColor
                 break
             case ExportPart.kExportPartStyleFemale:
-                result = this.pFlower[kGenderFemale].styleColor
+                result = this.pFlower[Gender.kGenderFemale].styleColor
                 break
             case ExportPart.kExportPartStigmaFemale:
-                result = this.pFlower[kGenderFemale].tdoParams[kPistils].faceColor
+                result = this.pFlower[Gender.kGenderFemale].tdoParams[kPistils].faceColor
                 break
             case ExportPart.kExportPartFilamentFemale:
-                result = this.pFlower[kGenderFemale].filamentColor
+                result = this.pFlower[Gender.kGenderFemale].filamentColor
                 break
             case ExportPart.kExportPartAntherFemale:
-                result = this.pFlower[kGenderFemale].tdoParams[kStamens].faceColor
+                result = this.pFlower[Gender.kGenderFemale].tdoParams[kStamens].faceColor
                 break
             case ExportPart.kExportPartFirstPetalsFemale:
-                result = this.pFlower[kGenderFemale].tdoParams[kFirstPetals].faceColor
+                result = this.pFlower[Gender.kGenderFemale].tdoParams[kFirstPetals].faceColor
                 break
             case ExportPart.kExportPartSecondPetalsFemale:
-                result = this.pFlower[kGenderFemale].tdoParams[kSecondPetals].faceColor
+                result = this.pFlower[Gender.kGenderFemale].tdoParams[kSecondPetals].faceColor
                 break
             case ExportPart.kExportPartThirdPetalsFemale:
-                result = this.pFlower[kGenderFemale].tdoParams[kThirdPetals].faceColor
+                result = this.pFlower[Gender.kGenderFemale].tdoParams[kThirdPetals].faceColor
                 break
             case ExportPart.kExportPartFourthPetalsFemale:
-                result = this.pFlower[kGenderFemale].tdoParams[kFourthPetals].faceColor
+                result = this.pFlower[Gender.kGenderFemale].tdoParams[kFourthPetals].faceColor
                 break
             case ExportPart.kExportPartFifthPetalsFemale:
-                result = this.pFlower[kGenderFemale].tdoParams[kFifthPetals].faceColor
+                result = this.pFlower[Gender.kGenderFemale].tdoParams[kFifthPetals].faceColor
                 break
             case ExportPart.kExportPartSepalsFemale:
-                result = this.pFlower[kGenderFemale].tdoParams[kSepals].faceColor
+                result = this.pFlower[Gender.kGenderFemale].tdoParams[kSepals].faceColor
                 break
             case ExportPart.kExportPartPedicelMale:
-                result = this.pInflor[kGenderMale].pedicelColor
+                result = this.pInflor[Gender.kGenderMale].pedicelColor
                 break
             case ExportPart.kExportPartFlowerBudMale:
-                result = this.pFlower[kGenderMale].tdoParams[kBud].faceColor
+                result = this.pFlower[Gender.kGenderMale].tdoParams[kBud].faceColor
                 break
             case ExportPart.kExportPartFilamentMale:
-                result = this.pFlower[kGenderMale].filamentColor
+                result = this.pFlower[Gender.kGenderMale].filamentColor
                 break
             case ExportPart.kExportPartAntherMale:
-                result = this.pFlower[kGenderMale].tdoParams[kStamens].faceColor
+                result = this.pFlower[Gender.kGenderMale].tdoParams[kStamens].faceColor
                 break
             case ExportPart.kExportPartFirstPetalsMale:
-                result = this.pFlower[kGenderMale].tdoParams[kFirstPetals].faceColor
+                result = this.pFlower[Gender.kGenderMale].tdoParams[kFirstPetals].faceColor
                 break
             case ExportPart.kExportPartSepalsMale:
-                result = this.pFlower[kGenderMale].tdoParams[kSepals].faceColor
+                result = this.pFlower[Gender.kGenderMale].tdoParams[kSepals].faceColor
                 break
             case ExportPart.kExportPartUnripeFruit:
                 result = this.pFruit.tdoParams.alternateFaceColor

@@ -148,6 +148,7 @@ export const MainForm = {
     plantsAsTextMemo: [],
     updateParameterValuesWithUpdateListForPlant: (something: any, updateList: any[]) => {},
     showDrawProgress: (value: number) => {},
+    selectedPlantPartID: null,
 }
 
 // TOFO: Fix PdBitmap stub

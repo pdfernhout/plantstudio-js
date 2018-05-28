@@ -1,5 +1,21 @@
-// unit upart
+// PdPlantPart from unit upart
 
+import { PdPlant, Gender } from "./PdPlant";
+import { float, short, long, IntToStr, int, TColorRef } from "./common";
+import { TRect } from "./TRect";
+import { PdPlantDrawingAmendment } from "./PdPlantDrawingAmendment";
+import { PdStreamableObject, messageForExceptionType, DebugPrint, MainForm, PdClassAndVersionInformationRecord, PdFiler, ExportPart } from "./temporary";
+import { PdTraverser, Activity, PdPlantStatistics } from "./PdTraverser";
+import { safedivExcept } from "./umath";
+import { KfObject3D } from "./KfObject3D";
+import { KfTurtle } from "./KfTurtle";
+import { KfTriangle } from "./KfTriangle";
+import { KfPoint3D } from "./KfPoint3D";
+import { domain } from "./PdDomain";
+import { ClassId } from "./uclasses";
+import { TPoint } from "./TPoint";
+
+/* TODO: Remove unused imports
 from conversion_common import *
 import umain
 import udebug
@@ -16,6 +32,7 @@ import usupport
 import umath
 import uplant
 import delphi_compatability
+*/
 
 // const
 const kAddingBiomassToPlant = true
@@ -24,7 +41,6 @@ const kDontTaper = -1.0
 const kUseAmendment = true
 const kDontUseAmendment = false
 
-
 // const
 const kDrawingTdo = true
 const kDrawingLine = false
@@ -32,13 +48,10 @@ const kRotateX = 0
 const kRotateY = 1
 const kRotateZ = 2
 
-
 // const
 const kMaxLineOutputPoints = 200
 
-
-
-export class PdPlantPart {
+export class PdPlantPart extends PdStreamableObject {
     plant: PdPlant = new PdPlant()
     liveBiomass_pctMPB: float = 0.0
     deadBiomass_pctMPB: float = 0.0
@@ -53,8 +66,6 @@ export class PdPlantPart {
     amendment: PdPlantDrawingAmendment = new PdPlantDrawingAmendment()
     parentAmendment: PdPlantDrawingAmendment = new PdPlantDrawingAmendment()
     biomassOfMeAndAllPartsAboveMe_pctMPB: float = 0.0
-    PdPlantPart.prototype = new PdStreamableObject()
-    PdPlantPart.prototype.constructor = PdPlantPart
     
     // ---------------------------------------------------------------------------------- initialize 
     initialize(thePlant: PdPlant): void {
@@ -64,7 +75,7 @@ export class PdPlantPart {
         this.plant.partsCreated += 1
         this.partID = this.plant.partsCreated
         this.age = 0
-        this.gender = uplant.kGenderFemale
+        this.gender = Gender.kGenderFemale
         this.hasFallenOff = false
         this.randomSwayIndex = this.plant.randomNumberGenerator.zeroToOne()
     }
@@ -75,128 +86,115 @@ export class PdPlantPart {
     }
     
     getName(): string {
-        let result = ""
         // subclasses should override
-        result = "plant part"
-        return result
+        return "plant part"
     }
     
     getFullName(): string {
-        let result = ""
-        result = "part " + IntToStr(this.partID) + " (" + this.getName() + ")"
-        return result
+        return "part " + IntToStr(this.partID) + " (" + this.getName() + ")"
     }
     
     // ---------------------------------------------------------------------------------- traversing 
-    traverseActivity(mode: int, traverserProxy: TObject): void {
-        let traverser: PdTraverser
+    traverseActivity(mode: int, traverser: PdTraverser): void {
         let biomassToRemove_pctMPB: float
         
-        traverser = utravers.PdTraverser(traverserProxy)
         if (traverser === null) {
             return
         }
         switch (mode) {
-            case utravers.kActivityNone:
+            case Activity.kActivityNone:
                 break
-            case utravers.kActivityNextDay:
+            case Activity.kActivityNextDay:
                 break
-            case utravers.kActivityDemandVegetative:
+            case Activity.kActivityDemandVegetative:
                 //inc(traverser.totalPlantParts)
                 this.biomassDemand_pctMPB = 0.0
                 break
-            case utravers.kActivityDemandReproductive:
+            case Activity.kActivityDemandReproductive:
                 this.biomassDemand_pctMPB = 0.0
                 break
-            case utravers.kActivityGrowVegetative:
+            case Activity.kActivityGrowVegetative:
                 break
-            case utravers.kActivityGrowReproductive:
+            case Activity.kActivityGrowReproductive:
                 break
-            case utravers.kActivityStartReproduction:
+            case Activity.kActivityStartReproduction:
                 break
-            case utravers.kActivityFindPlantPartAtPosition:
+            case Activity.kActivityFindPlantPartAtPosition:
                 break
-            case utravers.kActivityDraw:
+            case Activity.kActivityDraw:
                 traverser.totalPlantParts += 1
                 this.determineAmendmentAndAlsoForChildrenIfAny()
                 break
-            case utravers.kActivityReport:
+            case Activity.kActivityReport:
                 this.report()
                 break
-            case utravers.kActivityStream:
+            case Activity.kActivityStream:
                 break
-            case utravers.kActivityFree:
+            case Activity.kActivityFree:
                 break
-            case utravers.kActivityVegetativeBiomassThatCanBeRemoved:
+            case Activity.kActivityVegetativeBiomassThatCanBeRemoved:
                 break
-            case utravers.kActivityRemoveVegetativeBiomass:
+            case Activity.kActivityRemoveVegetativeBiomass:
                 break
-            case utravers.kActivityReproductiveBiomassThatCanBeRemoved:
+            case Activity.kActivityReproductiveBiomassThatCanBeRemoved:
                 break
-            case utravers.kActivityRemoveReproductiveBiomass:
+            case Activity.kActivityRemoveReproductiveBiomass:
                 break
-            case utravers.kActivityStandingDeadBiomassThatCanBeRemoved:
+            case Activity.kActivityStandingDeadBiomassThatCanBeRemoved:
                 traverser.total = traverser.total + this.deadBiomass_pctMPB
                 break
-            case utravers.kActivityRemoveStandingDeadBiomass:
+            case Activity.kActivityRemoveStandingDeadBiomass:
                 biomassToRemove_pctMPB = this.deadBiomass_pctMPB * traverser.fractionOfPotentialBiomass
                 this.deadBiomass_pctMPB = this.deadBiomass_pctMPB - biomassToRemove_pctMPB
                 break
-            case utravers.kActivityGatherStatistics:
+            case Activity.kActivityGatherStatistics:
                 break
-            case utravers.kActivityCountPlantParts:
+            case Activity.kActivityCountPlantParts:
                 traverser.totalPlantParts += 1
                 break
-            case utravers.kActivityFindPartForPartID:
+            case Activity.kActivityFindPartForPartID:
                 if (traverser.partID === this.partID) {
                     traverser.foundPlantPart = this
                     traverser.finished = true
                 }
                 break
-            case utravers.kActivityCountTotalMemoryUse:
+            case Activity.kActivityCountTotalMemoryUse:
                 break
-            case utravers.kActivityCalculateBiomassForGravity:
+            case Activity.kActivityCalculateBiomassForGravity:
                 this.biomassOfMeAndAllPartsAboveMe_pctMPB = this.totalBiomass_pctMPB()
                 break
-            case utravers.kActivityCountPointsAndTrianglesFor3DExport:
+            case Activity.kActivityCountPointsAndTrianglesFor3DExport:
                 traverser.totalPlantParts += 1
                 break
             default:
-                throw new GeneralException.create("Problem: Unhandled mode in method PdPlantPart.traverseActivity.")
-                break
+                throw new Error("Problem: Unhandled mode in method PdPlantPart.traverseActivity.")
         }
     }
     
     // procedure fillInInfoForDXFPart(index: smallint; var realIndex: smallint; var longName: string; var shortName: string);
     position(): TPoint {
         let result = new TPoint()
-        result = Point(this.boundsRect.Left + (this.boundsRect.Right - this.boundsRect.Left) / 2, this.boundsRect.Top + (this.boundsRect.Bottom - this.boundsRect.Top) / 2)
+        result = new TPoint(this.boundsRect.Left + (this.boundsRect.Right - this.boundsRect.Left) / 2, this.boundsRect.Top + (this.boundsRect.Bottom - this.boundsRect.Top) / 2)
         return result
     }
     
-    addExportMaterial(traverserProxy: TObject, femaleIndex: short, maleIndex: short): void {
-        let traverser: PdTraverser
-        
+    addExportMaterial(traverser: PdTraverser, femaleIndex: short, maleIndex: short): void {        
         // remember that this is not a true count; each part only adds at LEAST one
         // if you wanted to use this for a true export-type-part count you would have to amend some code
-        traverser = utravers.PdTraverser(traverserProxy)
         if (traverser === null) {
             return
         }
         if (maleIndex < 0) {
             // means to ignore gender
             traverser.exportTypeCounts[femaleIndex] += 1
-        } else if (this.gender === uplant.kGenderFemale) {
+        } else if (this.gender === Gender.kGenderFemale) {
             traverser.exportTypeCounts[femaleIndex] += 1
         } else {
             traverser.exportTypeCounts[maleIndex] += 1
         }
     }
     
-    addToStatistics(statisticsProxy: TObject, partType: short): void {
-        let statistics: PdPlantStatistics
-        
-        statistics = utravers.PdPlantStatistics(statisticsProxy)
+    addToStatistics(statistics: PdPlantStatistics, partType: short): void {
         if (statistics === null) {
             return
         }
@@ -219,12 +217,12 @@ export class PdPlantPart {
         result = 0.0
         try {
             if (this.totalBiomass_pctMPB() > 0.0) {
-                result = umath.safedivExcept(this.liveBiomass_pctMPB, this.totalBiomass_pctMPB(), 0)
+                result = safedivExcept(this.liveBiomass_pctMPB, this.totalBiomass_pctMPB(), 0)
             } else {
                 result = 0.0
             }
-        } catch (Exception e) {
-            usupport.messageForExceptionType(e, "PdPlantPart.fractionLive")
+        } catch (e) {
+            messageForExceptionType(e, "PdPlantPart.fractionLive")
         }
         return result
     }
@@ -253,7 +251,7 @@ export class PdPlantPart {
     
     genderString(): string {
         let result = ""
-        if (this.gender === uplant.kGenderFemale) {
+        if (this.gender === Gender.kGenderFemale) {
             result = "primary"
         } else {
             result = "secondary"
@@ -281,7 +279,7 @@ export class PdPlantPart {
                 partName = "leaf"
                 break
         }
-        udebug.DebugPrint("Part " + IntToStr(this.partID) + ", " + partName)
+        DebugPrint("Part " + IntToStr(this.partID) + ", " + partName)
     }
     
     // ---------------------------------------------------------------------------------- drawing 
@@ -292,10 +290,10 @@ export class PdPlantPart {
         if (tdo === null) {
             return
         }
-        turtle = this.plant.turtle
-        if ((turtle === null)) {
+        if (this.plant.turtle === null) {
             return
         }
+        turtle = this.plant.turtle
         if (this.setColorsWithAmendmentAndReturnTrueIfNoOverrides(kDrawingTdo)) {
             turtle.setForeColorBackColor(faceColor, backfaceColor)
             turtle.setLineColor(usupport.darkerColor(faceColor))
@@ -327,17 +325,17 @@ export class PdPlantPart {
         let realLength: float
         let realWidth: float
         
-        turtle = this.plant.turtle
-        if ((turtle === null)) {
+        if (this.plant.turtle === null) {
             return
         }
+        turtle = this.plant.turtle
         if (turtle.ifExporting_excludeStem(len)) {
             return
         }
         if (this.setColorsWithAmendmentAndReturnTrueIfNoOverrides(kDrawingLine)) {
             turtle.setLineColor(color)
         }
-        realLength = len * this.lengthMultiplierConsideringAmendments()
+        realLength = length * this.lengthMultiplierConsideringAmendments()
         realWidth = width * this.widthMultiplierConsideringAmendments()
         // set up for export
         //for POV you want radius not diameter
@@ -416,15 +414,14 @@ export class PdPlantPart {
         let angle: float
         let pipeRadius: float
         let faceWidth: float
-        let i: short
         let faces: short
         let startPoints: KfPoint3D[] /* kMaxLineOutputPoints + 1 */
         let endPoints: KfPoint3D[] /* kMaxLineOutputPoints + 1 */
         
-        turtle = this.plant.turtle
-        if (turtle === null) {
+        if (this.plant.turtle === null) {
             return
         }
+        turtle = this.plant.turtle
         if (turtle.writingToPOV()) {
             // POV draws cylinders directly, not with faces
             turtle.drawInMillimeters(len, partID)
@@ -437,7 +434,7 @@ export class PdPlantPart {
         if (segmentNumber <= 0) {
             // get startWidth points; if done before, copy from last endWidth points
             pipeRadius = 0.5 * startWidth
-            for (i = 0; i <= faces - 1; i++) {
+            for (let i = 0; i < faces; i++) {
                 turtle.push()
                 turtle.rotateX(i * 256 / faces)
                 turtle.rotateZ(64)
@@ -446,14 +443,14 @@ export class PdPlantPart {
                 turtle.pop()
             }
         } else {
-            for (i = 0; i <= faces - 1; i++) {
+            for (let i = 0; i < faces; i++) {
                 startPoints[i] = endPoints[i]
             }
         }
         turtle.moveInMillimeters(len)
         // get endWidth points
         pipeRadius = 0.5 * endWidth
-        for (i = 0; i <= faces - 1; i++) {
+        for (let i = 0; i < faces; i++) {
             turtle.push()
             turtle.rotateX(i * 256 / faces)
             turtle.rotateZ(64)
@@ -465,23 +462,18 @@ export class PdPlantPart {
         turtle.drawFileExportPipeFaces(startPoints, endPoints, faces, segmentNumber)
     }
     
-    tdoToSortLinesWith(): KfObject3D {
-        let result = new KfObject3D()
+    tdoToSortLinesWith(): KfObject3D | null {
         // subclasses can override
-        result = null
-        return result
+        return null
     }
     
     partType(): int {
-        let result = 0
         // implemented by subclasses 
-        result = 0
-        return result
+        return 0
     }
     
     angleWithSway(angle: float): float {
-        let result = 0.0
-        result = angle
+        let result = angle
         if (this.plant === null) {
             return result
         }
@@ -504,7 +496,7 @@ export class PdPlantPart {
         let drawingToMainWindow: boolean
         
         result = false
-        if (!udomain.domain.options.showPosingAtAll) {
+        if (!domain.options.showPosingAtAll) {
             return result
         }
         if (this.plant.turtle === null) {
@@ -515,10 +507,10 @@ export class PdPlantPart {
         myParentHasAnAmendment = this.parentAmendment !== null
         myAmendmentSaysIAmHidden = (this.amendment !== null) && (this.amendment.hide)
         myParentsAmendmentSaysIAmHidden = (this.parentAmendment !== null) && (this.parentAmendment.hide)
-        drawingToMainWindow = (this.plant.turtle.writingTo === u3dexport.kScreen) && (!udomain.domain.drawingToMakeCopyBitmap)
+        drawingToMainWindow = (this.plant.turtle.writingTo === u3dexport.kScreen) && (!domain.drawingToMakeCopyBitmap)
         if ((iHaveAnAmendment && myAmendmentSaysIAmHidden) || (iDontHaveAnAmendment && myParentHasAnAmendment && myParentsAmendmentSaysIAmHidden)) {
             if (drawingToMainWindow) {
-                result = !udomain.domain.options.showGhostingForHiddenParts
+                result = !domain.options.showGhostingForHiddenParts
             } else {
                 result = true
             }
@@ -527,7 +519,7 @@ export class PdPlantPart {
     }
     
     applyAmendmentRotations(): void {
-        if ((this.amendment !== null) && (this.amendment.addRotations) && (udomain.domain.options.showPosingAtAll)) {
+        if ((this.amendment !== null) && (this.amendment.addRotations) && (domain.options.showPosingAtAll)) {
             this.plant.turtle.rotateX(this.amendment.xRotation * 256 / 360)
             this.plant.turtle.rotateY(this.amendment.yRotation * 256 / 360)
             this.plant.turtle.rotateZ(this.amendment.zRotation * 256 / 360)
@@ -549,7 +541,7 @@ export class PdPlantPart {
         let showHighlights: boolean
         
         result = true
-        if (!udomain.domain.options.showPosingAtAll) {
+        if (!domain.options.showPosingAtAll) {
             return result
         }
         if (this.plant.turtle === null) {
@@ -563,16 +555,16 @@ export class PdPlantPart {
         myParentHasAnAmendment = this.parentAmendment !== null
         myAmendmentSaysIAmHidden = (this.amendment !== null) && (this.amendment.hide)
         myParentsAmendmentSaysIAmHidden = (this.parentAmendment !== null) && (this.parentAmendment.hide)
-        iAmSelectedInTheMainWindow = (this.partID === umain.MainForm.selectedPlantPartID) && (umain.MainForm.focusedPlant() === this.plant)
-        showHighlights = udomain.domain.options.showHighlightingForNonHiddenPosedParts && (this.plant.turtle.writingTo === u3dexport.kScreen) && (!udomain.domain.drawingToMakeCopyBitmap) && (!this.plant.drawingIntoPreviewCache)
+        iAmSelectedInTheMainWindow = (this.partID === MainForm.selectedPlantPartID) && (MainForm.focusedPlant() === this.plant)
+        showHighlights = domain.options.showHighlightingForNonHiddenPosedParts && (this.plant.turtle.writingTo === u3dexport.kScreen) && (!domain.drawingToMakeCopyBitmap) && (!this.plant.drawingIntoPreviewCache)
         if (iHaveAnAmendment || myParentHasAnAmendment) {
             result = false
             if ((iHaveAnAmendment && iAmSelectedInTheMainWindow && showHighlights)) {
-                color = udomain.domain.options.selectedPosedColor
+                color = domain.options.selectedPosedColor
             } else if ((iHaveAnAmendment && myAmendmentSaysIAmHidden) || (iDontHaveAnAmendment && myParentHasAnAmendment && myParentsAmendmentSaysIAmHidden)) {
-                color = udomain.domain.options.ghostingColor
+                color = domain.options.ghostingColor
             } else if ((iHaveAnAmendment && showHighlights)) {
-                color = udomain.domain.options.nonHiddenPosedColor
+                color = domain.options.nonHiddenPosedColor
             } else {
                 result = true
             }
@@ -609,7 +601,7 @@ export class PdPlantPart {
     rotateAngleConsideringAmendment(rotateWhat: short, useAmendment: boolean, angle: float): float {
         let result = 0.0
         result = angle
-        if ((useAmendment) && (this.amendment !== null) && (this.amendment.addRotations) && (udomain.domain.options.showPosingAtAll)) {
+        if ((useAmendment) && (this.amendment !== null) && (this.amendment.addRotations) && (domain.options.showPosingAtAll)) {
             switch (rotateWhat) {
                 case kRotateX:
                     result = angle + this.amendment.xRotation * 256 / 360
@@ -630,7 +622,7 @@ export class PdPlantPart {
         let amendmentToUse: PdPlantDrawingAmendment
         
         result = 1.0
-        if (!udomain.domain.options.showPosingAtAll) {
+        if (!domain.options.showPosingAtAll) {
             return result
         }
         if ((this.amendment !== null) || (this.parentAmendment !== null)) {
@@ -651,7 +643,7 @@ export class PdPlantPart {
         let amendmentToUse: PdPlantDrawingAmendment
         
         result = 1.0
-        if (!udomain.domain.options.showPosingAtAll) {
+        if (!domain.options.showPosingAtAll) {
             return result
         }
         if ((this.amendment !== null) || (this.parentAmendment !== null)) {
@@ -672,7 +664,7 @@ export class PdPlantPart {
         let amendmentToUse: PdPlantDrawingAmendment
         
         result = 1.0
-        if (!udomain.domain.options.showPosingAtAll) {
+        if (!domain.options.showPosingAtAll) {
             return result
         }
         if ((this.amendment !== null) || (this.parentAmendment !== null)) {
@@ -690,7 +682,7 @@ export class PdPlantPart {
     
     // ---------------------------------------------------------------------------------- streaming 
     classAndVersionInformation(cvir: PdClassAndVersionInformationRecord): void {
-        cvir.classNumber = uclasses.kPdPlantPart
+        cvir.classNumber = ClassId.kPdPlantPart
         cvir.versionNumber = 0
         cvir.additionNumber = 0
     }
@@ -713,7 +705,7 @@ export class PdPlantPart {
         this.randomSwayIndex = filer.streamSingle(this.randomSwayIndex)
     }
     
-    addDependentPartsToList(aList: TList): void {
+    addDependentPartsToList(aList: PdPlantPart[]): void {
         // subclasses can override 
     }
     
@@ -741,59 +733,59 @@ export class PdPlantPart {
         let result = 0
         result = index
         switch (index) {
-            case u3dexport.kExportPartLeaf:
+            case ExportPart.kExportPartLeaf:
                 if (this.isSeedlingLeaf) {
-                    result = u3dexport.kExportPartSeedlingLeaf
+                    result = ExportPart.kExportPartSeedlingLeaf
                 }
                 break
-            case u3dexport.kExportPartPetiole:
+            case ExportPart.kExportPartPetiole:
                 if (this.isSeedlingLeaf) {
-                    result = u3dexport.kExportPartFirstPetiole
+                    result = ExportPart.kExportPartFirstPetiole
                 }
                 break
-            case u3dexport.kExportPartInflorescenceStalkFemale:
-                if (this.gender === uplant.kGenderMale) {
-                    result = u3dexport.kExportPartInflorescenceStalkMale
+            case ExportPart.kExportPartInflorescenceStalkFemale:
+                if (this.gender === Gender.kGenderMale) {
+                    result = ExportPart.kExportPartInflorescenceStalkMale
                 }
                 break
-            case u3dexport.kExportPartInflorescenceInternodeFemale:
-                if (this.gender === uplant.kGenderMale) {
-                    result = u3dexport.kExportPartInflorescenceInternodeMale
+            case ExportPart.kExportPartInflorescenceInternodeFemale:
+                if (this.gender === Gender.kGenderMale) {
+                    result = ExportPart.kExportPartInflorescenceInternodeMale
                 }
                 break
-            case u3dexport.kExportPartInflorescenceBractFemale:
-                if (this.gender === uplant.kGenderMale) {
-                    result = u3dexport.kExportPartInflorescenceBractMale
+            case ExportPart.kExportPartInflorescenceBractFemale:
+                if (this.gender === Gender.kGenderMale) {
+                    result = ExportPart.kExportPartInflorescenceBractMale
                 }
                 break
-            case u3dexport.kExportPartPedicelFemale:
-                if (this.gender === uplant.kGenderMale) {
-                    result = u3dexport.kExportPartPedicelMale
+            case ExportPart.kExportPartPedicelFemale:
+                if (this.gender === Gender.kGenderMale) {
+                    result = ExportPart.kExportPartPedicelMale
                 }
                 break
-            case u3dexport.kExportPartFlowerBudFemale:
-                if (this.gender === uplant.kGenderMale) {
-                    result = u3dexport.kExportPartFlowerBudMale
+            case ExportPart.kExportPartFlowerBudFemale:
+                if (this.gender === Gender.kGenderMale) {
+                    result = ExportPart.kExportPartFlowerBudMale
                 }
                 break
-            case u3dexport.kExportPartFilamentFemale:
-                if (this.gender === uplant.kGenderMale) {
-                    result = u3dexport.kExportPartFilamentMale
+            case ExportPart.kExportPartFilamentFemale:
+                if (this.gender === Gender.kGenderMale) {
+                    result = ExportPart.kExportPartFilamentMale
                 }
                 break
-            case u3dexport.kExportPartAntherFemale:
-                if (this.gender === uplant.kGenderMale) {
-                    result = u3dexport.kExportPartAntherMale
+            case ExportPart.kExportPartAntherFemale:
+                if (this.gender === Gender.kGenderMale) {
+                    result = ExportPart.kExportPartAntherMale
                 }
                 break
-            case u3dexport.kExportPartFirstPetalsFemale:
-                if (this.gender === uplant.kGenderMale) {
-                    result = u3dexport.kExportPartFirstPetalsMale
+            case ExportPart.kExportPartFirstPetalsFemale:
+                if (this.gender === Gender.kGenderMale) {
+                    result = ExportPart.kExportPartFirstPetalsMale
                 }
                 break
-            case u3dexport.kExportPartSepalsFemale:
-                if (this.gender === uplant.kGenderMale) {
-                    result = u3dexport.kExportPartSepalsMale
+            case ExportPart.kExportPartSepalsFemale:
+                if (this.gender === Gender.kGenderMale) {
+                    result = ExportPart.kExportPartSepalsMale
                 }
                 break
         }
@@ -801,4 +793,3 @@ export class PdPlantPart {
     }
     
 }
-
