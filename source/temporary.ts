@@ -112,7 +112,7 @@ export const MainForm = {
     finishDrawProgress: () => {},
     isSelected: (something: any) => false,
     focusedPlant: () => null,
-    plantsAsTextMemo: [],
+    plantsAsTextMemo: <string[]>[],
     updateParameterValuesWithUpdateListForPlant: (something: any, updateList: any[]) => {},
     showDrawProgress: (value: number) => {},
     selectedPlantPartID: null,

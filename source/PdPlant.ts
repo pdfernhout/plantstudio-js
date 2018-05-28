@@ -1,7 +1,7 @@
 // PdPlant was unit Uplant
 
 import { PdStreamableObject, ExportFormats, DebugPrint, ucursor, MainForm, PdBitmap, PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof, PdInternode, TListCollection_streamUsingFiler, ExportPart } from "./temporary"
-import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor, ColorDefs, StrToIntDef, IntToStr, compareTextIgnoreCase, arrayRemove, TextFile } from "./common"
+import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor, ColorDefs, StrToIntDef, IntToStr, compareTextIgnoreCase, arrayRemove, TextFile, writeln, eof } from "./common"
 import { KfObject3D } from "./KfObject3D"
 import { TPoint } from "./TPoint"
 import { TRect } from "./TRect"
@@ -16,7 +16,7 @@ import { PdParameter, FieldType, IndexType } from "./PdParameter"
 import { PdSection } from "./PdSection"
 import { PdPlantDrawingAmendment, kStartAmendmentString } from "./PdPlantDrawingAmendment"
 import { PdPlantPart } from "./PdPlantPart"
-import { SinglePoint, messageForExceptionType } from "./usupport"
+import { SinglePoint, messageForExceptionType, support_rgb, boundForString, stringUpTo, strToBool, stringBeyond, tolerantReadln, trimLeftAndRight } from "./usupport"
 
 /* Remove unused imports
 from conversion_common import *
@@ -1376,7 +1376,7 @@ export class PdPlant extends PdStreamableObject {
                 (fileExportSurface).writeMaterialDescription(i, this.colorForDXFPartType(i))
             }
             if (!domain.registered) {
-                (fileExportSurface).writeMaterialDescription(-1, UNRESOLVED.rgb(100, 100, 100))
+                (fileExportSurface).writeMaterialDescription(-1, support_rgb(100, 100, 100))
             }
         }
         switch (outputType) {
@@ -1480,15 +1480,15 @@ export class PdPlant extends PdStreamableObject {
         }
         switch (param.fieldType) {
             case FieldType.kFieldBoolean:
-                tempBoolean = usupport.strToBool(param.defaultValueString())
+                tempBoolean = strToBool(param.defaultValueString())
                 tempBoolean = this.transferField(kSetField, tempBoolean, param.fieldNumber, param.fieldType, 0, false, null)
                 break
             case FieldType.kFieldSmallint:
-                tempSmallint = StrToIntDef(usupport.stringUpTo(param.defaultValueString(), " "), 0)
+                tempSmallint = StrToIntDef(stringUpTo(param.defaultValueString(), " "), 0)
                 tempSmallint = this.transferField(kSetField, tempSmallint, param.fieldNumber, param.fieldType, 0, false, null)
                 break
             case FieldType.kFieldEnumeratedList:
-                tempSmallint = StrToIntDef(usupport.stringUpTo(param.defaultValueString(), " "), 0)
+                tempSmallint = StrToIntDef(stringUpTo(param.defaultValueString(), " "), 0)
                 tempSmallint = this.transferField(kSetField, tempSmallint, param.fieldNumber, param.fieldType, 0, false, null)
                 break
             case FieldType.kFieldLongint:
@@ -1535,7 +1535,7 @@ export class PdPlant extends PdStreamableObject {
     
     writeLine(plantFile: TextFile, aString: string): void {
         if (this.writingToMemo) {
-            MainForm.plantsAsTextMemo.Lines.Add(aString)
+            MainForm.plantsAsTextMemo.push(aString)
         } else {
             writeln(plantFile, aString)
         }
@@ -1664,8 +1664,8 @@ export class PdPlant extends PdStreamableObject {
             // read note if this line starts it
             // this only will happen if in file
             this.noteLines = []
-            while (!UNRESOLVED.eof(plantFile)) {
-                noteLine = usupport.tolerantReadln(plantFile, noteLine)
+            while (!eof(plantFile)) {
+                noteLine = tolerantReadln(plantFile)
                 if (compareTextIgnoreCase(kEndNoteString, noteLine) && (this.noteLines.length < 5000)) {
                     break
                 } else {
@@ -1690,21 +1690,21 @@ export class PdPlant extends PdStreamableObject {
             if (this.readingFromMemo) {
                 // v2.0 fix lines broken before [ or = (does NOT fix lines broken within strings)
                 // this has to come AFTER we deal with notes and amendments; it applies to parameters only
-                secondLine = MainForm.plantsAsTextMemo.Lines.Strings[this.readingMemoLine]
+                secondLine = MainForm.plantsAsTextMemo[this.readingMemoLine]
             } else {
-                secondLine = usupport.tolerantReadln(plantFile, secondLine)
+                secondLine = tolerantReadln(plantFile)
             }
             this.readingMemoLine += 1
             DebugPrint("plant <" + this.name + "> line <" + aLine + "> merged with <" + secondLine + ">")
             aLine = aLine + " " + secondLine
         }
-        nameAndFieldID = usupport.stringUpTo(aLine, "=")
-        fieldID = usupport.stringBeyond(nameAndFieldID, "[")
-        fieldID = usupport.stringUpTo(fieldID, "]")
+        nameAndFieldID = stringUpTo(aLine, "=")
+        fieldID = stringBeyond(nameAndFieldID, "[")
+        fieldID = stringUpTo(fieldID, "]")
         if (UNRESOLVED.pos("header", fieldID) > 0) {
             return
         }
-        paramValue = usupport.stringBeyond(aLine, "=")
+        paramValue = stringBeyond(aLine, "=")
         found = false
         param = null
         if (domain.parameterManager.parameters.length > 0) {
@@ -1727,7 +1727,7 @@ export class PdPlant extends PdStreamableObject {
                 break
             case FieldType.kFieldBoolean:
                 // skip
-                tempBoolean = usupport.strToBool(paramValue)
+                tempBoolean = strToBool(paramValue)
                 tempBoolean = this.transferField(kSetField, tempBoolean, param.fieldNumber, param.fieldType, 0, false, null)
                 break
             case FieldType.kFieldSmallint:
@@ -1795,7 +1795,8 @@ export class PdPlant extends PdStreamableObject {
                     this.transferWholeSCurve(kSetField, tempSCurve, param.fieldNumber, param.fieldType, false, null)
                     this.changingWholeSCurves = false
                 } else {
-                    tempFloat = usupport.boundForString(paramValue, FieldType.kFieldFloat, tempFloat)
+                    let success
+                    [tempFloat, success] = boundForString(paramValue, FieldType.kFieldFloat)
                     if (UNRESOLVED.pos("Drawing scale", param.name) > 0) {
                         tempTdo = null
                     }
@@ -1813,7 +1814,7 @@ export class PdPlant extends PdStreamableObject {
                 break
             case FieldType.kFieldThreeDObject:
                 let tempTdo = new KfObject3D()
-                tempTdo.setName(usupport.trimLeftAndRight(paramValue))
+                tempTdo.setName(trimLeftAndRight(paramValue))
                 if (this.readingFromMemo) {
                     this.readingMemoLine = tempTdo.readFromMemo(MainForm.plantsAsTextMemo, this.readingMemoLine)
                 } else {

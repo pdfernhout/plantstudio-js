@@ -1,4 +1,4 @@
-import { float, StrToFloat, int, byte, long, compareTextIgnoreCase, short } from "./common";
+import { float, StrToFloat, int, byte, long, compareTextIgnoreCase, short, readln, TextFile } from "./common";
 import { DebugPrint } from "./temporary";
 
 // unit Usupport
@@ -233,11 +233,15 @@ function bitsPerPixelForColorType(colorType: TPixelFormat): short {
     return result
 }
 
+*/
+
 //, extraCharToCarryOver
-function tolerantReadln(aFile: TextFile, aString: string): void {
-    UNRESOLVED.readln(aFile, aString)
+export function tolerantReadln(aFile: TextFile): string {
+    const aString = readln(aFile)
     return aString
 }
+
+/*
 
 // text handling 
 // CFK unfinished - was trying to deal with text files that have irregular line endings
@@ -518,13 +522,12 @@ function boundForString(boundString: string, fieldType: int, number: FIX_MISSING
     return result, number
 }
 
-function trimLeftAndRight(theString: string): string {
-    let result = ""
-    result = trim(theString)
-    return result
-}
-
 */
+
+// TODO: Could simplify users of trimLeftAndRight to just use trim
+export function trimLeftAndRight(theString: string): string {
+    return theString.trim()
+}
 
 export function stringUpTo(aString: string, aDelimiter: string): string {
     if (aString.length === 0) {
