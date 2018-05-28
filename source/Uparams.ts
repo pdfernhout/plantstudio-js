@@ -78,7 +78,7 @@ export class PdParameter {
         this.collapsed = true
     }
     
-    make(aFieldNumber: short, aFieldID: string, aName: string, aFieldType: short, anIndexType: short, aUnitSet: short, aUnitModel: short, aUnitMetric: short, aUnitEnglish: short, aLowerBound: float, anUpperBound: float, aDefaultValueString: string, aRegrow: boolean, aReadOnly: boolean, anAccessString: string, aTransferType: short, aHint: string): void {
+    make(aFieldNumber: short, aFieldID: string, aName: string, aFieldType: short, anIndexType: short, aUnitSet: short, aUnitModel: short, aUnitMetric: short, aUnitEnglish: short, aLowerBound: float, anUpperBound: float, aDefaultValueString: string, aRegrow: boolean, aReadOnly: boolean, anAccessString: string, aTransferType: short, aHint: string): PdParameter {
         this.fieldNumber = aFieldNumber
         // TODO: Are these strign limites for fieldID and name and accessString still needed?
         this.fieldID = aFieldID.substring(0, 80)
@@ -87,7 +87,7 @@ export class PdParameter {
         // v2.0 headers can have hints
         this.hint = aHint
         if (this.fieldType === kFieldHeader) {
-            return
+            return this
         }
         this.indexType = anIndexType
         this.unitSet = aUnitSet
@@ -102,6 +102,7 @@ export class PdParameter {
         this.accessString = anAccessString.substring(0, 80)
         this.transferType = aTransferType
         // hint := aHint;
+        return this
     }
     
     indexCount(): int {

@@ -2,6 +2,8 @@ import { short, float, TColorRef, long } from "./common";
 import { TPoint } from "./TPoint";
 import { TRect } from "./TRect";
 import { SinglePoint } from "./temporary";
+import { PdSectionManager } from "./usection";
+import { PdParameterManager } from "./Uparams";
 
 // unit Udomain
 
@@ -267,8 +269,8 @@ export class PdDomain {
     unregisteredExportCountBeforeThisSession: short = 0
     unregisteredExportCountThisSession: short = 0
     // TODO: FIX plantManager: PdPlantManager = new PdPlantManager()
-    // TODO: FIX parameterManager: PdParameterManager = new PdParameterManager()
-    // TODO: FIX sectionManager: PdSectionManager = new PdSectionManager()
+    parameterManager: PdParameterManager = new PdParameterManager()
+    sectionManager: PdSectionManager = new PdSectionManager()
     // TODO: FIX hintManager: PdHintManager = new PdHintManager()
     iniFileName: string = ""
     iniFileBackupName: string = ""
@@ -315,6 +317,8 @@ export class PdDomain {
         // non-standard defaults 
         // TODO: FIX this.plantManager.plantDrawScale_PixelsPerMm = 1.0
         this.plantDrawScaleWhenDrawingCopy_PixelsPerMm = 1.0
+        // TODO: Moved makeParameters call from startupLoading -- is this OK? Need to remove duplicate commented code there eventually
+        this.parameterManager.makeParameters()
     }
 
     // TODO: Remove stub plantDrawOffset_mm
@@ -376,6 +380,7 @@ export class PdDomain {
             }
         }
         // make parameters
+        // TODO: Moved makeParameters call to constructor -- is this OK? Need to remove duplicate commented code eventually
         this.parameterManager.makeParameters()
         // make hints
         this.hintManager.makeHints()
