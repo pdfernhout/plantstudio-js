@@ -5,16 +5,7 @@ import { TRect } from "./TRect"
 import { PdTraverser } from "./PdTraverser"
 import { PdPlant } from "./PdPlant"
 import { PdPlantPart } from "./PdPlantPart";
-
-// TODO: Implement darkerColorWithSubtraction from usupport
-export function darkerColorWithSubtraction(a: number, b: number) {
-    return a
-}
-
-// TODO: Implement darkerColor from usupport
-export function darkerColor(a: number) {
-    return a
-}
+import { SinglePoint } from "./usupport";
 
 // TODO: Fix copied code from utdo
 export const kMaximumRecordedPoints = 10000
@@ -78,6 +69,7 @@ export class PdFiler {
 
 }
 
+// TODO: Fix FIX_sizeof with alternate approach to object size measurement
 export function FIX_sizeof(object: Object): number {
     return 0
 }
@@ -97,37 +89,6 @@ export enum ExportFormats {
 // TODO: Fix DebugPrint from udebug that should have result stored somewhere
 export function DebugPrint(aMessage: string): void {
     console.log("DebugPrint: " + aMessage)
-}
-
-// TODO: Fix digitValueString stub from usupport
-export function digitValueString(value: float) {
-    return "" + value
-}
-
-// TODO: Fix kFieldFloat
-export const kFieldFloat = 1
-
-// TODO: Fix boundForString stub from usupport
-export function boundForString(boundString: string, fieldType: int): [number, boolean] {
-    return [StrToFloat(boundString), true]
-}
-
-// TODO: Fix messageForExceptionType stub from usupport
-export function messageForExceptionType(e: Error, methodName: string): void {
-    console.log("Exception", e);
-    DebugPrint("Exception in " + methodName + " with " + e)
-}
-
-// TODO: Fix SinglePoint from usupport
-export class SinglePoint {
-    x: float
-    y: float
-    reservedZ: float
-
-    constructor(x = 0.0, y = 0.0) {
-        this.x = x
-        this.y = y
-    }
 }
 
 // TODO: Fix ucursor stub from ucursor
@@ -175,11 +136,6 @@ export class PdInternode extends PdPlantPart {
     nextPlantPart: PdInternode | null
     isPhytomer() { return true }
     traverseActivity(mode: number, traverser: PdTraverser) {}
-}
-
-// TODO: Fix support_rgb from usupport
-export function support_rgb(R: byte, G: byte, B: byte): long {
-    return R << 16 + G << 8 + B 
 }
 
 // Fix TListCollection_streamUsingFiler derived From ucollect -- not sure where to put code

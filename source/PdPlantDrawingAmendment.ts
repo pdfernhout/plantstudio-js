@@ -1,8 +1,9 @@
 // PdPlantDrawingAmendment was unit uamendmt
 
 import { long, float, TColorRef, short, IntToStr, intround, StrToIntDef, TextFile, StrToInt, writeln } from "./common"
-import { PdStreamableObject, PdClassAndVersionInformationRecord, support_rgb, PdFiler } from "./temporary";
+import { PdStreamableObject, PdClassAndVersionInformationRecord, PdFiler } from "./temporary";
 import { ClassId } from "./uclasses";
+import { support_rgb } from "./usupport";
 
 // const
 export const kStartAmendmentString = "start posing change"

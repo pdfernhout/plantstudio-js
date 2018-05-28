@@ -1,7 +1,7 @@
 import { short, float, TColorRef, long } from "./common";
 import { TPoint } from "./TPoint";
 import { TRect } from "./TRect";
-import { SinglePoint } from "./temporary";
+import { SinglePoint } from "./usupport";
 import { PdSectionManager } from "./PdSectionManager";
 import { PdParameterManager } from "./PdParameterManager";
 

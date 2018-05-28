@@ -4,7 +4,9 @@ import { float, int, double, FloatToStr } from "./common";
 import { ifError } from "assert";
 import { TPoint } from "./TPoint";
 import { KfStringStream } from "./KfStringStream";
-import { DebugPrint, digitValueString, boundForString, kFieldFloat } from "./temporary";
+import { DebugPrint } from "./temporary";
+import { FieldType } from "./PdParameter";
+import { digitValueString, boundForString } from "./usupport";
 
 /* TODO: Remove unnedded imports
 from conversion_common import *
@@ -469,10 +471,10 @@ export function stringToSCurve(aString: string): SCurveStructure {
     // format is x1 y1 x2 y2 
     const stream = new KfStringStream(aString, " ")
     let success
-    ;[result.x1, success] = boundForString(stream.nextToken(), kFieldFloat)
-    ;[result.y1, success] = boundForString(stream.nextToken(), kFieldFloat)
-    ;[result.x2, success] = boundForString(stream.nextToken(), kFieldFloat)
-    ;[result.y2, success] = boundForString(stream.nextToken(), kFieldFloat)
+    ;[result.x1, success] = boundForString(stream.nextToken(), FieldType.kFieldFloat)
+    ;[result.y1, success] = boundForString(stream.nextToken(), FieldType.kFieldFloat)
+    ;[result.x2, success] = boundForString(stream.nextToken(), FieldType.kFieldFloat)
+    ;[result.y2, success] = boundForString(stream.nextToken(), FieldType.kFieldFloat)
 
     return result
 }

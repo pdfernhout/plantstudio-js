@@ -2,9 +2,11 @@
 
 import { float, int, TColorRef, short, long } from "./common";
 import { max, safedivExcept, min } from "./umath";
-import { messageForExceptionType, PdFiler, MainForm, PdInternode, PdPlantPart, ExportPart } from "./temporary";
+import { PdFiler, MainForm, PdInternode, ExportPart } from "./temporary";
 import { PdPlant } from "./PdPlant";
 import { TPoint } from "./TPoint";
+import { messageForExceptionType } from "./usupport";
+import { PdPlantPart } from "./PdPlantPart";
 
 /* TODO: Remove unneeded imports
 from conversion_common import *

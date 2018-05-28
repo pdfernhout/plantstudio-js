@@ -1,5 +1,9 @@
+import { float, StrToFloat, int, byte, long } from "./common";
+import { DebugPrint } from "./temporary";
+
 // unit Usupport
 
+/* Remove unneeded imports
 from conversion_common import *
 import umain
 import udomain
@@ -9,22 +13,60 @@ import usstream
 import umath
 import uparams
 import delphi_compatability
+*/
 
 // var
-let iniFileChanged: boolean
-let gVersionName: string
-
+// TODO: Use or remove: let iniFileChanged: boolean
+// TODO: Use or remove: let gVersionName: string
 
 // const
+// TODO: Use or remove kMaxEvaluationTime_hours
 const kMaxEvaluationTime_hours = 10
 
-
 // record
-export interface SinglePoint {
+export class SinglePoint {
     x: float
     y: float
     reservedZ: float
+
+    constructor(x = 0.0, y = 0.0) {
+        this.x = x
+        this.y = y
+    }
 }
+
+// TODO: Implement darkerColorWithSubtraction from usupport
+export function darkerColorWithSubtraction(a: number, b: number) {
+    return a
+}
+
+// TODO: Implement darkerColor from usupport
+export function darkerColor(a: number) {
+    return a
+}
+
+// TODO: Fix digitValueString stub from usupport
+export function digitValueString(value: float) {
+    return "" + value
+}
+
+// TODO: Fix boundForString stub from usupport
+export function boundForString(boundString: string, fieldType: int): [number, boolean] {
+    return [StrToFloat(boundString), true]
+}
+
+// TODO: Fix messageForExceptionType stub from usupport
+export function messageForExceptionType(e: Error, methodName: string): void {
+    console.log("Exception", e);
+    DebugPrint("Exception in " + methodName + " with " + e)
+}
+
+// TODO: Fix support_rgb from usupport
+export function support_rgb(R: byte, G: byte, B: byte): long {
+    return R << 16 + G << 8 + B 
+}
+
+/*
 
 // record
 export interface SaveFileNamesStructure {
@@ -1430,4 +1472,4 @@ function setDecimalSeparator(): void {
     UNRESOLVED.DecimalSeparator = "."
 }
 
-
+*/

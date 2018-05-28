@@ -4,7 +4,7 @@ import { PdPlant, Gender, PartType } from "./PdPlant"
 import { float, short, long, IntToStr, int, TColorRef } from "./common"
 import { TRect } from "./TRect"
 import { PdPlantDrawingAmendment } from "./PdPlantDrawingAmendment"
-import { PdStreamableObject, messageForExceptionType, DebugPrint, MainForm, PdClassAndVersionInformationRecord, PdFiler, ExportPart, ExportFormats, darkerColor, longNameForDXFPartType, shortNameForDXFPartType } from "./temporary"
+import { PdStreamableObject, DebugPrint, MainForm, PdClassAndVersionInformationRecord, PdFiler, ExportPart, ExportFormats, longNameForDXFPartType, shortNameForDXFPartType } from "./temporary"
 import { PdTraverser, Activity, PdPlantStatistics } from "./PdTraverser"
 import { safedivExcept } from "./umath"
 import { KfObject3D } from "./KfObject3D"
@@ -14,6 +14,7 @@ import { KfPoint3D } from "./KfPoint3D"
 import { domain } from "./PdDomain"
 import { ClassId } from "./uclasses"
 import { TPoint } from "./TPoint"
+import { messageForExceptionType, darkerColor } from "./usupport";
 
 /* TODO: Remove unused imports
 from conversion_common import *
