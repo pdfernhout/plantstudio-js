@@ -2,8 +2,8 @@ import { short, float, TColorRef, long } from "./common";
 import { TPoint } from "./TPoint";
 import { TRect } from "./TRect";
 import { SinglePoint } from "./temporary";
-import { PdSectionManager } from "./usection";
-import { PdParameterManager } from "./Uparams";
+import { PdSectionManager } from "./PdSectionManager";
+import { PdParameterManager } from "./PdParameterManager";
 
 // unit Udomain
 

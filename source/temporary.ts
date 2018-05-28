@@ -114,26 +114,6 @@ export class SinglePoint {
     }
 }
 
-// TODO: Fix FieldType from Uparams
-export enum FieldType {
-    kFieldUndefined = 0,
-    kFieldFloat = 1,
-    kFieldSmallint = 2,
-    kFieldColor = 3,
-    kFieldBoolean = 4,
-    kFieldThreeDObject = 5,
-    kFieldEnumeratedList = 6,
-    kFieldHeader = 7,
-    kFieldLongint = 8,
-}
-
-// TODO: Fix IndexType from Uparams
-export enum IndexType {
-    kIndexTypeUndefined = 0,
-    kIndexTypeNone = 1,
-    kIndexTypeSCurve = 3,
-}
-
 // TODO: Fix ucursor stub from ucursor
 export const ucursor = {
     cursor_startWait: () => {},

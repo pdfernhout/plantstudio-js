@@ -1,22 +1,31 @@
 import { short, float, int } from "./common";
 
-// const
-const kFieldUndefined = 0
-const kFieldFloat = 1
-const kFieldSmallint = 2
-const kFieldColor = 3
-const kFieldBoolean = 4
-const kFieldThreeDObject = 5
-const kFieldEnumeratedList = 6
-const kFieldHeader = 7
-const kFieldLongint = 8
-const kIndexTypeUndefined = 0
-const kIndexTypeNone = 1
-const kIndexTypeSCurve = 3
-const kTransferTypeUndefined = 0
-const kTransferTypeMFD = 1
-const kTransferTypeGetSetSCurve = 2
-const kTransferTypeObject3D = 3
+export enum FieldType {
+    kFieldUndefined = 0,
+    kFieldFloat = 1,
+    kFieldSmallint = 2,
+    kFieldColor = 3,
+    kFieldBoolean = 4,
+    kFieldThreeDObject = 5,
+    kFieldEnumeratedList = 6,
+    kFieldHeader = 7,
+    kFieldLongint = 8,
+}
+
+export enum IndexType {
+    kIndexTypeUndefined = 0,
+    kIndexTypeNone = 1,
+    kIndexTypeSCurve = 3,
+}
+
+export enum TransferType {
+    kTransferTypeUndefined = 0,
+    kTransferTypeMFD = 1,
+    kTransferTypeGetSetSCurve = 2,
+    kTransferTypeObject3D = 3,
+}
+
+// TOOD: Should kNotArray go with FieldType?
 const kNotArray = -1
 
 // FieldType 
@@ -69,7 +78,7 @@ export class PdParameter {
         this.fieldType = aFieldType
         // v2.0 headers can have hints
         this.hint = aHint
-        if (this.fieldType === kFieldHeader) {
+        if (this.fieldType === FieldType.kFieldHeader) {
             return this
         }
         this.indexType = anIndexType
@@ -92,13 +101,13 @@ export class PdParameter {
         let result = 0
         result = 1
         switch (this.indexType) {
-            case kIndexTypeUndefined:
+            case IndexType.kIndexTypeUndefined:
                 result = 1
                 break
-            case kIndexTypeNone:
+            case IndexType.kIndexTypeNone:
                 result = 1
                 break
-            case kIndexTypeSCurve:
+            case IndexType.kIndexTypeSCurve:
                 result = 4
                 break
             default:

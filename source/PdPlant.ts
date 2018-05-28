@@ -1,6 +1,6 @@
 // PdPlant was unit Uplant
 
-import { PdStreamableObject, ExportFormats, messageForExceptionType, boundForString, DebugPrint, FieldType, IndexType, SinglePoint, ucursor, MainForm, PdBitmap, kExportPartLast, PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof } from "./temporary";
+import { PdStreamableObject, ExportFormats, messageForExceptionType, boundForString, DebugPrint, SinglePoint, ucursor, MainForm, PdBitmap, kExportPartLast, PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof } from "./temporary";
 import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor, ColorDefs, StrToIntDef, IntToStr, compareTextIgnoreCase } from "./common";
 import { KfObject3D } from "./KfObject3D";
 import { TPoint } from "./TPoint";
@@ -12,8 +12,8 @@ import { PdRandom } from "./PdRandom";
 import { domain, DrawMode } from "./PdDomain";
 import { PdTraverser, Activity, TraverserGlobals } from "./PdTraverser";
 import { ClassId } from "./uclasses";
-import { PdParameter } from "./Uparams";
-import { PdSection } from "./usection";
+import { PdParameter, FieldType, IndexType } from "./PdParameter";
+import { PdSection } from "./PdSection";
 
 /* Remove unused imports
 from conversion_common import *

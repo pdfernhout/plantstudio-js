@@ -1,7 +1,7 @@
 // PdSectionManager was unit Usection
 
 import { short } from "./common";
-import { PdParameter } from "./PdParameterManager";
+import { PdParameter } from "./PdParameter";
 import { domain } from "./PdDomain";
 import { PdSection } from "./PdSection";
 

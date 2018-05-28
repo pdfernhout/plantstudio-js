@@ -1,7 +1,7 @@
 import { short, float, int, long, IntToStr, compareTextIgnoreCase } from "./common";
 import { domain } from "./PdDomain";
 import { CreateParameters, CreateParameters_SecondHalf } from "./umakepm";
-import { PdParameter } from "./PdParameter";
+import { PdParameter, FieldType, IndexType } from "./PdParameter";
 
 // unit Uparams
 
@@ -60,28 +60,28 @@ export class PdParameterManager {
     fieldTypeName(fieldType: int): string {
         let result = ""
         switch (fieldType) {
-            case kFieldUndefined:
+            case FieldType.kFieldUndefined:
                 result = "Undefined"
                 break
-            case kFieldFloat:
+            case FieldType.kFieldFloat:
                 result = "Single"
                 break
-            case kFieldSmallint:
+            case FieldType.kFieldSmallint:
                 result = "Smallint"
                 break
-            case kFieldColor:
+            case FieldType.kFieldColor:
                 result = "Color"
                 break
-            case kFieldBoolean:
+            case FieldType.kFieldBoolean:
                 result = "Boolean"
                 break
-            case kFieldThreeDObject:
+            case FieldType.kFieldThreeDObject:
                 result = "3D object"
                 break
-            case kFieldEnumeratedList:
+            case FieldType.kFieldEnumeratedList:
                 result = "List of choices"
                 break
-            case kFieldLongint:
+            case FieldType.kFieldLongint:
                 result = "Longint"
                 break
             default:
@@ -94,13 +94,13 @@ export class PdParameterManager {
     indexTypeName(indexType: int): string {
         let result = ""
         switch (indexType) {
-            case kIndexTypeUndefined:
+            case IndexType.kIndexTypeUndefined:
                 result = "Undefined"
                 break
-            case kIndexTypeNone:
+            case IndexType.kIndexTypeNone:
                 result = "None"
                 break
-            case kIndexTypeSCurve:
+            case IndexType.kIndexTypeSCurve:
                 result = "S curve"
                 break
             default:
