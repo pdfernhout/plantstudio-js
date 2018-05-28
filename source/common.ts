@@ -49,6 +49,11 @@ export function StrToIntDef(value: string, defaultValue: number) {
     return result
 }
 
+export function StrToInt(value: string) {
+    // TODO: Maybe should handle NaN case here?
+    return parseInt(value, 10)
+}
+
 export function MessageDialog(text: string, ignore1: any, ignore2: any, ignore3: any) {
     alert(text)
 }
@@ -58,5 +63,11 @@ export function ShowMessage(text: string) {
 }
 
 export class TextFile {
-    lines: string[] = []
+    contents = ""
+    position = 0
+}
+
+export function writeln(file: TextFile, line: string) {
+    file.contents = file.contents + line + "\n"
+    file.position = file.contents.length
 }

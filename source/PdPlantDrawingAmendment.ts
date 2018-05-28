@@ -1,6 +1,6 @@
 // PdPlantDrawingAmendment was unit uamendmt
 
-import { long, float, TColorRef, short, IntToStr, intround, StrToIntDef } from "./common"
+import { long, float, TColorRef, short, IntToStr, intround, StrToIntDef, TextFile, StrToInt, writeln } from "./common"
 import { PdStreamableObject, PdClassAndVersionInformationRecord, support_rgb, PdFiler } from "./temporary";
 import { ClassId } from "./uclasses";
 
@@ -28,8 +28,6 @@ export class PdPlantDrawingAmendment extends PdStreamableObject {
     widthMultiplier_pct: short = 0
     applyAtAge: short = 0
 
-    /* TODO: Implement rest of PdPlantDrawingAmendment
-    
     readFromTextFile(inputFile: TextFile): void {
         let inputLine: string
         let varName: string
@@ -47,7 +45,7 @@ export class PdPlantDrawingAmendment extends PdStreamableObject {
                 break
             }
         }
-        if (UNRESOLVED.pos(uppercase(kEndAmendmentString), uppercase(inputLine)) <= 0) {
+        if (!compareTextIgnoreCase(kEndAmendmentString, inputLine)) {
             throw new Error("Problem: Expected end of posing change.")
         }
     }
@@ -70,7 +68,7 @@ export class PdPlantDrawingAmendment extends PdStreamableObject {
             }
             readingMemoLine += 1
         }
-        if (UNRESOLVED.pos(uppercase(kEndAmendmentString), uppercase(inputLine)) <= 0) {
+        if (!compareTextIgnoreCase(kEndAmendmentString, inputLine)) {
             throw new Error("Problem: Expected end of posing change.")
         }
         return readingMemoLine
@@ -79,48 +77,48 @@ export class PdPlantDrawingAmendment extends PdStreamableObject {
     setField(varName: string, varValue: string): boolean {
         let result = false
         result = true
-        if (UNRESOLVED.pos("part number", varName) > 0) {
+        if (varName.includes("part number")) {
             // how deal with problem?
             this.partID = StrToIntDef(varValue, 0)
-        } else if (UNRESOLVED.pos("part type", varName) > 0) {
+        } else if (varName.includes("part type")) {
             this.typeOfPart = varValue
-        } else if (UNRESOLVED.pos("hide", varName) > 0) {
+        } else if (varName.includes("hide")) {
             this.hide = usupport.strToBool(varValue)
-        } else if (UNRESOLVED.pos("change colors", varName) > 0) {
+        } else if (varName.includes("change colors")) {
             // read these for possible backward compatibility later, but don't do anything with them
             // self.changeColors := strToBool(varValue)
             result = true
-        } else if (UNRESOLVED.pos("propagate colors up stem", varName) > 0) {
+        } else if (varName.includes("propagate colors up stem")) {
             // self.propagateColors := strToBool(varValue)
             result = true
-        } else if (UNRESOLVED.pos("front face color", varName) > 0) {
+        } else if (varName.includes("front face color")) {
             // self.faceColor := strToIntDef(varValue, 0)
             result = true
-        } else if (UNRESOLVED.pos("back face color", varName) > 0) {
+        } else if (varName.includes("back face color")) {
             // self.backfaceColor := strToIntDef(varValue, 0)
             result = true
-        } else if (UNRESOLVED.pos("line color", varName) > 0) {
+        } else if (varName.includes("line color")) {
             // self.lineColor := strToIntDef(varValue, 0)
             result = true
-        } else if (UNRESOLVED.pos("rotate", varName) > 0) {
+        } else if (varName.includes("rotate")) {
             this.addRotations = usupport.strToBool(varValue)
-        } else if (UNRESOLVED.pos("x rotation", varName) > 0) {
+        } else if (varName.includes("x rotation")) {
             this.xRotation = StrToInt(varValue) * 1.0
-        } else if (UNRESOLVED.pos("y rotation", varName) > 0) {
+        } else if (varName.includes("y rotation")) {
             this.yRotation = StrToInt(varValue) * 1.0
-        } else if (UNRESOLVED.pos("z rotation", varName) > 0) {
+        } else if (varName.includes("z rotation")) {
             this.zRotation = StrToInt(varValue) * 1.0
-        } else if (UNRESOLVED.pos("change scale", varName) > 0) {
+        } else if (varName.includes("change scale")) {
             this.multiplyScale = usupport.strToBool(varValue)
-        } else if (UNRESOLVED.pos("propagate scale change up stem", varName) > 0) {
+        } else if (varName.includes("propagate scale change up stem")) {
             this.propagateScale = usupport.strToBool(varValue)
-        } else if (UNRESOLVED.pos("3d object scale multiplier", varName) > 0) {
+        } else if (varName.includes("3d object scale multiplier")) {
             this.scaleMultiplier_pct = StrToIntDef(varValue, 100)
-        } else if (UNRESOLVED.pos("line length multiplier", varName) > 0) {
+        } else if (varName.includes("line length multiplier")) {
             this.lengthMultiplier_pct = StrToIntDef(varValue, 100)
-        } else if (UNRESOLVED.pos("line width multiplier", varName) > 0) {
+        } else if (varName.includes("line width multiplier")) {
             this.widthMultiplier_pct = StrToIntDef(varValue, 100)
-        } else if (UNRESOLVED.pos("apply at age", varName) > 0) {
+        } else if (varName.includes("apply at age")) {
             // read these for possible backward compatibility later, but don't do anything with them
             // self.applyAtAge := strToIntDef(varValue, 0)
             result = true
@@ -183,8 +181,6 @@ export class PdPlantDrawingAmendment extends PdStreamableObject {
         //  
         aMemo.Lines.Add(kEndAmendmentString)
     }
-    
-    */
    
     getFullName(): string {
         let result = ""

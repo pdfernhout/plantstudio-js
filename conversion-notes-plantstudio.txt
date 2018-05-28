@@ -15,3 +15,7 @@ if there is an "exit" in a Delphi constructor (but not a regular function),
 there will be a missing return in that code.
 Exmaple: Uparams constructor PdParameter.make
   if fieldType = kFieldHeader then exit;
+
+Convertign pos comparison
+\(UNRESOLVED.pos\("([^"]*)", varName\) > 0\)
+(varName.includes("$1"))
