@@ -1,0 +1,1433 @@
+// unit Usupport
+
+from conversion_common import *
+import umain
+import udomain
+import uwait
+import ucursor
+import usstream
+import umath
+import uparams
+import delphi_compatability
+
+// var
+let iniFileChanged: boolean
+let gVersionName: string
+
+
+// const
+const kMaxEvaluationTime_hours = 10
+
+
+// record
+export interface SinglePoint {
+    x: float
+    y: float
+    reservedZ: float
+}
+
+// record
+export interface SaveFileNamesStructure {
+    fileType: short
+    tempFile: string
+    newFile: string
+    backupFile: string
+    writingWasSuccessful: boolean
+}
+
+// const
+const kFileTypeAny = 0
+const kFileTypePlant = 1
+const kFileTypeTabbedText = 2
+const kFileTypeStrategy = 3
+const kFileTypeIni = 4
+const kFileTypeExceptionList = 5
+const kFileTypeBitmap = 6
+const kFileTypeTdo = 7
+const kFileTypeDXF = 8
+const kFileTypeINC = 9
+const kFileType3DS = 10
+const kFileTypeProgramInfo = 11
+const kFileTypeJPEG = 12
+const kFileTypeOBJ = 13
+const kFileTypeMTL = 14
+const kFileTypeVRML = 15
+const kFileTypeLWO = 16
+const kWritingWasSuccessful = true
+const kWritingFailed = false
+const kNoSuggestedFile = ""
+const kAskForFileName = true
+const kDontAskForFileName = false
+
+
+// const
+const kMinSingle = -3.4e38
+const kMaxSingle = 3.4e38
+
+
+// const
+const kIncludeAllFiles = true
+const kDontIncludeAllFiles = false
+
+
+// don't like using constants for these, but can't find any functions that provide them 
+function rotateEncodeBy7(aString: string): string {
+    let result = ""
+    let i: int
+    let letter: char
+    
+    result = ""
+    for (i = 0; i <= len(aString) - 1; i++) {
+        letter = aString[i + 1]
+        result = result + chr((ord(letter) + 1) % 256)
+    }
+    return result
+}
+
+function hexEncode(aString: string): string {
+    let result = ""
+    let i: int
+    let letter: char
+    
+    result = ""
+    for (i = 0; i <= len(aString) - 1; i++) {
+        // ((i+4) mod length(aString))
+        letter = aString[i + 1]
+        result = result + chr(ord("A") + (ord(letter) / 32))
+        result = result + chr(ord("A") + (ord(letter) % 32))
+    }
+    return result
+}
+
+function hexUnencode(encodedString: string): string {
+    let result = ""
+    let i: int
+    let letter: char
+    let value: int
+    
+    result = ""
+    value = 0
+    for (i = 0; i <= len(encodedString) - 1; i++) {
+        letter = encodedString[i + 1]
+        if (i % 2 === 0) {
+            value = (ord(letter) - ord("A")) * 32
+        } else {
+            value = value + (ord(letter) - ord("A"))
+            result = result + chr(value)
+        }
+    }
+    return result
+}
+
+function strToFloatWithCommaCheck(aString: string): double {
+    let result = 0.0
+    if (found(",", aString)) {
+        aString = replaceCommasWithPeriods(aString)
+    }
+    result = StrToFloat(aString)
+    return result
+}
+
+function makeEnterWorkAsTab(form: TForm, activeControl: TControl, key: char): void {
+    if (form === null) {
+        // this is to make enter work as tab in edit boxes on the form 
+        return key
+    }
+    if (activeControl === null) {
+        return key
+    }
+    if (!((activeControl instanceof delphi_compatability.TEdit) || (activeControl instanceof delphi_compatability.TComboBox) || (activeControl instanceof delphi_compatability.TSpinEdit))) {
+        return key
+    }
+    if (key === Character(13)) {
+        key = Character(0)
+        //next control
+        UNRESOLVED.sendMessage(form.Handle, UNRESOLVED.Wm_NextDlgCtl, 0, 0)
+    }
+    return key
+}
+
+function bitsPerPixelForColorType(colorType: TPixelFormat): short {
+    let result = 0
+    let screenDC: HDC
+    
+    // default to max
+    result = 32
+    switch (colorType) {
+        case delphi_compatability.TPixelFormat.pfDevice:
+            screenDC = UNRESOLVED.GetDC(0)
+            try {
+                result = (UNRESOLVED.GetDeviceCaps(screenDC, delphi_compatability.BITSPIXEL) * UNRESOLVED.GetDeviceCaps(screenDC, delphi_compatability.PLANES))
+            } finally {
+                UNRESOLVED.ReleaseDC(0, screenDC)
+            }
+            break
+        case delphi_compatability.TPixelFormat.pf1bit:
+            result = 1
+            break
+        case delphi_compatability.TPixelFormat.pf4bit:
+            result = 4
+            break
+        case delphi_compatability.TPixelFormat.pf8bit:
+            result = 8
+            break
+        case delphi_compatability.TPixelFormat.pf15bit:
+            result = 15
+            break
+        case delphi_compatability.TPixelFormat.pf16bit:
+            result = 16
+            break
+        case delphi_compatability.TPixelFormat.pf24bit:
+            result = 24
+            break
+        case delphi_compatability.TPixelFormat.pf32bit:
+            result = 32
+            break
+        case delphi_compatability.TPixelFormat.pfCustom:
+            // just use largest
+            result = 32
+            break
+    }
+    return result
+}
+
+//, extraCharToCarryOver
+function tolerantReadln(aFile: TextFile, aString: string): void {
+    UNRESOLVED.readln(aFile, aString)
+    return aString
+}
+
+// text handling 
+// CFK unfinished - was trying to deal with text files that have irregular line endings
+// such as CR but not LF or just LF
+// did not finish - not often found
+// got files from user frank salinas as test cases - look at these (in PS longterm) if look at this again later
+//  var aChar: char;
+//
+//  aString := '';
+//  aChar := chr(32);
+//  // chr(26) is returned if read reaches eof
+//  while (not eof(aFile)) and (not (aChar in [#0, #10, #13, #26])) do
+//    begin
+//    read(aFile, aChar);
+//    if not (aChar in [#0, #10, #13, #26]) then
+//      aString := aString + aChar
+//    else
+//      begin
+//      read(aFile, aChar);
+//      if not (aChar in [#0, #10, #13, #26]) then
+//        extraCharToCarryOver := '' + aChar;
+//      end;
+//    end;
+//
+//  aChar := chr(32);
+//  aString := '';
+//  while not eof(aFile) do
+//    begin
+//    read(aFile, aChar);
+//    if not (aChar in [#0, #10, #13, #26]) then
+//      result := result + aChar
+//    else
+//      begin
+//      if (aChar = chr(13)) and not eof(aFile) then
+//        begin
+//        read(theTextFile, aChar);
+//        if aChar <> chr(10) then
+//          raise Exception.create('Problem in file input');
+//        end;
+//      break;
+//      end;
+//    end;
+//
+//
+//  end;
+//  
+//
+//  Start := BufPtr;
+//  while not (BufPtr^ in [#13, #26]) do Inc(BufPtr);
+//  SetString(S, Start, Integer(BufPtr - Start));
+//  if BufPtr^ = #13 then Inc(BufPtr);
+//  if BufPtr^ = #10 then Inc(BufPtr);
+//  Result := BufPtr;
+//  
+//
+//    aChar := chr(0);
+//  result := '';
+//  while not eof(theTextFile) do
+//    begin
+//    read(theTextFile, aChar);
+//    if (aChar <> kTextFilerDelimiter) and (aChar <> chr(9)) and (aChar <> chr(10)) and (aChar <> chr(13)) then
+//      result := result + aChar
+//    else
+//      begin
+//      if (aChar = chr(13)) and not eof(theTextFile) then
+//        begin
+//        read(theTextFile, aChar);
+//        if aChar <> chr(10) then
+//          raise Exception.create('Problem in file input');
+//        end;
+//      break;
+//      end;
+//    end;
+//  atEndOfFile := eof(theTextFile);
+//
+// ------------------------------------------------------------------------ text handling 
+function limitString(aString: string, maxChars: short): string {
+    let result = ""
+    result = aString
+    if (len(aString) > maxChars) {
+        result = UNRESOLVED.copy(aString, 1, maxChars - 3) + "..."
+    }
+    return result
+}
+
+function replacePunctuationWithUnderscores(aString: string): string {
+    let result = ""
+    let i: int
+    let lowerCaseString: string
+    let isAlpha: boolean
+    
+    result = ""
+    lowerCaseString = lowercase(aString)
+    if (len(aString) > 0) {
+        for (i = 1; i <= len(aString); i++) {
+            isAlpha = (ord(lowerCaseString[i]) >= ord("a")) && (ord(lowerCaseString[i]) <= ord("z")) || (ord(lowerCaseString[i]) >= ord("0")) && (ord(lowerCaseString[i]) <= ord("9"))
+            if (isAlpha) {
+                result = result + aString[i]
+            } else {
+                result = result + "_"
+            }
+        }
+    }
+    return result
+}
+
+function replaceCommasWithPeriods(aString: string): string {
+    let result = ""
+    let i: int
+    let isComma: boolean
+    
+    result = ""
+    if (len(aString) > 0) {
+        for (i = 1; i <= len(aString); i++) {
+            isComma = aString[i] === ","
+            if (!isComma) {
+                result = result + aString[i]
+            } else {
+                result = result + "."
+            }
+        }
+    }
+    return result
+}
+
+function found(substring: string, fullString: string): boolean {
+    let result = false
+    result = UNRESOLVED.pos(substring, fullString) > 0
+    return result
+}
+
+function trimQuotesFromFirstAndLast(theString: string): string {
+    let result = ""
+    result = theString
+    if (len(result) <= 0) {
+        return result
+    }
+    if (result[1] === "\"") {
+        result = UNRESOLVED.copy(result, 2, len(result) - 1)
+    }
+    if (result[len(result)] === "\"") {
+        UNRESOLVED.setLength(result, len(result) - 1)
+    }
+    return result
+}
+
+function capitalize(aString: string): string {
+    let result = ""
+    result = ""
+    if (len(aString) <= 0) {
+        return result
+    }
+    if (len(aString) === 1) {
+        result = uppercase(aString)
+    } else {
+        result = uppercase(UNRESOLVED.copy(aString, 1, 1)) + UNRESOLVED.copy(aString, 2, len(aString) - 1)
+    }
+    return result
+}
+
+function readUntilTab(theFile: textFile): string {
+    let result = ""
+    let aChar: char
+    
+    aChar = chr(0)
+    result = ""
+    while (!UNRESOLVED.eof(theFile)) {
+        UNRESOLVED.read(theFile, aChar)
+        if ((aChar !== chr(9)) && (aChar !== chr(10)) && (aChar !== chr(13))) {
+            result = result + aChar
+        } else {
+            if ((aChar === chr(13)) && !UNRESOLVED.eof(theFile)) {
+                UNRESOLVED.read(theFile, aChar)
+                if (aChar !== chr(10)) {
+                    throw new GeneralException.create("Problem: Something unexpected in file input.")
+                }
+            }
+            break
+        }
+    }
+    if ((UNRESOLVED.copy(result, 1, 1) === "\"") && (UNRESOLVED.copy(result, len(result), 1) === "\"")) {
+        // remove quotes placed by spreadsheet around string if it has a comma in it 
+        //if (result[1] = '"') and (result[length(result)] = '"') then 
+        result = UNRESOLVED.copy(result, 2, len(result) - 2)
+    }
+    return result
+}
+
+function readShortStringToTab(fileRef: TextFile): string {
+    let result = ""
+    let temp: string
+    
+    temp = readUntilTab(fileRef)
+    result = UNRESOLVED.copy(temp, 1, 80)
+    return result
+}
+
+function readSmallintToTab(fileRef: TextFile): short {
+    let result = 0
+    let ignore: string
+    
+    result = 0
+    UNRESOLVED.read(fileRef, result)
+    ignore = readUntilTab(fileRef)
+    return result
+}
+
+function readSingleToTab(fileRef: TextFile): float {
+    let result = 0.0
+    let temp: string
+    
+    result = 0.0
+    temp = readUntilTab(fileRef)
+    // boundForString returns false if unsuccessful, but not doing anything with result yet 
+    result = boundForString(temp, uparams.kFieldFloat, result)
+    return result
+}
+
+function readBooleanToTab(fileRef: TextFile): boolean {
+    let result = false
+    let booleanString: string
+    
+    booleanString = readUntilTab(fileRef)
+    if ((uppercase(booleanString) === "TRUE")) {
+        result = true
+    } else if ((uppercase(booleanString) === "FALSE")) {
+        result = false
+    } else {
+        throw new GeneralException.create("Problem: Improper file format for boolean; found: " + booleanString)
+    }
+    return result
+}
+
+function boundForString(boundString: string, fieldType: int, number: FIX_MISSING_ARG_TYPE): boolean {
+    raise "method boundForString with preexisting function result had var parameters added to return -- fixup manually"
+    let result = false
+    let piTimesTwo: float
+    
+    //returns whether conversion was successful
+    result = true
+    if ((boundString === "MIN") || (boundString === "FLT_MIN")) {
+        if (fieldType === uparams.kFieldFloat) {
+            number = kMinSingle
+        } else {
+            number = -32768
+        }
+    } else if ((boundString === "MAX") || (boundString === "FLT_MAX")) {
+        if (fieldType === uparams.kFieldFloat) {
+            number = kMaxSingle
+        } else {
+            number = 32767
+        }
+    } else if ((boundString === "PI*2") && (fieldType === uparams.kFieldFloat)) {
+        piTimesTwo = UNRESOLVED.pi * 2.0
+        number = piTimesTwo
+    } else if ((boundString === "")) {
+        if (fieldType === uparams.kFieldFloat) {
+            number = 0.0
+        } else {
+            number = 0
+        }
+    } else {
+        try {
+            if (fieldType === uparams.kFieldFloat) {
+                number = StrToFloat(boundString)
+            } else {
+                number = StrToInt(boundString)
+            }
+        } catch (EConvertError e) {
+            result = false
+            if (fieldType === uparams.kFieldFloat) {
+                number = 0.0
+            } else {
+                number = 0
+            }
+        }
+    }
+    return result, number
+}
+
+function trimLeftAndRight(theString: string): string {
+    let result = ""
+    result = trim(theString)
+    return result
+}
+
+function stringUpTo(aString: string, aDelimiter: string): string {
+    let result = ""
+    let delimiterPos: short
+    
+    if (len(aString) === 0) {
+        result = ""
+        return result
+    }
+    delimiterPos = UNRESOLVED.pos(aDelimiter, aString)
+    if (delimiterPos === 0) {
+        result = aString
+    } else if (delimiterPos === 1) {
+        result = ""
+    } else {
+        result = UNRESOLVED.copy(aString, 1, delimiterPos - 1)
+    }
+    return result
+}
+
+function stringBeyond(aString: string, aDelimiter: string): string {
+    let result = ""
+    let delimiterPos: short
+    
+    if (len(aString) === 0) {
+        result = ""
+        return result
+    }
+    delimiterPos = UNRESOLVED.pos(aDelimiter, aString)
+    if (delimiterPos === 0) {
+        result = aString
+    } else if (delimiterPos === len(aString)) {
+        result = ""
+    } else {
+        result = UNRESOLVED.copy(aString, delimiterPos + 1, len(aString) - delimiterPos)
+    }
+    return result
+}
+
+function stringBetween(startString: string, endString: string, wholeString: string): string {
+    let result = ""
+    result = stringUpTo(stringBeyond(trim(wholeString), startString), endString)
+    return result
+}
+
+// didn't use, don't know if works
+//function listOfStringsBetweenDelimiters(aString, aDelimiter: string): TStrings;
+//  var token: string;
+//  begin
+//  result := TStrings.create; // caller must free this
+//  while length(aString) > 0 do
+//    begin
+//    token := stringUpTo(aString, aDelimiter);
+//    aString := stringBeyond(aString, aDelimiter);
+//    result.add(token);
+//    end;
+//  end;
+//     
+function boolToStr(value: boolean): string {
+    let result = ""
+    if (value) {
+        result = "true"
+    } else {
+        result = "false"
+    }
+    return result
+}
+
+function strToBool(booleanString: string): boolean {
+    let result = false
+    result = false
+    if (booleanString === "") {
+        return result
+    }
+    if ((uppercase(booleanString) === "TRUE")) {
+        result = true
+    } else if ((uppercase(booleanString) === "FALSE")) {
+        result = false
+    }
+    return result
+}
+
+function messageForExceptionType(e: Exception, methodName: string): void {
+    let errorString: string
+    
+    if (e === null) {
+        return
+    }
+    if ((e instanceof UNRESOLVED.EZeroDivide)) {
+        errorString = "Problem: Floating-point divide by zero error in method " + methodName + "."
+    } else if ((e instanceof UNRESOLVED.EDivByZero)) {
+        errorString = "Problem: Integer divide by zero in method " + methodName + "."
+    } else if ((e instanceof UNRESOLVED.EInvalidOp)) {
+        errorString = "Problem: Invalid floating-point operation in method " + methodName + "."
+    } else if ((e instanceof UNRESOLVED.EOverFlow)) {
+        errorString = "Problem: Floating-point overflow in method " + methodName + "."
+    } else if ((e instanceof UNRESOLVED.EUnderFlow)) {
+        errorString = "Problem: Floating-point underflow in method " + methodName + "."
+    } else {
+        errorString = "Problem in method " + methodName + "."
+    }
+    errorString = errorString + chr(13) + chr(13) + e.message
+    umath.ErrorMessage(errorString)
+}
+
+// float to text conversion 
+// ---------------------------------------------------------------------------- float to text conversion 
+function removeTrailingZeros(theString: string): string {
+    let result = ""
+    while ((len(theString) > 1) && (theString[len(theString)] === "0") && (theString[len(theString) - 1] !== ".")) {
+        //dec(theString[0]);  
+        UNRESOLVED.setLength(theString, len(theString) - 1)
+    }
+    result = theString
+    return result
+}
+
+function shortenLongNonZeroDigitsAfterDecimal(theString: string, maxDigits: int): string {
+    let result = ""
+    let pointPos: long
+    let firstNonZeroDigit: long
+    let digitsToGetRidOf: long
+    
+    result = theString
+    pointPos = UNRESOLVED.pos(".", result)
+    if (pointPos !== 0) {
+        firstNonZeroDigit = pointPos + 1
+        while ((firstNonZeroDigit <= len(theString)) && (theString[firstNonZeroDigit] === "0")) {
+            firstNonZeroDigit += 1
+        }
+        if (firstNonZeroDigit < len(theString)) {
+            digitsToGetRidOf = len(theString) - firstNonZeroDigit + 1 - maxDigits
+            if (digitsToGetRidOf > 0) {
+                result = UNRESOLVED.copy(result, 1, len(theString) - digitsToGetRidOf)
+            }
+        }
+    }
+    return result
+}
+
+function digitValueString(value: float): string {
+    let result = ""
+    result = removeTrailingZeros(shortenLongNonZeroDigitsAfterDecimal(FloatToStrF(value, UNRESOLVED.ffFixed, 7, 8), 2))
+    return result
+}
+
+function valueString(value: float): string {
+    let result = ""
+    result = removeTrailingZeros(shortenLongNonZeroDigitsAfterDecimal(FloatToStrF(value, UNRESOLVED.ffFixed, 7, 8), 4))
+    return result
+}
+
+// graphics 
+// ---------------------------------------------------------------------------- graphics 
+function clientRectToScreenRect(handle: HWnd, clientRect: TRect): TRect {
+    let result = new TRect()
+    let p1: TPoint
+    let p2: TPoint
+    
+    p1 = point(clientRect.Left, clientRect.Top)
+    UNRESOLVED.clientToScreen(handle, p1)
+    p2 = point(clientRect.Right, clientRect.Bottom)
+    UNRESOLVED.clientToScreen(handle, p2)
+    result = Rect(p1.X, p1.Y, p2.X, p2.Y)
+    return result
+}
+
+function support_rgb(R: byte, G: byte, B: byte): long {
+    let result = 0
+    //var screenDC: HDC;
+    //result := RGB(r, g, b);  
+    //try
+    //  screenDC := GetDC(0);
+    //  result := GetNearestColor(screenDC, PALETTERGB(r, g, b));
+    //finally
+    //   releaseDC(0, screenDC);
+    //end;
+    result = UNRESOLVED.PALETTERGB(R, G, B)
+    return result
+}
+
+function combineRects(rect1: TRect, rect2: TRect): TRect {
+    let result = new TRect()
+    result.Left = umath.intMin(rect1.Left, rect2.Left)
+    result.Right = umath.intMax(rect1.Right, rect2.Right)
+    result.Top = umath.intMin(rect1.Top, rect2.Top)
+    result.Bottom = umath.intMax(rect1.Bottom, rect2.Bottom)
+    return result
+}
+
+function addRectToBoundsRect(boundsRect: TRect, newRect: TRect): void {
+    if ((boundsRect.Left === 0) && (boundsRect.Right === 0) && (boundsRect.Top === 0) && (boundsRect.Bottom === 0)) {
+        // on first rect entered, initialize bounds rect
+        boundsRect.Left = newRect.Left
+        boundsRect.Right = newRect.Right
+        boundsRect.Top = newRect.Top
+        boundsRect.Bottom = newRect.Bottom
+    } else {
+        if (newRect.Left < boundsRect.Left) {
+            // deal with possibility of rectangle being flipped, so left > right or top > bottom
+            // expand rectangle to include left side x
+            boundsRect.Left = newRect.Left
+        } else if (newRect.Left > boundsRect.Right) {
+            boundsRect.Right = newRect.Left
+        }
+        if (newRect.Right < boundsRect.Left) {
+            // expand rectangle to include right side x
+            boundsRect.Left = newRect.Right
+        } else if (newRect.Right > boundsRect.Right) {
+            boundsRect.Right = newRect.Right
+        }
+        if (newRect.Top < boundsRect.Top) {
+            // expand rectangle to include top y
+            boundsRect.Top = newRect.Top
+        } else if (newRect.Top > boundsRect.Bottom) {
+            boundsRect.Bottom = newRect.Top
+        }
+        if (newRect.Bottom < boundsRect.Top) {
+            // expand rectangle to include bottom y
+            boundsRect.Top = newRect.Bottom
+        } else if (newRect.Bottom > boundsRect.Bottom) {
+            boundsRect.Bottom = newRect.Bottom
+        }
+    }
+}
+
+function rWidth(rect: TRect): int {
+    let result = 0
+    result = Rect.right - Rect.left
+    return result
+}
+
+function rHeight(rect: TRect): int {
+    let result = 0
+    result = Rect.bottom - Rect.top
+    return result
+}
+
+function zeroRect(rect: TRect): boolean {
+    let result = false
+    //FIX unresolved WITH expression: Rect
+    result = (UNRESOLVED.left === 0) && (UNRESOLVED.top === 0) && (UNRESOLVED.right === 0) && (UNRESOLVED.bottom === 0)
+    return result
+}
+
+function rectsAreIdentical(oneRect: TRect, twoRect: TRect): boolean {
+    let result = false
+    result = (oneRect.Top === twoRect.Top) && (oneRect.Bottom === twoRect.Bottom) && (oneRect.Left === twoRect.Left) && (oneRect.Right === twoRect.Right)
+    return result
+}
+
+function rectToString(aRect: TRect): string {
+    let result = ""
+    result = IntToStr(aRect.Left) + " " + IntToStr(aRect.Top) + " " + IntToStr(aRect.Right) + " " + IntToStr(aRect.Bottom)
+    return result
+}
+
+function stringToRect(aString: string): TRect {
+    let result = new TRect()
+    let stream: KfStringStream
+    
+    result = Rect(0, 0, 0, 0)
+    stream = usstream.KfStringStream.create
+    try {
+        stream.onStringSeparator(aString, " ")
+        result.Left = StrToIntDef(stream.nextToken(), 0)
+        result.Top = StrToIntDef(stream.nextToken(), 0)
+        result.Right = StrToIntDef(stream.nextToken(), 0)
+        result.Bottom = StrToIntDef(stream.nextToken(), 0)
+    } finally {
+        stream.free
+    }
+    return result
+}
+
+function pointToString(aPoint: TPoint): string {
+    let result = ""
+    result = IntToStr(aPoint.X) + "  " + IntToStr(aPoint.Y)
+    return result
+}
+
+function stringToPoint(aString: string): TPoint {
+    let result = new TPoint()
+    let stream: KfStringStream
+    
+    result = point(0, 0)
+    stream = usstream.KfStringStream.create
+    try {
+        stream.onStringSeparator(aString, " ")
+        result.X = StrToIntDef(stream.nextToken(), 0)
+        result.Y = StrToIntDef(stream.nextToken(), 0)
+    } finally {
+        stream.free
+    }
+    return result
+}
+
+function setSinglePoint(x: float, y: float): SinglePoint {
+    let result = new SinglePoint()
+    result.x = x
+    result.y = y
+    return result
+}
+
+function singlePointToString(aPoint: SinglePoint): string {
+    let result = ""
+    result = digitValueString(aPoint.x) + "  " + digitValueString(aPoint.y)
+    return result
+}
+
+function stringToSinglePoint(aString: string): SinglePoint {
+    let result = new SinglePoint()
+    let stream: KfStringStream
+    let token: string
+    
+    result = setSinglePoint(0, 0)
+    stream = usstream.KfStringStream.create
+    try {
+        stream.onStringSeparator(aString, " ")
+        token = stream.nextToken()
+        if (UNRESOLVED.pos(".", token) === 0) {
+            // if it was written as an integer, deal with that
+            result.x = StrToIntDef(token, 0)
+        } else {
+            try {
+                result.x = StrToFloat(token)
+            } catch (e) {
+                result.x = 0.0
+            }
+        }
+        token = stream.nextToken()
+        if (UNRESOLVED.pos(".", token) === 0) {
+            result.y = StrToIntDef(token, 0)
+        } else {
+            try {
+                result.y = StrToFloat(token)
+            } catch (e) {
+                result.y = 0.0
+            }
+        }
+    } finally {
+        stream.free
+    }
+    return result
+}
+
+function colorToRGBString(color: TColorRef): string {
+    let result = ""
+    result = IntToStr(UNRESOLVED.getRValue(color)) + " " + IntToStr(UNRESOLVED.getGValue(color)) + " " + IntToStr(UNRESOLVED.getBValue(color))
+    return result
+}
+
+function rgbStringToColor(aString: string): TColorRef {
+    let result = new TColorRef()
+    let stream: KfStringStream
+    let r: byte
+    let g: byte
+    let b: byte
+    
+    // format is r g b 
+    result = 0
+    r = 0
+    g = 0
+    b = 0
+    stream = usstream.KfStringStream.create
+    try {
+        stream.onStringSeparator(aString, " ")
+        r = StrToIntDef(stream.nextToken(), 0)
+        g = StrToIntDef(stream.nextToken(), 0)
+        b = StrToIntDef(stream.nextToken(), 0)
+        result = UNRESOLVED.rgb(r, g, b)
+    } finally {
+        stream.free
+    }
+    return result
+}
+
+// ---------------------------------------------------------------------------------- color functions 
+function blendColors(firstColor: TColorRef, secondColor: TColorRef, aStrength: float): TColorRef {
+    let result = new TColorRef()
+    let r1: byte
+    let g1: byte
+    let b1: byte
+    let r2: byte
+    let g2: byte
+    let b2: byte
+    
+    //blend first color with second color,
+    //   weighting the second color by aStrength (0-1) and first color by (1 - aStrength).
+    aStrength = umath.max(0.0, umath.min(1.0, aStrength))
+    r1 = umath.intMax(0, umath.intMin(255, UNRESOLVED.GetRValue(firstColor)))
+    g1 = umath.intMax(0, umath.intMin(255, UNRESOLVED.GetGValue(firstColor)))
+    b1 = umath.intMax(0, umath.intMin(255, UNRESOLVED.GetBValue(firstColor)))
+    r2 = umath.intMax(0, umath.intMin(255, UNRESOLVED.GetRValue(secondColor)))
+    g2 = umath.intMax(0, umath.intMin(255, UNRESOLVED.GetGValue(secondColor)))
+    b2 = umath.intMax(0, umath.intMin(255, UNRESOLVED.GetBValue(secondColor)))
+    result = support_rgb(intround(r1 * (1.0 - aStrength) + r2 * aStrength), intround(g1 * (1.0 - aStrength) + g2 * aStrength), intround(b1 * (1.0 - aStrength) + b2 * aStrength))
+    return result
+}
+
+function darkerColor(aColor: TColorRef): TColorRef {
+    let result = new TColorRef()
+    let r: byte
+    let g: byte
+    let b: byte
+    
+    r = umath.intMax(0, UNRESOLVED.GetRValue(aColor) - 10)
+    g = umath.intMax(0, UNRESOLVED.GetGValue(aColor) - 10)
+    b = umath.intMax(0, UNRESOLVED.GetBValue(aColor) - 10)
+    result = support_rgb(r, g, b)
+    //result := support_rgb(GetRValue(aColor) div 2, GetGValue(aColor) div 2, GetBValue(aColor) div 2); 
+    return result
+}
+
+function darkerColorWithSubtraction(aColor: TColorRef, subtract: short): TColorRef {
+    let result = new TColorRef()
+    let r: byte
+    let g: byte
+    let b: byte
+    
+    r = umath.intMax(0, UNRESOLVED.GetRValue(aColor) - subtract)
+    g = umath.intMax(0, UNRESOLVED.GetGValue(aColor) - subtract)
+    b = umath.intMax(0, UNRESOLVED.GetBValue(aColor) - subtract)
+    result = support_rgb(r, g, b)
+    //result := support_rgb(GetRValue(aColor) div 2, GetGValue(aColor) div 2, GetBValue(aColor) div 2); 
+    return result
+}
+
+function lighterColor(aColor: TColorRef): TColorRef {
+    let result = new TColorRef()
+    let r: byte
+    let g: byte
+    let b: byte
+    
+    r = umath.intMin(255, intround(UNRESOLVED.GetRValue(aColor) * 1.5))
+    g = umath.intMin(255, intround(UNRESOLVED.GetGValue(aColor) * 1.5))
+    b = umath.intMin(255, intround(UNRESOLVED.GetBValue(aColor) * 1.5))
+    result = support_rgb(r, g, b)
+    //result := support_rgb(GetRValue(aColor) div 2, GetGValue(aColor) div 2, GetBValue(aColor) div 2); 
+    return result
+}
+
+function drawButton(aCanvas: TCanvas, aRect: TRect, selected: boolean, enabled: boolean): void {
+    let internalRect: TRect
+    
+    aCanvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsSolid
+    if (enabled) {
+        aCanvas.Pen.Color = delphi_compatability.clBlack
+        aCanvas.Brush.Color = delphi_compatability.clWhite
+    } else {
+        aCanvas.Brush.Color = UNRESOLVED.clBtnShadow
+        aCanvas.Pen.Color = UNRESOLVED.clBtnShadow
+    }
+    aCanvas.Rectangle(aRect.Left, aRect.Top, aRect.Right, aRect.Bottom)
+    if (selected) {
+        internalRect = aRect
+        UNRESOLVED.inflateRect(internalRect, -1, -1)
+        aCanvas.Brush.Color = delphi_compatability.clAqua
+        aCanvas.FillRect(internalRect)
+    }
+}
+
+function draw3DButton(ACanvas: TCanvas, Client: TRect, Selected: boolean, Pressed: boolean): TRect {
+    let result = new TRect()
+    ACanvas.Brush.Color = delphi_compatability.clWindowFrame
+    if (Selected) {
+        ACanvas.FrameRect(Client)
+        UNRESOLVED.InflateRect(Client, -1, -1)
+    }
+    if (!Pressed) {
+        ACanvas.Frame3d(ACanvas, Client, UNRESOLVED.clBtnHighlight, UNRESOLVED.clBtnShadow, 2)
+    } else {
+        ACanvas.Pen.Color = UNRESOLVED.clBtnShadow
+        ACanvas.Polyline({Point(Client.Left, Client.Bottom - 1), Point(Client.Left, Client.Top), Point(Client.Right, Client.Top), })
+        Client = Rect(Client.Left + 3, Client.Top + 3, Client.Right - 1, Client.Bottom - 1)
+    }
+    ACanvas.Brush.Color = UNRESOLVED.clBtnFace
+    ACanvas.FillRect(Client)
+    result = Client
+    return result
+}
+
+// combo and list box utilities 
+// ---------------------------------------------------------------------------- combo and list box utilities 
+function currentObjectInComboBox(comboBox: TComboBox): TObject {
+    let result = new TObject()
+    if (comboBox.Items.Count === 0) {
+        result = null
+    } else if (comboBox.ItemIndex !== -1) {
+        result = comboBox.Items.Objects[comboBox.ItemIndex]
+    } else {
+        result = null
+    }
+    return result
+}
+
+function currentObjectInListBox(listBox: TListBox): TObject {
+    let result = new TObject()
+    if (listBox.Items.Count === 0) {
+        result = null
+    } else if (listBox.ItemIndex !== -1) {
+        result = listBox.Items.Objects[listBox.ItemIndex]
+    } else {
+        result = null
+    }
+    return result
+}
+
+// file i/o 
+// ---------------------------------------------------------------------------- file i/o 
+function makeFileNameFrom(aString: string): string {
+    let result = ""
+    let done: boolean
+    let spacePos: short
+    
+    result = aString
+    done = false
+    while (!done) {
+        spacePos = UNRESOLVED.pos(" ", result)
+        done = (spacePos <= 0)
+        if (!done) {
+            UNRESOLVED.delete(result, spacePos, 1)
+        }
+    }
+    return result
+}
+
+function nameStringForFileType(fileType: short): string {
+    let result = ""
+    switch (fileType) {
+        case kFileTypeAny:
+            result = ""
+            break
+        case kFileTypePlant:
+            result = "Plant"
+            break
+        case kFileTypeTabbedText:
+            result = "Tabbed text"
+            break
+        case kFileTypeStrategy:
+            result = "Strategy"
+            break
+        case kFileTypeIni:
+            result = "Ini"
+            break
+        case kFileTypeExceptionList:
+            result = "Exception list"
+            break
+        case kFileTypeBitmap:
+            result = "Bitmap"
+            break
+        case kFileTypeTdo:
+            result = "3D object"
+            break
+        case kFileTypeDXF:
+            result = "DXF"
+            break
+        case kFileTypeINC:
+            result = "POV Include file"
+            break
+        case kFileType3DS:
+            result = "3DS"
+            break
+        case kFileTypeProgramInfo:
+            result = "Program Info"
+            break
+        case kFileTypeJPEG:
+            result = "JPEG"
+            break
+        case kFileTypeOBJ:
+            result = "OBJ"
+            break
+        case kFileTypeMTL:
+            result = "MTL"
+            break
+        case kFileTypeVRML:
+            result = "VRML"
+            break
+        case kFileTypeLWO:
+            result = "LWO"
+            break
+    }
+    return result
+}
+
+function extensionForFileType(fileType: short): string {
+    let result = ""
+    result = ""
+    switch (fileType) {
+        case kFileTypeAny:
+            result = "*"
+            break
+        case kFileTypePlant:
+            result = "pla"
+            break
+        case kFileTypeTabbedText:
+            result = "tab"
+            break
+        case kFileTypeStrategy:
+            result = "str"
+            break
+        case kFileTypeIni:
+            result = "ini"
+            break
+        case kFileTypeExceptionList:
+            result = "nex"
+            break
+        case kFileTypeBitmap:
+            result = "bmp"
+            break
+        case kFileTypeTdo:
+            result = "tdo"
+            break
+        case kFileTypeDXF:
+            result = "dxf"
+            break
+        case kFileTypeINC:
+            result = "inc"
+            break
+        case kFileType3DS:
+            result = "3ds"
+            break
+        case kFileTypeProgramInfo:
+            result = "txt"
+            break
+        case kFileTypeJPEG:
+            result = "jpg"
+            break
+        case kFileTypeOBJ:
+            result = "obj"
+            break
+        case kFileTypeMTL:
+            result = "mtl"
+            break
+        case kFileTypeVRML:
+            result = "wrl"
+            break
+        case kFileTypeLWO:
+            result = "lwo"
+            break
+    }
+    return result
+}
+
+function filterStringForFileType(fileType: short, includeAllFiles: boolean): string {
+    let result = ""
+    let extension: string
+    
+    extension = extensionForFileType(fileType)
+    if (fileType === kFileTypeAny) {
+        result = "All files (*.*)|*.*"
+    } else if (includeAllFiles) {
+        result = nameStringForFileType(fileType) + " files (*." + extension + ")|*." + extension + "|All files (*.*)|*.*"
+    } else {
+        result = nameStringForFileType(fileType) + " files (*." + extension + ")|*." + extension
+    }
+    return result
+}
+
+function getFileOpenInfo(fileType: short, suggestedFile: string, aTitle: string): string {
+    let result = ""
+    let fullSuggestedFileName: string
+    let openDialog: TOpenDialog
+    let nameString: string
+    
+    result = ""
+    openDialog = delphi_compatability.TOpenDialog().Create(delphi_compatability.Application)
+    try {
+        if (suggestedFile === "") {
+            openDialog.FileName = "*." + extensionForFileType(fileType)
+        } else {
+            fullSuggestedFileName = ExpandFileName(suggestedFile)
+            // if directory does not exist, will leave as it was 
+            openDialog.InitialDir = ExtractFilePath(fullSuggestedFileName)
+            if (FileExists(fullSuggestedFileName)) {
+                openDialog.FileName = ExtractFileName(fullSuggestedFileName)
+            }
+        }
+        nameString = nameStringForFileType(fileType)
+        if (len(aTitle) > 0) {
+            openDialog.Title = aTitle
+        } else if (nameString[1] in {"A", "E", "I", "O", "U", }) {
+            openDialog.Title = "Choose an " + nameString + " file"
+        } else {
+            openDialog.Title = "Choose a " + nameString + " file"
+        }
+        openDialog.Filter = filterStringForFileType(fileType, kIncludeAllFiles)
+        openDialog.DefaultExt = extensionForFileType(fileType)
+        openDialog.Options = openDialog.Options + {delphi_compatability.TOpenOption.ofPathMustExist, delphi_compatability.TOpenOption.ofFileMustExist, delphi_compatability.TOpenOption.ofHideReadOnly, }
+        if (openDialog.Execute()) {
+            if ((delphi_compatability.TOpenOption.ofExtensionDifferent in openDialog.Options) && (fileType !== kFileTypeAny)) {
+                ShowMessage("The file (" + openDialog.FileName + ") does not have the correct extension (" + openDialog.DefaultExt + ").")
+                return result
+            } else {
+                result = openDialog.FileName
+            }
+        }
+    } finally {
+        openDialog.free
+    }
+    return result
+}
+
+function fileNameIsOkayForSaving(suggestedFile: string): boolean {
+    let result = false
+    let fullSuggestedFileName: string
+    
+    result = false
+    if (len(suggestedFile) === 0) {
+        return result
+    }
+    fullSuggestedFileName = ExpandFileName(suggestedFile)
+    if (!UNRESOLVED.directoryExists(ExtractFilePath(fullSuggestedFileName))) {
+        // check if directory exists 
+        ShowMessage("The directory " + ExtractFilePath(fullSuggestedFileName) + " does not exist.")
+        return result
+    }
+    if (FileExists(fullSuggestedFileName) && UNRESOLVED.FileGetAttr(fullSuggestedFileName) && UNRESOLVED.faReadOnly) {
+        // if file exists and is writable, it's ok because Save (not Save As) should not ask to rewrite 
+        // if file exists but is read-only, quit  
+        ShowMessage("The file " + fullSuggestedFileName + " exists and is read-only.")
+        return result
+    }
+    result = true
+    return result
+}
+
+function getFileSaveInfo(fileType: short, askForFileName: boolean, suggestedFile: string, fileInfo: SaveFileNamesStructure): boolean {
+    let result = false
+    let saveDialog: TSaveDialog
+    let tryBackupName: string
+    let tryTempName: string
+    let fullSuggestedFileName: string
+    let prompt: string
+    let extension: string
+    let index: short
+    let tempFileHandle: long
+    let userAbortedSave: boolean
+    
+    fileInfo.fileType = fileType
+    result = false
+    userAbortedSave = false
+    // default info 
+    fileInfo.tempFile = ""
+    fileInfo.newFile = ""
+    fileInfo.backupFile = ""
+    fileInfo.writingWasSuccessful = false
+    if (!askForFileName) {
+        // if this is a Save, try to set the file name from the suggestedFile given; if file name
+        //    is invalid, set flag to move into Save As instead 
+        askForFileName = !fileNameIsOkayForSaving(suggestedFile)
+        if (!askForFileName) {
+            fileInfo.newFile = ExpandFileName(suggestedFile)
+        }
+    }
+    if (askForFileName) {
+        // if this is a Save As, or if this is a Save and the file in suggestedFile is invalid,
+        //    ask user for a file name 
+        saveDialog = delphi_compatability.TSaveDialog().Create(delphi_compatability.Application)
+        try {
+            if (len(suggestedFile) > 0) {
+                fullSuggestedFileName = ExpandFileName(suggestedFile)
+                // if directory does not exist, will leave as it was 
+                saveDialog.InitialDir = ExtractFilePath(fullSuggestedFileName)
+                if (UNRESOLVED.directoryExists(ExtractFilePath(fullSuggestedFileName))) {
+                    // don't check if file exists (because saving); check if dir exists 
+                    saveDialog.FileName = ExtractFileName(fullSuggestedFileName)
+                }
+            }
+            saveDialog.Filter = filterStringForFileType(fileType, kDontIncludeAllFiles)
+            saveDialog.DefaultExt = extensionForFileType(fileType)
+            saveDialog.Options = saveDialog.Options + {delphi_compatability.TOpenOption.ofPathMustExist, delphi_compatability.TOpenOption.ofOverwritePrompt, delphi_compatability.TOpenOption.ofHideReadOnly, delphi_compatability.TOpenOption.ofNoReadOnlyReturn, }
+            userAbortedSave = !saveDialog.Execute()
+            if (!userAbortedSave) {
+                fileInfo.newFile = saveDialog.FileName
+            }
+        } finally {
+            saveDialog.free
+            saveDialog = null
+        }
+    }
+    if (userAbortedSave) {
+        return result
+    }
+    try {
+        // set backup file name, check if read-only 
+        // changed backup file extension to put tilde first because it is better to have all backup files sort together 
+        // includes dot 
+        extension = ExtractFileExt(fileInfo.newFile)
+        extension = ".~" + UNRESOLVED.copy(extension, 2, 2)
+    } catch (e) {
+        extension = ".bak"
+    }
+    tryBackupName = ChangeFileExt(fileInfo.newFile, extension)
+    if (FileExists(tryBackupName)) {
+        if ((UNRESOLVED.fileGetAttr(tryBackupName) && UNRESOLVED.faReadOnly)) {
+            prompt = "The backup file " + tryBackupName + " is read-only. Continue?"
+            if (MessageDialog(prompt, mtConfirmation, {mbYes, mbNo, }, 0) !== mrYes) {
+                return result
+            }
+        }
+    } else {
+        fileInfo.backupFile = tryBackupName
+    }
+    for (index = 100; index <= 999; index++) {
+        // set temp file name 
+        tryTempName = ChangeFileExt(fileInfo.newFile, "." + IntToStr(index))
+        if (!FileExists(tryTempName)) {
+            fileInfo.tempFile = tryTempName
+            break
+        }
+    }
+    if (fileInfo.tempFile === "") {
+        // if can't find unused temp file, quit 
+        ShowMessage("Could not create temporary file " + tryTempName + ".")
+        return result
+    }
+    // test whether temp file can be created 
+    tempFileHandle = UNRESOLVED.fileCreate(fileInfo.tempFile)
+    if (tempFileHandle > 0) {
+        UNRESOLVED.fileClose(tempFileHandle)
+        if (!DeleteFile(fileInfo.tempFile)) {
+            ShowMessage("Problem with temporary file " + fileInfo.tempFile + ".")
+            return result
+        }
+    } else {
+        ShowMessage("Could not write to temporary file " + fileInfo.tempFile + ".")
+        return result
+    }
+    result = true
+    return result
+}
+
+function startFileSave(fileInfo: SaveFileNamesStructure): void {
+    ucursor.cursor_startWait()
+}
+
+function fileIsExportFile(fileType: short): boolean {
+    let result = false
+    result = false
+    switch (fileType) {
+        case kFileTypeBitmap:
+            result = true
+            break
+        case kFileTypeDXF:
+            result = true
+            break
+        case kFileTypeINC:
+            result = true
+            break
+        case kFileType3DS:
+            result = true
+            break
+        case kFileTypeJPEG:
+            result = true
+            break
+        case kFileTypeOBJ:
+            result = true
+            break
+        case kFileTypeVRML:
+            result = true
+            break
+        case kFileTypeLWO:
+            result = true
+            break
+    }
+    return result
+}
+
+function cleanUpAfterFileSave(fileInfo: SaveFileNamesStructure): void {
+    let useBackup: boolean
+    let renamingFailed: boolean
+    let deletingFailed: boolean
+    let prompt: string
+    
+    ucursor.cursor_stopWait()
+    uwait.stopWaitMessage()
+    useBackup = true
+    if (!fileInfo.writingWasSuccessful) {
+        //if couldn't write, then remove temp file and exit without warning
+        DeleteFile(fileInfo.tempFile)
+        return
+    }
+    if (fileInfo.backupFile !== "") {
+        if (FileExists(fileInfo.backupFile)) {
+            //remove backup file if exists from prior backup
+            //try to delete backup file
+            deletingFailed = !DeleteFile(fileInfo.backupFile)
+            if (deletingFailed) {
+                //couldn't delete backup file
+                prompt = "Could not write backup file " + fileInfo.backupFile + ". Continue?"
+                if (MessageDialog(prompt, mtConfirmation, {mbYes, mbNo, }, 0) !== mrYes) {
+                    //user doesn't want to proceed - so cleanup temp file
+                    DeleteFile(fileInfo.tempFile)
+                    return
+                } else {
+                    useBackup = false
+                }
+            }
+        }
+    } else {
+        useBackup = false
+    }
+    if (FileExists(fileInfo.newFile)) {
+        if (useBackup) {
+            //if original file exists make backup if requested...
+            //rename old copy of new file to make backup
+            renamingFailed = !RenameFile(fileInfo.newFile, fileInfo.backupFile)
+            if (renamingFailed) {
+                prompt = "Could not rename old file to backup file " + fileInfo.backupFile + ". Continue?"
+                if (MessageDialog(prompt, mtConfirmation, {mbYes, mbNo, }, 0) !== mrYes) {
+                    //user doesn't want to proceed - so cleanup temp file
+                    DeleteFile(fileInfo.tempFile)
+                    return
+                } else {
+                    useBackup = false
+                }
+            }
+        }
+        if (!useBackup) {
+            //could not create backup file - so just delete old file instead of renaming
+            deletingFailed = !DeleteFile(fileInfo.newFile)
+            if (deletingFailed) {
+                ShowMessage("Could not write file " + fileInfo.newFile)
+                return
+            }
+        }
+    }
+    //rename temp file to newFile name
+    renamingFailed = !RenameFile(fileInfo.tempFile, fileInfo.newFile)
+    if (renamingFailed) {
+        //clean up by removing temp file
+        ShowMessage("Could not write file " + fileInfo.newFile + " from " + fileInfo.tempFile)
+        DeleteFile(fileInfo.tempFile)
+        return
+    }
+    if ((!udomain.domain.registered) && (fileInfo.writingWasSuccessful) && (fileIsExportFile(fileInfo.fileType))) {
+        umain.MainForm.incrementUnregisteredExportCount()
+    }
+}
+
+// v1.5
+// v1.5
+function setDecimalSeparator(): void {
+    // called before opening any file for reading or writing
+    // to prevent problem with european comma separation
+    UNRESOLVED.DecimalSeparator = "."
+}
+
+
