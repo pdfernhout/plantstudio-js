@@ -44,10 +44,14 @@ const kBreederVariationMedium = 1
 const kBreederVariationHigh = 2
 const kBreederVariationCustom = 3
 const kBreederVariationNoNumeric = 4
-const kNoMutation = 0
-const kLowMutation = 20
-const kMediumMutation = 60
-const kHighMutation = 100
+
+export enum MutationRate {
+    kNoMutation = 0,
+    kLowMutation = 20,
+    kMediumMutation = 60,
+    kHighMutation = 100,
+}
+
 const kMaxColorOption = 7
 const kMinResolution = 10
 const kMaxResolution = 10000
@@ -723,7 +727,7 @@ export class PdDomain {
                 this.exportOptionsFor3D[i].dxf_whereToGetColors = StrToInt(this.stringForSectionAndKey(section, "DXF colors option (by type/by part/all)", "0"))
                 // lime
                 this.exportOptionsFor3D[i].dxf_wholePlantColorIndex = StrToInt(this.stringForSectionAndKey(section, "DXF whole plant color index", "2"))
-                for (j = 0; j <= u3dexport.kExportPartLast; j++) {
+                for (j = 0; j <= ExportPart.kExportPartLast; j++) {
                     // lime
                     this.exportOptionsFor3D[i].dxf_plantPartColorIndexes[j] = StrToInt(this.stringForSectionAndKey(section, "DXF color indexes " + IntToStr(j + 1), "2"))
                 }
@@ -1041,7 +1045,7 @@ export class PdDomain {
                     // special options
                     this.setStringForSectionAndKey(section, "DXF colors option (by type/by part/all)", IntToStr(this.exportOptionsFor3D[i].dxf_whereToGetColors))
                     this.setStringForSectionAndKey(section, "DXF whole plant color index", IntToStr(this.exportOptionsFor3D[i].dxf_wholePlantColorIndex))
-                    for (j = 0; j <= u3dexport.kExportPartLast; j++) {
+                    for (j = 0; j <= ExportPart.kExportPartLast; j++) {
                         this.setStringForSectionAndKey(section, "DXF color indexes " + IntToStr(j + 1), IntToStr(this.exportOptionsFor3D[i].dxf_plantPartColorIndexes[j]))
                     }
                 } else if (i === u3dexport.kPOV) {
@@ -1213,7 +1217,7 @@ export class PdDomain {
             this.exportOptionsFor3D[i].directionToPressPlants = umath.intMax(u3dexport.kX, umath.intMin(u3dexport.kZ, this.exportOptionsFor3D[i].directionToPressPlants))
             this.exportOptionsFor3D[i].dxf_whereToGetColors = umath.intMax(u3dexport.kColorDXFFromPlantPartType, umath.intMin(u3dexport.kColorDXFFromOneColor, this.exportOptionsFor3D[i].dxf_whereToGetColors))
             this.exportOptionsFor3D[i].dxf_wholePlantColorIndex = umath.intMax(0, umath.intMin(u3dexport.kLastDxfColorIndex, this.exportOptionsFor3D[i].dxf_wholePlantColorIndex))
-            for (j = 0; j <= u3dexport.kExportPartLast; j++) {
+            for (j = 0; j <= ExportPart.kExportPartLast; j++) {
                 this.exportOptionsFor3D[i].dxf_plantPartColorIndexes[j] = umath.intMax(0, umath.intMin(u3dexport.kLastDxfColorIndex, this.exportOptionsFor3D[i].dxf_plantPartColorIndexes[j]))
             }
             this.exportOptionsFor3D[i].pov_minLineLengthToWrite = umath.max(0.0, umath.min(100.0, this.exportOptionsFor3D[i].pov_minLineLengthToWrite))

@@ -1,16 +1,16 @@
 // PdPlant was unit Uplant
 
-import { PdStreamableObject, ExportFormats, messageForExceptionType, boundForString, DebugPrint, SinglePoint, ucursor, MainForm, PdBitmap, kExportPartLast, PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof, PdInternode, TListCollection_streamUsingFiler } from "./temporary";
-import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor, ColorDefs, StrToIntDef, IntToStr, compareTextIgnoreCase } from "./common";
+import { PdStreamableObject, ExportFormats, messageForExceptionType, boundForString, DebugPrint, SinglePoint, ucursor, MainForm, PdBitmap, PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof, PdInternode, TListCollection_streamUsingFiler, PdPlantPart, ExportPart } from "./temporary";
+import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor, ColorDefs, StrToIntDef, IntToStr, compareTextIgnoreCase, arrayRemove } from "./common";
 import { KfObject3D } from "./KfObject3D";
 import { TPoint } from "./TPoint";
 import { TRect } from "./TRect";
 import { KfTurtle } from "./KfTurtle";
-import { SCurveStructure, intMin, intMax, safedivExcept, min, stringToSCurve, calcSCurveCoeffs, max } from "./umath";
+import { SCurveStructure, intMin, intMax, safedivExcept, min, stringToSCurve, calcSCurveCoeffs, max, scurve } from "./umath";
 import { KfPoint3D } from "./KfPoint3D";
 import { PdRandom } from "./PdRandom";
-import { domain, DrawMode } from "./PdDomain";
-import { PdTraverser, Activity, TraverserGlobals } from "./PdTraverser";
+import { domain, DrawMode, MutationRate } from "./PdDomain";
+import { PdTraverser, Activity, TraverserGlobals, PdPlantStatistics, Statistics } from "./PdTraverser";
 import { ClassId } from "./uclasses";
 import { PdParameter, FieldType, IndexType } from "./PdParameter";
 import { PdSection } from "./PdSection";
@@ -386,6 +386,7 @@ export class PdPlant extends PdStreamableObject {
     readingMemoLine: long = 0
     useBestDrawingForPreview: boolean = false
     turtle: KfTurtle | null = null
+    // TODO: Should firstPhytomer be more generic PdPlantPart?
     firstPhytomer: PdInternode | null = null
     totalBiomass_pctMPB: float = 0.0
     reproBiomass_pctMPB: float = 0.0
@@ -587,7 +588,7 @@ export class PdPlant extends PdStreamableObject {
             }
             // this is only important for LWO and OBJ, but people will like to see it anyway
             this.total3DExportMaterials = 0
-            for (let i = 0; i <= kExportPartLast; i++) {
+            for (let i = 0; i <= ExportPart.kExportPartLast; i++) {
                 if (traverser.exportTypeCounts[i] > 0) {
                     this.total3DExportMaterials += 1
                 }
@@ -1370,7 +1371,7 @@ export class PdPlant extends PdStreamableObject {
         this.turtle.writingTo = outputType
         fileExportSurface.startPlant(this.name, indexOfPlant)
         if (outputType === ExportFormats.k3DS) {
-            for (let i = 0; i <= kExportPartLast; i++) {
+            for (let i = 0; i <= ExportPart.kExportPartLast; i++) {
                 // for 3DS need to write out all colors in front especially; must be done before reminder
                 (fileExportSurface).writeMaterialDescription(i, this.colorForDXFPartType(i))
             }
@@ -1611,7 +1612,7 @@ export class PdPlant extends PdStreamableObject {
                             if (param.indexType === IndexType.kIndexTypeSCurve) {
                                 // this is the only array
                                 this.transferWholeSCurve(kGetField, tempSCurve, param.fieldNumber, param.fieldType, false, null)
-                                this.writeLine(plantFile, param.name + start + param.fieldID + stop + umath.sCurveToString(tempSCurve))
+                                this.writeLine(plantFile, param.name + start + param.fieldID + stop + sCurveToString(tempSCurve))
                             } else {
                                 tempFloat = this.transferField(kGetField, tempFloat, param.fieldNumber, param.fieldType, 0, false, null)
                                 this.writeLine(plantFile, param.name + start + param.fieldID + stop + usupport.digitValueString(tempFloat))
@@ -1780,7 +1781,7 @@ export class PdPlant extends PdStreamableObject {
                 if (param.indexType === IndexType.kIndexTypeSCurve) {
                     // this is the only array
                     this.changingWholeSCurves = true
-                    tempSCurve = umath.stringToSCurve(paramValue)
+                    tempSCurve = stringToSCurve(paramValue)
                     if ((tempSCurve.x1 <= 0.0) || (tempSCurve.y1 <= 0.0) || (tempSCurve.x2 <= 0.0) || (tempSCurve.y2 <= 0.0) || (tempSCurve.x1 >= 1.0) || (tempSCurve.y1 >= 1.0) || (tempSCurve.x2 >= 1.0) || (tempSCurve.y2 >= 1.0)) {
                         // bound s curve
                         // all s curve values (x and y) must be between 0 and 1 EXCLUSIVE
@@ -1902,7 +1903,7 @@ export class PdPlant extends PdStreamableObject {
         return v
     }
     
-    directTransferField(d: int, v: FIX_MISSING_ARG_TYPE, fieldID: short, ft: short, index: short, updateList: TListCollection): void {
+    directTransferField(d: int, v: FIX_MISSING_ARG_TYPE, fieldID: short, ft: short, index: short, updateList: PdPlantUpdateEvent[]): void {
         if (fieldID <= 200) {
             // switch-over point is hard-coded and must be identical to that set in PlantStudio Utility program
             // that generates utransfr.pas
@@ -1916,16 +1917,14 @@ export class PdPlant extends PdStreamableObject {
         return v
     }
     
-    addToUpdateList(fieldID: int, updateList: TListCollection): void {
-        let updateEvent: PdPlantUpdateEvent
-        
+    addToUpdateList(fieldID: int, updateList: PdPlantUpdateEvent[]): void {
         if (updateList === null) {
             return
         }
-        updateEvent = PdPlantUpdateEvent.create
+        const updateEvent = new PdPlantUpdateEvent()
         updateEvent.plant = this
         updateEvent.fieldID = fieldID
-        updateList.Add(updateEvent)
+        updateList.push(updateEvent)
     }
     
     fillEnumStringList(list: TStringList, fieldID: int, hasRadioButtons: boolean): void {
@@ -2313,7 +2312,7 @@ export class PdPlant extends PdStreamableObject {
         if (options.mutationStrengths[sectionIndex] > 0) {
             mutationStrengthToUse = options.mutationStrengths[sectionIndex]
         } else if (options.mutateAndBlendColorValues) {
-            mutationStrengthToUse = udomain.kLowMutation
+            mutationStrengthToUse = MutationRate.kLowMutation
         }
         stdDevAsFractionOfMean = mutationStrengthToUse / 100.0
         // for colors, reduce std dev to 10% of for other things, because the numbers are so huge 
@@ -2482,9 +2481,9 @@ export class PdPlant extends PdStreamableObject {
             }
             if (hasFirstPhytomer) {
                 this.firstPhytomer = null
-                this.firstPhytomer = uintern.PdInternode().create()
+                this.firstPhytomer = new PdInternode()
                 if (this.firstPhytomer !== null) {
-                    uintern.PdInternode(this.firstPhytomer).plant = this
+                    this.firstPhytomer.plant = this
                 } else {
                     throw new Error("Problem: Could not create first internode in method PdPlant.streamDataWithFiler.")
                 }
@@ -2520,8 +2519,6 @@ export class PdPlant extends PdStreamableObject {
     }
     
     randomizeWithSeedsAndXRotation(generalSeed: short, breedingSeed: long, anXRotation: float): void {
-        let updateEvent: PdPlantUpdateEvent
-        
         this.pGeneral.startingSeedForRandomNumberGenerator = generalSeed
         this.breedingGenerator.setSeed(breedingSeed)
         this.xRotation = anXRotation
@@ -2530,12 +2527,12 @@ export class PdPlant extends PdStreamableObject {
         // if this is a breeder plant, it will create the update list, but the main window won't
         // recognize the plant pointer. this is extra memory use, but i'd have to pass a boolean all
         // over to stop it, and the list only has one item
-        const updateList = []
-        updateEvent = PdPlantUpdateEvent.create
+        const updateList: PdPlantUpdateEvent[] = []
+        const updateEvent = new PdPlantUpdateEvent()
         updateEvent.plant = this
         // hard-coded
         updateEvent.fieldID = utransfr.kGeneralStartingSeedForRandomNumberGenerator
-        updateList.Add(updateEvent)
+        updateList.push(updateEvent)
         MainForm.updateParameterValuesWithUpdateListForPlant(this, updateList)
     }
     
@@ -2552,12 +2549,12 @@ export class PdPlant extends PdStreamableObject {
         try {
             // calculate overall biomass change using s curve 
             fractionToMaturity_frn = safedivExcept(this.age, this.pGeneral.ageAtMaturity, 0)
-            newTotalBiomass_pctMPB = umath.max(0.0, umath.min(100.0, 100.0 * umath.scurve(fractionToMaturity_frn, this.pGeneral.growthSCurve.c1, this.pGeneral.growthSCurve.c2)))
+            newTotalBiomass_pctMPB = max(0.0, min(100.0, 100.0 * scurve(fractionToMaturity_frn, this.pGeneral.growthSCurve.c1, this.pGeneral.growthSCurve.c2)))
             changeInTotalBiomassTodayAsPercentOfMPB_pct = newTotalBiomass_pctMPB - this.totalBiomass_pctMPB
             this.totalBiomass_pctMPB = newTotalBiomass_pctMPB
             if (this.floweringHasStarted) {
                 // divide up change into shoot and fruit, make changes to total shoot/fruit 
-                fractionReproBiomassToday_frn = umath.max(0, this.pGeneral.fractionReproductiveAllocationAtMaturity_frn * safedivExcept(this.age - this.ageAtWhichFloweringStarted, this.pGeneral.ageAtMaturity - this.ageAtWhichFloweringStarted, 0))
+                fractionReproBiomassToday_frn = max(0, this.pGeneral.fractionReproductiveAllocationAtMaturity_frn * safedivExcept(this.age - this.ageAtWhichFloweringStarted, this.pGeneral.ageAtMaturity - this.ageAtWhichFloweringStarted, 0))
                 newReproBiomass_pctMPB = fractionReproBiomassToday_frn * this.totalBiomass_pctMPB
                 this.changeInReproBiomassToday_pctMPB = newReproBiomass_pctMPB - this.reproBiomass_pctMPB
                 this.reproBiomass_pctMPB = newReproBiomass_pctMPB
@@ -2612,8 +2609,7 @@ export class PdPlant extends PdStreamableObject {
         }
     }
     
-    allocateOrRemoveBiomassWithTraverser(traverserProxy: TObject): void {
-        let traverser: PdTraverser
+    allocateOrRemoveBiomassWithTraverser(traverser: PdTraverser): void {
         let shootAddition_pctMPB: float
         let shootReduction_pctMPB: float
         let reproAddition_pctMPB: float
@@ -2622,7 +2618,6 @@ export class PdPlant extends PdStreamableObject {
         if (this.firstPhytomer === null) {
             return
         }
-        traverser = traverserProxy
         if (traverser === null) {
             return
         }
@@ -2695,10 +2690,7 @@ export class PdPlant extends PdStreamableObject {
         return undistributedBiomass_pctMPB
     }
     
-    getPlantStatistics(statisticsProxy: TObject): void {
-        let statistics: PdPlantStatistics
-        
-        statistics = utravers.PdPlantStatistics(statisticsProxy)
+    getPlantStatistics(statistics: PdPlantStatistics): void {
         if (statistics === null) {
             return
         }
@@ -2707,10 +2699,10 @@ export class PdPlant extends PdStreamableObject {
         traverser.traverseWholePlant(Activity.kActivityGatherStatistics)
 
         // set undistributed amounts in statistics 
-        statistics.liveBiomass_pctMPB[utravers.kStatisticsPartTypeUnallocatedNewVegetativeBiomass] = this.unallocatedNewVegetativeBiomass_pctMPB
-        statistics.deadBiomass_pctMPB[utravers.kStatisticsPartTypeUnremovedDeadVegetativeBiomass] = this.unremovedDeadVegetativeBiomass_pctMPB
-        statistics.liveBiomass_pctMPB[utravers.kStatisticsPartTypeUnallocatedNewReproductiveBiomass] = this.unallocatedNewReproductiveBiomass_pctMPB
-        statistics.deadBiomass_pctMPB[utravers.kStatisticsPartTypeUnremovedDeadReproductiveBiomass] = this.unremovedDeadReproductiveBiomass_pctMPB
+        statistics.liveBiomass_pctMPB[Statistics.kStatisticsPartTypeUnallocatedNewVegetativeBiomass] = this.unallocatedNewVegetativeBiomass_pctMPB
+        statistics.deadBiomass_pctMPB[Statistics.kStatisticsPartTypeUnremovedDeadVegetativeBiomass] = this.unremovedDeadVegetativeBiomass_pctMPB
+        statistics.liveBiomass_pctMPB[Statistics.kStatisticsPartTypeUnallocatedNewReproductiveBiomass] = this.unallocatedNewReproductiveBiomass_pctMPB
+        statistics.deadBiomass_pctMPB[Statistics.kStatisticsPartTypeUnremovedDeadReproductiveBiomass] = this.unremovedDeadReproductiveBiomass_pctMPB
     }
     
     report(): void {
@@ -2723,61 +2715,54 @@ export class PdPlant extends PdStreamableObject {
     }
     
     // --------------------------------------------------------------------------------------------- amendments 
-    amendmentForPartID(partID: long): PdPlantDrawingAmendment {
-        let result = new PdPlantDrawingAmendment()
-        let i: int
-        let amendment: PdPlantDrawingAmendment
-        
-        result = null
-        if (this.amendments.Count <= 0) {
-            return result
+    amendmentForPartID(partID: long): PdPlantDrawingAmendment | null {
+        if (this.amendments.length <= 0) {
+            return null
         }
-        for (i = 0; i <= this.amendments.Count - 1; i++) {
-            amendment = uamendmt.PdPlantDrawingAmendment(this.amendments.Items[i])
+        for (let i = 0; i < this.amendments.length; i++) {
+            const amendment = this.amendments[i]
             if ((amendment.partID === partID)) {
-                result = amendment
-                return result
+                return amendment
             }
         }
-        return result
+        return null
     }
     
     addAmendment(newAmendment: PdPlantDrawingAmendment): void {
-        this.amendments.Add(newAmendment)
+        this.amendments.push(newAmendment)
     }
     
     removeAmendment(oldAmendment: PdPlantDrawingAmendment): void {
-        this.amendments.Remove(oldAmendment)
+        arrayRemove(this.amendments, oldAmendment)
     }
     
     removeAllAmendments(): void {
         this.amendments = []
     }
     
+    // This is probably tring to preserve allcoated space -- we just remove the space and reallocate later
     clearPointersToAllAmendments(): void {
-        this.amendments.clearPointersWithoutDeletingObjects()
+        this.amendments.length = 0
     }
     
-    restoreAmendmentPointersToList(aList: TList): void {
-        let i: int
-        
-        if ((aList !== null) && (aList.Count > 0)) {
-            for (i = 0; i <= aList.Count - 1; i++) {
-                this.addAmendment(uamendmt.PdPlantDrawingAmendment(aList.Items[i]))
+    // This is probably tring to preserve allcoated space -- we just remove the space and reallocate later
+    restoreAmendmentPointersToList(aList: PdPlantDrawingAmendment[]): void {
+        if ((aList !== null) && (aList.length > 0)) {
+            for (let i = 0; i < aList.length; i++) {
+                this.addAmendment(aList[i])
             }
         }
     }
-    
-    plantPartForPartID(partID: long): TObject | null {
-        let result: TObject | null = null
+
+    plantPartForPartID(partID: long): PdPlantPart | null {
         if (this.firstPhytomer !== null) {
             const traverser: PdTraverser = new PdTraverser(this)
             traverser.foundPlantPart = null
             traverser.partID = partID
             traverser.traverseWholePlant(Activity.kActivityFindPartForPartID)
-            result = traverser.foundPlantPart
+            return traverser.foundPlantPart
         }
-        return result
+        return null
     }
     
     getInfoForPlantPartAtPoint(point: TPoint, partID: long, partType: string): void {
@@ -2797,106 +2782,106 @@ export class PdPlant extends PdStreamableObject {
     colorForDXFPartType(index: short): TColorRef {
         let result = new TColorRef()
         switch (index) {
-            case u3dexport.kExportPartMeristem:
+            case ExportPart.kExportPartMeristem:
                 result = this.pAxillaryBud.tdoParams.faceColor
                 break
-            case u3dexport.kExportPartInternode:
+            case ExportPart.kExportPartInternode:
                 result = this.pInternode.faceColor
                 break
-            case u3dexport.kExportPartSeedlingLeaf:
+            case ExportPart.kExportPartSeedlingLeaf:
                 result = this.pSeedlingLeaf.leafTdoParams.faceColor
                 break
-            case u3dexport.kExportPartLeaf:
+            case ExportPart.kExportPartLeaf:
                 result = this.pLeaf.leafTdoParams.faceColor
                 break
-            case u3dexport.kExportPartFirstPetiole:
+            case ExportPart.kExportPartFirstPetiole:
                 result = this.pLeaf.petioleColor
                 break
-            case u3dexport.kExportPartPetiole:
+            case ExportPart.kExportPartPetiole:
                 result = this.pLeaf.petioleColor
                 break
-            case u3dexport.kExportPartLeafStipule:
+            case ExportPart.kExportPartLeafStipule:
                 result = this.pLeaf.stipuleTdoParams.faceColor
                 break
-            case u3dexport.kExportPartInflorescenceStalkFemale:
+            case ExportPart.kExportPartInflorescenceStalkFemale:
                 result = this.pInflor[kGenderFemale].stalkColor
                 break
-            case u3dexport.kExportPartInflorescenceInternodeFemale:
+            case ExportPart.kExportPartInflorescenceInternodeFemale:
                 result = this.pInflor[kGenderFemale].stalkColor
                 break
-            case u3dexport.kExportPartInflorescenceBractFemale:
+            case ExportPart.kExportPartInflorescenceBractFemale:
                 result = this.pInflor[kGenderFemale].bractTdoParams.faceColor
                 break
-            case u3dexport.kExportPartInflorescenceStalkMale:
+            case ExportPart.kExportPartInflorescenceStalkMale:
                 result = this.pInflor[kGenderMale].stalkColor
                 break
-            case u3dexport.kExportPartInflorescenceInternodeMale:
+            case ExportPart.kExportPartInflorescenceInternodeMale:
                 result = this.pInflor[kGenderMale].stalkColor
                 break
-            case u3dexport.kExportPartInflorescenceBractMale:
+            case ExportPart.kExportPartInflorescenceBractMale:
                 result = this.pInflor[kGenderMale].bractTdoParams.faceColor
                 break
-            case u3dexport.kExportPartPedicelFemale:
+            case ExportPart.kExportPartPedicelFemale:
                 result = this.pInflor[kGenderFemale].pedicelColor
                 break
-            case u3dexport.kExportPartFlowerBudFemale:
+            case ExportPart.kExportPartFlowerBudFemale:
                 result = this.pFlower[kGenderFemale].tdoParams[kBud].faceColor
                 break
-            case u3dexport.kExportPartStyleFemale:
+            case ExportPart.kExportPartStyleFemale:
                 result = this.pFlower[kGenderFemale].styleColor
                 break
-            case u3dexport.kExportPartStigmaFemale:
+            case ExportPart.kExportPartStigmaFemale:
                 result = this.pFlower[kGenderFemale].tdoParams[kPistils].faceColor
                 break
-            case u3dexport.kExportPartFilamentFemale:
+            case ExportPart.kExportPartFilamentFemale:
                 result = this.pFlower[kGenderFemale].filamentColor
                 break
-            case u3dexport.kExportPartAntherFemale:
+            case ExportPart.kExportPartAntherFemale:
                 result = this.pFlower[kGenderFemale].tdoParams[kStamens].faceColor
                 break
-            case u3dexport.kExportPartFirstPetalsFemale:
+            case ExportPart.kExportPartFirstPetalsFemale:
                 result = this.pFlower[kGenderFemale].tdoParams[kFirstPetals].faceColor
                 break
-            case u3dexport.kExportPartSecondPetalsFemale:
+            case ExportPart.kExportPartSecondPetalsFemale:
                 result = this.pFlower[kGenderFemale].tdoParams[kSecondPetals].faceColor
                 break
-            case u3dexport.kExportPartThirdPetalsFemale:
+            case ExportPart.kExportPartThirdPetalsFemale:
                 result = this.pFlower[kGenderFemale].tdoParams[kThirdPetals].faceColor
                 break
-            case u3dexport.kExportPartFourthPetalsFemale:
+            case ExportPart.kExportPartFourthPetalsFemale:
                 result = this.pFlower[kGenderFemale].tdoParams[kFourthPetals].faceColor
                 break
-            case u3dexport.kExportPartFifthPetalsFemale:
+            case ExportPart.kExportPartFifthPetalsFemale:
                 result = this.pFlower[kGenderFemale].tdoParams[kFifthPetals].faceColor
                 break
-            case u3dexport.kExportPartSepalsFemale:
+            case ExportPart.kExportPartSepalsFemale:
                 result = this.pFlower[kGenderFemale].tdoParams[kSepals].faceColor
                 break
-            case u3dexport.kExportPartPedicelMale:
+            case ExportPart.kExportPartPedicelMale:
                 result = this.pInflor[kGenderMale].pedicelColor
                 break
-            case u3dexport.kExportPartFlowerBudMale:
+            case ExportPart.kExportPartFlowerBudMale:
                 result = this.pFlower[kGenderMale].tdoParams[kBud].faceColor
                 break
-            case u3dexport.kExportPartFilamentMale:
+            case ExportPart.kExportPartFilamentMale:
                 result = this.pFlower[kGenderMale].filamentColor
                 break
-            case u3dexport.kExportPartAntherMale:
+            case ExportPart.kExportPartAntherMale:
                 result = this.pFlower[kGenderMale].tdoParams[kStamens].faceColor
                 break
-            case u3dexport.kExportPartFirstPetalsMale:
+            case ExportPart.kExportPartFirstPetalsMale:
                 result = this.pFlower[kGenderMale].tdoParams[kFirstPetals].faceColor
                 break
-            case u3dexport.kExportPartSepalsMale:
+            case ExportPart.kExportPartSepalsMale:
                 result = this.pFlower[kGenderMale].tdoParams[kSepals].faceColor
                 break
-            case u3dexport.kExportPartUnripeFruit:
+            case ExportPart.kExportPartUnripeFruit:
                 result = this.pFruit.tdoParams.alternateFaceColor
                 break
-            case u3dexport.kExportPartRipeFruit:
+            case ExportPart.kExportPartRipeFruit:
                 result = this.pFruit.tdoParams.faceColor
                 break
-            case u3dexport.kExportPartRootTop:
+            case ExportPart.kExportPartRootTop:
                 result = this.pRoot.tdoParams.faceColor
                 break
             default:

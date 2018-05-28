@@ -2,7 +2,7 @@
 
 import { float, int, TColorRef, short, long } from "./common";
 import { max, safedivExcept, min } from "./umath";
-import { messageForExceptionType, PdFiler, MainForm, PdInternode, PdPlantPart, kExportPartLast } from "./temporary";
+import { messageForExceptionType, PdFiler, MainForm, PdInternode, PdPlantPart, ExportPart } from "./temporary";
 import { PdPlant } from "./PdPlant";
 import { TPoint } from "./TPoint";
 
@@ -56,30 +56,29 @@ export enum Activity {
     kActivityCountPointsAndTrianglesFor3DExport = 23,
 }
 
-
-// const
-const kStatisticsPartTypeSeedlingLeaf = 0
-const kStatisticsPartTypeLeaf = 1
-const kStatisticsPartTypeFemaleInflorescence = 2
-const kStatisticsPartTypeMaleInflorescence = 3
-const kStatisticsPartTypeFemaleFlower = 4
-const kStatisticsPartTypeFemaleFlowerBud = 5
-const kStatisticsPartTypeMaleFlower = 6
-const kStatisticsPartTypeMaleFlowerBud = 7
-const kStatisticsPartTypeAxillaryBud = 8
-const kStatisticsPartTypeFruit = 9
-const kStatisticsPartTypeStem = 10
-const kStatisticsPartTypeUnripeFruit = 11
-const kStatisticsPartTypeFallenFruit = 12
-const kStatisticsPartTypeUnallocatedNewVegetativeBiomass = 13
-const kStatisticsPartTypeUnremovedDeadVegetativeBiomass = 14
-const kStatisticsPartTypeUnallocatedNewReproductiveBiomass = 15
-const kStatisticsPartTypeUnremovedDeadReproductiveBiomass = 16
-const kStatisticsPartTypeFallenFlower = 17
-const kStatisticsPartTypeAllVegetative = 18
-const kStatisticsPartTypeAllReproductive = 19
-const kStatisticsPartTypeLast = 19
-
+export enum Statistics {
+    kStatisticsPartTypeSeedlingLeaf = 0,
+    kStatisticsPartTypeLeaf = 1,
+    kStatisticsPartTypeFemaleInflorescence = 2,
+    kStatisticsPartTypeMaleInflorescence = 3,
+    kStatisticsPartTypeFemaleFlower = 4,
+    kStatisticsPartTypeFemaleFlowerBud = 5,
+    kStatisticsPartTypeMaleFlower = 6,
+    kStatisticsPartTypeMaleFlowerBud = 7,
+    kStatisticsPartTypeAxillaryBud = 8,
+    kStatisticsPartTypeFruit = 9,
+    kStatisticsPartTypeStem = 10,
+    kStatisticsPartTypeUnripeFruit = 11,
+    kStatisticsPartTypeFallenFruit = 12,
+    kStatisticsPartTypeUnallocatedNewVegetativeBiomass = 13,
+    kStatisticsPartTypeUnremovedDeadVegetativeBiomass = 14,
+    kStatisticsPartTypeUnallocatedNewReproductiveBiomass = 15,
+    kStatisticsPartTypeUnremovedDeadReproductiveBiomass = 16,
+    kStatisticsPartTypeFallenFlower = 17,
+    kStatisticsPartTypeAllVegetative = 18,
+    kStatisticsPartTypeAllReproductive = 19,
+    kStatisticsPartTypeLast = 19,
+}
 
 // var
 export const TraverserGlobals = {
@@ -158,13 +157,13 @@ function linearGrowth(current: float, optimal: float, minDays: int): float {
 
 // meristems
 export class PdPlantStatistics {
-    count: long[] /* kStatisticsPartTypeLast + 1 */ = Array(kStatisticsPartTypeLast + 1)
-    liveBiomass_pctMPB: float[] /* kStatisticsPartTypeLast + 1 */ = Array(kStatisticsPartTypeLast + 1)
-    deadBiomass_pctMPB: float[] /* kStatisticsPartTypeLast + 1 */ = Array(kStatisticsPartTypeLast + 1)
+    count: long[] = Array(Statistics.kStatisticsPartTypeLast + 1)
+    liveBiomass_pctMPB: float[] = Array(Statistics.kStatisticsPartTypeLast + 1)
+    deadBiomass_pctMPB: float[] = Array(Statistics.kStatisticsPartTypeLast + 1)
     
     // ---------------------------------------------------------------------------------- statistics object 
     zeroAllFields(): void {   
-        for (let i = 0; i <= kStatisticsPartTypeLast; i++) {
+        for (let i = 0; i <= Statistics.kStatisticsPartTypeLast; i++) {
             this.count[i] = 0
             this.liveBiomass_pctMPB[i] = 0.0
             this.deadBiomass_pctMPB[i] = 0.0
@@ -176,7 +175,7 @@ export class PdPlantStatistics {
         let i: short
         
         result = 0.0
-        for (i = 0; i <= kStatisticsPartTypeLast; i++) {
+        for (i = 0; i <= Statistics.kStatisticsPartTypeLast; i++) {
             result = result + this.liveBiomass_pctMPB[i]
             result = result + this.deadBiomass_pctMPB[i]
         }
@@ -208,7 +207,7 @@ export class PdTraverser {
     plantPartsDrawnAtStart: long = 0
     partID: long = 0
     totalMemorySize: long = 0
-    exportTypeCounts: long[] = Array(kExportPartLast + 1)
+    exportTypeCounts: long[] = Array(ExportPart.kExportPartLast + 1)
     
     // ---------------------------------------------------------------------------------- traversing object 
     constructor(thePlant: PdPlant) {
@@ -217,15 +216,15 @@ export class PdTraverser {
     
     beginTraversal(aMode: int): void {
         this.mode = aMode
-        this.currentPhytomer = this.plant.firstPhytomer
         this.total = 0.0
         this.finished = false
         this.foundPlantPart = null
         this.totalPlantParts = 0
-        if (this.currentPhytomer !== null) {
+        if (this.plant.firstPhytomer !== null) {
+            this.currentPhytomer = this.plant.firstPhytomer
             this.currentPhytomer.traversingDirection = kTraverseLeft
             this.currentPhytomer.traverseActivity(this.mode, this)
-            //reset afterwards in case read in differently
+            // reset afterwards in case read in differently
             this.currentPhytomer.traversingDirection = kTraverseLeft
         }
     }

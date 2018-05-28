@@ -3,6 +3,7 @@
 import { float, ColorDefs, short, int, StrToFloat, byte, long } from "./common"
 import { TRect } from "./TRect";
 import { PdTraverser } from "./PdTraverser";
+import { PdPlant } from "./PdPlant";
 
 // TODO: Implement darkerColorWithSubtraction from usupport
 export function darkerColorWithSubtraction(a: number, b: number) {
@@ -150,7 +151,7 @@ export const MainForm = {
 }
 
 // TOFO: Fix PdBitmap stub
-export class PdBitmap {
+export class PdBitmap extends PdStreamableObject {
     Width = 1
     Height = 1
     Transparent = true
@@ -158,8 +159,14 @@ export class PdBitmap {
     TransparentColor = ColorDefs.clBlack // domain.options.backgroundColor
 }
 
+
+// TODO: Fix PdPlantPart stub
+export class PdPlantPart extends PdStreamableObject {
+    plant: PdPlant
+}
+
 // TODO: Fix PdInternode stub
-export class PdInternode {
+export class PdInternode extends PdPlantPart {
     traversingDirection: number
     phytomerAttachedTo: PdInternode
     leftBranchPlantPart: PdInternode | null
@@ -168,14 +175,6 @@ export class PdInternode {
     isPhytomer() { return true }
     traverseActivity(mode: number, traverser: PdTraverser) {}
 }
-
-// TODO: Fix PdPlantPart stub
-export class PdPlantPart {
-    
-}
-
-// TODO: Fix kExportPartLast copied from U3dexport
-export const kExportPartLast = 33
 
 // TODO: Fix support_rgb from usupport
 export function support_rgb(R: byte, G: byte, B: byte): long {
@@ -207,4 +206,43 @@ export function TListCollection_streamUsingFiler(list: PdStreamableObject[], fil
             }
         }
     }
+}
+
+// TODO: Fix enum from U3dexport
+export enum ExportPart {
+    kExportPartMeristem = 0,
+    kExportPartInternode = 1,
+    kExportPartSeedlingLeaf = 2,
+    kExportPartLeaf = 3,
+    kExportPartFirstPetiole = 4,
+    kExportPartPetiole = 5,
+    kExportPartLeafStipule = 6,
+    kExportPartInflorescenceStalkFemale = 7,
+    kExportPartInflorescenceInternodeFemale = 8,
+    kExportPartInflorescenceBractFemale = 9,
+    kExportPartInflorescenceStalkMale = 10,
+    kExportPartInflorescenceInternodeMale = 11,
+    kExportPartInflorescenceBractMale = 12,
+    kExportPartPedicelFemale = 13,
+    kExportPartFlowerBudFemale = 14,
+    kExportPartStyleFemale = 15,
+    kExportPartStigmaFemale = 16,
+    kExportPartFilamentFemale = 17,
+    kExportPartAntherFemale = 18,
+    kExportPartFirstPetalsFemale = 19,
+    kExportPartSecondPetalsFemale = 20,
+    kExportPartThirdPetalsFemale = 21,
+    kExportPartFourthPetalsFemale = 22,
+    kExportPartFifthPetalsFemale = 23,
+    kExportPartSepalsFemale = 24,
+    kExportPartPedicelMale = 25,
+    kExportPartFlowerBudMale = 26,
+    kExportPartFilamentMale = 27,
+    kExportPartAntherMale = 28,
+    kExportPartFirstPetalsMale = 29,
+    kExportPartSepalsMale = 30,
+    kExportPartUnripeFruit = 31,
+    kExportPartRipeFruit = 32,
+    kExportPartRootTop = 33,
+    kExportPartLast = 33,
 }
