@@ -17,6 +17,7 @@ import { PdSection } from "./PdSection"
 import { PdPlantDrawingAmendment, kStartAmendmentString } from "./PdPlantDrawingAmendment"
 import { PdPlantPart } from "./PdPlantPart"
 import { SinglePoint, messageForExceptionType, support_rgb, boundForString, stringUpTo, strToBool, stringBeyond, tolerantReadln, trimLeftAndRight } from "./usupport"
+import { Plant_directTransferField } from "./utransfr";
 
 /* Remove unused imports
 from conversion_common import *
@@ -73,43 +74,59 @@ export enum PartType {
 
 const kDirectionLeft = 0
 const kDirectionRight = 1
+
 const kGetField = 0
 const kSetField = 1
+
 const kPlantNameLength = 80
+
 const kCheckForUnreadParams = true
 const kDontCheckForUnreadParams = false
+
 const kConsiderDomainScale = true
 const kDontConsiderDomainScale = false
+
 const kDrawNow = true
 const kDontDrawNow = false
+
 const kMutation = 0
 const kWeight = 1
+
 const kMaxBreedingSections = 20
+
 const kFromFirstPlant = 0
 const kFromSecondPlant = 1
 const kFromProbabilityBasedOnWeightsForSection = 2
 const kFromPlantWithGreaterWeightForSectionIfEqualFirstPlant = 3
 const kFromPlantWithGreaterWeightForSectionIfEqualSecondPlant = 4
 const kFromPlantWithGreaterWeightForSectionIfEqualChooseRandomly = 5
+
 const kPlantAsTextStartString = "start PlantStudio plant"
 const kPlantAsTextEndString = "end PlantStudio plant"
+
 const kStartNoteString = "=== start note"
 const kEndNoteString = "=== end note"
+
 const kInMainWindow = true
 const kNotInMainWindow = false
-const kBud = 0
-const kPistils = 1
-const kStamens = 2
-const kFirstPetals = 3
-const kSecondPetals = 4
-const kThirdPetals = 5
-const kFourthPetals = 6
-const kFifthPetals = 7
-const kSepals = 8
-const kHighestFloralPartConstant = kSepals
+
+export enum FloralPart {
+    kBud = 0,
+    kPistils = 1,
+    kStamens = 2,
+    kFirstPetals = 3,
+    kSecondPetals = 4,
+    kThirdPetals = 5,
+    kFourthPetals = 6,
+    kFifthPetals = 7,
+    kSepals = 8,
+    kHighestFloralPartConstant = 8
+}
+
 const kDrawNoBud = 0
 const kDrawSingleTdoBud = 1
 const kDrawOpeningFlower = 2
+
 const kNotExactAge = false
 const kExactAge = true
 
@@ -1903,14 +1920,8 @@ export class PdPlant extends PdStreamableObject {
         return v
     }
     
-    directTransferField(d: int, v: FIX_MISSING_ARG_TYPE, fieldID: short, ft: short, index: short, updateList: PdPlantUpdateEvent[]): void {
-        if (fieldID <= 200) {
-            // switch-over point is hard-coded and must be identical to that set in PlantStudio Utility program
-            // that generates utransfr.pas
-            v = utransfr.Plant_directTransferField(this, v, d, fieldID, ft, index, updateList)
-        } else {
-            v = utransfr.Plant_directTransferField_SecondPart(this, v, d, fieldID, ft, index, updateList)
-        }
+    directTransferField(d: int, v: any, fieldID: short, ft: short, index: short, updateList: PdPlantUpdateEvent[]): void {
+        v = Plant_directTransferField(this, v, d, fieldID, ft, index, updateList)
         if (updateList !== null) {
             this.addToUpdateList(fieldID, updateList)
         }
