@@ -370,1060 +370,1060 @@ export function Plant_directTransferField(plant: PdPlant, v: any, d: short, fiel
     }
     switch (fieldID) {
         case kGeneralLineDivisions:
-            plant.pGeneral.lineDivisions, v = plant.MFD(plant.pGeneral.lineDivisions, v, ft, d)
+            [plant.pGeneral.lineDivisions, v] = plant.MFD(plant.pGeneral.lineDivisions, v, ft, d)
             break
         case kGeneralRandomSway:
-            plant.pGeneral.randomSway, v = plant.MFD(plant.pGeneral.randomSway, v, ft, d)
+            [plant.pGeneral.randomSway, v] = plant.MFD(plant.pGeneral.randomSway, v, ft, d)
             break
         case kGeneralAgeAtMaturity:
-            plant.pGeneral.ageAtMaturity, v = plant.MFD(plant.pGeneral.ageAtMaturity, v, ft, d)
+            [plant.pGeneral.ageAtMaturity, v] = plant.MFD(plant.pGeneral.ageAtMaturity, v, ft, d)
             break
         case kGeneralGrowthSCurve:
             v = transferSCurveValue(d, plant.pGeneral.growthSCurve, index, v)
             break
         case kGeneralAgeAtWhichFloweringStarts:
-            plant.pGeneral.ageAtWhichFloweringStarts, v = plant.MFD(plant.pGeneral.ageAtWhichFloweringStarts, v, ft, d)
+            [plant.pGeneral.ageAtWhichFloweringStarts, v] = plant.MFD(plant.pGeneral.ageAtWhichFloweringStarts, v, ft, d)
             break
         case kGeneralFractionReproductiveAllocationAtMaturity:
-            plant.pGeneral.fractionReproductiveAllocationAtMaturity_frn, v = plant.MFD(plant.pGeneral.fractionReproductiveAllocationAtMaturity_frn, v, ft, d)
+            [plant.pGeneral.fractionReproductiveAllocationAtMaturity_frn, v] = plant.MFD(plant.pGeneral.fractionReproductiveAllocationAtMaturity_frn, v, ft, d)
             break
         case kGeneralMaleFlowersAreSeparate:
-            plant.pGeneral.maleFlowersAreSeparate, v = plant.MFD(plant.pGeneral.maleFlowersAreSeparate, v, ft, d)
+            [plant.pGeneral.maleFlowersAreSeparate, v] = plant.MFD(plant.pGeneral.maleFlowersAreSeparate, v, ft, d)
             break
         case kGeneralIsDicot:
-            plant.pGeneral.isDicot, v = plant.MFD(plant.pGeneral.isDicot, v, ft, d)
+            [plant.pGeneral.isDicot, v] = plant.MFD(plant.pGeneral.isDicot, v, ft, d)
             break
         case kGeneralNumApicalInflors:
-            plant.pGeneral.numApicalInflors, v = plant.MFD(plant.pGeneral.numApicalInflors, v, ft, d)
+            [plant.pGeneral.numApicalInflors, v] = plant.MFD(plant.pGeneral.numApicalInflors, v, ft, d)
             break
         case kGeneralNumAxillaryInflors:
-            plant.pGeneral.numAxillaryInflors, v = plant.MFD(plant.pGeneral.numAxillaryInflors, v, ft, d)
+            [plant.pGeneral.numAxillaryInflors, v] = plant.MFD(plant.pGeneral.numAxillaryInflors, v, ft, d)
             break
         case kGeneralPhyllotacticRotationAngle:
-            plant.pGeneral.phyllotacticRotationAngle, v = plant.MFD(plant.pGeneral.phyllotacticRotationAngle, v, ft, d)
+            [plant.pGeneral.phyllotacticRotationAngle, v] = plant.MFD(plant.pGeneral.phyllotacticRotationAngle, v, ft, d)
             break
         case kGeneralStartingSeedForRandomNumberGenerator:
-            plant.pGeneral.startingSeedForRandomNumberGenerator, v = plant.MFD(plant.pGeneral.startingSeedForRandomNumberGenerator, v, ft, d)
+            [plant.pGeneral.startingSeedForRandomNumberGenerator, v] = plant.MFD(plant.pGeneral.startingSeedForRandomNumberGenerator, v, ft, d)
             break
         case kMeristemAndLeafArrangement:
-            plant.pMeristem.branchingAndLeafArrangement, v = plant.MFD(plant.pMeristem.branchingAndLeafArrangement, v, ft, d)
+            [plant.pMeristem.branchingAndLeafArrangement, v] = plant.MFD(plant.pMeristem.branchingAndLeafArrangement, v, ft, d)
             break
         case kMeristemBranchingIndex:
-            plant.pMeristem.branchingIndex, v = plant.MFD(plant.pMeristem.branchingIndex, v, ft, d)
+            [plant.pMeristem.branchingIndex, v] = plant.MFD(plant.pMeristem.branchingIndex, v, ft, d)
             break
         case kMeristemBranchingDistance:
-            plant.pMeristem.branchingDistance, v = plant.MFD(plant.pMeristem.branchingDistance, v, ft, d)
+            [plant.pMeristem.branchingDistance, v] = plant.MFD(plant.pMeristem.branchingDistance, v, ft, d)
             break
         case kMeristemSecondaryBranchingIsAllowed:
-            plant.pMeristem.secondaryBranchingIsAllowed, v = plant.MFD(plant.pMeristem.secondaryBranchingIsAllowed, v, ft, d)
+            [plant.pMeristem.secondaryBranchingIsAllowed, v] = plant.MFD(plant.pMeristem.secondaryBranchingIsAllowed, v, ft, d)
             break
         case kMeristemBranchingIsSympodial:
-            plant.pMeristem.branchingIsSympodial, v = plant.MFD(plant.pMeristem.branchingIsSympodial, v, ft, d)
+            [plant.pMeristem.branchingIsSympodial, v] = plant.MFD(plant.pMeristem.branchingIsSympodial, v, ft, d)
             break
         case kMeristemBranchingAngle:
-            plant.pMeristem.branchingAngle, v = plant.MFD(plant.pMeristem.branchingAngle, v, ft, d)
+            [plant.pMeristem.branchingAngle, v] = plant.MFD(plant.pMeristem.branchingAngle, v, ft, d)
             break
         case kMeristemDeterminateProbability:
-            plant.pMeristem.determinateProbability, v = plant.MFD(plant.pMeristem.determinateProbability, v, ft, d)
+            [plant.pMeristem.determinateProbability, v] = plant.MFD(plant.pMeristem.determinateProbability, v, ft, d)
             break
         case kAxillaryBudObject3D:
             plant.transferObject3D(d, plant.pAxillaryBud.tdoParams.object3D, v)
             break
         case kAxillaryBudScale:
-            plant.pAxillaryBud.tdoParams.scaleAtFullSize, v = plant.MFD(plant.pAxillaryBud.tdoParams.scaleAtFullSize, v, ft, d)
+            [plant.pAxillaryBud.tdoParams.scaleAtFullSize, v] = plant.MFD(plant.pAxillaryBud.tdoParams.scaleAtFullSize, v, ft, d)
             break
         case kAxillaryBudObject3DXRotationBeforeDraw:
-            plant.pAxillaryBud.tdoParams.xRotationBeforeDraw, v = plant.MFD(plant.pAxillaryBud.tdoParams.xRotationBeforeDraw, v, ft, d)
+            [plant.pAxillaryBud.tdoParams.xRotationBeforeDraw, v] = plant.MFD(plant.pAxillaryBud.tdoParams.xRotationBeforeDraw, v, ft, d)
             break
         case kAxillaryBudObject3DYRotationBeforeDraw:
-            plant.pAxillaryBud.tdoParams.yRotationBeforeDraw, v = plant.MFD(plant.pAxillaryBud.tdoParams.yRotationBeforeDraw, v, ft, d)
+            [plant.pAxillaryBud.tdoParams.yRotationBeforeDraw, v] = plant.MFD(plant.pAxillaryBud.tdoParams.yRotationBeforeDraw, v, ft, d)
             break
         case kAxillaryBudObject3DZRotationBeforeDraw:
-            plant.pAxillaryBud.tdoParams.zRotationBeforeDraw, v = plant.MFD(plant.pAxillaryBud.tdoParams.zRotationBeforeDraw, v, ft, d)
+            [plant.pAxillaryBud.tdoParams.zRotationBeforeDraw, v] = plant.MFD(plant.pAxillaryBud.tdoParams.zRotationBeforeDraw, v, ft, d)
             break
         case kAxillaryBudFaceColor:
-            plant.pAxillaryBud.tdoParams.faceColor, v = plant.MFD(plant.pAxillaryBud.tdoParams.faceColor, v, ft, d)
+            [plant.pAxillaryBud.tdoParams.faceColor, v] = plant.MFD(plant.pAxillaryBud.tdoParams.faceColor, v, ft, d)
             break
         case kAxillaryBudBackfaceColor:
-            plant.pAxillaryBud.tdoParams.backfaceColor, v = plant.MFD(plant.pAxillaryBud.tdoParams.backfaceColor, v, ft, d)
+            [plant.pAxillaryBud.tdoParams.backfaceColor, v] = plant.MFD(plant.pAxillaryBud.tdoParams.backfaceColor, v, ft, d)
             break
         case kInternodeFaceColor:
-            plant.pInternode.faceColor, v = plant.MFD(plant.pInternode.faceColor, v, ft, d)
+            [plant.pInternode.faceColor, v] = plant.MFD(plant.pInternode.faceColor, v, ft, d)
             break
         case kInternodeFirstInternodeCurvingIndex:
-            plant.pInternode.firstInternodeCurvingIndex, v = plant.MFD(plant.pInternode.firstInternodeCurvingIndex, v, ft, d)
+            [plant.pInternode.firstInternodeCurvingIndex, v] = plant.MFD(plant.pInternode.firstInternodeCurvingIndex, v, ft, d)
             break
         case kInternodeCurvingIndex:
-            plant.pInternode.curvingIndex, v = plant.MFD(plant.pInternode.curvingIndex, v, ft, d)
+            [plant.pInternode.curvingIndex, v] = plant.MFD(plant.pInternode.curvingIndex, v, ft, d)
             break
         case kInternodeLengthAtOptimalFinalBiomassAndExpansion_mm:
-            plant.pInternode.lengthAtOptimalFinalBiomassAndExpansion_mm, v = plant.MFD(plant.pInternode.lengthAtOptimalFinalBiomassAndExpansion_mm, v, ft, d)
+            [plant.pInternode.lengthAtOptimalFinalBiomassAndExpansion_mm, v] = plant.MFD(plant.pInternode.lengthAtOptimalFinalBiomassAndExpansion_mm, v, ft, d)
             break
         case kInternodeWidthAtOptimalFinalBiomassAndExpansion_mm:
-            plant.pInternode.widthAtOptimalFinalBiomassAndExpansion_mm, v = plant.MFD(plant.pInternode.widthAtOptimalFinalBiomassAndExpansion_mm, v, ft, d)
+            [plant.pInternode.widthAtOptimalFinalBiomassAndExpansion_mm, v] = plant.MFD(plant.pInternode.widthAtOptimalFinalBiomassAndExpansion_mm, v, ft, d)
             break
         case kInternodeOptimalFinalBiomass:
-            plant.pInternode.optimalFinalBiomass_pctMPB, v = plant.MFD(plant.pInternode.optimalFinalBiomass_pctMPB, v, ft, d)
+            [plant.pInternode.optimalFinalBiomass_pctMPB, v] = plant.MFD(plant.pInternode.optimalFinalBiomass_pctMPB, v, ft, d)
             break
         case kInternodeMinDaysToCreateInternode:
-            plant.pInternode.minDaysToCreateInternode, v = plant.MFD(plant.pInternode.minDaysToCreateInternode, v, ft, d)
+            [plant.pInternode.minDaysToCreateInternode, v] = plant.MFD(plant.pInternode.minDaysToCreateInternode, v, ft, d)
             break
         case kInternodeMaxDaysToCreateInternodeIfOverMinFraction:
-            plant.pInternode.maxDaysToCreateInternodeIfOverMinFraction, v = plant.MFD(plant.pInternode.maxDaysToCreateInternodeIfOverMinFraction, v, ft, d)
+            [plant.pInternode.maxDaysToCreateInternodeIfOverMinFraction, v] = plant.MFD(plant.pInternode.maxDaysToCreateInternodeIfOverMinFraction, v, ft, d)
             break
         case kInternodeMinFractionOfOptimalInitialBiomassToCreateInternode_frn:
-            plant.pInternode.minFractionOfOptimalInitialBiomassToCreateInternode_frn, v = plant.MFD(plant.pInternode.minFractionOfOptimalInitialBiomassToCreateInternode_frn, v, ft, d)
+            [plant.pInternode.minFractionOfOptimalInitialBiomassToCreateInternode_frn, v] = plant.MFD(plant.pInternode.minFractionOfOptimalInitialBiomassToCreateInternode_frn, v, ft, d)
             break
         case kInternodeCanRecoverFromStuntingDuringCreation:
-            plant.pInternode.canRecoverFromStuntingDuringCreation, v = plant.MFD(plant.pInternode.canRecoverFromStuntingDuringCreation, v, ft, d)
+            [plant.pInternode.canRecoverFromStuntingDuringCreation, v] = plant.MFD(plant.pInternode.canRecoverFromStuntingDuringCreation, v, ft, d)
             break
         case kInternodeMinDaysToAccumulateBiomass:
-            plant.pInternode.minDaysToAccumulateBiomass, v = plant.MFD(plant.pInternode.minDaysToAccumulateBiomass, v, ft, d)
+            [plant.pInternode.minDaysToAccumulateBiomass, v] = plant.MFD(plant.pInternode.minDaysToAccumulateBiomass, v, ft, d)
             break
         case kInternodeMaxDaysToAccumulateBiomass:
-            plant.pInternode.maxDaysToAccumulateBiomass, v = plant.MFD(plant.pInternode.maxDaysToAccumulateBiomass, v, ft, d)
+            [plant.pInternode.maxDaysToAccumulateBiomass, v] = plant.MFD(plant.pInternode.maxDaysToAccumulateBiomass, v, ft, d)
             break
         case kInternodeLengthMultiplierDueToBolting:
-            plant.pInternode.lengthMultiplierDueToBolting, v = plant.MFD(plant.pInternode.lengthMultiplierDueToBolting, v, ft, d)
+            [plant.pInternode.lengthMultiplierDueToBolting, v] = plant.MFD(plant.pInternode.lengthMultiplierDueToBolting, v, ft, d)
             break
         case kInternodeBoltingMinDaysToBolt:
-            plant.pInternode.minDaysToBolt, v = plant.MFD(plant.pInternode.minDaysToBolt, v, ft, d)
+            [plant.pInternode.minDaysToBolt, v] = plant.MFD(plant.pInternode.minDaysToBolt, v, ft, d)
             break
         case kLeafObject3D:
             plant.transferObject3D(d, plant.pLeaf.leafTdoParams.object3D, v)
             break
         case kLeafScaleAtOptimalBiomass:
-            plant.pLeaf.leafTdoParams.scaleAtFullSize, v = plant.MFD(plant.pLeaf.leafTdoParams.scaleAtFullSize, v, ft, d)
+            [plant.pLeaf.leafTdoParams.scaleAtFullSize, v] = plant.MFD(plant.pLeaf.leafTdoParams.scaleAtFullSize, v, ft, d)
             break
         case kLeafObject3DXRotationBeforeDraw:
-            plant.pLeaf.leafTdoParams.xRotationBeforeDraw, v = plant.MFD(plant.pLeaf.leafTdoParams.xRotationBeforeDraw, v, ft, d)
+            [plant.pLeaf.leafTdoParams.xRotationBeforeDraw, v] = plant.MFD(plant.pLeaf.leafTdoParams.xRotationBeforeDraw, v, ft, d)
             break
         case kLeafObject3DYRotationBeforeDraw:
-            plant.pLeaf.leafTdoParams.yRotationBeforeDraw, v = plant.MFD(plant.pLeaf.leafTdoParams.yRotationBeforeDraw, v, ft, d)
+            [plant.pLeaf.leafTdoParams.yRotationBeforeDraw, v] = plant.MFD(plant.pLeaf.leafTdoParams.yRotationBeforeDraw, v, ft, d)
             break
         case kLeafObject3DZRotationBeforeDraw:
-            plant.pLeaf.leafTdoParams.zRotationBeforeDraw, v = plant.MFD(plant.pLeaf.leafTdoParams.zRotationBeforeDraw, v, ft, d)
+            [plant.pLeaf.leafTdoParams.zRotationBeforeDraw, v] = plant.MFD(plant.pLeaf.leafTdoParams.zRotationBeforeDraw, v, ft, d)
             break
         case kLeafFaceColor:
-            plant.pLeaf.leafTdoParams.faceColor, v = plant.MFD(plant.pLeaf.leafTdoParams.faceColor, v, ft, d)
+            [plant.pLeaf.leafTdoParams.faceColor, v] = plant.MFD(plant.pLeaf.leafTdoParams.faceColor, v, ft, d)
             break
         case kLeafBackfaceColor:
-            plant.pLeaf.leafTdoParams.backfaceColor, v = plant.MFD(plant.pLeaf.leafTdoParams.backfaceColor, v, ft, d)
+            [plant.pLeaf.leafTdoParams.backfaceColor, v] = plant.MFD(plant.pLeaf.leafTdoParams.backfaceColor, v, ft, d)
             break
         case kLeafCompoundNumLeaflets:
-            plant.pLeaf.compoundNumLeaflets, v = plant.MFD(plant.pLeaf.compoundNumLeaflets, v, ft, d)
+            [plant.pLeaf.compoundNumLeaflets, v] = plant.MFD(plant.pLeaf.compoundNumLeaflets, v, ft, d)
             break
         case kLeafCompoundPinnateOrPalmate:
-            plant.pLeaf.compoundPinnateOrPalmate, v = plant.MFD(plant.pLeaf.compoundPinnateOrPalmate, v, ft, d)
+            [plant.pLeaf.compoundPinnateOrPalmate, v] = plant.MFD(plant.pLeaf.compoundPinnateOrPalmate, v, ft, d)
             break
         case kLeafCompoundPinnateArrangement:
-            plant.pLeaf.compoundPinnateLeafletArrangement, v = plant.MFD(plant.pLeaf.compoundPinnateLeafletArrangement, v, ft, d)
+            [plant.pLeaf.compoundPinnateLeafletArrangement, v] = plant.MFD(plant.pLeaf.compoundPinnateLeafletArrangement, v, ft, d)
             break
         case kLeafCompoundRachisToPetioleRatio:
-            plant.pLeaf.compoundRachisToPetioleRatio, v = plant.MFD(plant.pLeaf.compoundRachisToPetioleRatio, v, ft, d)
+            [plant.pLeaf.compoundRachisToPetioleRatio, v] = plant.MFD(plant.pLeaf.compoundRachisToPetioleRatio, v, ft, d)
             break
         case kLeafCompoundBendAngleAtStart:
-            plant.pLeaf.compoundCurveAngleAtStart, v = plant.MFD(plant.pLeaf.compoundCurveAngleAtStart, v, ft, d)
+            [plant.pLeaf.compoundCurveAngleAtStart, v] = plant.MFD(plant.pLeaf.compoundCurveAngleAtStart, v, ft, d)
             break
         case kLeafCompoundBendAngleAtFullSize:
-            plant.pLeaf.compoundCurveAngleAtFullSize, v = plant.MFD(plant.pLeaf.compoundCurveAngleAtFullSize, v, ft, d)
+            [plant.pLeaf.compoundCurveAngleAtFullSize, v] = plant.MFD(plant.pLeaf.compoundCurveAngleAtFullSize, v, ft, d)
             break
         case kLeafPetioleAngle:
-            plant.pLeaf.petioleAngle, v = plant.MFD(plant.pLeaf.petioleAngle, v, ft, d)
+            [plant.pLeaf.petioleAngle, v] = plant.MFD(plant.pLeaf.petioleAngle, v, ft, d)
             break
         case kLeafPetioleColor:
-            plant.pLeaf.petioleColor, v = plant.MFD(plant.pLeaf.petioleColor, v, ft, d)
+            [plant.pLeaf.petioleColor, v] = plant.MFD(plant.pLeaf.petioleColor, v, ft, d)
             break
         case kLeafPetioleLengthAtOptimalBiomass_mm:
-            plant.pLeaf.petioleLengthAtOptimalBiomass_mm, v = plant.MFD(plant.pLeaf.petioleLengthAtOptimalBiomass_mm, v, ft, d)
+            [plant.pLeaf.petioleLengthAtOptimalBiomass_mm, v] = plant.MFD(plant.pLeaf.petioleLengthAtOptimalBiomass_mm, v, ft, d)
             break
         case kLeafPetioleWidthAtOptimalBiomass_mm:
-            plant.pLeaf.petioleWidthAtOptimalBiomass_mm, v = plant.MFD(plant.pLeaf.petioleWidthAtOptimalBiomass_mm, v, ft, d)
+            [plant.pLeaf.petioleWidthAtOptimalBiomass_mm, v] = plant.MFD(plant.pLeaf.petioleWidthAtOptimalBiomass_mm, v, ft, d)
             break
         case kLeafPetioleTaperIndex:
-            plant.pLeaf.petioleTaperIndex, v = plant.MFD(plant.pLeaf.petioleTaperIndex, v, ft, d)
+            [plant.pLeaf.petioleTaperIndex, v] = plant.MFD(plant.pLeaf.petioleTaperIndex, v, ft, d)
             break
         case kStipuleNumSections:
-            plant.pLeaf.stipuleTdoParams.repetitions, v = plant.MFD(plant.pLeaf.stipuleTdoParams.repetitions, v, ft, d)
+            [plant.pLeaf.stipuleTdoParams.repetitions, v] = plant.MFD(plant.pLeaf.stipuleTdoParams.repetitions, v, ft, d)
             break
         case kStipuleObject3D:
             plant.transferObject3D(d, plant.pLeaf.stipuleTdoParams.object3D, v)
             break
         case kStipuleScaleAtOptimalLeafBiomass:
-            plant.pLeaf.stipuleTdoParams.scaleAtFullSize, v = plant.MFD(plant.pLeaf.stipuleTdoParams.scaleAtFullSize, v, ft, d)
+            [plant.pLeaf.stipuleTdoParams.scaleAtFullSize, v] = plant.MFD(plant.pLeaf.stipuleTdoParams.scaleAtFullSize, v, ft, d)
             break
         case kStipuleObject3DXRotationBeforeDraw:
-            plant.pLeaf.stipuleTdoParams.xRotationBeforeDraw, v = plant.MFD(plant.pLeaf.stipuleTdoParams.xRotationBeforeDraw, v, ft, d)
+            [plant.pLeaf.stipuleTdoParams.xRotationBeforeDraw, v] = plant.MFD(plant.pLeaf.stipuleTdoParams.xRotationBeforeDraw, v, ft, d)
             break
         case kStipuleObject3DYRotationBeforeDraw:
-            plant.pLeaf.stipuleTdoParams.yRotationBeforeDraw, v = plant.MFD(plant.pLeaf.stipuleTdoParams.yRotationBeforeDraw, v, ft, d)
+            [plant.pLeaf.stipuleTdoParams.yRotationBeforeDraw, v] = plant.MFD(plant.pLeaf.stipuleTdoParams.yRotationBeforeDraw, v, ft, d)
             break
         case kStipuleObject3DZRotationBeforeDraw:
-            plant.pLeaf.stipuleTdoParams.zRotationBeforeDraw, v = plant.MFD(plant.pLeaf.stipuleTdoParams.zRotationBeforeDraw, v, ft, d)
+            [plant.pLeaf.stipuleTdoParams.zRotationBeforeDraw, v] = plant.MFD(plant.pLeaf.stipuleTdoParams.zRotationBeforeDraw, v, ft, d)
             break
         case kStipuleFaceColor:
-            plant.pLeaf.stipuleTdoParams.faceColor, v = plant.MFD(plant.pLeaf.stipuleTdoParams.faceColor, v, ft, d)
+            [plant.pLeaf.stipuleTdoParams.faceColor, v] = plant.MFD(plant.pLeaf.stipuleTdoParams.faceColor, v, ft, d)
             break
         case kStipuleBackfaceColor:
-            plant.pLeaf.stipuleTdoParams.backfaceColor, v = plant.MFD(plant.pLeaf.stipuleTdoParams.backfaceColor, v, ft, d)
+            [plant.pLeaf.stipuleTdoParams.backfaceColor, v] = plant.MFD(plant.pLeaf.stipuleTdoParams.backfaceColor, v, ft, d)
             break
         case kStipuleAngleFromStem:
-            plant.pLeaf.stipuleTdoParams.pullBackAngle, v = plant.MFD(plant.pLeaf.stipuleTdoParams.pullBackAngle, v, ft, d)
+            [plant.pLeaf.stipuleTdoParams.pullBackAngle, v] = plant.MFD(plant.pLeaf.stipuleTdoParams.pullBackAngle, v, ft, d)
             break
         case kLeafOptimalBiomass:
-            plant.pLeaf.optimalBiomass_pctMPB, v = plant.MFD(plant.pLeaf.optimalBiomass_pctMPB, v, ft, d)
+            [plant.pLeaf.optimalBiomass_pctMPB, v] = plant.MFD(plant.pLeaf.optimalBiomass_pctMPB, v, ft, d)
             break
         case kLeafSCurve:
             v = transferSCurveValue(d, plant.pLeaf.sCurveParams, index, v)
             break
         case kLeafOptimalFractionOfOptimalBiomassAtCreation_frn:
-            plant.pLeaf.optimalFractionOfOptimalBiomassAtCreation_frn, v = plant.MFD(plant.pLeaf.optimalFractionOfOptimalBiomassAtCreation_frn, v, ft, d)
+            [plant.pLeaf.optimalFractionOfOptimalBiomassAtCreation_frn, v] = plant.MFD(plant.pLeaf.optimalFractionOfOptimalBiomassAtCreation_frn, v, ft, d)
             break
         case kLeafMinDaysToGrow:
-            plant.pLeaf.minDaysToGrow, v = plant.MFD(plant.pLeaf.minDaysToGrow, v, ft, d)
+            [plant.pLeaf.minDaysToGrow, v] = plant.MFD(plant.pLeaf.minDaysToGrow, v, ft, d)
             break
         case kLeafMaxDaysToGrow:
-            plant.pLeaf.maxDaysToGrow, v = plant.MFD(plant.pLeaf.maxDaysToGrow, v, ft, d)
+            [plant.pLeaf.maxDaysToGrow, v] = plant.MFD(plant.pLeaf.maxDaysToGrow, v, ft, d)
             break
         case kSeedlingLeafObject3D:
             plant.transferObject3D(d, plant.pSeedlingLeaf.leafTdoParams.object3D, v)
             break
         case kSeedlingLeafScale:
-            plant.pSeedlingLeaf.leafTdoParams.scaleAtFullSize, v = plant.MFD(plant.pSeedlingLeaf.leafTdoParams.scaleAtFullSize, v, ft, d)
+            [plant.pSeedlingLeaf.leafTdoParams.scaleAtFullSize, v] = plant.MFD(plant.pSeedlingLeaf.leafTdoParams.scaleAtFullSize, v, ft, d)
             break
         case kSeedlingLeafObject3DXRotationBeforeDraw:
-            plant.pSeedlingLeaf.leafTdoParams.xRotationBeforeDraw, v = plant.MFD(plant.pSeedlingLeaf.leafTdoParams.xRotationBeforeDraw, v, ft, d)
+            [plant.pSeedlingLeaf.leafTdoParams.xRotationBeforeDraw, v] = plant.MFD(plant.pSeedlingLeaf.leafTdoParams.xRotationBeforeDraw, v, ft, d)
             break
         case kSeedlingLeafObject3DYRotationBeforeDraw:
-            plant.pSeedlingLeaf.leafTdoParams.yRotationBeforeDraw, v = plant.MFD(plant.pSeedlingLeaf.leafTdoParams.yRotationBeforeDraw, v, ft, d)
+            [plant.pSeedlingLeaf.leafTdoParams.yRotationBeforeDraw, v] = plant.MFD(plant.pSeedlingLeaf.leafTdoParams.yRotationBeforeDraw, v, ft, d)
             break
         case kSeedlingLeafObject3DZRotationBeforeDraw:
-            plant.pSeedlingLeaf.leafTdoParams.zRotationBeforeDraw, v = plant.MFD(plant.pSeedlingLeaf.leafTdoParams.zRotationBeforeDraw, v, ft, d)
+            [plant.pSeedlingLeaf.leafTdoParams.zRotationBeforeDraw, v] = plant.MFD(plant.pSeedlingLeaf.leafTdoParams.zRotationBeforeDraw, v, ft, d)
             break
         case kSeedlingLeafFaceColor:
-            plant.pSeedlingLeaf.leafTdoParams.faceColor, v = plant.MFD(plant.pSeedlingLeaf.leafTdoParams.faceColor, v, ft, d)
+            [plant.pSeedlingLeaf.leafTdoParams.faceColor, v] = plant.MFD(plant.pSeedlingLeaf.leafTdoParams.faceColor, v, ft, d)
             break
         case kSeedlingLeafBackfaceColor:
-            plant.pSeedlingLeaf.leafTdoParams.backfaceColor, v = plant.MFD(plant.pSeedlingLeaf.leafTdoParams.backfaceColor, v, ft, d)
+            [plant.pSeedlingLeaf.leafTdoParams.backfaceColor, v] = plant.MFD(plant.pSeedlingLeaf.leafTdoParams.backfaceColor, v, ft, d)
             break
         case kSeedlingLeafNodesOnStemWhenFallsOff:
-            plant.pSeedlingLeaf.nodesOnStemWhenFallsOff, v = plant.MFD(plant.pSeedlingLeaf.nodesOnStemWhenFallsOff, v, ft, d)
+            [plant.pSeedlingLeaf.nodesOnStemWhenFallsOff, v] = plant.MFD(plant.pSeedlingLeaf.nodesOnStemWhenFallsOff, v, ft, d)
             break
         case kFlowerNumPetalsFemale:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].repetitions, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].repetitions, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].repetitions, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].repetitions, v, ft, d)
             break
         case kFlowerFemaleObject3D:
             plant.transferObject3D(d, plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].object3D, v)
             break
         case kFlowerScaleAtFullSizeFemale:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].scaleAtFullSize, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].scaleAtFullSize, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].scaleAtFullSize, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].scaleAtFullSize, v, ft, d)
             break
         case kFlowerFemaleObject3DXRotationBeforeDraw:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].xRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].xRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].xRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].xRotationBeforeDraw, v, ft, d)
             break
         case kFlowerFemaleObject3DYRotationBeforeDraw:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].yRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].yRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].yRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].yRotationBeforeDraw, v, ft, d)
             break
         case kFlowerFemaleObject3DZRotationBeforeDraw:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].zRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].zRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].zRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].zRotationBeforeDraw, v, ft, d)
             break
         case kFlowerFemaleFaceColor:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].faceColor, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].faceColor, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].faceColor, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].faceColor, v, ft, d)
             break
         case kFlowerFemaleBackfaceColor:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].backfaceColor, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].backfaceColor, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].backfaceColor, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].backfaceColor, v, ft, d)
             break
         case kFlowerPetalsAreRadiallyArrangedFemale:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].radiallyArranged, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].radiallyArranged, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].radiallyArranged, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].radiallyArranged, v, ft, d)
             break
         case kFlowerFemaleObject3DPullbackAngle:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].pullBackAngle, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].pullBackAngle, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].pullBackAngle, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFirstPetals].pullBackAngle, v, ft, d)
             break
         case kFlowerOptimalBiomassFemale:
-            plant.pFlower[kGenderFemale].optimalBiomass_pctMPB, v = plant.MFD(plant.pFlower[kGenderFemale].optimalBiomass_pctMPB, v, ft, d)
+            [plant.pFlower[kGenderFemale].optimalBiomass_pctMPB, v] = plant.MFD(plant.pFlower[kGenderFemale].optimalBiomass_pctMPB, v, ft, d)
             break
         case kFlowerMinFractOptBiomassToOpenFlowerFemale:
-            plant.pFlower[kGenderFemale].minFractionOfOptimalBiomassToOpenFlower_frn, v = plant.MFD(plant.pFlower[kGenderFemale].minFractionOfOptimalBiomassToOpenFlower_frn, v, ft, d)
+            [plant.pFlower[kGenderFemale].minFractionOfOptimalBiomassToOpenFlower_frn, v] = plant.MFD(plant.pFlower[kGenderFemale].minFractionOfOptimalBiomassToOpenFlower_frn, v, ft, d)
             break
         case kFlowerMinFractionOfOptimalBiomassToCreateFruitFemale:
-            plant.pFlower[kGenderFemale].minFractionOfOptimalBiomassToCreateFruit_frn, v = plant.MFD(plant.pFlower[kGenderFemale].minFractionOfOptimalBiomassToCreateFruit_frn, v, ft, d)
+            [plant.pFlower[kGenderFemale].minFractionOfOptimalBiomassToCreateFruit_frn, v] = plant.MFD(plant.pFlower[kGenderFemale].minFractionOfOptimalBiomassToCreateFruit_frn, v, ft, d)
             break
         case kFlowerMinDaysToGrowFemale:
-            plant.pFlower[kGenderFemale].minDaysToGrow, v = plant.MFD(plant.pFlower[kGenderFemale].minDaysToGrow, v, ft, d)
+            [plant.pFlower[kGenderFemale].minDaysToGrow, v] = plant.MFD(plant.pFlower[kGenderFemale].minDaysToGrow, v, ft, d)
             break
         case kFlowerMaxDaysToGrowIfOverMinFractionFemale:
-            plant.pFlower[kGenderFemale].maxDaysToGrowIfOverMinFraction, v = plant.MFD(plant.pFlower[kGenderFemale].maxDaysToGrowIfOverMinFraction, v, ft, d)
+            [plant.pFlower[kGenderFemale].maxDaysToGrowIfOverMinFraction, v] = plant.MFD(plant.pFlower[kGenderFemale].maxDaysToGrowIfOverMinFraction, v, ft, d)
             break
         case kFlowerMinDaysBeforeOpeningFemale:
-            plant.pFlower[kGenderFemale].minDaysToOpenFlower, v = plant.MFD(plant.pFlower[kGenderFemale].minDaysToOpenFlower, v, ft, d)
+            [plant.pFlower[kGenderFemale].minDaysToOpenFlower, v] = plant.MFD(plant.pFlower[kGenderFemale].minDaysToOpenFlower, v, ft, d)
             break
         case kFlowerMinDaysBeforeSettingFruit:
-            plant.pFlower[kGenderFemale].minDaysBeforeSettingFruit, v = plant.MFD(plant.pFlower[kGenderFemale].minDaysBeforeSettingFruit, v, ft, d)
+            [plant.pFlower[kGenderFemale].minDaysBeforeSettingFruit, v] = plant.MFD(plant.pFlower[kGenderFemale].minDaysBeforeSettingFruit, v, ft, d)
             break
         case kFlowerDaysBeforeDropFemale:
-            plant.pFlower[kGenderFemale].daysBeforeDrop, v = plant.MFD(plant.pFlower[kGenderFemale].daysBeforeDrop, v, ft, d)
+            [plant.pFlower[kGenderFemale].daysBeforeDrop, v] = plant.MFD(plant.pFlower[kGenderFemale].daysBeforeDrop, v, ft, d)
             break
         case kInflorescenceNumFlowersOnMainBranchFemale:
-            plant.pInflor[kGenderFemale].numFlowersOnMainBranch, v = plant.MFD(plant.pInflor[kGenderFemale].numFlowersOnMainBranch, v, ft, d)
+            [plant.pInflor[kGenderFemale].numFlowersOnMainBranch, v] = plant.MFD(plant.pInflor[kGenderFemale].numFlowersOnMainBranch, v, ft, d)
             break
         case kInflorescenceNumFlowersPerBranchFemale:
-            plant.pInflor[kGenderFemale].numFlowersPerBranch, v = plant.MFD(plant.pInflor[kGenderFemale].numFlowersPerBranch, v, ft, d)
+            [plant.pInflor[kGenderFemale].numFlowersPerBranch, v] = plant.MFD(plant.pInflor[kGenderFemale].numFlowersPerBranch, v, ft, d)
             break
         case kInflorescenceNumBranchesFemale:
-            plant.pInflor[kGenderFemale].numBranches, v = plant.MFD(plant.pInflor[kGenderFemale].numBranches, v, ft, d)
+            [plant.pInflor[kGenderFemale].numBranches, v] = plant.MFD(plant.pInflor[kGenderFemale].numBranches, v, ft, d)
             break
         case kInflorescenceFemaleStalkColor:
-            plant.pInflor[kGenderFemale].stalkColor, v = plant.MFD(plant.pInflor[kGenderFemale].stalkColor, v, ft, d)
+            [plant.pInflor[kGenderFemale].stalkColor, v] = plant.MFD(plant.pInflor[kGenderFemale].stalkColor, v, ft, d)
             break
         case kInflorescenceFemalePedicelColor:
-            plant.pInflor[kGenderFemale].pedicelColor, v = plant.MFD(plant.pInflor[kGenderFemale].pedicelColor, v, ft, d)
+            [plant.pInflor[kGenderFemale].pedicelColor, v] = plant.MFD(plant.pInflor[kGenderFemale].pedicelColor, v, ft, d)
             break
         case kInflorescenceBranchesAreAlternateFemale:
-            plant.pInflor[kGenderFemale].branchesAreAlternate, v = plant.MFD(plant.pInflor[kGenderFemale].branchesAreAlternate, v, ft, d)
+            [plant.pInflor[kGenderFemale].branchesAreAlternate, v] = plant.MFD(plant.pInflor[kGenderFemale].branchesAreAlternate, v, ft, d)
             break
         case kInflorescenceBranchAngleFemale:
-            plant.pInflor[kGenderFemale].branchAngle, v = plant.MFD(plant.pInflor[kGenderFemale].branchAngle, v, ft, d)
+            [plant.pInflor[kGenderFemale].branchAngle, v] = plant.MFD(plant.pInflor[kGenderFemale].branchAngle, v, ft, d)
             break
         case kInflorescenceInternodeAngleFemale:
-            plant.pInflor[kGenderFemale].angleBetweenInternodes, v = plant.MFD(plant.pInflor[kGenderFemale].angleBetweenInternodes, v, ft, d)
+            [plant.pInflor[kGenderFemale].angleBetweenInternodes, v] = plant.MFD(plant.pInflor[kGenderFemale].angleBetweenInternodes, v, ft, d)
             break
         case kInflorescencePedicelAngleFemale:
-            plant.pInflor[kGenderFemale].pedicelAngle, v = plant.MFD(plant.pInflor[kGenderFemale].pedicelAngle, v, ft, d)
+            [plant.pInflor[kGenderFemale].pedicelAngle, v] = plant.MFD(plant.pInflor[kGenderFemale].pedicelAngle, v, ft, d)
             break
         case kInflorescencePeduncleAngleFromVegetativeStemFemale:
-            plant.pInflor[kGenderFemale].peduncleAngleFromVegetativeStem, v = plant.MFD(plant.pInflor[kGenderFemale].peduncleAngleFromVegetativeStem, v, ft, d)
+            [plant.pInflor[kGenderFemale].peduncleAngleFromVegetativeStem, v] = plant.MFD(plant.pInflor[kGenderFemale].peduncleAngleFromVegetativeStem, v, ft, d)
             break
         case kInflorescencePeduncleAngleFromVegetativeStemApicalFemale:
-            plant.pInflor[kGenderFemale].apicalStalkAngleFromVegetativeStem, v = plant.MFD(plant.pInflor[kGenderFemale].apicalStalkAngleFromVegetativeStem, v, ft, d)
+            [plant.pInflor[kGenderFemale].apicalStalkAngleFromVegetativeStem, v] = plant.MFD(plant.pInflor[kGenderFemale].apicalStalkAngleFromVegetativeStem, v, ft, d)
             break
         case kInflorescenceFlowersSpiralOnStemFemale:
-            plant.pInflor[kGenderFemale].flowersSpiralOnStem, v = plant.MFD(plant.pInflor[kGenderFemale].flowersSpiralOnStem, v, ft, d)
+            [plant.pInflor[kGenderFemale].flowersSpiralOnStem, v] = plant.MFD(plant.pInflor[kGenderFemale].flowersSpiralOnStem, v, ft, d)
             break
         case kInflorescenceIsHeadFemale:
-            plant.pInflor[kGenderFemale].isHead, v = plant.MFD(plant.pInflor[kGenderFemale].isHead, v, ft, d)
+            [plant.pInflor[kGenderFemale].isHead, v] = plant.MFD(plant.pInflor[kGenderFemale].isHead, v, ft, d)
             break
         case kInflorescenceTerminalStalkLengthFemale:
-            plant.pInflor[kGenderFemale].terminalStalkLength_mm, v = plant.MFD(plant.pInflor[kGenderFemale].terminalStalkLength_mm, v, ft, d)
+            [plant.pInflor[kGenderFemale].terminalStalkLength_mm, v] = plant.MFD(plant.pInflor[kGenderFemale].terminalStalkLength_mm, v, ft, d)
             break
         case kInflorescencePeduncleLengthFemale:
-            plant.pInflor[kGenderFemale].peduncleLength_mm, v = plant.MFD(plant.pInflor[kGenderFemale].peduncleLength_mm, v, ft, d)
+            [plant.pInflor[kGenderFemale].peduncleLength_mm, v] = plant.MFD(plant.pInflor[kGenderFemale].peduncleLength_mm, v, ft, d)
             break
         case kInflorescenceInternodeLengthFemale:
-            plant.pInflor[kGenderFemale].internodeLength_mm, v = plant.MFD(plant.pInflor[kGenderFemale].internodeLength_mm, v, ft, d)
+            [plant.pInflor[kGenderFemale].internodeLength_mm, v] = plant.MFD(plant.pInflor[kGenderFemale].internodeLength_mm, v, ft, d)
             break
         case kInflorescencePedicelLengthFemale:
-            plant.pInflor[kGenderFemale].pedicelLength_mm, v = plant.MFD(plant.pInflor[kGenderFemale].pedicelLength_mm, v, ft, d)
+            [plant.pInflor[kGenderFemale].pedicelLength_mm, v] = plant.MFD(plant.pInflor[kGenderFemale].pedicelLength_mm, v, ft, d)
             break
         case kInflorescenceInternodeWidthFemale:
-            plant.pInflor[kGenderFemale].internodeWidth_mm, v = plant.MFD(plant.pInflor[kGenderFemale].internodeWidth_mm, v, ft, d)
+            [plant.pInflor[kGenderFemale].internodeWidth_mm, v] = plant.MFD(plant.pInflor[kGenderFemale].internodeWidth_mm, v, ft, d)
             break
         case kInflorescencePedicelTaperIndexFemale:
-            plant.pInflor[kGenderFemale].pedicelTaperIndex, v = plant.MFD(plant.pInflor[kGenderFemale].pedicelTaperIndex, v, ft, d)
+            [plant.pInflor[kGenderFemale].pedicelTaperIndex, v] = plant.MFD(plant.pInflor[kGenderFemale].pedicelTaperIndex, v, ft, d)
             break
         case kInflorescenceIsTerminalFemale:
-            plant.pInflor[kGenderFemale].isTerminal, v = plant.MFD(plant.pInflor[kGenderFemale].isTerminal, v, ft, d)
+            [plant.pInflor[kGenderFemale].isTerminal, v] = plant.MFD(plant.pInflor[kGenderFemale].isTerminal, v, ft, d)
             break
         case kInflorescenceBiomassRequiredFemale:
-            plant.pInflor[kGenderFemale].optimalBiomass_pctMPB, v = plant.MFD(plant.pInflor[kGenderFemale].optimalBiomass_pctMPB, v, ft, d)
+            [plant.pInflor[kGenderFemale].optimalBiomass_pctMPB, v] = plant.MFD(plant.pInflor[kGenderFemale].optimalBiomass_pctMPB, v, ft, d)
             break
         case kInflorescenceMinFractOptBiomassToCreateFemale:
-            plant.pInflor[kGenderFemale].minFractionOfOptimalBiomassToCreateInflorescence_frn, v = plant.MFD(plant.pInflor[kGenderFemale].minFractionOfOptimalBiomassToCreateInflorescence_frn, v, ft, d)
+            [plant.pInflor[kGenderFemale].minFractionOfOptimalBiomassToCreateInflorescence_frn, v] = plant.MFD(plant.pInflor[kGenderFemale].minFractionOfOptimalBiomassToCreateInflorescence_frn, v, ft, d)
             break
         case kInflorescenceMinFractOptBiomassForFlowersFemale:
-            plant.pInflor[kGenderFemale].minFractionOfOptimalBiomassToMakeFlowers_frn, v = plant.MFD(plant.pInflor[kGenderFemale].minFractionOfOptimalBiomassToMakeFlowers_frn, v, ft, d)
+            [plant.pInflor[kGenderFemale].minFractionOfOptimalBiomassToMakeFlowers_frn, v] = plant.MFD(plant.pInflor[kGenderFemale].minFractionOfOptimalBiomassToMakeFlowers_frn, v, ft, d)
             break
         case kInflorescenceDaysToAllFlowersShowingFemale:
-            plant.pInflor[kGenderFemale].daysToAllFlowersCreated, v = plant.MFD(plant.pInflor[kGenderFemale].daysToAllFlowersCreated, v, ft, d)
+            [plant.pInflor[kGenderFemale].daysToAllFlowersCreated, v] = plant.MFD(plant.pInflor[kGenderFemale].daysToAllFlowersCreated, v, ft, d)
             break
         case kInflorescenceFlowersDrawTopToBottomFemale:
-            plant.pInflor[kGenderFemale].flowersDrawTopToBottom, v = plant.MFD(plant.pInflor[kGenderFemale].flowersDrawTopToBottom, v, ft, d)
+            [plant.pInflor[kGenderFemale].flowersDrawTopToBottom, v] = plant.MFD(plant.pInflor[kGenderFemale].flowersDrawTopToBottom, v, ft, d)
             break
         case kInflorescenceMinDaysToCreateInflorescenceFemale:
-            plant.pInflor[kGenderFemale].minDaysToCreateInflorescence, v = plant.MFD(plant.pInflor[kGenderFemale].minDaysToCreateInflorescence, v, ft, d)
+            [plant.pInflor[kGenderFemale].minDaysToCreateInflorescence, v] = plant.MFD(plant.pInflor[kGenderFemale].minDaysToCreateInflorescence, v, ft, d)
             break
         case kInflorescenceMaxDaysToCreateIfOverMinFractFemale:
-            plant.pInflor[kGenderFemale].maxDaysToCreateInflorescenceIfOverMinFraction, v = plant.MFD(plant.pInflor[kGenderFemale].maxDaysToCreateInflorescenceIfOverMinFraction, v, ft, d)
+            [plant.pInflor[kGenderFemale].maxDaysToCreateInflorescenceIfOverMinFraction, v] = plant.MFD(plant.pInflor[kGenderFemale].maxDaysToCreateInflorescenceIfOverMinFraction, v, ft, d)
             break
         case kInflorescenceMinDaysToGrowFemale:
-            plant.pInflor[kGenderFemale].minDaysToGrow, v = plant.MFD(plant.pInflor[kGenderFemale].minDaysToGrow, v, ft, d)
+            [plant.pInflor[kGenderFemale].minDaysToGrow, v] = plant.MFD(plant.pInflor[kGenderFemale].minDaysToGrow, v, ft, d)
             break
         case kInflorescenceMaxDaysToGrowFemale:
-            plant.pInflor[kGenderFemale].maxDaysToGrow, v = plant.MFD(plant.pInflor[kGenderFemale].maxDaysToGrow, v, ft, d)
+            [plant.pInflor[kGenderFemale].maxDaysToGrow, v] = plant.MFD(plant.pInflor[kGenderFemale].maxDaysToGrow, v, ft, d)
             break
         case kInflorescenceFemaleBractNumBracts:
-            plant.pInflor[kGenderFemale].bractTdoParams.repetitions, v = plant.MFD(plant.pInflor[kGenderFemale].bractTdoParams.repetitions, v, ft, d)
+            [plant.pInflor[kGenderFemale].bractTdoParams.repetitions, v] = plant.MFD(plant.pInflor[kGenderFemale].bractTdoParams.repetitions, v, ft, d)
             break
         case kInflorescenceFemaleBractObject3D:
             plant.transferObject3D(d, plant.pInflor[kGenderFemale].bractTdoParams.object3D, v)
             break
         case kInflorescenceFemaleBractScaleAtFullSize:
-            plant.pInflor[kGenderFemale].bractTdoParams.scaleAtFullSize, v = plant.MFD(plant.pInflor[kGenderFemale].bractTdoParams.scaleAtFullSize, v, ft, d)
+            [plant.pInflor[kGenderFemale].bractTdoParams.scaleAtFullSize, v] = plant.MFD(plant.pInflor[kGenderFemale].bractTdoParams.scaleAtFullSize, v, ft, d)
             break
         case kInflorescenceFemaleBractObject3DXRotationBeforeDraw:
-            plant.pInflor[kGenderFemale].bractTdoParams.xRotationBeforeDraw, v = plant.MFD(plant.pInflor[kGenderFemale].bractTdoParams.xRotationBeforeDraw, v, ft, d)
+            [plant.pInflor[kGenderFemale].bractTdoParams.xRotationBeforeDraw, v] = plant.MFD(plant.pInflor[kGenderFemale].bractTdoParams.xRotationBeforeDraw, v, ft, d)
             break
         case kInflorescenceFemaleBractObject3DYRotationBeforeDraw:
-            plant.pInflor[kGenderFemale].bractTdoParams.yRotationBeforeDraw, v = plant.MFD(plant.pInflor[kGenderFemale].bractTdoParams.yRotationBeforeDraw, v, ft, d)
+            [plant.pInflor[kGenderFemale].bractTdoParams.yRotationBeforeDraw, v] = plant.MFD(plant.pInflor[kGenderFemale].bractTdoParams.yRotationBeforeDraw, v, ft, d)
             break
         case kInflorescenceFemaleBractObject3DZRotationBeforeDraw:
-            plant.pInflor[kGenderFemale].bractTdoParams.zRotationBeforeDraw, v = plant.MFD(plant.pInflor[kGenderFemale].bractTdoParams.zRotationBeforeDraw, v, ft, d)
+            [plant.pInflor[kGenderFemale].bractTdoParams.zRotationBeforeDraw, v] = plant.MFD(plant.pInflor[kGenderFemale].bractTdoParams.zRotationBeforeDraw, v, ft, d)
             break
         case kInflorescenceFemaleBractFaceColor:
-            plant.pInflor[kGenderFemale].bractTdoParams.faceColor, v = plant.MFD(plant.pInflor[kGenderFemale].bractTdoParams.faceColor, v, ft, d)
+            [plant.pInflor[kGenderFemale].bractTdoParams.faceColor, v] = plant.MFD(plant.pInflor[kGenderFemale].bractTdoParams.faceColor, v, ft, d)
             break
         case kInflorescenceFemaleBractBackfaceColor:
-            plant.pInflor[kGenderFemale].bractTdoParams.backfaceColor, v = plant.MFD(plant.pInflor[kGenderFemale].bractTdoParams.backfaceColor, v, ft, d)
+            [plant.pInflor[kGenderFemale].bractTdoParams.backfaceColor, v] = plant.MFD(plant.pInflor[kGenderFemale].bractTdoParams.backfaceColor, v, ft, d)
             break
         case kInflorescenceFemaleBractsAreRadiallyArranged:
-            plant.pInflor[kGenderFemale].bractTdoParams.radiallyArranged, v = plant.MFD(plant.pInflor[kGenderFemale].bractTdoParams.radiallyArranged, v, ft, d)
+            [plant.pInflor[kGenderFemale].bractTdoParams.radiallyArranged, v] = plant.MFD(plant.pInflor[kGenderFemale].bractTdoParams.radiallyArranged, v, ft, d)
             break
         case kInflorescenceFemaleBractObject3DPullbackAngle:
-            plant.pInflor[kGenderFemale].bractTdoParams.pullBackAngle, v = plant.MFD(plant.pInflor[kGenderFemale].bractTdoParams.pullBackAngle, v, ft, d)
+            [plant.pInflor[kGenderFemale].bractTdoParams.pullBackAngle, v] = plant.MFD(plant.pInflor[kGenderFemale].bractTdoParams.pullBackAngle, v, ft, d)
             break
         case kFruitNumSections:
-            plant.pFruit.tdoParams.repetitions, v = plant.MFD(plant.pFruit.tdoParams.repetitions, v, ft, d)
+            [plant.pFruit.tdoParams.repetitions, v] = plant.MFD(plant.pFruit.tdoParams.repetitions, v, ft, d)
             break
         case kFruitObject3D:
             plant.transferObject3D(d, plant.pFruit.tdoParams.object3D, v)
             break
         case kFruitScaleAtFullSize:
-            plant.pFruit.tdoParams.scaleAtFullSize, v = plant.MFD(plant.pFruit.tdoParams.scaleAtFullSize, v, ft, d)
+            [plant.pFruit.tdoParams.scaleAtFullSize, v] = plant.MFD(plant.pFruit.tdoParams.scaleAtFullSize, v, ft, d)
             break
         case kFruitObject3DXRotationBeforeDraw:
-            plant.pFruit.tdoParams.xRotationBeforeDraw, v = plant.MFD(plant.pFruit.tdoParams.xRotationBeforeDraw, v, ft, d)
+            [plant.pFruit.tdoParams.xRotationBeforeDraw, v] = plant.MFD(plant.pFruit.tdoParams.xRotationBeforeDraw, v, ft, d)
             break
         case kFruitObject3DYRotationBeforeDraw:
-            plant.pFruit.tdoParams.yRotationBeforeDraw, v = plant.MFD(plant.pFruit.tdoParams.yRotationBeforeDraw, v, ft, d)
+            [plant.pFruit.tdoParams.yRotationBeforeDraw, v] = plant.MFD(plant.pFruit.tdoParams.yRotationBeforeDraw, v, ft, d)
             break
         case kFruitObject3DZRotationBeforeDraw:
-            plant.pFruit.tdoParams.zRotationBeforeDraw, v = plant.MFD(plant.pFruit.tdoParams.zRotationBeforeDraw, v, ft, d)
+            [plant.pFruit.tdoParams.zRotationBeforeDraw, v] = plant.MFD(plant.pFruit.tdoParams.zRotationBeforeDraw, v, ft, d)
             break
         case kFruitSectionsAreRadiallyArranged:
-            plant.pFruit.tdoParams.radiallyArranged, v = plant.MFD(plant.pFruit.tdoParams.radiallyArranged, v, ft, d)
+            [plant.pFruit.tdoParams.radiallyArranged, v] = plant.MFD(plant.pFruit.tdoParams.radiallyArranged, v, ft, d)
             break
         case kFruitUnripeFaceColor:
-            plant.pFruit.tdoParams.alternateFaceColor, v = plant.MFD(plant.pFruit.tdoParams.alternateFaceColor, v, ft, d)
+            [plant.pFruit.tdoParams.alternateFaceColor, v] = plant.MFD(plant.pFruit.tdoParams.alternateFaceColor, v, ft, d)
             break
         case kFruitUnripeBackfaceColor:
-            plant.pFruit.tdoParams.alternateBackfaceColor, v = plant.MFD(plant.pFruit.tdoParams.alternateBackfaceColor, v, ft, d)
+            [plant.pFruit.tdoParams.alternateBackfaceColor, v] = plant.MFD(plant.pFruit.tdoParams.alternateBackfaceColor, v, ft, d)
             break
         case kFruitRipeFaceColor:
-            plant.pFruit.tdoParams.faceColor, v = plant.MFD(plant.pFruit.tdoParams.faceColor, v, ft, d)
+            [plant.pFruit.tdoParams.faceColor, v] = plant.MFD(plant.pFruit.tdoParams.faceColor, v, ft, d)
             break
         case kFruitRipeBackfaceColor:
-            plant.pFruit.tdoParams.backfaceColor, v = plant.MFD(plant.pFruit.tdoParams.backfaceColor, v, ft, d)
+            [plant.pFruit.tdoParams.backfaceColor, v] = plant.MFD(plant.pFruit.tdoParams.backfaceColor, v, ft, d)
             break
         case kFruitOptimumMass_pctMPB:
-            plant.pFruit.optimalBiomass_pctMPB, v = plant.MFD(plant.pFruit.optimalBiomass_pctMPB, v, ft, d)
+            [plant.pFruit.optimalBiomass_pctMPB, v] = plant.MFD(plant.pFruit.optimalBiomass_pctMPB, v, ft, d)
             break
         case kFruitSCurve:
             v = transferSCurveValue(d, plant.pFruit.sCurveParams, index, v)
             break
         case kFruitMinDaysToGrow:
-            plant.pFruit.minDaysToGrow, v = plant.MFD(plant.pFruit.minDaysToGrow, v, ft, d)
+            [plant.pFruit.minDaysToGrow, v] = plant.MFD(plant.pFruit.minDaysToGrow, v, ft, d)
             break
         case kFruitMaxDaysToGrow:
-            plant.pFruit.maxDaysToGrow, v = plant.MFD(plant.pFruit.maxDaysToGrow, v, ft, d)
+            [plant.pFruit.maxDaysToGrow, v] = plant.MFD(plant.pFruit.maxDaysToGrow, v, ft, d)
             break
         case kFruitDaysToRipen:
-            plant.pFruit.daysToRipen, v = plant.MFD(plant.pFruit.daysToRipen, v, ft, d)
+            [plant.pFruit.daysToRipen, v] = plant.MFD(plant.pFruit.daysToRipen, v, ft, d)
             break
         case kRootTopShowsAboveGround:
-            plant.pRoot.showsAboveGround, v = plant.MFD(plant.pRoot.showsAboveGround, v, ft, d)
+            [plant.pRoot.showsAboveGround, v] = plant.MFD(plant.pRoot.showsAboveGround, v, ft, d)
             break
         case kRootTopObject3D:
             plant.transferObject3D(d, plant.pRoot.tdoParams.object3D, v)
             break
         case kRootTopScaleAtFullSize:
-            plant.pRoot.tdoParams.scaleAtFullSize, v = plant.MFD(plant.pRoot.tdoParams.scaleAtFullSize, v, ft, d)
+            [plant.pRoot.tdoParams.scaleAtFullSize, v] = plant.MFD(plant.pRoot.tdoParams.scaleAtFullSize, v, ft, d)
             break
         case kRootTopObject3DXRotationBeforeDraw:
-            plant.pRoot.tdoParams.xRotationBeforeDraw, v = plant.MFD(plant.pRoot.tdoParams.xRotationBeforeDraw, v, ft, d)
+            [plant.pRoot.tdoParams.xRotationBeforeDraw, v] = plant.MFD(plant.pRoot.tdoParams.xRotationBeforeDraw, v, ft, d)
             break
         case kRootTopObject3DYRotationBeforeDraw:
-            plant.pRoot.tdoParams.yRotationBeforeDraw, v = plant.MFD(plant.pRoot.tdoParams.yRotationBeforeDraw, v, ft, d)
+            [plant.pRoot.tdoParams.yRotationBeforeDraw, v] = plant.MFD(plant.pRoot.tdoParams.yRotationBeforeDraw, v, ft, d)
             break
         case kRootTopObject3DZRotationBeforeDraw:
-            plant.pRoot.tdoParams.zRotationBeforeDraw, v = plant.MFD(plant.pRoot.tdoParams.zRotationBeforeDraw, v, ft, d)
+            [plant.pRoot.tdoParams.zRotationBeforeDraw, v] = plant.MFD(plant.pRoot.tdoParams.zRotationBeforeDraw, v, ft, d)
             break
         case kRootTopFaceColor:
-            plant.pRoot.tdoParams.faceColor, v = plant.MFD(plant.pRoot.tdoParams.faceColor, v, ft, d)
+            [plant.pRoot.tdoParams.faceColor, v] = plant.MFD(plant.pRoot.tdoParams.faceColor, v, ft, d)
             break
         case kRootTopBackfaceColor:
-            plant.pRoot.tdoParams.backfaceColor, v = plant.MFD(plant.pRoot.tdoParams.backfaceColor, v, ft, d)
+            [plant.pRoot.tdoParams.backfaceColor, v] = plant.MFD(plant.pRoot.tdoParams.backfaceColor, v, ft, d)
             break
         case kStateAge:
-            plant.age, v = plant.MFD(plant.age, v, ft, d)
+            [plant.age, v] = plant.MFD(plant.age, v, ft, d)
             break
         case kStateBasePointX:
-            plant.basePoint_mm.x, v = plant.MFD(plant.basePoint_mm.x, v, ft, d)
+            [plant.basePoint_mm.x, v] = plant.MFD(plant.basePoint_mm.x, v, ft, d)
             break
         case kStateBasePointY:
-            plant.basePoint_mm.y, v = plant.MFD(plant.basePoint_mm.y, v, ft, d)
+            [plant.basePoint_mm.y, v] = plant.MFD(plant.basePoint_mm.y, v, ft, d)
             break
         case kStateDrawingScale:
-            plant.drawingScale_PixelsPerMm, v = plant.MFD(plant.drawingScale_PixelsPerMm, v, ft, d)
+            [plant.drawingScale_PixelsPerMm, v] = plant.MFD(plant.drawingScale_PixelsPerMm, v, ft, d)
             break
         case kStateHidden:
-            plant.hidden, v = plant.MFD(plant.hidden, v, ft, d)
+            [plant.hidden, v] = plant.MFD(plant.hidden, v, ft, d)
             break
         case kStateSelected:
-            plant.selectedWhenLastSaved, v = plant.MFD(plant.selectedWhenLastSaved, v, ft, d)
+            [plant.selectedWhenLastSaved, v] = plant.MFD(plant.selectedWhenLastSaved, v, ft, d)
             break
         case kStateRotationX:
-            plant.xRotation, v = plant.MFD(plant.xRotation, v, ft, d)
+            [plant.xRotation, v] = plant.MFD(plant.xRotation, v, ft, d)
             break
         case kStateRotationY:
-            plant.yRotation, v = plant.MFD(plant.yRotation, v, ft, d)
+            [plant.yRotation, v] = plant.MFD(plant.yRotation, v, ft, d)
             break
         case kStateRotationZ:
-            plant.zRotation, v = plant.MFD(plant.zRotation, v, ft, d)
+            [plant.zRotation, v] = plant.MFD(plant.zRotation, v, ft, d)
             break
         case kFlowerNumPetalsMale:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].repetitions, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].repetitions, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].repetitions, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].repetitions, v, ft, d)
             break
         case kFlowerMaleObject3D:
             plant.transferObject3D(d, plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].object3D, v)
             break
         case kFlowerScaleAtFullSizeMale:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].scaleAtFullSize, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].scaleAtFullSize, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].scaleAtFullSize, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].scaleAtFullSize, v, ft, d)
             break
         case kFlowerMaleObject3DXRotationBeforeDraw:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].xRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].xRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].xRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].xRotationBeforeDraw, v, ft, d)
             break
         case kFlowerMaleObject3DYRotationBeforeDraw:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].yRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].yRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].yRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].yRotationBeforeDraw, v, ft, d)
             break
         case kFlowerMaleObject3DZRotationBeforeDraw:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].zRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].zRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].zRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].zRotationBeforeDraw, v, ft, d)
             break
         case kFlowerMaleFaceColor:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].faceColor, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].faceColor, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].faceColor, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].faceColor, v, ft, d)
             break
         case kFlowerMaleBackfaceColor:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].backfaceColor, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].backfaceColor, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].backfaceColor, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].backfaceColor, v, ft, d)
             break
         case kFlowerPetalsAreRadiallyArrangedMale:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].radiallyArranged, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].radiallyArranged, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].radiallyArranged, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].radiallyArranged, v, ft, d)
             break
         case kFlowerMaleObject3DPullbackAngle:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].pullBackAngle, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].pullBackAngle, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].pullBackAngle, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kFirstPetals].pullBackAngle, v, ft, d)
             break
         case kFlowerOptimalBiomassMale:
-            plant.pFlower[kGenderMale].optimalBiomass_pctMPB, v = plant.MFD(plant.pFlower[kGenderMale].optimalBiomass_pctMPB, v, ft, d)
+            [plant.pFlower[kGenderMale].optimalBiomass_pctMPB, v] = plant.MFD(plant.pFlower[kGenderMale].optimalBiomass_pctMPB, v, ft, d)
             break
         case kFlowerMinFractOptBiomassToOpenFlowerMale:
-            plant.pFlower[kGenderMale].minFractionOfOptimalBiomassToOpenFlower_frn, v = plant.MFD(plant.pFlower[kGenderMale].minFractionOfOptimalBiomassToOpenFlower_frn, v, ft, d)
+            [plant.pFlower[kGenderMale].minFractionOfOptimalBiomassToOpenFlower_frn, v] = plant.MFD(plant.pFlower[kGenderMale].minFractionOfOptimalBiomassToOpenFlower_frn, v, ft, d)
             break
         case kFlowerMinDaysToGrowMale:
-            plant.pFlower[kGenderMale].minDaysToGrow, v = plant.MFD(plant.pFlower[kGenderMale].minDaysToGrow, v, ft, d)
+            [plant.pFlower[kGenderMale].minDaysToGrow, v] = plant.MFD(plant.pFlower[kGenderMale].minDaysToGrow, v, ft, d)
             break
         case kFlowerMaxDaysToGrowIfOverMinFractionMale:
-            plant.pFlower[kGenderMale].maxDaysToGrowIfOverMinFraction, v = plant.MFD(plant.pFlower[kGenderMale].maxDaysToGrowIfOverMinFraction, v, ft, d)
+            [plant.pFlower[kGenderMale].maxDaysToGrowIfOverMinFraction, v] = plant.MFD(plant.pFlower[kGenderMale].maxDaysToGrowIfOverMinFraction, v, ft, d)
             break
         case kFlowerMinDaysBeforeOpeningMale:
-            plant.pFlower[kGenderMale].minDaysToOpenFlower, v = plant.MFD(plant.pFlower[kGenderMale].minDaysToOpenFlower, v, ft, d)
+            [plant.pFlower[kGenderMale].minDaysToOpenFlower, v] = plant.MFD(plant.pFlower[kGenderMale].minDaysToOpenFlower, v, ft, d)
             break
         case kFlowerDaysBeforeDropMale:
-            plant.pFlower[kGenderMale].daysBeforeDrop, v = plant.MFD(plant.pFlower[kGenderMale].daysBeforeDrop, v, ft, d)
+            [plant.pFlower[kGenderMale].daysBeforeDrop, v] = plant.MFD(plant.pFlower[kGenderMale].daysBeforeDrop, v, ft, d)
             break
         case kFlowerNumStamensMale:
-            plant.pFlower[kGenderMale].numStamens, v = plant.MFD(plant.pFlower[kGenderMale].numStamens, v, ft, d)
+            [plant.pFlower[kGenderMale].numStamens, v] = plant.MFD(plant.pFlower[kGenderMale].numStamens, v, ft, d)
             break
         case kFlowerFilamentLengthMale:
-            plant.pFlower[kGenderMale].filamentLength_mm, v = plant.MFD(plant.pFlower[kGenderMale].filamentLength_mm, v, ft, d)
+            [plant.pFlower[kGenderMale].filamentLength_mm, v] = plant.MFD(plant.pFlower[kGenderMale].filamentLength_mm, v, ft, d)
             break
         case kFlowerFilamentWidthMale:
-            plant.pFlower[kGenderMale].filamentWidth_mm, v = plant.MFD(plant.pFlower[kGenderMale].filamentWidth_mm, v, ft, d)
+            [plant.pFlower[kGenderMale].filamentWidth_mm, v] = plant.MFD(plant.pFlower[kGenderMale].filamentWidth_mm, v, ft, d)
             break
         case kFlowerFilamentTaperIndexMale:
-            plant.pFlower[kGenderMale].filamentTaperIndex, v = plant.MFD(plant.pFlower[kGenderMale].filamentTaperIndex, v, ft, d)
+            [plant.pFlower[kGenderMale].filamentTaperIndex, v] = plant.MFD(plant.pFlower[kGenderMale].filamentTaperIndex, v, ft, d)
             break
         case kFlowerFilamentColorMale:
-            plant.pFlower[kGenderMale].filamentColor, v = plant.MFD(plant.pFlower[kGenderMale].filamentColor, v, ft, d)
+            [plant.pFlower[kGenderMale].filamentColor, v] = plant.MFD(plant.pFlower[kGenderMale].filamentColor, v, ft, d)
             break
         case kFlowerAntherMaleObject3DPullbackAngle:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].pullBackAngle, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].pullBackAngle, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].pullBackAngle, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].pullBackAngle, v, ft, d)
             break
         case kFlowerAntherNumSectionsMale:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].repetitions, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].repetitions, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].repetitions, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].repetitions, v, ft, d)
             break
         case kFlowerMaleAntherObject3D:
             plant.transferObject3D(d, plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].object3D, v)
             break
         case kFlowerAntherScaleAtFullSizeMale:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].scaleAtFullSize, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].scaleAtFullSize, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].scaleAtFullSize, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].scaleAtFullSize, v, ft, d)
             break
         case kFlowerMaleAntherObject3DXRotationBeforeDraw:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].xRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].xRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].xRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].xRotationBeforeDraw, v, ft, d)
             break
         case kFlowerMaleAntherObject3DYRotationBeforeDraw:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].yRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].yRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].yRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].yRotationBeforeDraw, v, ft, d)
             break
         case kFlowerMaleAntherObject3DZRotationBeforeDraw:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].zRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].zRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].zRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].zRotationBeforeDraw, v, ft, d)
             break
         case kFlowerAntherMaleFaceColor:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].faceColor, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].faceColor, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].faceColor, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].faceColor, v, ft, d)
             break
         case kFlowerAntherMaleBackfaceColor:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].backfaceColor, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].backfaceColor, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].backfaceColor, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].backfaceColor, v, ft, d)
             break
         case kFlowerAntherSectionsAreRadiallyArrangedMale:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].radiallyArranged, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].radiallyArranged, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].radiallyArranged, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kStamens].radiallyArranged, v, ft, d)
             break
         case kFlowerSepalNumPetalsMale:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].repetitions, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].repetitions, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].repetitions, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].repetitions, v, ft, d)
             break
         case kFlowerMaleSepalObject3D:
             plant.transferObject3D(d, plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].object3D, v)
             break
         case kFlowerSepalScaleAtFullSizeMale:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].scaleAtFullSize, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].scaleAtFullSize, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].scaleAtFullSize, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].scaleAtFullSize, v, ft, d)
             break
         case kFlowerMaleSepalObject3DXRotationBeforeDraw:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].xRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].xRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].xRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].xRotationBeforeDraw, v, ft, d)
             break
         case kFlowerMaleSepalObject3DYRotationBeforeDraw:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].yRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].yRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].yRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].yRotationBeforeDraw, v, ft, d)
             break
         case kFlowerMaleSepalObject3DZRotationBeforeDraw:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].zRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].zRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].zRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].zRotationBeforeDraw, v, ft, d)
             break
         case kFlowerSepalMaleFaceColor:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].faceColor, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].faceColor, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].faceColor, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].faceColor, v, ft, d)
             break
         case kFlowerSepalMaleBackfaceColor:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].backfaceColor, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].backfaceColor, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].backfaceColor, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].backfaceColor, v, ft, d)
             break
         case kFlowerSepalPetalsAreRadiallyArrangedMale:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].radiallyArranged, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].radiallyArranged, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].radiallyArranged, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].radiallyArranged, v, ft, d)
             break
         case kFlowerSepalMaleObject3DPullbackAngle:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].pullBackAngle, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].pullBackAngle, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].pullBackAngle, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kSepals].pullBackAngle, v, ft, d)
             break
         case kFlowerMaleBudOption:
-            plant.pFlower[kGenderMale].budDrawingOption, v = plant.MFD(plant.pFlower[kGenderMale].budDrawingOption, v, ft, d)
+            [plant.pFlower[kGenderMale].budDrawingOption, v] = plant.MFD(plant.pFlower[kGenderMale].budDrawingOption, v, ft, d)
             break
         case kFlowerBudNumPetalsMale:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].repetitions, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].repetitions, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].repetitions, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].repetitions, v, ft, d)
             break
         case kFlowerMaleBudObject3D:
             plant.transferObject3D(d, plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].object3D, v)
             break
         case kFlowerBudScaleAtFullSizeMale:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].scaleAtFullSize, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].scaleAtFullSize, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].scaleAtFullSize, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].scaleAtFullSize, v, ft, d)
             break
         case kFlowerMaleBudObject3DXRotationBeforeDraw:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].xRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].xRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].xRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].xRotationBeforeDraw, v, ft, d)
             break
         case kFlowerMaleBudObject3DYRotationBeforeDraw:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].yRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].yRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].yRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].yRotationBeforeDraw, v, ft, d)
             break
         case kFlowerMaleBudObject3DZRotationBeforeDraw:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].zRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].zRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].zRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].zRotationBeforeDraw, v, ft, d)
             break
         case kFlowerBudMaleFaceColor:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].faceColor, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].faceColor, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].faceColor, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].faceColor, v, ft, d)
             break
         case kFlowerBudMaleBackfaceColor:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].backfaceColor, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].backfaceColor, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].backfaceColor, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].backfaceColor, v, ft, d)
             break
         case kFlowerBudPetalsAreRadiallyArrangedMale:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].radiallyArranged, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].radiallyArranged, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].radiallyArranged, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].radiallyArranged, v, ft, d)
             break
         case kFlowerBudMaleObject3DPullbackAngle:
-            plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].pullBackAngle, v = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].pullBackAngle, v, ft, d)
+            [plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].pullBackAngle, v] = plant.MFD(plant.pFlower[kGenderMale].tdoParams[FloralPart.kBud].pullBackAngle, v, ft, d)
             break
         case kInflorescenceNumFlowersOnMainBranchMale:
-            plant.pInflor[kGenderMale].numFlowersOnMainBranch, v = plant.MFD(plant.pInflor[kGenderMale].numFlowersOnMainBranch, v, ft, d)
+            [plant.pInflor[kGenderMale].numFlowersOnMainBranch, v] = plant.MFD(plant.pInflor[kGenderMale].numFlowersOnMainBranch, v, ft, d)
             break
         case kInflorescenceNumFlowersPerBranchMale:
-            plant.pInflor[kGenderMale].numFlowersPerBranch, v = plant.MFD(plant.pInflor[kGenderMale].numFlowersPerBranch, v, ft, d)
+            [plant.pInflor[kGenderMale].numFlowersPerBranch, v] = plant.MFD(plant.pInflor[kGenderMale].numFlowersPerBranch, v, ft, d)
             break
         case kInflorescenceNumBranchesMale:
-            plant.pInflor[kGenderMale].numBranches, v = plant.MFD(plant.pInflor[kGenderMale].numBranches, v, ft, d)
+            [plant.pInflor[kGenderMale].numBranches, v] = plant.MFD(plant.pInflor[kGenderMale].numBranches, v, ft, d)
             break
         case kInflorescenceMaleStalkColor:
-            plant.pInflor[kGenderMale].stalkColor, v = plant.MFD(plant.pInflor[kGenderMale].stalkColor, v, ft, d)
+            [plant.pInflor[kGenderMale].stalkColor, v] = plant.MFD(plant.pInflor[kGenderMale].stalkColor, v, ft, d)
             break
         case kInflorescenceMalePedicelColor:
-            plant.pInflor[kGenderMale].pedicelColor, v = plant.MFD(plant.pInflor[kGenderMale].pedicelColor, v, ft, d)
+            [plant.pInflor[kGenderMale].pedicelColor, v] = plant.MFD(plant.pInflor[kGenderMale].pedicelColor, v, ft, d)
             break
         case kInflorescenceBranchesAreAlternateMale:
-            plant.pInflor[kGenderMale].branchesAreAlternate, v = plant.MFD(plant.pInflor[kGenderMale].branchesAreAlternate, v, ft, d)
+            [plant.pInflor[kGenderMale].branchesAreAlternate, v] = plant.MFD(plant.pInflor[kGenderMale].branchesAreAlternate, v, ft, d)
             break
         case kInflorescenceBranchAngleMale:
-            plant.pInflor[kGenderMale].branchAngle, v = plant.MFD(plant.pInflor[kGenderMale].branchAngle, v, ft, d)
+            [plant.pInflor[kGenderMale].branchAngle, v] = plant.MFD(plant.pInflor[kGenderMale].branchAngle, v, ft, d)
             break
         case kInflorescenceInternodeAngleMale:
-            plant.pInflor[kGenderMale].angleBetweenInternodes, v = plant.MFD(plant.pInflor[kGenderMale].angleBetweenInternodes, v, ft, d)
+            [plant.pInflor[kGenderMale].angleBetweenInternodes, v] = plant.MFD(plant.pInflor[kGenderMale].angleBetweenInternodes, v, ft, d)
             break
         case kInflorescencePedicelAngleMale:
-            plant.pInflor[kGenderMale].pedicelAngle, v = plant.MFD(plant.pInflor[kGenderMale].pedicelAngle, v, ft, d)
+            [plant.pInflor[kGenderMale].pedicelAngle, v] = plant.MFD(plant.pInflor[kGenderMale].pedicelAngle, v, ft, d)
             break
         case kInflorescencePeduncleAngleFromVegetativeStemMale:
-            plant.pInflor[kGenderMale].peduncleAngleFromVegetativeStem, v = plant.MFD(plant.pInflor[kGenderMale].peduncleAngleFromVegetativeStem, v, ft, d)
+            [plant.pInflor[kGenderMale].peduncleAngleFromVegetativeStem, v] = plant.MFD(plant.pInflor[kGenderMale].peduncleAngleFromVegetativeStem, v, ft, d)
             break
         case kInflorescencePeduncleAngleFromVegetativeStemApicalMale:
-            plant.pInflor[kGenderMale].apicalStalkAngleFromVegetativeStem, v = plant.MFD(plant.pInflor[kGenderMale].apicalStalkAngleFromVegetativeStem, v, ft, d)
+            [plant.pInflor[kGenderMale].apicalStalkAngleFromVegetativeStem, v] = plant.MFD(plant.pInflor[kGenderMale].apicalStalkAngleFromVegetativeStem, v, ft, d)
             break
         case kInflorescenceFlowersSpiralOnStemMale:
-            plant.pInflor[kGenderMale].flowersSpiralOnStem, v = plant.MFD(plant.pInflor[kGenderMale].flowersSpiralOnStem, v, ft, d)
+            [plant.pInflor[kGenderMale].flowersSpiralOnStem, v] = plant.MFD(plant.pInflor[kGenderMale].flowersSpiralOnStem, v, ft, d)
             break
         case kInflorescenceIsHeadMale:
-            plant.pInflor[kGenderMale].isHead, v = plant.MFD(plant.pInflor[kGenderMale].isHead, v, ft, d)
+            [plant.pInflor[kGenderMale].isHead, v] = plant.MFD(plant.pInflor[kGenderMale].isHead, v, ft, d)
             break
         case kInflorescenceTerminalStalkLengthMale:
-            plant.pInflor[kGenderMale].terminalStalkLength_mm, v = plant.MFD(plant.pInflor[kGenderMale].terminalStalkLength_mm, v, ft, d)
+            [plant.pInflor[kGenderMale].terminalStalkLength_mm, v] = plant.MFD(plant.pInflor[kGenderMale].terminalStalkLength_mm, v, ft, d)
             break
         case kInflorescencePeduncleLengthMale:
-            plant.pInflor[kGenderMale].peduncleLength_mm, v = plant.MFD(plant.pInflor[kGenderMale].peduncleLength_mm, v, ft, d)
+            [plant.pInflor[kGenderMale].peduncleLength_mm, v] = plant.MFD(plant.pInflor[kGenderMale].peduncleLength_mm, v, ft, d)
             break
         case kInflorescenceInternodeLengthMale:
-            plant.pInflor[kGenderMale].internodeLength_mm, v = plant.MFD(plant.pInflor[kGenderMale].internodeLength_mm, v, ft, d)
+            [plant.pInflor[kGenderMale].internodeLength_mm, v] = plant.MFD(plant.pInflor[kGenderMale].internodeLength_mm, v, ft, d)
             break
         case kInflorescencePedicelLengthMale:
-            plant.pInflor[kGenderMale].pedicelLength_mm, v = plant.MFD(plant.pInflor[kGenderMale].pedicelLength_mm, v, ft, d)
+            [plant.pInflor[kGenderMale].pedicelLength_mm, v] = plant.MFD(plant.pInflor[kGenderMale].pedicelLength_mm, v, ft, d)
             break
         case kInflorescenceInternodeWidthMale:
-            plant.pInflor[kGenderMale].internodeWidth_mm, v = plant.MFD(plant.pInflor[kGenderMale].internodeWidth_mm, v, ft, d)
+            [plant.pInflor[kGenderMale].internodeWidth_mm, v] = plant.MFD(plant.pInflor[kGenderMale].internodeWidth_mm, v, ft, d)
             break
         case kInflorescencePedicelTaperIndexMale:
-            plant.pInflor[kGenderMale].pedicelTaperIndex, v = plant.MFD(plant.pInflor[kGenderMale].pedicelTaperIndex, v, ft, d)
+            [plant.pInflor[kGenderMale].pedicelTaperIndex, v] = plant.MFD(plant.pInflor[kGenderMale].pedicelTaperIndex, v, ft, d)
             break
         case kInflorescenceIsTerminalMale:
-            plant.pInflor[kGenderMale].isTerminal, v = plant.MFD(plant.pInflor[kGenderMale].isTerminal, v, ft, d)
+            [plant.pInflor[kGenderMale].isTerminal, v] = plant.MFD(plant.pInflor[kGenderMale].isTerminal, v, ft, d)
             break
         case kInflorescenceBiomassRequiredMale:
-            plant.pInflor[kGenderMale].optimalBiomass_pctMPB, v = plant.MFD(plant.pInflor[kGenderMale].optimalBiomass_pctMPB, v, ft, d)
+            [plant.pInflor[kGenderMale].optimalBiomass_pctMPB, v] = plant.MFD(plant.pInflor[kGenderMale].optimalBiomass_pctMPB, v, ft, d)
             break
         case kInflorescenceMinFractOptBiomassToCreateMale:
-            plant.pInflor[kGenderMale].minFractionOfOptimalBiomassToCreateInflorescence_frn, v = plant.MFD(plant.pInflor[kGenderMale].minFractionOfOptimalBiomassToCreateInflorescence_frn, v, ft, d)
+            [plant.pInflor[kGenderMale].minFractionOfOptimalBiomassToCreateInflorescence_frn, v] = plant.MFD(plant.pInflor[kGenderMale].minFractionOfOptimalBiomassToCreateInflorescence_frn, v, ft, d)
             break
         case kInflorescenceMinFractOptBiomassForFlowersMale:
-            plant.pInflor[kGenderMale].minFractionOfOptimalBiomassToMakeFlowers_frn, v = plant.MFD(plant.pInflor[kGenderMale].minFractionOfOptimalBiomassToMakeFlowers_frn, v, ft, d)
+            [plant.pInflor[kGenderMale].minFractionOfOptimalBiomassToMakeFlowers_frn, v] = plant.MFD(plant.pInflor[kGenderMale].minFractionOfOptimalBiomassToMakeFlowers_frn, v, ft, d)
             break
         case kInflorescenceDaysToAllFlowersShowingMale:
-            plant.pInflor[kGenderMale].daysToAllFlowersCreated, v = plant.MFD(plant.pInflor[kGenderMale].daysToAllFlowersCreated, v, ft, d)
+            [plant.pInflor[kGenderMale].daysToAllFlowersCreated, v] = plant.MFD(plant.pInflor[kGenderMale].daysToAllFlowersCreated, v, ft, d)
             break
         case kInflorescenceFlowersDrawTopToBottomMale:
-            plant.pInflor[kGenderMale].flowersDrawTopToBottom, v = plant.MFD(plant.pInflor[kGenderMale].flowersDrawTopToBottom, v, ft, d)
+            [plant.pInflor[kGenderMale].flowersDrawTopToBottom, v] = plant.MFD(plant.pInflor[kGenderMale].flowersDrawTopToBottom, v, ft, d)
             break
         case kInflorescenceMinDaysToCreateInflorescenceMale:
-            plant.pInflor[kGenderMale].minDaysToCreateInflorescence, v = plant.MFD(plant.pInflor[kGenderMale].minDaysToCreateInflorescence, v, ft, d)
+            [plant.pInflor[kGenderMale].minDaysToCreateInflorescence, v] = plant.MFD(plant.pInflor[kGenderMale].minDaysToCreateInflorescence, v, ft, d)
             break
         case kInflorescenceMaxDaysToCreateIfOverMinFractMale:
-            plant.pInflor[kGenderMale].maxDaysToCreateInflorescenceIfOverMinFraction, v = plant.MFD(plant.pInflor[kGenderMale].maxDaysToCreateInflorescenceIfOverMinFraction, v, ft, d)
+            [plant.pInflor[kGenderMale].maxDaysToCreateInflorescenceIfOverMinFraction, v] = plant.MFD(plant.pInflor[kGenderMale].maxDaysToCreateInflorescenceIfOverMinFraction, v, ft, d)
             break
         case kInflorescenceMinDaysToGrowMale:
-            plant.pInflor[kGenderMale].minDaysToGrow, v = plant.MFD(plant.pInflor[kGenderMale].minDaysToGrow, v, ft, d)
+            [plant.pInflor[kGenderMale].minDaysToGrow, v] = plant.MFD(plant.pInflor[kGenderMale].minDaysToGrow, v, ft, d)
             break
         case kInflorescenceMaxDaysToGrowMale:
-            plant.pInflor[kGenderMale].maxDaysToGrow, v = plant.MFD(plant.pInflor[kGenderMale].maxDaysToGrow, v, ft, d)
+            [plant.pInflor[kGenderMale].maxDaysToGrow, v] = plant.MFD(plant.pInflor[kGenderMale].maxDaysToGrow, v, ft, d)
             break
         case kInflorescenceMaleBractNumBracts:
-            plant.pInflor[kGenderMale].bractTdoParams.repetitions, v = plant.MFD(plant.pInflor[kGenderMale].bractTdoParams.repetitions, v, ft, d)
+            [plant.pInflor[kGenderMale].bractTdoParams.repetitions, v] = plant.MFD(plant.pInflor[kGenderMale].bractTdoParams.repetitions, v, ft, d)
             break
         case kInflorescenceMaleBractObject3D:
             plant.transferObject3D(d, plant.pInflor[kGenderMale].bractTdoParams.object3D, v)
             break
         case kInflorescenceMaleBractScaleAtFullSize:
-            plant.pInflor[kGenderMale].bractTdoParams.scaleAtFullSize, v = plant.MFD(plant.pInflor[kGenderMale].bractTdoParams.scaleAtFullSize, v, ft, d)
+            [plant.pInflor[kGenderMale].bractTdoParams.scaleAtFullSize, v] = plant.MFD(plant.pInflor[kGenderMale].bractTdoParams.scaleAtFullSize, v, ft, d)
             break
         case kInflorescenceMaleBractObject3DXRotationBeforeDraw:
-            plant.pInflor[kGenderMale].bractTdoParams.xRotationBeforeDraw, v = plant.MFD(plant.pInflor[kGenderMale].bractTdoParams.xRotationBeforeDraw, v, ft, d)
+            [plant.pInflor[kGenderMale].bractTdoParams.xRotationBeforeDraw, v] = plant.MFD(plant.pInflor[kGenderMale].bractTdoParams.xRotationBeforeDraw, v, ft, d)
             break
         case kInflorescenceMaleBractObject3DYRotationBeforeDraw:
-            plant.pInflor[kGenderMale].bractTdoParams.yRotationBeforeDraw, v = plant.MFD(plant.pInflor[kGenderMale].bractTdoParams.yRotationBeforeDraw, v, ft, d)
+            [plant.pInflor[kGenderMale].bractTdoParams.yRotationBeforeDraw, v] = plant.MFD(plant.pInflor[kGenderMale].bractTdoParams.yRotationBeforeDraw, v, ft, d)
             break
         case kInflorescenceMaleBractObject3DZRotationBeforeDraw:
-            plant.pInflor[kGenderMale].bractTdoParams.zRotationBeforeDraw, v = plant.MFD(plant.pInflor[kGenderMale].bractTdoParams.zRotationBeforeDraw, v, ft, d)
+            [plant.pInflor[kGenderMale].bractTdoParams.zRotationBeforeDraw, v] = plant.MFD(plant.pInflor[kGenderMale].bractTdoParams.zRotationBeforeDraw, v, ft, d)
             break
         case kInflorescenceMaleBractFaceColor:
-            plant.pInflor[kGenderMale].bractTdoParams.faceColor, v = plant.MFD(plant.pInflor[kGenderMale].bractTdoParams.faceColor, v, ft, d)
+            [plant.pInflor[kGenderMale].bractTdoParams.faceColor, v] = plant.MFD(plant.pInflor[kGenderMale].bractTdoParams.faceColor, v, ft, d)
             break
         case kInflorescenceMaleBractBackfaceColor:
-            plant.pInflor[kGenderMale].bractTdoParams.backfaceColor, v = plant.MFD(plant.pInflor[kGenderMale].bractTdoParams.backfaceColor, v, ft, d)
+            [plant.pInflor[kGenderMale].bractTdoParams.backfaceColor, v] = plant.MFD(plant.pInflor[kGenderMale].bractTdoParams.backfaceColor, v, ft, d)
             break
         case kInflorescenceMaleBractsAreRadiallyArranged:
-            plant.pInflor[kGenderMale].bractTdoParams.radiallyArranged, v = plant.MFD(plant.pInflor[kGenderMale].bractTdoParams.radiallyArranged, v, ft, d)
+            [plant.pInflor[kGenderMale].bractTdoParams.radiallyArranged, v] = plant.MFD(plant.pInflor[kGenderMale].bractTdoParams.radiallyArranged, v, ft, d)
             break
         case kInflorescenceMaleBractObject3DPullbackAngle:
-            plant.pInflor[kGenderMale].bractTdoParams.pullBackAngle, v = plant.MFD(plant.pInflor[kGenderMale].bractTdoParams.pullBackAngle, v, ft, d)
+            [plant.pInflor[kGenderMale].bractTdoParams.pullBackAngle, v] = plant.MFD(plant.pInflor[kGenderMale].bractTdoParams.pullBackAngle, v, ft, d)
             break
         case kFlowerNumPistilsFemale:
-            plant.pFlower[kGenderFemale].numPistils, v = plant.MFD(plant.pFlower[kGenderFemale].numPistils, v, ft, d)
+            [plant.pFlower[kGenderFemale].numPistils, v] = plant.MFD(plant.pFlower[kGenderFemale].numPistils, v, ft, d)
             break
         case kFlowerStyleLengthFemale:
-            plant.pFlower[kGenderFemale].styleLength_mm, v = plant.MFD(plant.pFlower[kGenderFemale].styleLength_mm, v, ft, d)
+            [plant.pFlower[kGenderFemale].styleLength_mm, v] = plant.MFD(plant.pFlower[kGenderFemale].styleLength_mm, v, ft, d)
             break
         case kFlowerStyleWidthFemale:
-            plant.pFlower[kGenderFemale].styleWidth_mm, v = plant.MFD(plant.pFlower[kGenderFemale].styleWidth_mm, v, ft, d)
+            [plant.pFlower[kGenderFemale].styleWidth_mm, v] = plant.MFD(plant.pFlower[kGenderFemale].styleWidth_mm, v, ft, d)
             break
         case kFlowerStyleTaperIndexFemale:
-            plant.pFlower[kGenderFemale].styleTaperIndex, v = plant.MFD(plant.pFlower[kGenderFemale].styleTaperIndex, v, ft, d)
+            [plant.pFlower[kGenderFemale].styleTaperIndex, v] = plant.MFD(plant.pFlower[kGenderFemale].styleTaperIndex, v, ft, d)
             break
         case kFlowerStigmaFemaleObject3DPullbackAngle:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].pullBackAngle, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].pullBackAngle, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].pullBackAngle, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].pullBackAngle, v, ft, d)
             break
         case kFlowerStyleColorFemale:
-            plant.pFlower[kGenderFemale].styleColor, v = plant.MFD(plant.pFlower[kGenderFemale].styleColor, v, ft, d)
+            [plant.pFlower[kGenderFemale].styleColor, v] = plant.MFD(plant.pFlower[kGenderFemale].styleColor, v, ft, d)
             break
         case kFlowerStigmaNumSectionsFemale:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].repetitions, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].repetitions, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].repetitions, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].repetitions, v, ft, d)
             break
         case kFlowerFemaleStigmaObject3D:
             plant.transferObject3D(d, plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].object3D, v)
             break
         case kFlowerStigmaScaleAtFullSizeFemale:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].scaleAtFullSize, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].scaleAtFullSize, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].scaleAtFullSize, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].scaleAtFullSize, v, ft, d)
             break
         case kFlowerFemaleStigmaObject3DXRotationBeforeDraw:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].xRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].xRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].xRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].xRotationBeforeDraw, v, ft, d)
             break
         case kFlowerFemaleStigmaObject3DYRotationBeforeDraw:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].yRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].yRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].yRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].yRotationBeforeDraw, v, ft, d)
             break
         case kFlowerFemaleStigmaObject3DZRotationBeforeDraw:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].zRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].zRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].zRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].zRotationBeforeDraw, v, ft, d)
             break
         case kFlowerStigmaFemaleFaceColor:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].faceColor, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].faceColor, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].faceColor, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].faceColor, v, ft, d)
             break
         case kFlowerStigmaFemaleBackfaceColor:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].backfaceColor, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].backfaceColor, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].backfaceColor, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].backfaceColor, v, ft, d)
             break
         case kFlowerStigmaSectionsAreRadiallyArrangedFemale:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].radiallyArranged, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].radiallyArranged, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].radiallyArranged, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kPistils].radiallyArranged, v, ft, d)
             break
         case kFlowerNumStamensFemale:
-            plant.pFlower[kGenderFemale].numStamens, v = plant.MFD(plant.pFlower[kGenderFemale].numStamens, v, ft, d)
+            [plant.pFlower[kGenderFemale].numStamens, v] = plant.MFD(plant.pFlower[kGenderFemale].numStamens, v, ft, d)
             break
         case kFlowerFilamentLengthFemale:
-            plant.pFlower[kGenderFemale].filamentLength_mm, v = plant.MFD(plant.pFlower[kGenderFemale].filamentLength_mm, v, ft, d)
+            [plant.pFlower[kGenderFemale].filamentLength_mm, v] = plant.MFD(plant.pFlower[kGenderFemale].filamentLength_mm, v, ft, d)
             break
         case kFlowerFilamentWidthFemale:
-            plant.pFlower[kGenderFemale].filamentWidth_mm, v = plant.MFD(plant.pFlower[kGenderFemale].filamentWidth_mm, v, ft, d)
+            [plant.pFlower[kGenderFemale].filamentWidth_mm, v] = plant.MFD(plant.pFlower[kGenderFemale].filamentWidth_mm, v, ft, d)
             break
         case kFlowerFilamentTaperIndexFemale:
-            plant.pFlower[kGenderFemale].filamentTaperIndex, v = plant.MFD(plant.pFlower[kGenderFemale].filamentTaperIndex, v, ft, d)
+            [plant.pFlower[kGenderFemale].filamentTaperIndex, v] = plant.MFD(plant.pFlower[kGenderFemale].filamentTaperIndex, v, ft, d)
             break
         case kFlowerFilamentColorFemale:
-            plant.pFlower[kGenderFemale].filamentColor, v = plant.MFD(plant.pFlower[kGenderFemale].filamentColor, v, ft, d)
+            [plant.pFlower[kGenderFemale].filamentColor, v] = plant.MFD(plant.pFlower[kGenderFemale].filamentColor, v, ft, d)
             break
         case kFlowerAntherFemaleObject3DPullbackAngle:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].pullBackAngle, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].pullBackAngle, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].pullBackAngle, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].pullBackAngle, v, ft, d)
             break
         case kFlowerAntherNumSectionsFemale:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].repetitions, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].repetitions, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].repetitions, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].repetitions, v, ft, d)
             break
         case kFlowerFemaleAntherObject3D:
             plant.transferObject3D(d, plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].object3D, v)
             break
         case kFlowerAntherScaleAtFullSizeFemale:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].scaleAtFullSize, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].scaleAtFullSize, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].scaleAtFullSize, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].scaleAtFullSize, v, ft, d)
             break
         case kFlowerFemaleAntherObject3DXRotationBeforeDraw:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].xRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].xRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].xRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].xRotationBeforeDraw, v, ft, d)
             break
         case kFlowerFemaleAntherObject3DYRotationBeforeDraw:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].yRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].yRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].yRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].yRotationBeforeDraw, v, ft, d)
             break
         case kFlowerFemaleAntherObject3DZRotationBeforeDraw:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].zRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].zRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].zRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].zRotationBeforeDraw, v, ft, d)
             break
         case kFlowerAntherFemaleFaceColor:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].faceColor, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].faceColor, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].faceColor, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].faceColor, v, ft, d)
             break
         case kFlowerAntherFemaleBackfaceColor:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].backfaceColor, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].backfaceColor, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].backfaceColor, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].backfaceColor, v, ft, d)
             break
         case kFlowerAntherSectionsAreRadiallyArrangedFemale:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].radiallyArranged, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].radiallyArranged, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].radiallyArranged, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kStamens].radiallyArranged, v, ft, d)
             break
         case kFlowerPetal2NumPetalsFemale:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].repetitions, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].repetitions, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].repetitions, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].repetitions, v, ft, d)
             break
         case kFlowerFemalePetal2Object3D:
             plant.transferObject3D(d, plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].object3D, v)
             break
         case kFlowerPetal2ScaleAtFullSizeFemale:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].scaleAtFullSize, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].scaleAtFullSize, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].scaleAtFullSize, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].scaleAtFullSize, v, ft, d)
             break
         case kFlowerFemalePetal2Object3DXRotationBeforeDraw:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].xRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].xRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].xRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].xRotationBeforeDraw, v, ft, d)
             break
         case kFlowerFemalePetal2Object3DYRotationBeforeDraw:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].yRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].yRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].yRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].yRotationBeforeDraw, v, ft, d)
             break
         case kFlowerFemalePetal2Object3DZRotationBeforeDraw:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].zRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].zRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].zRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].zRotationBeforeDraw, v, ft, d)
             break
         case kFlowerPetal2FemaleFaceColor:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].faceColor, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].faceColor, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].faceColor, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].faceColor, v, ft, d)
             break
         case kFlowerPetal2FemaleBackfaceColor:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].backfaceColor, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].backfaceColor, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].backfaceColor, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].backfaceColor, v, ft, d)
             break
         case kFlowerPetal2PetalsAreRadiallyArrangedFemale:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].radiallyArranged, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].radiallyArranged, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].radiallyArranged, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].radiallyArranged, v, ft, d)
             break
         case kFlowerPetal2FemaleObject3DPullbackAngle:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].pullBackAngle, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].pullBackAngle, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].pullBackAngle, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSecondPetals].pullBackAngle, v, ft, d)
             break
         case kFlowerPetal3NumPetalsFemale:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].repetitions, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].repetitions, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].repetitions, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].repetitions, v, ft, d)
             break
         case kFlowerFemalePetal3Object3D:
             plant.transferObject3D(d, plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].object3D, v)
             break
         case kFlowerPetal3ScaleAtFullSizeFemale:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].scaleAtFullSize, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].scaleAtFullSize, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].scaleAtFullSize, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].scaleAtFullSize, v, ft, d)
             break
         case kFlowerFemalePetal3Object3DXRotationBeforeDraw:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].xRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].xRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].xRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].xRotationBeforeDraw, v, ft, d)
             break
         case kFlowerFemalePetal3Object3DYRotationBeforeDraw:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].yRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].yRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].yRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].yRotationBeforeDraw, v, ft, d)
             break
         case kFlowerFemalePetal3Object3DZRotationBeforeDraw:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].zRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].zRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].zRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].zRotationBeforeDraw, v, ft, d)
             break
         case kFlowerPetal3FemaleFaceColor:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].faceColor, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].faceColor, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].faceColor, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].faceColor, v, ft, d)
             break
         case kFlowerPetal3FemaleBackfaceColor:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].backfaceColor, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].backfaceColor, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].backfaceColor, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].backfaceColor, v, ft, d)
             break
         case kFlowerPetal3PetalsAreRadiallyArrangedFemale:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].radiallyArranged, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].radiallyArranged, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].radiallyArranged, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].radiallyArranged, v, ft, d)
             break
         case kFlowerPetal3FemaleObject3DPullbackAngle:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].pullBackAngle, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].pullBackAngle, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].pullBackAngle, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kThirdPetals].pullBackAngle, v, ft, d)
             break
         case kFlowerPetal4NumPetalsFemale:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].repetitions, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].repetitions, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].repetitions, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].repetitions, v, ft, d)
             break
         case kFlowerFemalePetal4Object3D:
             plant.transferObject3D(d, plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].object3D, v)
             break
         case kFlowerPetal4ScaleAtFullSizeFemale:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].scaleAtFullSize, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].scaleAtFullSize, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].scaleAtFullSize, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].scaleAtFullSize, v, ft, d)
             break
         case kFlowerFemalePetal4Object3DXRotationBeforeDraw:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].xRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].xRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].xRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].xRotationBeforeDraw, v, ft, d)
             break
         case kFlowerFemalePetal4Object3DYRotationBeforeDraw:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].yRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].yRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].yRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].yRotationBeforeDraw, v, ft, d)
             break
         case kFlowerFemalePetal4Object3DZRotationBeforeDraw:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].zRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].zRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].zRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].zRotationBeforeDraw, v, ft, d)
             break
         case kFlowerPetal4FemaleFaceColor:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].faceColor, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].faceColor, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].faceColor, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].faceColor, v, ft, d)
             break
         case kFlowerPetal4FemaleBackfaceColor:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].backfaceColor, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].backfaceColor, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].backfaceColor, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].backfaceColor, v, ft, d)
             break
         case kFlowerPetal4PetalsAreRadiallyArrangedFemale:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].radiallyArranged, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].radiallyArranged, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].radiallyArranged, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].radiallyArranged, v, ft, d)
             break
         case kFlowerPetal4FemaleObject3DPullbackAngle:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].pullBackAngle, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].pullBackAngle, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].pullBackAngle, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFourthPetals].pullBackAngle, v, ft, d)
             break
         case kFlowerPetal5NumPetalsFemale:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].repetitions, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].repetitions, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].repetitions, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].repetitions, v, ft, d)
             break
         case kFlowerFemalePetal5Object3D:
             plant.transferObject3D(d, plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].object3D, v)
             break
         case kFlowerPetal5ScaleAtFullSizeFemale:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].scaleAtFullSize, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].scaleAtFullSize, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].scaleAtFullSize, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].scaleAtFullSize, v, ft, d)
             break
         case kFlowerFemalePetal5Object3DXRotationBeforeDraw:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].xRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].xRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].xRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].xRotationBeforeDraw, v, ft, d)
             break
         case kFlowerFemalePetal5Object3DYRotationBeforeDraw:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].yRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].yRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].yRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].yRotationBeforeDraw, v, ft, d)
             break
         case kFlowerFemalePetal5Object3DZRotationBeforeDraw:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].zRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].zRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].zRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].zRotationBeforeDraw, v, ft, d)
             break
         case kFlowerPetal5FemaleFaceColor:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].faceColor, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].faceColor, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].faceColor, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].faceColor, v, ft, d)
             break
         case kFlowerPetal5FemaleBackfaceColor:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].backfaceColor, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].backfaceColor, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].backfaceColor, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].backfaceColor, v, ft, d)
             break
         case kFlowerPetal5PetalsAreRadiallyArrangedFemale:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].radiallyArranged, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].radiallyArranged, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].radiallyArranged, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].radiallyArranged, v, ft, d)
             break
         case kFlowerPetal5FemaleObject3DPullbackAngle:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].pullBackAngle, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].pullBackAngle, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].pullBackAngle, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kFifthPetals].pullBackAngle, v, ft, d)
             break
         case kFlowerSepalNumPetalsFemale:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].repetitions, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].repetitions, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].repetitions, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].repetitions, v, ft, d)
             break
         case kFlowerFemaleSepalObject3D:
             plant.transferObject3D(d, plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].object3D, v)
             break
         case kFlowerSepalScaleAtFullSizeFemale:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].scaleAtFullSize, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].scaleAtFullSize, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].scaleAtFullSize, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].scaleAtFullSize, v, ft, d)
             break
         case kFlowerFemaleSepalObject3DXRotationBeforeDraw:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].xRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].xRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].xRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].xRotationBeforeDraw, v, ft, d)
             break
         case kFlowerFemaleSepalObject3DYRotationBeforeDraw:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].yRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].yRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].yRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].yRotationBeforeDraw, v, ft, d)
             break
         case kFlowerFemaleSepalObject3DZRotationBeforeDraw:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].zRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].zRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].zRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].zRotationBeforeDraw, v, ft, d)
             break
         case kFlowerSepalFemaleFaceColor:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].faceColor, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].faceColor, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].faceColor, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].faceColor, v, ft, d)
             break
         case kFlowerSepalFemaleBackfaceColor:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].backfaceColor, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].backfaceColor, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].backfaceColor, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].backfaceColor, v, ft, d)
             break
         case kFlowerSepalPetalsAreRadiallyArrangedFemale:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].radiallyArranged, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].radiallyArranged, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].radiallyArranged, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].radiallyArranged, v, ft, d)
             break
         case kFlowerSepalFemaleObject3DPullbackAngle:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].pullBackAngle, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].pullBackAngle, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].pullBackAngle, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kSepals].pullBackAngle, v, ft, d)
             break
         case kFlowerFemaleBudOption:
-            plant.pFlower[kGenderFemale].budDrawingOption, v = plant.MFD(plant.pFlower[kGenderFemale].budDrawingOption, v, ft, d)
+            [plant.pFlower[kGenderFemale].budDrawingOption, v] = plant.MFD(plant.pFlower[kGenderFemale].budDrawingOption, v, ft, d)
             break
         case kFlowerBudNumPetalsFemale:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].repetitions, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].repetitions, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].repetitions, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].repetitions, v, ft, d)
             break
         case kFlowerFemaleBudObject3D:
             plant.transferObject3D(d, plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].object3D, v)
             break
         case kFlowerBudScaleAtFullSizeFemale:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].scaleAtFullSize, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].scaleAtFullSize, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].scaleAtFullSize, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].scaleAtFullSize, v, ft, d)
             break
         case kFlowerFemaleBudObject3DXRotationBeforeDraw:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].xRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].xRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].xRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].xRotationBeforeDraw, v, ft, d)
             break
         case kFlowerFemaleBudObject3DYRotationBeforeDraw:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].yRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].yRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].yRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].yRotationBeforeDraw, v, ft, d)
             break
         case kFlowerFemaleBudObject3DZRotationBeforeDraw:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].zRotationBeforeDraw, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].zRotationBeforeDraw, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].zRotationBeforeDraw, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].zRotationBeforeDraw, v, ft, d)
             break
         case kFlowerBudFemaleFaceColor:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].faceColor, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].faceColor, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].faceColor, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].faceColor, v, ft, d)
             break
         case kFlowerBudFemaleBackfaceColor:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].backfaceColor, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].backfaceColor, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].backfaceColor, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].backfaceColor, v, ft, d)
             break
         case kFlowerBudPetalsAreRadiallyArrangedFemale:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].radiallyArranged, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].radiallyArranged, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].radiallyArranged, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].radiallyArranged, v, ft, d)
             break
         case kFlowerBudFemaleObject3DPullbackAngle:
-            plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].pullBackAngle, v = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].pullBackAngle, v, ft, d)
+            [plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].pullBackAngle, v] = plant.MFD(plant.pFlower[kGenderFemale].tdoParams[FloralPart.kBud].pullBackAngle, v, ft, d)
             break
     }
     return v
