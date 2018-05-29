@@ -1,6 +1,6 @@
 // PdPlant was unit Uplant
 
-import { PdStreamableObject, ExportFormats, DebugPrint, ucursor, MainForm, PdBitmap, PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof, PdInternode, TListCollection_streamUsingFiler, ExportPart } from "./temporary"
+import { PdStreamableObject, ExportFormats, DebugPrint, ucursor, MainForm, PdBitmap, PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof, PdInternode, TListCollection_streamUsingFiler, ExportPart, CursorMode } from "./temporary"
 import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor, ColorDefs, StrToIntDef, IntToStr, compareTextIgnoreCase, arrayRemove, TextFile, writeln, eof } from "./common"
 import { KfObject3D } from "./KfObject3D"
 import { TPoint } from "./TPoint"
@@ -1107,7 +1107,7 @@ export class PdPlant extends PdStreamableObject {
     
     getHint(point: TPoint): string {
         let result = this.getName()
-        if ((MainForm.cursorModeForDrawing === umain.kCursorModePosingSelect) && (MainForm.focusedPlant() === this)) {
+        if ((MainForm.cursorModeForDrawing === CursorMode.kCursorModePosingSelect) && (MainForm.focusedPlant() === this)) {
             const plantPart = this.findPlantPartAtPositionByTestingPolygons(point)
             if ((plantPart !== null) && (plantPart instanceof PdPlantPart)) {
                 result = plantPart.getFullName()
@@ -1686,7 +1686,7 @@ export class PdPlant extends PdStreamableObject {
             this.addAmendment(newAmendment)
             return
         }
-        if ((UNRESOLVED.pos("[", aLine) <= 0) || (UNRESOLVED.pos("=", aLine) <= 0)) {
+        if (!aLine.includes("[") || !aLine.includes("=")) {
             if (this.readingFromMemo) {
                 // v2.0 fix lines broken before [ or = (does NOT fix lines broken within strings)
                 // this has to come AFTER we deal with notes and amendments; it applies to parameters only
@@ -1701,7 +1701,7 @@ export class PdPlant extends PdStreamableObject {
         nameAndFieldID = stringUpTo(aLine, "=")
         fieldID = stringBeyond(nameAndFieldID, "[")
         fieldID = stringUpTo(fieldID, "]")
-        if (UNRESOLVED.pos("header", fieldID) > 0) {
+        if (fieldID.includes("header")) {
             return
         }
         paramValue = stringBeyond(aLine, "=")
@@ -1797,7 +1797,7 @@ export class PdPlant extends PdStreamableObject {
                 } else {
                     let success
                     [tempFloat, success] = boundForString(paramValue, FieldType.kFieldFloat)
-                    if (UNRESOLVED.pos("Drawing scale", param.name) > 0) {
+                    if (param.name.includes("Drawing scale")) {
                         tempTdo = null
                     }
                     if ((param.lowerBound() !== 0) || (param.upperBound() !== 0)) {

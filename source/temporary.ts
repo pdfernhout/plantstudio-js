@@ -213,3 +213,12 @@ export function longNameForDXFPartType(index: number): string {
 export function shortNameForDXFPartType(index: short): string {
     return "TODO shortNameForDXFPartType"
 }
+
+// TODO: Fix CursorMode enum from umain
+export enum CursorMode {
+    kCursorModeSelectDrag = 0,
+    kCursorModeMagnify = 1,
+    kCursorModeScroll = 2,
+    kCursorModeRotate = 3,
+    kCursorModePosingSelect = 4,
+}
