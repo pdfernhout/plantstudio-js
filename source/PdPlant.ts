@@ -17,7 +17,7 @@ import { PdSection } from "./PdSection"
 import { PdPlantDrawingAmendment, kStartAmendmentString } from "./PdPlantDrawingAmendment"
 import { PdPlantPart } from "./PdPlantPart"
 import { SinglePoint, messageForExceptionType, support_rgb, boundForString, stringUpTo, strToBool, stringBeyond, tolerantReadln, trimLeftAndRight } from "./usupport"
-import { Plant_directTransferField } from "./utransfr";
+import { Plant_directTransferField, kFruitSCurve, kLeafSCurve, kGeneralGrowthSCurve, kGeneralAgeAtMaturity, kFlowerMaleBudOption, kFlowerFemaleBudOption, kLeafCompoundPinnateArrangement, kMeristemAndLeafArrangement, kLeafCompoundPinnateOrPalmate, kGeneralStartingSeedForRandomNumberGenerator, kStateBasePointY } from "./utransfr";
 
 /* Remove unused imports
 from conversion_common import *
@@ -474,7 +474,7 @@ export class PdPlant extends PdStreamableObject {
         this.pLeaf.stipuleTdoParams.object3D = new KfObject3D()
         this.pInflor[Gender.kGenderFemale].bractTdoParams.object3D = new KfObject3D()
         this.pInflor[Gender.kGenderMale].bractTdoParams.object3D = new KfObject3D()
-        for (partType = 0; partType <= kHighestFloralPartConstant; partType++) {
+        for (partType = 0; partType <= FloralPart.kHighestFloralPartConstant; partType++) {
             this.pFlower[Gender.kGenderFemale].tdoParams[partType].object3D = new KfObject3D()
             this.pFlower[Gender.kGenderMale].tdoParams[partType].object3D = new KfObject3D()
         }
@@ -1784,7 +1784,7 @@ export class PdPlant extends PdStreamableObject {
                         tempLongint = intround(param.upperBound())
                     }
                 }
-                if (param.fieldNumber === utransfr.kStateBasePointY) {
+                if (param.fieldNumber === kStateBasePointY) {
                     tempLongint = tempLongint
                 }
                 tempLongint = this.transferField(kSetField, tempLongint, param.fieldNumber, param.fieldType, 0, false, null)
@@ -1862,7 +1862,7 @@ export class PdPlant extends PdStreamableObject {
         this.regrow()
     }
     
-    editTransferField(d: int, value: FIX_MISSING_ARG_TYPE, fieldID: int, fieldType: int, fieldIndex: int, regrow: boolean): void {
+    editTransferField(d: int, value: any, fieldID: int, fieldType: int, fieldIndex: int, regrow: boolean): void {
         if (fieldType === FieldType.kFieldHeader) {
             return value
         }
@@ -1884,30 +1884,30 @@ export class PdPlant extends PdStreamableObject {
         return value
     }
     
-    transferField(d: int, v: FIX_MISSING_ARG_TYPE, fieldID: short, ft: short, index: short, regrow: boolean, updateList: TListCollection): void {
+    transferField(d: int, v: any, fieldID: short, ft: short, index: short, regrow: boolean, updateList: PdPlantUpdateEvent[]): void {
         if (ft === FieldType.kFieldHeader) {
             return v
         }
         v = this.directTransferField(d, v, fieldID, ft, index, updateList)
         if (d === kSetField) {
             switch (fieldID) {
-                case utransfr.kFruitSCurve:
+                case kFruitSCurve:
                     if (!this.changingWholeSCurves) {
                         // cfk fix: should be not allowing to change these to values that don't work 
                         calcSCurveCoeffs(this.pFruit.sCurveParams)
                     }
                     break
-                case utransfr.kGeneralGrowthSCurve:
+                case kGeneralGrowthSCurve:
                     if (!this.changingWholeSCurves) {
                         calcSCurveCoeffs(this.pGeneral.growthSCurve)
                     }
                     break
-                case utransfr.kLeafSCurve:
+                case kLeafSCurve:
                     if (!this.changingWholeSCurves) {
                         calcSCurveCoeffs(this.pLeaf.sCurveParams)
                     }
                     break
-                case utransfr.kGeneralAgeAtMaturity:
+                case kGeneralAgeAtMaturity:
                     if ((this.age > v)) {
                         this.setAge(v)
                     }
@@ -1940,29 +1940,29 @@ export class PdPlant extends PdStreamableObject {
     
     fillEnumStringList(list: string[], fieldID: int, hasRadioButtons: boolean): void {
         switch (fieldID) {
-            case utransfr.kLeafCompoundPinnateOrPalmate:
+            case kLeafCompoundPinnateOrPalmate:
                 // assumes list being given to it is empty 
                 list.push("pinnate (feather-like)")
                 list.push("palmate (hand-like)")
                 hasRadioButtons = true
                 break
-            case utransfr.kMeristemAndLeafArrangement:
+            case kMeristemAndLeafArrangement:
                 list.push("alternate (one per node)")
                 list.push("opposite (two per node)")
                 hasRadioButtons = true
                 break
-            case utransfr.kLeafCompoundPinnateArrangement:
+            case kLeafCompoundPinnateArrangement:
                 list.push("alternate")
                 list.push("opposite")
                 hasRadioButtons = true
                 break
-            case utransfr.kFlowerFemaleBudOption:
+            case kFlowerFemaleBudOption:
                 list.push("no bud")
                 list.push("single 3D object bud (old style)")
                 list.push("unfolding flower (new style)")
                 hasRadioButtons = true
                 break
-            case utransfr.kFlowerMaleBudOption:
+            case kFlowerMaleBudOption:
                 list.push("no bud")
                 list.push("single 3D object bud (old style)")
                 list.push("unfolding flower (new style)")
@@ -1993,11 +1993,11 @@ export class PdPlant extends PdStreamableObject {
         value.y2 = this.transferField(direction, value.y2, fieldNumber, fieldType, 3, regrow, updateList)
     }
     
-    MFD(objectValue: FIX_MISSING_ARG_TYPE, value: FIX_MISSING_ARG_TYPE, fieldType: int, direction: int): void {
+    // MFD = MoveFieldData
+    MFD(objectValue: any, value: any, fieldType: int, direction: int): [any, any] {
         if (direction === kGetField) {
             switch (fieldType) {
                 case FieldType.kFieldFloat:
-                    // MFD = MoveFieldData
                     value = objectValue
                     break
                 case FieldType.kFieldSmallint:
@@ -2007,7 +2007,7 @@ export class PdPlant extends PdStreamableObject {
                     value = objectValue
                     break
                 case FieldType.kFieldColor:
-                    delphi_compatability.TColorRef(value) = delphi_compatability.TColorRef(objectValue)
+                    value = objectValue
                     break
                 case FieldType.kFieldBoolean:
                     value = objectValue
@@ -2030,7 +2030,7 @@ export class PdPlant extends PdStreamableObject {
                     objectValue = value
                     break
                 case FieldType.kFieldColor:
-                    delphi_compatability.TColorRef(objectValue) = delphi_compatability.TColorRef(value)
+                    objectValue = value
                     break
                 case FieldType.kFieldBoolean:
                     objectValue = value
@@ -2042,7 +2042,7 @@ export class PdPlant extends PdStreamableObject {
                     throw new Error("Problem: Unsupported transfer to field " + IntToStr(fieldType) + " in method PdPlant.MFD.")
             }
         }
-        return objectValue, value
+        return [objectValue, value]
     }
     
     // ------------------------------------------------------------------------------- breeding 
@@ -2297,7 +2297,7 @@ export class PdPlant extends PdStreamableObject {
     }
     
     blendAndMutateColors(options: BreedingAndTimeSeriesOptionsStructure, sectionIndex: short, haveSecondPlant: boolean, firstColor: TColorRef, secondColor: TColorRef): TColorRef {
-        let result = new TColorRef()
+        let result: TColorRef
         let weight: float
         let stdDevAsFractionOfMean: float
         let firstColorAsFloat: float
@@ -2357,7 +2357,7 @@ export class PdPlant extends PdStreamableObject {
         let tdoRoot: KfObject3D
         let femaleFlowerTdos: KfObject3D[] /* kHighestFloralPartConstant + 1 */
         let maleFlowerTdos: KfObject3D[] /* kHighestFloralPartConstant + 1 */
-        let hasFirstPhytomer: boolean
+        let hasFirstPhytomer: boolean = false
         let partType: int
         
         PdStreamableObject.prototype.streamDataWithFiler.call(this, filer, cvir)
@@ -2434,7 +2434,7 @@ export class PdPlant extends PdStreamableObject {
             this.pInflor[Gender.kGenderMale].bractTdoParams.object3D = tdoInflorBractMale
         }
         this.pInflor[Gender.kGenderMale].bractTdoParams.object3D.streamUsingFiler(filer)
-        for (partType = 0; partType <= kHighestFloralPartConstant; partType++) {
+        for (partType = 0; partType <= FloralPart.kHighestFloralPartConstant; partType++) {
             if (filer.isReading()) {
                 this.pFlower[Gender.kGenderFemale].tdoParams[partType].object3D = femaleFlowerTdos[partType]
             }
@@ -2537,7 +2537,7 @@ export class PdPlant extends PdStreamableObject {
         const updateEvent = new PdPlantUpdateEvent()
         updateEvent.plant = this
         // hard-coded
-        updateEvent.fieldID = utransfr.kGeneralStartingSeedForRandomNumberGenerator
+        updateEvent.fieldID = kGeneralStartingSeedForRandomNumberGenerator
         updateList.push(updateEvent)
         MainForm.updateParameterValuesWithUpdateListForPlant(this, updateList)
     }
@@ -2827,55 +2827,55 @@ export class PdPlant extends PdStreamableObject {
                 result = this.pInflor[Gender.kGenderFemale].pedicelColor
                 break
             case ExportPart.kExportPartFlowerBudFemale:
-                result = this.pFlower[Gender.kGenderFemale].tdoParams[kBud].faceColor
+                result = this.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kBud].faceColor
                 break
             case ExportPart.kExportPartStyleFemale:
                 result = this.pFlower[Gender.kGenderFemale].styleColor
                 break
             case ExportPart.kExportPartStigmaFemale:
-                result = this.pFlower[Gender.kGenderFemale].tdoParams[kPistils].faceColor
+                result = this.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kPistils].faceColor
                 break
             case ExportPart.kExportPartFilamentFemale:
                 result = this.pFlower[Gender.kGenderFemale].filamentColor
                 break
             case ExportPart.kExportPartAntherFemale:
-                result = this.pFlower[Gender.kGenderFemale].tdoParams[kStamens].faceColor
+                result = this.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kStamens].faceColor
                 break
             case ExportPart.kExportPartFirstPetalsFemale:
-                result = this.pFlower[Gender.kGenderFemale].tdoParams[kFirstPetals].faceColor
+                result = this.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kFirstPetals].faceColor
                 break
             case ExportPart.kExportPartSecondPetalsFemale:
-                result = this.pFlower[Gender.kGenderFemale].tdoParams[kSecondPetals].faceColor
+                result = this.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kSecondPetals].faceColor
                 break
             case ExportPart.kExportPartThirdPetalsFemale:
-                result = this.pFlower[Gender.kGenderFemale].tdoParams[kThirdPetals].faceColor
+                result = this.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kThirdPetals].faceColor
                 break
             case ExportPart.kExportPartFourthPetalsFemale:
-                result = this.pFlower[Gender.kGenderFemale].tdoParams[kFourthPetals].faceColor
+                result = this.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kFourthPetals].faceColor
                 break
             case ExportPart.kExportPartFifthPetalsFemale:
-                result = this.pFlower[Gender.kGenderFemale].tdoParams[kFifthPetals].faceColor
+                result = this.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kFifthPetals].faceColor
                 break
             case ExportPart.kExportPartSepalsFemale:
-                result = this.pFlower[Gender.kGenderFemale].tdoParams[kSepals].faceColor
+                result = this.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kSepals].faceColor
                 break
             case ExportPart.kExportPartPedicelMale:
                 result = this.pInflor[Gender.kGenderMale].pedicelColor
                 break
             case ExportPart.kExportPartFlowerBudMale:
-                result = this.pFlower[Gender.kGenderMale].tdoParams[kBud].faceColor
+                result = this.pFlower[Gender.kGenderMale].tdoParams[FloralPart.kBud].faceColor
                 break
             case ExportPart.kExportPartFilamentMale:
                 result = this.pFlower[Gender.kGenderMale].filamentColor
                 break
             case ExportPart.kExportPartAntherMale:
-                result = this.pFlower[Gender.kGenderMale].tdoParams[kStamens].faceColor
+                result = this.pFlower[Gender.kGenderMale].tdoParams[FloralPart.kStamens].faceColor
                 break
             case ExportPart.kExportPartFirstPetalsMale:
-                result = this.pFlower[Gender.kGenderMale].tdoParams[kFirstPetals].faceColor
+                result = this.pFlower[Gender.kGenderMale].tdoParams[FloralPart.kFirstPetals].faceColor
                 break
             case ExportPart.kExportPartSepalsMale:
-                result = this.pFlower[Gender.kGenderMale].tdoParams[kSepals].faceColor
+                result = this.pFlower[Gender.kGenderMale].tdoParams[FloralPart.kSepals].faceColor
                 break
             case ExportPart.kExportPartUnripeFruit:
                 result = this.pFruit.tdoParams.alternateFaceColor
