@@ -1,59 +1,48 @@
-// unit umerist
+// PdMeristem was unit umerist
 
-from conversion_common import *
-import usupport
-import uclasses
-import uleaf
-import uinflor
-import umath
-import utdo
-import udomain
-import u3dexport
-import uturtle
-import udebug
-import utravers
-import ufiler
-import uplant
-import uintern
-import upart
-import delphi_compatability
+import { PdInternode, PdClassAndVersionInformationRecord, PdFiler } from "./temporary";
+import { PdPlant, Gender, PartType } from "./PdPlant";
+import { short, long, float, int } from "./common";
+import { PdPlantPart } from "./PdPlantPart";
+import { messageForExceptionType } from "./usupport";
+import { min, max, safedivExcept, pointsAreCloseEnough } from "./umath";
+import { Activity, Statistics, PdTraverser } from "./PdTraverser";
+import { TRect } from "./TRect";
+import { ClassId } from "./uclasses";
 
-
-export class PdMeristem {
+export class PdMeristem extends PdPlantPart {
     phytomerAttachedTo: PdInternode = new PdInternode()
     daysCreatingThisPlantPart: long = 0
     isActive: boolean = false
     isApical: boolean = false
     isReproductive: boolean = false
     gender: short = 0
-    PdMeristem.prototype = new PdPlantPart()
-    PdMeristem.prototype.constructor = PdMeristem
     
-    newWithPlant(aPlant: PdPlant): void {
-        this.create()
+    constructor(aPlant: PdPlant) {
+        super()
         this.InitializeWithPlant(aPlant)
     }
     
-    destroy(): void {
+    // TODO: This should be called on removal (was destroy) to keep plant part counts up-to-date
+    removed(): void {
         if (this.isReproductive) {
             if (this.isActive) {
                 if (this.isApical) {
-                    //not isApical
+                    // not isApical
                     this.plant.numApicalActiveReproductiveMeristemsOrInflorescences -= 1
                 } else {
                     this.plant.numAxillaryActiveReproductiveMeristemsOrInflorescences -= 1
                 }
-                //not isActive
+                // not isActive
             } else {
                 if (this.isApical) {
-                    //not isApical
+                    // not isApical
                     this.plant.numApicalInactiveReproductiveMeristems -= 1
                 } else {
                     this.plant.numAxillaryInactiveReproductiveMeristems -= 1
                 }
             }
         }
-        PdPlantPart.prototype.destroy.call(this)
     }
     
     InitializeWithPlant(aPlant: PdPlant): void {
@@ -67,7 +56,7 @@ export class PdMeristem {
         this.daysCreatingThisPlantPart = 0
         this.isActive = false
         this.isReproductive = false
-        this.gender = uplant.kGenderFemale
+        this.gender = Gender.kGenderFemale
         if (this.plant.floweringHasStarted && (this.plant.randomNumberGenerator.zeroToOne() <= this.plant.pMeristem.determinateProbability)) {
             this.setIfReproductive(true)
         }
@@ -94,8 +83,8 @@ export class PdMeristem {
                     this.setIfActive(true)
                 }
             }
-        } catch (Exception e) {
-            usupport.messageForExceptionType(e, "PdMeristem.nextDay")
+        } catch (e) {
+            messageForExceptionType(e, "PdMeristem.nextDay")
         }
     }
     
@@ -127,7 +116,7 @@ export class PdMeristem {
             if (this.plant.pMeristem.branchingDistance === 0) {
                 decisionPercent = this.plant.pMeristem.branchingIndex
             } else {
-                decisionPercent = this.plant.pMeristem.branchingIndex * umath.min(1.0, umath.max(0.0, umath.safedivExcept(this.phytomerAttachedTo.distanceFromApicalMeristem(), this.plant.pMeristem.branchingDistance, 0)))
+                decisionPercent = this.plant.pMeristem.branchingIndex * min(1.0, max(0.0, safedivExcept(this.phytomerAttachedTo.distanceFromApicalMeristem(), this.plant.pMeristem.branchingDistance, 0)))
             }
             randomPercent = this.plant.randomNumberGenerator.randomPercent()
             result = randomPercent < decisionPercent
@@ -166,13 +155,13 @@ export class PdMeristem {
                 }
             }
             if (shouldCreatePhytomer) {
-                fractionOfOptimalSize = umath.safedivExcept(this.liveBiomass_pctMPB, optimalInitialBiomass_pctMPB, 0)
+                fractionOfOptimalSize = safedivExcept(this.liveBiomass_pctMPB, optimalInitialBiomass_pctMPB, 0)
                 this.createPhytomer(fractionOfOptimalSize)
                 this.liveBiomass_pctMPB = 0.0
                 this.daysCreatingThisPlantPart = 0
             }
-        } catch (Exception e) {
-            usupport.messageForExceptionType(e, "PdMeristem.accumulateOrCreatePhytomer")
+        } catch (e) {
+            messageForExceptionType(e, "PdMeristem.accumulateOrCreatePhytomer")
         }
     }
     
@@ -197,37 +186,35 @@ export class PdMeristem {
                 }
             }
             if (shouldCreateInflorescence) {
-                fractionOfOptimalSize = umath.safedivExcept(this.liveBiomass_pctMPB, optimalInitialBiomass_pctMPB, 0)
+                fractionOfOptimalSize = safedivExcept(this.liveBiomass_pctMPB, optimalInitialBiomass_pctMPB, 0)
                 this.createInflorescence(fractionOfOptimalSize)
                 this.liveBiomass_pctMPB = 0.0
                 this.daysCreatingThisPlantPart = 0
             }
-        } catch (Exception e) {
-            usupport.messageForExceptionType(e, "PdMeristem.accumulateOrCreateInflorescence")
+        } catch (e) {
+            messageForExceptionType(e, "PdMeristem.accumulateOrCreateInflorescence")
         }
     }
     
-    traverseActivity(mode: int, traverserProxy: TObject): void {
-        let traverser: PdTraverser
+    traverseActivity(mode: int, traverser: PdTraverser): void {
         let optimalBiomass_pctMPB: float
         let biomassToRemove_pctMPB: float
         
-        PdPlantPart.prototype.traverseActivity.call(this, mode, traverserProxy)
-        traverser = utravers.PdTraverser(traverserProxy)
+        super.traverseActivity.call(this, mode, traverser)
         if (traverser === null) {
             return
         }
-        if (this.hasFallenOff && (mode !== utravers.kActivityStream) && (mode !== utravers.kActivityFree)) {
+        if (this.hasFallenOff && (mode !== Activity.kActivityStream) && (mode !== Activity.kActivityFree)) {
             return
         }
         try {
             switch (mode) {
-                case utravers.kActivityNone:
+                case Activity.kActivityNone:
                     break
-                case utravers.kActivityNextDay:
+                case Activity.kActivityNextDay:
                     this.nextDay()
                     break
-                case utravers.kActivityDemandVegetative:
+                case Activity.kActivityDemandVegetative:
                     if ((!this.isActive) || (this.isReproductive)) {
                         // return vegetative demand to create a phytomer. no demand if meristem is inactive, meristem is
                         // in reproductive mode, or if meristem is axillary and attached to the first phytomer
@@ -244,11 +231,11 @@ export class PdMeristem {
                         }
                         this.biomassDemand_pctMPB = utravers.linearGrowthResult(this.liveBiomass_pctMPB, optimalBiomass_pctMPB, this.plant.pInternode.minDaysToCreateInternode)
                         traverser.total = traverser.total + this.biomassDemand_pctMPB
-                    } catch (Exception e) {
-                        usupport.messageForExceptionType(e, "PdMeristem.traverseActivity (vegetative demand)")
+                    } catch (e) {
+                        messageForExceptionType(e, "PdMeristem.traverseActivity (vegetative demand)")
                     }
                     break
-                case utravers.kActivityDemandReproductive:
+                case Activity.kActivityDemandReproductive:
                     if ((!this.isActive) || (!this.isReproductive)) {
                         // return reproductive demand to create an inflorescence. no demand if meristem is inactive,
                         // if it is in vegetative mode, or if it is attached to the first phytomer.
@@ -260,11 +247,11 @@ export class PdMeristem {
                     try {
                         this.biomassDemand_pctMPB = utravers.linearGrowthResult(this.liveBiomass_pctMPB, this.plant.pInflor[self.gender].optimalBiomass_pctMPB, this.plant.pInflor[self.gender].minDaysToCreateInflorescence)
                         traverser.total = traverser.total + this.biomassDemand_pctMPB
-                    } catch (Exception e) {
-                        usupport.messageForExceptionType(e, "PdMeristem.traverseActivity (reproductive demand)")
+                    } catch (e) {
+                        messageForExceptionType(e, "PdMeristem.traverseActivity (reproductive demand)")
                     }
                     break
-                case utravers.kActivityGrowVegetative:
+                case Activity.kActivityGrowVegetative:
                     if (!(this.isActive)) {
                         //Allocate new biomass by portion of demand. A phytomer cannot be made before the minimum number
                         //      of days has passed to make one phytomer.
@@ -275,138 +262,125 @@ export class PdMeristem {
                     }
                     try {
                         this.liveBiomass_pctMPB = this.liveBiomass_pctMPB + this.biomassDemand_pctMPB * traverser.fractionOfPotentialBiomass
-                    } catch (Exception e) {
-                        usupport.messageForExceptionType(e, "PdMeristem.traverseActivity (vegetative growth)")
+                    } catch (e) {
+                        messageForExceptionType(e, "PdMeristem.traverseActivity (vegetative growth)")
                     }
                     break
-                case utravers.kActivityGrowReproductive:
+                case Activity.kActivityGrowReproductive:
                     if ((!this.isActive) || (!this.isReproductive)) {
                         return
                     }
                     try {
                         this.liveBiomass_pctMPB = this.liveBiomass_pctMPB + this.biomassDemand_pctMPB * traverser.fractionOfPotentialBiomass
-                    } catch (Exception e) {
-                        usupport.messageForExceptionType(e, "PdMeristem.traverseActivity (reproductive growth)")
+                    } catch (e) {
+                        messageForExceptionType(e, "PdMeristem.traverseActivity (reproductive growth)")
                     }
                     break
-                case utravers.kActivityStartReproduction:
+                case Activity.kActivityStartReproduction:
                     this.startReproduction()
                     break
-                case utravers.kActivityFindPlantPartAtPosition:
-                    if (umath.pointsAreCloseEnough(traverser.point, this.position())) {
+                case Activity.kActivityFindPlantPartAtPosition:
+                    if (pointsAreCloseEnough(traverser.point, this.position())) {
                         traverser.foundPlantPart = this
                         traverser.finished = true
                     }
                     break
-                case utravers.kActivityDraw:
+                case Activity.kActivityDraw:
                     this.draw()
                     break
-                case utravers.kActivityReport:
+                case Activity.kActivityReport:
                     break
-                case utravers.kActivityStream:
+                case Activity.kActivityStream:
                     break
-                case utravers.kActivityFree:
+                case Activity.kActivityFree:
                     break
-                case utravers.kActivityVegetativeBiomassThatCanBeRemoved:
+                case Activity.kActivityVegetativeBiomassThatCanBeRemoved:
                     if (!this.isActive) {
                         //called by phytomer
                         // free called by phytomer or inflorescence 
                         return
                     }
-                    if ((mode === utravers.kActivityVegetativeBiomassThatCanBeRemoved) && (this.isReproductive)) {
-                        return
-                    }
-                    if ((mode === utravers.kActivityReproductiveBiomassThatCanBeRemoved) && (!this.isReproductive)) {
+                    if ((mode === Activity.kActivityVegetativeBiomassThatCanBeRemoved) && (this.isReproductive)) {
                         return
                     }
                     try {
                         // a meristem can lose all of its biomass 
                         traverser.total = traverser.total + this.liveBiomass_pctMPB
-                    } catch (Exception e) {
-                        usupport.messageForExceptionType(e, "PdMeristem.traverseActivity (removal request)")
+                    } catch (e) {
+                        messageForExceptionType(e, "PdMeristem.traverseActivity (removal request)")
                     }
                     break
-                case utravers.kActivityReproductiveBiomassThatCanBeRemoved:
+                case Activity.kActivityReproductiveBiomassThatCanBeRemoved:
                     if (!this.isActive) {
                         //called by phytomer
                         // free called by phytomer or inflorescence 
                         return
                     }
-                    if ((mode === utravers.kActivityVegetativeBiomassThatCanBeRemoved) && (this.isReproductive)) {
-                        return
-                    }
-                    if ((mode === utravers.kActivityReproductiveBiomassThatCanBeRemoved) && (!this.isReproductive)) {
+                    if ((mode === Activity.kActivityReproductiveBiomassThatCanBeRemoved) && (!this.isReproductive)) {
                         return
                     }
                     try {
                         // a meristem can lose all of its biomass 
                         traverser.total = traverser.total + this.liveBiomass_pctMPB
-                    } catch (Exception e) {
-                        usupport.messageForExceptionType(e, "PdMeristem.traverseActivity (removal request)")
+                    } catch (e) {
+                        messageForExceptionType(e, "PdMeristem.traverseActivity (removal request)")
                     }
                     break
-                case utravers.kActivityRemoveVegetativeBiomass:
+                case Activity.kActivityRemoveVegetativeBiomass:
                     if (!this.isActive) {
                         return
                     }
-                    if ((mode === utravers.kActivityRemoveVegetativeBiomass) && (this.isReproductive)) {
-                        return
-                    }
-                    if ((mode === utravers.kActivityRemoveReproductiveBiomass) && (!this.isReproductive)) {
+                    if ((mode === Activity.kActivityRemoveVegetativeBiomass) && (this.isReproductive)) {
                         return
                     }
                     try {
                         biomassToRemove_pctMPB = this.liveBiomass_pctMPB * traverser.fractionOfPotentialBiomass
                         this.liveBiomass_pctMPB = this.liveBiomass_pctMPB - biomassToRemove_pctMPB
                         this.deadBiomass_pctMPB = this.deadBiomass_pctMPB + biomassToRemove_pctMPB
-                    } catch (Exception e) {
-                        usupport.messageForExceptionType(e, "PdMeristem.traverseActivity (removal)")
+                    } catch (e) {
+                        messageForExceptionType(e, "PdMeristem.traverseActivity (removal)")
                     }
                     break
-                case utravers.kActivityRemoveReproductiveBiomass:
+                case Activity.kActivityRemoveReproductiveBiomass:
                     if (!this.isActive) {
                         return
                     }
-                    if ((mode === utravers.kActivityRemoveVegetativeBiomass) && (this.isReproductive)) {
-                        return
-                    }
-                    if ((mode === utravers.kActivityRemoveReproductiveBiomass) && (!this.isReproductive)) {
+                    if ((mode === Activity.kActivityRemoveReproductiveBiomass) && (!this.isReproductive)) {
                         return
                     }
                     try {
                         biomassToRemove_pctMPB = this.liveBiomass_pctMPB * traverser.fractionOfPotentialBiomass
                         this.liveBiomass_pctMPB = this.liveBiomass_pctMPB - biomassToRemove_pctMPB
                         this.deadBiomass_pctMPB = this.deadBiomass_pctMPB + biomassToRemove_pctMPB
-                    } catch (Exception e) {
-                        usupport.messageForExceptionType(e, "PdMeristem.traverseActivity (removal)")
+                    } catch (e) {
+                        messageForExceptionType(e, "PdMeristem.traverseActivity (removal)")
                     }
                     break
-                case utravers.kActivityGatherStatistics:
-                    this.addToStatistics(traverser.statistics, utravers.kStatisticsPartTypeAxillaryBud)
+                case Activity.kActivityGatherStatistics:
+                    this.addToStatistics(traverser.statistics, Statistics.kStatisticsPartTypeAxillaryBud)
                     if (this.isReproductive) {
-                        this.addToStatistics(traverser.statistics, utravers.kStatisticsPartTypeAllReproductive)
+                        this.addToStatistics(traverser.statistics, Statistics.kStatisticsPartTypeAllReproductive)
                     } else {
-                        this.addToStatistics(traverser.statistics, utravers.kStatisticsPartTypeAllVegetative)
+                        this.addToStatistics(traverser.statistics, Statistics.kStatisticsPartTypeAllVegetative)
                     }
                     break
-                case utravers.kActivityCountPlantParts:
+                case Activity.kActivityCountPlantParts:
                     break
-                case utravers.kActivityFindPartForPartID:
+                case Activity.kActivityFindPartForPartID:
                     break
-                case utravers.kActivityCountTotalMemoryUse:
+                case Activity.kActivityCountTotalMemoryUse:
                     traverser.totalMemorySize += this.instanceSize
                     break
-                case utravers.kActivityCalculateBiomassForGravity:
+                case Activity.kActivityCalculateBiomassForGravity:
                     break
-                case utravers.kActivityCountPointsAndTrianglesFor3DExport:
+                case Activity.kActivityCountPointsAndTrianglesFor3DExport:
                     this.countPointsAndTrianglesFor3DExportAndAddToTraverserTotals(traverser)
                     break
                 default:
-                    throw new GeneralException.create("Problem: Unhandled mode in method PdMeristem.traverseActivity.")
-                    break
+                    throw new Error("Problem: Unhandled mode in method PdMeristem.traverseActivity.")
             }
-        } catch (Exception e) {
-            usupport.messageForExceptionType(e, "PdMeristem.traverseActivity")
+        } catch (e) {
+            messageForExceptionType(e, "PdMeristem.traverseActivity")
         }
     }
     
@@ -537,8 +511,8 @@ export class PdMeristem {
             if (this.plant.pGeneral.isDicot) {
                 result.makeSecondSeedlingLeaf(this.optimalInitialPhytomerBiomass_pctMPB())
             }
-        } catch (Exception e) {
-            usupport.messageForExceptionType(e, "PdMeristem.createFirstPhytomer")
+        } catch (e) {
+            messageForExceptionType(e, "PdMeristem.createFirstPhytomer")
         }
         return result
     }
@@ -564,7 +538,7 @@ export class PdMeristem {
         } else if (this.phytomerAttachedTo.rightBranchPlantPart === this) {
             this.phytomerAttachedTo.rightBranchPlantPart = newInflorescence
         } else {
-            throw new GeneralException.create("Problem: Branching incorrect in method PdMeristem.createInflorescence.")
+            throw new Error("Problem: Branching incorrect in method PdMeristem.createInflorescence.")
         }
         this.phytomerAttachedTo = null
     }
@@ -595,7 +569,7 @@ export class PdMeristem {
                 } else if (this.phytomerAttachedTo.rightBranchPlantPart === this) {
                     this.phytomerAttachedTo.rightBranchPlantPart = newPhytomer
                 } else {
-                    throw new GeneralException.create("Problem: Branching incorrect in method PdMeristem.createPhytomer.")
+                    throw new Error("Problem: Branching incorrect in method PdMeristem.createPhytomer.")
                 }
                 this.setIfApical(true)
             }
@@ -662,14 +636,14 @@ export class PdMeristem {
         if ((turtle === null)) {
             return
         }
-        this.boundsRect = Rect(0, 0, 0, 0)
+        this.boundsRect = new TRect(0, 0, 0, 0)
         if (this.hiddenByAmendment()) {
             return
         } else {
             this.applyAmendmentRotations()
         }
         daysToFullSize = 5
-        scale = (this.plant.pAxillaryBud.tdoParams.scaleAtFullSize / 100.0) * (umath.min(1.0, umath.safedivExcept(this.age, daysToFullSize, 0)))
+        scale = (this.plant.pAxillaryBud.tdoParams.scaleAtFullSize / 100.0) * (min(1.0, safedivExcept(this.age, daysToFullSize, 0)))
         if (this.isApical) {
             return
         }
@@ -701,8 +675,8 @@ export class PdMeristem {
                 tdo.zForSorting = minZ
             }
             turtle.ifExporting_endPlantPart()
-        } catch (Exception e) {
-            usupport.messageForExceptionType(e, "PdMeristem.draw")
+        } catch (e) {
+            messageForExceptionType(e, "PdMeristem.draw")
         }
     }
     
@@ -716,17 +690,17 @@ export class PdMeristem {
             return
         }
         this.setIfActive(false)
-        this.gender = uplant.kGenderFemale
+        this.gender = Gender.kGenderFemale
         if (!this.plant.pGeneral.maleFlowersAreSeparate) {
             if (this.decideIfActiveHermaphroditic()) {
-                this.gender = uplant.kGenderFemale
+                this.gender = Gender.kGenderFemale
             }
         } else {
             if (this.decideIfActiveMale()) {
-                this.gender = uplant.kGenderMale
+                this.gender = Gender.kGenderMale
             }
             if (this.decideIfActiveFemale()) {
-                this.gender = uplant.kGenderFemale
+                this.gender = Gender.kGenderFemale
             }
         }
         if (this.willCreateInflorescence()) {
@@ -740,8 +714,8 @@ export class PdMeristem {
         //  a female inflorescence. Called by decideReproductiveGenderAndActivity.
         //If meristem is already male, then both male and female flowers are apical (or axillary).
         //  in that case, override with female only half the time.
-        result = (this.isApical === this.plant.pInflor[uplant.kGenderFemale].isTerminal)
-        if (result && (this.gender === uplant.kGenderMale)) {
+        result = (this.isApical === this.plant.pInflor[Gender.kGenderFemale].isTerminal)
+        if (result && (this.gender === Gender.kGenderMale)) {
             result = (this.plant.randomNumberGenerator.zeroToOne() < 0.5)
         }
         return result
@@ -752,7 +726,7 @@ export class PdMeristem {
         //For the case of hermaphroditic flowers, decide if this meristem will be able to create
         //  a hermaphroditic inflorescence (if flowers are hermaphroditic, female parameters are used).
         //  Called by decideReproductiveGenderAndActivity.
-        result = (this.isApical === this.plant.pInflor[uplant.kGenderFemale].isTerminal)
+        result = (this.isApical === this.plant.pInflor[Gender.kGenderFemale].isTerminal)
         return result
     }
     
@@ -760,14 +734,12 @@ export class PdMeristem {
         let result = false
         //For the case of separate male and female flowers, decide if this meristem will be able to create
         //  a male inflorescence. Called by decideReproductiveGenderAndActivity.
-        result = (this.isApical === this.plant.pInflor[uplant.kGenderMale].isTerminal)
+        result = (this.isApical === this.plant.pInflor[Gender.kGenderMale].isTerminal)
         return result
     }
     
     partType(): int {
-        let result = 0
-        result = uplant.kPartTypeMeristem
-        return result
+        return PartType.kPartTypeMeristem
     }
     
     willCreateInflorescence(): boolean {
@@ -788,11 +760,11 @@ export class PdMeristem {
             if (this.isApical) {
                 numExpected = this.plant.pGeneral.numApicalInflors
                 numAlready = this.plant.numApicalActiveReproductiveMeristemsOrInflorescences
-                inflorProb = umath.safedivExcept(numExpected - numAlready, this.plant.numApicalInactiveReproductiveMeristems, 0)
+                inflorProb = safedivExcept(numExpected - numAlready, this.plant.numApicalInactiveReproductiveMeristems, 0)
             } else {
                 numExpected = this.plant.pGeneral.numAxillaryInflors
                 numAlready = this.plant.numAxillaryActiveReproductiveMeristemsOrInflorescences
-                inflorProb = umath.safedivExcept(numExpected - numAlready, this.plant.numAxillaryInactiveReproductiveMeristems, 0)
+                inflorProb = safedivExcept(numExpected - numAlready, this.plant.numAxillaryInactiveReproductiveMeristems, 0)
             }
             if ((numExpected <= 3)) {
                 //If there are only a few inflorescences on the plant, don't mess with probability; place on
@@ -805,15 +777,15 @@ export class PdMeristem {
             } else {
                 result = false
             }
-        } catch (Exception e) {
+        } catch (e) {
             result = false
-            usupport.messageForExceptionType(e, "PdMeristem.willCreateInflorescence")
+            messageForExceptionType(e, "PdMeristem.willCreateInflorescence")
         }
         return result
     }
     
     classAndVersionInformation(cvir: PdClassAndVersionInformationRecord): void {
-        cvir.classNumber = uclasses.kPdMeristem
+        cvir.classNumber = ClassId.kPdMeristem
         cvir.versionNumber = 0
         cvir.additionNumber = 0
     }
@@ -828,4 +800,3 @@ export class PdMeristem {
     }
     
 }
-
