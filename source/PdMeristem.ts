@@ -296,11 +296,11 @@ export class PdMeristem extends PdPlantPart {
                     break
                 case Activity.kActivityVegetativeBiomassThatCanBeRemoved:
                     if (!this.isActive) {
-                        //called by phytomer
+                        // called by phytomer
                         // free called by phytomer or inflorescence 
                         return
                     }
-                    if ((mode === Activity.kActivityVegetativeBiomassThatCanBeRemoved) && (this.isReproductive)) {
+                    if (this.isReproductive) {
                         return
                     }
                     try {
@@ -312,11 +312,11 @@ export class PdMeristem extends PdPlantPart {
                     break
                 case Activity.kActivityReproductiveBiomassThatCanBeRemoved:
                     if (!this.isActive) {
-                        //called by phytomer
+                        // called by phytomer
                         // free called by phytomer or inflorescence 
                         return
                     }
-                    if ((mode === Activity.kActivityReproductiveBiomassThatCanBeRemoved) && (!this.isReproductive)) {
+                    if (!this.isReproductive) {
                         return
                     }
                     try {
@@ -330,7 +330,7 @@ export class PdMeristem extends PdPlantPart {
                     if (!this.isActive) {
                         return
                     }
-                    if ((mode === Activity.kActivityRemoveVegetativeBiomass) && (this.isReproductive)) {
+                    if (this.isReproductive) {
                         return
                     }
                     try {
@@ -345,7 +345,7 @@ export class PdMeristem extends PdPlantPart {
                     if (!this.isActive) {
                         return
                     }
-                    if ((mode === Activity.kActivityRemoveReproductiveBiomass) && (!this.isReproductive)) {
+                    if (!this.isReproductive) {
                         return
                     }
                     try {
