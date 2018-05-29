@@ -46,11 +46,6 @@ export function darkerColor(a: number) {
     return a
 }
 
-// TODO: Fix digitValueString stub from usupport
-export function digitValueString(value: float) {
-    return "" + value
-}
-
 // TODO: Fix boundForString stub from usupport
 export function boundForString(boundString: string, fieldType: int): [number, boolean] {
     return [StrToFloat(boundString), true]
@@ -67,8 +62,6 @@ export function support_rgb(R: byte, G: byte, B: byte): long {
     return R << 16 + G << 8 + B 
 }
 
-/*
-
 // record
 export interface SaveFileNamesStructure {
     fileType: short
@@ -79,25 +72,29 @@ export interface SaveFileNamesStructure {
 }
 
 // const
-const kFileTypeAny = 0
-const kFileTypePlant = 1
-const kFileTypeTabbedText = 2
-const kFileTypeStrategy = 3
-const kFileTypeIni = 4
-const kFileTypeExceptionList = 5
-const kFileTypeBitmap = 6
-const kFileTypeTdo = 7
-const kFileTypeDXF = 8
-const kFileTypeINC = 9
-const kFileType3DS = 10
-const kFileTypeProgramInfo = 11
-const kFileTypeJPEG = 12
-const kFileTypeOBJ = 13
-const kFileTypeMTL = 14
-const kFileTypeVRML = 15
-const kFileTypeLWO = 16
+export enum FileType {
+    kFileTypeAny = 0,
+    kFileTypePlant = 1,
+    kFileTypeTabbedText = 2,
+    kFileTypeStrategy = 3,
+    kFileTypeIni = 4,
+    kFileTypeExceptionList = 5,
+    kFileTypeBitmap = 6,
+    kFileTypeTdo = 7,
+    kFileTypeDXF = 8,
+    kFileTypeINC = 9,
+    kFileType3DS = 10,
+    kFileTypeProgramInfo = 11,
+    kFileTypeJPEG = 12,
+    kFileTypeOBJ = 13,
+    kFileTypeMTL = 14,
+    kFileTypeVRML = 15,
+    kFileTypeLWO = 16,
+}
+
 const kWritingWasSuccessful = true
 const kWritingFailed = false
+
 const kNoSuggestedFile = ""
 const kAskForFileName = true
 const kDontAskForFileName = false
@@ -112,6 +109,7 @@ const kMaxSingle = 3.4e38
 const kIncludeAllFiles = true
 const kDontIncludeAllFiles = false
 
+/*
 
 // don't like using constants for these, but can't find any functions that provide them 
 export function rotateEncodeBy7(aString: string): string {
@@ -637,35 +635,30 @@ export function messageForExceptionType(e: Exception, methodName: string): void 
     umath.ErrorMessage(errorString)
 }
 
+*/
+
 // float to text conversion 
-// ---------------------------------------------------------------------------- float to text conversion 
+ 
 export function removeTrailingZeros(theString: string): string {
-    let result = ""
-    while ((len(theString) > 1) && (theString[len(theString)] === "0") && (theString[len(theString) - 1] !== ".")) {
-        //dec(theString[0]);  
-        UNRESOLVED.setLength(theString, len(theString) - 1)
+    let result = theString
+    while ((result.length > 1) && (result[result.length - 1] === "0") && (result[result.length - 2] !== ".")) {
+        result = result.substring(0, result.length - 1)
     }
-    result = theString
     return result
 }
 
 export function shortenLongNonZeroDigitsAfterDecimal(theString: string, maxDigits: int): string {
-    let result = ""
-    let pointPos: long
-    let firstNonZeroDigit: long
-    let digitsToGetRidOf: long
-    
-    result = theString
-    pointPos = UNRESOLVED.pos(".", result)
+    let result = theString
+    const pointPos = result.indexOf(".")
     if (pointPos !== 0) {
-        firstNonZeroDigit = pointPos + 1
-        while ((firstNonZeroDigit <= len(theString)) && (theString[firstNonZeroDigit] === "0")) {
+        let firstNonZeroDigit = pointPos + 1
+        while ((firstNonZeroDigit < theString.length) && (theString[firstNonZeroDigit] === "0")) {
             firstNonZeroDigit += 1
         }
-        if (firstNonZeroDigit < len(theString)) {
-            digitsToGetRidOf = len(theString) - firstNonZeroDigit + 1 - maxDigits
+        if (firstNonZeroDigit < theString.length) {
+            const digitsToGetRidOf = theString.length - firstNonZeroDigit + 1 - maxDigits
             if (digitsToGetRidOf > 0) {
-                result = UNRESOLVED.copy(result, 1, len(theString) - digitsToGetRidOf)
+                result = result.substring(0, theString.length - digitsToGetRidOf)
             }
         }
     }
@@ -674,15 +667,17 @@ export function shortenLongNonZeroDigitsAfterDecimal(theString: string, maxDigit
 
 export function digitValueString(value: float): string {
     let result = ""
-    result = removeTrailingZeros(shortenLongNonZeroDigitsAfterDecimal(FloatToStrF(value, UNRESOLVED.ffFixed, 7, 8), 2))
+    result = removeTrailingZeros(shortenLongNonZeroDigitsAfterDecimal("" + value.toFixed(8), 2))
     return result
 }
 
 export function valueString(value: float): string {
     let result = ""
-    result = removeTrailingZeros(shortenLongNonZeroDigitsAfterDecimal(FloatToStrF(value, UNRESOLVED.ffFixed, 7, 8), 4))
+    result = removeTrailingZeros(shortenLongNonZeroDigitsAfterDecimal("" + value.toFixed(8), 4))
     return result
 }
+
+/*
 
 // graphics 
 // ---------------------------------------------------------------------------- graphics 

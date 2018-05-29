@@ -1,50 +1,50 @@
+import { short, int, float, long, TColorRef, IntToStr, TextFile, writeln } from "./common";
+import { KfPoint3D } from "./KfPoint3D";
+import { FileType, valueString } from "./usupport";
+import { domain } from "./PdDomain";
+import { intMin } from "./umath";
+import { KfTriangle } from "./KfTriangle";
+
 // unit U3dexport
 
-from conversion_common import *
-import umath
-import udomain
-import u3dsupport
-import udrawingsurface
-import utdo
-import usupport
-import delphi_compatability
+export enum ExportPart {
+    kExportPartMeristem = 0,
+    kExportPartInternode = 1,
+    kExportPartSeedlingLeaf = 2,
+    kExportPartLeaf = 3,
+    kExportPartFirstPetiole = 4,
+    kExportPartPetiole = 5,
+    kExportPartLeafStipule = 6,
+    kExportPartInflorescenceStalkFemale = 7,
+    kExportPartInflorescenceInternodeFemale = 8,
+    kExportPartInflorescenceBractFemale = 9,
+    kExportPartInflorescenceStalkMale = 10,
+    kExportPartInflorescenceInternodeMale = 11,
+    kExportPartInflorescenceBractMale = 12,
+    kExportPartPedicelFemale = 13,
+    kExportPartFlowerBudFemale = 14,
+    kExportPartStyleFemale = 15,
+    kExportPartStigmaFemale = 16,
+    kExportPartFilamentFemale = 17,
+    kExportPartAntherFemale = 18,
+    kExportPartFirstPetalsFemale = 19,
+    kExportPartSecondPetalsFemale = 20,
+    kExportPartThirdPetalsFemale = 21,
+    kExportPartFourthPetalsFemale = 22,
+    kExportPartFifthPetalsFemale = 23,
+    kExportPartSepalsFemale = 24,
+    kExportPartPedicelMale = 25,
+    kExportPartFlowerBudMale = 26,
+    kExportPartFilamentMale = 27,
+    kExportPartAntherMale = 28,
+    kExportPartFirstPetalsMale = 29,
+    kExportPartSepalsMale = 30,
+    kExportPartUnripeFruit = 31,
+    kExportPartRipeFruit = 32,
+    kExportPartRootTop = 33,
+    kExportPartLast = 33,
+}
 
-// const
-const kExportPartMeristem = 0
-const kExportPartInternode = 1
-const kExportPartSeedlingLeaf = 2
-const kExportPartLeaf = 3
-const kExportPartFirstPetiole = 4
-const kExportPartPetiole = 5
-const kExportPartLeafStipule = 6
-const kExportPartInflorescenceStalkFemale = 7
-const kExportPartInflorescenceInternodeFemale = 8
-const kExportPartInflorescenceBractFemale = 9
-const kExportPartInflorescenceStalkMale = 10
-const kExportPartInflorescenceInternodeMale = 11
-const kExportPartInflorescenceBractMale = 12
-const kExportPartPedicelFemale = 13
-const kExportPartFlowerBudFemale = 14
-const kExportPartStyleFemale = 15
-const kExportPartStigmaFemale = 16
-const kExportPartFilamentFemale = 17
-const kExportPartAntherFemale = 18
-const kExportPartFirstPetalsFemale = 19
-const kExportPartSecondPetalsFemale = 20
-const kExportPartThirdPetalsFemale = 21
-const kExportPartFourthPetalsFemale = 22
-const kExportPartFifthPetalsFemale = 23
-const kExportPartSepalsFemale = 24
-const kExportPartPedicelMale = 25
-const kExportPartFlowerBudMale = 26
-const kExportPartFilamentMale = 27
-const kExportPartAntherMale = 28
-const kExportPartFirstPetalsMale = 29
-const kExportPartSepalsMale = 30
-const kExportPartUnripeFruit = 31
-const kExportPartRipeFruit = 32
-const kExportPartRootTop = 33
-const kExportPartLast = 33
 const kLastDxfColorIndex = 10
 const dxfColors = [delphi_compatability.clRed, delphi_compatability.clYellow, delphi_compatability.clLime, delphi_compatability.clAqua, delphi_compatability.clBlue, delphi_compatability.clPurple, delphi_compatability.clBlack, delphi_compatability.clOlive, delphi_compatability.clFuchsia, delphi_compatability.clTeal, delphi_compatability.clGray, ]
 const kColorDXFFromPlantPartType = 0
@@ -59,14 +59,19 @@ const kMaxPOVPlants = 1000
 const kMaxStoredMaterials = 1000
 const kVRMLVersionOne = 0
 const kVRMLVersionTwo = 1
-const kScreen = 0
-const kDXF = 1
-const kPOV = 2
-const k3DS = 3
-const kOBJ = 4
-const kVRML = 5
-const kLWO = 6
-const k3DExportTypeLast = 6
+
+// TODO: Fix constants copied from U3dexport
+export enum ExportFormats {
+    kScreen = 0,
+    kDXF = 1,
+    kPOV = 2,
+    k3DS = 3,
+    kOBJ = 4,
+    kVRML = 5,
+    kLWO = 6,
+    k3DExportTypeLast = 6
+}
+
 const kLayerOutputAllTogether = 0
 const kLayerOutputByTypeOfPlantPart = 1
 const kLayerOutputByPlantPart = 2
@@ -154,26 +159,26 @@ export interface SingleOverlay {
 function fileTypeFor3DExportType(outputType: short): short {
     let result = 0
     switch (outputType) {
-        case kDXF:
-            result = usupport.kFileTypeDXF
+        case ExportFormats.kDXF:
+            result = FileType.kFileTypeDXF
             break
-        case kPOV:
-            result = usupport.kFileTypeINC
+        case ExportFormats.kPOV:
+            result = FileType.kFileTypeINC
             break
-        case k3DS:
-            result = usupport.kFileType3DS
+        case ExportFormats.k3DS:
+            result = FileType.kFileType3DS
             break
-        case kOBJ:
-            result = usupport.kFileTypeOBJ
+        case ExportFormats.kOBJ:
+            result = FileType.kFileTypeOBJ
             break
-        case kVRML:
-            result = usupport.kFileTypeVRML
+        case ExportFormats.kVRML:
+            result = FileType.kFileTypeVRML
             break
-        case kLWO:
-            result = usupport.kFileTypeLWO
+        case ExportFormats.kLWO:
+            result = FileType.kFileTypeLWO
             break
         default:
-            throw new GeneralException.create("Problem: Invalid export type in TMainForm.fileTypeFor3DExportType.")
+            throw new Error("Problem: Invalid export type in TMainForm.fileTypeFor3DExportType.")
             break
     }
     return result
@@ -182,26 +187,26 @@ function fileTypeFor3DExportType(outputType: short): short {
 function nameFor3DExportType(anOutputType: short): string {
     let result = ""
     switch (anOutputType) {
-        case kDXF:
+        case ExportFormats.kDXF:
             result = "DXF"
             break
-        case kPOV:
+        case ExportFormats.kPOV:
             result = "POV"
             break
-        case k3DS:
+        case ExportFormats.k3DS:
             result = "3DS"
             break
-        case kOBJ:
+        case ExportFormats.kOBJ:
             result = "OBJ"
             break
-        case kVRML:
+        case ExportFormats.kVRML:
             result = "VRML"
             break
-        case kLWO:
+        case ExportFormats.kLWO:
             result = "LWO"
             break
         default:
-            throw new GeneralException.create("Problem: Invalid type in PdDomain.sectionNumberFor3DExportType.")
+            throw new Error("Problem: Invalid type in PdDomain.sectionNumberFor3DExportType.")
             break
     }
     return result
@@ -212,7 +217,7 @@ function longNameForDXFPartType(index: short): string {
     let longName: string
     let shortName: string
     
-    longName, shortName = getInfoForDXFPartType(index, longName, shortName)
+    [longName, shortName] = getInfoForDXFPartType(index)
     result = longName
     return result
 }
@@ -222,161 +227,162 @@ function shortNameForDXFPartType(index: short): string {
     let longName: string
     let shortName: string
     
-    longName, shortName = getInfoForDXFPartType(index, longName, shortName)
+    [longName, shortName] = getInfoForDXFPartType(index)
     result = shortName
     return result
 }
 
-function getInfoForDXFPartType(index: short, longName: string, shortName: string): void {
+function getInfoForDXFPartType(index: short): [string, string] {
+    let longName: string
+    let shortName: string
     switch (index) {
-        case kExportPartMeristem:
+        case ExportPart.kExportPartMeristem:
             longName = "Meristem"
             shortName = "Mrstm"
             break
-        case kExportPartInternode:
+        case ExportPart.kExportPartInternode:
             longName = "Internode"
             shortName = "Intrnd"
             break
-        case kExportPartSeedlingLeaf:
+        case ExportPart.kExportPartSeedlingLeaf:
             longName = "Seedling leaf"
             shortName = "1stLeaf"
             break
-        case kExportPartLeaf:
+        case ExportPart.kExportPartLeaf:
             longName = "Leaf"
             shortName = "Leaf"
             break
-        case kExportPartFirstPetiole:
+        case ExportPart.kExportPartFirstPetiole:
             longName = "Seedling petiole"
             shortName = "1stPetiole"
             break
-        case kExportPartPetiole:
+        case ExportPart.kExportPartPetiole:
             longName = "Petiole"
             shortName = "Petiole"
             break
-        case kExportPartLeafStipule:
+        case ExportPart.kExportPartLeafStipule:
             longName = "Leaf stipule"
             shortName = "Stipule"
             break
-        case kExportPartInflorescenceStalkFemale:
+        case ExportPart.kExportPartInflorescenceStalkFemale:
             longName = "Primary inflorescence stalk (peduncle)"
             shortName = "1Pdncle"
             break
-        case kExportPartInflorescenceInternodeFemale:
+        case ExportPart.kExportPartInflorescenceInternodeFemale:
             longName = "Primary inflorescence internode"
             shortName = "1InfInt"
             break
-        case kExportPartInflorescenceBractFemale:
+        case ExportPart.kExportPartInflorescenceBractFemale:
             longName = "Primary inflorescence bract"
             shortName = "1Bract"
             break
-        case kExportPartInflorescenceStalkMale:
+        case ExportPart.kExportPartInflorescenceStalkMale:
             longName = "Secondary inflorescence stalk (peduncle)"
             shortName = "2Pdncle"
             break
-        case kExportPartInflorescenceInternodeMale:
+        case ExportPart.kExportPartInflorescenceInternodeMale:
             longName = "Secondary inflorescence internode"
             shortName = "2InfInt"
             break
-        case kExportPartInflorescenceBractMale:
+        case ExportPart.kExportPartInflorescenceBractMale:
             longName = "Secondary inflorescence bract"
             shortName = "2Bract"
             break
-        case kExportPartPedicelFemale:
+        case ExportPart.kExportPartPedicelFemale:
             longName = "Primary flower stalk"
             shortName = "1Pdcel"
             break
-        case kExportPartFlowerBudFemale:
+        case ExportPart.kExportPartFlowerBudFemale:
             longName = "Primary flower bud"
             shortName = "1Bud"
             break
-        case kExportPartStyleFemale:
+        case ExportPart.kExportPartStyleFemale:
             longName = "Flower style"
             shortName = "Style"
             break
-        case kExportPartStigmaFemale:
+        case ExportPart.kExportPartStigmaFemale:
             longName = "Flower stigma"
             shortName = "Stigma"
             break
-        case kExportPartFilamentFemale:
+        case ExportPart.kExportPartFilamentFemale:
             longName = "Primary flower filament"
             shortName = "1Flmnt"
             break
-        case kExportPartAntherFemale:
+        case ExportPart.kExportPartAntherFemale:
             longName = "Primary flower anther"
             shortName = "1Anther"
             break
-        case kExportPartFirstPetalsFemale:
+        case ExportPart.kExportPartFirstPetalsFemale:
             longName = "Primary flower petal, first row"
             shortName = "1Petal1"
             break
-        case kExportPartSecondPetalsFemale:
+        case ExportPart.kExportPartSecondPetalsFemale:
             longName = "Flower petal, second row"
             shortName = "1Petal2"
             break
-        case kExportPartThirdPetalsFemale:
+        case ExportPart.kExportPartThirdPetalsFemale:
             longName = "Flower petal, third row"
             shortName = "1Petal3"
             break
-        case kExportPartFourthPetalsFemale:
+        case ExportPart.kExportPartFourthPetalsFemale:
             longName = "Flower petal, fourth row"
             shortName = "1Petal4"
             break
-        case kExportPartFifthPetalsFemale:
+        case ExportPart.kExportPartFifthPetalsFemale:
             longName = "Flower petal, fifth row"
             shortName = "1Petal5"
             break
-        case kExportPartSepalsFemale:
+        case ExportPart.kExportPartSepalsFemale:
             longName = "Primary flower sepal"
             shortName = "1Sepal"
             break
-        case kExportPartPedicelMale:
+        case ExportPart.kExportPartPedicelMale:
             longName = "Secondary flower stalk"
             shortName = "2Pdcel"
             break
-        case kExportPartFlowerBudMale:
+        case ExportPart.kExportPartFlowerBudMale:
             longName = "Secondary flower bud"
             shortName = "2Bud"
             break
-        case kExportPartFilamentMale:
+        case ExportPart.kExportPartFilamentMale:
             longName = "Secondary flower filament"
             shortName = "2Flmnt"
             break
-        case kExportPartAntherMale:
+        case ExportPart.kExportPartAntherMale:
             longName = "Secondary flower anther"
             shortName = "2Anther"
             break
-        case kExportPartFirstPetalsMale:
+        case ExportPart.kExportPartFirstPetalsMale:
             longName = "Secondary flower petal"
             shortName = "2Petal1"
             break
-        case kExportPartSepalsMale:
+        case ExportPart.kExportPartSepalsMale:
             longName = "Secondary flower sepal"
             shortName = "2Sepal"
             break
-        case kExportPartUnripeFruit:
+        case ExportPart.kExportPartUnripeFruit:
             longName = "Unripe fruit"
             shortName = "FruitU"
             break
-        case kExportPartRipeFruit:
+        case ExportPart.kExportPartRipeFruit:
             longName = "Ripe fruit"
             shortName = "FruitR"
             break
-        case kExportPartRootTop:
+        case ExportPart.kExportPartRootTop:
             longName = "Root top"
             shortName = "Root"
             break
         default:
-            throw new GeneralException.create("Problem: Invalid part type in method getInfoForDXFPartType.")
-            break
+            throw new Error("Problem: Invalid part type in method getInfoForDXFPartType.")
     }
-    return longName, shortName
+    return [longName, shortName]
 }
 
 
 // don't save in settings file
 // to deal with quirks in other programs
 // specific (keep in generic structure so one window can handle all of these)
-export class KfFileExportSurface {
+export class KfFileExportSurface extends KfDrawingSurface {
     fileName: string = ""
     scale: float = 0.0
     options: FileExport3DOptionsStructure = new FileExport3DOptionsStructure()
@@ -387,20 +393,17 @@ export class KfFileExportSurface {
     currentPlantTranslateY: float = 0.0
     currentPlantIndex: short = 0
     currentGroupingString: string = ""
-    currentColor: TColorRef = new TColorRef()
-    plantPartCounts: short[] /* kExportPartLast + 1 */ = Array(kExportPartLast + 1)
+    currentColor: TColorRef = 0
+    plantPartCounts: short[] = Array(ExportPart.kExportPartLast + 1)
     numPoints: int = 0
-    points: Vertex[] /* kMax3DPoints + 1 */ = Array(kMax3DPoints + 1)
+    points: Vertex[] = Array(kMax3DPoints + 1)
     numFaces: int = 0
-    faces: Triangle[] /* kMax3DFaces + 1 */ = Array(kMax3DFaces + 1)
-    KfFileExportSurface.prototype = new KfDrawingSurface()
-    KfFileExportSurface.prototype.constructor = KfFileExportSurface
-    
-    // ----------------------------------------------------------------------------- KfFileExportSurface 
-    createWithFileName(aFileName: string): void {
-        KfDrawingSurface.prototype.create.call(this)
+    faces: Triangle[] = Array(kMax3DFaces + 1)
+     
+    constructor(aFileName: string): void {
+        super()
         this.fileName = aFileName
-        this.options = udomain.domain.exportOptionsFor3D[this.outputType()]
+        this.options = domain.exportOptionsFor3D[this.outputType()]
         this.scale = this.options.overallScalingFactor_pct / 100.0
     }
     
@@ -409,11 +412,11 @@ export class KfFileExportSurface {
     }
     
     startFile(): void {
-        throw new GeneralException.create("subclasses must override")
+        throw new Error("subclasses must override")
     }
     
     endFile(): void {
-        throw new GeneralException.create("subclasses must override")
+        throw new Error("subclasses must override")
     }
     
     startPlant(aLongName: string, aPlantIndex: short): void {
@@ -426,8 +429,8 @@ export class KfFileExportSurface {
         // subclasses can override
     }
     
-    writeRegistrationReminder(p1: KFPoint3D, p2: KFPoint3D, p3: KFPoint3D, p4: KFPoint3D): void {
-        throw new GeneralException.create("subclasses must override")
+    writeRegistrationReminder(p1: KfPoint3D, p2: KfPoint3D, p3: KfPoint3D, p4: KfPoint3D): void {
+        throw new Error("subclasses must override")
     }
     
     startNestedGroupOfPlantParts(groupName: string, shortName: string, nestingType: short): void {
@@ -464,7 +467,7 @@ export class KfFileExportSurface {
     
     addPoint(point: KfPoint3D): void {
         if (this.numPoints >= kMax3DPoints) {
-            throw new GeneralException.Create("Problem: Too many points in 3D export.")
+            throw new Error("Problem: Too many points in 3D export.")
         }
         this.points[this.numPoints].x = this.pressedOrNot(this.scale * point.x, kX)
         this.points[this.numPoints].y = this.pressedOrNot(this.scale * point.y, kY)
@@ -484,7 +487,7 @@ export class KfFileExportSurface {
     
     addTriangle(a: int, b: int, c: int): void {
         if (this.numFaces >= kMax3DFaces) {
-            throw new GeneralException.Create("Problem: Too many faces in 3D export.")
+            throw new Error("Problem: Too many faces in 3D export.")
         }
         this.faces[this.numFaces].vertex1 = a
         this.faces[this.numFaces].vertex2 = b
@@ -516,18 +519,17 @@ export class KfFileExportSurface {
     }
     
     drawPipeFaces(startPoints: KfPoint3D[], endPoints: KfPoint3D[], faces: short, segmentNumber: short): void {
-        let i: long
         let disp: long
         
         // subclasses can override - this works for some
         disp = segmentNumber * faces * 2
-        for (i = 0; i <= faces - 1; i++) {
+        for (let i = 0; i < faces; i++) {
             this.addPoint(startPoints[i])
         }
-        for (i = 0; i <= faces - 1; i++) {
+        for (let i = 0; i < faces; i++) {
             this.addPoint(endPoints[i])
         }
-        for (i = 0; i <= faces - 1; i++) {
+        for (let i = 0; i < faces; i++) {
             this.addTriangle(disp + i, disp + i + faces, disp + (i + 1) % faces)
             this.addTriangle(disp + (i + 1) % faces, disp + i + faces, disp + (i + 1) % faces + faces)
         }
@@ -543,17 +545,17 @@ export class KfFileExportSurface {
         let result = 0
         result = -1
         if ((this instanceof KfDrawingSurfaceForDXF)) {
-            result = kDXF
+            result = ExportFormats.kDXF
         } else if ((this instanceof KfDrawingSurfaceForPOV)) {
-            result = kPOV
+            result = ExportFormats.kPOV
         } else if ((this instanceof KfDrawingSurfaceFor3DS)) {
-            result = k3DS
+            result = ExportFormats.k3DS
         } else if ((this instanceof KfDrawingSurfaceForOBJ)) {
-            result = kOBJ
+            result = ExportFormats.kOBJ
         } else if ((this instanceof KfDrawingSurfaceForVRML)) {
-            result = kVRML
+            result = ExportFormats.kVRML
         } else if ((this instanceof KfDrawingSurfaceForLWO)) {
-            result = kLWO
+            result = ExportFormats.kLWO
         }
         return result
     }
@@ -564,13 +566,13 @@ export class KfFileExportSurface {
         let i: int
         
         result = ""
-        if (len(this.currentPlantNameLong) <= 0) {
+        if (this.currentPlantNameLong.length <= 0) {
             return result
         }
-        shortNameLength = umath.intMin(this.options.lengthOfShortName, len(this.currentPlantNameLong))
+        shortNameLength = intMin(this.options.lengthOfShortName, this.currentPlantNameLong.length)
         for (i = 1; i <= shortNameLength; i++) {
             if (this.currentPlantNameLong[i] !== " ") {
-                result = result + UNRESOLVED.copy(this.currentPlantNameLong, i, 1)
+                result = result + this.currentPlantNameLong[i]
             }
         }
         if (this.options.writePlantNumberInFrontOfName) {
@@ -581,16 +583,14 @@ export class KfFileExportSurface {
     
 }
 
-export class KfTextFileExportSurface {
+export class KfTextFileExportSurface extends KfFileExportSurface {
     outputFile: TextFile = new TextFile()
-    KfTextFileExportSurface.prototype = new KfFileExportSurface()
-    KfTextFileExportSurface.prototype.constructor = KfTextFileExportSurface
     
     // ----------------------------------------------------------------------------- KfTextFileExportSurface 
-    createWithFileName(aFileName: string): void {
-        KfFileExportSurface.prototype.createWithFileName.call(this, aFileName)
+    constructor(aFileName: string) {
+        super(aFileName)
         // we assume that the file name has been already okayed by whoever created us
-        AssignFile(this.outputFile, this.fileName)
+        this.outputFile.fileName = this.fileName
     }
     
     destroy(): void {
@@ -598,19 +598,17 @@ export class KfTextFileExportSurface {
     }
     
     startFile(): void {
-        Rewrite(this.outputFile)
+        // TODO: Use or remove: Rewrite(this.outputFile)
     }
     
     endFile(): void {
-        CloseFile(this.outputFile)
+        // TODO: Use or remove: CloseFile(this.outputFile)
     }
     
 }
 
-export class KfDrawingSurfaceForDXF {
+export class KfDrawingSurfaceForDXF extends KfTextFileExportSurface {
     currentColorIndex: short = 0
-    KfDrawingSurfaceForDXF.prototype = new KfTextFileExportSurface()
-    KfDrawingSurfaceForDXF.prototype.constructor = KfDrawingSurfaceForDXF
     
     // ----------------------------------------------------------------------------- KfDrawingSurfaceForDXF 
     startFile(): void {
@@ -664,9 +662,7 @@ export class KfDrawingSurfaceForDXF {
     }
     
     drawPipeFaces(startPoints: KfPoint3D[], endPoints: KfPoint3D[], faces: short, segmentNumber: short): void {
-        let i: short
-        
-        for (i = 0; i <= faces - 1; i++) {
+        for (let i = 0; i <= faces - 1; i++) {
             // for this don't have to worry about segment number, we are not adding points and triangles
             this.draw3DFace(startPoints[i], endPoints[i], endPoints[(i + 1) % faces], startPoints[(i + 1) % faces])
         }
@@ -687,29 +683,29 @@ export class KfDrawingSurfaceForDXF {
             }
         }
         writeln(this.outputFile, "10")
-        writeln(this.outputFile, usupport.valueString(this.pressedOrNot(this.scale * point1.x, kX)))
+        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * point1.x, kX)))
         writeln(this.outputFile, "20")
-        writeln(this.outputFile, usupport.valueString(this.pressedOrNot(this.scale * -point1.y, kY)))
+        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * -point1.y, kY)))
         writeln(this.outputFile, "30")
-        writeln(this.outputFile, usupport.valueString(this.pressedOrNot(this.scale * point1.z, kZ)))
+        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * point1.z, kZ)))
         writeln(this.outputFile, "11")
-        writeln(this.outputFile, usupport.valueString(this.pressedOrNot(this.scale * point2.x, kX)))
+        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * point2.x, kX)))
         writeln(this.outputFile, "21")
-        writeln(this.outputFile, usupport.valueString(this.pressedOrNot(this.scale * -point2.y, kY)))
+        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * -point2.y, kY)))
         writeln(this.outputFile, "31")
-        writeln(this.outputFile, usupport.valueString(this.pressedOrNot(this.scale * point2.z, kZ)))
+        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * point2.z, kZ)))
         writeln(this.outputFile, "12")
-        writeln(this.outputFile, usupport.valueString(this.pressedOrNot(this.scale * point3.x, kX)))
+        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * point3.x, kX)))
         writeln(this.outputFile, "22")
-        writeln(this.outputFile, usupport.valueString(this.pressedOrNot(this.scale * -point3.y, kY)))
+        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * -point3.y, kY)))
         writeln(this.outputFile, "32")
-        writeln(this.outputFile, usupport.valueString(this.pressedOrNot(this.scale * point3.z, kZ)))
+        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * point3.z, kZ)))
         writeln(this.outputFile, "13")
-        writeln(this.outputFile, usupport.valueString(this.pressedOrNot(this.scale * point4.x, kX)))
+        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * point4.x, kX)))
         writeln(this.outputFile, "23")
-        writeln(this.outputFile, usupport.valueString(this.pressedOrNot(this.scale * -point4.y, kY)))
+        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * -point4.y, kY)))
         writeln(this.outputFile, "33")
-        writeln(this.outputFile, usupport.valueString(this.pressedOrNot(this.scale * point4.z, kZ)))
+        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * point4.z, kZ)))
     }
     
     basicDrawLineFromTo(startPoint: KfPoint3D, endPoint: KfPoint3D): void {
@@ -720,7 +716,7 @@ export class KfDrawingSurfaceForDXF {
         this.draw3DFace(triangle.points[0], triangle.points[1], triangle.points[2], triangle.points[2])
     }
     
-    writeRegistrationReminder(p1: KFPoint3D, p2: KFPoint3D, p3: KFPoint3D, p4: KFPoint3D): void {
+    writeRegistrationReminder(p1: KfPoint3D, p2: KfPoint3D, p3: KfPoint3D, p4: KfPoint3D): void {
         this.currentGroupingString = this.currentPlantNameShort + "_rem"
         // adds one; kLastDxfColorIndex is gray
         this.currentColorIndex = kLastDxfColorIndex - 1
@@ -730,17 +726,14 @@ export class KfDrawingSurfaceForDXF {
     
 }
 
-export class KfDrawingSurfaceForPOV {
+export class KfDrawingSurfaceForPOV extends KfTextFileExportSurface {
     currentComment: string = ""
     currentWidth: float = 0.0
     currentIndentLevel: int = 0
     currentRotateString: string = ""
     numPlantsDrawn: short = 0
     plantNames: string[] /* kMaxPOVPlants + 1 */ = Array(kMaxPOVPlants + 1)
-    KfDrawingSurfaceForPOV.prototype = new KfTextFileExportSurface()
-    KfDrawingSurfaceForPOV.prototype.constructor = KfDrawingSurfaceForPOV
-    
-    // ----------------------------------------------------------------------------- KfDrawingSurfaceForPOV 
+     
     startFile(): void {
         KfTextFileExportSurface.prototype.startFile.call(this)
         writeln(this.outputFile, "// INC file for Persistence of Vision (POV) raytracer")
@@ -757,9 +750,9 @@ export class KfDrawingSurfaceForPOV {
         }
         writeln(this.outputFile, "#declare allPlants_" + usupport.replacePunctuationWithUnderscores(usupport.stringUpTo(ExtractFileName(this.fileName), ".")) + " = union {")
         for (i = 0; i <= this.numPlantsDrawn - 1; i++) {
-            writeln(this.outputFile, chr(9) + "object { " + this.plantNames[i] + " }")
+            writeln(this.outputFile, String.fromCharCode(9) + "object { " + this.plantNames[i] + " }")
         }
-        writeln(this.outputFile, chr(9) + "}")
+        writeln(this.outputFile, String.fromCharCode(9) + "}")
         if (this.options.pov_commentOutUnionAtEnd) {
             writeln(this.outputFile, "*/ ")
         }
@@ -779,7 +772,7 @@ export class KfDrawingSurfaceForPOV {
     
     endPlant(): void {
         if ((this.currentPlantIsTranslated) && (this.options.translatePlantsToWindowPositions)) {
-            writeln(this.outputFile, "translate <" + usupport.valueString(this.currentPlantTranslateX) + ", " + usupport.valueString(this.currentPlantTranslateY) + ", 0>")
+            writeln(this.outputFile, "translate <" + valueString(this.currentPlantTranslateX) + ", " + valueString(this.currentPlantTranslateY) + ", 0>")
         }
         if (!this.options.writeColors) {
             write(this.outputFile, "pigment { color rgb <0.8, 0.8, 0.8> }")
@@ -818,7 +811,7 @@ export class KfDrawingSurfaceForPOV {
                 }
                 break
             default:
-                throw new GeneralException.create("Problem: Unrecognized nesting type in KfDrawingSurfaceForPOV.startNestedGroupOfPlantParts.")
+                throw new Error("Problem: Unrecognized nesting type in KfDrawingSurfaceForPOV.startNestedGroupOfPlantParts.")
                 break
         }
         this.startUnion(groupName)
@@ -852,7 +845,7 @@ export class KfDrawingSurfaceForPOV {
                 }
                 break
             default:
-                throw new GeneralException.create("Problem: Unrecognized nesting type in KfDrawingSurfaceForPOV.startNestedGroupOfPlantParts.")
+                throw new Error("Problem: Unrecognized nesting type in KfDrawingSurfaceForPOV.startNestedGroupOfPlantParts.")
                 break
         }
         this.endBrace(kDontWriteColor)
@@ -904,7 +897,7 @@ export class KfDrawingSurfaceForPOV {
         let i: int
         
         for (i = 1; i <= this.currentIndentLevel; i++) {
-            write(this.outputFile, chr(9))
+            write(this.outputFile, String.fromCharCode(9))
         }
     }
     
@@ -937,7 +930,7 @@ export class KfDrawingSurfaceForPOV {
     endBrace(writeColor: boolean): void {
         this.doIndenting()
         if ((writeColor) && (this.options.writeColors) && (this.currentColor >= 0)) {
-            write(this.outputFile, "pigment { color rgb <" + usupport.valueString(UNRESOLVED.getRValue(this.currentColor) / 256.0) + ", " + usupport.valueString(UNRESOLVED.getGValue(this.currentColor) / 256.0) + ", " + usupport.valueString(UNRESOLVED.getBValue(this.currentColor) / 256.0) + "> }")
+            write(this.outputFile, "pigment { color rgb <" + valueString(UNRESOLVED.getRValue(this.currentColor) / 256.0) + ", " + valueString(UNRESOLVED.getGValue(this.currentColor) / 256.0) + ", " + valueString(UNRESOLVED.getBValue(this.currentColor) / 256.0) + "> }")
         }
         writeln(this.outputFile, "}")
         this.unindent()
@@ -949,7 +942,7 @@ export class KfDrawingSurfaceForPOV {
         endPointFinal = endPoint
         this.doIndenting()
         write(this.outputFile, "cylinder { ")
-        writeln(this.outputFile, "<" + usupport.valueString((this.pressedOrNot(this.scale * startPoint.x, kX))) + ", " + usupport.valueString(this.pressedOrNot(this.scale * -startPoint.y, kY)) + ", " + usupport.valueString(this.pressedOrNot(this.scale * startPoint.z, kZ)) + ">, <" + usupport.valueString(this.pressedOrNot(this.scale * endPointFinal.x, kX)) + ", " + usupport.valueString(this.pressedOrNot(this.scale * -endPointFinal.y, kY)) + ", " + usupport.valueString(this.pressedOrNot(this.scale * endPointFinal.z, kZ)) + ">, " + usupport.valueString(this.scale * this.currentWidth) + " }")
+        writeln(this.outputFile, "<" + valueString((this.pressedOrNot(this.scale * startPoint.x, kX))) + ", " + valueString(this.pressedOrNot(this.scale * -startPoint.y, kY)) + ", " + valueString(this.pressedOrNot(this.scale * startPoint.z, kZ)) + ">, <" + valueString(this.pressedOrNot(this.scale * endPointFinal.x, kX)) + ", " + valueString(this.pressedOrNot(this.scale * -endPointFinal.y, kY)) + ", " + valueString(this.pressedOrNot(this.scale * endPointFinal.z, kZ)) + ">, " + valueString(this.scale * this.currentWidth) + " }")
     }
     
     basicDrawTriangle(triangle: KfTriangle): void {
@@ -963,9 +956,9 @@ export class KfDrawingSurfaceForPOV {
         this.doIndenting()
         write(this.outputFile, "triangle { <")
         // all y values must be negative because it seems our coordinate systems are different
-        write(this.outputFile, usupport.valueString(this.pressedOrNot(this.scale * p1.x, kX)) + ", " + usupport.valueString(this.pressedOrNot(this.scale * -p1.y, kY)) + ", " + usupport.valueString(this.pressedOrNot(this.scale * p1.z, kZ)) + ">, <")
-        write(this.outputFile, usupport.valueString(this.pressedOrNot(this.scale * p2.x, kX)) + ", " + usupport.valueString(this.pressedOrNot(this.scale * -p2.y, kY)) + ", " + usupport.valueString(this.pressedOrNot(this.scale * p2.z, kZ)) + ">, <")
-        writeln(this.outputFile, usupport.valueString(this.pressedOrNot(this.scale * p3.x, kX)) + ", " + usupport.valueString(this.pressedOrNot(this.scale * -p3.y, kY)) + ", " + usupport.valueString(this.pressedOrNot(this.scale * p3.z, kZ)) + "> }")
+        write(this.outputFile, valueString(this.pressedOrNot(this.scale * p1.x, kX)) + ", " + valueString(this.pressedOrNot(this.scale * -p1.y, kY)) + ", " + valueString(this.pressedOrNot(this.scale * p1.z, kZ)) + ">, <")
+        write(this.outputFile, valueString(this.pressedOrNot(this.scale * p2.x, kX)) + ", " + valueString(this.pressedOrNot(this.scale * -p2.y, kY)) + ", " + valueString(this.pressedOrNot(this.scale * p2.z, kZ)) + ">, <")
+        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * p3.x, kX)) + ", " + valueString(this.pressedOrNot(this.scale * -p3.y, kY)) + ", " + valueString(this.pressedOrNot(this.scale * p3.z, kZ)) + "> }")
     }
     
     writeRegistrationReminder(p1: KFPoint3D, p2: KFPoint3D, p3: KFPoint3D, p4: KFPoint3D): void {
@@ -1080,7 +1073,7 @@ export class KfDrawingSurfaceForVRML {
                 }
                 break
             default:
-                throw new GeneralException.create("Problem: Unrecognized nesting type in KfDrawingSurfaceForVRML.startNestedGroupOfPlantParts.")
+                throw new Error("Problem: Unrecognized nesting type in KfDrawingSurfaceForVRML.startNestedGroupOfPlantParts.")
                 break
         }
         switch (this.options.vrml_version) {
@@ -1122,7 +1115,7 @@ export class KfDrawingSurfaceForVRML {
                 }
                 break
             default:
-                throw new GeneralException.create("Problem: Unrecognized nesting type in KfDrawingSurfaceForVRML.endNestedGroupOfPlantParts.")
+                throw new Error("Problem: Unrecognized nesting type in KfDrawingSurfaceForVRML.endNestedGroupOfPlantParts.")
                 break
         }
         switch (this.options.vrml_version) {
@@ -1197,7 +1190,7 @@ export class KfDrawingSurfaceForVRML {
                 this.writeConsideringIndenting("DEF " + this.currentGroupingString + " Shape {")
                 this.indent()
                 if (this.options.writeColors) {
-                    this.writeConsideringIndenting("appearance Appearance { material Material { diffuseColor " + usupport.valueString(UNRESOLVED.getRValue(this.currentColor) / 256.0) + " " + usupport.valueString(UNRESOLVED.getGValue(this.currentColor) / 256.0) + " " + usupport.valueString(UNRESOLVED.getBValue(this.currentColor) / 256.0) + " } }")
+                    this.writeConsideringIndenting("appearance Appearance { material Material { diffuseColor " + valueString(UNRESOLVED.getRValue(this.currentColor) / 256.0) + " " + valueString(UNRESOLVED.getGValue(this.currentColor) / 256.0) + " " + valueString(UNRESOLVED.getBValue(this.currentColor) / 256.0) + " } }")
                 }
                 break
         }
@@ -1231,14 +1224,14 @@ export class KfDrawingSurfaceForVRML {
                 this.endBrace("ShapeHints")
                 if (this.options.writeColors) {
                     // color
-                    this.writeConsideringIndenting("Material { diffuseColor [ " + usupport.valueString(UNRESOLVED.getRValue(this.currentColor) / 256.0) + " " + usupport.valueString(UNRESOLVED.getGValue(this.currentColor) / 256.0) + " " + usupport.valueString(UNRESOLVED.getBValue(this.currentColor) / 256.0) + " ] }")
+                    this.writeConsideringIndenting("Material { diffuseColor [ " + valueString(UNRESOLVED.getRValue(this.currentColor) / 256.0) + " " + valueString(UNRESOLVED.getGValue(this.currentColor) / 256.0) + " " + valueString(UNRESOLVED.getBValue(this.currentColor) / 256.0) + " ] }")
                 }
                 // coordinate points
                 this.writeThenIndent("Coordinate3 {")
                 this.writeThenIndent("point [")
                 this.doIndenting()
                 for (i = 0; i <= this.numPoints - 1; i++) {
-                    write(this.outputFile, usupport.valueString(this.pressedOrNot(this.scale * this.points[i].x, kX)) + " " + usupport.valueString(this.pressedOrNot(this.scale * -this.points[i].y, kY)) + " " + usupport.valueString(this.pressedOrNot(this.scale * this.points[i].z, kZ)))
+                    write(this.outputFile, valueString(this.pressedOrNot(this.scale * this.points[i].x, kX)) + " " + valueString(this.pressedOrNot(this.scale * -this.points[i].y, kY)) + " " + valueString(this.pressedOrNot(this.scale * this.points[i].z, kZ)))
                     if (i < this.numPoints - 1) {
                         write(this.outputFile, ", ")
                     }
@@ -1277,7 +1270,7 @@ export class KfDrawingSurfaceForVRML {
                 this.writeThenIndent("point [")
                 this.doIndenting()
                 for (i = 0; i <= this.numPoints - 1; i++) {
-                    write(this.outputFile, usupport.valueString(this.pressedOrNot(this.scale * this.points[i].x, kX)) + " " + usupport.valueString(this.pressedOrNot(this.scale * -this.points[i].y, kY)) + " " + usupport.valueString(this.pressedOrNot(this.scale * this.points[i].z, kZ)))
+                    write(this.outputFile, valueString(this.pressedOrNot(this.scale * this.points[i].x, kX)) + " " + valueString(this.pressedOrNot(this.scale * -this.points[i].y, kY)) + " " + valueString(this.pressedOrNot(this.scale * this.points[i].z, kZ)))
                     if (i < this.numPoints - 1) {
                         write(this.outputFile, ", ")
                     }
@@ -1348,7 +1341,7 @@ export class KfDrawingSurfaceForVRML {
         let i: int
         
         for (i = 1; i <= this.currentIndentLevel; i++) {
-            // chr(9));
+            // String.fromCharCode(9));
             write(this.outputFile, "  ")
         }
     }
@@ -1479,7 +1472,7 @@ export class KfDrawingSurfaceForOBJ {
                         continue
                     }
                     writeln(materialsFile, "newmtl " + this.materialNames[i])
-                    colorString = usupport.valueString(UNRESOLVED.GetRValue(this.materialColors[i]) / 255.0) + " " + usupport.valueString(UNRESOLVED.GetGValue(this.materialColors[i]) / 255.0) + " " + usupport.valueString(UNRESOLVED.GetBValue(this.materialColors[i]) / 255.0)
+                    colorString = valueString(UNRESOLVED.GetRValue(this.materialColors[i]) / 255.0) + " " + valueString(UNRESOLVED.GetGValue(this.materialColors[i]) / 255.0) + " " + valueString(UNRESOLVED.GetBValue(this.materialColors[i]) / 255.0)
                     writeln(materialsFile, "Ka  " + colorString)
                     writeln(materialsFile, "Kd  " + colorString)
                     writeln(materialsFile, "Ks  " + colorString)
@@ -1534,7 +1527,7 @@ export class KfDrawingSurfaceForOBJ {
         writeln(this.outputFile)
         writeln(this.outputFile, "# " + IntToStr(this.numPoints) + " vertices")
         for (i = 0; i <= this.numPoints - 1; i++) {
-            writeln(this.outputFile, "v " + usupport.valueString(this.pressedOrNot(this.scale * this.points[i].x, kX)) + " " + usupport.valueString(this.pressedOrNot(this.scale * -this.points[i].y, kY)) + " " + usupport.valueString(this.pressedOrNot(this.scale * this.points[i].z, kZ)))
+            writeln(this.outputFile, "v " + valueString(this.pressedOrNot(this.scale * this.points[i].x, kX)) + " " + valueString(this.pressedOrNot(this.scale * -this.points[i].y, kY)) + " " + valueString(this.pressedOrNot(this.scale * this.points[i].z, kZ)))
         }
         writeln(this.outputFile)
         writeln(this.outputFile, "# " + IntToStr(this.numFaces) + " faces")
@@ -1566,11 +1559,9 @@ export class KfDrawingSurfaceForOBJ {
     
 }
 
-export class KfBinaryFileExportSurface {
+export class KfBinaryFileExportSurface extends KfFileExportSurface {
     stream: TFileStream = new TFileStream()
     chunkStartStack: TList = new TList()
-    KfBinaryFileExportSurface.prototype = new KfFileExportSurface()
-    KfBinaryFileExportSurface.prototype.constructor = KfBinaryFileExportSurface
     
     // ----------------------------------------------------------------------------- KfBinaryFileExportSurface 
     createWithFileName(aFileName: string): void {
@@ -1592,21 +1583,20 @@ export class KfBinaryFileExportSurface {
     }
     
     endFile(): void {
-        throw new GeneralException.create("subclasses must override")
+        throw new Error("subclasses must override")
     }
     
     writeStringZ(value: string): void {
         let stringBuffer: char[] /* 1024 + 1 */
-        let i: int
-        
+
         if (len(value) > 1023) {
-            throw new GeneralException.Create("Problem: String too long in KfBinaryFileExportSurface.writeStringZ.")
+            throw new Error("Problem: String too long in KfBinaryFileExportSurface.writeStringZ.")
         }
-        for (i = 1; i <= len(value); i++) {
+        for (let i = 1; i <= len(value); i++) {
             stringBuffer[i - 1] = value[i]
         }
-        stringBuffer[len(value)] = chr(0)
-        this.stream.WriteBuffer(stringBuffer, len(value) + 1)
+        stringBuffer[value.length] = String.fromCharCode(0)
+        this.stream.WriteBuffer(stringBuffer, value.length + 1)
         // maybe should align on four byte boundaries for efficiency of seeks later?
     }
     
@@ -1665,10 +1655,8 @@ export class KfBinaryFileExportSurface {
     
 }
 
-export class KfDrawingSurfaceFor3DS {
+export class KfDrawingSurfaceFor3DS extends KfBinaryFileExportSurface {
     currentMaterialName: string = ""
-    KfDrawingSurfaceFor3DS.prototype = new KfBinaryFileExportSurface()
-    KfDrawingSurfaceFor3DS.prototype.constructor = KfDrawingSurfaceFor3DS
     
     // ----------------------------------------------------------------------------- KfDrawingSurfaceFor3DS 
     createWithFileName(aFileName: string): void {
@@ -1787,7 +1775,7 @@ export class KfDrawingSurfaceFor3DS {
         lastIndex = this.chunkStartStack.Count - 1
         if (lastIndex < 0) {
             // should check if -1
-            throw new GeneralException.Create("Problem with stack indexing for 3DS writing in method KfDrawingSurfaceFor3DS.popChunkStartAndFixupChunkSize.")
+            throw new Error("Problem with stack indexing for 3DS writing in method KfDrawingSurfaceFor3DS.popChunkStartAndFixupChunkSize.")
         }
         startSize = this.chunkStartStack.Items[lastIndex]
         this.chunkStartStack.Delete(lastIndex)
@@ -1864,13 +1852,11 @@ export class KfDrawingSurfaceFor3DS {
     
 }
 
-export class KfDrawingSurfaceForLWO {
+export class KfDrawingSurfaceForLWO extends KfBinaryFileExportSurface {
     currentSurfaceID: short = 0
     numSurfacesStored: short = 0
     surfaceColors: TColorRef[] /* kMaxStoredMaterials + 1 */ = Array(kMaxStoredMaterials + 1)
     surfaceNames: string[] /* kMaxStoredMaterials + 1 */ = Array(kMaxStoredMaterials + 1)
-    KfDrawingSurfaceForLWO.prototype = new KfBinaryFileExportSurface()
-    KfDrawingSurfaceForLWO.prototype.constructor = KfDrawingSurfaceForLWO
     
     // ----------------------------------------------------------------------------- KfDrawingSurfaceForLWO 
     endFile(): void {
@@ -2020,7 +2006,7 @@ export class KfDrawingSurfaceForLWO {
     
     addTriangleWithSurface(a: int, b: int, c: int, surfaceID: int): void {
         if (this.numFaces >= kMax3DFaces) {
-            throw new GeneralException.Create("Problem: Too many faces in LWO; in method KfDrawingSurfaceFor3DS.addTriangle.")
+            throw new Error("Problem: Too many faces in LWO; in method KfDrawingSurfaceFor3DS.addTriangle.")
         }
         this.faces[this.numFaces].vertex1 = a
         this.faces[this.numFaces].vertex2 = b
@@ -2046,7 +2032,7 @@ export class KfDrawingSurfaceForLWO {
         lastIndex = this.chunkStartStack.Count - 1
         if (lastIndex < 0) {
             // should check if -1
-            throw new GeneralException.Create("Problem with stack indexing for 3DS writing in method KfDrawingSurfaceFor3DS.popChunkStartAndFixupChunkSize.")
+            throw new Error("Problem with stack indexing for 3DS writing in method KfDrawingSurfaceFor3DS.popChunkStartAndFixupChunkSize.")
         }
         startSize = this.chunkStartStack.Items[lastIndex]
         this.chunkStartStack.Delete(lastIndex)

@@ -74,18 +74,6 @@ export function FIX_sizeof(object: Object): number {
     return 0
 }
 
-// TODO: Fix constants copied from U3dexport
-export enum ExportFormats {
-    kScreen = 0,
-    kDXF = 1,
-    kPOV = 2,
-    k3DS = 3,
-    kOBJ = 4,
-    kVRML = 5,
-    kLWO = 6,
-    k3DExportTypeLast = 6
-}
-
 // TODO: Fix DebugPrint from udebug that should have result stored somewhere
 export function DebugPrint(aMessage: string): void {
     console.log("DebugPrint: " + aMessage)
@@ -168,54 +156,6 @@ export function TListCollection_streamUsingFiler(list: PdStreamableObject[], fil
     }
 }
 
-// TODO: Fix enum from U3dexport
-export enum ExportPart {
-    kExportPartMeristem = 0,
-    kExportPartInternode = 1,
-    kExportPartSeedlingLeaf = 2,
-    kExportPartLeaf = 3,
-    kExportPartFirstPetiole = 4,
-    kExportPartPetiole = 5,
-    kExportPartLeafStipule = 6,
-    kExportPartInflorescenceStalkFemale = 7,
-    kExportPartInflorescenceInternodeFemale = 8,
-    kExportPartInflorescenceBractFemale = 9,
-    kExportPartInflorescenceStalkMale = 10,
-    kExportPartInflorescenceInternodeMale = 11,
-    kExportPartInflorescenceBractMale = 12,
-    kExportPartPedicelFemale = 13,
-    kExportPartFlowerBudFemale = 14,
-    kExportPartStyleFemale = 15,
-    kExportPartStigmaFemale = 16,
-    kExportPartFilamentFemale = 17,
-    kExportPartAntherFemale = 18,
-    kExportPartFirstPetalsFemale = 19,
-    kExportPartSecondPetalsFemale = 20,
-    kExportPartThirdPetalsFemale = 21,
-    kExportPartFourthPetalsFemale = 22,
-    kExportPartFifthPetalsFemale = 23,
-    kExportPartSepalsFemale = 24,
-    kExportPartPedicelMale = 25,
-    kExportPartFlowerBudMale = 26,
-    kExportPartFilamentMale = 27,
-    kExportPartAntherMale = 28,
-    kExportPartFirstPetalsMale = 29,
-    kExportPartSepalsMale = 30,
-    kExportPartUnripeFruit = 31,
-    kExportPartRipeFruit = 32,
-    kExportPartRootTop = 33,
-    kExportPartLast = 33,
-}
-
-// TODO: Fix longNameForDXFPartType from u3dexport
-export function longNameForDXFPartType(index: number): string {
-    return "TODO longNameForDXFPartType"
-}
-
-// TODO: Fix shortNameForDXFPartType from u3dexport
-export function shortNameForDXFPartType(index: short): string {
-    return "TODO shortNameForDXFPartType"
-}
 
 // TODO: Fix CursorMode enum from umain
 export enum CursorMode {

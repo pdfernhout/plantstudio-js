@@ -79,6 +79,8 @@ export function ShowMessage(text: string) {
 export class TextFile {
     contents = ""
     position = 0
+    // TODO: Maybe don't need fileName in TextFile?
+    fileName = ""
 }
 
 export function write(file: TextFile, text: string) {
