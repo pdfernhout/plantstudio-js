@@ -364,7 +364,7 @@ export const kFlowerBudFemaleBackfaceColor = 397
 export const kFlowerBudPetalsAreRadiallyArrangedFemale = 398
 export const kFlowerBudFemaleObject3DPullbackAngle = 399
 
-export function Plant_directTransferField(plant: PdPlant, v: any, d: short, fieldID: short, ft: short, index: short, updateList: PdPlantUpdateEvent[]): void {
+export function Plant_directTransferField(plant: PdPlant, v: any, d: short, fieldID: short, ft: short, index: short, updateList: PdPlantUpdateEvent[] | null): any {
     if (plant === null) {
         throw new Error("Plant_directTransferField: nil plant")
     }

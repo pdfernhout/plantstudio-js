@@ -16,7 +16,7 @@ import { PdParameter, FieldType, IndexType } from "./PdParameter"
 import { PdSection } from "./PdSection"
 import { PdPlantDrawingAmendment, kStartAmendmentString } from "./PdPlantDrawingAmendment"
 import { PdPlantPart } from "./PdPlantPart"
-import { SinglePoint, messageForExceptionType, support_rgb, boundForString, stringUpTo, strToBool, stringBeyond, tolerantReadln, trimLeftAndRight } from "./usupport"
+import { SinglePoint, messageForExceptionType, support_rgb, boundForString, stringUpTo, strToBool, stringBeyond, tolerantReadln, trimLeftAndRight, boolToStr } from "./usupport"
 import { Plant_directTransferField, kFruitSCurve, kLeafSCurve, kGeneralGrowthSCurve, kGeneralAgeAtMaturity, kFlowerMaleBudOption, kFlowerFemaleBudOption, kLeafCompoundPinnateArrangement, kMeristemAndLeafArrangement, kLeafCompoundPinnateOrPalmate, kGeneralStartingSeedForRandomNumberGenerator, kStateBasePointY } from "./utransfr";
 
 /* Remove unused imports
@@ -1561,11 +1561,11 @@ export class PdPlant extends PdStreamableObject {
     writeToPlantFile(plantFile: TextFile): void {
         let section: PdSection
         let param: PdParameter
-        let tempBoolean: boolean
-        let tempSmallint: short
-        let tempLongint: long
-        let tempFloat: float
-        let tempColorRef: TColorRef
+        let tempBoolean: boolean = false
+        let tempSmallint: short = 0
+        let tempLongint: long = 0
+        let tempFloat: float = 0
+        let tempColorRef: TColorRef = 0
         let tempSCurve: SCurveStructure
         let tempTdo: KfObject3D
         
@@ -1606,7 +1606,7 @@ export class PdPlant extends PdStreamableObject {
                         case FieldType.kFieldBoolean:
                             // skip
                             tempBoolean = this.transferField(kGetField, tempBoolean, param.fieldNumber, param.fieldType, 0, false, null)
-                            this.writeLine(plantFile, param.name + start + param.fieldID + stop + usupport.boolToStr(tempBoolean))
+                            this.writeLine(plantFile, param.name + start + param.fieldID + stop + boolToStr(tempBoolean))
                             break
                         case FieldType.kFieldSmallint:
                             tempSmallint = this.transferField(kGetField, tempSmallint, param.fieldNumber, param.fieldType, 0, false, null)
@@ -1862,7 +1862,7 @@ export class PdPlant extends PdStreamableObject {
         this.regrow()
     }
     
-    editTransferField(d: int, value: any, fieldID: int, fieldType: int, fieldIndex: int, regrow: boolean): void {
+    editTransferField(d: int, value: any, fieldID: int, fieldType: int, fieldIndex: int, regrow: boolean): any {
         if (fieldType === FieldType.kFieldHeader) {
             return value
         }
@@ -1884,7 +1884,7 @@ export class PdPlant extends PdStreamableObject {
         return value
     }
     
-    transferField(d: int, v: any, fieldID: short, ft: short, index: short, regrow: boolean, updateList: PdPlantUpdateEvent[]): void {
+    transferField(d: int, v: any, fieldID: short, ft: short, index: short, regrow: boolean, updateList: PdPlantUpdateEvent[] | null): any {
         if (ft === FieldType.kFieldHeader) {
             return v
         }
@@ -1920,7 +1920,7 @@ export class PdPlant extends PdStreamableObject {
         return v
     }
     
-    directTransferField(d: int, v: any, fieldID: short, ft: short, index: short, updateList: PdPlantUpdateEvent[]): void {
+    directTransferField(d: int, v: any, fieldID: short, ft: short, index: short, updateList: PdPlantUpdateEvent[] | null): any {
         v = Plant_directTransferField(this, v, d, fieldID, ft, index, updateList)
         if (updateList !== null) {
             this.addToUpdateList(fieldID, updateList)
@@ -1986,7 +1986,7 @@ export class PdPlant extends PdStreamableObject {
         }
     }
     
-    transferWholeSCurve(direction: short, value: SCurveStructure, fieldNumber: short, fieldType: short, regrow: boolean, updateList: TListCollection): void {
+    transferWholeSCurve(direction: short, value: SCurveStructure, fieldNumber: short, fieldType: short, regrow: boolean, updateList: PdPlantUpdateEvent[]): void {
         value.x1 = this.transferField(direction, value.x1, fieldNumber, fieldType, 0, regrow, updateList)
         value.y1 = this.transferField(direction, value.y1, fieldNumber, fieldType, 1, regrow, updateList)
         value.x2 = this.transferField(direction, value.x2, fieldNumber, fieldType, 2, regrow, updateList)
@@ -2059,9 +2059,9 @@ export class PdPlant extends PdStreamableObject {
         let firstColor: TColorRef = 0
         let secondColor: TColorRef = 0
         let newColor: TColorRef = 0
-        let firstSCurve: SCurveStructure
-        let secondSCurve: SCurveStructure
-        let newSCurve: SCurveStructure
+        let firstSCurve: SCurveStructure = new SCurveStructure()
+        let secondSCurve: SCurveStructure = new SCurveStructure()
+        let newSCurve: SCurveStructure = new SCurveStructure()
         let randomTdo: KfObject3D
         let weight: float
         let stdDev: float
