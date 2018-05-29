@@ -1,7 +1,7 @@
 // KfObject3D was unit Utdo
 
-import { float, long, ColorDefs, int, IntToStr, short, StrToFloat, intround, arrayRemove, compareTextIgnoreCase, StrToIntDef, MessageDialog } from "./common"
-import { PdStreamableObject, PdClassAndVersionInformationRecord, PdFiler, ExportFormats } from "./temporary";
+import { float, long, ColorDefs, int, IntToStr, short, StrToFloat, intround, arrayRemove, compareTextIgnoreCase, StrToIntDef, MessageDialog, TextFile, TMemo, writeln, eof, readln, write, TColorRef, getRValue, getGValue, getBValue } from "./common"
+import { PdStreamableObject, PdClassAndVersionInformationRecord, PdFiler, ExportFormats, FIX_sizeof, TListCollection_streamUsingFiler } from "./temporary";
 import { KfPoint3D, KfPoint3D_matchXYZ, KfPoint3D_setXYZ, KfPoint3D_addPointToBoundsRect, KfPoint3D_subtract } from "./KfPoint3D";
 import { KfIndexTriangle } from "./KfIndexTriangle";
 import { KfTriangle } from "./KfTriangle";
@@ -9,6 +9,8 @@ import { TRect } from "./TRect";
 import { TPoint } from "./TPoint";
 import { KfTurtle } from "./KfTurtle";
 import { KfStringStream } from "./KfStringStream";
+import { stringUpTo, digitValueString } from "./usupport";
+import { ClassId } from "./uclasses";
 
 /* TODO: Remove unused imports 
 from conversion_common import *
@@ -369,18 +371,7 @@ export class KfObject3D extends PdStreamableObject {
         turtle.drawTrianglesFromBoundsRect(this.boundsRect)
         turtle.drawingSurface.fillingTriangles = oldSetting
     }
-
-    // TODO: Removed stub totalMemorySize
-    totalMemorySize(): long {
-        return 0
-    }
     
-    // TODO: Remove stub write3DExportElements
-    write3DExportElements(turtle: KfTurtle, scale: float, partID: short): void {
-    }
-
-    /* TODO: Implement write3DExportElements
-
     write3DExportElements(turtle: KfTurtle, scale: float, partID: short): void {
         let fileExportSurface: KfFileExportSurface
         let triangle: KfIndexTriangle
@@ -413,7 +404,6 @@ export class KfObject3D extends PdStreamableObject {
                     }
                 }
                 fileExportSurface.endVerticesAndTriangles()
-                // PDF PORT -- added semicolon
                 break
             case ExportFormats.kOBJ:
                 fileExportSurface.startVerticesAndTriangles()
@@ -479,7 +469,6 @@ export class KfObject3D extends PdStreamableObject {
                     }
                 }
                 fileExportSurface.endVerticesAndTriangles()
-                // PDF PORT -- added semicolon
                 break
             default:
                 for (let i = 1; i <= this.triangles.length; i++) {
@@ -493,8 +482,6 @@ export class KfObject3D extends PdStreamableObject {
             }
     }
     
-    */
-
     addTriangleWithVerticesABC(a: long, b: long, c: long): void {
         this.addTriangle(new KfIndexTriangle().createABC(a, b, c))
     }
@@ -585,8 +572,6 @@ export class KfObject3D extends PdStreamableObject {
             this.addTriangle(new KfIndexTriangle().createABC(p1, p2, p3))
         }
     }
-    
-    /* TODO: Make import/export for for KfObject3D
 
     writeToFile(fileName: string): void {
         let outputFile: TextFile
@@ -617,21 +602,21 @@ export class KfObject3D extends PdStreamableObject {
     }
     
     writeToMemo(aMemo: TMemo): void {
-        aMemo.Lines.Add("  " + kStartTdoString)
-        aMemo.Lines.Add("  Name=" + this.getName())
+        aMemo.push("  " + kStartTdoString)
+        aMemo.push("  Name=" + this.getName())
         if (this.pointsInUse > 0) {
             for (let i = 0; i < this.pointsInUse; i++) {
-                aMemo.Lines.Add("  Point=" + IntToStr(intround(this.points[i].x)) + " " + IntToStr(intround(this.points[i].y)) + " " + IntToStr(intround(this.points[i].z)))
+                aMemo.push("  Point=" + IntToStr(intround(this.points[i].x)) + " " + IntToStr(intround(this.points[i].y)) + " " + IntToStr(intround(this.points[i].z)))
             }
         }
-        aMemo.Lines.Add("; Origin=" + IntToStr(this.originPointIndex))
+        aMemo.push("; Origin=" + IntToStr(this.originPointIndex))
         if (this.triangles.length > 0) {
             for (let i = 0; i < this.triangles.length; i++) {
                 const triangle: KfIndexTriangle = this.triangles[i]
-                aMemo.Lines.Add("  Triangle=" + IntToStr(triangle.pointIndexes[0]) + " " + IntToStr(triangle.pointIndexes[1]) + " " + IntToStr(triangle.pointIndexes[2]))
+                aMemo.push("  Triangle=" + IntToStr(triangle.pointIndexes[0]) + " " + IntToStr(triangle.pointIndexes[1]) + " " + IntToStr(triangle.pointIndexes[2]))
             }
         }
-        aMemo.Lines.Add("  " + kEndTdoString)
+        aMemo.push("  " + kEndTdoString)
     }
     
     writeToFileStream(outputFile: TextFile, embeddedInPlant: boolean): void {
@@ -662,68 +647,60 @@ export class KfObject3D extends PdStreamableObject {
     }
     
     readFromFileStream(inputFile: TextFile, embeddedInPlant: boolean): void {
-        let inputLine: string
-        let fieldType: string
-        let stream: KfStringStream
-        
         this.pointsInUse = 0
         this.originPointIndex = 0
         this.triangles = []
         if (embeddedInPlant) {
-            UNRESOLVED.readln(inputFile, inputLine)
-            if ((embeddedInPlant) && (trim(inputLine) === "")) {
+            let inputLine = readln(inputFile)
+            if ((embeddedInPlant) && (inputLine.trim() === "")) {
                 // cfk change for v1.3 added '' case
-                UNRESOLVED.readln(inputFile, inputLine)
+                inputLine = readln(inputFile)
             }
-            if ((UNRESOLVED.copy(inputLine, 1, 1) === ";") && (UNRESOLVED.pos("ORIGIN", uppercase(inputLine)) <= 0)) {
+            if ((inputLine[0] === ";") && !inputLine.toUpperCase().includes("ORIGIN")) {
                 // cfk change for v1.6b2 mistake with origin, placed with comment
-                UNRESOLVED.readln(inputFile, inputLine)
+                inputLine = readln(inputFile)
             }
-            if (UNRESOLVED.pos(uppercase(kStartTdoString), uppercase(inputLine)) <= 0) {
+            if (!compareTextIgnoreCase(kStartTdoString, inputLine)) {
                 throw new Error("Problem: Expected start of 3D object.")
             }
         }
-        stream = null
-        try {
-            // read info for 3D object from file at current position
-            stream = usstream.KfStringStream.create
-            while (!UNRESOLVED.eof(inputFile)) {
-                UNRESOLVED.readln(inputFile, inputLine)
-                if ((embeddedInPlant) && (trim(inputLine) === "")) {
-                    // cfk change v1.3 added '' case
-                    continue
-                }
-                if ((UNRESOLVED.copy(inputLine, 1, 1) === ";") && (UNRESOLVED.pos("ORIGIN", uppercase(inputLine)) <= 0)) {
-                    // cfk change for v1.6b2 mistake with origin, placed with comment
-                    continue
-                }
-                if ((!embeddedInPlant) && (UNRESOLVED.pos("[", inputLine) === 1)) {
-                    // ignore old thing in brackets
-                    continue
-                }
-                stream.onStringSeparator(inputLine, "=")
-                fieldType = stream.nextToken()
-                stream.spaceSeparator()
-                if (UNRESOLVED.pos("POINT", uppercase(fieldType)) > 0) {
-                    this.addPointString(stream)
-                } else if (UNRESOLVED.pos("ORIGIN", uppercase(fieldType)) > 0) {
-                    this.setOriginPointIndex(StrToIntDef(stream.remainder, 0))
-                } else if (UNRESOLVED.pos("TRIANGLE", uppercase(fieldType)) > 0) {
-                    this.addTriangleString(stream)
-                } else if (UNRESOLVED.pos("NAME", uppercase(fieldType)) > 0) {
-                    this.setName(stream.remainder)
-                } else {
-                    break
-                }
+
+        // read info for 3D object from file at current position
+        let inputLine = ""
+        while (!eof(inputFile)) {
+            inputLine = readln(inputFile)
+            if ((embeddedInPlant) && (inputLine.trim() === "")) {
+                // cfk change v1.3 added '' case
+                continue
             }
-            this.adjustForOrigin()
-            if (embeddedInPlant) {
-                if (UNRESOLVED.pos(uppercase(kEndTdoString), uppercase(inputLine)) <= 0) {
-                    throw new Error("Problem: Expected end of 3D object.")
-                }
+            if ((inputLine[0] === ";") && !inputLine.includes("ORIGIN")) {
+                // cfk change for v1.6b2 mistake with origin, placed with comment
+                continue
             }
-        } finally {
-            stream.free
+            if ((!embeddedInPlant) && (inputLine[0] === "[")) {
+                // ignore old thing in brackets
+                continue
+            }
+            const stream = new KfStringStream(inputLine, "=")
+            const fieldType = stream.nextToken().toUpperCase()
+            stream.spaceSeparator()
+            if (fieldType.includes("POINT")) {
+                this.addPointString(stream)
+            } else if (fieldType.includes("ORIGIN")) {
+                this.setOriginPointIndex(StrToIntDef(stream.remainder, 0))
+            } else if (fieldType.includes("TRIANGLE")) {
+                this.addTriangleString(stream)
+            } else if (fieldType.includes("NAME")) {
+                this.setName(stream.remainder)
+            } else {
+                break
+            }
+        }
+        this.adjustForOrigin()
+        if (embeddedInPlant) {
+            if (!compareTextIgnoreCase(kEndTdoString, inputLine)) {
+                throw new Error("Problem: Expected end of 3D object.")
+            }
         }
     }
     
@@ -747,11 +724,11 @@ export class KfObject3D extends PdStreamableObject {
         newPoints[2].x = 0
         newPoints[2].y = 0
         newPoints[2].z = 0
-        while (!UNRESOLVED.eof(inputFile)) {
-            UNRESOLVED.readln(inputFile, identifierLine)
-            identifierLine = trim(identifierLine)
-            UNRESOLVED.readln(inputFile, valueLine)
-            valueLine = trim(valueLine)
+        while (!eof(inputFile)) {
+            identifierLine = readln(inputFile)
+            identifierLine = identifierLine.trim()
+            valueLine = readln(inputFile)
+            valueLine = valueLine.trim()
             if (identifierLine === "10") {
                 // v1.60final changed this from else to all ifs; something wrong in Delphi, I think
                 // first point
@@ -805,8 +782,6 @@ export class KfObject3D extends PdStreamableObject {
         }
         this.adjustForOrigin()
     }
-    
-    */
 
     readFromMemo(aMemo: string[], readingMemoLine: long): number {
         let stream: KfStringStream
@@ -870,42 +845,29 @@ export class KfObject3D extends PdStreamableObject {
         return readingMemoLine
     }
 
-    /*
-    
     readFromInputString(aString: string, doAdjustForOrigin: boolean): void {
-        let part: string
-        let firstLetter: string
-        let stream: KfStringStream
-        let partStream: KfStringStream
-        
         // format is n[name],p[# # #],p[# # #],p[# # #],t[# # #],t[# # #],t[# # #] 
         this.pointsInUse = 0
         this.originPointIndex = 0
         this.triangles = []
-        stream = usstream.KfStringStream.create
-        partStream = usstream.KfStringStream.create
-        try {
-            stream.onStringSeparator(aString, ",")
-            part = "none"
-            while (part !== "") {
-                part = stream.nextToken()
-                firstLetter = UNRESOLVED.copy(part, 1, 1)
-                if (uppercase(firstLetter) === "N") {
-                    this.setName(betweenBrackets(part))
-                } else if (uppercase(firstLetter) === "P") {
-                    partStream.onStringSeparator(betweenBrackets(part), " ")
-                    this.addPointString(partStream)
-                } else if (uppercase(firstLetter) === "T") {
-                    partStream.onStringSeparator(betweenBrackets(part), " ")
-                    this.addTriangleString(partStream)
-                }
+
+        const stream = new KfStringStream(aString, ",")
+        let part = "none"
+        while (part !== "") {
+            part = stream.nextToken()
+            const firstLetter = part[0] ? part[0].toUpperCase() : ""
+            if (firstLetter === "N") {
+                this.setName(betweenBrackets(part))
+            } else if (firstLetter === "P") {
+                const partStream = new KfStringStream(betweenBrackets(part), " ")
+                this.addPointString(partStream)
+            } else if (firstLetter === "T") {
+                const partStream = new KfStringStream(betweenBrackets(part), " ")
+                this.addTriangleString(partStream)
             }
-            if (doAdjustForOrigin) {
-                this.adjustForOrigin()
-            }
-        } finally {
-            stream.free
-            partStream.free
+        }
+        if (doAdjustForOrigin) {
+            this.adjustForOrigin()
         }
     }
     
@@ -939,14 +901,14 @@ export class KfObject3D extends PdStreamableObject {
             // may have triangles already, because we are keeping them around now
             this.triangles = []
         }
-        this.triangles.streamUsingFiler(filer, KfIndexTriangle)
+        TListCollection_streamUsingFiler(this.triangles, filer, () => new KfIndexTriangle())
     }
     
     totalMemorySize(): long {
         let result = 0
 
         result = this.instanceSize
-        result = result + this.triangles.instanceSize
+        // TODO: Improve size calulcation for array: result = result + this.triangles.instanceSize
         if (this.triangles.length > 0) {
             for (let i = 0; i < this.triangles.length; i++) {
                 result = result + this.triangles[i].instanceSize
@@ -998,29 +960,29 @@ export class KfObject3D extends PdStreamableObject {
         // can't see that there was ever any reason to round these; it's probably left over from
         // when I didn't understand DXF very well
         writeln(outputFile, "10")
-        writeln(outputFile, usupport.digitValueString(p1.x))
+        writeln(outputFile, digitValueString(p1.x))
         writeln(outputFile, "20")
-        writeln(outputFile, usupport.digitValueString(-p1.y))
+        writeln(outputFile, digitValueString(-p1.y))
         writeln(outputFile, "30")
-        writeln(outputFile, usupport.digitValueString(p1.z))
+        writeln(outputFile, digitValueString(p1.z))
         writeln(outputFile, "11")
-        writeln(outputFile, usupport.digitValueString(p2.x))
+        writeln(outputFile, digitValueString(p2.x))
         writeln(outputFile, "21")
-        writeln(outputFile, usupport.digitValueString(-p2.y))
+        writeln(outputFile, digitValueString(-p2.y))
         writeln(outputFile, "31")
-        writeln(outputFile, usupport.digitValueString(p2.z))
+        writeln(outputFile, digitValueString(p2.z))
         writeln(outputFile, "12")
-        writeln(outputFile, usupport.digitValueString(p3.x))
+        writeln(outputFile, digitValueString(p3.x))
         writeln(outputFile, "22")
-        writeln(outputFile, usupport.digitValueString(-p3.y))
+        writeln(outputFile, digitValueString(-p3.y))
         writeln(outputFile, "32")
-        writeln(outputFile, usupport.digitValueString(p3.z))
+        writeln(outputFile, digitValueString(p3.z))
         writeln(outputFile, "13")
-        writeln(outputFile, usupport.digitValueString(p3.x))
+        writeln(outputFile, digitValueString(p3.x))
         writeln(outputFile, "23")
-        writeln(outputFile, usupport.digitValueString(-p3.y))
+        writeln(outputFile, digitValueString(-p3.y))
         writeln(outputFile, "33")
-        writeln(outputFile, usupport.digitValueString(p3.z))
+        writeln(outputFile, digitValueString(p3.z))
     }
     
     writeToPOV_INCFile(fileName: string, frontFaceColor: TColorRef, embeddedInPlant: boolean, rotateCount: int): void {
@@ -1038,7 +1000,7 @@ export class KfObject3D extends PdStreamableObject {
             writeln(outputFile, "//     \"" + this.getName() + "\"")
             if ((!embeddedInPlant)) {
                 writeln(outputFile, "// include this file in a POV file thus to use it:")
-                writeln(outputFile, "//     #include \"" + usupport.stringUpTo(ExtractFileName(fileName), ".") + ".inc\"")
+                writeln(outputFile, "//     #include \"" + stringUpTo(ExtractFileName(fileName), ".") + ".inc\"")
                 writeln(outputFile, "//     object { " + nameString + " }")
                 if (rotateCount > 1) {
                     writeln(outputFile, "//  or")
@@ -1051,14 +1013,14 @@ export class KfObject3D extends PdStreamableObject {
                 const triangle: KfIndexTriangle = this.triangles[i]
                 this.writeTriangleToPOV_INCFile(outputFile, this.points[triangle.pointIndexes[0] - 1], this.points[triangle.pointIndexes[1] - 1], this.points[triangle.pointIndexes[2] - 1])
             }
-            writeln(outputFile, chr(9) + "pigment { color rgb <" + usupport.digitValueString(UNRESOLVED.getRValue(frontFaceColor) / 256.0) + ", " + usupport.digitValueString(UNRESOLVED.getGValue(frontFaceColor) / 256.0) + ", " + usupport.digitValueString(UNRESOLVED.getBValue(frontFaceColor) / 256.0) + "> }")
+            writeln(outputFile, String.fromCharCode(9) + "pigment { color rgb <" + digitValueString(getRValue(frontFaceColor) / 256.0) + ", " + digitValueString(getGValue(frontFaceColor) / 256.0) + ", " + digitValueString(getBValue(frontFaceColor) / 256.0) + "> }")
             writeln(outputFile, "}")
             if (rotateCount > 1) {
                 writeln(outputFile)
                 writeln(outputFile, "#declare " + nameString + "_rotated=union {")
-                writeln(outputFile, chr(9) + "object { " + nameString + " }")
+                writeln(outputFile, String.fromCharCode(9) + "object { " + nameString + " }")
                 for (let i = 1; i < rotateCount; i++) {
-                    writeln(outputFile, chr(9) + "object { " + nameString + " rotate " + IntToStr(i) + "*365/" + IntToStr(rotateCount) + "*y }")
+                    writeln(outputFile, String.fromCharCode(9) + "object { " + nameString + " rotate " + IntToStr(i) + "*365/" + IntToStr(rotateCount) + "*y }")
                 }
                 writeln(outputFile, "}")
             }
@@ -1068,7 +1030,7 @@ export class KfObject3D extends PdStreamableObject {
     }
     
     writeTriangleToPOV_INCFile(outputFile: TextFile, p1: KfPoint3D, p2: KfPoint3D, p3: KfPoint3D): void {
-        write(outputFile, chr(9) + "triangle { <")
+        write(outputFile, String.fromCharCode(9) + "triangle { <")
         // all y values must be negative because it seems our coordinate systems are different
         write(outputFile, IntToStr(intround(p1.x)) + ", " + IntToStr(-intround(p1.y)) + ", " + IntToStr(intround(p1.z)) + ">, <")
         write(outputFile, IntToStr(intround(p2.x)) + ", " + IntToStr(-intround(p2.y)) + ", " + IntToStr(intround(p2.z)) + ">, <")
@@ -1090,8 +1052,6 @@ export class KfObject3D extends PdStreamableObject {
         result = (backfacingResult < 0)
         return result
     }
-
-    */
     
 }
 
@@ -1111,11 +1071,11 @@ export class KfObject3D extends PdStreamableObject {
 //
 //
 //    writeln(outputFile, '#declare camera_' + nameString + '= camera {');
-//    writeln(outputFile, chr(9) + 'location  <0, 0, ' + intToStr(round(lowestZ)) + '>');
-//    writeln(outputFile, chr(9) + 'look_at <'
+//    writeln(outputFile, String.fromCharCode(9) + 'location  <0, 0, ' + intToStr(round(lowestZ)) + '>');
+//    writeln(outputFile, String.fromCharCode(9) + 'look_at <'
 //      + intToStr(round(totalX / (triangles.count * 3)))
 //      + ', ' + intToStr(round(totalY / (triangles.count * 3)))
 //      + ', ' + intToStr(round(totalZ / (triangles.count * 3))) + '>');
-//    writeln(outputFile, chr(9) + 'angle 90');
+//    writeln(outputFile, String.fromCharCode(9) + 'angle 90');
 //    writeln(outputFile, '}');
 //    

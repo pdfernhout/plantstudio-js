@@ -21,6 +21,19 @@ export const ColorDefs = {
     clSilver: 0xC0C0C0
 }
 
+export function getRValue(value: TColorRef) {
+    return (value >> 16) & 255
+}
+
+export function getGValue(value: TColorRef) {
+    return (value >> 8) & 255
+}
+
+export function getBValue(value: TColorRef) {
+    return value & 255
+}
+
+
 export function IntToStr(value: int) {
     return "" + value
 }
@@ -68,7 +81,13 @@ export class TextFile {
     position = 0
 }
 
-export function writeln(file: TextFile, line: string) {
+export function write(file: TextFile, text: string) {
+    file.contents = file.contents + text
+    file.position = file.contents.length
+}
+
+export function writeln(file: TextFile, line: string = "") {
+    // TODO: Maybe change writeln line ending depending on platform?
     file.contents = file.contents + line + "\n"
     file.position = file.contents.length
 }
