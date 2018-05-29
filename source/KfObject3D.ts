@@ -29,7 +29,7 @@ import delphi_compatability
 const kMaximumRecordedPoints = 10000
 const kAdjustForOrigin = true
 const kDontAdjustForOrigin = false
-const kEmbeddedInPlant = true
+export const kEmbeddedInPlant = true
 const kInTdoLibrary = false
 const kStandAloneFile = false
 const kTdoForeColor = ColorDefs.clSilver

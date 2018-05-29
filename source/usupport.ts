@@ -1,5 +1,6 @@
-import { float, StrToFloat, int, byte, long, compareTextIgnoreCase, short, readln, TextFile } from "./common";
+import { float, StrToFloat, int, byte, long, compareTextIgnoreCase, short, readln, TextFile, StrToIntDef, TColorRef } from "./common";
 import { DebugPrint } from "./temporary";
+import { KfStringStream } from "./KfStringStream";
 
 // unit Usupport
 
@@ -113,7 +114,7 @@ const kDontIncludeAllFiles = false
 
 
 // don't like using constants for these, but can't find any functions that provide them 
-function rotateEncodeBy7(aString: string): string {
+export function rotateEncodeBy7(aString: string): string {
     let result = ""
     let i: int
     let letter: char
@@ -126,7 +127,7 @@ function rotateEncodeBy7(aString: string): string {
     return result
 }
 
-function hexEncode(aString: string): string {
+export function hexEncode(aString: string): string {
     let result = ""
     let i: int
     let letter: char
@@ -141,7 +142,7 @@ function hexEncode(aString: string): string {
     return result
 }
 
-function hexUnencode(encodedString: string): string {
+export function hexUnencode(encodedString: string): string {
     let result = ""
     let i: int
     let letter: char
@@ -161,7 +162,7 @@ function hexUnencode(encodedString: string): string {
     return result
 }
 
-function strToFloatWithCommaCheck(aString: string): double {
+export function strToFloatWithCommaCheck(aString: string): double {
     let result = 0.0
     if (found(",", aString)) {
         aString = replaceCommasWithPeriods(aString)
@@ -170,7 +171,7 @@ function strToFloatWithCommaCheck(aString: string): double {
     return result
 }
 
-function makeEnterWorkAsTab(form: TForm, activeControl: TControl, key: char): void {
+export function makeEnterWorkAsTab(form: TForm, activeControl: TControl, key: char): void {
     if (form === null) {
         // this is to make enter work as tab in edit boxes on the form 
         return key
@@ -189,7 +190,7 @@ function makeEnterWorkAsTab(form: TForm, activeControl: TControl, key: char): vo
     return key
 }
 
-function bitsPerPixelForColorType(colorType: TPixelFormat): short {
+export function bitsPerPixelForColorType(colorType: TPixelFormat): short {
     let result = 0
     let screenDC: HDC
     
@@ -318,7 +319,7 @@ export function tolerantReadln(aFile: TextFile): string {
 //  atEndOfFile := eof(theTextFile);
 //
 // ------------------------------------------------------------------------ text handling 
-function limitString(aString: string, maxChars: short): string {
+export function limitString(aString: string, maxChars: short): string {
     let result = ""
     result = aString
     if (len(aString) > maxChars) {
@@ -327,7 +328,7 @@ function limitString(aString: string, maxChars: short): string {
     return result
 }
 
-function replacePunctuationWithUnderscores(aString: string): string {
+export function replacePunctuationWithUnderscores(aString: string): string {
     let result = ""
     let i: int
     let lowerCaseString: string
@@ -348,7 +349,7 @@ function replacePunctuationWithUnderscores(aString: string): string {
     return result
 }
 
-function replaceCommasWithPeriods(aString: string): string {
+export function replaceCommasWithPeriods(aString: string): string {
     let result = ""
     let i: int
     let isComma: boolean
@@ -367,13 +368,13 @@ function replaceCommasWithPeriods(aString: string): string {
     return result
 }
 
-function found(substring: string, fullString: string): boolean {
+export function found(substring: string, fullString: string): boolean {
     let result = false
     result = UNRESOLVED.pos(substring, fullString) > 0
     return result
 }
 
-function trimQuotesFromFirstAndLast(theString: string): string {
+export function trimQuotesFromFirstAndLast(theString: string): string {
     let result = ""
     result = theString
     if (len(result) <= 0) {
@@ -388,7 +389,7 @@ function trimQuotesFromFirstAndLast(theString: string): string {
     return result
 }
 
-function capitalize(aString: string): string {
+export function capitalize(aString: string): string {
     let result = ""
     result = ""
     if (len(aString) <= 0) {
@@ -402,7 +403,7 @@ function capitalize(aString: string): string {
     return result
 }
 
-function readUntilTab(theFile: textFile): string {
+export function readUntilTab(theFile: textFile): string {
     let result = ""
     let aChar: char
     
@@ -430,7 +431,7 @@ function readUntilTab(theFile: textFile): string {
     return result
 }
 
-function readShortStringToTab(fileRef: TextFile): string {
+export function readShortStringToTab(fileRef: TextFile): string {
     let result = ""
     let temp: string
     
@@ -439,7 +440,7 @@ function readShortStringToTab(fileRef: TextFile): string {
     return result
 }
 
-function readSmallintToTab(fileRef: TextFile): short {
+export function readSmallintToTab(fileRef: TextFile): short {
     let result = 0
     let ignore: string
     
@@ -449,7 +450,7 @@ function readSmallintToTab(fileRef: TextFile): short {
     return result
 }
 
-function readSingleToTab(fileRef: TextFile): float {
+export function readSingleToTab(fileRef: TextFile): float {
     let result = 0.0
     let temp: string
     
@@ -460,7 +461,7 @@ function readSingleToTab(fileRef: TextFile): float {
     return result
 }
 
-function readBooleanToTab(fileRef: TextFile): boolean {
+export function readBooleanToTab(fileRef: TextFile): boolean {
     let result = false
     let booleanString: string
     
@@ -475,7 +476,7 @@ function readBooleanToTab(fileRef: TextFile): boolean {
     return result
 }
 
-function boundForString(boundString: string, fieldType: int, number: FIX_MISSING_ARG_TYPE): boolean {
+export function boundForString(boundString: string, fieldType: int, number: FIX_MISSING_ARG_TYPE): boolean {
     raise "method boundForString with preexisting function result had var parameters added to return -- fixup manually"
     let result = false
     let piTimesTwo: float
@@ -564,7 +565,7 @@ export function stringBeyond(aString: string, aDelimiter: string): string {
 
 /*
 
-function stringBetween(startString: string, endString: string, wholeString: string): string {
+export function stringBetween(startString: string, endString: string, wholeString: string): string {
     let result = ""
     result = stringUpTo(stringBeyond(trim(wholeString), startString), endString)
     return result
@@ -611,7 +612,7 @@ export function strToBool(booleanString: string): boolean {
 
 /*
 
-function messageForExceptionType(e: Exception, methodName: string): void {
+export function messageForExceptionType(e: Exception, methodName: string): void {
     let errorString: string
     
     if (e === null) {
@@ -636,7 +637,7 @@ function messageForExceptionType(e: Exception, methodName: string): void {
 
 // float to text conversion 
 // ---------------------------------------------------------------------------- float to text conversion 
-function removeTrailingZeros(theString: string): string {
+export function removeTrailingZeros(theString: string): string {
     let result = ""
     while ((len(theString) > 1) && (theString[len(theString)] === "0") && (theString[len(theString) - 1] !== ".")) {
         //dec(theString[0]);  
@@ -646,7 +647,7 @@ function removeTrailingZeros(theString: string): string {
     return result
 }
 
-function shortenLongNonZeroDigitsAfterDecimal(theString: string, maxDigits: int): string {
+export function shortenLongNonZeroDigitsAfterDecimal(theString: string, maxDigits: int): string {
     let result = ""
     let pointPos: long
     let firstNonZeroDigit: long
@@ -669,13 +670,13 @@ function shortenLongNonZeroDigitsAfterDecimal(theString: string, maxDigits: int)
     return result
 }
 
-function digitValueString(value: float): string {
+export function digitValueString(value: float): string {
     let result = ""
     result = removeTrailingZeros(shortenLongNonZeroDigitsAfterDecimal(FloatToStrF(value, UNRESOLVED.ffFixed, 7, 8), 2))
     return result
 }
 
-function valueString(value: float): string {
+export function valueString(value: float): string {
     let result = ""
     result = removeTrailingZeros(shortenLongNonZeroDigitsAfterDecimal(FloatToStrF(value, UNRESOLVED.ffFixed, 7, 8), 4))
     return result
@@ -683,7 +684,7 @@ function valueString(value: float): string {
 
 // graphics 
 // ---------------------------------------------------------------------------- graphics 
-function clientRectToScreenRect(handle: HWnd, clientRect: TRect): TRect {
+export function clientRectToScreenRect(handle: HWnd, clientRect: TRect): TRect {
     let result = new TRect()
     let p1: TPoint
     let p2: TPoint
@@ -696,7 +697,7 @@ function clientRectToScreenRect(handle: HWnd, clientRect: TRect): TRect {
     return result
 }
 
-function support_rgb(R: byte, G: byte, B: byte): long {
+export function support_rgb(R: byte, G: byte, B: byte): long {
     let result = 0
     //var screenDC: HDC;
     //result := RGB(r, g, b);  
@@ -710,7 +711,7 @@ function support_rgb(R: byte, G: byte, B: byte): long {
     return result
 }
 
-function combineRects(rect1: TRect, rect2: TRect): TRect {
+export function combineRects(rect1: TRect, rect2: TRect): TRect {
     let result = new TRect()
     result.Left = umath.intMin(rect1.Left, rect2.Left)
     result.Right = umath.intMax(rect1.Right, rect2.Right)
@@ -719,7 +720,7 @@ function combineRects(rect1: TRect, rect2: TRect): TRect {
     return result
 }
 
-function addRectToBoundsRect(boundsRect: TRect, newRect: TRect): void {
+export function addRectToBoundsRect(boundsRect: TRect, newRect: TRect): void {
     if ((boundsRect.Left === 0) && (boundsRect.Right === 0) && (boundsRect.Top === 0) && (boundsRect.Bottom === 0)) {
         // on first rect entered, initialize bounds rect
         boundsRect.Left = newRect.Left
@@ -755,38 +756,38 @@ function addRectToBoundsRect(boundsRect: TRect, newRect: TRect): void {
     }
 }
 
-function rWidth(rect: TRect): int {
+export function rWidth(rect: TRect): int {
     let result = 0
     result = Rect.right - Rect.left
     return result
 }
 
-function rHeight(rect: TRect): int {
+export function rHeight(rect: TRect): int {
     let result = 0
     result = Rect.bottom - Rect.top
     return result
 }
 
-function zeroRect(rect: TRect): boolean {
+export function zeroRect(rect: TRect): boolean {
     let result = false
     //FIX unresolved WITH expression: Rect
     result = (UNRESOLVED.left === 0) && (UNRESOLVED.top === 0) && (UNRESOLVED.right === 0) && (UNRESOLVED.bottom === 0)
     return result
 }
 
-function rectsAreIdentical(oneRect: TRect, twoRect: TRect): boolean {
+export function rectsAreIdentical(oneRect: TRect, twoRect: TRect): boolean {
     let result = false
     result = (oneRect.Top === twoRect.Top) && (oneRect.Bottom === twoRect.Bottom) && (oneRect.Left === twoRect.Left) && (oneRect.Right === twoRect.Right)
     return result
 }
 
-function rectToString(aRect: TRect): string {
+export function rectToString(aRect: TRect): string {
     let result = ""
     result = IntToStr(aRect.Left) + " " + IntToStr(aRect.Top) + " " + IntToStr(aRect.Right) + " " + IntToStr(aRect.Bottom)
     return result
 }
 
-function stringToRect(aString: string): TRect {
+export function stringToRect(aString: string): TRect {
     let result = new TRect()
     let stream: KfStringStream
     
@@ -804,13 +805,13 @@ function stringToRect(aString: string): TRect {
     return result
 }
 
-function pointToString(aPoint: TPoint): string {
+export function pointToString(aPoint: TPoint): string {
     let result = ""
     result = IntToStr(aPoint.X) + "  " + IntToStr(aPoint.Y)
     return result
 }
 
-function stringToPoint(aString: string): TPoint {
+export function stringToPoint(aString: string): TPoint {
     let result = new TPoint()
     let stream: KfStringStream
     
@@ -826,20 +827,20 @@ function stringToPoint(aString: string): TPoint {
     return result
 }
 
-function setSinglePoint(x: float, y: float): SinglePoint {
+export function setSinglePoint(x: float, y: float): SinglePoint {
     let result = new SinglePoint()
     result.x = x
     result.y = y
     return result
 }
 
-function singlePointToString(aPoint: SinglePoint): string {
+export function singlePointToString(aPoint: SinglePoint): string {
     let result = ""
     result = digitValueString(aPoint.x) + "  " + digitValueString(aPoint.y)
     return result
 }
 
-function stringToSinglePoint(aString: string): SinglePoint {
+export function stringToSinglePoint(aString: string): SinglePoint {
     let result = new SinglePoint()
     let stream: KfStringStream
     let token: string
@@ -875,39 +876,27 @@ function stringToSinglePoint(aString: string): SinglePoint {
     return result
 }
 
-function colorToRGBString(color: TColorRef): string {
+export function colorToRGBString(color: TColorRef): string {
     let result = ""
     result = IntToStr(UNRESOLVED.getRValue(color)) + " " + IntToStr(UNRESOLVED.getGValue(color)) + " " + IntToStr(UNRESOLVED.getBValue(color))
     return result
 }
 
-function rgbStringToColor(aString: string): TColorRef {
-    let result = new TColorRef()
-    let stream: KfStringStream
-    let r: byte
-    let g: byte
-    let b: byte
-    
+*/
+
+export function rgbStringToColor(aString: string): TColorRef {
     // format is r g b 
-    result = 0
-    r = 0
-    g = 0
-    b = 0
-    stream = usstream.KfStringStream.create
-    try {
-        stream.onStringSeparator(aString, " ")
-        r = StrToIntDef(stream.nextToken(), 0)
-        g = StrToIntDef(stream.nextToken(), 0)
-        b = StrToIntDef(stream.nextToken(), 0)
-        result = UNRESOLVED.rgb(r, g, b)
-    } finally {
-        stream.free
-    }
-    return result
+    const stream = new KfStringStream(aString, " ")
+    const r = StrToIntDef(stream.nextToken(), 0)
+    const g = StrToIntDef(stream.nextToken(), 0)
+    const b = StrToIntDef(stream.nextToken(), 0)
+    return support_rgb(r, g, b)
 }
 
+/*
+
 // ---------------------------------------------------------------------------------- color functions 
-function blendColors(firstColor: TColorRef, secondColor: TColorRef, aStrength: float): TColorRef {
+export function blendColors(firstColor: TColorRef, secondColor: TColorRef, aStrength: float): TColorRef {
     let result = new TColorRef()
     let r1: byte
     let g1: byte
@@ -929,7 +918,7 @@ function blendColors(firstColor: TColorRef, secondColor: TColorRef, aStrength: f
     return result
 }
 
-function darkerColor(aColor: TColorRef): TColorRef {
+export function darkerColor(aColor: TColorRef): TColorRef {
     let result = new TColorRef()
     let r: byte
     let g: byte
@@ -943,7 +932,7 @@ function darkerColor(aColor: TColorRef): TColorRef {
     return result
 }
 
-function darkerColorWithSubtraction(aColor: TColorRef, subtract: short): TColorRef {
+export function darkerColorWithSubtraction(aColor: TColorRef, subtract: short): TColorRef {
     let result = new TColorRef()
     let r: byte
     let g: byte
@@ -957,7 +946,7 @@ function darkerColorWithSubtraction(aColor: TColorRef, subtract: short): TColorR
     return result
 }
 
-function lighterColor(aColor: TColorRef): TColorRef {
+export function lighterColor(aColor: TColorRef): TColorRef {
     let result = new TColorRef()
     let r: byte
     let g: byte
@@ -971,7 +960,7 @@ function lighterColor(aColor: TColorRef): TColorRef {
     return result
 }
 
-function drawButton(aCanvas: TCanvas, aRect: TRect, selected: boolean, enabled: boolean): void {
+export function drawButton(aCanvas: TCanvas, aRect: TRect, selected: boolean, enabled: boolean): void {
     let internalRect: TRect
     
     aCanvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsSolid
@@ -991,7 +980,7 @@ function drawButton(aCanvas: TCanvas, aRect: TRect, selected: boolean, enabled: 
     }
 }
 
-function draw3DButton(ACanvas: TCanvas, Client: TRect, Selected: boolean, Pressed: boolean): TRect {
+export function draw3DButton(ACanvas: TCanvas, Client: TRect, Selected: boolean, Pressed: boolean): TRect {
     let result = new TRect()
     ACanvas.Brush.Color = delphi_compatability.clWindowFrame
     if (Selected) {
@@ -1013,7 +1002,7 @@ function draw3DButton(ACanvas: TCanvas, Client: TRect, Selected: boolean, Presse
 
 // combo and list box utilities 
 // ---------------------------------------------------------------------------- combo and list box utilities 
-function currentObjectInComboBox(comboBox: TComboBox): TObject {
+export function currentObjectInComboBox(comboBox: TComboBox): TObject {
     let result = new TObject()
     if (comboBox.Items.Count === 0) {
         result = null
@@ -1025,7 +1014,7 @@ function currentObjectInComboBox(comboBox: TComboBox): TObject {
     return result
 }
 
-function currentObjectInListBox(listBox: TListBox): TObject {
+export function currentObjectInListBox(listBox: TListBox): TObject {
     let result = new TObject()
     if (listBox.Items.Count === 0) {
         result = null
@@ -1039,7 +1028,7 @@ function currentObjectInListBox(listBox: TListBox): TObject {
 
 // file i/o 
 // ---------------------------------------------------------------------------- file i/o 
-function makeFileNameFrom(aString: string): string {
+export function makeFileNameFrom(aString: string): string {
     let result = ""
     let done: boolean
     let spacePos: short
@@ -1056,7 +1045,7 @@ function makeFileNameFrom(aString: string): string {
     return result
 }
 
-function nameStringForFileType(fileType: short): string {
+export function nameStringForFileType(fileType: short): string {
     let result = ""
     switch (fileType) {
         case kFileTypeAny:
@@ -1114,7 +1103,7 @@ function nameStringForFileType(fileType: short): string {
     return result
 }
 
-function extensionForFileType(fileType: short): string {
+export function extensionForFileType(fileType: short): string {
     let result = ""
     result = ""
     switch (fileType) {
@@ -1173,7 +1162,7 @@ function extensionForFileType(fileType: short): string {
     return result
 }
 
-function filterStringForFileType(fileType: short, includeAllFiles: boolean): string {
+export function filterStringForFileType(fileType: short, includeAllFiles: boolean): string {
     let result = ""
     let extension: string
     
@@ -1188,7 +1177,7 @@ function filterStringForFileType(fileType: short, includeAllFiles: boolean): str
     return result
 }
 
-function getFileOpenInfo(fileType: short, suggestedFile: string, aTitle: string): string {
+export function getFileOpenInfo(fileType: short, suggestedFile: string, aTitle: string): string {
     let result = ""
     let fullSuggestedFileName: string
     let openDialog: TOpenDialog
@@ -1232,7 +1221,7 @@ function getFileOpenInfo(fileType: short, suggestedFile: string, aTitle: string)
     return result
 }
 
-function fileNameIsOkayForSaving(suggestedFile: string): boolean {
+export function fileNameIsOkayForSaving(suggestedFile: string): boolean {
     let result = false
     let fullSuggestedFileName: string
     
@@ -1256,7 +1245,7 @@ function fileNameIsOkayForSaving(suggestedFile: string): boolean {
     return result
 }
 
-function getFileSaveInfo(fileType: short, askForFileName: boolean, suggestedFile: string, fileInfo: SaveFileNamesStructure): boolean {
+export function getFileSaveInfo(fileType: short, askForFileName: boolean, suggestedFile: string, fileInfo: SaveFileNamesStructure): boolean {
     let result = false
     let saveDialog: TSaveDialog
     let tryBackupName: string
@@ -1362,11 +1351,11 @@ function getFileSaveInfo(fileType: short, askForFileName: boolean, suggestedFile
     return result
 }
 
-function startFileSave(fileInfo: SaveFileNamesStructure): void {
+export function startFileSave(fileInfo: SaveFileNamesStructure): void {
     ucursor.cursor_startWait()
 }
 
-function fileIsExportFile(fileType: short): boolean {
+export function fileIsExportFile(fileType: short): boolean {
     let result = false
     result = false
     switch (fileType) {
@@ -1398,7 +1387,7 @@ function fileIsExportFile(fileType: short): boolean {
     return result
 }
 
-function cleanUpAfterFileSave(fileInfo: SaveFileNamesStructure): void {
+export function cleanUpAfterFileSave(fileInfo: SaveFileNamesStructure): void {
     let useBackup: boolean
     let renamingFailed: boolean
     let deletingFailed: boolean
@@ -1472,7 +1461,7 @@ function cleanUpAfterFileSave(fileInfo: SaveFileNamesStructure): void {
 
 // v1.5
 // v1.5
-function setDecimalSeparator(): void {
+export function setDecimalSeparator(): void {
     // called before opening any file for reading or writing
     // to prevent problem with european comma separation
     UNRESOLVED.DecimalSeparator = "."

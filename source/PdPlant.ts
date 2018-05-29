@@ -1,12 +1,12 @@
 // PdPlant was unit Uplant
 
-import { PdStreamableObject, ExportFormats, DebugPrint, ucursor, MainForm, PdBitmap, PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof, PdInternode, TListCollection_streamUsingFiler, ExportPart, CursorMode } from "./temporary"
+import { PdStreamableObject, ExportFormats, DebugPrint, ucursor, MainForm, PdBitmap, PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof, PdInternode, TListCollection_streamUsingFiler, ExportPart, CursorMode, TimeSeriesForm } from "./temporary"
 import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor, ColorDefs, StrToIntDef, IntToStr, compareTextIgnoreCase, arrayRemove, TextFile, writeln, eof } from "./common"
-import { KfObject3D } from "./KfObject3D"
+import { KfObject3D, kEmbeddedInPlant } from "./KfObject3D"
 import { TPoint } from "./TPoint"
 import { TRect } from "./TRect"
 import { KfTurtle } from "./KfTurtle"
-import { SCurveStructure, intMin, intMax, safedivExcept, min, stringToSCurve, calcSCurveCoeffs, max, scurve } from "./umath"
+import { SCurveStructure, intMin, intMax, safedivExcept, min, stringToSCurve, calcSCurveCoeffs, max, scurve, sCurveToString } from "./umath"
 import { KfPoint3D } from "./KfPoint3D"
 import { PdRandom } from "./PdRandom"
 import { domain, DrawMode, MutationRate } from "./PdDomain"
@@ -16,7 +16,7 @@ import { PdParameter, FieldType, IndexType } from "./PdParameter"
 import { PdSection } from "./PdSection"
 import { PdPlantDrawingAmendment, kStartAmendmentString } from "./PdPlantDrawingAmendment"
 import { PdPlantPart } from "./PdPlantPart"
-import { SinglePoint, messageForExceptionType, support_rgb, boundForString, stringUpTo, strToBool, stringBeyond, tolerantReadln, trimLeftAndRight, boolToStr } from "./usupport"
+import { SinglePoint, messageForExceptionType, support_rgb, boundForString, stringUpTo, strToBool, stringBeyond, tolerantReadln, trimLeftAndRight, boolToStr, rgbStringToColor, digitValueString } from "./usupport"
 import { Plant_directTransferField, kFruitSCurve, kLeafSCurve, kGeneralGrowthSCurve, kGeneralAgeAtMaturity, kFlowerMaleBudOption, kFlowerFemaleBudOption, kLeafCompoundPinnateArrangement, kMeristemAndLeafArrangement, kLeafCompoundPinnateOrPalmate, kGeneralStartingSeedForRandomNumberGenerator, kStateBasePointY } from "./utransfr";
 
 /* Remove unused imports
@@ -628,7 +628,7 @@ export class PdPlant extends PdStreamableObject {
         result = result + this.tdoMemoryUse_K()
         if (this.previewCache !== null) {
             // preview cache
-            result = result + ubitmap.BitmapMemorySize(this.previewCache) / 1024.0
+            result = result + this.previewCache.bitmapMemorySize() / 1024.0
         }
         this.totalMemoryUsed_K = result
         if ((this.firstPhytomer !== null)) {
@@ -679,7 +679,7 @@ export class PdPlant extends PdStreamableObject {
         result = result + this.pLeaf.stipuleTdoParams.object3D.totalMemorySize() / 1024.0
         result = result + this.pInflor[Gender.kGenderFemale].bractTdoParams.object3D.totalMemorySize() / 1024.0
         result = result + this.pInflor[Gender.kGenderMale].bractTdoParams.object3D.totalMemorySize() / 1024.0
-        for (partType = 0; partType <= kHighestFloralPartConstant; partType++) {
+        for (partType = 0; partType <= FloralPart.kHighestFloralPartConstant; partType++) {
             result = result + this.pFlower[Gender.kGenderFemale].tdoParams[partType].object3D.totalMemorySize() / 1024.0
             result = result + this.pFlower[Gender.kGenderMale].tdoParams[partType].object3D.totalMemorySize() / 1024.0
         }
@@ -795,17 +795,13 @@ export class PdPlant extends PdStreamableObject {
     }
     
     recalculateBoundsForOffsetChange(): void {
-        let drawingRect: TRect
-        let intersectRect_pixels: TRect
-        let intersectResult: boolean
-        
         this.fakeDrawToGetBounds()
         if (this.hidden) {
             return
         }
         if (domain.options.cachePlantBitmaps) {
-            drawingRect = new TRect(0, 0, MainForm.drawingPaintBox.width, MainForm.drawingPaintBox.height)
-            intersectResult = delphi_compatability.IntersectRect(intersectRect_pixels, this.boundsRect_pixels(), drawingRect)
+            const drawingRect = new TRect(0, 0, MainForm.drawingPaintBox.width, MainForm.drawingPaintBox.height)
+            const intersectResult = this.boundsRect_pixels().intersects(drawingRect)
             if ((intersectResult) && (!this.hidden) && (this.previewCache.Width < 5)) {
                 this.recalculateBounds(kDrawNow)
             }
@@ -1513,7 +1509,7 @@ export class PdPlant extends PdStreamableObject {
                 tempLongint = this.transferField(kSetField, tempLongint, param.fieldNumber, param.fieldType, 0, false, null)
                 break
             case FieldType.kFieldColor:
-                tempColorRef = usupport.rgbStringToColor(param.defaultValueString())
+                tempColorRef = rgbStringToColor(param.defaultValueString())
                 tempColorRef = this.transferField(kSetField, tempColorRef, param.fieldNumber, param.fieldType, 0, false, null)
                 break
             case FieldType.kFieldFloat:
@@ -1524,7 +1520,8 @@ export class PdPlant extends PdStreamableObject {
                     this.transferWholeSCurve(kSetField, tempSCurve, param.fieldNumber, param.fieldType, false, null)
                     this.changingWholeSCurves = false
                 } else {
-                    tempFloat = boundForString(param.defaultValueString(), FieldType.kFieldFloat)
+                    let success: boolean
+                    [tempFloat, success] = boundForString(param.defaultValueString(), FieldType.kFieldFloat)
                     tempFloat = this.transferField(kSetField, tempFloat, param.fieldNumber, param.fieldType, 0, false, null)
                 }
                 break
@@ -1566,7 +1563,7 @@ export class PdPlant extends PdStreamableObject {
         let tempLongint: long = 0
         let tempFloat: float = 0
         let tempColorRef: TColorRef = 0
-        let tempSCurve: SCurveStructure
+        let tempSCurve: SCurveStructure = new SCurveStructure()
         let tempTdo: KfObject3D
         
         if (MainForm !== null) {
@@ -1631,7 +1628,7 @@ export class PdPlant extends PdStreamableObject {
                                 this.writeLine(plantFile, param.name + start + param.fieldID + stop + sCurveToString(tempSCurve))
                             } else {
                                 tempFloat = this.transferField(kGetField, tempFloat, param.fieldNumber, param.fieldType, 0, false, null)
-                                this.writeLine(plantFile, param.name + start + param.fieldID + stop + usupport.digitValueString(tempFloat))
+                                this.writeLine(plantFile, param.name + start + param.fieldID + stop + digitValueString(tempFloat))
                             }
                             break
                         case FieldType.kFieldThreeDObject:
@@ -1668,14 +1665,11 @@ export class PdPlant extends PdStreamableObject {
         let tempFloat: float
         let tempColorRef: TColorRef
         let tempSCurve: SCurveStructure
-        let param: PdParameter
         let secondLine: string
         let noteLine: string
         let nameAndFieldID: string
         let fieldID: string
         let paramValue: string
-        let tempTdo: KfObject3D
-        let found: boolean
         
         if (compareTextIgnoreCase(kStartNoteString, aLine)) {
             // read note if this line starts it
@@ -1722,8 +1716,8 @@ export class PdPlant extends PdStreamableObject {
             return
         }
         paramValue = stringBeyond(aLine, "=")
-        found = false
-        param = null
+        let found: boolean = false
+        let param: PdParameter | null = null
         if (domain.parameterManager.parameters.length > 0) {
             for (let i = 0; i < domain.parameterManager.parameters.length; i++) {
                 param = domain.parameterManager.parameters[i]
@@ -1736,7 +1730,7 @@ export class PdPlant extends PdStreamableObject {
                 }
             }
         }
-        if (!found) {
+        if (!found || !param) {
             return
         }
         switch (param.fieldType) {
@@ -1815,7 +1809,7 @@ export class PdPlant extends PdStreamableObject {
                     let success
                     [tempFloat, success] = boundForString(paramValue, FieldType.kFieldFloat)
                     if (param.name.includes("Drawing scale")) {
-                        tempTdo = null
+                        // ORIGINAL: TODO: Use or remove -- why was this here? Seems unneded? tempTdo = null
                     }
                     if ((param.lowerBound() !== 0) || (param.upperBound() !== 0)) {
                         if (tempFloat < param.lowerBound()) {
@@ -1835,7 +1829,7 @@ export class PdPlant extends PdStreamableObject {
                 if (this.readingFromMemo) {
                     this.readingMemoLine = tempTdo.readFromMemo(MainForm.plantsAsTextMemo, this.readingMemoLine)
                 } else {
-                    tempTdo.readFromFileStream(plantFile, utdo.kEmbeddedInPlant)
+                    tempTdo.readFromFileStream(plantFile, kEmbeddedInPlant)
                 }
                 tempTdo = this.transferField(kSetField, tempTdo, param.fieldNumber, param.fieldType, 0, false, null)
                 break
@@ -1873,8 +1867,8 @@ export class PdPlant extends PdStreamableObject {
             value = this.transferField(d, value, fieldID, fieldType, fieldIndex, regrow, updateList)
             if (updateList.length > 0) {
                 MainForm.updateParameterValuesWithUpdateListForPlant(this, updateList)
-                if ((domain.options.updateTimeSeriesPlantsOnParameterChange) && (utimeser.TimeSeriesForm !== null)) {
-                    utimeser.TimeSeriesForm.updatePlantsFromParent(this)
+                if ((domain.options.updateTimeSeriesPlantsOnParameterChange) && (TimeSeriesForm !== null)) {
+                    TimeSeriesForm.updatePlantsFromParent(this)
                 }
             }
         }
@@ -1938,7 +1932,7 @@ export class PdPlant extends PdStreamableObject {
         updateList.push(updateEvent)
     }
     
-    fillEnumStringList(list: string[], fieldID: int, hasRadioButtons: boolean): void {
+    fillEnumStringList(list: string[], fieldID: int, hasRadioButtons: boolean): boolean {
         switch (fieldID) {
             case kLeafCompoundPinnateOrPalmate:
                 // assumes list being given to it is empty 
@@ -1986,7 +1980,7 @@ export class PdPlant extends PdStreamableObject {
         }
     }
     
-    transferWholeSCurve(direction: short, value: SCurveStructure, fieldNumber: short, fieldType: short, regrow: boolean, updateList: PdPlantUpdateEvent[]): void {
+    transferWholeSCurve(direction: short, value: SCurveStructure, fieldNumber: short, fieldType: short, regrow: boolean, updateList: PdPlantUpdateEvent[] | null): void {
         value.x1 = this.transferField(direction, value.x1, fieldNumber, fieldType, 0, regrow, updateList)
         value.y1 = this.transferField(direction, value.y1, fieldNumber, fieldType, 1, regrow, updateList)
         value.x2 = this.transferField(direction, value.x2, fieldNumber, fieldType, 2, regrow, updateList)
@@ -2046,7 +2040,7 @@ export class PdPlant extends PdStreamableObject {
     }
     
     // ------------------------------------------------------------------------------- breeding 
-    useBreedingOptionsAndPlantsToSetParameters(options: BreedingAndTimeSeriesOptionsStructure, firstPlant: PdPlant, secondPlant: PdPlant, tdos: TListCollection): void {
+    useBreedingOptionsAndPlantsToSetParameters(options: BreedingAndTimeSeriesOptionsStructure, firstPlant: PdPlant, secondPlant: PdPlant, tdos: KfObject3D[]): void {
         let firstBoolean: boolean = false
         let secondBoolean: boolean = false
         let newBoolean: boolean = false
@@ -2206,12 +2200,16 @@ export class PdPlant extends PdStreamableObject {
                             break
                         case FieldType.kFieldThreeDObject:
                             // non-numeric
-                            newTdo = new KfObject3D()
-                            const firstTdo: KfObject3D = firstPlant.transferField(kGetField, firstTdo, param.fieldNumber, param.fieldType, 0, false, null)
+                            let newTdo = new KfObject3D()
+                            // TODO: May not need to create firstTdo except to keep compiler happy?
+                            let firstTdo: KfObject3D = new KfObject3D()
+                            firstTdo = firstPlant.transferField(kGetField, firstTdo, param.fieldNumber, param.fieldType, 0, false, null)
                             if (secondPlant === null) {
                                 newTdo.copyFrom(firstTdo)
                             } else {
-                                const secondTdo: KfObject3D = secondPlant.transferField(kGetField, secondTdo, param.fieldNumber, param.fieldType, 0, false, null)
+                                // TODO: May not need to create secondTdo except to keep compiler happy?
+                                let secondTdo: KfObject3D = new KfObject3D()
+                                secondTdo = secondPlant.transferField(kGetField, secondTdo, param.fieldNumber, param.fieldType, 0, false, null)
                                 if (!options.chooseTdosRandomlyFromCurrentLibrary) {
                                     if (this.pickPlantToCopyNonNumericalParameterFrom(options, sectionIndex) === kFromFirstPlant) {
                                         newTdo.copyFrom(firstTdo)
@@ -2219,14 +2217,14 @@ export class PdPlant extends PdStreamableObject {
                                         newTdo.copyFrom(secondTdo)
                                     }
                                 } else {
-                                    randomTdo = this.tdoRandomlyPickedFromCurrentLibrary(tdos)
+                                    const randomTdo = this.tdoRandomlyPickedFromCurrentLibrary(tdos)
                                     if (randomTdo !== null) {
                                         newTdo.copyFrom(randomTdo)
                                     }
                                 }
                             }
                             if (options.chooseTdosRandomlyFromCurrentLibrary) {
-                                randomTdo = this.tdoRandomlyPickedFromCurrentLibrary(tdos)
+                                const randomTdo = this.tdoRandomlyPickedFromCurrentLibrary(tdos)
                                 if (randomTdo !== null) {
                                     newTdo.copyFrom(randomTdo)
                                 }
@@ -2373,6 +2371,7 @@ export class PdPlant extends PdStreamableObject {
         this.justCopiedFromMainWindow = filer.streamBoolean(this.justCopiedFromMainWindow)
         this.indexWhenRemoved = filer.streamSmallint(this.indexWhenRemoved)
         this.selectedIndexWhenRemoved = filer.streamSmallint(this.selectedIndexWhenRemoved)
+
         if (filer.isReading()) {
             // save pointers to 3d objects if reading because they will get written over during streaming of structures 
             tdoSeedlingLeaf = this.pSeedlingLeaf.leafTdoParams.object3D
@@ -2380,7 +2379,7 @@ export class PdPlant extends PdStreamableObject {
             tdoStipule = this.pLeaf.stipuleTdoParams.object3D
             tdoInflorBractFemale = this.pInflor[Gender.kGenderFemale].bractTdoParams.object3D
             tdoInflorBractMale = this.pInflor[Gender.kGenderMale].bractTdoParams.object3D
-            for (partType = 0; partType <= kHighestFloralPartConstant; partType++) {
+            for (partType = 0; partType <= FloralPart.kHighestFloralPartConstant; partType++) {
                 femaleFlowerTdos[partType] = this.pFlower[Gender.kGenderFemale].tdoParams[partType].object3D
                 maleFlowerTdos[partType] = this.pFlower[Gender.kGenderMale].tdoParams[partType].object3D
             }
@@ -2401,6 +2400,7 @@ export class PdPlant extends PdStreamableObject {
             tdoFruit = null
             tdoRoot = null
         }
+
         this.pGeneral = filer.streamBytes(this.pGeneral, FIX_sizeof(this.pGeneral))
         this.pMeristem = filer.streamBytes(this.pMeristem, FIX_sizeof(this.pMeristem))
         this.pInternode = filer.streamBytes(this.pInternode, FIX_sizeof(this.pInternode))
@@ -2413,8 +2413,9 @@ export class PdPlant extends PdStreamableObject {
         this.pFlower[Gender.kGenderFemale] = filer.streamBytes(this.pFlower[Gender.kGenderFemale], FIX_sizeof(this.pFlower))
         this.pFruit = filer.streamBytes(this.pFruit, FIX_sizeof(this.pFruit))
         this.pRoot = filer.streamBytes(this.pRoot, FIX_sizeof(this.pRoot))
+
+        // reset pointers if reading and stream 3d objects 
         if (filer.isReading()) {
-            // reset pointers if reading and stream 3d objects 
             this.pSeedlingLeaf.leafTdoParams.object3D = tdoSeedlingLeaf
         }
         this.pSeedlingLeaf.leafTdoParams.object3D.streamUsingFiler(filer)
@@ -2458,6 +2459,7 @@ export class PdPlant extends PdStreamableObject {
         this.pRoot.tdoParams.object3D.streamUsingFiler(filer)
         this.randomNumberGenerator.streamUsingFiler(filer)
         this.breedingGenerator.streamUsingFiler(filer)
+
         // biomass info 
         this.totalBiomass_pctMPB = filer.streamSingle(this.totalBiomass_pctMPB)
         this.reproBiomass_pctMPB = filer.streamSingle(this.reproBiomass_pctMPB)
@@ -2477,8 +2479,8 @@ export class PdPlant extends PdStreamableObject {
         this.ageAtWhichFloweringStarted = filer.streamSmallint(this.ageAtWhichFloweringStarted)
         this.floweringHasStarted = filer.streamBoolean(this.floweringHasStarted)
         this.totalPlantParts = filer.streamLongint(this.totalPlantParts)
+
         // plant parts 
-        traverser = null
         if (filer.isReading()) {
             hasFirstPhytomer = filer.streamBoolean(hasFirstPhytomer)
             if (this.firstPhytomer !== null) {

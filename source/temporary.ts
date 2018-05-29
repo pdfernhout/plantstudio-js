@@ -125,6 +125,9 @@ export class PdBitmap extends PdStreamableObject {
     Transparent = true
     TransparentMode = <any>null // delphi_compatability.TTransparentMode.tmFixed
     TransparentColor = ColorDefs.clBlack // domain.options.backgroundColor
+    bitmapMemorySize() {
+        return 0
+    }
 }
 
 // TODO: Fix PdInternode stub
@@ -221,4 +224,10 @@ export enum CursorMode {
     kCursorModeScroll = 2,
     kCursorModeRotate = 3,
     kCursorModePosingSelect = 4,
+}
+
+// TODO: Implement TimeSeriesForm from utmimeser
+export const TimeSeriesForm = {
+    updatePlantsFromParent(plant: PdPlant) {
+    }
 }
