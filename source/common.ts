@@ -114,3 +114,15 @@ export function readln(file: TextFile) {
     }
     return result
 }
+
+export function ExtractFileName(fileName: string) {
+    const lastSlash = fileName.lastIndexOf("/")
+    if (lastSlash !== -1) fileName = fileName.substring(lastSlash + 1)
+    const lastDot = fileName.lastIndexOf(".")
+    if (lastSlash !== -1) fileName = fileName.substring(0, lastDot)
+    return fileName
+}
+
+export function ord(character: string) {
+    return character.charCodeAt(0)
+}

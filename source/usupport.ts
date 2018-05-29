@@ -1,4 +1,4 @@
-import { float, StrToFloat, int, byte, long, compareTextIgnoreCase, short, readln, TextFile, StrToIntDef, TColorRef } from "./common";
+import { float, StrToFloat, int, byte, long, compareTextIgnoreCase, short, readln, TextFile, StrToIntDef, TColorRef, ord } from "./common";
 import { DebugPrint } from "./temporary";
 import { KfStringStream } from "./KfStringStream";
 
@@ -328,16 +328,16 @@ export function limitString(aString: string, maxChars: short): string {
     return result
 }
 
+*/
+
 export function replacePunctuationWithUnderscores(aString: string): string {
-    let result = ""
-    let i: int
     let lowerCaseString: string
     let isAlpha: boolean
     
-    result = ""
-    lowerCaseString = lowercase(aString)
-    if (len(aString) > 0) {
-        for (i = 1; i <= len(aString); i++) {
+    let result = ""
+    lowerCaseString = aString.toLowerCase()
+    if (aString.length > 0) {
+        for (let i = 1; i <= aString.length; i++) {
             isAlpha = (ord(lowerCaseString[i]) >= ord("a")) && (ord(lowerCaseString[i]) <= ord("z")) || (ord(lowerCaseString[i]) >= ord("0")) && (ord(lowerCaseString[i]) <= ord("9"))
             if (isAlpha) {
                 result = result + aString[i]
@@ -348,6 +348,8 @@ export function replacePunctuationWithUnderscores(aString: string): string {
     }
     return result
 }
+
+/*
 
 export function replaceCommasWithPeriods(aString: string): string {
     let result = ""
@@ -1457,14 +1459,6 @@ export function cleanUpAfterFileSave(fileInfo: SaveFileNamesStructure): void {
     if ((!udomain.domain.registered) && (fileInfo.writingWasSuccessful) && (fileIsExportFile(fileInfo.fileType))) {
         umain.MainForm.incrementUnregisteredExportCount()
     }
-}
-
-// v1.5
-// v1.5
-export function setDecimalSeparator(): void {
-    // called before opening any file for reading or writing
-    // to prevent problem with european comma separation
-    UNRESOLVED.DecimalSeparator = "."
 }
 
 */

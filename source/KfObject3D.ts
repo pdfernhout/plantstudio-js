@@ -1,6 +1,6 @@
 // KfObject3D was unit Utdo
 
-import { float, long, ColorDefs, int, IntToStr, short, StrToFloat, intround, arrayRemove, compareTextIgnoreCase, StrToIntDef, MessageDialog, TextFile, TMemo, writeln, eof, readln, write, TColorRef, getRValue, getGValue, getBValue } from "./common"
+import { float, long, ColorDefs, int, IntToStr, short, StrToFloat, intround, arrayRemove, compareTextIgnoreCase, StrToIntDef, MessageDialog, TextFile, TMemo, writeln, eof, readln, write, TColorRef, getRValue, getGValue, getBValue, ExtractFileName } from "./common"
 import { PdStreamableObject, PdClassAndVersionInformationRecord, PdFiler, ExportFormats, FIX_sizeof, TListCollection_streamUsingFiler } from "./temporary";
 import { KfPoint3D, KfPoint3D_matchXYZ, KfPoint3D_setXYZ, KfPoint3D_addPointToBoundsRect, KfPoint3D_subtract } from "./KfPoint3D";
 import { KfIndexTriangle } from "./KfIndexTriangle";
@@ -9,7 +9,7 @@ import { TRect } from "./TRect";
 import { TPoint } from "./TPoint";
 import { KfTurtle } from "./KfTurtle";
 import { KfStringStream } from "./KfStringStream";
-import { stringUpTo, digitValueString } from "./usupport";
+import { stringUpTo, digitValueString, replacePunctuationWithUnderscores } from "./usupport";
 import { ClassId } from "./uclasses";
 
 /* TODO: Remove unused imports 
@@ -573,32 +573,12 @@ export class KfObject3D extends PdStreamableObject {
         }
     }
 
-    writeToFile(fileName: string): void {
-        let outputFile: TextFile
-        
-        AssignFile(outputFile, fileName)
-        try {
-            // v1.5
-            usupport.setDecimalSeparator()
-            Rewrite(outputFile)
-            this.writeToFileStream(outputFile, kStandAloneFile)
-        } finally {
-            CloseFile(outputFile)
-        }
+    writeToFile(outputFile: TextFile): void {
+        this.writeToFileStream(outputFile, kStandAloneFile)
     }
     
-    readFromFile(fileName: string): void {
-        let inputFile: TextFile
-        
-        AssignFile(inputFile, fileName)
-        try {
-            // v1.5
-            usupport.setDecimalSeparator()
-            Reset(inputFile)
-            this.readFromFileStream(inputFile, kStandAloneFile)
-        } finally {
-            CloseFile(inputFile)
-        }
+    readFromFile(inputFile: TextFile): void {
+        this.readFromFileStream(inputFile, kStandAloneFile)
     }
     
     writeToMemo(aMemo: TMemo): void {
@@ -918,35 +898,26 @@ export class KfObject3D extends PdStreamableObject {
         return result
     }
     
-    writeToDXFFile(fileName: string, frontFaceColor: TColorRef, backFaceColor: TColorRef): void {
-        let outputFile: TextFile
+    writeToDXFFile(outputFile: TextFile, frontFaceColor: TColorRef, backFaceColor: TColorRef): void {
         let colorToDraw: TColorRef
         
-        AssignFile(outputFile, fileName)
-        try {
-            // v1.5
-            usupport.setDecimalSeparator()
-            Rewrite(outputFile)
-            writeln(outputFile, "0")
-            writeln(outputFile, "SECTION")
-            writeln(outputFile, "2")
-            writeln(outputFile, "ENTITIES")
-            for (let i = 0; i < this.triangles.length; i++) {
-                const triangle: KfIndexTriangle = this.triangles[i]
-                if (this.triangleIsBackFacing(triangle)) {
-                    colorToDraw = backFaceColor
-                } else {
-                    colorToDraw = frontFaceColor
-                }
-                this.writeTriangleToDXFFIle(outputFile, this.points[triangle.pointIndexes[0] - 1], this.points[triangle.pointIndexes[1] - 1], this.points[triangle.pointIndexes[2] - 1], colorToDraw)
+        writeln(outputFile, "0")
+        writeln(outputFile, "SECTION")
+        writeln(outputFile, "2")
+        writeln(outputFile, "ENTITIES")
+        for (let i = 0; i < this.triangles.length; i++) {
+            const triangle: KfIndexTriangle = this.triangles[i]
+            if (this.triangleIsBackFacing(triangle)) {
+                colorToDraw = backFaceColor
+            } else {
+                colorToDraw = frontFaceColor
             }
-            writeln(outputFile, "0")
-            writeln(outputFile, "ENDSEC")
-            writeln(outputFile, "0")
-            writeln(outputFile, "EOF")
-        } finally {
-            CloseFile(outputFile)
+            this.writeTriangleToDXFFIle(outputFile, this.points[triangle.pointIndexes[0] - 1], this.points[triangle.pointIndexes[1] - 1], this.points[triangle.pointIndexes[2] - 1], colorToDraw)
         }
+        writeln(outputFile, "0")
+        writeln(outputFile, "ENDSEC")
+        writeln(outputFile, "0")
+        writeln(outputFile, "EOF")
     }
     
     writeTriangleToDXFFIle(outputFile: TextFile, p1: KfPoint3D, p2: KfPoint3D, p3: KfPoint3D, color: TColorRef): void {
@@ -985,47 +956,38 @@ export class KfObject3D extends PdStreamableObject {
         writeln(outputFile, digitValueString(p3.z))
     }
     
-    writeToPOV_INCFile(fileName: string, frontFaceColor: TColorRef, embeddedInPlant: boolean, rotateCount: int): void {
-        let outputFile: TextFile
+    writeToPOV_INCFile(outputFile: TextFile, fileName: string, frontFaceColor: TColorRef, embeddedInPlant: boolean, rotateCount: int): void {
         let colorToDraw: TColorRef
         let nameString: string
         
-        AssignFile(outputFile, fileName)
-        try {
-            // v1.5
-            usupport.setDecimalSeparator()
-            Rewrite(outputFile)
-            nameString = usupport.replacePunctuationWithUnderscores(this.getName())
-            writeln(outputFile, "// POV-format INC file of PlantStudio v1.x 3D object")
-            writeln(outputFile, "//     \"" + this.getName() + "\"")
-            if ((!embeddedInPlant)) {
-                writeln(outputFile, "// include this file in a POV file thus to use it:")
-                writeln(outputFile, "//     #include \"" + stringUpTo(ExtractFileName(fileName), ".") + ".inc\"")
-                writeln(outputFile, "//     object { " + nameString + " }")
-                if (rotateCount > 1) {
-                    writeln(outputFile, "//  or")
-                    writeln(outputFile, "//     object { " + nameString + "_rotated }")
-                }
-                writeln(outputFile)
-            }
-            writeln(outputFile, "#declare " + nameString + "=mesh {")
-            for (let i = 0; i < this.triangles.length; i++) {
-                const triangle: KfIndexTriangle = this.triangles[i]
-                this.writeTriangleToPOV_INCFile(outputFile, this.points[triangle.pointIndexes[0] - 1], this.points[triangle.pointIndexes[1] - 1], this.points[triangle.pointIndexes[2] - 1])
-            }
-            writeln(outputFile, String.fromCharCode(9) + "pigment { color rgb <" + digitValueString(getRValue(frontFaceColor) / 256.0) + ", " + digitValueString(getGValue(frontFaceColor) / 256.0) + ", " + digitValueString(getBValue(frontFaceColor) / 256.0) + "> }")
-            writeln(outputFile, "}")
+        nameString = replacePunctuationWithUnderscores(this.getName())
+        writeln(outputFile, "// POV-format INC file of PlantStudio v1.x 3D object")
+        writeln(outputFile, "//     \"" + this.getName() + "\"")
+        if ((!embeddedInPlant)) {
+            writeln(outputFile, "// include this file in a POV file thus to use it:")
+            writeln(outputFile, "//     #include \"" + stringUpTo(ExtractFileName(fileName), ".") + ".inc\"")
+            writeln(outputFile, "//     object { " + nameString + " }")
             if (rotateCount > 1) {
-                writeln(outputFile)
-                writeln(outputFile, "#declare " + nameString + "_rotated=union {")
-                writeln(outputFile, String.fromCharCode(9) + "object { " + nameString + " }")
-                for (let i = 1; i < rotateCount; i++) {
-                    writeln(outputFile, String.fromCharCode(9) + "object { " + nameString + " rotate " + IntToStr(i) + "*365/" + IntToStr(rotateCount) + "*y }")
-                }
-                writeln(outputFile, "}")
+                writeln(outputFile, "//  or")
+                writeln(outputFile, "//     object { " + nameString + "_rotated }")
             }
-        } finally {
-            CloseFile(outputFile)
+            writeln(outputFile)
+        }
+        writeln(outputFile, "#declare " + nameString + "=mesh {")
+        for (let i = 0; i < this.triangles.length; i++) {
+            const triangle: KfIndexTriangle = this.triangles[i]
+            this.writeTriangleToPOV_INCFile(outputFile, this.points[triangle.pointIndexes[0] - 1], this.points[triangle.pointIndexes[1] - 1], this.points[triangle.pointIndexes[2] - 1])
+        }
+        writeln(outputFile, String.fromCharCode(9) + "pigment { color rgb <" + digitValueString(getRValue(frontFaceColor) / 256.0) + ", " + digitValueString(getGValue(frontFaceColor) / 256.0) + ", " + digitValueString(getBValue(frontFaceColor) / 256.0) + "> }")
+        writeln(outputFile, "}")
+        if (rotateCount > 1) {
+            writeln(outputFile)
+            writeln(outputFile, "#declare " + nameString + "_rotated=union {")
+            writeln(outputFile, String.fromCharCode(9) + "object { " + nameString + " }")
+            for (let i = 1; i < rotateCount; i++) {
+                writeln(outputFile, String.fromCharCode(9) + "object { " + nameString + " rotate " + IntToStr(i) + "*365/" + IntToStr(rotateCount) + "*y }")
+            }
+            writeln(outputFile, "}")
         }
     }
     
