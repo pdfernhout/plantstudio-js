@@ -2,11 +2,13 @@
 
 import { float, int, TColorRef, short, long } from "./common";
 import { max, safedivExcept, min } from "./umath";
-import { PdFiler, MainForm, PdInternode, ExportPart } from "./temporary";
+import { PdFiler, MainForm } from "./temporary";
 import { PdPlant } from "./PdPlant";
 import { TPoint } from "./TPoint";
 import { messageForExceptionType } from "./usupport";
 import { PdPlantPart } from "./PdPlantPart";
+import { PdInternode } from "./PdInternode";
+import { ExportPart } from "./U3dexport";
 
 /* TODO: Remove unneeded imports
 from conversion_common import *
@@ -24,12 +26,13 @@ import uplant
 import delphi_compatability
 */
 
-// const
-const kTraverseNone = 0
-const kTraverseLeft = 1
-const kTraverseRight = 2
-const kTraverseNext = 3
-const kTraverseDone = 4
+export enum TraverseDirection {
+    kTraverseNone = 0,
+    kTraverseLeft = 1,
+    kTraverseRight = 2,
+    kTraverseNext = 3,
+    kTraverseDone = 4,
+}
 
 export enum Activity {
     kActivityNone = 0,
@@ -109,7 +112,7 @@ function linearGrowthWithFactorResult(current: float, optimal: float, minDays: i
     return result
 }
 
-function linearGrowthWithFactor(current: float, optimal: float, minDays: int, growthFactor: float): float {
+export function linearGrowthWithFactor(current: float, optimal: float, minDays: int, growthFactor: float): float {
     let amountNeeded: float
     let maxPossible: float
     
@@ -124,7 +127,7 @@ function linearGrowthWithFactor(current: float, optimal: float, minDays: int, gr
     return current
 }
 
-function linearGrowthResult(current: float, optimal: float, minDays: int): float {
+export function linearGrowthResult(current: float, optimal: float, minDays: int): float {
     let result = 0.0
     let amountNeeded: float
     let maxPossible: float
@@ -224,10 +227,10 @@ export class PdTraverser {
         this.totalPlantParts = 0
         if (this.plant.firstPhytomer !== null) {
             this.currentPhytomer = this.plant.firstPhytomer
-            this.currentPhytomer.traversingDirection = kTraverseLeft
+            this.currentPhytomer.traversingDirection = TraverseDirection.kTraverseLeft
             this.currentPhytomer.traverseActivity(this.mode, this)
             // reset afterwards in case read in differently
-            this.currentPhytomer.traversingDirection = kTraverseLeft
+            this.currentPhytomer.traversingDirection = TraverseDirection.kTraverseLeft
         }
     }
     
@@ -250,7 +253,7 @@ export class PdTraverser {
                 return
             }
             switch (phytomerTraversing.traversingDirection) {
-                case kTraverseLeft:
+                case TraverseDirection.kTraverseLeft:
                     phytomerTraversing.traversingDirection += 1
                     if (phytomerTraversing.leftBranchPlantPart !== null) {
                         if ((this.mode === Activity.kActivityDraw)) {
@@ -258,14 +261,14 @@ export class PdTraverser {
                         }
                         phytomerTraversing.leftBranchPlantPart.traverseActivity(this.mode, this)
                         if ((phytomerTraversing.leftBranchPlantPart.isPhytomer())) {
-                            phytomerTraversing = phytomerTraversing.leftBranchPlantPart
-                            phytomerTraversing.traversingDirection = kTraverseLeft
+                            phytomerTraversing = <PdInternode>phytomerTraversing.leftBranchPlantPart
+                            phytomerTraversing.traversingDirection = TraverseDirection.kTraverseLeft
                         } else if ((this.mode === Activity.kActivityDraw)) {
                             this.plant.turtle.pop()
                         }
                     }
                     break
-                case kTraverseRight:
+                case TraverseDirection.kTraverseRight:
                     phytomerTraversing.traversingDirection += 1
                     if (phytomerTraversing.rightBranchPlantPart !== null) {
                         if ((this.mode === Activity.kActivityDraw)) {
@@ -273,14 +276,14 @@ export class PdTraverser {
                         }
                         phytomerTraversing.rightBranchPlantPart.traverseActivity(this.mode, this)
                         if ((phytomerTraversing.rightBranchPlantPart.isPhytomer())) {
-                            phytomerTraversing = phytomerTraversing.rightBranchPlantPart
-                            phytomerTraversing.traversingDirection = kTraverseLeft
+                            phytomerTraversing = <PdInternode>phytomerTraversing.rightBranchPlantPart
+                            phytomerTraversing.traversingDirection = TraverseDirection.kTraverseLeft
                         } else if ((this.mode === Activity.kActivityDraw)) {
                             this.plant.turtle.pop()
                         }
                     }
                     break
-                case kTraverseNext:
+                case TraverseDirection.kTraverseNext:
                     phytomerTraversing.traversingDirection += 1
                     if (phytomerTraversing.nextPlantPart !== null) {
                         if ((this.mode === Activity.kActivityDraw)) {
@@ -289,25 +292,25 @@ export class PdTraverser {
                         }
                         phytomerTraversing.nextPlantPart.traverseActivity(this.mode, this)
                         if ((phytomerTraversing.nextPlantPart.isPhytomer())) {
-                            phytomerTraversing = phytomerTraversing.nextPlantPart
-                            phytomerTraversing.traversingDirection = kTraverseLeft
+                            phytomerTraversing = <PdInternode>phytomerTraversing.nextPlantPart
+                            phytomerTraversing.traversingDirection = TraverseDirection.kTraverseLeft
                         } else if ((this.mode === Activity.kActivityDraw)) {
                             this.plant.turtle.pop()
                         }
                     }
                     break
-                case kTraverseDone:
-                    phytomerTraversing.traversingDirection = kTraverseNone
+                case TraverseDirection.kTraverseDone:
+                    phytomerTraversing.traversingDirection = TraverseDirection.kTraverseNone
                     const lastPhytomer: PdInternode = phytomerTraversing
                     phytomerTraversing = phytomerTraversing.phytomerAttachedTo
                     if ((this.mode === Activity.kActivityFree)) {
                         // TODO: Use or remove: lastPhytomer.free
                         if (phytomerTraversing !== null) {
-                            if ((phytomerTraversing.traversingDirection === kTraverseLeft + 1)) {
+                            if ((phytomerTraversing.traversingDirection === TraverseDirection.kTraverseLeft + 1)) {
                                 phytomerTraversing.leftBranchPlantPart = null
-                            } else if ((phytomerTraversing.traversingDirection === kTraverseRight + 1)) {
+                            } else if ((phytomerTraversing.traversingDirection === TraverseDirection.kTraverseRight + 1)) {
                                 phytomerTraversing.rightBranchPlantPart = null
-                            } else if ((phytomerTraversing.traversingDirection === kTraverseNext + 1)) {
+                            } else if ((phytomerTraversing.traversingDirection === TraverseDirection.kTraverseNext + 1)) {
                                 phytomerTraversing.nextPlantPart = null
                             }
                         }
@@ -317,16 +320,16 @@ export class PdTraverser {
                     }
                     if ((this.mode === Activity.kActivityDraw)) {
                         //special drawing stuff - if returning from left or right branch draw, pop turtle
-                        //	if (phytomerTraversing.traversingDirection = kTraverseLeft + 1)
-                        //           or (phytomerTraversing.traversingDirection =  kTraverseRight + 1)  then 
+                        //	if (phytomerTraversing.traversingDirection = TraverseDirection.kTraverseLeft + 1)
+                        //           or (phytomerTraversing.traversingDirection =  TraverseDirection.kTraverseRight + 1)  then 
                         this.plant.turtle.pop()
                     }
                     if ((this.mode === Activity.kActivityCalculateBiomassForGravity)) {
                         phytomerTraversing.traverseActivity(this.mode, this)
                     }
                     break
-                case kTraverseNone:
-                    throw new Error("Problem: kTraverseNone encountered in method PdTraverser.traversePlant.")
+                case TraverseDirection.kTraverseNone:
+                    throw new Error("Problem: TraverseDirection.kTraverseNone encountered in method PdTraverser.traversePlant.")
             }
             if ((traversalCount !== 0)) {
                 i += 1

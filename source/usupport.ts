@@ -1,6 +1,7 @@
-import { float, StrToFloat, int, byte, long, compareTextIgnoreCase, short, readln, TextFile, StrToIntDef, TColorRef, ord } from "./common";
+import { float, StrToFloat, int, byte, long, compareTextIgnoreCase, short, readln, TextFile, StrToIntDef, TColorRef, ord, intround, getBValue, getRValue, getGValue } from "./common";
 import { DebugPrint } from "./temporary";
 import { KfStringStream } from "./KfStringStream";
+import { intMax, max, min, intMin } from "./umath";
 
 // unit Usupport
 
@@ -34,16 +35,6 @@ export class SinglePoint {
         this.x = x
         this.y = y
     }
-}
-
-// TODO: Implement darkerColorWithSubtraction from usupport
-export function darkerColorWithSubtraction(a: number, b: number) {
-    return a
-}
-
-// TODO: Implement darkerColor from usupport
-export function darkerColor(a: number) {
-    return a
 }
 
 // TODO: Fix boundForString stub from usupport
@@ -632,7 +623,7 @@ export function messageForExceptionType(e: Exception, methodName: string): void 
         errorString = "Problem in method " + methodName + "."
     }
     errorString = errorString + chr(13) + chr(13) + e.message
-    umath.ErrorMessage(errorString)
+    ErrorMessage(errorString)
 }
 
 */
@@ -710,10 +701,10 @@ export function support_rgb(R: byte, G: byte, B: byte): long {
 
 export function combineRects(rect1: TRect, rect2: TRect): TRect {
     let result = new TRect()
-    result.Left = umath.intMin(rect1.Left, rect2.Left)
-    result.Right = umath.intMax(rect1.Right, rect2.Right)
-    result.Top = umath.intMin(rect1.Top, rect2.Top)
-    result.Bottom = umath.intMax(rect1.Bottom, rect2.Bottom)
+    result.Left = intMin(rect1.Left, rect2.Left)
+    result.Right = intMax(rect1.Right, rect2.Right)
+    result.Top = intMin(rect1.Top, rect2.Top)
+    result.Bottom = intMax(rect1.Bottom, rect2.Bottom)
     return result
 }
 
@@ -875,7 +866,7 @@ export function stringToSinglePoint(aString: string): SinglePoint {
 
 export function colorToRGBString(color: TColorRef): string {
     let result = ""
-    result = IntToStr(UNRESOLVED.getRValue(color)) + " " + IntToStr(UNRESOLVED.getGValue(color)) + " " + IntToStr(UNRESOLVED.getBValue(color))
+    result = IntToStr(getRValue(color)) + " " + IntToStr(getGValue(color)) + " " + IntToStr(getBValue(color))
     return result
 }
 
@@ -890,72 +881,48 @@ export function rgbStringToColor(aString: string): TColorRef {
     return support_rgb(r, g, b)
 }
 
-/*
-
 // ---------------------------------------------------------------------------------- color functions 
 export function blendColors(firstColor: TColorRef, secondColor: TColorRef, aStrength: float): TColorRef {
-    let result = new TColorRef()
-    let r1: byte
-    let g1: byte
-    let b1: byte
-    let r2: byte
-    let g2: byte
-    let b2: byte
-    
-    //blend first color with second color,
-    //   weighting the second color by aStrength (0-1) and first color by (1 - aStrength).
-    aStrength = umath.max(0.0, umath.min(1.0, aStrength))
-    r1 = umath.intMax(0, umath.intMin(255, UNRESOLVED.GetRValue(firstColor)))
-    g1 = umath.intMax(0, umath.intMin(255, UNRESOLVED.GetGValue(firstColor)))
-    b1 = umath.intMax(0, umath.intMin(255, UNRESOLVED.GetBValue(firstColor)))
-    r2 = umath.intMax(0, umath.intMin(255, UNRESOLVED.GetRValue(secondColor)))
-    g2 = umath.intMax(0, umath.intMin(255, UNRESOLVED.GetGValue(secondColor)))
-    b2 = umath.intMax(0, umath.intMin(255, UNRESOLVED.GetBValue(secondColor)))
-    result = support_rgb(intround(r1 * (1.0 - aStrength) + r2 * aStrength), intround(g1 * (1.0 - aStrength) + g2 * aStrength), intround(b1 * (1.0 - aStrength) + b2 * aStrength))
-    return result
+    // blend first color with second color,
+    // weighting the second color by aStrength (0-1) and first color by (1 - aStrength).
+    aStrength = max(0.0, min(1.0, aStrength))
+    const r1: byte = intMax(0, intMin(255, getRValue(firstColor)))
+    const g1: byte = intMax(0, intMin(255, getGValue(firstColor)))
+    const b1: byte = intMax(0, intMin(255, getBValue(firstColor)))
+    const r2: byte = intMax(0, intMin(255, getRValue(secondColor)))
+    const g2: byte = intMax(0, intMin(255, getGValue(secondColor)))
+    const b2: byte = intMax(0, intMin(255, getBValue(secondColor)))
+    return support_rgb(intround(r1 * (1.0 - aStrength) + r2 * aStrength), intround(g1 * (1.0 - aStrength) + g2 * aStrength), intround(b1 * (1.0 - aStrength) + b2 * aStrength))
 }
 
 export function darkerColor(aColor: TColorRef): TColorRef {
-    let result = new TColorRef()
-    let r: byte
-    let g: byte
-    let b: byte
-    
-    r = umath.intMax(0, UNRESOLVED.GetRValue(aColor) - 10)
-    g = umath.intMax(0, UNRESOLVED.GetGValue(aColor) - 10)
-    b = umath.intMax(0, UNRESOLVED.GetBValue(aColor) - 10)
-    result = support_rgb(r, g, b)
+    const r: byte = intMax(0, getRValue(aColor) - 10)
+    const g: byte = intMax(0, getGValue(aColor) - 10)
+    const b: byte = intMax(0, getBValue(aColor) - 10)
+    const result: TColorRef = support_rgb(r, g, b)
     //result := support_rgb(GetRValue(aColor) div 2, GetGValue(aColor) div 2, GetBValue(aColor) div 2); 
     return result
 }
 
 export function darkerColorWithSubtraction(aColor: TColorRef, subtract: short): TColorRef {
-    let result = new TColorRef()
-    let r: byte
-    let g: byte
-    let b: byte
-    
-    r = umath.intMax(0, UNRESOLVED.GetRValue(aColor) - subtract)
-    g = umath.intMax(0, UNRESOLVED.GetGValue(aColor) - subtract)
-    b = umath.intMax(0, UNRESOLVED.GetBValue(aColor) - subtract)
-    result = support_rgb(r, g, b)
+    const r: byte = intMax(0, getRValue(aColor) - subtract)
+    const g: byte = intMax(0, getGValue(aColor) - subtract)
+    const b: byte = intMax(0, getBValue(aColor) - subtract)
+    const result: TColorRef = support_rgb(r, g, b)
     //result := support_rgb(GetRValue(aColor) div 2, GetGValue(aColor) div 2, GetBValue(aColor) div 2); 
     return result
 }
 
 export function lighterColor(aColor: TColorRef): TColorRef {
-    let result = new TColorRef()
-    let r: byte
-    let g: byte
-    let b: byte
-    
-    r = umath.intMin(255, intround(UNRESOLVED.GetRValue(aColor) * 1.5))
-    g = umath.intMin(255, intround(UNRESOLVED.GetGValue(aColor) * 1.5))
-    b = umath.intMin(255, intround(UNRESOLVED.GetBValue(aColor) * 1.5))
-    result = support_rgb(r, g, b)
+    const r: byte = intMin(255, intround(getRValue(aColor) * 1.5))
+    const g: byte = intMin(255, intround(getGValue(aColor) * 1.5))
+    const b: byte = intMin(255, intround(getBValue(aColor) * 1.5))
+    const result: TColorRef = support_rgb(r, g, b)
     //result := support_rgb(GetRValue(aColor) div 2, GetGValue(aColor) div 2, GetBValue(aColor) div 2); 
     return result
 }
+
+/*
 
 export function drawButton(aCanvas: TCanvas, aRect: TRect, selected: boolean, enabled: boolean): void {
     let internalRect: TRect

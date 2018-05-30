@@ -20,6 +20,7 @@ import { SinglePoint, messageForExceptionType, support_rgb, boundForString, stri
 import { Plant_directTransferField, kFruitSCurve, kLeafSCurve, kGeneralGrowthSCurve, kGeneralAgeAtMaturity, kFlowerMaleBudOption, kFlowerFemaleBudOption, kLeafCompoundPinnateArrangement, kMeristemAndLeafArrangement, kLeafCompoundPinnateOrPalmate, kGeneralStartingSeedForRandomNumberGenerator, kStateBasePointY } from "./utransfr";
 import { KfFileExportSurface, ExportPart, ExportFormats } from "./U3dexport";
 import { PdMeristem } from "./PdMeristem";
+import { PdInternode } from "./PdInternode";
 
 /* Remove unused imports
 from conversion_common import *
@@ -58,8 +59,12 @@ export enum Gender {
 
 const kCompoundLeafPinnate = 0
 const kCompoundLeafPalmate = 1
-const kArrangementAlternate = 0
-const kArrangementOpposite = 1
+
+export enum LeafArrangement {
+    kArrangementAlternate = 0,
+    kArrangementOpposite = 1,
+}
+
 const kStageFlowerBud = 1
 const kStageOpenFlower = 2
 const kStageUnripeFruit = 3
@@ -74,8 +79,10 @@ export enum PartType {
     kPartTypeLeaf = 5,
 }
 
-const kDirectionLeft = 0
-const kDirectionRight = 1
+export enum Direction {
+    kDirectionLeft = 0,
+    kDirectionRight = 1,
+}
 
 const kGetField = 0
 const kSetField = 1

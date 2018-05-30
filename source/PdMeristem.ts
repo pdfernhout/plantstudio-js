@@ -1,14 +1,15 @@
 // PdMeristem was unit umerist
 
 import { PdInternode, PdClassAndVersionInformationRecord, PdFiler } from "./temporary";
-import { PdPlant, Gender, PartType } from "./PdPlant";
+import { PdPlant, Gender, PartType, LeafArrangement } from "./PdPlant";
 import { short, long, float, int } from "./common";
 import { PdPlantPart } from "./PdPlantPart";
 import { messageForExceptionType } from "./usupport";
 import { min, max, safedivExcept, pointsAreCloseEnough } from "./umath";
-import { Activity, Statistics, PdTraverser } from "./PdTraverser";
+import { Activity, Statistics, PdTraverser, linearGrowthResult } from "./PdTraverser";
 import { TRect } from "./TRect";
 import { ClassId } from "./uclasses";
+import { ExportPart } from "./U3dexport";
 
 export class PdMeristem extends PdPlantPart {
     phytomerAttachedTo: PdInternode = new PdInternode()
@@ -226,10 +227,10 @@ export class PdMeristem extends PdPlantPart {
                     }
                     try {
                         optimalBiomass_pctMPB = uintern.PdInternode.optimalInitialBiomass_pctMPB(this.plant) + uleaf.PdLeaf.optimalInitialBiomass_pctMPB(this.plant)
-                        if (this.plant.pMeristem.branchingAndLeafArrangement === uplant.kArrangementOpposite) {
+                        if (this.plant.pMeristem.branchingAndLeafArrangement === LeafArrangement.kArrangementOpposite) {
                             optimalBiomass_pctMPB = optimalBiomass_pctMPB + uleaf.PdLeaf.optimalInitialBiomass_pctMPB(this.plant)
                         }
-                        this.biomassDemand_pctMPB = utravers.linearGrowthResult(this.liveBiomass_pctMPB, optimalBiomass_pctMPB, this.plant.pInternode.minDaysToCreateInternode)
+                        this.biomassDemand_pctMPB = linearGrowthResult(this.liveBiomass_pctMPB, optimalBiomass_pctMPB, this.plant.pInternode.minDaysToCreateInternode)
                         traverser.total = traverser.total + this.biomassDemand_pctMPB
                     } catch (e) {
                         messageForExceptionType(e, "PdMeristem.traverseActivity (vegetative demand)")
@@ -245,7 +246,7 @@ export class PdMeristem extends PdPlantPart {
                         return
                     }
                     try {
-                        this.biomassDemand_pctMPB = utravers.linearGrowthResult(this.liveBiomass_pctMPB, this.plant.pInflor[self.gender].optimalBiomass_pctMPB, this.plant.pInflor[self.gender].minDaysToCreateInflorescence)
+                        this.biomassDemand_pctMPB = linearGrowthResult(this.liveBiomass_pctMPB, this.plant.pInflor[self.gender].optimalBiomass_pctMPB, this.plant.pInflor[self.gender].minDaysToCreateInflorescence)
                         traverser.total = traverser.total + this.biomassDemand_pctMPB
                     } catch (e) {
                         messageForExceptionType(e, "PdMeristem.traverseActivity (reproductive demand)")
@@ -391,7 +392,7 @@ export class PdMeristem extends PdPlantPart {
         if (this.plant.pAxillaryBud.tdoParams.scaleAtFullSize > 0) {
             traverser.total3DExportPointsIn3DObjects += this.plant.pAxillaryBud.tdoParams.object3D.pointsInUse * this.plant.pAxillaryBud.tdoParams.repetitions
             traverser.total3DExportTrianglesIn3DObjects += this.plant.pAxillaryBud.tdoParams.object3D.triangles.Count * this.plant.pAxillaryBud.tdoParams.repetitions
-            this.addExportMaterial(traverser, u3dexport.kExportPartMeristem, -1)
+            this.addExportMaterial(traverser, ExportPart.kExportPartMeristem, -1)
         }
     }
     
@@ -403,7 +404,6 @@ export class PdMeristem extends PdPlantPart {
     }
     
     createAxillaryMeristem(direction: int): PdMeristem {
-        let result = new PdMeristem()
         let newMeristem: PdMeristem
         
         // create new axillary meristem attached to the same phytomer as this apical meristem is attached to.
@@ -416,8 +416,7 @@ export class PdMeristem extends PdPlantPart {
         } else {
             this.phytomerAttachedTo.rightBranchPlantPart = newMeristem
         }
-        result = newMeristem
-        return result
+        return newMeristem
     }
     
     setIfActive(active: boolean): void {

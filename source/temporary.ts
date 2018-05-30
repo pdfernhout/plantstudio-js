@@ -53,6 +53,9 @@ export class PdFiler {
     streamSmallint(value: any): any {
         return value
     }
+    streamByte(value: any): any {
+        return value
+    }
     streamSingle(value: any): any {
         return value
     }

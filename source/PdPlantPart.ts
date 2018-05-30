@@ -38,9 +38,11 @@ import delphi_compatability
 // const
 const kAddingBiomassToPlant = true
 const kRemovingBiomassFromPlant = false
-const kDontTaper = -1.0
-const kUseAmendment = true
-const kDontUseAmendment = false
+
+export const kDontTaper = -1.0
+
+export const kUseAmendment = true
+export const kDontUseAmendment = false
 
 // const
 const kDrawingTdo = true
@@ -233,9 +235,7 @@ export class PdPlantPart extends PdStreamableObject {
     }
     
     isPhytomer(): boolean {
-        let result = false
-        result = false
-        return result
+        return false
     }
     
     addOrRemove(addOrRemoveFlag: boolean): void {

@@ -1,21 +1,27 @@
 // PdInternode was unit uintern
 
-import { PdPlantPart } from "./PdPlantPart";
-import { TColorRef, float, long, int, byte } from "./common";
-import { PdPlant } from "./PdPlant";
+import { PdPlantPart, kDontTaper, kUseAmendment } from "./PdPlantPart";
+import { TColorRef, float, long, int, byte, IntToStr } from "./common";
+import { PdPlant, PartType, Direction, LeafArrangement } from "./PdPlant";
 import { PdPlantDrawingAmendment } from "./PdPlantDrawingAmendment";
 import { PdFiler, PdClassAndVersionInformationRecord } from "./temporary";
 import { max, pointsAreCloseEnough, min, safedivExcept } from "./umath";
-import { messageForExceptionType } from "./usupport";
+import { messageForExceptionType, blendColors } from "./usupport";
+import { Activity, Statistics, PdTraverser, TraverseDirection, linearGrowthResult, linearGrowthWithFactor } from "./PdTraverser";
+import { ClassId } from "./uclasses";
+import { KfTurtle } from "./KfTurtle";
+import { KfObject3D } from "./KfObject3D";
+import { TRect } from "./TRect";
+import { ExportPart } from "./U3dexport";
 
 export class PdInternode extends PdPlantPart {
-    leftBranchPlantPart: PdPlantPart = new PdPlantPart()
-    rightBranchPlantPart: PdPlantPart = new PdPlantPart()
-    nextPlantPart: PdPlantPart = new PdPlantPart()
-    phytomerAttachedTo: PdInternode = new PdInternode()
-    leftLeaf: PdLeaf = new PdLeaf()
-    rightLeaf: PdLeaf = new PdLeaf()
-    internodeColor: TColorRef = new TColorRef()
+    leftBranchPlantPart: PdPlantPart | null = null
+    rightBranchPlantPart: PdPlantPart | null = null
+    nextPlantPart: PdPlantPart | null = null
+    phytomerAttachedTo: PdInternode | null = null
+    leftLeaf: PdLeaf | null = null
+    rightLeaf: PdLeaf | null = null
+    internodeColor: TColorRef = 0
     internodeAngle: float = 0.0
     lengthExpansion: float = 0.0
     widthExpansion: float = 0.0
@@ -26,14 +32,13 @@ export class PdInternode extends PdPlantPart {
     newBiomassForDay_pctMPB: float = 0.0
     distanceFromFirstPhytomer: long = 0
     
-    NewWithPlantFractionOfInitialOptimalSize(aPlant: PdPlant, aFraction: float): PdInternode {
+    static NewWithPlantFractionOfInitialOptimalSize(aPlant: PdPlant, aFraction: float): PdInternode {
         let result = new PdInternode()
-        result = this.create()
         result.InitializeFractionOfInitialOptimalSize(aPlant, aFraction)
         return result
     }
     
-    //???
+    // ???
     InitializeFractionOfInitialOptimalSize(thePlant: PdPlant, aFraction: float): void {
         this.initialize(thePlant)
         //Plant sets this from outside on first phytomer.
@@ -46,9 +51,9 @@ export class PdInternode extends PdPlantPart {
         this.liveBiomass_pctMPB = aFraction * PdInternode.optimalInitialBiomass_pctMPB(this.plant)
         this.deadBiomass_pctMPB = 0.0
         this.internodeColor = this.plant.pInternode.faceColor
-        this.leftLeaf = uleaf.PdLeaf.NewWithPlantFractionOfOptimalSize(this.plant, aFraction)
-        if (this.plant.pMeristem.branchingAndLeafArrangement === uplant.kArrangementOpposite) {
-            this.rightLeaf = uleaf.PdLeaf.NewWithPlantFractionOfOptimalSize(this.plant, aFraction)
+        this.leftLeaf = PdLeaf.NewWithPlantFractionOfOptimalSize(this.plant, aFraction)
+        if (this.plant.pMeristem.branchingAndLeafArrangement === LeafArrangement.kArrangementOpposite) {
+            this.rightLeaf = PdLeaf.NewWithPlantFractionOfOptimalSize(this.plant, aFraction)
         }
     }
     
@@ -60,27 +65,11 @@ export class PdInternode extends PdPlantPart {
     
     makeSecondSeedlingLeaf(aFraction: float): void {
         if (this.rightLeaf === null) {
-            this.rightLeaf = uleaf.PdLeaf.NewWithPlantFractionOfOptimalSize(this.plant, aFraction)
+            this.rightLeaf = PdLeaf.NewWithPlantFractionOfOptimalSize(this.plant, aFraction)
         }
         if (this.rightLeaf !== null) {
             this.rightLeaf.isSeedlingLeaf = true
         }
-    }
-    
-    destroy(): void {
-        //note that if branch parts were phytomers they will have been
-        //  freed and set to nil by the traverser
-        this.nextPlantPart.free
-        this.nextPlantPart = null
-        this.leftBranchPlantPart.free
-        this.leftBranchPlantPart = null
-        this.rightBranchPlantPart.free
-        this.rightBranchPlantPart = null
-        this.leftLeaf.free
-        this.leftLeaf = null
-        this.rightLeaf.free
-        this.rightLeaf = null
-        PdPlantPart.prototype.destroy.call(this)
     }
     
     setAsFirstPhytomer(): void {
@@ -95,9 +84,9 @@ export class PdInternode extends PdPlantPart {
     }
     
     determineAmendmentAndAlsoForChildrenIfAny(): void {
-        let amendmentToPass: PdPlantDrawingAmendment
+        let amendmentToPass: PdPlantDrawingAmendment | null
         
-        PdPlantPart.prototype.determineAmendmentAndAlsoForChildrenIfAny.call(this)
+        super.determineAmendmentAndAlsoForChildrenIfAny()
         if (this.amendment !== null) {
             amendmentToPass = this.amendment
         } else {
@@ -156,7 +145,7 @@ export class PdInternode extends PdPlantPart {
                     //    
                     //and
                     //      (plant.age - plant.ageAtWhichFloweringStarted <= plant.pInternode.maxDaysToBolt)
-                    this.boltingExpansion = utravers.linearGrowthWithFactor(this.boltingExpansion, this.plant.pInternode.lengthMultiplierDueToBolting, this.plant.pInternode.minDaysToBolt, 1.0)
+                    this.boltingExpansion = linearGrowthWithFactor(this.boltingExpansion, this.plant.pInternode.lengthMultiplierDueToBolting, this.plant.pInternode.minDaysToBolt, 1.0)
                 }
             }
             this.checkIfSeedlingLeavesHaveAbscissed()
@@ -166,39 +155,31 @@ export class PdInternode extends PdPlantPart {
         }
     }
     
-    optimalInitialBiomass_pctMPB(plant: PdPlant): float {
-        let result = 0.0
-        result = safedivExcept(plant.pInternode.optimalFinalBiomass_pctMPB, plant.pInternode.lengthMultiplierDueToBiomassAccretion * plant.pInternode.widthMultiplierDueToBiomassAccretion, 0)
-        return result
+    static optimalInitialBiomass_pctMPB(plant: PdPlant): float {
+        return safedivExcept(plant.pInternode.optimalFinalBiomass_pctMPB, plant.pInternode.lengthMultiplierDueToBiomassAccretion * plant.pInternode.widthMultiplierDueToBiomassAccretion, 0)
     }
     
     propFullLength(): float {
-        let result = 0.0
-        result = safedivExcept(this.totalBiomass_pctMPB() * this.lengthExpansion * this.boltingExpansion, this.plant.pInternode.optimalFinalBiomass_pctMPB, 0)
-        return result
+        return safedivExcept(this.totalBiomass_pctMPB() * this.lengthExpansion * this.boltingExpansion, this.plant.pInternode.optimalFinalBiomass_pctMPB, 0)
     }
     
     propFullWidth(): float {
-        let result = 0.0
-        result = safedivExcept(this.totalBiomass_pctMPB() * this.widthExpansion, this.plant.pInternode.optimalFinalBiomass_pctMPB, 0)
-        return result
+        return safedivExcept(this.totalBiomass_pctMPB() * this.widthExpansion, this.plant.pInternode.optimalFinalBiomass_pctMPB, 0)
     }
     
-    traverseActivity(mode: int, traverserProxy: TObject): void {
-        let traverser: PdTraverser
+    traverseActivity(mode: int, traverser: PdTraverser): void {
         let biomassToRemove_pctMPB: float
         let targetBiomass_pctMPB: float
         
-        PdPlantPart.prototype.traverseActivity.call(this, mode, traverserProxy)
-        traverser = utravers.PdTraverser(traverserProxy)
+        super.traverseActivity(mode, traverser)
         if (traverser === null) {
             return
         }
-        if (this.hasFallenOff && (mode !== utravers.kActivityStream) && (mode !== utravers.kActivityFree)) {
+        if (this.hasFallenOff && (mode !== Activity.kActivityStream) && (mode !== Activity.kActivityFree)) {
             return
         }
         try {
-            if ((mode !== utravers.kActivityDraw)) {
+            if ((mode !== Activity.kActivityDraw)) {
                 if (this.leftLeaf !== null) {
                     this.leftLeaf.traverseActivity(mode, traverser)
                 }
@@ -207,15 +188,15 @@ export class PdInternode extends PdPlantPart {
                 }
             }
             switch (mode) {
-                case utravers.kActivityNone:
+                case Activity.kActivityNone:
                     break
-                case utravers.kActivityNextDay:
+                case Activity.kActivityNextDay:
                     this.nextDay()
                     if (this.age < traverser.ageOfYoungestPhytomer) {
                         traverser.ageOfYoungestPhytomer = this.age
                     }
                     break
-                case utravers.kActivityDemandVegetative:
+                case Activity.kActivityDemandVegetative:
                     if (this.age > this.plant.pInternode.maxDaysToAccumulateBiomass) {
                         this.biomassDemand_pctMPB = 0.0
                         return
@@ -226,15 +207,15 @@ export class PdInternode extends PdPlantPart {
                         } else {
                             targetBiomass_pctMPB = this.plant.pInternode.optimalFinalBiomass_pctMPB * this.fractionOfOptimalInitialBiomassAtCreation_frn
                         }
-                        this.biomassDemand_pctMPB = utravers.linearGrowthResult(this.liveBiomass_pctMPB, targetBiomass_pctMPB, this.plant.pInternode.minDaysToAccumulateBiomass)
+                        this.biomassDemand_pctMPB = linearGrowthResult(this.liveBiomass_pctMPB, targetBiomass_pctMPB, this.plant.pInternode.minDaysToAccumulateBiomass)
                         traverser.total = traverser.total + this.biomassDemand_pctMPB
                     } catch (e) {
                         messageForExceptionType(e, "PdInternode.traverseActivity (vegetative demand)")
                     }
                     break
-                case utravers.kActivityDemandReproductive:
+                case Activity.kActivityDemandReproductive:
                     break
-                case utravers.kActivityGrowVegetative:
+                case Activity.kActivityGrowVegetative:
                     if (this.age > this.plant.pInternode.maxDaysToAccumulateBiomass) {
                         //Return reproductive demand recursively from all reproductive meristems and fruits connected to
                         //      this phytomer. Phytomers, inflorescences, and flowers themselves have no demands.
@@ -247,11 +228,11 @@ export class PdInternode extends PdPlantPart {
                         messageForExceptionType(e, "PdInternode.traverseActivity (vegetative growth)")
                     }
                     break
-                case utravers.kActivityGrowReproductive:
+                case Activity.kActivityGrowReproductive:
                     break
-                case utravers.kActivityStartReproduction:
+                case Activity.kActivityStartReproduction:
                     break
-                case utravers.kActivityFindPlantPartAtPosition:
+                case Activity.kActivityFindPlantPartAtPosition:
                     if (pointsAreCloseEnough(traverser.point, this.position())) {
                         //Recurse available photosynthate allocated to reproductive growth to all plant parts.
                         //      Only meristems and fruits will incorporate it.
@@ -260,54 +241,53 @@ export class PdInternode extends PdPlantPart {
                         traverser.finished = true
                     }
                     break
-                case utravers.kActivityDraw:
+                case Activity.kActivityDraw:
                     this.draw()
                     break
-                case utravers.kActivityReport:
+                case Activity.kActivityReport:
                     break
-                case utravers.kActivityStream:
+                case Activity.kActivityStream:
                     this.streamUsingFiler(traverser.filer)
                     break
-                case utravers.kActivityFree:
+                case Activity.kActivityFree:
                     break
-                case utravers.kActivityVegetativeBiomassThatCanBeRemoved:
+                case Activity.kActivityVegetativeBiomassThatCanBeRemoved:
                     // free called by traverser 
                     traverser.total = traverser.total + this.liveBiomass_pctMPB
                     break
-                case utravers.kActivityRemoveVegetativeBiomass:
+                case Activity.kActivityRemoveVegetativeBiomass:
                     biomassToRemove_pctMPB = this.liveBiomass_pctMPB * traverser.fractionOfPotentialBiomass
                     this.liveBiomass_pctMPB = this.liveBiomass_pctMPB - biomassToRemove_pctMPB
                     this.deadBiomass_pctMPB = this.deadBiomass_pctMPB + biomassToRemove_pctMPB
                     break
-                case utravers.kActivityReproductiveBiomassThatCanBeRemoved:
-                    break
-                case utravers.kActivityRemoveReproductiveBiomass:
-                    break
-                case utravers.kActivityGatherStatistics:
+                case Activity.kActivityReproductiveBiomassThatCanBeRemoved:
                     // none 
+                    break
+                case Activity.kActivityRemoveReproductiveBiomass:
                     // none 
-                    this.addToStatistics(traverser.statistics, utravers.kStatisticsPartTypeStem)
-                    this.addToStatistics(traverser.statistics, utravers.kStatisticsPartTypeAllVegetative)
                     break
-                case utravers.kActivityCountPlantParts:
+                case Activity.kActivityGatherStatistics: 
+                    this.addToStatistics(traverser.statistics, Statistics.kStatisticsPartTypeStem)
+                    this.addToStatistics(traverser.statistics, Statistics.kStatisticsPartTypeAllVegetative)
                     break
-                case utravers.kActivityFindPartForPartID:
+                case Activity.kActivityCountPlantParts:
                     break
-                case utravers.kActivityCountTotalMemoryUse:
+                case Activity.kActivityFindPartForPartID:
+                    break
+                case Activity.kActivityCountTotalMemoryUse:
                     traverser.totalMemorySize += this.instanceSize
                     break
-                case utravers.kActivityCalculateBiomassForGravity:
-                    if (this.traversingDirection === utravers.kTraverseDone) {
+                case Activity.kActivityCalculateBiomassForGravity:
+                    if (this.traversingDirection === TraverseDirection.kTraverseDone) {
                         // on way up, do nothing; on way down, total up accumulated biomass
                         this.biomassOfMeAndAllPartsAboveMe_pctMPB = this.biomassOfMeAndAllPartsConnectedToMe_pctMPB() + this.biomassOfPartsImmediatelyAboveMe_pctMPB()
                     }
                     break
-                case utravers.kActivityCountPointsAndTrianglesFor3DExport:
+                case Activity.kActivityCountPointsAndTrianglesFor3DExport:
                     this.countPointsAndTrianglesFor3DExportAndAddToTraverserTotals(traverser)
                     break
                 default:
                     throw new Error("Problem: Unhandled mode in method PdInternode.traverseActivity.")
-                    break
             }
         } catch (e) {
             messageForExceptionType(e, "PdInternode.traverseActivity")
@@ -319,23 +299,21 @@ export class PdInternode extends PdPlantPart {
             return
         }
         traverser.total3DExportStemSegments += 1
-        this.addExportMaterial(traverser, u3dexport.kExportPartInternode, -1)
+        this.addExportMaterial(traverser, ExportPart.kExportPartInternode, -1)
         if (this.plant.pRoot.tdoParams.scaleAtFullSize > 0) {
-            this.addExportMaterial(traverser, u3dexport.kExportPartRootTop, -1)
+            this.addExportMaterial(traverser, ExportPart.kExportPartRootTop, -1)
         }
     }
     
     isPhytomer(): boolean {
-        let result = false
-        result = true
-        return result
+        return true
     }
     
     blendColorsStrength(aColor: TColorRef, aStrength: float): void {
         if (aStrength <= 0.0) {
             return
         }
-        this.internodeColor = usupport.blendColors(this.internodeColor, aColor, aStrength)
+        this.internodeColor = blendColors(this.internodeColor, aColor, aStrength)
     }
     
     setColorsToParameters(): void {
@@ -361,20 +339,21 @@ export class PdInternode extends PdPlantPart {
     }
     
     distanceFromApicalMeristem(): long {
-        let result = 0
-        let aPhytomer: PdInternode
+        let aPhytomer: PdInternode | null = null
         
-        //Count phytomers along this apex until you reach an apical meristem or inflorescence.
-        result = 0
-        if ((this.nextPlantPart.isPhytomer())) {
-            aPhytomer = PdInternode(this.nextPlantPart)
+        // Count phytomers along this apex until you reach an apical meristem or inflorescence.
+        let result = 0
+        // ORIGINAL: Maybe NPE if this.nextPlantPart is null?
+        if (this.nextPlantPart && this.nextPlantPart.isPhytomer()) {
+            aPhytomer = <PdInternode>this.nextPlantPart
         } else {
             aPhytomer = null
         }
         while (aPhytomer !== null) {
             result += 1
-            if ((aPhytomer.nextPlantPart.isPhytomer())) {
-                aPhytomer = PdInternode(aPhytomer.nextPlantPart)
+            // ORIGINAL: Maybe NPE if aPhytomer.nextPlantPart is null?
+            if (aPhytomer.nextPlantPart && aPhytomer.nextPlantPart.isPhytomer()) {
+                aPhytomer = <PdInternode>aPhytomer.nextPlantPart
             } else {
                 aPhytomer = null
             }
@@ -383,15 +362,12 @@ export class PdInternode extends PdPlantPart {
     }
     
     calculateDistanceFromFirstPhytomer(): void {
-        let aPhytomer: PdInternode
-        let result: long
-        
-        //Count phytomers backwards along this apex until you reach the first.
-        result = 0
+        // Count phytomers backwards along this apex until you reach the first.
+        let result: long = 0
         if (this.isFirstPhytomer) {
             return
         }
-        aPhytomer = this.phytomerAttachedTo
+        let aPhytomer: PdInternode | null = this.phytomerAttachedTo
         while (aPhytomer !== null) {
             result += 1
             aPhytomer = aPhytomer.phytomerAttachedTo
@@ -399,12 +375,11 @@ export class PdInternode extends PdPlantPart {
         this.distanceFromFirstPhytomer = result
     }
     
-    firstPhytomerOnBranch(): PdInternode {
-        let result = new PdInternode()
-        result = this
+    firstPhytomerOnBranch(): PdInternode | null {
+        let result: PdInternode | null = this
         while (result !== null) {
             if ((result.phytomerAttachedTo !== null) && (result.phytomerAttachedTo.nextPlantPart === result)) {
-                result = PdInternode(result.phytomerAttachedTo)
+                result = result.phytomerAttachedTo
             } else {
                 break
             }
@@ -416,8 +391,7 @@ export class PdInternode extends PdPlantPart {
     }
     
     biomassOfMeAndAllPartsConnectedToMe_pctMPB(): float {
-        let result = 0.0
-        result = this.totalBiomass_pctMPB()
+        let result = this.totalBiomass_pctMPB()
         if (this.leftLeaf !== null) {
             result = result + this.leftLeaf.totalBiomass_pctMPB()
         }
@@ -429,7 +403,6 @@ export class PdInternode extends PdPlantPart {
     
     biomassOfPartsImmediatelyAboveMe_pctMPB(): float {
         let result = 0.0
-        result = 0
         if (this.leftBranchPlantPart !== null) {
             result = result + this.leftBranchPlantPart.biomassOfMeAndAllPartsAboveMe_pctMPB
         }
@@ -443,23 +416,22 @@ export class PdInternode extends PdPlantPart {
     }
     
     draw(): void {
-        let turtle: KfTurtle
-        
         //Draw all parts of phytomer. Consider if the phytomer is the first (has the seedling leaves) and whether
         //    the leaves attached to this phytomer have abscissed (and are not drawn).
-        turtle = this.plant.turtle
-        if ((turtle === null)) {
+        if (this.plant.turtle === null) {
             return
         }
-        this.boundsRect = Rect(0, 0, 0, 0)
+        const turtle: KfTurtle = this.plant.turtle
+        
+        this.boundsRect = new TRect(0, 0, 0, 0)
         if (this.hiddenByAmendment()) {
             if (this.leftLeaf !== null) {
                 // if internode is hidden the leaves could still be drawn, if they are posed.
                 // if they are themselves hidden, they will pop back out without drawing.
-                this.leftLeaf.drawWithDirection(uplant.kDirectionLeft)
+                this.leftLeaf.drawWithDirection(Direction.kDirectionLeft)
             }
             if (this.rightLeaf !== null) {
-                this.rightLeaf.drawWithDirection(uplant.kDirectionRight)
+                this.rightLeaf.drawWithDirection(Direction.kDirectionRight)
             }
             // amendment rotations handled in drawStemSegment
             return
@@ -473,10 +445,10 @@ export class PdInternode extends PdPlantPart {
             }
             this.drawInternode()
             if (this.leftLeaf !== null) {
-                this.leftLeaf.drawWithDirection(uplant.kDirectionLeft)
+                this.leftLeaf.drawWithDirection(Direction.kDirectionLeft)
             }
             if (this.rightLeaf !== null) {
-                this.rightLeaf.drawWithDirection(uplant.kDirectionRight)
+                this.rightLeaf.drawWithDirection(Direction.kDirectionRight)
             }
         } catch (e) {
             messageForExceptionType(e, "PdInternode.draw")
@@ -502,31 +474,24 @@ export class PdInternode extends PdPlantPart {
         }
         length = max(0.0, this.propFullLength() * this.plant.pInternode.lengthAtOptimalFinalBiomassAndExpansion_mm)
         width = max(0.0, this.propFullWidth() * this.plant.pInternode.widthAtOptimalFinalBiomassAndExpansion_mm)
-        this.drawStemSegment(length, width, zAngle, 0, this.internodeColor, upart.kDontTaper, u3dexport.kExportPartInternode, upart.kUseAmendment)
+        this.drawStemSegment(length, width, zAngle, 0, this.internodeColor, kDontTaper, ExportPart.kExportPartInternode, kUseAmendment)
     }
     
     drawRootTop(): void {
-        let turtle: KfTurtle
-        let scale: float
-        let numParts: int
-        let tdo: KfObject3D
-        let minZ: float
-        let i: int
-        
-        //Draw top of root above ground, if it can be seen. Adjust size for heat unit index of plant. 
-        //constant
-        numParts = 5
-        turtle = this.plant.turtle
-        if ((turtle === null)) {
+        // Draw top of root above ground, if it can be seen. Adjust size for heat unit index of plant. 
+        // TODO: Move numParts constant somewhere else
+        const numParts = 5
+        if (this.plant.turtle === null) {
             return
         }
-        scale = safedivExcept(this.plant.age, this.plant.pGeneral.ageAtMaturity, 0) * this.plant.pRoot.tdoParams.scaleAtFullSize / 100.0
+        const turtle: KfTurtle = this.plant.turtle
+        const scale = safedivExcept(this.plant.age, this.plant.pGeneral.ageAtMaturity, 0) * this.plant.pRoot.tdoParams.scaleAtFullSize / 100.0
         turtle.push()
-        minZ = 0
-        tdo = this.plant.pRoot.tdoParams.object3D
-        turtle.ifExporting_startPlantPart(this.longNameForDXFPartConsideringGenderEtc(u3dexport.kExportPartRootTop), this.longNameForDXFPartConsideringGenderEtc(u3dexport.kExportPartRootTop))
+        let minZ = 0.0
+        const tdo = this.plant.pRoot.tdoParams.object3D
+        turtle.ifExporting_startPlantPart(this.longNameForDXFPartConsideringGenderEtc(ExportPart.kExportPartRootTop), this.longNameForDXFPartConsideringGenderEtc(ExportPart.kExportPartRootTop))
         if (numParts > 0) {
-            for (i = 0; i <= numParts - 1; i++) {
+            for (let i = 0; i < numParts; i++) {
                 turtle.rotateX(256 / numParts)
                 turtle.push()
                 turtle.rotateZ(64)
@@ -535,7 +500,7 @@ export class PdInternode extends PdPlantPart {
                     turtle.rotateX(this.angleWithSway(this.plant.pRoot.tdoParams.xRotationBeforeDraw))
                     turtle.rotateY(this.angleWithSway(this.plant.pRoot.tdoParams.yRotationBeforeDraw))
                     turtle.rotateZ(this.angleWithSway(this.plant.pRoot.tdoParams.zRotationBeforeDraw))
-                    this.draw3DObject(tdo, scale, this.plant.pRoot.tdoParams.faceColor, this.plant.pRoot.tdoParams.backfaceColor, u3dexport.kExportPartRootTop)
+                    this.draw3DObject(tdo, scale, this.plant.pRoot.tdoParams.faceColor, this.plant.pRoot.tdoParams.backfaceColor, ExportPart.kExportPartRootTop)
                     if (i === 1) {
                         minZ = tdo.zForSorting
                     } else if (tdo.zForSorting < minZ) {
@@ -553,7 +518,7 @@ export class PdInternode extends PdPlantPart {
     }
     
     report(): void {
-        PdPlantPart.prototype.report.call(this)
+        super.report()
         //debugPrint('internode, age ' + IntToStr(age) + ' biomass ' + floatToStr(liveBiomass_pctMPB));
         //DebugForm.printNested(plant.turtle.stackSize, 'phytomer, age ' + IntToStr(age));
     }
@@ -566,11 +531,11 @@ export class PdInternode extends PdPlantPart {
             return
         }
         if ((this.plant.pMeristem.branchingIsSympodial)) {
-            if ((this.age < 10)) {
+            if (this.age < 10) {
                 return
             }
         } else {
-            if ((this.distanceFromApicalMeristem() <= this.plant.pSeedlingLeaf.nodesOnStemWhenFallsOff)) {
+            if (this.distanceFromApicalMeristem() <= this.plant.pSeedlingLeaf.nodesOnStemWhenFallsOff) {
                 return
             }
         }
@@ -589,12 +554,12 @@ export class PdInternode extends PdPlantPart {
     
     partType(): int {
         let result = 0
-        result = uplant.kPartTypePhytomer
+        result = PartType.kPartTypePhytomer
         return result
     }
     
     classAndVersionInformation(cvir: PdClassAndVersionInformationRecord): void {
-        cvir.classNumber = uclasses.kPdInternode
+        cvir.classNumber = ClassId.kPdInternode
         cvir.versionNumber = 0
         cvir.additionNumber = 0
     }
@@ -616,61 +581,62 @@ export class PdInternode extends PdPlantPart {
         this.streamPlantPart(filer, this.leftBranchPlantPart)
         this.streamPlantPart(filer, this.rightBranchPlantPart)
         this.streamPlantPart(filer, this.nextPlantPart)
-        this.streamPlantPart(filer, upart.PdPlantPart(this.leftLeaf))
-        this.streamPlantPart(filer, upart.PdPlantPart(this.rightLeaf))
+        this.streamPlantPart(filer, this.leftLeaf)
+        this.streamPlantPart(filer, this.rightLeaf)
     }
     
-    streamPlantPart(filer: PdFiler, plantPart: PdPlantPart): void {
+    streamPlantPart(filer: PdFiler, plantPart: PdPlantPart | null): void {
         raise "method streamPlantPart had assigned to var parameter plantPart not added to return -- fixup manually"
         let partType: short
         
         if (filer.isWriting()) {
             if (plantPart === null) {
-                partType = uplant.kPartTypeNone
+                partType = PartType.kPartTypeNone
             } else {
                 partType = plantPart.partType()
             }
             partType = filer.streamSmallint(partType)
-            switch (partType) {
-                case uplant.kPartTypeMeristem:
-                    plantPart.streamUsingFiler(filer)
-                    break
-                case uplant.kPartTypeInflorescence:
-                    plantPart.streamUsingFiler(filer)
-                    break
-                case uplant.kPartTypeLeaf:
-                    plantPart.streamUsingFiler(filer)
-                    break
+            if (plantPart) {
+                switch (partType) {
+                    case PartType.kPartTypeMeristem:
+                        plantPart.streamUsingFiler(filer)
+                        break
+                    case PartType.kPartTypeInflorescence:
+                        plantPart.streamUsingFiler(filer)
+                        break
+                    case PartType.kPartTypeLeaf:
+                        plantPart.streamUsingFiler(filer)
+                        break
+                }
             }
         } else if (filer.isReading()) {
             partType = filer.streamSmallint(partType)
             switch (partType) {
-                case uplant.kPartTypeNone:
+                case PartType.kPartTypeNone:
                     plantPart = null
                     break
-                case uplant.kPartTypeMeristem:
-                    plantPart = umerist.PdMeristem().create()
+                case PartType.kPartTypeMeristem:
+                    plantPart = new PdMeristem()
                     plantPart.plant = this.plant
-                    umerist.PdMeristem(plantPart).phytomerAttachedTo = this
+                    ;(<PdMeristem>plantPart).phytomerAttachedTo = this
                     plantPart.streamUsingFiler(filer)
                     break
-                case uplant.kPartTypeInflorescence:
-                    plantPart = uinflor.PdInflorescence().create()
+                case PartType.kPartTypeInflorescence:
+                    plantPart = new PdInflorescence()
                     plantPart.plant = this.plant
-                    uinflor.PdInflorescence(plantPart).phytomerAttachedTo = this
+                    ;(<PdInflorescence>plantPart).phytomerAttachedTo = this
                     plantPart.streamUsingFiler(filer)
                     break
-                case uplant.kPartTypePhytomer:
-                    plantPart = PdInternode().create()
+                case PartType.kPartTypePhytomer:
+                    plantPart = new PdInternode()
                     plantPart.plant = this.plant
-                    PdInternode(plantPart).phytomerAttachedTo = this
-                    //will be streamed in by traverser
+                    ;(<PdInternode>plantPart).phytomerAttachedTo = this
+                    // will be streamed in by traverser
                     break
-                case uplant.kPartTypeLeaf:
-                    plantPart = uleaf.PdLeaf().create()
+                case PartType.kPartTypeLeaf:
+                    plantPart = new PdLeaf()
                     plantPart.plant = this.plant
                     plantPart.streamUsingFiler(filer)
-                    // PDF PORT inserted semicolon
                     break
                 default:
                     Error("PdInternode: unknown plant part type " + IntToStr(partType))
