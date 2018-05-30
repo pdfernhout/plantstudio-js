@@ -19,6 +19,7 @@ import { PdPlantPart } from "./PdPlantPart"
 import { SinglePoint, messageForExceptionType, support_rgb, boundForString, stringUpTo, strToBool, stringBeyond, tolerantReadln, trimLeftAndRight, boolToStr, rgbStringToColor, digitValueString } from "./usupport"
 import { Plant_directTransferField, kFruitSCurve, kLeafSCurve, kGeneralGrowthSCurve, kGeneralAgeAtMaturity, kFlowerMaleBudOption, kFlowerFemaleBudOption, kLeafCompoundPinnateArrangement, kMeristemAndLeafArrangement, kLeafCompoundPinnateOrPalmate, kGeneralStartingSeedForRandomNumberGenerator, kStateBasePointY } from "./utransfr";
 import { KfFileExportSurface } from "./U3dexport";
+import { PdMeristem } from "./PdMeristem";
 
 /* Remove unused imports
 from conversion_common import *
@@ -2516,14 +2517,14 @@ export class PdPlant extends PdStreamableObject {
             try {
                 if ((this.firstPhytomer === null)) {
                     // If first day, create first phytomer. Assume seed reserves are placed into this phytomer.
-                    firstMeristem = umerist.PdMeristem().newWithPlant(this)
+                    firstMeristem = new PdMeristem(this)
                     this.firstPhytomer = firstMeristem.createFirstPhytomer()
                     if (this.firstPhytomer === null) {
                         // Must tell firstPhytomer to recalculate internode angle because it did not know it was the
                         //      first phytomer until after drawing plant got this pointer back.
                         return
                     }
-                    uintern.PdInternode(this.firstPhytomer).setAsFirstPhytomer()
+                    this.firstPhytomer.setAsFirstPhytomer()
                     // reduce changeInShootBiomassToday_pctMPB for amount used to make first phytomer 
                     this.changeInShootBiomassToday_pctMPB = this.changeInShootBiomassToday_pctMPB - firstMeristem.optimalInitialPhytomerBiomass_pctMPB()
                 }
