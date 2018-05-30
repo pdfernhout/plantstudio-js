@@ -13,12 +13,19 @@ export function intround(x: number) {
 }
 
 export const ColorDefs = {
+    clAqua: 0xFFFF00,
     clBlack: 0x000000,
     clBlue: 0x0000FF,
+    clFuchsia: 0xFF00FF,
     clGray: 0x808080,
-    clGreen: 0x00FF00,
+    clGreen: 0x008000,
+    clLime: 0x00FF00,
+    clOlive: 0x008080,
+    clPurple: 0x800080,
     clRed: 0xFF0000,
-    clSilver: 0xC0C0C0
+    clSilver: 0xC0C0C0,
+    clTeal: 0x808000,
+    clYellow: 0x00FFFF,
 }
 
 export function getRValue(value: TColorRef) {
@@ -125,6 +132,16 @@ export function ExtractFileName(fileName: string) {
     return fileName
 }
 
+export function ExtractFilePath(fileName: string) {
+    const lastSlash = fileName.lastIndexOf("/")
+    if (lastSlash !== -1) return fileName.substring(0, lastSlash + 1)
+    return ""
+}
+
 export function ord(character: string) {
     return character.charCodeAt(0)
+}
+
+export function odd(value: number) {
+    return (value % 2) == 1
 }
