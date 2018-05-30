@@ -2,13 +2,14 @@
 
 import { short, float, long, intround, byte, TColor, ColorDefs, TColorRef } from "./common"
 import { KfPoint3D, KfPoint3D_scaleBy } from "./KfPoint3D"
-import { kTdoBackColor, kTdoForeColor, kTdoLineContrastIndex, kMaximumRecordedPoints, ExportFormats } from "./temporary"
+import { kTdoBackColor, kTdoForeColor, kTdoLineContrastIndex, kMaximumRecordedPoints } from "./temporary"
 import { TRealRect } from "./U3dsupport"
 import { KfDrawingSurface } from "./KfDrawingSurface"
 import { TPoint } from "./TPoint"
 import { TRect } from "./TRect"
 import { KfMatrix } from "./KfMatrix"
 import { KfTriangle } from "./KfTriangle"
+import { KfFileExportSurface, KfDrawingSurfaceForPOV, KfDrawingSurfaceForDXF, KfDrawingSurfaceFor3DS, KfDrawingSurfaceForOBJ, KfDrawingSurfaceForVRML, KfDrawingSurfaceForLWO, ExportFormats } from "./U3dexport";
 
 /* TODO: Remove unused imports
 from conversion_common import *
@@ -27,7 +28,6 @@ import delphi_compatability
 
 // const
 const kInitialTurtleMatrixStackDepth = 250
-
 
 // OpenGL,
 // if this is defined - turtle will draw axis marks for each line segment
@@ -109,51 +109,44 @@ export class KfTurtle {
         }
     }
     
-    /* TODO -- Finish export
-
     // 3d file export
     createFor3DOutput(anOutputType: short, aFileName: string): void {
-        this.create()
-        // already created
-        this.drawingSurface.free
-        this.drawingSurface = null
+        // already created drawingSurface in constructor, which will be replaced
         switch (anOutputType) {
-            case u3dexport.kDXF:
-                this.drawingSurface = u3dexport.KfDrawingSurfaceForDXF().createWithFileName(aFileName)
+            case ExportFormats.kDXF:
+                this.drawingSurface = new KfDrawingSurfaceForDXF(aFileName)
                 break
-            case u3dexport.kPOV:
-                this.drawingSurface = u3dexport.KfDrawingSurfaceForPOV().createWithFileName(aFileName)
+            case ExportFormats.kPOV:
+                this.drawingSurface = new KfDrawingSurfaceForPOV(aFileName)
                 break
-            case u3dexport.k3DS:
-                this.drawingSurface = u3dexport.KfDrawingSurfaceFor3DS().createWithFileName(aFileName)
+            case ExportFormats.k3DS:
+                this.drawingSurface = new KfDrawingSurfaceFor3DS(aFileName)
                 break
-            case u3dexport.kOBJ:
-                this.drawingSurface = u3dexport.KfDrawingSurfaceForOBJ().createWithFileName(aFileName)
+            case ExportFormats.kOBJ:
+                this.drawingSurface = new KfDrawingSurfaceForOBJ(aFileName)
                 break
-            case u3dexport.kVRML:
-                this.drawingSurface = u3dexport.KfDrawingSurfaceForVRML().createWithFileName(aFileName)
+            case ExportFormats.kVRML:
+                this.drawingSurface = new KfDrawingSurfaceForVRML(aFileName)
                 break
-            case u3dexport.kLWO:
-                this.drawingSurface = u3dexport.KfDrawingSurfaceForLWO().createWithFileName(aFileName)
+            case ExportFormats.kLWO:
+                this.drawingSurface = new KfDrawingSurfaceForLWO(aFileName)
                 break
             default:
-                throw new GeneralException.create("KfTurtle.createFor3DOutput: Unrecognized output type")
-                break
+                throw new Error("KfTurtle.createFor3DOutput: Unrecognized output type")
+        }
     }
     
     start3DExportFile(): void {
-        if ((this.drawingSurface !== null) && (this.drawingSurface instanceof u3dexport.KfFileExportSurface)) {
-            (this.drawingSurface).startFile
+        if ((this.drawingSurface !== null) && (this.drawingSurface instanceof KfFileExportSurface)) {
+            this.drawingSurface.startFile()
         }
     }
     
     end3DExportFile(): void {
-        if ((this.drawingSurface !== null) && (this.drawingSurface instanceof u3dexport.KfFileExportSurface)) {
-            (this.drawingSurface).endFile
+        if ((this.drawingSurface !== null) && (this.drawingSurface instanceof KfFileExportSurface)) {
+            this.drawingSurface.endFile()
         }
     }
-
-    */
     
     // -------------------------------------------------------------------------- KfTurtle initializing and setting values 
     reset(): void {
@@ -264,33 +257,10 @@ export class KfTurtle {
     writingToLWO(): boolean {
         return this.writingTo === ExportFormats.kLWO
     }
-    
-    // TODO: Remove thse stub ifExporting methods
-    ifExporting_exclude3DObject(scale: float): boolean {
-        return false;
-    }
-    ifExporting_start3DObject(aLongName: string, aShortName: string, color: any, index: short): void {
-    }
-    ifExporting_end3DObject(): void {
-    }
-    ifExporting_startStemSegment(aLongName: string, aShortName: string, color: TColorRef, width: float, index: short): void {
-    }
-    ifExporting_endStemSegment(): void {
-    }
-    ifExporting_stemCylinderFaces(): number {
-        return 0
-    }
-    ifExporting_excludeStem(value: number): boolean {
-        return false
-    }
-    drawFileExportPipeFaces(startPoints: KfPoint3D[], endPoints: KfPoint3D[], faces: short, segmentNumber: short): void {
-    }
 
-    /* TODO -- Finish export 
-
-    fileExportSurface(): KfFileExportSurface {
-        let result = new KfFileExportSurface()
-        if ((this.drawingSurface instanceof u3dexport.KfFileExportSurface)) {
+    fileExportSurface(): KfFileExportSurface | null {
+        let result: KfFileExportSurface | null
+        if (this.drawingSurface instanceof KfFileExportSurface) {
             result = this.drawingSurface
         } else {
             result = null
@@ -299,111 +269,98 @@ export class KfTurtle {
     }
     
     ifExporting_startNestedGroupOfPlantParts(groupName: string, shortName: string, nestingType: short): void {
-        if ((this.drawingSurface instanceof u3dexport.KfFileExportSurface)) {
-            (this.drawingSurface).startNestedGroupOfPlantParts(groupName, shortName, nestingType)
+        if (this.drawingSurface instanceof KfFileExportSurface) {
+            this.drawingSurface.startNestedGroupOfPlantParts(groupName, shortName, nestingType)
         }
     }
     
     ifExporting_endNestedGroupOfPlantParts(nestingType: short): void {
-        if ((this.drawingSurface instanceof u3dexport.KfFileExportSurface)) {
-            (this.drawingSurface).endNestedGroupOfPlantParts(nestingType)
+        if (this.drawingSurface instanceof KfFileExportSurface) {
+            this.drawingSurface.endNestedGroupOfPlantParts(nestingType)
         }
     }
     
     ifExporting_startPlantPart(aLongName: string, aShortName: string): void {
-        if ((this.drawingSurface instanceof u3dexport.KfFileExportSurface)) {
-            (this.drawingSurface).startPlantPart(aLongName, aShortName)
+        if (this.drawingSurface instanceof KfFileExportSurface) {
+            this.drawingSurface.startPlantPart(aLongName, aShortName)
         }
     }
     
     ifExporting_endPlantPart(): void {
-        if ((this.drawingSurface instanceof u3dexport.KfFileExportSurface)) {
-            (this.drawingSurface).endPlantPart
+        if (this.drawingSurface instanceof KfFileExportSurface) {
+            this.drawingSurface.endPlantPart()
         }
     }
     
     ifExporting_excludeStem(length: float): boolean {
         let result = false
-        result = false
-        if ((this.drawingSurface instanceof u3dexport.KfDrawingSurfaceForPOV)) {
-            result = (length <= (this.drawingSurface).options.pov_minLineLengthToWrite)
+        if ((this.drawingSurface instanceof KfDrawingSurfaceForPOV)) {
+            result = (length <= this.drawingSurface.options.pov_minLineLengthToWrite)
         }
         return result
     }
     
     ifExporting_exclude3DObject(scale: float): boolean {
         let result = false
-        result = false
-        if ((this.drawingSurface instanceof u3dexport.KfDrawingSurfaceForPOV)) {
-            result = (scale <= (this.drawingSurface).options.pov_minTdoScaleToWrite)
+        if (this.drawingSurface instanceof KfDrawingSurfaceForPOV) {
+            result = (scale <= this.drawingSurface.options.pov_minTdoScaleToWrite)
         }
         return result
     }
     
     ifExporting_startStemSegment(aLongName: string, aShortName: string, color: TColorRef, width: float, index: short): void {
-        if ((this.drawingSurface instanceof u3dexport.KfFileExportSurface)) {
-            (this.drawingSurface).startStemSegment(aLongName, aShortName, color, width, index)
+        if (this.drawingSurface instanceof KfFileExportSurface) {
+            this.drawingSurface.startStemSegment(aLongName, aShortName, color, width, index)
         }
     }
     
     ifExporting_endStemSegment(): void {
-        if ((this.drawingSurface instanceof u3dexport.KfFileExportSurface)) {
-            (this.drawingSurface).endStemSegment
+        if (this.drawingSurface instanceof KfFileExportSurface) {
+            this.drawingSurface.endStemSegment()
         }
     }
     
     ifExporting_stemCylinderFaces(): short {
         let result = 0
-        result = 0
-        if ((this.drawingSurface instanceof u3dexport.KfFileExportSurface)) {
-            result = (this.drawingSurface).options.stemCylinderFaces
+        if (this.drawingSurface instanceof KfFileExportSurface) {
+            result = this.drawingSurface.options.stemCylinderFaces
         }
         return result
     }
     
     drawFileExportPipeFaces(startPoints: KfPoint3D[], endPoints: KfPoint3D[], faces: short, segmentNumber: short): void {
-        if ((this.drawingSurface instanceof u3dexport.KfFileExportSurface)) {
-            (this.drawingSurface).drawPipeFaces(startPoints, endPoints, faces, segmentNumber)
+        if (this.drawingSurface instanceof KfFileExportSurface) {
+            this.drawingSurface.drawPipeFaces(startPoints, endPoints, faces, segmentNumber)
         }
     }
     
     ifExporting_start3DObject(aLongName: string, aShortName: string, color: TColorRef, index: short): void {
-        if ((this.drawingSurface instanceof u3dexport.KfFileExportSurface)) {
-            (this.drawingSurface).start3DObject(aLongName, aShortName, color, index)
+        if (this.drawingSurface instanceof KfFileExportSurface) {
+            this.drawingSurface.start3DObject(aLongName, aShortName, color, index)
         }
     }
     
     ifExporting_end3DObject(): void {
-        if ((this.drawingSurface instanceof u3dexport.KfFileExportSurface)) {
-            (this.drawingSurface).end3DObject
+        if (this.drawingSurface instanceof KfFileExportSurface) {
+            this.drawingSurface.end3DObject
         }
     }
-
-    */
     
     // ---------------------------------------------------------------------------------- KfTurtle returning values 
     millimetersToPixels(mm: float): float {
-        let result = 0.0
-        result = mm * this.scale_pixelsPerMm
-        return result
+        return mm * this.scale_pixelsPerMm
     }
     
     angleX(): byte {
-        let result = 0
-        result = this.currentMatrix.angleX()
-        return result
+        return this.currentMatrix.angleX()
     }
     
     angleY(): byte {
-        let result = 0
-        result = this.currentMatrix.angleY()
-        return result
+        return this.currentMatrix.angleY()
     }
     
     angleZ(): byte {
-        let result = 0
-        result = this.currentMatrix.angleZ()
-        return result
+        return this.currentMatrix.angleZ()
     }
     
     lineColor(): TColor {
@@ -590,13 +547,11 @@ export class KfTurtle {
     }
     
     drawTriangle(): void {
-        let triangle: KfTriangle
-        
         if (this.recordedPointsInUse !== 3) {
             throw new Error("Problem: Triangle made without three points in method KfTurtle.drawTriangle.")
         }
         // drawing surface owns triangle
-        triangle = this.drawingSurface.allocateTriangle()
+        const triangle = this.drawingSurface.allocateTriangle()
         triangle.points[0] = this.recordedPoints[0]
         triangle.points[1] = this.recordedPoints[1]
         triangle.points[2] = this.recordedPoints[2]
@@ -637,9 +592,7 @@ export class KfTurtle {
     }
     
     stackSize(): long {
-        let result = 0
-        result = this.numMatrixesUsed
-        return result
+        return this.numMatrixesUsed
     }
     
     // ---------------------------------------------------------------------------------- KfTurtle rotating 
