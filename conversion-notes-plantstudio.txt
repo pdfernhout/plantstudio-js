@@ -19,3 +19,7 @@ Exmaple: Uparams constructor PdParameter.make
 Convertign pos comparison
 \(UNRESOLVED.pos\("([^"]*)", varName\) > 0\)
 (varName.includes("$1"))
+
+Superclass definition wrong -- does not use extends
+
+Calling super methods is wrong e.g. KfTextFileExportSurface.prototype.endPlant.call(this)

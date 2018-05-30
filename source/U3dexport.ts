@@ -214,23 +214,19 @@ function nameFor3DExportType(anOutputType: short): string {
 }
 
 function longNameForDXFPartType(index: short): string {
-    let result = ""
     let longName: string
     let shortName: string
     
     [longName, shortName] = getInfoForDXFPartType(index)
-    result = longName
-    return result
+    return longName
 }
 
 function shortNameForDXFPartType(index: short): string {
-    let result = ""
     let longName: string
     let shortName: string
     
     [longName, shortName] = getInfoForDXFPartType(index)
-    result = shortName
-    return result
+    return shortName
 }
 
 function getInfoForDXFPartType(index: short): [string, string] {
@@ -408,10 +404,6 @@ export class KfFileExportSurface extends KfDrawingSurface {
         this.scale = this.options.overallScalingFactor_pct / 100.0
     }
     
-    destroy(): void {
-        // nothing yet
-    }
-    
     startFile(): void {
         throw new Error("subclasses must override")
     }
@@ -520,10 +512,8 @@ export class KfFileExportSurface extends KfDrawingSurface {
     }
     
     drawPipeFaces(startPoints: KfPoint3D[], endPoints: KfPoint3D[], faces: short, segmentNumber: short): void {
-        let disp: long
-        
         // subclasses can override - this works for some
-        disp = segmentNumber * faces * 2
+        const disp: long = segmentNumber * faces * 2
         for (let i = 0; i < faces; i++) {
             this.addPoint(startPoints[i])
         }
@@ -543,19 +533,18 @@ export class KfFileExportSurface extends KfDrawingSurface {
     }
     
     outputType(): short {
-        let result = 0
-        result = -1
+        let result = -1
         if ((this instanceof KfDrawingSurfaceForDXF)) {
             result = ExportFormats.kDXF
-        } else if ((this instanceof KfDrawingSurfaceForPOV)) {
+        } else if (this instanceof KfDrawingSurfaceForPOV) {
             result = ExportFormats.kPOV
-        } else if ((this instanceof KfDrawingSurfaceFor3DS)) {
+        } else if (this instanceof KfDrawingSurfaceFor3DS) {
             result = ExportFormats.k3DS
-        } else if ((this instanceof KfDrawingSurfaceForOBJ)) {
+        } else if (this instanceof KfDrawingSurfaceForOBJ) {
             result = ExportFormats.kOBJ
-        } else if ((this instanceof KfDrawingSurfaceForVRML)) {
+        } else if (this instanceof KfDrawingSurfaceForVRML) {
             result = ExportFormats.kVRML
-        } else if ((this instanceof KfDrawingSurfaceForLWO)) {
+        } else if (this instanceof KfDrawingSurfaceForLWO) {
             result = ExportFormats.kLWO
         }
         return result
@@ -563,15 +552,11 @@ export class KfFileExportSurface extends KfDrawingSurface {
     
     generateShortName(): string {
         let result = ""
-        let shortNameLength: int
-        let i: int
-        
-        result = ""
         if (this.currentPlantNameLong.length <= 0) {
             return result
         }
-        shortNameLength = intMin(this.options.lengthOfShortName, this.currentPlantNameLong.length)
-        for (i = 1; i <= shortNameLength; i++) {
+        const shortNameLength = intMin(this.options.lengthOfShortName, this.currentPlantNameLong.length)
+        for (let i = 0; i < shortNameLength; i++) {
             if (this.currentPlantNameLong[i] !== " ") {
                 result = result + this.currentPlantNameLong[i]
             }
@@ -613,7 +598,7 @@ export class KfDrawingSurfaceForDXF extends KfTextFileExportSurface {
     
     // ----------------------------------------------------------------------------- KfDrawingSurfaceForDXF 
     startFile(): void {
-        KfTextFileExportSurface.prototype.startFile.call(this)
+        super.startFile()
         writeln(this.outputFile, "999")
         writeln(this.outputFile, "DXF created by PlantStudio http://www.kurtz-fernhout.com")
         // v2.0 moved ENTITY section from starting and ending each plant to entire file - may fix bug
@@ -631,11 +616,11 @@ export class KfDrawingSurfaceForDXF extends KfTextFileExportSurface {
         writeln(this.outputFile, "ENDSEC")
         writeln(this.outputFile, "0")
         writeln(this.outputFile, "EOF")
-        KfTextFileExportSurface.prototype.endFile.call(this)
+        super.endFile()
     }
     
     startPlant(aLongName: string, aPlantIndex: short): void {
-        KfTextFileExportSurface.prototype.startPlant.call(this, aLongName, aPlantIndex)
+        super.startPlant(aLongName, aPlantIndex)
         if (this.options.layeringOption === kLayerOutputAllTogether) {
             this.currentGroupingString = this.currentPlantNameLong.substring(0, 16)
         }
@@ -645,7 +630,7 @@ export class KfDrawingSurfaceForDXF extends KfTextFileExportSurface {
     }
     
     startStemSegment(aLongName: string, aShortName: string, color: TColorRef, width: float, index: short): void {
-        KfTextFileExportSurface.prototype.startStemSegment.call(this, aLongName, aShortName, color, width, index)
+        super.startStemSegment(aLongName, aShortName, color, width, index)
         if (this.options.dxf_whereToGetColors === kColorDXFFromPlantPartType) {
             this.currentColorIndex = this.options.dxf_plantPartColorIndexes[index]
         } else if (this.options.dxf_whereToGetColors === kColorDXFFromRGB) {
@@ -654,7 +639,7 @@ export class KfDrawingSurfaceForDXF extends KfTextFileExportSurface {
     }
     
     start3DObject(aLongName: string, aShortName: string, color: TColorRef, index: short): void {
-        KfTextFileExportSurface.prototype.start3DObject.call(this, aLongName, aShortName, color, index)
+        super.start3DObject(aLongName, aShortName, color, index)
         if (this.options.dxf_whereToGetColors === kColorDXFFromPlantPartType) {
             this.currentColorIndex = this.options.dxf_plantPartColorIndexes[index]
         } else if (this.options.dxf_whereToGetColors === kColorDXFFromRGB) {
@@ -736,34 +721,32 @@ export class KfDrawingSurfaceForPOV extends KfTextFileExportSurface {
     plantNames: string[] /* kMaxPOVPlants + 1 */ = Array(kMaxPOVPlants + 1)
      
     startFile(): void {
-        KfTextFileExportSurface.prototype.startFile.call(this)
+        super.startFile()
         writeln(this.outputFile, "// INC file for Persistence of Vision (POV) raytracer")
         writeln(this.outputFile, "// created by PlantStudio http://www.kurtz-fernhout.com")
         writeln(this.outputFile)
     }
     
     endFile(): void {
-        let i: short
-        
         writeln(this.outputFile)
         if (this.options.pov_commentOutUnionAtEnd) {
             writeln(this.outputFile, "/* ")
         }
         writeln(this.outputFile, "#declare allPlants_" + replacePunctuationWithUnderscores(stringUpTo(ExtractFileName(this.fileName), ".")) + " = union {")
-        for (i = 0; i <= this.numPlantsDrawn - 1; i++) {
+        for (let i = 0; i < this.numPlantsDrawn; i++) {
             writeln(this.outputFile, String.fromCharCode(9) + "object { " + this.plantNames[i] + " }")
         }
         writeln(this.outputFile, String.fromCharCode(9) + "}")
         if (this.options.pov_commentOutUnionAtEnd) {
             writeln(this.outputFile, "*/ ")
         }
-        KfTextFileExportSurface.prototype.endFile.call(this)
+        super.endFile()
     }
     
     startPlant(aLongName: string, aPlantIndex: short): void {
         // in POV you can't have spaces in names
         aLongName = replacePunctuationWithUnderscores(aLongName)
-        KfTextFileExportSurface.prototype.startPlant.call(this, aLongName, aPlantIndex)
+        super.startPlant(aLongName, aPlantIndex)
         writeln(this.outputFile, "#declare " + this.currentPlantNameLong + " = union {")
         this.currentIndentLevel = 0
         this.indent()
@@ -781,7 +764,7 @@ export class KfDrawingSurfaceForPOV extends KfTextFileExportSurface {
         writeln(this.outputFile, "} // end " + this.currentPlantNameLong)
         writeln(this.outputFile)
         this.currentIndentLevel = 0
-        KfTextFileExportSurface.prototype.endPlant.call(this)
+        super.endPlant()
     }
     
     startNestedGroupOfPlantParts(groupName: string, shortName: string, nestingType: short): void {
@@ -813,7 +796,6 @@ export class KfDrawingSurfaceForPOV extends KfTextFileExportSurface {
                 break
             default:
                 throw new Error("Problem: Unrecognized nesting type in KfDrawingSurfaceForPOV.startNestedGroupOfPlantParts.")
-                break
         }
         this.startUnion(groupName)
     }
@@ -847,7 +829,6 @@ export class KfDrawingSurfaceForPOV extends KfTextFileExportSurface {
                 break
             default:
                 throw new Error("Problem: Unrecognized nesting type in KfDrawingSurfaceForPOV.startNestedGroupOfPlantParts.")
-                break
         }
         this.endBrace(kDontWriteColor)
     }
@@ -861,7 +842,7 @@ export class KfDrawingSurfaceForPOV extends KfTextFileExportSurface {
     }
     
     startStemSegment(aLongName: string, aShortName: string, color: TColorRef, width: float, index: short): void {
-        KfTextFileExportSurface.prototype.startStemSegment.call(this, aLongName, aShortName, color, width, index)
+        super.startStemSegment(aLongName, aShortName, color, width, index)
         this.startUnion(aLongName)
         this.setColor(color)
         this.currentWidth = width
@@ -873,7 +854,7 @@ export class KfDrawingSurfaceForPOV extends KfTextFileExportSurface {
     }
     
     start3DObject(aLongName: string, aShortName: string, color: TColorRef, index: short): void {
-        KfTextFileExportSurface.prototype.start3DObject.call(this, aLongName, aShortName, color, index)
+        super.start3DObject(aLongName, aShortName, color, index)
         this.startMesh(color, aLongName)
         this.setColor(color)
     }
@@ -894,10 +875,8 @@ export class KfDrawingSurfaceForPOV extends KfTextFileExportSurface {
         }
     }
     
-    doIndenting(): void {
-        let i: int
-        
-        for (i = 1; i <= this.currentIndentLevel; i++) {
+    doIndenting(): void { 
+        for (let i = 0; i < this.currentIndentLevel; i++) {
             write(this.outputFile, String.fromCharCode(9))
         }
     }
@@ -938,22 +917,16 @@ export class KfDrawingSurfaceForPOV extends KfTextFileExportSurface {
     }
     
     basicDrawLineFromTo(startPoint: KfPoint3D, endPoint: KfPoint3D): void {
-        let endPointFinal: KfPoint3D
-        
-        endPointFinal = endPoint
+        const endPointFinal: KfPoint3D = endPoint
         this.doIndenting()
         write(this.outputFile, "cylinder { ")
         writeln(this.outputFile, "<" + valueString((this.pressedOrNot(this.scale * startPoint.x, kX))) + ", " + valueString(this.pressedOrNot(this.scale * -startPoint.y, kY)) + ", " + valueString(this.pressedOrNot(this.scale * startPoint.z, kZ)) + ">, <" + valueString(this.pressedOrNot(this.scale * endPointFinal.x, kX)) + ", " + valueString(this.pressedOrNot(this.scale * -endPointFinal.y, kY)) + ", " + valueString(this.pressedOrNot(this.scale * endPointFinal.z, kZ)) + ">, " + valueString(this.scale * this.currentWidth) + " }")
     }
     
     basicDrawTriangle(triangle: KfTriangle): void {
-        let p1: KfPoint3D
-        let p2: KfPoint3D
-        let p3: KfPoint3D
-        
-        p1 = triangle.points[0]
-        p2 = triangle.points[1]
-        p3 = triangle.points[2]
+        const p1 = triangle.points[0]
+        const p2 = triangle.points[1]
+        const p3 = triangle.points[2]
         this.doIndenting()
         write(this.outputFile, "triangle { <")
         // all y values must be negative because it seems our coordinate systems are different
@@ -988,7 +961,7 @@ export class KfDrawingSurfaceForVRML extends KfTextFileExportSurface {
     startFile(): void {
         let scaleString: string
         
-        KfTextFileExportSurface.prototype.startFile.call(this)
+        super.startFile()
         switch (this.options.vrml_version) {
             case kVRMLVersionOne:
                 writeln(this.outputFile, "#VRML V1.0 ascii")
@@ -1006,7 +979,7 @@ export class KfDrawingSurfaceForVRML extends KfTextFileExportSurface {
     startPlant(aLongName: string, aPlantIndex: short): void {
         // in VRML you can't have spaces in names
         aLongName = replacePunctuationWithUnderscores(aLongName)
-        KfTextFileExportSurface.prototype.startPlant.call(this, aLongName, aPlantIndex)
+        super.startPlant(aLongName, aPlantIndex)
         this.currentIndentLevel = 0
         switch (this.options.vrml_version) {
             case kVRMLVersionOne:
@@ -1032,7 +1005,7 @@ export class KfDrawingSurfaceForVRML extends KfTextFileExportSurface {
                 break
         }
         this.currentIndentLevel = 0
-        KfTextFileExportSurface.prototype.endPlant.call(this)
+        super.endPlant()
     }
     
     startNestedGroupOfPlantParts(groupName: string, shortName: string, nestingType: short): void {
@@ -1151,7 +1124,7 @@ export class KfDrawingSurfaceForVRML extends KfTextFileExportSurface {
     }
     
     startStemSegment(aLongName: string, aShortName: string, color: TColorRef, width: float, index: short): void {
-        KfTextFileExportSurface.prototype.startStemSegment.call(this, aLongName, aShortName, color, width, index)
+        super.startStemSegment(aLongName, aShortName, color, width, index)
         this.setColor(color)
         this.startMesh()
     }
@@ -1161,7 +1134,7 @@ export class KfDrawingSurfaceForVRML extends KfTextFileExportSurface {
     }
     
     start3DObject(aLongName: string, aShortName: string, color: TColorRef, index: short): void {
-        KfTextFileExportSurface.prototype.start3DObject.call(this, aLongName, aShortName, color, index)
+        super.start3DObject(aLongName, aShortName, color, index)
         this.setColor(color)
         this.startMesh()
     }
@@ -1327,9 +1300,7 @@ export class KfDrawingSurfaceForVRML extends KfTextFileExportSurface {
     }
     
     doIndenting(): void {
-        let i: int
-        
-        for (i = 1; i <= this.currentIndentLevel; i++) {
+        for (let i = 0; i < this.currentIndentLevel; i++) {
             // String.fromCharCode(9));
             write(this.outputFile, "  ")
         }
@@ -1352,13 +1323,11 @@ export class KfDrawingSurfaceForVRML extends KfTextFileExportSurface {
         this.indent()
     }
     
-    writeRegistrationReminder(p1: KfPoint3D, p2: KfPoint3D, p3: KfPoint3D, p4: KfPoint3D): void {
-        let numPointsAtStart: long
-        
+    writeRegistrationReminder(p1: KfPoint3D, p2: KfPoint3D, p3: KfPoint3D, p4: KfPoint3D): void { 
         this.setColor(support_rgb(100, 100, 100))
         this.currentGroupingString = this.currentPlantNameShort + "_reminder"
         this.startMesh()
-        numPointsAtStart = this.numPoints
+        const numPointsAtStart = this.numPoints
         this.addPoint(p1)
         this.addPoint(p2)
         this.addPoint(p3)
@@ -1379,7 +1348,7 @@ export class KfDrawingSurfaceForOBJ extends KfTextFileExportSurface {
     
     // ----------------------------------------------------------------------------- KfDrawingSurfaceForOBJ 
     startFile(): void {
-        KfTextFileExportSurface.prototype.startFile.call(this)
+        super.startFile()
         writeln(this.outputFile, "# OBJ file created by PlantStudio http://www.kurtz-fernhout.com")
         if (this.options.writeColors) {
             this.materialsFileName = ExtractFilePath(this.fileName) + stringUpTo(ExtractFileName(this.fileName), ".") + ".mtl"
@@ -1393,11 +1362,11 @@ export class KfDrawingSurfaceForOBJ extends KfTextFileExportSurface {
         if (this.options.writeColors) {
             this.writeMaterialDescriptionsToFile()
         }
-        KfTextFileExportSurface.prototype.endFile.call(this)
+        super.endFile()
     }
     
     startPlant(aLongName: string, aPlantIndex: short): void {
-        KfTextFileExportSurface.prototype.startPlant.call(this, aLongName, aPlantIndex)
+        super.startPlant(aLongName, aPlantIndex)
         writeln(this.outputFile)
         writeln(this.outputFile, "# plant \"" + this.currentPlantNameLong + "\"")
         writeln(this.outputFile, "o " + this.currentPlantNameShort)
@@ -1407,7 +1376,7 @@ export class KfDrawingSurfaceForOBJ extends KfTextFileExportSurface {
     }
     
     startStemSegment(aLongName: string, aShortName: string, color: TColorRef, width: float, index: short): void {
-        KfTextFileExportSurface.prototype.startStemSegment.call(this, aLongName, aShortName, color, width, index)
+        super.startStemSegment(aLongName, aShortName, color, width, index)
         if ((this.options.layeringOption !== kLayerOutputAllTogether) && (this.currentGroupingString !== "")) {
             this.startGroup(this.currentGroupingString)
         }
@@ -1421,7 +1390,7 @@ export class KfDrawingSurfaceForOBJ extends KfTextFileExportSurface {
     }
     
     start3DObject(aLongName: string, aShortName: string, color: TColorRef, index: short): void {
-        KfTextFileExportSurface.prototype.start3DObject.call(this, aLongName, aShortName, color, index)
+        super.start3DObject(aLongName, aShortName, color, index)
         if ((this.options.layeringOption !== kLayerOutputAllTogether) && (this.currentGroupingString !== "")) {
             this.startGroup(this.currentGroupingString)
         }
@@ -1476,10 +1445,8 @@ export class KfDrawingSurfaceForOBJ extends KfTextFileExportSurface {
     }
     
     storeMaterialDescription(aName: string, aColor: TColorRef): void {
-        let i: short
-        
         if (this.numMaterialsStored > 0) {
-            for (i = 0; i <= this.numMaterialsStored - 1; i++) {
+            for (let i = 0; i < this.numMaterialsStored; i++) {
                 if (this.materialNames[i] === aName) {
                     return
                 }
@@ -1509,16 +1476,14 @@ export class KfDrawingSurfaceForOBJ extends KfTextFileExportSurface {
     }
     
     endVerticesAndTriangles(): void {
-        let i: short
-        
         writeln(this.outputFile)
         writeln(this.outputFile, "# " + IntToStr(this.numPoints) + " vertices")
-        for (i = 0; i <= this.numPoints - 1; i++) {
+        for (let i = 0; i < this.numPoints; i++) {
             writeln(this.outputFile, "v " + valueString(this.pressedOrNot(this.scale * this.points[i].x, kX)) + " " + valueString(this.pressedOrNot(this.scale * -this.points[i].y, kY)) + " " + valueString(this.pressedOrNot(this.scale * this.points[i].z, kZ)))
         }
         writeln(this.outputFile)
         writeln(this.outputFile, "# " + IntToStr(this.numFaces) + " faces")
-        for (i = 0; i <= this.numFaces - 1; i++) {
+        for (let i = 0; i < this.numFaces; i++) {
             writeln(this.outputFile, "f " + IntToStr(this.faces[i].vertex1 - this.numPoints) + " " + IntToStr(this.faces[i].vertex2 - this.numPoints) + " " + IntToStr(this.faces[i].vertex3 - this.numPoints) + " ")
         }
         this.numPoints = 0
@@ -1526,11 +1491,9 @@ export class KfDrawingSurfaceForOBJ extends KfTextFileExportSurface {
     }
     
     writeRegistrationReminder(p1: KfPoint3D, p2: KfPoint3D, p3: KfPoint3D, p4: KfPoint3D): void {
-        let numPointsAtStart: short
-        
         this.startGroup(this.currentPlantNameShort + "_reminder")
         this.startColor(support_rgb(100, 100, 100), "reminder_gray")
-        numPointsAtStart = this.numPoints
+        const numPointsAtStart = this.numPoints
         this.startVerticesAndTriangles()
         this.addPoint(p1)
         this.addPoint(p2)
@@ -1622,10 +1585,8 @@ export class KfBinaryFileExportSurface extends KfFileExportSurface {
     }
     
     isLittleEndian(): boolean {
-        let result = false
         // subclasses should override if they need to change this
-        result = true
-        return result
+        return true
     }
     
 }
@@ -1634,7 +1595,7 @@ export class KfDrawingSurfaceFor3DS extends KfBinaryFileExportSurface {
     currentMaterialName: string = "not defined"
     
     startFile(): void {
-        KfBinaryFileExportSurface.prototype.startFile.call(this)
+        super.startFile()
         // 4d4dH 	M3DMAGIC; 3DS Magic Number (.3DS file)
         this.startChunk(0x4D4D)
         // 3d3dH 	MDATA; Mesh Data Magic Number (.3DS files sub of 4d4d)
@@ -1649,7 +1610,7 @@ export class KfDrawingSurfaceFor3DS extends KfBinaryFileExportSurface {
     }
     
     startStemSegment(aLongName: string, aShortName: string, color: TColorRef, width: float, index: short): void {
-        KfBinaryFileExportSurface.prototype.startStemSegment.call(this, aLongName, aShortName, color, width, index)
+        super.startStemSegment(aLongName, aShortName, color, width, index)
         this.currentMaterialName = this.currentPlantNameShort + "_" + aShortName
         this.startVerticesAndTriangles()
     }
@@ -1659,7 +1620,7 @@ export class KfDrawingSurfaceFor3DS extends KfBinaryFileExportSurface {
     }
     
     start3DObject(aLongName: string, aShortName: string, color: TColorRef, index: short): void {
-        KfBinaryFileExportSurface.prototype.start3DObject.call(this, aLongName, aShortName, color, index)
+        super.start3DObject(aLongName, aShortName, color, index)
         this.currentMaterialName = this.currentPlantNameShort + "_" + aShortName
     }
     
@@ -1668,12 +1629,10 @@ export class KfDrawingSurfaceFor3DS extends KfBinaryFileExportSurface {
     }
     
     endVerticesAndTriangles(): void {
-        let i: int
-        
         // 4110H 	POINT_ARRAY short npoints; struct (float x, y, z;) points[npoints];
         this.startChunk(0x4110)
         this.writeWord(this.numPoints)
-        for (i = 0; i <= this.numPoints - 1; i++) {
+        for (let i = 0; i < this.numPoints; i++) {
             this.writeFloat(this.pressedOrNot(this.scale * this.points[i].x, kX))
             this.writeFloat(this.pressedOrNot(this.scale * this.points[i].y, kY))
             this.writeFloat(this.pressedOrNot(this.scale * this.points[i].z, kZ))
@@ -1683,7 +1642,7 @@ export class KfDrawingSurfaceFor3DS extends KfBinaryFileExportSurface {
         // struct (short vertex1, vertex2, vertex3; short flags;) facearray[nfaces];
         this.startChunk(0x4120)
         this.writeWord(this.numFaces)
-        for (i = 0; i <= this.numFaces - 1; i++) {
+        for (let i = 0; i < this.numFaces; i++) {
             this.writeWord(this.faces[i].vertex1)
             this.writeWord(this.faces[i].vertex2)
             this.writeWord(this.faces[i].vertex3)
@@ -1694,7 +1653,7 @@ export class KfDrawingSurfaceFor3DS extends KfBinaryFileExportSurface {
             this.startChunk(0x4130)
             this.writeStringZ(this.currentMaterialName)
             this.writeWord(this.numFaces)
-            for (i = 0; i <= this.numFaces - 1; i++) {
+            for (let i = 0; i < this.numFaces; i++) {
                 this.writeWord(i)
             }
             this.finishChunk(0x4130)
@@ -1796,12 +1755,10 @@ export class KfDrawingSurfaceFor3DS extends KfBinaryFileExportSurface {
         this.finishChunk(0xAFFF)
     }
     
-    writeRegistrationReminder(p1: KfPoint3D, p2: KfPoint3D, p3: KfPoint3D, p4: KfPoint3D): void {
-        let numPointsAtStart: short
-        
+    writeRegistrationReminder(p1: KfPoint3D, p2: KfPoint3D, p3: KfPoint3D, p4: KfPoint3D): void {  
         this.currentGroupingString = this.currentPlantNameShort + "_rem"
         this.currentMaterialName = this.currentPlantNameShort + "_rem"
-        numPointsAtStart = this.numPoints
+        const numPointsAtStart = this.numPoints
         this.startVerticesAndTriangles()
         this.addPoint(p1)
         this.addPoint(p2)
@@ -1817,19 +1774,17 @@ export class KfDrawingSurfaceFor3DS extends KfBinaryFileExportSurface {
 export class KfDrawingSurfaceForLWO extends KfBinaryFileExportSurface {
     currentSurfaceID: short = 0
     numSurfacesStored: short = 0
-    surfaceColors: TColorRef[] /* kMaxStoredMaterials + 1 */ = Array(kMaxStoredMaterials + 1)
-    surfaceNames: string[] /* kMaxStoredMaterials + 1 */ = Array(kMaxStoredMaterials + 1)
+    surfaceColors: TColorRef[] = Array(kMaxStoredMaterials + 1)
+    surfaceNames: string[] = Array(kMaxStoredMaterials + 1)
     
     // ----------------------------------------------------------------------------- KfDrawingSurfaceForLWO 
     endFile(): void {
-        let i: long
-        
         // start file
         this.startChunk("FORM")
         this.writeTagOfFourCharacters("LWOB")
         // points
         this.startChunk("PNTS")
-        for (i = 0; i <= this.numPoints - 1; i++) {
+        for (let i = 0; i < this.numPoints; i++) {
             this.writeFloat(this.pressedOrNot(this.scale * this.points[i].x, kX))
             this.writeFloat(this.pressedOrNot(this.scale * this.points[i].y, kY))
             this.writeFloat(this.pressedOrNot(this.scale * this.points[i].z, kZ))
@@ -1838,7 +1793,8 @@ export class KfDrawingSurfaceForLWO extends KfBinaryFileExportSurface {
         if (this.options.writeColors) {
             // surfaces
             this.startChunk("SRFS")
-            for (i = 1; i <= this.numSurfacesStored; i++) {
+            // TODO: Is this off by one?
+            for (let i = 1; i <= this.numSurfacesStored; i++) {
                 this.writeStringZ(this.surfaceNames[i])
                 if (odd(this.surfaceNames[i].length + 1)) {
                     // 1 is for terminating zero
@@ -1854,7 +1810,7 @@ export class KfDrawingSurfaceForLWO extends KfBinaryFileExportSurface {
         }
         // faces
         this.startChunk("POLS")
-        for (i = 0; i <= this.numFaces - 1; i++) {
+        for (let i = 0; i < this.numFaces; i++) {
             this.writeWord(3)
             this.writeWord(this.faces[i].vertex1)
             this.writeWord(this.faces[i].vertex2)
@@ -1867,7 +1823,8 @@ export class KfDrawingSurfaceForLWO extends KfBinaryFileExportSurface {
         }
         this.finishChunk()
         if (this.options.writeColors) {
-            for (i = 1; i <= this.numSurfacesStored; i++) {
+            // TODO: Is this off by one?
+            for (let i = 1; i <= this.numSurfacesStored; i++) {
                 // surfaces again
                 this.startChunk("SURF")
                 this.writeStringZ(this.surfaceNames[i])
@@ -1909,25 +1866,19 @@ export class KfDrawingSurfaceForLWO extends KfBinaryFileExportSurface {
     }
     
     isLittleEndian(): boolean {
-        let result = false
-        result = false
-        return result
+        return false
     }
     
     startStemSegment(aLongName: string, aShortName: string, color: TColorRef, width: float, index: short): void {
-        KfBinaryFileExportSurface.prototype.startStemSegment.call(this, aLongName, aShortName, color, width, index)
+        super.startStemSegment(aLongName, aShortName, color, width, index)
         //currentPlantNameShort + '_' + aShortName
         this.currentSurfaceID = this.lookUpSurfaceIDForName(this.currentGroupingString, color)
     }
     
     lookUpSurfaceIDForName(aName: string, color: TColorRef): short {
-        let result = 0
-        let i: long
-        
-        for (i = 1; i <= this.numSurfacesStored; i++) {
+        for (let i = 1; i <= this.numSurfacesStored; i++) {
             if (this.surfaceNames[i] === aName) {
-                result = i
-                return result
+                return i
             }
         }
         if (this.numSurfacesStored < kMaxStoredMaterials) {
@@ -1935,29 +1886,25 @@ export class KfDrawingSurfaceForLWO extends KfBinaryFileExportSurface {
             this.surfaceNames[this.numSurfacesStored] = aName
             this.surfaceColors[this.numSurfacesStored] = color
         }
-        result = this.numSurfacesStored
-        return result
+        return this.numSurfacesStored
     }
     
-    drawPipeFaces(startPoints: KfPoint3D[], endPoints: KfPoint3D[], faces: short, segmentNumber: short): void {
-        let i: long
-        let firstPtIndex: long
-        
-        firstPtIndex = this.numPoints
-        for (i = 0; i <= faces - 1; i++) {
+    drawPipeFaces(startPoints: KfPoint3D[], endPoints: KfPoint3D[], faces: short, segmentNumber: short): void {  
+        const firstPtIndex = this.numPoints
+        for (let i = 0; i < faces; i++) {
             this.addPoint(startPoints[i])
         }
-        for (i = 0; i <= faces - 1; i++) {
+        for (let i = 0; i < faces; i++) {
             this.addPoint(endPoints[i])
         }
-        for (i = 0; i <= faces - 1; i++) {
+        for (let i = 0; i < faces; i++) {
             this.addTriangle(firstPtIndex + i, firstPtIndex + i + faces, firstPtIndex + (i + 1) % faces)
             this.addTriangle(firstPtIndex + (i + 1) % faces, firstPtIndex + i + faces, firstPtIndex + (i + 1) % faces + faces)
         }
     }
     
     start3DObject(aLongName: string, aShortName: string, color: TColorRef, index: short): void {
-        KfBinaryFileExportSurface.prototype.start3DObject.call(this, aLongName, aShortName, color, index)
+        super.start3DObject(aLongName, aShortName, color, index)
         //currentPlantNameShort + '_' + aShortName
         this.currentSurfaceID = this.lookUpSurfaceIDForName(this.currentGroupingString, color)
     }
@@ -2017,11 +1964,9 @@ export class KfDrawingSurfaceForLWO extends KfBinaryFileExportSurface {
         this.writeByte(aString[3].charCodeAt(0))
     }
     
-    writeRegistrationReminder(p1: KfPoint3D, p2: KfPoint3D, p3: KfPoint3D, p4: KfPoint3D): void {
-        let numPointsAtStart: short
-        
+    writeRegistrationReminder(p1: KfPoint3D, p2: KfPoint3D, p3: KfPoint3D, p4: KfPoint3D): void {   
         this.currentSurfaceID = this.lookUpSurfaceIDForName(this.currentPlantNameShort + "_rem", support_rgb(100, 100, 100))
-        numPointsAtStart = this.numPoints
+        const numPointsAtStart = this.numPoints
         this.addPoint(p1)
         this.addPoint(p2)
         this.addPoint(p3)
