@@ -496,7 +496,7 @@ export class PdPlant extends PdStreamableObject {
     
     initializeCache(cache: PdBitmap): void {
         // giving the cache a tiny size at creation forces it to create its canvas etc
-        // without this there is a nil pointer at streaming which causes a problem
+        // without this there is a Null pointer at streaming which causes a problem
         cache.Width = 1
         cache.Height = 1
         cache.Transparent = true
@@ -561,7 +561,7 @@ export class PdPlant extends PdStreamableObject {
     draw(): void {
         TraverserGlobals.cancelDrawing = false
         if (this.turtle === null) {
-            throw new Error("Problem: Nil turtle in method PdPlant.draw.")
+            throw new Error("Problem: Null turtle in method PdPlant.draw.")
         }
         if (this.turtle.drawingSurface.pane !== null) {
             this.turtle.drawingSurface.pane.Brush.Style = delphi_compatability.TFPBrushStyle.bsSolid
@@ -771,11 +771,8 @@ export class PdPlant extends PdStreamableObject {
     }
     
     resizingRect(): TRect {
-        let result = new TRect()
-        let theRect: TRect
-        
-        theRect = this.boundsRect_pixels()
-        result = new TRect(theRect.Right - domain.options.resizeRectSize, theRect.Top, theRect.Right, theRect.Top + domain.options.resizeRectSize)
+        const theRect = this.boundsRect_pixels()
+        const result = new TRect(theRect.Right - domain.options.resizeRectSize, theRect.Top, theRect.Right, theRect.Top + domain.options.resizeRectSize)
         if (result.Left < theRect.Left) {
             result.Left = theRect.Left
         }
@@ -1325,11 +1322,11 @@ export class PdPlant extends PdStreamableObject {
         }
         this.turtle = aTurtle
         if (this.turtle === null) {
-            throw new Error("Problem: Nil turtle in PdPlant.saveToGlobal3DOutputFile.")
+            throw new Error("Problem: Null turtle in PdPlant.saveToGlobal3DOutputFile.")
         }
-        const fileExportSurface: KfFileExportSurface = this.turtle.fileExportSurface()
-        if (this.turtle === null) {
-            throw new Error("Problem: Nil export surface in PdPlant.saveToGlobal3DOutputFile.")
+        const fileExportSurface: KfFileExportSurface | null = this.turtle.fileExportSurface()
+        if (fileExportSurface === null) {
+            throw new Error("Problem: Null export surface in PdPlant.saveToGlobal3DOutputFile.")
         }
         this.setUpTurtleFor3DOutput()
         if (translate) {
@@ -1933,7 +1930,7 @@ export class PdPlant extends PdStreamableObject {
     transferObject3D(direction: int, myTdo: KfObject3D, otherTdo: KfObject3D): void {
         if ((myTdo === null) || (otherTdo === null)) {
             // assumption: both tdos exist 
-            throw new Error("Problem: Nil 3D object in method PdPlant.transferObject3D.")
+            throw new Error("Problem: Null 3D object in method PdPlant.transferObject3D.")
         }
         if (direction === kSetField) {
             myTdo.copyFrom(otherTdo)
