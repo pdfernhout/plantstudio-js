@@ -18,6 +18,7 @@ import { PdPlantDrawingAmendment, kStartAmendmentString } from "./PdPlantDrawing
 import { PdPlantPart } from "./PdPlantPart"
 import { SinglePoint, messageForExceptionType, support_rgb, boundForString, stringUpTo, strToBool, stringBeyond, tolerantReadln, trimLeftAndRight, boolToStr, rgbStringToColor, digitValueString } from "./usupport"
 import { Plant_directTransferField, kFruitSCurve, kLeafSCurve, kGeneralGrowthSCurve, kGeneralAgeAtMaturity, kFlowerMaleBudOption, kFlowerFemaleBudOption, kLeafCompoundPinnateArrangement, kMeristemAndLeafArrangement, kLeafCompoundPinnateOrPalmate, kGeneralStartingSeedForRandomNumberGenerator, kStateBasePointY } from "./utransfr";
+import { KfFileExportSurface } from "./U3dexport";
 
 /* Remove unused imports
 from conversion_common import *
@@ -641,10 +642,8 @@ export class PdPlant extends PdStreamableObject {
         return result
     }
     
-    hangingObjectsMemoryUse_K(): double {
-        let result = 0.0
-        
-        result = 0
+    hangingObjectsMemoryUse_K(): double {  
+        let result = 0
         if (this.randomNumberGenerator !== null) {
             // random number generators
             result = result + this.randomNumberGenerator.instanceSize / 1024.0
@@ -669,17 +668,14 @@ export class PdPlant extends PdStreamableObject {
     }
     
     tdoMemoryUse_K(): double {
-        let result = 0.0
-        let partType: short
-        
         // tdos
-        result = 0
+        let result = 0
         result = result + this.pSeedlingLeaf.leafTdoParams.object3D.totalMemorySize() / 1024.0
         result = result + this.pLeaf.leafTdoParams.object3D.totalMemorySize() / 1024.0
         result = result + this.pLeaf.stipuleTdoParams.object3D.totalMemorySize() / 1024.0
         result = result + this.pInflor[Gender.kGenderFemale].bractTdoParams.object3D.totalMemorySize() / 1024.0
         result = result + this.pInflor[Gender.kGenderMale].bractTdoParams.object3D.totalMemorySize() / 1024.0
-        for (partType = 0; partType <= FloralPart.kHighestFloralPartConstant; partType++) {
+        for (let partType = 0; partType <= FloralPart.kHighestFloralPartConstant; partType++) {
             result = result + this.pFlower[Gender.kGenderFemale].tdoParams[partType].object3D.totalMemorySize() / 1024.0
             result = result + this.pFlower[Gender.kGenderMale].tdoParams[partType].object3D.totalMemorySize() / 1024.0
         }
@@ -809,14 +805,7 @@ export class PdPlant extends PdStreamableObject {
     }
     
     // procedure drawOnUsingOpenGL(turtle: KfTurtle; selected, firstSelected: boolean);
-    recalculateBounds(drawNow: boolean): void {
-        let oldBasePoint: TPoint
-        let drawingRect: TRect
-        let intersectRect_pixels: TRect
-        let intersectResult: boolean
-        let showProgress: boolean
-        let bytesThisBitmapWillBe: long
-        
+    recalculateBounds(drawNow: boolean): void { 
         this.fakeDrawToGetBounds()
         if (!domain.options.cachePlantBitmaps) {
             if (this.previewCache.Width > 5) {
@@ -833,26 +822,26 @@ export class PdPlant extends PdStreamableObject {
             MainForm.updateForChangeToPlantBitmaps()
             return
         }
-        drawingRect = new TRect(0, 0, MainForm.drawingPaintBox.Width, MainForm.drawingPaintBox.Height)
+        const drawingRect = new TRect(0, 0, MainForm.drawingPaintBox.width, MainForm.drawingPaintBox.height)
         // on opening file at first, force redraw of cache because drawingPaintBox size might be wrong
-        intersectResult = MainForm.inFormCreation || MainForm.inFileOpen || delphi_compatability.IntersectRect(intersectRect_pixels, this.boundsRect_pixels(), drawingRect)
+        const intersectResult = MainForm.inFormCreation || MainForm.inFileOpen || this.boundsRect_pixels().intersects(drawingRect)
         if (!intersectResult) {
             this.shrinkPreviewCache()
             MainForm.updateForChangeToPlantBitmaps()
             return
         }
-        bytesThisBitmapWillBe = intround(this.boundsRect_pixels().width * this.boundsRect_pixels().height * MainForm.screenBytesPerPixel())
+        const bytesThisBitmapWillBe = intround(this.boundsRect_pixels().width * this.boundsRect_pixels().height * MainForm.screenBytesPerPixel())
         if (!MainForm.roomForPlantBitmap(this, bytesThisBitmapWillBe)) {
             return
         }
-        oldBasePoint = this.basePoint_pixels()
+        const oldBasePoint = this.basePoint_pixels()
         try {
             this.setBasePoint_pixels(new TPoint(this.basePoint_pixels().X - this.boundsRect_pixels().Left, this.basePoint_pixels().Y - this.boundsRect_pixels().Top))
             this.resizeCacheIfNecessary(this.previewCache, new TPoint(this.boundsRect_pixels().width, this.boundsRect_pixels().height), kInMainWindow)
             this.previewCache.TransparentColor = domain.options.transparentColor
             ubmpsupport.fillBitmap(this.previewCache, domain.options.transparentColor)
             // showing progress here is mainly for really complicated plants; most plants won't need it
-            showProgress = (!MainForm.drawing) && (domain.options.showPlantDrawingProgress)
+            let showProgress = (!MainForm.drawing) && (domain.options.showPlantDrawingProgress)
             if (showProgress) {
                 this.plantPartsDrawnAtStart = 0
                 this.countPlantParts()
@@ -1241,11 +1230,8 @@ export class PdPlant extends PdStreamableObject {
     }
     
     moveTo(aPoint_pixels: TPoint): void {
-        let oldBasePoint_pixels: TPoint
-        let theRect: TRect
-        
-        oldBasePoint_pixels = this.basePoint_pixels()
-        theRect = this.boundsRect_pixels()
+        const oldBasePoint_pixels = this.basePoint_pixels()
+        const theRect = this.boundsRect_pixels()
         theRect.Left = theRect.Left + aPoint_pixels.X - oldBasePoint_pixels.X
         theRect.Right = theRect.Right + aPoint_pixels.X - oldBasePoint_pixels.X
         theRect.Top = theRect.Top + aPoint_pixels.Y - oldBasePoint_pixels.Y
@@ -1254,27 +1240,20 @@ export class PdPlant extends PdStreamableObject {
     }
     
     includesPoint(aPoint: TPoint): boolean {
-        let result = false
-        result = this.boundsRectIncludesPoint(aPoint, this.boundsRect_pixels(), true)
-        return result
+        return this.boundsRectIncludesPoint(aPoint, this.boundsRect_pixels(), true)
     }
     
     boundsRectIncludesPoint(aPoint: TPoint, boundsRect: TRect, checkResizeRect: boolean): boolean {
-        let result = false
-        let xPixel: long
-        let yPixel: long
-        let i: long
-        
-        result = boundsRect.contains(aPoint)
+        let result: boolean = boundsRect.contains(aPoint)
         if (result && domain.options.cachePlantBitmaps) {
             if (checkResizeRect && this.resizingRect().contains(aPoint)) {
                 result = true
             } else {
-                xPixel = aPoint.X - boundsRect.Left
-                yPixel = aPoint.Y - boundsRect.Top
+                const xPixel = aPoint.X - boundsRect.Left
+                const yPixel = aPoint.Y - boundsRect.Top
                 result = this.pointColorMatch(xPixel, yPixel)
                 if ((!result) && (domain.options.cachePlantBitmaps)) {
-                    for (i = 0; i <= 7; i++) {
+                    for (let i = 0; i <= 7; i++) {
                         if (this.pointColorAdjacentMatch(xPixel, yPixel, i)) {
                             result = true
                             return result
@@ -1287,28 +1266,17 @@ export class PdPlant extends PdStreamableObject {
     }
     
     pointInBoundsRect(aPoint: TPoint): boolean {
-        let result = false
-        result = this.normalBoundsRect_pixels.contains(aPoint)
-        return result
+        return this.normalBoundsRect_pixels.contains(aPoint)
     }
     
     pointColorMatch(xPixel: long, yPixel: long): boolean {
-        let result = false
-        let testPixelColor: TColor
-        
-        testPixelColor = this.previewCache.Canvas.Pixels[xPixel, yPixel]
-        result = testPixelColor !== domain.options.transparentColor
-        return result
+        const testPixelColor: TColor = this.previewCache.Canvas.Pixels[xPixel, yPixel]
+        return testPixelColor !== domain.options.transparentColor
     }
     
     pointColorAdjacentMatch(xPixel: long, yPixel: long, position: long): boolean {
-        let result = false
-        let testPixelColor: TColor
-        let x: long
-        let y: long
-        
-        x = xPixel
-        y = yPixel
+        let x = xPixel
+        let y = yPixel
         switch (position) {
             case 0:
                 // 0 1 2
@@ -1347,18 +1315,11 @@ export class PdPlant extends PdStreamableObject {
                 y = yPixel + 1
                 break
         }
-        testPixelColor = this.previewCache.Canvas.Pixels[x, y]
-        result = testPixelColor !== domain.options.transparentColor
-        return result
+        const testPixelColor: TColor = this.previewCache.Canvas.Pixels[x, y]
+        return testPixelColor !== domain.options.transparentColor
     }
     
     saveToGlobal3DOutputFile(indexOfPlant: short, translate: boolean, rectWithAllPlants: TRect, outputType: short, aTurtle: KfTurtle): void {
-        let remPoints: KfPoint3D[] = [new KfPoint3D(), new KfPoint3D(), new KfPoint3D(), new KfPoint3D()]
-        let remWidth: float
-        let fileExportSurface: KfFileExportSurface
-        let relativeBasePoint_mm: SinglePoint = new SinglePoint()
-        let fixRotation: short
-        
         if (this.firstPhytomer === null) {
             return
         }
@@ -1366,12 +1327,13 @@ export class PdPlant extends PdStreamableObject {
         if (this.turtle === null) {
             throw new Error("Problem: Nil turtle in PdPlant.saveToGlobal3DOutputFile.")
         }
-        fileExportSurface = this.turtle.fileExportSurface()
+        const fileExportSurface: KfFileExportSurface = this.turtle.fileExportSurface()
         if (this.turtle === null) {
             throw new Error("Problem: Nil export surface in PdPlant.saveToGlobal3DOutputFile.")
         }
         this.setUpTurtleFor3DOutput()
         if (translate) {
+            const relativeBasePoint_mm: SinglePoint = new SinglePoint()
             relativeBasePoint_mm.x = safedivExcept(this.basePoint_pixels().X - rectWithAllPlants.Left, domain.plantDrawScale_PixelsPerMm(), 0) - domain.plantDrawOffset_mm().x
             relativeBasePoint_mm.y = safedivExcept(this.basePoint_pixels().Y - rectWithAllPlants.Top, domain.plantDrawScale_PixelsPerMm(), 0) - domain.plantDrawOffset_mm().y
             if (outputType !== ExportFormats.kPOV) {
@@ -1386,12 +1348,13 @@ export class PdPlant extends PdStreamableObject {
         if (outputType === ExportFormats.k3DS) {
             for (let i = 0; i <= ExportPart.kExportPartLast; i++) {
                 // for 3DS need to write out all colors in front especially; must be done before reminder
-                (fileExportSurface).writeMaterialDescription(i, this.colorForDXFPartType(i))
+                fileExportSurface.writeMaterialDescription(i, this.colorForDXFPartType(i))
             }
             if (!domain.registered) {
-                (fileExportSurface).writeMaterialDescription(-1, support_rgb(100, 100, 100))
+                fileExportSurface.writeMaterialDescription(-1, support_rgb(100, 100, 100))
             }
         }
+        let fixRotation: short
         switch (outputType) {
             case ExportFormats.kDXF:
                 // these rotations are to fix consistent misrotations - the option sits on top of them
@@ -1425,21 +1388,22 @@ export class PdPlant extends PdStreamableObject {
         // this is a user-specified turn on top of the default
         this.turtle.rotateX(domain.exportOptionsFor3D[outputType].xRotationBeforeDraw * 256.0 / 360.0)
         if (!domain.registered) {
-            remWidth = this.realDrawingScale_pixelsPerMm() * 5.0
+            const remWidth = this.realDrawingScale_pixelsPerMm() * 5.0
             this.turtle.push()
             this.turtle.moveInMillimeters(remWidth / 2)
             this.turtle.rotateY(64)
             this.turtle.moveInMillimeters(remWidth / 2)
-            remPoints[0] = this.turtle.position()
+            const remPoints: KfPoint3D[] = Array(4)
+            remPoints[0] = this.turtle.positionCopy()
             this.turtle.rotateY(64)
             this.turtle.moveInMillimeters(remWidth)
-            remPoints[1] = this.turtle.position()
+            remPoints[1] = this.turtle.positionCopy()
             this.turtle.rotateY(64)
             this.turtle.moveInMillimeters(remWidth)
-            remPoints[2] = this.turtle.position()
+            remPoints[2] = this.turtle.positionCopy()
             this.turtle.rotateY(64)
             this.turtle.moveInMillimeters(remWidth)
-            remPoints[3] = this.turtle.position()
+            remPoints[3] = this.turtle.positionCopy()
             this.turtle.pop()
             fileExportSurface.writeRegistrationReminder(remPoints[0], remPoints[1], remPoints[2], remPoints[3])
         }
@@ -1556,8 +1520,6 @@ export class PdPlant extends PdStreamableObject {
     }
     
     writeToPlantFile(plantFile: TextFile): void {
-        let section: PdSection
-        let param: PdParameter
         let tempBoolean: boolean = false
         let tempSmallint: short = 0
         let tempLongint: long = 0
@@ -1585,7 +1547,7 @@ export class PdPlant extends PdStreamableObject {
         }
         if (domain.sectionManager.sections.length > 0) {
             for (let i = 0; i < domain.sectionManager.sections.length; i++) {
-                section = domain.sectionManager.sections[i]
+                const section: PdSection = domain.sectionManager.sections[i]
                 if (section === null) {
                     continue
                 }
@@ -1593,7 +1555,7 @@ export class PdPlant extends PdStreamableObject {
                 this.writeLine(plantFile, "; ------------------------- " + section.getName())
                 for (let j = 0; j < section.numSectionItems; j++) {
                     // write out params 
-                    param = domain.parameterManager.parameterForFieldNumber(section.sectionItems[j])
+                    const param: PdParameter = domain.parameterManager.parameterForFieldNumber(section.sectionItems[j])
                     if (param === null) {
                         continue
                     }
@@ -1637,7 +1599,7 @@ export class PdPlant extends PdStreamableObject {
                             if (this.writingToMemo) {
                                 tempTdo.writeToMemo(MainForm.plantsAsTextMemo)
                             } else {
-                                tempTdo.writeToFileStream(plantFile, utdo.kEmbeddedInPlant)
+                                tempTdo.writeToFileStream(plantFile, kEmbeddedInPlant)
                             }
                             break
                     }
@@ -1658,25 +1620,13 @@ export class PdPlant extends PdStreamableObject {
         this.writeLine(plantFile, "")
     }
     
-    readLineAndTdoFromPlantFile(aLine: string, plantFile: TextFile): void {
-        let tempBoolean: boolean
-        let tempSmallint: short
-        let tempLongint: long
-        let tempFloat: float
-        let tempColorRef: TColorRef
-        let tempSCurve: SCurveStructure
-        let secondLine: string
-        let noteLine: string
-        let nameAndFieldID: string
-        let fieldID: string
-        let paramValue: string
-        
+    readLineAndTdoFromPlantFile(aLine: string, plantFile: TextFile): void {        
         if (compareTextIgnoreCase(kStartNoteString, aLine)) {
             // read note if this line starts it
             // this only will happen if in file
             this.noteLines = []
             while (!eof(plantFile)) {
-                noteLine = tolerantReadln(plantFile)
+                const noteLine = tolerantReadln(plantFile)
                 if (compareTextIgnoreCase(kEndNoteString, noteLine) && (this.noteLines.length < 5000)) {
                     break
                 } else {
@@ -1686,6 +1636,7 @@ export class PdPlant extends PdStreamableObject {
             // added v2.0, no use reading other stuff when finished with note
             return
         }
+
         if (aLine.includes(kStartAmendmentString)) {
             // read amendment if line is an amendment - v2.0
             const newAmendment = new PdPlantDrawingAmendment()
@@ -1697,7 +1648,9 @@ export class PdPlant extends PdStreamableObject {
             this.addAmendment(newAmendment)
             return
         }
+
         if (!aLine.includes("[") || !aLine.includes("=")) {
+            let secondLine: string
             if (this.readingFromMemo) {
                 // v2.0 fix lines broken before [ or = (does NOT fix lines broken within strings)
                 // this has to come AFTER we deal with notes and amendments; it applies to parameters only
@@ -1709,13 +1662,15 @@ export class PdPlant extends PdStreamableObject {
             DebugPrint("plant <" + this.name + "> line <" + aLine + "> merged with <" + secondLine + ">")
             aLine = aLine + " " + secondLine
         }
-        nameAndFieldID = stringUpTo(aLine, "=")
-        fieldID = stringBeyond(nameAndFieldID, "[")
+
+        const nameAndFieldID = stringUpTo(aLine, "=")
+        let fieldID: string = stringBeyond(nameAndFieldID, "[")
         fieldID = stringUpTo(fieldID, "]")
         if (fieldID.includes("header")) {
             return
         }
-        paramValue = stringBeyond(aLine, "=")
+
+        const paramValue: string = stringBeyond(aLine, "=")
         let found: boolean = false
         let param: PdParameter | null = null
         if (domain.parameterManager.parameters.length > 0) {
@@ -1733,6 +1688,13 @@ export class PdPlant extends PdStreamableObject {
         if (!found || !param) {
             return
         }
+
+        let tempBoolean: boolean
+        let tempSmallint: short
+        let tempLongint: long
+        let tempFloat: float
+        let tempColorRef: TColorRef
+        let tempSCurve: SCurveStructure
         switch (param.fieldType) {
             case FieldType.kFieldHeader:
                 break
@@ -1860,7 +1822,7 @@ export class PdPlant extends PdStreamableObject {
         if (fieldType === FieldType.kFieldHeader) {
             return value
         }
-        if ((d === kGetField)) {
+        if (d === kGetField) {
             value = this.transferField(d, value, fieldID, fieldType, fieldIndex, regrow, null)
         } else {
             const updateList: any[] = []
@@ -2056,11 +2018,6 @@ export class PdPlant extends PdStreamableObject {
         let firstSCurve: SCurveStructure = new SCurveStructure()
         let secondSCurve: SCurveStructure = new SCurveStructure()
         let newSCurve: SCurveStructure = new SCurveStructure()
-        let randomTdo: KfObject3D
-        let weight: float
-        let stdDev: float
-        let param: PdParameter
-        let section: PdSection
         
         if (firstPlant === null) {
             return
@@ -2069,12 +2026,12 @@ export class PdPlant extends PdStreamableObject {
         this.reset()
         if (domain.sectionManager.sections.length > 0) {
             for (let sectionIndex = 0; sectionIndex < domain.sectionManager.sections.length; sectionIndex++) {
-                section = domain.sectionManager.sections[sectionIndex]
+                const section: PdSection = domain.sectionManager.sections[sectionIndex]
                 if (section === null) {
                     continue
                 }
                 for (let paramIndex = 0; paramIndex < section.numSectionItems; paramIndex++) {
-                    param = domain.parameterManager.parameterForFieldNumber(section.sectionItems[paramIndex])
+                    const param: PdParameter = domain.parameterManager.parameterForFieldNumber(section.sectionItems[paramIndex])
                     if ((param === null) || (param.fieldType === FieldType.kFieldHeader)) {
                         continue
                     }
@@ -2106,12 +2063,12 @@ export class PdPlant extends PdStreamableObject {
                                 if (firstInteger === secondInteger) {
                                     newInteger = firstInteger
                                 } else {
-                                    weight = options.firstPlantWeights[sectionIndex] / 100.0
+                                    const weight: float = options.firstPlantWeights[sectionIndex] / 100.0
                                     newInteger = intround(firstInteger * weight + secondInteger * (1.0 - weight))
                                 }
                             }
                             // extra limit on mutation to stop exceptions
-                            stdDev = 0.5 * newInteger * options.mutationStrengths[sectionIndex] / 100.0
+                            const stdDev = 0.5 * newInteger * options.mutationStrengths[sectionIndex] / 100.0
                             newInteger = intround(this.breedingGenerator.randomNormalWithStdDev(newInteger * 1.0, stdDev))
                             newInteger = intround(min(param.upperBound(), max(param.lowerBound(), 1.0 * newInteger)))
                             newInteger = this.transferField(kSetField, newInteger, param.fieldNumber, param.fieldType, 0, false, null)
@@ -2185,12 +2142,12 @@ export class PdPlant extends PdStreamableObject {
                                     if (firstFloat === secondFloat) {
                                         newFloat = firstFloat
                                     } else {
-                                        weight = options.firstPlantWeights[sectionIndex] / 100.0
+                                        const weight = options.firstPlantWeights[sectionIndex] / 100.0
                                         newFloat = firstFloat * weight + secondFloat * (1.0 - weight)
                                     }
                                 }
                                 // extra limit on mutation to stop exceptions
-                                stdDev = 0.5 * newFloat * options.mutationStrengths[sectionIndex] / 100.0
+                                const stdDev = 0.5 * newFloat * options.mutationStrengths[sectionIndex] / 100.0
                                 newFloat = this.breedingGenerator.randomNormalWithStdDev(newFloat * 1.0, stdDev)
                                 newFloat = min(param.upperBound(), max(param.lowerBound(), newFloat))
                                 // for now, don't let float get to zero because it causes problems 
@@ -2246,8 +2203,7 @@ export class PdPlant extends PdStreamableObject {
     }
     
     pickPlantToCopyNonNumericalParameterFrom(options: BreedingAndTimeSeriesOptionsStructure, sectionIndex: short): short {
-        let result = 0
-        result = kFromFirstPlant
+        let result = kFromFirstPlant
         switch (options.getNonNumericalParametersFrom) {
             case kFromFirstPlant:
                 result = kFromFirstPlant
@@ -2295,34 +2251,26 @@ export class PdPlant extends PdStreamableObject {
     }
     
     blendAndMutateColors(options: BreedingAndTimeSeriesOptionsStructure, sectionIndex: short, haveSecondPlant: boolean, firstColor: TColorRef, secondColor: TColorRef): TColorRef {
-        let result: TColorRef
-        let weight: float
-        let stdDevAsFractionOfMean: float
-        let firstColorAsFloat: float
-        let secondColorAsFloat: float
-        let resultAsFloat: float
-        let mutationStrengthToUse: float
-        
-        firstColorAsFloat = firstColor
-        resultAsFloat = firstColorAsFloat
+        const firstColorAsFloat: float = firstColor
+        let resultAsFloat = firstColorAsFloat
         if (haveSecondPlant) {
-            secondColorAsFloat = secondColor
-            weight = options.firstPlantWeights[sectionIndex] / 100.0
+            const secondColorAsFloat: float = secondColor
+            const weight: float = options.firstPlantWeights[sectionIndex] / 100.0
             resultAsFloat = firstColorAsFloat * weight + secondColorAsFloat * (1.0 - weight)
         }
         // v2.0 can mutate colors separately from other parameters - if other params not zero, go with that,
         // if other params zero, and mutating colors, use low mutation for colors only
-        mutationStrengthToUse = 0
+        let mutationStrengthToUse: float = 0
         if (options.mutationStrengths[sectionIndex] > 0) {
             mutationStrengthToUse = options.mutationStrengths[sectionIndex]
         } else if (options.mutateAndBlendColorValues) {
             mutationStrengthToUse = MutationRate.kLowMutation
         }
-        stdDevAsFractionOfMean = mutationStrengthToUse / 100.0
+        let stdDevAsFractionOfMean: float = mutationStrengthToUse / 100.0
         // for colors, reduce std dev to 10% of for other things, because the numbers are so huge 
         stdDevAsFractionOfMean = stdDevAsFractionOfMean * 0.1
         resultAsFloat = this.breedingGenerator.randomNormalWithStdDev(resultAsFloat, resultAsFloat * stdDevAsFractionOfMean)
-        result = intround(resultAsFloat)
+        const result: TColorRef = intround(resultAsFloat)
         return result
     }
     
@@ -2356,7 +2304,6 @@ export class PdPlant extends PdStreamableObject {
         let femaleFlowerTdos: KfObject3D[] /* kHighestFloralPartConstant + 1 */
         let maleFlowerTdos: KfObject3D[] /* kHighestFloralPartConstant + 1 */
         let hasFirstPhytomer: boolean = false
-        let partType: int
         
         PdStreamableObject.prototype.streamDataWithFiler.call(this, filer, cvir)
         this.name = filer.streamShortString(this.name)
@@ -2379,7 +2326,7 @@ export class PdPlant extends PdStreamableObject {
             tdoStipule = this.pLeaf.stipuleTdoParams.object3D
             tdoInflorBractFemale = this.pInflor[Gender.kGenderFemale].bractTdoParams.object3D
             tdoInflorBractMale = this.pInflor[Gender.kGenderMale].bractTdoParams.object3D
-            for (partType = 0; partType <= FloralPart.kHighestFloralPartConstant; partType++) {
+            for (let partType = 0; partType <= FloralPart.kHighestFloralPartConstant; partType++) {
                 femaleFlowerTdos[partType] = this.pFlower[Gender.kGenderFemale].tdoParams[partType].object3D
                 maleFlowerTdos[partType] = this.pFlower[Gender.kGenderMale].tdoParams[partType].object3D
             }
@@ -2392,7 +2339,7 @@ export class PdPlant extends PdStreamableObject {
             tdoStipule = null
             tdoInflorBractFemale = null
             tdoInflorBractMale = null
-            for (partType = 0; partType <= kHighestFloralPartConstant; partType++) {
+            for (let partType = 0; partType <= kHighestFloralPartConstant; partType++) {
                 femaleFlowerTdos[partType] = null
                 maleFlowerTdos[partType] = null
             }
@@ -2435,7 +2382,7 @@ export class PdPlant extends PdStreamableObject {
             this.pInflor[Gender.kGenderMale].bractTdoParams.object3D = tdoInflorBractMale
         }
         this.pInflor[Gender.kGenderMale].bractTdoParams.object3D.streamUsingFiler(filer)
-        for (partType = 0; partType <= FloralPart.kHighestFloralPartConstant; partType++) {
+        for (let partType = 0; partType <= FloralPart.kHighestFloralPartConstant; partType++) {
             if (filer.isReading()) {
                 this.pFlower[Gender.kGenderFemale].tdoParams[partType].object3D = femaleFlowerTdos[partType]
             }
@@ -2516,13 +2463,9 @@ export class PdPlant extends PdStreamableObject {
     
     // --------------------------------------------------------------------------------  command-related 
     randomize(): void {
-        let seed: short
-        let breedingSeed: long
-        let anXRotation: float
-        
-        seed = this.randomNumberGenerator.randomSmallintSeedFromTime()
-        breedingSeed = this.breedingGenerator.randomSeedFromTime()
-        anXRotation = this.randomNumberGenerator.zeroToOne() * 360.0
+        const seed: short = this.randomNumberGenerator.randomSmallintSeedFromTime()
+        const breedingSeed: long = this.breedingGenerator.randomSeedFromTime()
+        const anXRotation: float = this.randomNumberGenerator.zeroToOne() * 360.0
         this.randomizeWithSeedsAndXRotation(seed, breedingSeed, anXRotation)
     }
     
@@ -2546,28 +2489,22 @@ export class PdPlant extends PdStreamableObject {
     
     // ------------------------------------------------------------------------------------  next day and traverser 
     nextDay(): void {
-        let newTotalBiomass_pctMPB: float
-        let changeInTotalBiomassTodayAsPercentOfMPB_pct: float
-        let fractionReproBiomassToday_frn: float
-        let newReproBiomass_pctMPB: float
-        let newShootBiomass_pctMPB: float
-        let fractionToMaturity_frn: float
         let firstMeristem: PdMeristem
         
         try {
             // calculate overall biomass change using s curve 
-            fractionToMaturity_frn = safedivExcept(this.age, this.pGeneral.ageAtMaturity, 0)
-            newTotalBiomass_pctMPB = max(0.0, min(100.0, 100.0 * scurve(fractionToMaturity_frn, this.pGeneral.growthSCurve.c1, this.pGeneral.growthSCurve.c2)))
-            changeInTotalBiomassTodayAsPercentOfMPB_pct = newTotalBiomass_pctMPB - this.totalBiomass_pctMPB
+            const fractionToMaturity_frn: float = safedivExcept(this.age, this.pGeneral.ageAtMaturity, 0)
+            const newTotalBiomass_pctMPB: float = max(0.0, min(100.0, 100.0 * scurve(fractionToMaturity_frn, this.pGeneral.growthSCurve.c1, this.pGeneral.growthSCurve.c2)))
+            const changeInTotalBiomassTodayAsPercentOfMPB_pct: float = newTotalBiomass_pctMPB - this.totalBiomass_pctMPB
             this.totalBiomass_pctMPB = newTotalBiomass_pctMPB
             if (this.floweringHasStarted) {
                 // divide up change into shoot and fruit, make changes to total shoot/fruit 
-                fractionReproBiomassToday_frn = max(0, this.pGeneral.fractionReproductiveAllocationAtMaturity_frn * safedivExcept(this.age - this.ageAtWhichFloweringStarted, this.pGeneral.ageAtMaturity - this.ageAtWhichFloweringStarted, 0))
-                newReproBiomass_pctMPB = fractionReproBiomassToday_frn * this.totalBiomass_pctMPB
+                const fractionReproBiomassToday_frn: float = max(0, this.pGeneral.fractionReproductiveAllocationAtMaturity_frn * safedivExcept(this.age - this.ageAtWhichFloweringStarted, this.pGeneral.ageAtMaturity - this.ageAtWhichFloweringStarted, 0))
+                const newReproBiomass_pctMPB: float = fractionReproBiomassToday_frn * this.totalBiomass_pctMPB
                 this.changeInReproBiomassToday_pctMPB = newReproBiomass_pctMPB - this.reproBiomass_pctMPB
                 this.reproBiomass_pctMPB = newReproBiomass_pctMPB
                 // rest goes to shoots 
-                newShootBiomass_pctMPB = this.totalBiomass_pctMPB - this.reproBiomass_pctMPB
+                const newShootBiomass_pctMPB: float= this.totalBiomass_pctMPB - this.reproBiomass_pctMPB
                 this.changeInShootBiomassToday_pctMPB = newShootBiomass_pctMPB - this.shootBiomass_pctMPB
                 this.shootBiomass_pctMPB = newShootBiomass_pctMPB
             } else {
@@ -2670,14 +2607,12 @@ export class PdPlant extends PdStreamableObject {
     }
     
     allocateOrRemoveParticularBiomass(biomassToAddOrRemove_pctMPB: float, undistributedBiomass_pctMPB: float, askingMode: int, tellingMode: int, traverser: PdTraverser): number {
-        let totalDemandOrAvailableBiomass_pctMPB: float
-        
         try {
             if (traverser === null) {
                 return undistributedBiomass_pctMPB
             }
             traverser.traverseWholePlant(askingMode)
-            totalDemandOrAvailableBiomass_pctMPB = traverser.total
+            const totalDemandOrAvailableBiomass_pctMPB: float = traverser.total
             if (totalDemandOrAvailableBiomass_pctMPB > 0.0) {
                 if (biomassToAddOrRemove_pctMPB > totalDemandOrAvailableBiomass_pctMPB) {
                     undistributedBiomass_pctMPB = biomassToAddOrRemove_pctMPB - totalDemandOrAvailableBiomass_pctMPB
