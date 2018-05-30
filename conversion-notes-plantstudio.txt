@@ -23,3 +23,6 @@ Convertign pos comparison
 Superclass definition wrong -- does not use extends
 
 Calling super methods is wrong e.g. KfTextFileExportSurface.prototype.endPlant.call(this)
+
+Commented frift down to above following statements -- which can put them in wrong place
+e.g. // no response 

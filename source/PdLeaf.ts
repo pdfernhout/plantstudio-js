@@ -1,35 +1,28 @@
-// unit uleaf
+// PdLeaf was unit uleaf
 
-from conversion_common import *
-import usupport
-import uclasses
-import u3dexport
-import uturtle
-import udebug
-import utravers
-import utdo
-import ufiler
-import umath
-import uplant
-import upart
-import delphi_compatability
+import { SCurveStructure, safedivExcept, max, min, scurve, pointsAreCloseEnough } from "./umath";
+import { PdPlantPart, kDontTaper, kUseAmendment, kDontUseAmendment } from "./PdPlantPart";
+import { float, int, odd, TColorRef } from "./common";
+import { PdPlant, CompoundLeafStyle, Direction, PartType, LeafArrangement } from "./PdPlant";
+import { PdTraverser, Activity, linearGrowthResult, Statistics } from "./PdTraverser";
+import { ExportPart, NestingType } from "./U3dexport";
+import { messageForExceptionType } from "./usupport";
+import { KfObject3D } from "./KfObject3D";
+import { KfTurtle } from "./KfTurtle";
+import { TRect } from "./TRect";
+import { PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof } from "./temporary";
+import { ClassId } from "./uclasses";
 
-// const
 const kNumCompoundLeafRandomSwayIndexes = 49
 
-
-
-export class PdLeaf {
+export class PdLeaf extends PdPlantPart {
     sCurveParams: SCurveStructure = new SCurveStructure()
     propFullSize: float = 0.0
     biomassAtCreation_pctMPB: float = 0.0
     compoundLeafRandomSwayIndexes: float[] /* kNumCompoundLeafRandomSwayIndexes + 1 */ = Array(kNumCompoundLeafRandomSwayIndexes + 1)
-    PdLeaf.prototype = new PdPlantPart()
-    PdLeaf.prototype.constructor = PdLeaf
     
-    NewWithPlantFractionOfOptimalSize(aPlant: PdPlant, aFraction: float): PdLeaf {
+    static NewWithPlantFractionOfOptimalSize(aPlant: PdPlant, aFraction: float): PdLeaf {
         let result = new PdLeaf()
-        result = this.create()
         result.initializeFractionOfOptimalSize(aPlant, aFraction)
         return result
     }
@@ -43,21 +36,19 @@ export class PdLeaf {
             this.isSeedlingLeaf = false
             this.liveBiomass_pctMPB = aFraction * PdLeaf.optimalInitialBiomass_pctMPB(this.plant)
             this.deadBiomass_pctMPB = 0.0
-            this.propFullSize = umath.safedivExcept(this.liveBiomass_pctMPB, this.plant.pLeaf.optimalBiomass_pctMPB, 1.0)
+            this.propFullSize = safedivExcept(this.liveBiomass_pctMPB, this.plant.pLeaf.optimalBiomass_pctMPB, 1.0)
             if (this.plant.pLeaf.compoundNumLeaflets > 1) {
                 for (i = 0; i <= kNumCompoundLeafRandomSwayIndexes; i++) {
                     this.compoundLeafRandomSwayIndexes[i] = this.plant.randomNumberGenerator.zeroToOne()
                 }
             }
-        } catch (Exception e) {
-            usupport.messageForExceptionType(e, "PdLeaf.initializeFractionOfOptimalSize")
+        } catch (e) {
+            messageForExceptionType(e, "PdLeaf.initializeFractionOfOptimalSize")
         }
     }
     
-    optimalInitialBiomass_pctMPB(drawingPlant: PdPlant): float {
-        let result = 0.0
-        result = drawingPlant.pLeaf.optimalFractionOfOptimalBiomassAtCreation_frn * drawingPlant.pLeaf.optimalBiomass_pctMPB
-        return result
+    static optimalInitialBiomass_pctMPB(drawingPlant: PdPlant): float {
+        return drawingPlant.pLeaf.optimalFractionOfOptimalBiomassAtCreation_frn * drawingPlant.pLeaf.optimalBiomass_pctMPB
     }
     
     getName(): string {
@@ -70,118 +61,115 @@ export class PdLeaf {
         try {
             PdPlantPart.prototype.nextDay.call(this)
             this.checkIfHasAbscissed()
-        } catch (Exception e) {
-            usupport.messageForExceptionType(e, "PdLeaf.nextDay")
+        } catch (e) {
+            messageForExceptionType(e, "PdLeaf.nextDay")
         }
     }
     
-    traverseActivity(mode: int, traverserProxy: TObject): void {
-        let traverser: PdTraverser
+    traverseActivity(mode: int, traverser: PdTraverser): void {
         let propFullSizeWanted: float
         let newBiomass_pctMPB: float
         let biomassToRemove_pctMPB: float
         let fractionOfMaxAge_frn: float
         let turtle: KfTurtle
         
-        PdPlantPart.prototype.traverseActivity.call(this, mode, traverserProxy)
-        traverser = utravers.PdTraverser(traverserProxy)
+        super.traverseActivity(mode, traverser)
         if (traverser === null) {
             return
         }
-        if (this.hasFallenOff && (mode !== utravers.kActivityStream) && (mode !== utravers.kActivityFree)) {
+        if (this.hasFallenOff && (mode !== Activity.kActivityStream) && (mode !== Activity.kActivityFree)) {
             return
         }
         try {
             switch (mode) {
-                case utravers.kActivityNone:
+                case Activity.kActivityNone:
                     break
-                case utravers.kActivityNextDay:
+                case Activity.kActivityNextDay:
                     this.nextDay()
                     break
-                case utravers.kActivityDemandVegetative:
+                case Activity.kActivityDemandVegetative:
                     if (this.age > this.plant.pLeaf.maxDaysToGrow) {
                         this.biomassDemand_pctMPB = 0.0
                         return
                     }
-                    fractionOfMaxAge_frn = umath.safedivExcept(this.age + 1, this.plant.pLeaf.maxDaysToGrow, 0.0)
-                    propFullSizeWanted = umath.max(0.0, umath.min(1.0, umath.scurve(fractionOfMaxAge_frn, this.plant.pLeaf.sCurveParams.c1, this.plant.pLeaf.sCurveParams.c2)))
-                    this.biomassDemand_pctMPB = utravers.linearGrowthResult(this.liveBiomass_pctMPB, propFullSizeWanted * this.plant.pLeaf.optimalBiomass_pctMPB, this.plant.pLeaf.minDaysToGrow)
+                    fractionOfMaxAge_frn = safedivExcept(this.age + 1, this.plant.pLeaf.maxDaysToGrow, 0.0)
+                    propFullSizeWanted = max(0.0, min(1.0, scurve(fractionOfMaxAge_frn, this.plant.pLeaf.sCurveParams.c1, this.plant.pLeaf.sCurveParams.c2)))
+                    this.biomassDemand_pctMPB = linearGrowthResult(this.liveBiomass_pctMPB, propFullSizeWanted * this.plant.pLeaf.optimalBiomass_pctMPB, this.plant.pLeaf.minDaysToGrow)
                     traverser.total = traverser.total + this.biomassDemand_pctMPB
                     break
-                case utravers.kActivityDemandReproductive:
+                case Activity.kActivityDemandReproductive:
                     break
-                case utravers.kActivityGrowVegetative:
+                case Activity.kActivityGrowVegetative:
                     if (this.age > this.plant.pLeaf.maxDaysToGrow) {
                         // no repro. demand
                         return
                     }
                     newBiomass_pctMPB = this.biomassDemand_pctMPB * traverser.fractionOfPotentialBiomass
                     this.liveBiomass_pctMPB = this.liveBiomass_pctMPB + newBiomass_pctMPB
-                    this.propFullSize = umath.min(1.0, umath.safedivExcept(this.totalBiomass_pctMPB(), this.plant.pLeaf.optimalBiomass_pctMPB, 0))
+                    this.propFullSize = min(1.0, safedivExcept(this.totalBiomass_pctMPB(), this.plant.pLeaf.optimalBiomass_pctMPB, 0))
                     break
-                case utravers.kActivityGrowReproductive:
+                case Activity.kActivityGrowReproductive:
+                     // no repro. growth
                     break
-                case utravers.kActivityStartReproduction:
+                case Activity.kActivityStartReproduction:
+                    // no response 
                     break
-                case utravers.kActivityFindPlantPartAtPosition:
-                    if (umath.pointsAreCloseEnough(traverser.point, this.position())) {
-                        // no repro. growth
-                        // no response 
+                case Activity.kActivityFindPlantPartAtPosition:
+                    if (pointsAreCloseEnough(traverser.point, this.position())) {
                         traverser.foundPlantPart = this
                         traverser.finished = true
                     }
                     break
-                case utravers.kActivityDraw:
+                case Activity.kActivityDraw:
                     break
-                case utravers.kActivityReport:
+                case Activity.kActivityReport:
                     break
-                case utravers.kActivityStream:
+                case Activity.kActivityStream:
                     break
-                case utravers.kActivityFree:
+                case Activity.kActivityFree:
                     break
-                case utravers.kActivityVegetativeBiomassThatCanBeRemoved:
+                case Activity.kActivityVegetativeBiomassThatCanBeRemoved:
                     // phytomer will control drawing 
                     //streaming will be done by internode
                     // free will be called by phytomer 
                     traverser.total = traverser.total + this.liveBiomass_pctMPB
                     break
-                case utravers.kActivityRemoveVegetativeBiomass:
+                case Activity.kActivityRemoveVegetativeBiomass:
                     biomassToRemove_pctMPB = this.liveBiomass_pctMPB * traverser.fractionOfPotentialBiomass
                     this.liveBiomass_pctMPB = this.liveBiomass_pctMPB - biomassToRemove_pctMPB
                     this.deadBiomass_pctMPB = this.deadBiomass_pctMPB + biomassToRemove_pctMPB
                     break
-                case utravers.kActivityReproductiveBiomassThatCanBeRemoved:
+                case Activity.kActivityReproductiveBiomassThatCanBeRemoved:
                     break
-                case utravers.kActivityRemoveReproductiveBiomass:
+                case Activity.kActivityRemoveReproductiveBiomass:
                     break
-                case utravers.kActivityGatherStatistics:
+                case Activity.kActivityGatherStatistics:
                     if (this.isSeedlingLeaf) {
                         // none 
                         // none 
-                        this.addToStatistics(traverser.statistics, utravers.kStatisticsPartTypeSeedlingLeaf)
+                        this.addToStatistics(traverser.statistics, Statistics.kStatisticsPartTypeSeedlingLeaf)
                     } else {
-                        this.addToStatistics(traverser.statistics, utravers.kStatisticsPartTypeLeaf)
+                        this.addToStatistics(traverser.statistics, Statistics.kStatisticsPartTypeLeaf)
                     }
-                    this.addToStatistics(traverser.statistics, utravers.kStatisticsPartTypeAllVegetative)
+                    this.addToStatistics(traverser.statistics, Statistics.kStatisticsPartTypeAllVegetative)
                     break
-                case utravers.kActivityCountPlantParts:
+                case Activity.kActivityCountPlantParts:
                     break
-                case utravers.kActivityFindPartForPartID:
+                case Activity.kActivityFindPartForPartID:
                     break
-                case utravers.kActivityCountTotalMemoryUse:
+                case Activity.kActivityCountTotalMemoryUse:
                     traverser.totalMemorySize += this.instanceSize
                     break
-                case utravers.kActivityCalculateBiomassForGravity:
+                case Activity.kActivityCalculateBiomassForGravity:
                     break
-                case utravers.kActivityCountPointsAndTrianglesFor3DExport:
+                case Activity.kActivityCountPointsAndTrianglesFor3DExport:
                     this.countPointsAndTrianglesFor3DExportAndAddToTraverserTotals(traverser)
                     break
                 default:
-                    throw new GeneralException.create("Problem: Unhandled mode in method PdLeaf.traverseActivity.")
-                    break
+                    throw new Error("Problem: Unhandled mode in method PdLeaf.traverseActivity.")
             }
-        } catch (Exception e) {
-            usupport.messageForExceptionType(e, "PdLeaf.traverseActivity")
+        } catch (e) {
+            messageForExceptionType(e, "PdLeaf.traverseActivity")
         }
     }
     
@@ -192,14 +180,8 @@ export class PdLeaf {
         //  self.hasFallenOff := true;
     }
     
-    destroy(): void {
-        PdPlantPart.prototype.destroy.call(this)
-    }
-    
     isPhytomer(): boolean {
-        let result = false
-        result = false
-        return result
+        return false
     }
     
     countPointsAndTrianglesFor3DExportAndAddToTraverserTotals(traverser: PdTraverser): void {
@@ -216,31 +198,31 @@ export class PdLeaf {
             if (this.plant.pSeedlingLeaf.leafTdoParams.scaleAtFullSize > 0) {
                 // seedling leaf
                 traverser.total3DExportPointsIn3DObjects += this.plant.pSeedlingLeaf.leafTdoParams.object3D.pointsInUse
-                traverser.total3DExportTrianglesIn3DObjects += this.plant.pSeedlingLeaf.leafTdoParams.object3D.triangles.Count
-                this.addExportMaterial(traverser, u3dexport.kExportPartSeedlingLeaf, -1)
+                traverser.total3DExportTrianglesIn3DObjects += this.plant.pSeedlingLeaf.leafTdoParams.object3D.triangles.length
+                this.addExportMaterial(traverser, ExportPart.kExportPartSeedlingLeaf, -1)
             }
             // not seedling leaf
         } else {
             if (this.plant.pLeaf.leafTdoParams.scaleAtFullSize > 0) {
                 // leaf (considering compound leaf)
                 traverser.total3DExportPointsIn3DObjects += this.plant.pLeaf.leafTdoParams.object3D.pointsInUse * this.plant.pLeaf.compoundNumLeaflets
-                traverser.total3DExportTrianglesIn3DObjects += this.plant.pLeaf.leafTdoParams.object3D.triangles.Count * this.plant.pLeaf.compoundNumLeaflets
-                this.addExportMaterial(traverser, u3dexport.kExportPartLeaf, -1)
+                traverser.total3DExportTrianglesIn3DObjects += this.plant.pLeaf.leafTdoParams.object3D.triangles.length * this.plant.pLeaf.compoundNumLeaflets
+                this.addExportMaterial(traverser, ExportPart.kExportPartLeaf, -1)
             }
             if (this.plant.pLeaf.stipuleTdoParams.scaleAtFullSize > 0) {
                 // stipule
                 traverser.total3DExportPointsIn3DObjects += this.plant.pLeaf.stipuleTdoParams.object3D.pointsInUse
-                traverser.total3DExportTrianglesIn3DObjects += this.plant.pLeaf.stipuleTdoParams.object3D.triangles.Count
-                this.addExportMaterial(traverser, u3dexport.kExportPartLeafStipule, -1)
+                traverser.total3DExportTrianglesIn3DObjects += this.plant.pLeaf.stipuleTdoParams.object3D.triangles.length
+                this.addExportMaterial(traverser, ExportPart.kExportPartLeafStipule, -1)
             }
         }
         if (this.plant.pLeaf.petioleLengthAtOptimalBiomass_mm > 0) {
             // petiole
             traverser.total3DExportStemSegments += 1
             if (this.isSeedlingLeaf) {
-                this.addExportMaterial(traverser, u3dexport.kExportPartFirstPetiole, -1)
+                this.addExportMaterial(traverser, ExportPart.kExportPartFirstPetiole, -1)
             } else {
-                this.addExportMaterial(traverser, u3dexport.kExportPartPetiole, -1)
+                this.addExportMaterial(traverser, ExportPart.kExportPartPetiole, -1)
             }
             if (this.plant.pLeaf.compoundNumLeaflets > 1) {
                 // petiolets + compound leaf internodes
@@ -249,9 +231,8 @@ export class PdLeaf {
         }
     }
     
-    tdoToSortLinesWith(): KfObject3D {
-        let result = new KfObject3D()
-        result = null
+    tdoToSortLinesWith(): KfObject3D | null {
+        let result: KfObject3D | null = null
         if (this.plant === null) {
             return result
         }
@@ -264,17 +245,11 @@ export class PdLeaf {
     }
     
     drawWithDirection(direction: float): void {
-        let scale: float
-        let length: float
-        let width: float
-        let angle: float
-        let turtle: KfTurtle
-        
-        turtle = this.plant.turtle
-        if ((turtle === null)) {
+        if ((this.plant.turtle === null)) {
             return
         }
-        this.boundsRect = Rect(0, 0, 0, 0)
+        const turtle: KfTurtle = this.plant.turtle
+        this.boundsRect = new TRect(0, 0, 0, 0)
         if (this.hasFallenOff) {
             return
         }
@@ -290,44 +265,44 @@ export class PdLeaf {
                 this.calculateColors()
             }
             this.plant.turtle.push()
-            if ((direction === uplant.kDirectionRight)) {
+            if (direction === Direction.kDirectionRight) {
                 turtle.rotateX(128)
             }
-            len = this.plant.pLeaf.petioleLengthAtOptimalBiomass_mm * this.propFullSize
-            if ((this.isSeedlingLeaf)) {
-                len = len / 2
-            }
-            width = this.plant.pLeaf.petioleWidthAtOptimalBiomass_mm * this.propFullSize
-            angle = this.angleWithSway(this.plant.pLeaf.petioleAngle)
-            turtle.ifExporting_startNestedGroupOfPlantParts("leaf, petiole and stipule", "LeafPetiole", u3dexport.kNestingTypeLeafAndPetiole)
+            let length = this.plant.pLeaf.petioleLengthAtOptimalBiomass_mm * this.propFullSize
             if (this.isSeedlingLeaf) {
-                this.drawStemSegment(len, width, angle, 0, this.plant.pLeaf.petioleColor, this.plant.pLeaf.petioleTaperIndex, u3dexport.kExportPartPetiole, upart.kUseAmendment)
-                scale = (this.propFullSize * (this.plant.pSeedlingLeaf.leafTdoParams.scaleAtFullSize / 100.0)) * 1.0
+                length = length / 2
+            }
+            const width = this.plant.pLeaf.petioleWidthAtOptimalBiomass_mm * this.propFullSize
+            const angle = this.angleWithSway(this.plant.pLeaf.petioleAngle)
+            turtle.ifExporting_startNestedGroupOfPlantParts("leaf, petiole and stipule", "LeafPetiole", NestingType.kNestingTypeLeafAndPetiole)
+            if (this.isSeedlingLeaf) {
+                this.drawStemSegment(length, width, angle, 0, this.plant.pLeaf.petioleColor, this.plant.pLeaf.petioleTaperIndex, ExportPart.kExportPartPetiole, kUseAmendment)
+                const scale = (this.propFullSize * (this.plant.pSeedlingLeaf.leafTdoParams.scaleAtFullSize / 100.0)) * 1.0
                 this.DrawLeafOrLeaflet(scale)
             } else {
                 if ((this.plant.pLeaf.stipuleTdoParams.scaleAtFullSize > 0)) {
                     this.drawStipule()
                 }
                 if ((this.plant.pLeaf.compoundNumLeaflets <= 1) || this.plant.turtle.drawOptions.simpleLeavesOnly) {
-                    this.drawStemSegment(len, width, angle, 0, this.plant.pLeaf.petioleColor, this.plant.pLeaf.petioleTaperIndex, u3dexport.kExportPartPetiole, upart.kUseAmendment)
-                    scale = this.propFullSize * this.plant.pLeaf.leafTdoParams.scaleAtFullSize / 100.0
+                    this.drawStemSegment(length, width, angle, 0, this.plant.pLeaf.petioleColor, this.plant.pLeaf.petioleTaperIndex, ExportPart.kExportPartPetiole, kUseAmendment)
+                    const scale = this.propFullSize * this.plant.pLeaf.leafTdoParams.scaleAtFullSize / 100.0
                     this.DrawLeafOrLeaflet(scale)
                 } else {
-                    this.drawStemSegment(len, width, angle, 0, this.plant.pLeaf.petioleColor, upart.kDontTaper, u3dexport.kExportPartPetiole, upart.kUseAmendment)
-                    turtle.ifExporting_startNestedGroupOfPlantParts("compound leaf", "CompoundLeaf", u3dexport.kNestingTypeCompoundLeaf)
-                    if ((this.plant.pLeaf.compoundPinnateOrPalmate === uplant.kCompoundLeafPinnate)) {
+                    this.drawStemSegment(length, width, angle, 0, this.plant.pLeaf.petioleColor, kDontTaper, ExportPart.kExportPartPetiole, kUseAmendment)
+                    turtle.ifExporting_startNestedGroupOfPlantParts("compound leaf", "CompoundLeaf", NestingType.kNestingTypeCompoundLeaf)
+                    if ((this.plant.pLeaf.compoundPinnateOrPalmate === CompoundLeafStyle.kCompoundLeafPinnate)) {
                         this.drawCompoundLeafPinnate()
                     } else {
                         this.drawCompoundLeafPalmate()
                     }
-                    turtle.ifExporting_endNestedGroupOfPlantParts(u3dexport.kNestingTypeCompoundLeaf)
+                    turtle.ifExporting_endNestedGroupOfPlantParts(NestingType.kNestingTypeCompoundLeaf)
                 }
             }
             turtle.pop()
-            turtle.ifExporting_endNestedGroupOfPlantParts(u3dexport.kNestingTypeLeafAndPetiole)
+            turtle.ifExporting_endNestedGroupOfPlantParts(NestingType.kNestingTypeLeafAndPetiole)
             turtle.pop()
-        } catch (Exception e) {
-            usupport.messageForExceptionType(e, "PdLeaf.drawWithDirection")
+        } catch (e) {
+            messageForExceptionType(e, "PdLeaf.drawWithDirection")
         }
     }
     
@@ -344,19 +319,10 @@ export class PdLeaf {
     }
     
     drawStipule(): void {
-        let turtle: KfTurtle
-        let scale: float
-        let i: int
-        let turnPortion: int
-        let leftOverDegrees: int
-        let addThisTime: int
-        let addition: float
-        let carryOver: float
-        
-        turtle = this.plant.turtle
-        if ((turtle === null)) {
+        if (this.plant.turtle === null) {
             return
         }
+        const turtle: KfTurtle = this.plant.turtle
         if (this.isSeedlingLeaf) {
             return
         }
@@ -364,35 +330,35 @@ export class PdLeaf {
         turtle.rotateX(this.angleWithSway(this.plant.pLeaf.stipuleTdoParams.xRotationBeforeDraw))
         turtle.rotateY(this.angleWithSway(this.plant.pLeaf.stipuleTdoParams.yRotationBeforeDraw))
         turtle.rotateZ(this.angleWithSway(this.plant.pLeaf.stipuleTdoParams.zRotationBeforeDraw))
-        scale = (this.propFullSize * (this.plant.pLeaf.stipuleTdoParams.scaleAtFullSize / 100.0)) * 1.0
+        const scale = (this.propFullSize * (this.plant.pLeaf.stipuleTdoParams.scaleAtFullSize / 100.0)) * 1.0
         if (this.plant.pLeaf.stipuleTdoParams.repetitions > 1) {
-            turnPortion = 256 / this.plant.pLeaf.stipuleTdoParams.repetitions
-            leftOverDegrees = 256 - turnPortion * this.plant.pLeaf.stipuleTdoParams.repetitions
+            const turnPortion: int = 256 / this.plant.pLeaf.stipuleTdoParams.repetitions
+            const leftOverDegrees: int = 256 - turnPortion * this.plant.pLeaf.stipuleTdoParams.repetitions
+            let addition: float
             if (leftOverDegrees > 0) {
                 addition = leftOverDegrees / this.plant.pLeaf.stipuleTdoParams.repetitions
             } else {
                 addition = 0
             }
-            carryOver = 0
-            for (i = 1; i <= this.plant.pLeaf.stipuleTdoParams.repetitions; i++) {
-                addThisTime = trunc(addition + carryOver)
+            let carryOver: float = 0
+            for (let i = 1; i <= this.plant.pLeaf.stipuleTdoParams.repetitions; i++) {
+                const addThisTime: int = Math.trunc(addition + carryOver)
                 carryOver = carryOver + addition - addThisTime
                 if (carryOver < 0) {
                     carryOver = 0
                 }
                 turtle.rotateY(turnPortion + addThisTime)
                 if (this.plant.pLeaf.stipuleTdoParams.object3D !== null) {
-                    this.draw3DObject(this.plant.pLeaf.stipuleTdoParams.object3D, scale, this.plant.pLeaf.stipuleTdoParams.faceColor, this.plant.pLeaf.stipuleTdoParams.backfaceColor, u3dexport.kExportPartLeafStipule)
+                    this.draw3DObject(this.plant.pLeaf.stipuleTdoParams.object3D, scale, this.plant.pLeaf.stipuleTdoParams.faceColor, this.plant.pLeaf.stipuleTdoParams.backfaceColor, ExportPart.kExportPartLeafStipule)
                 }
             }
         } else if (this.plant.pLeaf.stipuleTdoParams.object3D !== null) {
-            this.draw3DObject(this.plant.pLeaf.stipuleTdoParams.object3D, scale, this.plant.pLeaf.stipuleTdoParams.faceColor, this.plant.pLeaf.stipuleTdoParams.backfaceColor, u3dexport.kExportPartLeafStipule)
+            this.draw3DObject(this.plant.pLeaf.stipuleTdoParams.object3D, scale, this.plant.pLeaf.stipuleTdoParams.faceColor, this.plant.pLeaf.stipuleTdoParams.backfaceColor, ExportPart.kExportPartLeafStipule)
         }
         turtle.pop()
     }
     
     DrawLeafOrLeaflet(aScale: float): void {
-        let turtle: KfTurtle
         let rotateAngle: float
         let tdo: KfObject3D
         let useFaceColor: TColorRef
@@ -400,10 +366,10 @@ export class PdLeaf {
         
         //Draw leaf only. If seedling leaf (on first phytomer), draw seedling leaf 3D object and colors instead.
         //    Wilt leaf according to water stress and age.
-        turtle = this.plant.turtle
-        if ((turtle === null)) {
+        if (this.plant.turtle === null) {
             return
         }
+        const turtle: KfTurtle = this.plant.turtle
         if (this.isSeedlingLeaf) {
             turtle.setLineWidth(1.0)
             useFaceColor = this.plant.pSeedlingLeaf.leafTdoParams.faceColor
@@ -436,27 +402,26 @@ export class PdLeaf {
             tdo = this.plant.pLeaf.leafTdoParams.object3D
         }
         if (tdo !== null) {
-            this.draw3DObject(tdo, aScale, useFaceColor, useBackfaceColor, u3dexport.kExportPartLeaf)
+            this.draw3DObject(tdo, aScale, useFaceColor, useBackfaceColor, ExportPart.kExportPartLeaf)
         }
     }
     
     drawCompoundLeafPinnate(): void {
-        let turtle: KfTurtle
         let scale: float
         let i: int
         
         //Draw compound leaf. Use recursion structure we used to use for whole plant, with no branching.
         //    Leaflets decrease in size as you move up the leaf, simulating a gradual appearance of leaflets.
         //    Note that seedling leaves are never compound.
-        turtle = this.plant.turtle
-        if (turtle === null) {
+        if (this.plant.turtle === null) {
             return
         }
+        const turtle: KfTurtle = this.plant.turtle
         if (this.plant.pLeaf.compoundNumLeaflets <= 0) {
             return
         }
         for (i = this.plant.pLeaf.compoundNumLeaflets; i >= 1; i--) {
-            if ((this.plant.pLeaf.compoundPinnateLeafletArrangement === uplant.kArrangementOpposite)) {
+            if ((this.plant.pLeaf.compoundPinnateLeafletArrangement === LeafArrangement.kArrangementOpposite)) {
                 if ((i !== 1) && (i % 2 === 1)) {
                     // v2 added opposite leaflets
                     this.drawCompoundLeafInternode(i)
@@ -473,19 +438,14 @@ export class PdLeaf {
     }
     
     drawCompoundLeafInternode(count: int): void {
-        let length: float
-        let width: float
-        let angleZ: float
-        let angleY: float
-        
         //Draw internode of leaflet (portion of rachis). This is almost identical to drawing the petiole, etc,
         //   but a bit of random drift is included to make the compound leaf look more single.
-        len = this.plant.pLeaf.petioleLengthAtOptimalBiomass_mm * this.propFullSize * this.plant.pLeaf.compoundRachisToPetioleRatio / 100.0
-        width = this.plant.pLeaf.petioleWidthAtOptimalBiomass_mm * this.propFullSize
+        const length = this.plant.pLeaf.petioleLengthAtOptimalBiomass_mm * this.propFullSize * this.plant.pLeaf.compoundRachisToPetioleRatio / 100.0
+        const width = this.plant.pLeaf.petioleWidthAtOptimalBiomass_mm * this.propFullSize
         // v1.6b3
-        angleZ = this.compoundLeafAngleWithSway(this.bendAngleForCompoundLeaf(count), count)
-        angleY = this.compoundLeafAngleWithSway(0, count)
-        this.drawStemSegment(len, width, angleZ, angleY, this.plant.pLeaf.petioleColor, upart.kDontTaper, u3dexport.kExportPartPetiole, upart.kDontUseAmendment)
+        const angleZ = this.compoundLeafAngleWithSway(this.bendAngleForCompoundLeaf(count), count)
+        const angleY = this.compoundLeafAngleWithSway(0, count)
+        this.drawStemSegment(length, width, angleZ, angleY, this.plant.pLeaf.petioleColor, kDontTaper, ExportPart.kExportPartPetiole, kDontUseAmendment)
     }
     
     // v1.6b3
@@ -499,9 +459,9 @@ export class PdLeaf {
         if (this.plant === null) {
             return result
         }
-        difference = abs(this.plant.pLeaf.compoundCurveAngleAtFullSize - this.plant.pLeaf.compoundCurveAngleAtStart)
-        leafletNumberEffect = 0.75 + 0.25 * umath.safedivExcept(count, this.plant.pLeaf.compoundNumLeaflets - 1, 0)
-        propFullSizeThisLeaflet = umath.max(0.0, umath.min(1.0, (0.25 + 0.75 * this.propFullSize) * leafletNumberEffect))
+        difference = Math.abs(this.plant.pLeaf.compoundCurveAngleAtFullSize - this.plant.pLeaf.compoundCurveAngleAtStart)
+        leafletNumberEffect = 0.75 + 0.25 * safedivExcept(count, this.plant.pLeaf.compoundNumLeaflets - 1, 0)
+        propFullSizeThisLeaflet = max(0.0, min(1.0, (0.25 + 0.75 * this.propFullSize) * leafletNumberEffect))
         if (this.plant.pLeaf.compoundCurveAngleAtFullSize > this.plant.pLeaf.compoundCurveAngleAtStart) {
             result = this.plant.pLeaf.compoundCurveAngleAtStart + difference * propFullSizeThisLeaflet
         } else {
@@ -511,24 +471,21 @@ export class PdLeaf {
     }
     
     DrawCompoundLeafPetioletCount(scale: float, aCount: int): void {
-        let length: float
-        let width: float
+        // Draw petiolet, which is the leaflet stem coming off the compound leaf rachis.
+        const length = scale * this.plant.pLeaf.petioleLengthAtOptimalBiomass_mm * this.propFullSize
+        const width = scale * this.plant.pLeaf.petioleWidthAtOptimalBiomass_mm * this.propFullSize
         let angle: float
-        
-        //Draw petiolet, which is the leaflet stem coming off the compound leaf rachis.
-        len = scale * this.plant.pLeaf.petioleLengthAtOptimalBiomass_mm * this.propFullSize
-        width = scale * this.plant.pLeaf.petioleWidthAtOptimalBiomass_mm * this.propFullSize
-        if ((aCount === 1)) {
+        if (aCount === 1) {
             angle = 0
         } else {
-            if ((odd(aCount))) {
+            if (odd(aCount)) {
                 angle = 32
             } else {
                 angle = -32
             }
         }
         angle = this.compoundLeafAngleWithSway(angle, aCount)
-        this.drawStemSegment(len, width, 0, angle, this.plant.pLeaf.petioleColor, this.plant.pLeaf.petioleTaperIndex, u3dexport.kExportPartPetiole, upart.kDontUseAmendment)
+        this.drawStemSegment(length, width, 0, angle, this.plant.pLeaf.petioleColor, this.plant.pLeaf.petioleTaperIndex, ExportPart.kExportPartPetiole, kDontUseAmendment)
     }
     
     compoundLeafAngleWithSway(angle: float, count: int): float {
@@ -549,37 +506,29 @@ export class PdLeaf {
     }
     
     drawCompoundLeafPalmate(): void {
-        let turtle: KfTurtle
-        let scale: float
-        let angle: float
-        let angleOne: float
-        let length: float
-        let width: float
-        
-        let i: int
-        
-        //Draw palmate compound leaf. Use recursion structure we used to use for whole plant, with no branching.
+        // Draw palmate compound leaf. Use recursion structure we used to use for whole plant, with no branching.
         //    In a palmate leaf, leaflets increase in size as you move toward the middle of the leaf.
         //    Note that seedling leaves are never compound.
-        turtle = this.plant.turtle
-        if ((turtle === null)) {
+        if (this.plant.turtle === null) {
             return
         }
-        angleOne = umath.safedivExcept(64, this.plant.pLeaf.compoundNumLeaflets, 0)
+        const turtle: KfTurtle = this.plant.turtle
+        const angleOne = safedivExcept(64, this.plant.pLeaf.compoundNumLeaflets, 0)
         if (this.plant.pLeaf.compoundNumLeaflets > 0) {
-            for (i = this.plant.pLeaf.compoundNumLeaflets; i >= 1; i--) {
+            for (let i = this.plant.pLeaf.compoundNumLeaflets; i >= 1; i--) {
                 turtle.push()
-                if ((i === 1)) {
+                let angle: float
+                if (i === 1) {
                     angle = 0
-                } else if ((odd(i))) {
+                } else if (odd(i)) {
                     angle = angleOne * i * -1
                 } else {
                     angle = angleOne * i * 1
                 }
-                len = this.plant.pLeaf.petioleLengthAtOptimalBiomass_mm * this.propFullSize * this.plant.pLeaf.compoundRachisToPetioleRatio / 100.0
-                width = this.plant.pLeaf.petioleWidthAtOptimalBiomass_mm * this.propFullSize
-                this.drawStemSegment(len, width, 0, angle, this.plant.pLeaf.petioleColor, this.plant.pLeaf.petioleTaperIndex, u3dexport.kExportPartPetiole, upart.kDontUseAmendment)
-                scale = this.propFullSize * this.plant.pLeaf.leafTdoParams.scaleAtFullSize / 100.0
+                const length = this.plant.pLeaf.petioleLengthAtOptimalBiomass_mm * this.propFullSize * this.plant.pLeaf.compoundRachisToPetioleRatio / 100.0
+                const width = this.plant.pLeaf.petioleWidthAtOptimalBiomass_mm * this.propFullSize
+                this.drawStemSegment(length, width, 0, angle, this.plant.pLeaf.petioleColor, this.plant.pLeaf.petioleTaperIndex, ExportPart.kExportPartPetiole, kDontUseAmendment)
+                const scale = this.propFullSize * this.plant.pLeaf.leafTdoParams.scaleAtFullSize / 100.0
                 //scale := safedivExcept(scale, plant.pLeaf.compoundNumLeaflets, 0); 
                 this.DrawLeafOrLeaflet(scale)
                 turtle.pop()
@@ -594,13 +543,11 @@ export class PdLeaf {
     }
     
     partType(): int {
-        let result = 0
-        result = uplant.kPartTypeLeaf
-        return result
+        return PartType.kPartTypeLeaf
     }
     
     classAndVersionInformation(cvir: PdClassAndVersionInformationRecord): void {
-        cvir.classNumber = uclasses.kPdLeaf
+        cvir.classNumber = ClassId.kPdLeaf
         cvir.versionNumber = 0
         cvir.additionNumber = 0
     }

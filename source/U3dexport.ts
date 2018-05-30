@@ -48,16 +48,22 @@ export enum ExportPart {
 
 const kLastDxfColorIndex = 10
 const dxfColors = [ColorDefs.clRed, ColorDefs.clYellow, ColorDefs.clLime, ColorDefs.clAqua, ColorDefs.clBlue, ColorDefs.clPurple, ColorDefs.clBlack, ColorDefs.clOlive, ColorDefs.clFuchsia, ColorDefs.clTeal, ColorDefs.clGray, ]
+
 const kColorDXFFromPlantPartType = 0
 const kColorDXFFromRGB = 1
 const kColorDXFFromOneColor = 3
-const kNestingTypeInflorescence = 0
-const kNestingTypeLeafAndPetiole = 1
-const kNestingTypeCompoundLeaf = 2
-const kNestingTypePedicelAndFlowerFruit = 3
-const kNestingTypeFloralLayers = 4
+
+export enum NestingType {
+    kNestingTypeInflorescence = 0,
+    kNestingTypeLeafAndPetiole = 1,
+    kNestingTypeCompoundLeaf = 2,
+    kNestingTypePedicelAndFlowerFruit = 3,
+    kNestingTypeFloralLayers = 4,
+}
+
 const kMaxPOVPlants = 1000
 const kMaxStoredMaterials = 1000
+
 const kVRMLVersionOne = 0
 const kVRMLVersionTwo = 1
 
@@ -769,27 +775,27 @@ export class KfDrawingSurfaceForPOV extends KfTextFileExportSurface {
     
     startNestedGroupOfPlantParts(groupName: string, shortName: string, nestingType: short): void {
         switch (nestingType) {
-            case kNestingTypeInflorescence:
+            case NestingType.kNestingTypeInflorescence:
                 if (!this.options.nest_Inflorescence) {
                     return
                 }
                 break
-            case kNestingTypeLeafAndPetiole:
+            case NestingType.kNestingTypeLeafAndPetiole:
                 if (!this.options.nest_LeafAndPetiole) {
                     return
                 }
                 break
-            case kNestingTypeCompoundLeaf:
+            case NestingType.kNestingTypeCompoundLeaf:
                 if (!this.options.nest_CompoundLeaf) {
                     return
                 }
                 break
-            case kNestingTypePedicelAndFlowerFruit:
+            case NestingType.kNestingTypePedicelAndFlowerFruit:
                 if (!this.options.nest_PedicelAndFlowerFruit) {
                     return
                 }
                 break
-            case kNestingTypeFloralLayers:
+            case NestingType.kNestingTypeFloralLayers:
                 if (!this.options.nest_FloralLayers) {
                     return
                 }
@@ -802,27 +808,27 @@ export class KfDrawingSurfaceForPOV extends KfTextFileExportSurface {
     
     endNestedGroupOfPlantParts(nestingType: short): void {
         switch (nestingType) {
-            case kNestingTypeInflorescence:
+            case NestingType.kNestingTypeInflorescence:
                 if (!this.options.nest_Inflorescence) {
                     return
                 }
                 break
-            case kNestingTypeLeafAndPetiole:
+            case NestingType.kNestingTypeLeafAndPetiole:
                 if (!this.options.nest_LeafAndPetiole) {
                     return
                 }
                 break
-            case kNestingTypeCompoundLeaf:
+            case NestingType.kNestingTypeCompoundLeaf:
                 if (!this.options.nest_CompoundLeaf) {
                     return
                 }
                 break
-            case kNestingTypePedicelAndFlowerFruit:
+            case NestingType.kNestingTypePedicelAndFlowerFruit:
                 if (!this.options.nest_PedicelAndFlowerFruit) {
                     return
                 }
                 break
-            case kNestingTypeFloralLayers:
+            case NestingType.kNestingTypeFloralLayers:
                 if (!this.options.nest_FloralLayers) {
                     return
                 }
@@ -1011,27 +1017,27 @@ export class KfDrawingSurfaceForVRML extends KfTextFileExportSurface {
     startNestedGroupOfPlantParts(groupName: string, shortName: string, nestingType: short): void {
         shortName = this.currentPlantNameShort + "_" + shortName
         switch (nestingType) {
-            case kNestingTypeInflorescence:
+            case NestingType.kNestingTypeInflorescence:
                 if (!this.options.nest_Inflorescence) {
                     return
                 }
                 break
-            case kNestingTypeLeafAndPetiole:
+            case NestingType.kNestingTypeLeafAndPetiole:
                 if (!this.options.nest_LeafAndPetiole) {
                     return
                 }
                 break
-            case kNestingTypeCompoundLeaf:
+            case NestingType.kNestingTypeCompoundLeaf:
                 if (!this.options.nest_CompoundLeaf) {
                     return
                 }
                 break
-            case kNestingTypePedicelAndFlowerFruit:
+            case NestingType.kNestingTypePedicelAndFlowerFruit:
                 if (!this.options.nest_PedicelAndFlowerFruit) {
                     return
                 }
                 break
-            case kNestingTypeFloralLayers:
+            case NestingType.kNestingTypeFloralLayers:
                 if (!this.options.nest_FloralLayers) {
                     return
                 }
@@ -1052,27 +1058,27 @@ export class KfDrawingSurfaceForVRML extends KfTextFileExportSurface {
     
     endNestedGroupOfPlantParts(nestingType: short): void {
         switch (nestingType) {
-            case kNestingTypeInflorescence:
+            case NestingType.kNestingTypeInflorescence:
                 if (!this.options.nest_Inflorescence) {
                     return
                 }
                 break
-            case kNestingTypeLeafAndPetiole:
+            case NestingType.kNestingTypeLeafAndPetiole:
                 if (!this.options.nest_LeafAndPetiole) {
                     return
                 }
                 break
-            case kNestingTypeCompoundLeaf:
+            case NestingType.kNestingTypeCompoundLeaf:
                 if (!this.options.nest_CompoundLeaf) {
                     return
                 }
                 break
-            case kNestingTypePedicelAndFlowerFruit:
+            case NestingType.kNestingTypePedicelAndFlowerFruit:
                 if (!this.options.nest_PedicelAndFlowerFruit) {
                     return
                 }
                 break
-            case kNestingTypeFloralLayers:
+            case NestingType.kNestingTypeFloralLayers:
                 if (!this.options.nest_FloralLayers) {
                     return
                 }

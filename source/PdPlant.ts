@@ -57,8 +57,10 @@ export enum Gender {
     kGenderFemale = 1,
 }
 
-const kCompoundLeafPinnate = 0
-const kCompoundLeafPalmate = 1
+export enum CompoundLeafStyle {
+    kCompoundLeafPinnate = 0,
+    kCompoundLeafPalmate = 1,
+}
 
 export enum LeafArrangement {
     kArrangementAlternate = 0,
