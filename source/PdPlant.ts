@@ -67,10 +67,12 @@ export enum LeafArrangement {
     kArrangementOpposite = 1,
 }
 
-const kStageFlowerBud = 1
-const kStageOpenFlower = 2
-const kStageUnripeFruit = 3
-const kStageRipeFruit = 4
+export enum FlowerFruitStage {
+    kStageFlowerBud = 1,
+    kStageOpenFlower = 2,
+    kStageUnripeFruit = 3,
+    kStageRipeFruit = 4,
+}
 
 export enum PartType {
     kPartTypeNone = 0,
@@ -134,9 +136,11 @@ export enum FloralPart {
     kHighestFloralPartConstant = 8
 }
 
-const kDrawNoBud = 0
-const kDrawSingleTdoBud = 1
-const kDrawOpeningFlower = 2
+export enum DrawFlowerStage {
+    kDrawNoBud = 0,
+    kDrawSingleTdoBud = 1,
+    kDrawOpeningFlower = 2,
+}
 
 const kNotExactAge = false
 const kExactAge = true
