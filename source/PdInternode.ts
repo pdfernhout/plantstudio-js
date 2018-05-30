@@ -1,25 +1,14 @@
-// unit uintern
+// PdInternode was unit uintern
 
-from conversion_common import *
-import uamendmt
-import uclasses
-import uinflor
-import umerist
-import umath
-import utdo
-import u3dexport
-import uturtle
-import udebug
-import usupport
-import utravers
-import ufiler
-import uleaf
-import uplant
-import upart
-import delphi_compatability
+import { PdPlantPart } from "./PdPlantPart";
+import { TColorRef, float, long, int, byte } from "./common";
+import { PdPlant } from "./PdPlant";
+import { PdPlantDrawingAmendment } from "./PdPlantDrawingAmendment";
+import { PdFiler, PdClassAndVersionInformationRecord } from "./temporary";
+import { max, pointsAreCloseEnough, min, safedivExcept } from "./umath";
+import { messageForExceptionType } from "./usupport";
 
-
-export class PdInternode {
+export class PdInternode extends PdPlantPart {
     leftBranchPlantPart: PdPlantPart = new PdPlantPart()
     rightBranchPlantPart: PdPlantPart = new PdPlantPart()
     nextPlantPart: PdPlantPart = new PdPlantPart()
@@ -36,8 +25,6 @@ export class PdInternode {
     isFirstPhytomer: boolean = false
     newBiomassForDay_pctMPB: float = 0.0
     distanceFromFirstPhytomer: long = 0
-    PdInternode.prototype = new PdPlantPart()
-    PdInternode.prototype.constructor = PdInternode
     
     NewWithPlantFractionOfInitialOptimalSize(aPlant: PdPlant, aFraction: float): PdInternode {
         let result = new PdInternode()
@@ -144,13 +131,13 @@ export class PdInternode {
                     // length and width expansion adjustment from new biomass (always decreases because new biomass is compact) 
                     // if liveBiomass_pctMPB is extremely small, these divisions may produce an overflow 
                     // must bound these because some accounting error is causing problems that should be fixed later 
-                    tryExpansion = umath.max(0.0, umath.min(500.0, umath.safedivExcept(this.liveBiomass_pctMPB - this.newBiomassForDay_pctMPB, this.liveBiomass_pctMPB, 0) * this.lengthExpansion + umath.safedivExcept(this.newBiomassForDay_pctMPB, this.liveBiomass_pctMPB, 0) * 1.0))
+                    tryExpansion = max(0.0, min(500.0, safedivExcept(this.liveBiomass_pctMPB - this.newBiomassForDay_pctMPB, this.liveBiomass_pctMPB, 0) * this.lengthExpansion + safedivExcept(this.newBiomassForDay_pctMPB, this.liveBiomass_pctMPB, 0) * 1.0))
                     this.lengthExpansion = tryExpansion
                 } catch (e) {
                     // pass
                 }
                 try {
-                    tryExpansion = umath.max(0.0, umath.min(50.0, umath.safedivExcept(this.liveBiomass_pctMPB - this.newBiomassForDay_pctMPB, this.liveBiomass_pctMPB, 0) * this.widthExpansion + umath.safedivExcept(this.newBiomassForDay_pctMPB, this.liveBiomass_pctMPB, 0) * 1.0))
+                    tryExpansion = max(0.0, min(50.0, safedivExcept(this.liveBiomass_pctMPB - this.newBiomassForDay_pctMPB, this.liveBiomass_pctMPB, 0) * this.widthExpansion + safedivExcept(this.newBiomassForDay_pctMPB, this.liveBiomass_pctMPB, 0) * 1.0))
                     this.widthExpansion = tryExpansion
                 } catch (e) {
                     // pass
@@ -174,26 +161,26 @@ export class PdInternode {
             }
             this.checkIfSeedlingLeavesHaveAbscissed()
             this.calculateDistanceFromFirstPhytomer()
-        } catch (Exception e) {
-            usupport.messageForExceptionType(e, "PdInternode.nextDay")
+        } catch (e) {
+            messageForExceptionType(e, "PdInternode.nextDay")
         }
     }
     
     optimalInitialBiomass_pctMPB(plant: PdPlant): float {
         let result = 0.0
-        result = umath.safedivExcept(plant.pInternode.optimalFinalBiomass_pctMPB, plant.pInternode.lengthMultiplierDueToBiomassAccretion * plant.pInternode.widthMultiplierDueToBiomassAccretion, 0)
+        result = safedivExcept(plant.pInternode.optimalFinalBiomass_pctMPB, plant.pInternode.lengthMultiplierDueToBiomassAccretion * plant.pInternode.widthMultiplierDueToBiomassAccretion, 0)
         return result
     }
     
     propFullLength(): float {
         let result = 0.0
-        result = umath.safedivExcept(this.totalBiomass_pctMPB() * this.lengthExpansion * this.boltingExpansion, this.plant.pInternode.optimalFinalBiomass_pctMPB, 0)
+        result = safedivExcept(this.totalBiomass_pctMPB() * this.lengthExpansion * this.boltingExpansion, this.plant.pInternode.optimalFinalBiomass_pctMPB, 0)
         return result
     }
     
     propFullWidth(): float {
         let result = 0.0
-        result = umath.safedivExcept(this.totalBiomass_pctMPB() * this.widthExpansion, this.plant.pInternode.optimalFinalBiomass_pctMPB, 0)
+        result = safedivExcept(this.totalBiomass_pctMPB() * this.widthExpansion, this.plant.pInternode.optimalFinalBiomass_pctMPB, 0)
         return result
     }
     
@@ -241,8 +228,8 @@ export class PdInternode {
                         }
                         this.biomassDemand_pctMPB = utravers.linearGrowthResult(this.liveBiomass_pctMPB, targetBiomass_pctMPB, this.plant.pInternode.minDaysToAccumulateBiomass)
                         traverser.total = traverser.total + this.biomassDemand_pctMPB
-                    } catch (Exception e) {
-                        usupport.messageForExceptionType(e, "PdInternode.traverseActivity (vegetative demand)")
+                    } catch (e) {
+                        messageForExceptionType(e, "PdInternode.traverseActivity (vegetative demand)")
                     }
                     break
                 case utravers.kActivityDemandReproductive:
@@ -254,10 +241,10 @@ export class PdInternode {
                         return
                     }
                     try {
-                        this.newBiomassForDay_pctMPB = umath.max(0.0, this.biomassDemand_pctMPB * traverser.fractionOfPotentialBiomass)
+                        this.newBiomassForDay_pctMPB = max(0.0, this.biomassDemand_pctMPB * traverser.fractionOfPotentialBiomass)
                         this.liveBiomass_pctMPB = this.liveBiomass_pctMPB + this.newBiomassForDay_pctMPB
-                    } catch (Exception e) {
-                        usupport.messageForExceptionType(e, "PdInternode.traverseActivity (vegetative growth)")
+                    } catch (e) {
+                        messageForExceptionType(e, "PdInternode.traverseActivity (vegetative growth)")
                     }
                     break
                 case utravers.kActivityGrowReproductive:
@@ -265,7 +252,7 @@ export class PdInternode {
                 case utravers.kActivityStartReproduction:
                     break
                 case utravers.kActivityFindPlantPartAtPosition:
-                    if (umath.pointsAreCloseEnough(traverser.point, this.position())) {
+                    if (pointsAreCloseEnough(traverser.point, this.position())) {
                         //Recurse available photosynthate allocated to reproductive growth to all plant parts.
                         //      Only meristems and fruits will incorporate it.
                         //Send signal to consider reproductive mode to all meristems on plant.
@@ -319,11 +306,11 @@ export class PdInternode {
                     this.countPointsAndTrianglesFor3DExportAndAddToTraverserTotals(traverser)
                     break
                 default:
-                    throw new GeneralException.create("Problem: Unhandled mode in method PdInternode.traverseActivity.")
+                    throw new Error("Problem: Unhandled mode in method PdInternode.traverseActivity.")
                     break
             }
-        } catch (Exception e) {
-            usupport.messageForExceptionType(e, "PdInternode.traverseActivity")
+        } catch (e) {
+            messageForExceptionType(e, "PdInternode.traverseActivity")
         }
     }
     
@@ -491,8 +478,8 @@ export class PdInternode {
             if (this.rightLeaf !== null) {
                 this.rightLeaf.drawWithDirection(uplant.kDirectionRight)
             }
-        } catch (Exception e) {
-            usupport.messageForExceptionType(e, "PdInternode.draw")
+        } catch (e) {
+            messageForExceptionType(e, "PdInternode.draw")
         }
     }
     
@@ -513,9 +500,9 @@ export class PdInternode {
                 this.plant.turtle.rotateX(128)
             }
         }
-        len = umath.max(0.0, this.propFullLength() * this.plant.pInternode.lengthAtOptimalFinalBiomassAndExpansion_mm)
-        width = umath.max(0.0, this.propFullWidth() * this.plant.pInternode.widthAtOptimalFinalBiomassAndExpansion_mm)
-        this.drawStemSegment(len, width, zAngle, 0, this.internodeColor, upart.kDontTaper, u3dexport.kExportPartInternode, upart.kUseAmendment)
+        length = max(0.0, this.propFullLength() * this.plant.pInternode.lengthAtOptimalFinalBiomassAndExpansion_mm)
+        width = max(0.0, this.propFullWidth() * this.plant.pInternode.widthAtOptimalFinalBiomassAndExpansion_mm)
+        this.drawStemSegment(length, width, zAngle, 0, this.internodeColor, upart.kDontTaper, u3dexport.kExportPartInternode, upart.kUseAmendment)
     }
     
     drawRootTop(): void {
@@ -533,7 +520,7 @@ export class PdInternode {
         if ((turtle === null)) {
             return
         }
-        scale = umath.safedivExcept(this.plant.age, this.plant.pGeneral.ageAtMaturity, 0) * this.plant.pRoot.tdoParams.scaleAtFullSize / 100.0
+        scale = safedivExcept(this.plant.age, this.plant.pGeneral.ageAtMaturity, 0) * this.plant.pRoot.tdoParams.scaleAtFullSize / 100.0
         turtle.push()
         minZ = 0
         tdo = this.plant.pRoot.tdoParams.object3D
@@ -587,7 +574,7 @@ export class PdInternode {
                 return
             }
         }
-        if (umath.safedivExcept(this.plant.age, this.plant.pGeneral.ageAtMaturity, 0) < 0.25) {
+        if (safedivExcept(this.plant.age, this.plant.pGeneral.ageAtMaturity, 0) < 0.25) {
             // absolute cut-off 
             return
         }
@@ -686,7 +673,7 @@ export class PdInternode {
                     // PDF PORT inserted semicolon
                     break
                 default:
-                    GeneralException.create("PdInternode: unknown plant part type " + IntToStr(partType))
+                    Error("PdInternode: unknown plant part type " + IntToStr(partType))
                     break
             }
         }

@@ -118,17 +118,6 @@ export class PdBitmap extends PdStreamableObject {
     }
 }
 
-// TODO: Fix PdInternode stub
-export class PdInternode extends PdPlantPart {
-    traversingDirection: number
-    phytomerAttachedTo: PdInternode
-    leftBranchPlantPart: PdInternode | null
-    rightBranchPlantPart: PdInternode | null
-    nextPlantPart: PdInternode | null
-    isPhytomer() { return true }
-    traverseActivity(mode: number, traverser: PdTraverser) {}
-}
-
 // Fix TListCollection_streamUsingFiler derived From ucollect -- not sure where to put code
 export function TListCollection_streamUsingFiler(list: PdStreamableObject[], filer: PdFiler, functionForCreating: () => PdStreamableObject): void {
     let countOnStream: long = 0

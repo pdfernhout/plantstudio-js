@@ -1,6 +1,6 @@
 // PdPlant was unit Uplant
 
-import { PdStreamableObject, ExportFormats, DebugPrint, ucursor, MainForm, PdBitmap, PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof, PdInternode, TListCollection_streamUsingFiler, ExportPart, CursorMode, TimeSeriesForm } from "./temporary"
+import { PdStreamableObject, DebugPrint, ucursor, MainForm, PdBitmap, PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof, TListCollection_streamUsingFiler, CursorMode, TimeSeriesForm } from "./temporary"
 import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor, ColorDefs, StrToIntDef, IntToStr, compareTextIgnoreCase, arrayRemove, TextFile, writeln, eof } from "./common"
 import { KfObject3D, kEmbeddedInPlant } from "./KfObject3D"
 import { TPoint } from "./TPoint"
@@ -18,7 +18,7 @@ import { PdPlantDrawingAmendment, kStartAmendmentString } from "./PdPlantDrawing
 import { PdPlantPart } from "./PdPlantPart"
 import { SinglePoint, messageForExceptionType, support_rgb, boundForString, stringUpTo, strToBool, stringBeyond, tolerantReadln, trimLeftAndRight, boolToStr, rgbStringToColor, digitValueString } from "./usupport"
 import { Plant_directTransferField, kFruitSCurve, kLeafSCurve, kGeneralGrowthSCurve, kGeneralAgeAtMaturity, kFlowerMaleBudOption, kFlowerFemaleBudOption, kLeafCompoundPinnateArrangement, kMeristemAndLeafArrangement, kLeafCompoundPinnateOrPalmate, kGeneralStartingSeedForRandomNumberGenerator, kStateBasePointY } from "./utransfr";
-import { KfFileExportSurface } from "./U3dexport";
+import { KfFileExportSurface, ExportPart, ExportFormats } from "./U3dexport";
 import { PdMeristem } from "./PdMeristem";
 
 /* Remove unused imports
