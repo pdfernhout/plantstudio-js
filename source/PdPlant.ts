@@ -176,9 +176,9 @@ export class ParamsGeneral {
 // access->pLeaf 
 // record
 export class ParamsLeaf {
-    leafTdoParams: TdoParamsStructure
-    stipuleTdoParams: TdoParamsStructure
-    sCurveParams: SCurveStructure
+    leafTdoParams: TdoParamsStructure = new TdoParamsStructure()
+    stipuleTdoParams: TdoParamsStructure = new TdoParamsStructure()
+    sCurveParams: SCurveStructure = new SCurveStructure()
     petioleColor: TColorRef
     optimalBiomass_pctMPB: float
     optimalFractionOfOptimalBiomassAtCreation_frn: float
@@ -201,7 +201,7 @@ export class ParamsLeaf {
 // access->pSeedlingLeaf 
 // record
 export class ParamsSeedlingLeaf {
-    leafTdoParams: TdoParamsStructure
+    leafTdoParams: TdoParamsStructure = new TdoParamsStructure()
     nodesOnStemWhenFallsOff: short
 }
 
@@ -239,7 +239,7 @@ export class ParamsInternode {
 // kBud = 0; kPistil = 1; kStamens = 2; kFirstPetals = 3; kSecondPetals = 4; kThirdPetals = 5; kSepals = 6;
 // record
 export class ParamsFlower {
-    tdoParams: TdoParamsStructure[] /* kSepals + 1 */
+    tdoParams: TdoParamsStructure[] = Array(FloralPart.kSepals + 1)
     budDrawingOption: short
     optimalBiomass_pctMPB: float
     minFractionOfOptimalInitialBiomassToCreateFlower_frn: float
@@ -262,12 +262,18 @@ export class ParamsFlower {
     filamentWidth_mm: float
     filamentTaperIndex: short
     filamentColor: TColorRef
+
+    constructor() {
+        for (let i = 0; i < this.tdoParams.length; i++) {
+            this.tdoParams[i] = new TdoParamsStructure()
+        }
+    }
 }
 
 // access->pInflor 
 // record
 export class ParamsInflorescence {
-    bractTdoParams: TdoParamsStructure
+    bractTdoParams: TdoParamsStructure = new TdoParamsStructure()
     optimalBiomass_pctMPB: float
     minFractionOfOptimalBiomassToCreateInflorescence_frn: float
     minDaysToCreateInflorescence: short
@@ -302,7 +308,7 @@ export class ParamsInflorescence {
 // access->pAxillaryBud 
 // record
 export class ParamsAxillaryBud {
-    tdoParams: TdoParamsStructure
+    tdoParams: TdoParamsStructure = new TdoParamsStructure()
 }
 
 // access->pMeristem 
@@ -320,8 +326,8 @@ export class ParamsMeristem {
 // access->pFruit 
 // record
 export class ParamsFruit {
-    tdoParams: TdoParamsStructure
-    sCurveParams: SCurveStructure
+    tdoParams: TdoParamsStructure = new TdoParamsStructure()
+    sCurveParams: SCurveStructure = new SCurveStructure()
     optimalBiomass_pctMPB: float
     minDaysToGrow: short
     maxDaysToGrow: short
@@ -332,7 +338,7 @@ export class ParamsFruit {
 // access->pRoot 
 // record
 export class ParamsRoot {
-    tdoParams: TdoParamsStructure
+    tdoParams: TdoParamsStructure = new TdoParamsStructure()
     showsAboveGround: boolean
 }
 
@@ -377,8 +383,8 @@ export class PdPlant extends PdStreamableObject {
     pLeaf: ParamsLeaf = new ParamsLeaf()
     pSeedlingLeaf: ParamsSeedlingLeaf = new ParamsSeedlingLeaf()
     pAxillaryBud: ParamsAxillaryBud = new ParamsAxillaryBud()
-    pInflor: ParamsInflorescence[] /* 1 + 1 */ = Array(1+ 1)
-    pFlower: ParamsFlower[] /* 1 + 1 */ = Array(1+ 1)
+    pInflor: ParamsInflorescence[] = [new ParamsInflorescence(), new ParamsInflorescence()]
+    pFlower: ParamsFlower[] = [new ParamsFlower(), new ParamsFlower()]
     pFruit: ParamsFruit = new ParamsFruit()
     pRoot: ParamsRoot = new ParamsRoot()
     selectedWhenLastSaved: boolean = false
