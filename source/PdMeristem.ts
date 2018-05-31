@@ -1,7 +1,7 @@
 // PdMeristem was unit umerist
 
-import { PdInternode, PdClassAndVersionInformationRecord, PdFiler } from "./temporary"
-import { PdPlant, Gender, PartType, LeafArrangement } from "./PdPlant"
+import { PdClassAndVersionInformationRecord, PdFiler } from "./temporary"
+import { PdPlant, Gender, PartType, LeafArrangement, Direction } from "./PdPlant"
 import { short, long, float, int } from "./common"
 import { PdPlantPart } from "./PdPlantPart"
 import { messageForExceptionType } from "./usupport"
@@ -10,9 +10,15 @@ import { Activity, Statistics, PdTraverser, linearGrowthResult } from "./PdTrave
 import { TRect } from "./TRect"
 import { ClassId } from "./uclasses"
 import { ExportPart } from "./U3dexport"
+import { PdInternode } from "./PdInternode"
+import { PdLeaf } from "./PdLeaf"
+import { PdInflorescence } from "./PdInflorescence"
+import { domain } from "./PdDomain"
+import { KfTurtle } from "./KfTurtle"
+import { KfObject3D } from "./KfObject3D"
 
 export class PdMeristem extends PdPlantPart {
-    phytomerAttachedTo: PdInternode = new PdInternode()
+    phytomerAttachedTo: PdInternode
     daysCreatingThisPlantPart: long = 0
     isActive: boolean = false
     isApical: boolean = false
@@ -93,7 +99,7 @@ export class PdMeristem extends PdPlantPart {
         let result = false
         let decisionPercent: float
         let randomPercent: float
-        let firstOnBranch: PdInternode
+        let firstOnBranch: PdInternode | null
         
         if (this.plant.pMeristem.branchingIndex === 0) {
             //Decide if this meristem is going to become active and branch (start demanding photosynthate).
@@ -131,9 +137,9 @@ export class PdMeristem extends PdPlantPart {
     
     optimalInitialPhytomerBiomass_pctMPB(): float {
         let result = 0.0
-        result = uintern.PdInternode.optimalInitialBiomass_pctMPB(this.plant) + uleaf.PdLeaf.optimalInitialBiomass_pctMPB(this.plant)
-        if (this.plant.pMeristem.branchingAndLeafArrangement === uplant.kArrangementOpposite) {
-            result = result + uleaf.PdLeaf.optimalInitialBiomass_pctMPB(this.plant)
+        result = PdInternode.optimalInitialBiomass_pctMPB(this.plant) + PdLeaf.optimalInitialBiomass_pctMPB(this.plant)
+        if (this.plant.pMeristem.branchingAndLeafArrangement === LeafArrangement.kArrangementOpposite) {
+            result = result + PdLeaf.optimalInitialBiomass_pctMPB(this.plant)
         }
         return result
     }
@@ -177,7 +183,7 @@ export class PdMeristem extends PdPlantPart {
                 return
             }
             shouldCreateInflorescence = false
-            optimalInitialBiomass_pctMPB = uinflor.PdInflorescence.optimalInitialBiomass_pctMPB(this.plant, this.gender)
+            optimalInitialBiomass_pctMPB = PdInflorescence.optimalInitialBiomass_pctMPB(this.plant, this.gender)
             if ((this.liveBiomass_pctMPB >= optimalInitialBiomass_pctMPB)) {
                 shouldCreateInflorescence = true
             } else {
@@ -226,9 +232,9 @@ export class PdMeristem extends PdPlantPart {
                         return
                     }
                     try {
-                        optimalBiomass_pctMPB = uintern.PdInternode.optimalInitialBiomass_pctMPB(this.plant) + uleaf.PdLeaf.optimalInitialBiomass_pctMPB(this.plant)
+                        optimalBiomass_pctMPB = PdInternode.optimalInitialBiomass_pctMPB(this.plant) + PdLeaf.optimalInitialBiomass_pctMPB(this.plant)
                         if (this.plant.pMeristem.branchingAndLeafArrangement === LeafArrangement.kArrangementOpposite) {
-                            optimalBiomass_pctMPB = optimalBiomass_pctMPB + uleaf.PdLeaf.optimalInitialBiomass_pctMPB(this.plant)
+                            optimalBiomass_pctMPB = optimalBiomass_pctMPB + PdLeaf.optimalInitialBiomass_pctMPB(this.plant)
                         }
                         this.biomassDemand_pctMPB = linearGrowthResult(this.liveBiomass_pctMPB, optimalBiomass_pctMPB, this.plant.pInternode.minDaysToCreateInternode)
                         traverser.total = traverser.total + this.biomassDemand_pctMPB
@@ -246,7 +252,7 @@ export class PdMeristem extends PdPlantPart {
                         return
                     }
                     try {
-                        this.biomassDemand_pctMPB = linearGrowthResult(this.liveBiomass_pctMPB, this.plant.pInflor[self.gender].optimalBiomass_pctMPB, this.plant.pInflor[self.gender].minDaysToCreateInflorescence)
+                        this.biomassDemand_pctMPB = linearGrowthResult(this.liveBiomass_pctMPB, this.plant.pInflor[this.gender].optimalBiomass_pctMPB, this.plant.pInflor[this.gender].minDaysToCreateInflorescence)
                         traverser.total = traverser.total + this.biomassDemand_pctMPB
                     } catch (e) {
                         messageForExceptionType(e, "PdMeristem.traverseActivity (reproductive demand)")
@@ -391,7 +397,7 @@ export class PdMeristem extends PdPlantPart {
         }
         if (this.plant.pAxillaryBud.tdoParams.scaleAtFullSize > 0) {
             traverser.total3DExportPointsIn3DObjects += this.plant.pAxillaryBud.tdoParams.object3D.pointsInUse * this.plant.pAxillaryBud.tdoParams.repetitions
-            traverser.total3DExportTrianglesIn3DObjects += this.plant.pAxillaryBud.tdoParams.object3D.triangles.Count * this.plant.pAxillaryBud.tdoParams.repetitions
+            traverser.total3DExportTrianglesIn3DObjects += this.plant.pAxillaryBud.tdoParams.object3D.triangles.length * this.plant.pAxillaryBud.tdoParams.repetitions
             this.addExportMaterial(traverser, ExportPart.kExportPartMeristem, -1)
         }
     }
@@ -407,11 +413,10 @@ export class PdMeristem extends PdPlantPart {
         let newMeristem: PdMeristem
         
         // create new axillary meristem attached to the same phytomer as this apical meristem is attached to.
-        newMeristem = PdMeristem().create()
-        newMeristem.InitializeWithPlant(this.plant)
+        newMeristem = new PdMeristem(this.plant)
         newMeristem.setIfApical(false)
         newMeristem.phytomerAttachedTo = this.phytomerAttachedTo
-        if ((direction === uplant.kDirectionLeft)) {
+        if ((direction === Direction.kDirectionLeft)) {
             this.phytomerAttachedTo.leftBranchPlantPart = newMeristem
         } else {
             this.phytomerAttachedTo.rightBranchPlantPart = newMeristem
@@ -500,8 +505,7 @@ export class PdMeristem extends PdPlantPart {
     
     // create first phytomer of plant with optimal biomass. return phytomer created so plant can hold on to it.
     createFirstPhytomer(): PdInternode {
-        let result = new PdInternode()
-        result = null
+        let result: PdInternode
         try {
             //CreatePhytomer(self.optimalInitialPhytomerBiomass_pctMPB);
             // v1.6b1 -- biomass was wrong, should be fraction
@@ -512,6 +516,7 @@ export class PdMeristem extends PdPlantPart {
             }
         } catch (e) {
             messageForExceptionType(e, "PdMeristem.createFirstPhytomer")
+            throw new Error("Problem in PdMeristem.createFirstPhytomer")
         }
         return result
     }
@@ -522,11 +527,11 @@ export class PdMeristem extends PdPlantPart {
     createInflorescence(fractionOfOptimalSize: float): void {
         let newInflorescence: PdInflorescence
         
-        if (this.plant.partsCreated > udomain.domain.options.maxPartsPerPlant_thousands * 1000) {
+        if (this.plant.partsCreated > domain.options.maxPartsPerPlant_thousands * 1000) {
             // v1.6b1
             return
         }
-        newInflorescence = uinflor.PdInflorescence().create()
+        newInflorescence = new PdInflorescence()
         newInflorescence.initializeGenderApicalOrAxillary(this.plant, this.gender, this.isApical, fractionOfOptimalSize)
         newInflorescence.meristemThatCreatedMe = this
         newInflorescence.phytomerAttachedTo = this.phytomerAttachedTo
@@ -539,7 +544,8 @@ export class PdMeristem extends PdPlantPart {
         } else {
             throw new Error("Problem: Branching incorrect in method PdMeristem.createInflorescence.")
         }
-        this.phytomerAttachedTo = null
+        // TODO: remove need to cast null to use with phytomerAttachedTo
+        this.phytomerAttachedTo = <any>null
     }
     
     createPhytomer(fractionOfFullSize: float): void {
@@ -547,13 +553,13 @@ export class PdMeristem extends PdPlantPart {
         let leftMeristem: PdMeristem
         let rightMeristem: PdMeristem
         
-        if (this.plant.partsCreated > udomain.domain.options.maxPartsPerPlant_thousands * 1000) {
+        if (this.plant.partsCreated > domain.options.maxPartsPerPlant_thousands * 1000) {
             // create new phytomer. fraction of full size is the amount of biomass the meristem accumulated
             // (in the number of days it had to create a phytomer) divided by the optimal biomass of a phytomer.
             // v1.6b1
             return
         }
-        newPhytomer = uintern.PdInternode.NewWithPlantFractionOfInitialOptimalSize(this.plant, fractionOfFullSize)
+        newPhytomer = PdInternode.NewWithPlantFractionOfInitialOptimalSize(this.plant, fractionOfFullSize)
         newPhytomer.phytomerAttachedTo = this.phytomerAttachedTo
         if ((this.phytomerAttachedTo !== null)) {
             if (this.isApical) {
@@ -575,14 +581,14 @@ export class PdMeristem extends PdPlantPart {
             // set up pointers
             this.phytomerAttachedTo = newPhytomer
             this.phytomerAttachedTo.nextPlantPart = this
-            if (this.plant.pMeristem.branchingAndLeafArrangement === uplant.kArrangementAlternate) {
-                leftMeristem = this.createAxillaryMeristem(uplant.kDirectionLeft)
+            if (this.plant.pMeristem.branchingAndLeafArrangement === LeafArrangement.kArrangementAlternate) {
+                leftMeristem = this.createAxillaryMeristem(Direction.kDirectionLeft)
                 if (this.plant.pMeristem.branchingIsSympodial) {
                     leftMeristem.setIfActive(true)
                 }
             } else {
-                leftMeristem = this.createAxillaryMeristem(uplant.kDirectionLeft)
-                rightMeristem = this.createAxillaryMeristem(uplant.kDirectionRight)
+                leftMeristem = this.createAxillaryMeristem(Direction.kDirectionLeft)
+                rightMeristem = this.createAxillaryMeristem(Direction.kDirectionRight)
                 if (this.plant.pMeristem.branchingIsSympodial) {
                     if ((this.plant.randomNumberGenerator.zeroToOne() < 0.5)) {
                         leftMeristem.setIfActive(true)
@@ -599,12 +605,12 @@ export class PdMeristem extends PdPlantPart {
             this.phytomerAttachedTo = newPhytomer
             this.phytomerAttachedTo.nextPlantPart = this
             if (this.plant.pMeristem.branchingIsSympodial) {
-                if (this.plant.pMeristem.branchingAndLeafArrangement === uplant.kArrangementAlternate) {
-                    leftMeristem = this.createAxillaryMeristem(uplant.kDirectionLeft)
+                if (this.plant.pMeristem.branchingAndLeafArrangement === LeafArrangement.kArrangementAlternate) {
+                    leftMeristem = this.createAxillaryMeristem(Direction.kDirectionLeft)
                     leftMeristem.setIfActive(true)
                 } else {
-                    leftMeristem = this.createAxillaryMeristem(uplant.kDirectionLeft)
-                    rightMeristem = this.createAxillaryMeristem(uplant.kDirectionRight)
+                    leftMeristem = this.createAxillaryMeristem(Direction.kDirectionLeft)
+                    rightMeristem = this.createAxillaryMeristem(Direction.kDirectionRight)
                     if ((this.plant.randomNumberGenerator.zeroToOne() < 0.5)) {
                         leftMeristem.setIfActive(true)
                     } else {
@@ -616,43 +622,34 @@ export class PdMeristem extends PdPlantPart {
     }
     
     draw(): void {
-        let i: int
-        
-        let turtle: KfTurtle
-        let scale: float
-        let daysToFullSize: float
-        let numParts: int
-        let tdo: KfObject3D
-        let minZ: float
-        
         if ((this.plant.pAxillaryBud.tdoParams.scaleAtFullSize === 0)) {
             return
         }
         //Draw meristem (only if buds are enlarged as in Brussels sprouts). Since this only very rarely happens,
         //  have these buds increase to maximum size in a constant number of days (5). Number of sections drawn
         //  (of the 3D object being rotated) is also set to a constant (5).
-        turtle = this.plant.turtle
-        if ((turtle === null)) {
+        if (this.plant.turtle === null) {
             return
         }
+        const turtle: KfTurtle = this.plant.turtle
         this.boundsRect = new TRect(0, 0, 0, 0)
         if (this.hiddenByAmendment()) {
             return
         } else {
             this.applyAmendmentRotations()
         }
-        daysToFullSize = 5
-        scale = (this.plant.pAxillaryBud.tdoParams.scaleAtFullSize / 100.0) * (min(1.0, safedivExcept(this.age, daysToFullSize, 0)))
+        const daysToFullSize = 5
+        const scale = (this.plant.pAxillaryBud.tdoParams.scaleAtFullSize / 100.0) * (min(1.0, safedivExcept(this.age, daysToFullSize, 0)))
         if (this.isApical) {
             return
         }
         try {
-            numParts = 5
-            minZ = 0
-            tdo = this.plant.pAxillaryBud.tdoParams.object3D
-            turtle.ifExporting_startPlantPart(this.longNameForDXFPartConsideringGenderEtc(u3dexport.kExportPartMeristem), this.longNameForDXFPartConsideringGenderEtc(u3dexport.kExportPartMeristem))
+            let numParts = 5
+            let minZ = 0.0
+            const tdo: KfObject3D = this.plant.pAxillaryBud.tdoParams.object3D
+            turtle.ifExporting_startPlantPart(this.longNameForDXFPartConsideringGenderEtc(ExportPart.kExportPartMeristem), this.longNameForDXFPartConsideringGenderEtc(ExportPart.kExportPartMeristem))
             if (numParts > 0) {
-                for (i = 0; i <= numParts - 1; i++) {
+                for (let i = 0; i < numParts; i++) {
                     turtle.rotateX(256 / numParts)
                     turtle.push()
                     turtle.rotateZ(-64)
@@ -660,7 +657,7 @@ export class PdMeristem extends PdPlantPart {
                         turtle.rotateX(this.angleWithSway(this.plant.pAxillaryBud.tdoParams.xRotationBeforeDraw))
                         turtle.rotateY(this.angleWithSway(this.plant.pAxillaryBud.tdoParams.yRotationBeforeDraw))
                         turtle.rotateZ(this.angleWithSway(this.plant.pAxillaryBud.tdoParams.zRotationBeforeDraw))
-                        this.draw3DObject(tdo, scale, this.plant.pAxillaryBud.tdoParams.faceColor, this.plant.pAxillaryBud.tdoParams.backfaceColor, u3dexport.kExportPartMeristem)
+                        this.draw3DObject(tdo, scale, this.plant.pAxillaryBud.tdoParams.faceColor, this.plant.pAxillaryBud.tdoParams.backfaceColor, ExportPart.kExportPartMeristem)
                         if (i === 1) {
                             minZ = tdo.zForSorting
                         } else if (tdo.zForSorting < minZ) {

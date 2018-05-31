@@ -82,7 +82,7 @@ export class PdInflorescence extends PdPlantPart {
         }
     }
     
-    optimalInitialBiomass_pctMPB(drawingPlant: PdPlant, gender: int): float {
+    static optimalInitialBiomass_pctMPB(drawingPlant: PdPlant, gender: int): float {
         let result = 0.0
         if ((gender < 0) || (gender > 1)) {
             result = 0.0
