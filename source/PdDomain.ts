@@ -1517,4 +1517,5 @@ export class PdDomain {
     
 }
 
-PdDomain.createDefault()
+// TODO: Someone needs to call this after all files are loaded:
+// PdDomain.createDefault()
