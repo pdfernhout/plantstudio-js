@@ -30,14 +30,19 @@ import delphi_compatability
 
 // const
 const kMaximumRecordedPoints = 10000
-const kAdjustForOrigin = true
-const kDontAdjustForOrigin = false
+
+export const kAdjustForOrigin = true
+export const kDontAdjustForOrigin = false
+
 export const kEmbeddedInPlant = true
 const kInTdoLibrary = false
 const kStandAloneFile = false
+
 const kTdoForeColor = ColorDefs.clSilver
 const kTdoBackColor = ColorDefs.clGray
+
 const kTdoLineContrastIndex = 10
+
 const kStartTdoString = "start 3D object"
 const kEndTdoString = "end 3D object"
 
@@ -861,7 +866,7 @@ export class KfObject3D extends PdStreamableObject {
     streamDataWithFiler(filer: PdFiler, cvir: PdClassAndVersionInformationRecord): void {
         let tempPoint: KfPoint3D = new KfPoint3D()
         
-        PdStreamableObject.prototype.streamDataWithFiler.call(this, filer, cvir)
+        super.streamDataWithFiler(filer, cvir)
         this.name = filer.streamShortString(this.name)
         this.pointsInUse = filer.streamLongint(this.pointsInUse)
         this.originPointIndex = filer.streamLongint(this.originPointIndex)

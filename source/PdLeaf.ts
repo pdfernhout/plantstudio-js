@@ -59,7 +59,7 @@ export class PdLeaf extends PdPlantPart {
     
     nextDay(): void {
         try {
-            PdPlantPart.prototype.nextDay.call(this)
+            super.nextDay()
             this.checkIfHasAbscissed()
         } catch (e) {
             messageForExceptionType(e, "PdLeaf.nextDay")
@@ -537,7 +537,7 @@ export class PdLeaf extends PdPlantPart {
     }
     
     report(): void {
-        PdPlantPart.prototype.report.call(this)
+        super.report()
         //debugPrint('leaf, age ' + IntToStr(age) + ' biomass ' + floatToStr(liveBiomass_pctMPB));
         //DebugForm.printNested(plant.turtle.stackSize, 'leaf, age ' + IntToStr(age));
     }
@@ -553,7 +553,7 @@ export class PdLeaf extends PdPlantPart {
     }
     
     streamDataWithFiler(filer: PdFiler, cvir: PdClassAndVersionInformationRecord): void {
-        PdPlantPart.prototype.streamDataWithFiler.call(this, filer, cvir)
+        super.streamDataWithFiler(filer, cvir)
         this.sCurveParams = filer.streamBytes(this.sCurveParams, FIX_sizeof(this.sCurveParams))
         this.propFullSize = filer.streamSingle(this.propFullSize)
         this.biomassAtCreation_pctMPB = filer.streamSingle(this.biomassAtCreation_pctMPB)

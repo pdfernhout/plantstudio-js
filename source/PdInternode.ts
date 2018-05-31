@@ -114,7 +114,7 @@ export class PdInternode extends PdPlantPart {
         let tryExpansion: float
         
         try {
-            PdPlantPart.prototype.nextDay.call(this)
+            super.nextDay()
             if (this.liveBiomass_pctMPB > 0) {
                 try {
                     // length and width expansion adjustment from new biomass (always decreases because new biomass is compact) 
@@ -565,7 +565,7 @@ export class PdInternode extends PdPlantPart {
     }
     
     streamDataWithFiler(filer: PdFiler, cvir: PdClassAndVersionInformationRecord): void {
-        PdPlantPart.prototype.streamDataWithFiler.call(this, filer, cvir)
+        super.streamDataWithFiler(filer, cvir)
         filer.streamColorRef(this.internodeColor)
         this.internodeAngle = filer.streamSingle(this.internodeAngle)
         this.lengthExpansion = filer.streamSingle(this.lengthExpansion)

@@ -71,7 +71,7 @@ export class PdMeristem extends PdPlantPart {
     
     nextDay(): void {
         try {
-            PdPlantPart.prototype.nextDay.call(this)
+            super.nextDay()
             if (this.isActive) {
                 this.daysCreatingThisPlantPart += 1
                 if (!this.isReproductive) {
@@ -201,7 +201,7 @@ export class PdMeristem extends PdPlantPart {
         let optimalBiomass_pctMPB: float
         let biomassToRemove_pctMPB: float
         
-        super.traverseActivity.call(this, mode, traverser)
+        super.traverseActivity(mode, traverser)
         if (traverser === null) {
             return
         }
@@ -397,7 +397,7 @@ export class PdMeristem extends PdPlantPart {
     }
     
     report(): void {
-        PdPlantPart.prototype.report.call(this)
+        super.report()
         //debugPrint('meristem, age ' + IntToStr(age) + ' biomass ' + floatToStr(liveBiomass_pctMPB));
         //DebugForm.printNested(plant.turtle.stackSize, 'meristem, age ' + IntToStr(age) + ' biomass '
         //    + floatToStr(liveBiomass_pctMPB));
@@ -790,7 +790,7 @@ export class PdMeristem extends PdPlantPart {
     }
     
     streamDataWithFiler(filer: PdFiler, cvir: PdClassAndVersionInformationRecord): void {
-        PdPlantPart.prototype.streamDataWithFiler.call(this, filer, cvir)
+        super.streamDataWithFiler(filer, cvir)
         this.daysCreatingThisPlantPart = filer.streamLongint(this.daysCreatingThisPlantPart)
         this.isActive = filer.streamBoolean(this.isActive)
         this.isApical = filer.streamBoolean(this.isApical)

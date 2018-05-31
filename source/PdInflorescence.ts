@@ -37,7 +37,7 @@ export class PdInflorescence extends PdPlantPart {
     determineAmendmentAndAlsoForChildrenIfAny(): void {
         let amendmentToPass: PdPlantDrawingAmendment | null
         
-        PdPlantPart.prototype.determineAmendmentAndAlsoForChildrenIfAny.call(this)
+        super.determineAmendmentAndAlsoForChildrenIfAny()
         if (this.amendment !== null) {
             amendmentToPass = this.amendment
         } else {
@@ -98,7 +98,7 @@ export class PdInflorescence extends PdPlantPart {
         let biomassToMakeFlowers_pctMPB: float
         
         try {
-            PdPlantPart.prototype.nextDay.call(this)
+            super.nextDay()
             if (this.flowers.length > 0) {
                 for (i = 0; i < this.flowers.length; i++) {
                     this.flowers[i].nextDay()
@@ -279,7 +279,7 @@ export class PdInflorescence extends PdPlantPart {
     }
     
     report(): void {
-        PdPlantPart.prototype.report.call(this)
+        super.report()
         DebugPrint(IntToStr(this.numFlowers) + " flowers")
         // note flowers will print first 
         // debugPrint('inflorescence, age '  + IntToStr(age));
@@ -733,7 +733,7 @@ export class PdInflorescence extends PdPlantPart {
     }
     
     streamDataWithFiler(filer: PdFiler, cvir: PdClassAndVersionInformationRecord): void {
-        PdPlantPart.prototype.streamDataWithFiler.call(this, filer, cvir)
+        super.streamDataWithFiler(filer, cvir)
         this.daysSinceStartedMakingFlowers = filer.streamSmallint(this.daysSinceStartedMakingFlowers)
         this.numFlowersEachDay = filer.streamSmallint(this.numFlowersEachDay)
         this.numFlowers = filer.streamSmallint(this.numFlowers)

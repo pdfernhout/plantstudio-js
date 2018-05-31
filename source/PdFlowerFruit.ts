@@ -60,7 +60,7 @@ export class PdFlowerFruit extends PdPlantPart {
             return
         }
         try {
-            PdPlantPart.prototype.nextDay.call(this)
+            super.nextDay()
             switch (this.stage) {
                 case FlowerFruitStage.kStageFlowerBud:
                     if (((this.liveBiomass_pctMPB >= this.plant.pFlower[this.gender].minFractionOfOptimalBiomassToOpenFlower_frn * this.plant.pFlower[this.gender].optimalBiomass_pctMPB) || (this.age > this.plant.pFlower[this.gender].maxDaysToGrowIfOverMinFraction)) && (this.age > this.plant.pFlower[this.gender].minDaysToOpenFlower)) {
@@ -309,7 +309,7 @@ export class PdFlowerFruit extends PdPlantPart {
     }
     
     report(): void {
-        PdPlantPart.prototype.report.call(this)
+        super.report()
         // DebugPrint(' flower/fruit, age '  + IntToStr(age) + ' biomass '  + floatToStr(self.liveBiomass_pctMPB));
     }
     
@@ -769,7 +769,7 @@ export class PdFlowerFruit extends PdPlantPart {
     }
     
     streamDataWithFiler(filer: PdFiler, cvir: PdClassAndVersionInformationRecord): void {
-        PdPlantPart.prototype.streamDataWithFiler.call(this, filer, cvir)
+        super.streamDataWithFiler(filer, cvir)
         this.propFullSize = filer.streamSingle(this.propFullSize)
         this.stage = filer.streamSmallint(this.stage)
         this.hasBeenDrawn = filer.streamBoolean(this.hasBeenDrawn)

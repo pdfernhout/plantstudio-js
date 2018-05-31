@@ -200,7 +200,7 @@ export class PdPlantDrawingAmendment extends PdStreamableObject {
     }
     
     streamDataWithFiler(filer: PdFiler, cvir: PdClassAndVersionInformationRecord): void {
-        PdStreamableObject.prototype.streamDataWithFiler.call(this, filer, cvir)
+        super.streamDataWithFiler(filer, cvir)
         this.partID = filer.streamLongint(this.partID)
         this.typeOfPart = filer.streamShortString(this.typeOfPart)
         this.hide = filer.streamBoolean(this.hide)

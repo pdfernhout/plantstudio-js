@@ -698,7 +698,7 @@ export class PdPlantPart extends PdStreamableObject {
     //or the objects streamed out separately afterwards - subclasses overrides
     //need to call inherited to get this behavior
     streamDataWithFiler(filer: PdFiler, cvir: PdClassAndVersionInformationRecord): void {
-        PdStreamableObject.prototype.streamDataWithFiler.call(this, filer, cvir)
+        super.streamDataWithFiler(filer, cvir)
         this.liveBiomass_pctMPB = filer.streamSingle(this.liveBiomass_pctMPB)
         this.deadBiomass_pctMPB = filer.streamSingle(this.deadBiomass_pctMPB)
         this.biomassDemand_pctMPB = filer.streamSingle(this.biomassDemand_pctMPB)

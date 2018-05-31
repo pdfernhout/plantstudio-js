@@ -2,7 +2,7 @@
 
 import { PdStreamableObject, DebugPrint, ucursor, MainForm, PdBitmap, PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof, TListCollection_streamUsingFiler, CursorMode, TimeSeriesForm } from "./temporary"
 import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor, ColorDefs, StrToIntDef, IntToStr, compareTextIgnoreCase, arrayRemove, TextFile, writeln, eof } from "./common"
-import { KfObject3D, kEmbeddedInPlant } from "./KfObject3D"
+import { KfObject3D, kEmbeddedInPlant, kAdjustForOrigin } from "./KfObject3D"
 import { TPoint } from "./TPoint"
 import { TRect } from "./TRect"
 import { KfTurtle } from "./KfTurtle"
@@ -18,7 +18,7 @@ import { PdPlantDrawingAmendment, kStartAmendmentString } from "./PdPlantDrawing
 import { PdPlantPart } from "./PdPlantPart"
 import { SinglePoint, messageForExceptionType, support_rgb, boundForString, stringUpTo, strToBool, stringBeyond, tolerantReadln, trimLeftAndRight, boolToStr, rgbStringToColor, digitValueString } from "./usupport"
 import { Plant_directTransferField, kFruitSCurve, kLeafSCurve, kGeneralGrowthSCurve, kGeneralAgeAtMaturity, kFlowerMaleBudOption, kFlowerFemaleBudOption, kLeafCompoundPinnateArrangement, kMeristemAndLeafArrangement, kLeafCompoundPinnateOrPalmate, kGeneralStartingSeedForRandomNumberGenerator, kStateBasePointY } from "./utransfr";
-import { KfFileExportSurface, ExportPart, ExportFormats } from "./U3dexport";
+import { KfFileExportSurface, ExportPart, ExportFormats, KfDrawingSurfaceFor3DS } from "./U3dexport";
 import { PdMeristem } from "./PdMeristem";
 import { PdInternode } from "./PdInternode";
 
@@ -1359,10 +1359,10 @@ export class PdPlant extends PdStreamableObject {
         if (outputType === ExportFormats.k3DS) {
             for (let i = 0; i <= ExportPart.kExportPartLast; i++) {
                 // for 3DS need to write out all colors in front especially; must be done before reminder
-                fileExportSurface.writeMaterialDescription(i, this.colorForDXFPartType(i))
+                (<KfDrawingSurfaceFor3DS>fileExportSurface).writeMaterialDescription(i, this.colorForDXFPartType(i))
             }
             if (!domain.registered) {
-                fileExportSurface.writeMaterialDescription(-1, support_rgb(100, 100, 100))
+                (<KfDrawingSurfaceFor3DS>fileExportSurface).writeMaterialDescription(-1, support_rgb(100, 100, 100))
             }
         }
         let fixRotation: short
@@ -1502,7 +1502,7 @@ export class PdPlant extends PdStreamableObject {
                 break
             case FieldType.kFieldThreeDObject:
                 let tempTdo: KfObject3D = new KfObject3D()
-                tempTdo.readFromInputString(param.defaultValueString(), utdo.kAdjustForOrigin)
+                tempTdo.readFromInputString(param.defaultValueString(), kAdjustForOrigin)
                 tempTdo = this.transferField(kSetField, tempTdo, param.fieldNumber, param.fieldType, 0, false, null)
                 break
         }
@@ -1537,7 +1537,7 @@ export class PdPlant extends PdStreamableObject {
         let tempFloat: float = 0
         let tempColorRef: TColorRef = 0
         let tempSCurve: SCurveStructure = new SCurveStructure()
-        let tempTdo: KfObject3D
+        let tempTdo: KfObject3D = new KfObject3D()
         
         if (MainForm !== null) {
             // v2.0 saving selection state in main window
@@ -1605,7 +1605,7 @@ export class PdPlant extends PdStreamableObject {
                             }
                             break
                         case FieldType.kFieldThreeDObject:
-                            const tempTdo: KfObject3D = this.transferField(kGetField, tempTdo, param.fieldNumber, param.fieldType, 0, false, null)
+                            tempTdo = this.transferField(kGetField, tempTdo, param.fieldNumber, param.fieldType, 0, false, null)
                             this.writeLine(plantFile, param.name + start + param.fieldID + stop + tempTdo.name)
                             if (this.writingToMemo) {
                                 tempTdo.writeToMemo(MainForm.plantsAsTextMemo)
@@ -2312,11 +2312,11 @@ export class PdPlant extends PdStreamableObject {
         let tdoInflorBractMale: KfObject3D
         let tdoFruit: KfObject3D
         let tdoRoot: KfObject3D
-        let femaleFlowerTdos: KfObject3D[] /* kHighestFloralPartConstant + 1 */
-        let maleFlowerTdos: KfObject3D[] /* kHighestFloralPartConstant + 1 */
+        let femaleFlowerTdos: KfObject3D[] = Array(FloralPart.kHighestFloralPartConstant + 1)
+        let maleFlowerTdos: KfObject3D[] = Array(FloralPart.kHighestFloralPartConstant + 1)
         let hasFirstPhytomer: boolean = false
         
-        PdStreamableObject.prototype.streamDataWithFiler.call(this, filer, cvir)
+        super.streamDataWithFiler(filer, cvir)
         this.name = filer.streamShortString(this.name)
         this.age = filer.streamSmallint(this.age)
         filer.streamSinglePoint(this.basePoint_mm)
