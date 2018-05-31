@@ -842,7 +842,7 @@ export class PdPlant extends PdStreamableObject {
             }
             try {
                 this.computeBounds = true
-                this.drawOn(this.previewCache.Canvas)
+                this.drawOn(this.previewCache.Context)
             } finally {
                 this.computeBounds = false
                 if (showProgress) {
@@ -901,7 +901,7 @@ export class PdPlant extends PdStreamableObject {
         this.turtle = KfTurtle.defaultStartUsing()
         try {
             // set starting values 
-            this.turtle.drawingSurface.pane = cache.Canvas
+            this.turtle.drawingSurface.pane = cache.Context
             if (!this.fixedPreviewScale) {
                 this.drawingScale_PixelsPerMm = 10.0
                 drawPosition = new TPoint(cache.Width / 2, cache.Height - 5)

@@ -12,12 +12,7 @@ PdDomain.createDefault()
 
 let yAngle = 0
 
-const drawingSurface = new KfDrawingSurface(null)
-
-const turtle = new KfTurtle()
-turtle.drawingSurface = drawingSurface
-
-function initDrawingSurface() {
+function initDrawingSurface(drawingSurface: KfDrawingSurface) {
     drawingSurface.backColor = 255
     drawingSurface.foreColor = 255 * 256
     drawingSurface.circleColor = 128 * 256 * 256
@@ -28,65 +23,29 @@ function initDrawingSurface() {
     drawingSurface.circlingPoints = true
 }
 
-function drawWithTurtle() {
-    const rect = new TRect(50, 50, 150, 150)
-    turtle.drawTrianglesFromBoundsRect(rect)
-    drawingSurface.backColor = 128
-    drawingSurface.foreColor = 128 * 256
-    turtle.xyz(300, 300, 0)
-    turtle.moveInPixelsAndRecord(100)
-    turtle.rotateZ(64);
-    turtle.moveInPixelsAndRecord(100)
-    turtle.rotateZ(64);
-    turtle.moveInPixelsAndRecord(100)
-    turtle.drawTriangleFromIndexes(1, 2, 3, 0)
-}
-
-function drawWithTDO() {
-    const exampleTDOMemo = `start 3D object
-    Name=Tutorial leaf
-    Point=0 0 0
-    Point=-7 -75 8
-    Point=1 -77 6
-    Point=-8 -117 6
-    Point=1 -119 4
-    Point=2 -179 2
-    Point=10 -117 6
-    Point=9 -75 7
-    Triangle=1 2 3
-    Triangle=2 4 3
-    Triangle=4 5 3
-    Triangle=4 6 5
-    Triangle=5 6 7
-    Triangle=3 5 7
-    Triangle=3 7 8
-    Triangle=3 8 1
-end 3D object`.split("\n")
-
-    const tdo = new KfObject3D()
-    tdo.readFromMemo(exampleTDOMemo, 0)
-
-    turtle.drawOptions.draw3DObjects = true
-    turtle.xyz(300, 300, 0)
-    turtle.rotateY(yAngle)
-    tdo.draw(turtle, 1.0, "test", "test", 0, 0)
-}
-
 function drawPlant() {
     const plant = new PdPlant()
-    turtle.xyz(300, 300, 0)
-    plant.draw()
+    plant.drawOn(null)
 }
 
 function redrawEverything() {
-    initDrawingSurface()
-    turtle.reset()
-    drawingSurface.recordingStart()
-    // drawWithTurtle()
-    // drawWithTDO()
+    let turtle = KfTurtle.defaultStartUsing()
+    try {
+        initDrawingSurface(turtle.drawingSurface)
+        turtle.reset()
+        turtle.xyz(300, 300, 0)
+        turtle.drawingSurface.recordingStart()
+    } finally {
+        KfTurtle.defaultStopUsing()
+    }
     drawPlant()
-    drawingSurface.recordingStop()
-    drawingSurface.recordingDraw()
+    turtle = KfTurtle.defaultStartUsing()
+    try {
+        turtle.drawingSurface.recordingStop()
+        turtle.drawingSurface.recordingDraw()
+    } finally {
+        KfTurtle.defaultStopUsing()
+    }
 }
 
 redrawEverything()
@@ -105,9 +64,14 @@ const MyComponent = {
                 const context = canvas.getContext("2d")
                 if (!context) return
 
-                drawingSurface.pane = context
-                drawingSurface.recordingDraw()
-                console.log("drawingSurface", drawingSurface)               
+                const turtle = KfTurtle.defaultStartUsing()
+                try {
+                    turtle.drawingSurface.pane = context
+                    turtle.drawingSurface.recordingDraw()
+                    console.log("drawingSurface", turtle.drawingSurface)    
+                } finally {
+                    KfTurtle.defaultStopUsing()
+                }           
             },
             onclick: () => {
                 console.log("onclick")

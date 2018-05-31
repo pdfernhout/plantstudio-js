@@ -122,14 +122,14 @@ export class PdBitmap extends PdStreamableObject {
     }
 
     getPixel(x: int, y: int): TColorRef {
-        const context = this.Canvas
+        const context = this.Context
         if (!context) return 0
         const data = context.getImageData(x, y, 1, 1).data
         const color = support_rgb(data[0], data[1], data[2])
         return color
     }
 
-    get Canvas(): CanvasRenderingContext2D | null {
+    get Context(): CanvasRenderingContext2D | null {
         return this.canvas.getContext("2d")
     }
 

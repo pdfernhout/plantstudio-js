@@ -612,7 +612,6 @@ export class KfTurtle {
     }
     
     static defaultAllocate(): void {
-        gDefaultTurtle = null
         gDefaultTurtle = new KfTurtle()
         gDefaultTurtleInUse = false
     }
