@@ -1,51 +1,32 @@
-// unit uinflor
+// PdInflorescence was unit uinflor
 
-from conversion_common import *
-import usupport
-import uamendmt
-import uclasses
-import umath
-import udomain
-import u3dexport
-import uturtle
-import udebug
-import utravers
-import ufiler
-import ucollect
-import ufruit
-import uplant
-import uintern
-import upart
-import delphi_compatability
+import { short, float, int, intround, arrayRemove, IntToStr } from "./common";
+import { PdPlantPart, kDontTaper, kDontUseAmendment, kUseAmendment } from "./PdPlantPart";
+import { PdInternode } from "./PdInternode";
+import { PdPlantDrawingAmendment } from "./PdPlantDrawingAmendment";
+import { PdPlant, Gender, PartType } from "./PdPlant";
+import { safedivExcept, min, pointsAreCloseEnough, intMin } from "./umath";
+import { messageForExceptionType } from "./usupport";
+import { PdTraverser, Activity, linearGrowthResult, Statistics } from "./PdTraverser";
+import { PdFlowerFruit } from "./PdFlowerFruit";
+import { KfTurtle } from "./KfTurtle";
+import { TRect } from "./TRect";
+import { NestingType, ExportPart } from "./U3dexport";
+import { PdClassAndVersionInformationRecord, PdFiler, TListCollection_streamUsingFiler, DebugPrint } from "./temporary";
+import { ClassId } from "./uclasses";
+import { domain } from "./PdDomain";
 
-
-export class PdInflorescence {
-    flowers: TListCollection = new TListCollection()
+export class PdInflorescence extends PdPlantPart {
+    flowers: PdFlowerFruit[] = []
     numFlowers: short = 0
     numFlowersEachDay: short = 0
     daysBetweenFlowerAppearances: short = 0
     daysSinceLastFlowerAppeared: short = 0
     daysSinceStartedMakingFlowers: short = 0
     isApical: boolean = false
-    meristemThatCreatedMe: PdPlantPart = new PdPlantPart()
-    phytomerAttachedTo: PdInternode = new PdInternode()
+    meristemThatCreatedMe: PdPlantPart | null = null
+    phytomerAttachedTo: PdInternode
     fractionOfOptimalSizeWhenCreated: float = 0.0
-    PdInflorescence.prototype = new PdPlantPart()
-    PdInflorescence.prototype.constructor = PdInflorescence
-    
-    create(): void {
-        PdPlantPart.prototype.create.call(this)
-        this.flowers = ucollect.TListCollection().Create()
-        this.meristemThatCreatedMe = null
-    }
-    
-    destroy(): void {
-        this.flowers.free
-        this.flowers = null
-        this.meristemThatCreatedMe.free
-        this.meristemThatCreatedMe = null
-        PdPlantPart.prototype.destroy.call(this)
-    }
     
     getName(): string {
         let result = ""
@@ -54,8 +35,7 @@ export class PdInflorescence {
     }
     
     determineAmendmentAndAlsoForChildrenIfAny(): void {
-        let i: int
-        let amendmentToPass: PdPlantDrawingAmendment
+        let amendmentToPass: PdPlantDrawingAmendment | null
         
         PdPlantPart.prototype.determineAmendmentAndAlsoForChildrenIfAny.call(this)
         if (this.amendment !== null) {
@@ -63,9 +43,9 @@ export class PdInflorescence {
         } else {
             amendmentToPass = this.parentAmendment
         }
-        if (this.flowers.Count > 0) {
-            for (i = 0; i <= this.flowers.Count - 1; i++) {
-                ufruit.PdFlowerFruit(this.flowers.Items[i]).parentAmendment = amendmentToPass
+        if (this.flowers.length > 0) {
+            for (let i = 0; i < this.flowers.length; i++) {
+                this.flowers[i].parentAmendment = amendmentToPass
             }
         }
     }
@@ -79,11 +59,11 @@ export class PdInflorescence {
             this.isApical = initAsApical
             this.daysSinceLastFlowerAppeared = 0
             this.daysSinceStartedMakingFlowers = 0
-            this.fractionOfOptimalSizeWhenCreated = umath.min(1.0, fractionOfOptimalSize)
+            this.fractionOfOptimalSizeWhenCreated = min(1.0, fractionOfOptimalSize)
             //The inflorescence must know whether it produces flowers slowly (over a greater number of days than flowers)
             //  or produces many flowers in a few days.
             daysToAllFlowers = this.plant.pInflor[this.gender].daysToAllFlowersCreated
-            this.numFlowers = this.plant.pInflor[self.gender].numFlowersOnMainBranch + this.plant.pInflor[self.gender].numFlowersPerBranch * this.plant.pInflor[self.gender].numBranches
+            this.numFlowers = this.plant.pInflor[this.gender].numFlowersOnMainBranch + this.plant.pInflor[this.gender].numFlowersPerBranch * this.plant.pInflor[this.gender].numBranches
             this.daysBetweenFlowerAppearances = 0
             this.numFlowersEachDay = 0
             if (this.numFlowers > 0) {
@@ -92,13 +72,13 @@ export class PdInflorescence {
                 } else if (this.numFlowers === daysToAllFlowers) {
                     this.numFlowersEachDay = 1
                 } else if (this.numFlowers > daysToAllFlowers) {
-                    this.numFlowersEachDay = intround(umath.safedivExcept(1.0 * this.numFlowers, 1.0 * daysToAllFlowers, 0))
+                    this.numFlowersEachDay = intround(safedivExcept(1.0 * this.numFlowers, 1.0 * daysToAllFlowers, 0))
                 } else {
-                    this.daysBetweenFlowerAppearances = intround(umath.safedivExcept(1.0 * daysToAllFlowers, 1.0 * this.numFlowers, 0))
+                    this.daysBetweenFlowerAppearances = intround(safedivExcept(1.0 * daysToAllFlowers, 1.0 * this.numFlowers, 0))
                 }
             }
-        } catch (Exception e) {
-            usupport.messageForExceptionType(e, "PdInflorescence.InitializeGenderApicalOrAxillary")
+        } catch (e) {
+            messageForExceptionType(e, "PdInflorescence.InitializeGenderApicalOrAxillary")
         }
     }
     
@@ -119,19 +99,19 @@ export class PdInflorescence {
         
         try {
             PdPlantPart.prototype.nextDay.call(this)
-            if (this.flowers.Count > 0) {
-                for (i = 0; i <= this.flowers.Count - 1; i++) {
-                    ufruit.PdFlowerFruit(this.flowers.Items[i]).nextDay()
+            if (this.flowers.length > 0) {
+                for (i = 0; i < this.flowers.length; i++) {
+                    this.flowers[i].nextDay()
                 }
             }
             //if self.age < plant.pInflor[gender].maxDaysToGrow then
             biomassToMakeFlowers_pctMPB = this.plant.pInflor[this.gender].minFractionOfOptimalBiomassToMakeFlowers_frn * this.plant.pInflor[this.gender].optimalBiomass_pctMPB
             if (this.liveBiomass_pctMPB >= biomassToMakeFlowers_pctMPB) {
                 this.daysSinceStartedMakingFlowers += 1
-                if ((this.flowers.Count <= 0) && (this.numFlowers > 0)) {
+                if ((this.flowers.length <= 0) && (this.numFlowers > 0)) {
                     // make first flower on first day
                     this.createFlower()
-                } else if ((this.flowers.Count < this.numFlowers)) {
+                } else if ((this.flowers.length < this.numFlowers)) {
                     if ((this.daysBetweenFlowerAppearances > 0)) {
                         if ((this.daysSinceLastFlowerAppeared >= this.daysBetweenFlowerAppearances)) {
                             this.createFlower()
@@ -140,9 +120,9 @@ export class PdInflorescence {
                             this.daysSinceLastFlowerAppeared += 1
                         }
                     } else {
-                        numFlowersToCreateToday = umath.intMin(this.numFlowersEachDay, this.numFlowers - this.flowers.Count)
+                        numFlowersToCreateToday = intMin(this.numFlowersEachDay, this.numFlowers - this.flowers.length)
                         if (numFlowersToCreateToday > 0) {
-                            for (i = 0; i <= numFlowersToCreateToday - 1; i++) {
+                            for (i = 0; i < numFlowersToCreateToday; i++) {
                                 this.createFlower()
                             }
                         }
@@ -150,58 +130,56 @@ export class PdInflorescence {
                     }
                 }
             }
-        } catch (Exception e) {
-            usupport.messageForExceptionType(e, "PdInflorescence.nextDay")
+        } catch (e) {
+            messageForExceptionType(e, "PdInflorescence.nextDay")
         }
     }
     
-    traverseActivity(mode: int, traverserProxy: TObject): void {
-        let traverser: PdTraverser
+    traverseActivity(mode: int, traverser: PdTraverser): void {
         let newBiomass_pctMPB: float
         let biomassToRemove_pctMPB: float
         let i: int
         let numLines: int
         
-        PdPlantPart.prototype.traverseActivity.call(this, mode, traverserProxy)
-        traverser = utravers.PdTraverser(traverserProxy)
+        super.traverseActivity(mode, traverser)
         if (traverser === null) {
             return
         }
-        if (this.hasFallenOff && (mode !== utravers.kActivityStream) && (mode !== utravers.kActivityFree)) {
+        if (this.hasFallenOff && (mode !== Activity.kActivityStream) && (mode !== Activity.kActivityFree)) {
             return
         }
         try {
-            if ((mode !== utravers.kActivityDraw)) {
-                if (this.flowers.Count > 0) {
-                    for (i = 0; i <= this.flowers.Count - 1; i++) {
-                        (ufruit.PdFlowerFruit(this.flowers.Items[i])).traverseActivity(mode, traverser)
+            if ((mode !== Activity.kActivityDraw)) {
+                if (this.flowers.length > 0) {
+                    for (i = 0; i < this.flowers.length; i++) {
+                        this.flowers[i].traverseActivity(mode, traverser)
                     }
                 }
             }
             switch (mode) {
-                case utravers.kActivityNone:
+                case Activity.kActivityNone:
                     break
-                case utravers.kActivityNextDay:
+                case Activity.kActivityNextDay:
                     this.nextDay()
                     break
-                case utravers.kActivityDemandVegetative:
+                case Activity.kActivityDemandVegetative:
                     break
-                case utravers.kActivityDemandReproductive:
+                case Activity.kActivityDemandReproductive:
                     if ((this.age > this.plant.pInflor[this.gender].maxDaysToGrow)) {
                         // no vegetative demand 
                         this.biomassDemand_pctMPB = 0.0
                         return
                     }
                     try {
-                        this.biomassDemand_pctMPB = utravers.linearGrowthResult(this.liveBiomass_pctMPB, this.plant.pInflor[this.gender].optimalBiomass_pctMPB, this.plant.pInflor[this.gender].minDaysToGrow)
+                        this.biomassDemand_pctMPB = linearGrowthResult(this.liveBiomass_pctMPB, this.plant.pInflor[this.gender].optimalBiomass_pctMPB, this.plant.pInflor[this.gender].minDaysToGrow)
                         traverser.total = traverser.total + this.biomassDemand_pctMPB
-                    } catch (Exception e) {
-                        usupport.messageForExceptionType(e, "PdInflorescence.traverseActivity (reproductive demand)")
+                    } catch (e) {
+                        messageForExceptionType(e, "PdInflorescence.traverseActivity (reproductive demand)")
                     }
                     break
-                case utravers.kActivityGrowVegetative:
+                case Activity.kActivityGrowVegetative:
                     break
-                case utravers.kActivityGrowReproductive:
+                case Activity.kActivityGrowReproductive:
                     if (this.age > this.plant.pInflor[this.gender].maxDaysToGrow) {
                         // no vegetative growth 
                         return
@@ -209,67 +187,66 @@ export class PdInflorescence {
                     newBiomass_pctMPB = this.biomassDemand_pctMPB * traverser.fractionOfPotentialBiomass
                     this.liveBiomass_pctMPB = this.liveBiomass_pctMPB + newBiomass_pctMPB
                     break
-                case utravers.kActivityStartReproduction:
+                case Activity.kActivityStartReproduction:
                     break
-                case utravers.kActivityFindPlantPartAtPosition:
-                    if (umath.pointsAreCloseEnough(traverser.point, this.position())) {
+                case Activity.kActivityFindPlantPartAtPosition:
+                    if (pointsAreCloseEnough(traverser.point, this.position())) {
                         // cannot switch 
                         traverser.foundPlantPart = this
                         traverser.finished = true
                     }
                     break
-                case utravers.kActivityDraw:
+                case Activity.kActivityDraw:
                     this.draw()
                     break
-                case utravers.kActivityReport:
+                case Activity.kActivityReport:
                     break
-                case utravers.kActivityStream:
+                case Activity.kActivityStream:
                     break
-                case utravers.kActivityFree:
+                case Activity.kActivityFree:
                     break
-                case utravers.kActivityVegetativeBiomassThatCanBeRemoved:
+                case Activity.kActivityVegetativeBiomassThatCanBeRemoved:
                     break
-                case utravers.kActivityRemoveVegetativeBiomass:
+                case Activity.kActivityRemoveVegetativeBiomass:
                     break
-                case utravers.kActivityReproductiveBiomassThatCanBeRemoved:
+                case Activity.kActivityReproductiveBiomassThatCanBeRemoved:
                     //streaming called by phytomer
                     // free called by phytomer 
                     // none 
                     // none 
                     traverser.total = traverser.total + this.liveBiomass_pctMPB
                     break
-                case utravers.kActivityRemoveReproductiveBiomass:
+                case Activity.kActivityRemoveReproductiveBiomass:
                     biomassToRemove_pctMPB = this.liveBiomass_pctMPB * traverser.fractionOfPotentialBiomass
                     this.liveBiomass_pctMPB = this.liveBiomass_pctMPB - biomassToRemove_pctMPB
                     this.deadBiomass_pctMPB = this.deadBiomass_pctMPB + biomassToRemove_pctMPB
                     break
-                case utravers.kActivityGatherStatistics:
-                    if (this.gender === uplant.kGenderMale) {
-                        this.addToStatistics(traverser.statistics, utravers.kStatisticsPartTypeMaleInflorescence)
+                case Activity.kActivityGatherStatistics:
+                    if (this.gender === Gender.kGenderMale) {
+                        this.addToStatistics(traverser.statistics, Statistics.kStatisticsPartTypeMaleInflorescence)
                     } else {
-                        this.addToStatistics(traverser.statistics, utravers.kStatisticsPartTypeFemaleInflorescence)
+                        this.addToStatistics(traverser.statistics, Statistics.kStatisticsPartTypeFemaleInflorescence)
                     }
-                    this.addToStatistics(traverser.statistics, utravers.kStatisticsPartTypeAllReproductive)
+                    this.addToStatistics(traverser.statistics, Statistics.kStatisticsPartTypeAllReproductive)
                     break
-                case utravers.kActivityCountPlantParts:
+                case Activity.kActivityCountPlantParts:
                     break
-                case utravers.kActivityFindPartForPartID:
+                case Activity.kActivityFindPartForPartID:
                     break
-                case utravers.kActivityCountTotalMemoryUse:
+                case Activity.kActivityCountTotalMemoryUse:
                     traverser.totalMemorySize += this.instanceSize
                     break
-                case utravers.kActivityCalculateBiomassForGravity:
+                case Activity.kActivityCalculateBiomassForGravity:
                     this.biomassOfMeAndAllPartsAboveMe_pctMPB = this.biomassOfMeAndAllPartsConnectedToMe_pctMPB()
                     break
-                case utravers.kActivityCountPointsAndTrianglesFor3DExport:
+                case Activity.kActivityCountPointsAndTrianglesFor3DExport:
                     this.countPointsAndTrianglesFor3DExportAndAddToTraverserTotals(traverser)
                     break
                 default:
-                    throw new GeneralException.create("Problem: Unhandled mode in method PdInflorescence.traverseActivity.")
-                    break
+                    throw new Error("Problem: Unhandled mode in method PdInflorescence.traverseActivity.")
             }
-        } catch (Exception e) {
-            usupport.messageForExceptionType(e, "PdInflorescence.traverseActivity")
+        } catch (e) {
+            messageForExceptionType(e, "PdInflorescence.traverseActivity")
         }
     }
     
@@ -279,11 +256,11 @@ export class PdInflorescence {
         if (traverser === null) {
             return
         }
-        if (this.plant.pInflor[self.gender].bractTdoParams.scaleAtFullSize > 0) {
+        if (this.plant.pInflor[this.gender].bractTdoParams.scaleAtFullSize > 0) {
             // bracts
-            traverser.total3DExportPointsIn3DObjects += this.plant.pInflor[self.gender].bractTdoParams.object3D.pointsInUse * this.plant.pInflor[self.gender].bractTdoParams.repetitions
-            traverser.total3DExportTrianglesIn3DObjects += this.plant.pInflor[self.gender].bractTdoParams.object3D.triangles.Count * this.plant.pInflor[self.gender].bractTdoParams.repetitions
-            this.addExportMaterial(traverser, u3dexport.kExportPartInflorescenceBractFemale, u3dexport.kExportPartInflorescenceBractMale)
+            traverser.total3DExportPointsIn3DObjects += this.plant.pInflor[this.gender].bractTdoParams.object3D.pointsInUse * this.plant.pInflor[this.gender].bractTdoParams.repetitions
+            traverser.total3DExportTrianglesIn3DObjects += this.plant.pInflor[this.gender].bractTdoParams.object3D.triangles.length * this.plant.pInflor[this.gender].bractTdoParams.repetitions
+            this.addExportMaterial(traverser, ExportPart.kExportPartInflorescenceBractFemale, ExportPart.kExportPartInflorescenceBractMale)
         }
         // pedicels and inflorescence internodes
         numLines = this.plant.pInflor[this.gender].numBranches
@@ -291,19 +268,19 @@ export class PdInflorescence {
             numLines = numLines * 2
         }
         if (this.plant.pInflor[this.gender].internodeLength_mm > 0) {
-            this.addExportMaterial(traverser, u3dexport.kExportPartInflorescenceInternodeFemale, u3dexport.kExportPartInflorescenceInternodeMale)
+            this.addExportMaterial(traverser, ExportPart.kExportPartInflorescenceInternodeFemale, ExportPart.kExportPartInflorescenceInternodeMale)
         }
         // peduncle
         numLines += 1
         traverser.total3DExportStemSegments += numLines
         if (this.plant.pInflor[this.gender].peduncleLength_mm > 0) {
-            this.addExportMaterial(traverser, u3dexport.kExportPartInflorescenceStalkFemale, u3dexport.kExportPartInflorescenceStalkMale)
+            this.addExportMaterial(traverser, ExportPart.kExportPartInflorescenceStalkFemale, ExportPart.kExportPartInflorescenceStalkMale)
         }
     }
     
     report(): void {
         PdPlantPart.prototype.report.call(this)
-        udebug.DebugPrint(IntToStr(this.numFlowers) + " flowers")
+        DebugPrint(IntToStr(this.numFlowers) + " flowers")
         // note flowers will print first 
         // debugPrint('inflorescence, age '  + IntToStr(age));
         //DebugForm.printNested(plant.turtle.stackSize, 'inflorescence, age '  + IntToStr(age));
@@ -314,9 +291,9 @@ export class PdInflorescence {
         let i: int
         
         result = this.totalBiomass_pctMPB()
-        if (this.flowers.Count > 0) {
-            for (i = 0; i <= this.flowers.Count - 1; i++) {
-                result = result + (ufruit.PdFlowerFruit(this.flowers.Items[i])).totalBiomass_pctMPB()
+        if (this.flowers.length > 0) {
+            for (i = 0; i < this.flowers.length; i++) {
+                result = result + this.flowers[i].totalBiomass_pctMPB()
             }
         }
         return result
@@ -327,9 +304,9 @@ export class PdInflorescence {
         let i: int
         
         result = true
-        if (this.flowers.Count > 0) {
-            for (i = 0; i <= this.flowers.Count - 1; i++) {
-                if (!((ufruit.PdFlowerFruit(this.flowers.Items[i])).hasBeenDrawn)) {
+        if (this.flowers.length > 0) {
+            for (i = 0; i < this.flowers.length; i++) {
+                if (!this.flowers[i].hasBeenDrawn) {
                     result = false
                     return result
                 }
@@ -338,12 +315,10 @@ export class PdInflorescence {
         return result
     }
     
-    addDependentPartsToList(aList: TList): void {
-        let i: long
-        
-        if (this.flowers.Count > 0) {
-            for (i = 0; i <= this.flowers.Count - 1; i++) {
-                aList.Add(this.flowers.Items[i])
+    addDependentPartsToList(aList: PdPlantPart[]): void {
+        if (this.flowers.length > 0) {
+            for (let i = 0; i < this.flowers.length; i++) {
+                aList.push(this.flowers[i])
             }
         }
     }
@@ -351,30 +326,28 @@ export class PdInflorescence {
     createFlower(): void {
         let aFlowerFruit: PdFlowerFruit
         
-        if (this.plant.partsCreated > udomain.domain.options.maxPartsPerPlant_thousands * 1000) {
+        if (this.plant.partsCreated > domain.options.maxPartsPerPlant_thousands * 1000) {
             // create new flower/fruit object 
             // v1.6b1
             return
         }
-        aFlowerFruit = ufruit.PdFlowerFruit().create()
+        aFlowerFruit = new PdFlowerFruit()
         aFlowerFruit.initializeGender(this.plant, this.gender)
-        this.flowers.Add(aFlowerFruit)
+        this.flowers.push(aFlowerFruit)
     }
     
     deleteFlower(theFlower: PdFlowerFruit): void {
         // remove flower object from list 
-        this.flowers.Remove(theFlower)
+        arrayRemove(this.flowers, theFlower)
     }
     
-    draw(): void {
-        let i: int
-        let turtle: KfTurtle
-        
+    draw(): void {        
         if (!this.shouldDraw()) {
             return
         }
-        turtle = this.plant.turtle
-        this.boundsRect = Rect(0, 0, 0, 0)
+        if (!this.plant.turtle) return
+        const turtle: KfTurtle = this.plant.turtle
+        this.boundsRect = new TRect(0, 0, 0, 0)
         turtle.push()
         if (this.hiddenByAmendment()) {
             // amendment rotation handled in drawStemSegment for peduncle
@@ -382,14 +355,14 @@ export class PdInflorescence {
             return
         }
         try {
-            if (this.flowers.Count > 0) {
-                for (i = 0; i <= this.flowers.Count - 1; i++) {
-                    ufruit.PdFlowerFruit(this.flowers.Items[i]).hasBeenDrawn = false
+            if (this.flowers.length > 0) {
+                for (let i = 0; i < this.flowers.length; i++) {
+                    this.flowers[i].hasBeenDrawn = false
                 }
             }
             this.calculateColors()
-            turtle.ifExporting_startNestedGroupOfPlantParts(this.genderString() + " inflorescence", this.genderString() + "Inflor", u3dexport.kNestingTypeInflorescence)
-            if ((this.flowers.Count > 0)) {
+            turtle.ifExporting_startNestedGroupOfPlantParts(this.genderString() + " inflorescence", this.genderString() + "Inflor", NestingType.kNestingTypeInflorescence)
+            if ((this.flowers.length > 0)) {
                 this.drawBracts()
                 this.drawPeduncle()
                 if ((this.plant.pInflor[this.gender].isHead)) {
@@ -398,23 +371,22 @@ export class PdInflorescence {
                     this.drawApex(this.plant.pInflor[this.gender].numFlowersOnMainBranch, 0, true)
                 }
             }
-            turtle.ifExporting_endNestedGroupOfPlantParts(u3dexport.kNestingTypeInflorescence)
+            turtle.ifExporting_endNestedGroupOfPlantParts(NestingType.kNestingTypeInflorescence)
             turtle.pop()
-        } catch (Exception e) {
-            usupport.messageForExceptionType(e, "PdInflorescence.draw")
+        } catch (e) {
+            messageForExceptionType(e, "PdInflorescence.draw")
         }
     }
     
     shouldDraw(): boolean {
         let result = false
-        let i: long
         let flowerFruit: PdFlowerFruit
         
         // if inflorescence has at least one flower or non-fallen fruit, should draw 
         result = true
-        if (this.flowers.Count > 0) {
-            for (i = 0; i <= this.flowers.Count - 1; i++) {
-                flowerFruit = ufruit.PdFlowerFruit(this.flowers.Items[i])
+        if (this.flowers.length > 0) {
+            for (let i = 0; i < this.flowers.length; i++) {
+                flowerFruit = this.flowers[i]
                 if (flowerFruit === null) {
                     continue
                 }
@@ -427,20 +399,15 @@ export class PdInflorescence {
         return result
     }
     
-    drawApex(internodeCount: int, flowerIndexOffset: int, mainBranch: boolean): void {
-        let turtle: KfTurtle
-        
-        let i: short
-        let branchesDrawn: short
-        
-        i = 0
+    drawApex(internodeCount: int, flowerIndexOffset: int, mainBranch: boolean): void {  
         //Draw inflorescence in raceme, panicle, or umbel form. This method uses the recursive algorithm
         //     we first developed to draw the entire plant.
-        turtle = this.plant.turtle
-        if (turtle === null) {
+        if (this.plant.turtle === null) {
             return
         }
-        branchesDrawn = 0
+        const turtle: KfTurtle = this.plant.turtle
+        let branchesDrawn = 0
+        let i = 0
         if (internodeCount > 0) {
             if (mainBranch) {
                 // draw the flowers on the main stem first, because if any are not going to be drawn for
@@ -498,7 +465,6 @@ export class PdInflorescence {
         let width: float
         let angle: float
         let propFullSize: float
-        let turtle: KfTurtle
         let i: short
         let turnPortion: int
         let leftOverDegrees: int
@@ -506,39 +472,39 @@ export class PdInflorescence {
         let addition: float
         let carryOver: float
         
-        if ((this.plant.turtle === null)) {
-            return
-        }
         if (this.plant.pInflor[this.gender].bractTdoParams.scaleAtFullSize <= 0) {
             return
         }
-        turtle = this.plant.turtle
+        if (this.plant.turtle === null) {
+            return
+        }
+        const turtle: KfTurtle = this.plant.turtle
         turtle.push()
-        turtle.ifExporting_startNestedGroupOfPlantParts(this.longNameForDXFPartConsideringGenderEtc(u3dexport.kExportPartInflorescenceBractFemale), this.shortNameForDXFPartConsideringGenderEtc(u3dexport.kExportPartInflorescenceBractFemale), u3dexport.kNestingTypeInflorescence)
-        propFullSize = umath.safedivExcept(this.liveBiomass_pctMPB, this.plant.pInflor[this.gender].optimalBiomass_pctMPB, 0)
-        scale = ((this.plant.pInflor[self.gender].bractTdoParams.scaleAtFullSize / 100.0) * propFullSize)
-        turtle.rotateX(this.angleWithSway(this.plant.pInflor[self.gender].bractTdoParams.xRotationBeforeDraw))
-        turtle.rotateY(this.angleWithSway(this.plant.pInflor[self.gender].bractTdoParams.yRotationBeforeDraw))
-        turtle.rotateZ(this.angleWithSway(this.plant.pInflor[self.gender].bractTdoParams.zRotationBeforeDraw))
-        if ((this.plant.pInflor[self.gender].bractTdoParams.radiallyArranged) && (this.plant.pInflor[self.gender].bractTdoParams.repetitions > 0)) {
-            turnPortion = 256 / this.plant.pInflor[self.gender].bractTdoParams.repetitions
-            leftOverDegrees = 256 - turnPortion * this.plant.pInflor[self.gender].bractTdoParams.repetitions
+        turtle.ifExporting_startNestedGroupOfPlantParts(this.longNameForDXFPartConsideringGenderEtc(ExportPart.kExportPartInflorescenceBractFemale), this.shortNameForDXFPartConsideringGenderEtc(ExportPart.kExportPartInflorescenceBractFemale), NestingType.kNestingTypeInflorescence)
+        propFullSize = safedivExcept(this.liveBiomass_pctMPB, this.plant.pInflor[this.gender].optimalBiomass_pctMPB, 0)
+        scale = ((this.plant.pInflor[this.gender].bractTdoParams.scaleAtFullSize / 100.0) * propFullSize)
+        turtle.rotateX(this.angleWithSway(this.plant.pInflor[this.gender].bractTdoParams.xRotationBeforeDraw))
+        turtle.rotateY(this.angleWithSway(this.plant.pInflor[this.gender].bractTdoParams.yRotationBeforeDraw))
+        turtle.rotateZ(this.angleWithSway(this.plant.pInflor[this.gender].bractTdoParams.zRotationBeforeDraw))
+        if ((this.plant.pInflor[this.gender].bractTdoParams.radiallyArranged) && (this.plant.pInflor[this.gender].bractTdoParams.repetitions > 0)) {
+            turnPortion = 256 / this.plant.pInflor[this.gender].bractTdoParams.repetitions
+            leftOverDegrees = 256 - turnPortion * this.plant.pInflor[this.gender].bractTdoParams.repetitions
             if (leftOverDegrees > 0) {
-                addition = umath.safedivExcept(leftOverDegrees, this.plant.pInflor[self.gender].bractTdoParams.repetitions, 0)
+                addition = safedivExcept(leftOverDegrees, this.plant.pInflor[this.gender].bractTdoParams.repetitions, 0)
             } else {
                 addition = 0
             }
             carryOver = 0
-            for (i = 0; i <= this.plant.pInflor[self.gender].bractTdoParams.repetitions - 1; i++) {
+            for (i = 0; i < this.plant.pInflor[this.gender].bractTdoParams.repetitions; i++) {
                 turtle.push()
                 //aligns object as stored in the file to way should draw on plant
                 turtle.rotateY(-64)
                 // why? i don't know.
                 turtle.rotateX(64)
-                turtle.rotateX(this.plant.pInflor[self.gender].bractTdoParams.pullBackAngle)
-                this.draw3DObject(this.plant.pInflor[self.gender].bractTdoParams.object3D, scale, this.plant.pInflor[self.gender].bractTdoParams.faceColor, this.plant.pInflor[self.gender].bractTdoParams.backfaceColor, u3dexport.kExportPartInflorescenceBractFemale)
+                turtle.rotateX(this.plant.pInflor[this.gender].bractTdoParams.pullBackAngle)
+                this.draw3DObject(this.plant.pInflor[this.gender].bractTdoParams.object3D, scale, this.plant.pInflor[this.gender].bractTdoParams.faceColor, this.plant.pInflor[this.gender].bractTdoParams.backfaceColor, ExportPart.kExportPartInflorescenceBractFemale)
                 turtle.pop()
-                addThisTime = trunc(addition + carryOver)
+                addThisTime = Math.trunc(addition + carryOver)
                 carryOver = carryOver + addition - addThisTime
                 if (carryOver < 0) {
                     carryOver = 0
@@ -551,12 +517,12 @@ export class PdInflorescence {
             turtle.rotateY(-64)
             // why? i don't know.
             turtle.rotateX(64)
-            turtle.rotateX(this.plant.pInflor[self.gender].bractTdoParams.pullBackAngle)
-            this.draw3DObject(this.plant.pInflor[self.gender].bractTdoParams.object3D, scale, this.plant.pInflor[self.gender].bractTdoParams.faceColor, this.plant.pInflor[self.gender].bractTdoParams.backfaceColor, u3dexport.kExportPartInflorescenceBractFemale)
+            turtle.rotateX(this.plant.pInflor[this.gender].bractTdoParams.pullBackAngle)
+            this.draw3DObject(this.plant.pInflor[this.gender].bractTdoParams.object3D, scale, this.plant.pInflor[this.gender].bractTdoParams.faceColor, this.plant.pInflor[this.gender].bractTdoParams.backfaceColor, ExportPart.kExportPartInflorescenceBractFemale)
             turtle.pop()
         }
         turtle.pop()
-        turtle.ifExporting_endNestedGroupOfPlantParts(u3dexport.kNestingTypeInflorescence)
+        turtle.ifExporting_endNestedGroupOfPlantParts(NestingType.kNestingTypeInflorescence)
     }
     
     drawPeduncle(): void {
@@ -564,6 +530,11 @@ export class PdInflorescence {
         let width: float
         let zAngle: float
         let propFullSize: float
+
+        if (this.plant.turtle === null) {
+            return
+        }
+        const turtle: KfTurtle = this.plant.turtle
         
         try {
             //Draw peduncle, which is the primary inflorescence stalk. If the inflorescence has only one flower,
@@ -572,43 +543,40 @@ export class PdInflorescence {
             zAngle = 0
             if ((this.phytomerAttachedTo !== null)) {
                 if ((this.phytomerAttachedTo.leftBranchPlantPart === this)) {
-                    zAngle = this.plant.pInflor[self.gender].peduncleAngleFromVegetativeStem
+                    zAngle = this.plant.pInflor[this.gender].peduncleAngleFromVegetativeStem
                 } else if ((this.phytomerAttachedTo.rightBranchPlantPart === this)) {
-                    zAngle = this.plant.pInflor[self.gender].peduncleAngleFromVegetativeStem
-                    this.plant.turtle.rotateX(128)
+                    zAngle = this.plant.pInflor[this.gender].peduncleAngleFromVegetativeStem
+                    turtle.rotateX(128)
                 } else if (this.isApical) {
-                    zAngle = this.plant.pInflor[self.gender].apicalStalkAngleFromVegetativeStem
+                    zAngle = this.plant.pInflor[this.gender].apicalStalkAngleFromVegetativeStem
                 }
             }
-            propFullSize = umath.safedivExcept(this.liveBiomass_pctMPB, this.plant.pInflor[this.gender].optimalBiomass_pctMPB, 0)
+            propFullSize = safedivExcept(this.liveBiomass_pctMPB, this.plant.pInflor[this.gender].optimalBiomass_pctMPB, 0)
             if (this.isApical) {
-                len = this.lengthOrWidthAtAgeForFraction(this.plant.pInflor[self.gender].terminalStalkLength_mm, propFullSize)
+                length = this.lengthOrWidthAtAgeForFraction(this.plant.pInflor[this.gender].terminalStalkLength_mm, propFullSize)
             } else {
-                len = this.lengthOrWidthAtAgeForFraction(this.plant.pInflor[self.gender].peduncleLength_mm, propFullSize)
+                length = this.lengthOrWidthAtAgeForFraction(this.plant.pInflor[this.gender].peduncleLength_mm, propFullSize)
             }
-            width = this.lengthOrWidthAtAgeForFraction(this.plant.pInflor[self.gender].internodeWidth_mm, propFullSize)
+            width = this.lengthOrWidthAtAgeForFraction(this.plant.pInflor[this.gender].internodeWidth_mm, propFullSize)
             //Use no angle here because phytomer makes the rotation before the inflorescence is drawn.
-            this.drawStemSegment(len, width, zAngle, 0, this.plant.pInflor[self.gender].stalkColor, upart.kDontTaper, u3dexport.kExportPartInflorescenceStalkFemale, upart.kUseAmendment)
-        } catch (Exception e) {
-            usupport.messageForExceptionType(e, "PdInflorescence.drawPeduncle")
+            this.drawStemSegment(length, width, zAngle, 0, this.plant.pInflor[this.gender].stalkColor, kDontTaper, ExportPart.kExportPartInflorescenceStalkFemale, kUseAmendment)
+        } catch (e) {
+            messageForExceptionType(e, "PdInflorescence.drawPeduncle")
         }
     }
     
     drawAxillaryBud(internodeCount: int, flowerIndexOffset: int): void {
-        let turtle: KfTurtle
-        let angle: float
-        
         //This message is sent when the inflorescence is branched. The decision to create a branch is
         //     made before the message is sent. Note the check if all flowers have been drawn; this prevents
         //     scrawly lines with no flowers.
-        turtle = this.plant.turtle
-        if ((turtle === null)) {
+        if ((this.plant.turtle === null)) {
             return
         }
+        const turtle: KfTurtle = this.plant.turtle
         if ((this.allFlowersHaveBeenDrawn())) {
             return
         }
-        angle = this.angleWithSway(this.plant.pInflor[this.gender].branchAngle)
+        const angle = this.angleWithSway(this.plant.pInflor[this.gender].branchAngle)
         turtle.push()
         turtle.rotateZ(angle)
         this.drawApex(internodeCount, flowerIndexOffset, false)
@@ -621,6 +589,11 @@ export class PdInflorescence {
         let angle: float
         let propFullSize: float
         let flowerIndex: int
+
+        if ((this.plant.turtle === null)) {
+            return
+        }
+        const turtle: KfTurtle = this.plant.turtle
         
         try {
             if ((this.allFlowersHaveBeenDrawn())) {
@@ -634,28 +607,27 @@ export class PdInflorescence {
                 //  In most plants the older flowers are lower.
                 return
             }
-            propFullSize = umath.safedivExcept(this.liveBiomass_pctMPB, this.plant.pInflor[this.gender].optimalBiomass_pctMPB, 0)
-            len = this.lengthOrWidthAtAgeForFraction(this.plant.pInflor[self.gender].pedicelLength_mm, propFullSize)
-            width = this.lengthOrWidthAtAgeForFraction(this.plant.pInflor[self.gender].internodeWidth_mm, propFullSize)
-            angle = this.angleWithSway(this.plant.pInflor[self.gender].pedicelAngle)
+            propFullSize = safedivExcept(this.liveBiomass_pctMPB, this.plant.pInflor[this.gender].optimalBiomass_pctMPB, 0)
+            length = this.lengthOrWidthAtAgeForFraction(this.plant.pInflor[this.gender].pedicelLength_mm, propFullSize)
+            width = this.lengthOrWidthAtAgeForFraction(this.plant.pInflor[this.gender].internodeWidth_mm, propFullSize)
+            angle = this.angleWithSway(this.plant.pInflor[this.gender].pedicelAngle)
             if ((this.plant.pInflor[this.gender].flowersDrawTopToBottom)) {
                 flowerIndex = internodeCount
             } else {
-                flowerIndex = this.flowers.Count - internodeCount + 1
+                flowerIndex = this.flowers.length - internodeCount + 1
             }
-            this.plant.turtle.ifExporting_startNestedGroupOfPlantParts(this.genderString() + " pedicel and flower/fruit", this.genderString() + "PedicelFlower", u3dexport.kNestingTypePedicelAndFlowerFruit)
-            this.drawStemSegment(len, width, angle, 0, this.plant.pInflor[self.gender].pedicelColor, this.plant.pInflor[self.gender].pedicelTaperIndex, u3dexport.kExportPartPedicelFemale, upart.kDontUseAmendment)
-            if ((flowerIndex - 1 >= 0) && (flowerIndex - 1 <= this.flowers.Count - 1)) {
-                ufruit.PdFlowerFruit(this.flowers.Items[flowerIndex - 1]).draw()
+            turtle.ifExporting_startNestedGroupOfPlantParts(this.genderString() + " pedicel and flower/fruit", this.genderString() + "PedicelFlower", NestingType.kNestingTypePedicelAndFlowerFruit)
+            this.drawStemSegment(length, width, angle, 0, this.plant.pInflor[this.gender].pedicelColor, this.plant.pInflor[this.gender].pedicelTaperIndex, ExportPart.kExportPartPedicelFemale, kDontUseAmendment)
+            if ((flowerIndex > 0) && (flowerIndex - 1 < this.flowers.length)) {
+                this.flowers[flowerIndex - 1].draw()
             }
-            this.plant.turtle.ifExporting_endNestedGroupOfPlantParts(u3dexport.kNestingTypePedicelAndFlowerFruit)
-        } catch (Exception e) {
-            usupport.messageForExceptionType(e, "PdInflorescence.drawFlower")
+            this.plant.turtle.ifExporting_endNestedGroupOfPlantParts(NestingType.kNestingTypePedicelAndFlowerFruit)
+        } catch (e) {
+            messageForExceptionType(e, "PdInflorescence.drawFlower")
         }
     }
     
     drawHead(): void {
-        let turtle: KfTurtle
         let i: int
         let turnPortion: int
         let leftOverDegrees: int
@@ -666,26 +638,26 @@ export class PdInflorescence {
         // v1.4
         // v1.4
         //Draw the inflorescences in a radial pattern; this is for a head such as a sunflower.
-        turtle = this.plant.turtle
-        if ((turtle === null)) {
+        if (this.plant.turtle === null) {
             return
         }
+        const turtle: KfTurtle = this.plant.turtle
         turtle.rotateY(64)
         turtle.rotateZ(64)
         // give a little angle down to make it look more natural 
         turtle.rotateY(32)
-        if (this.flowers.Count > 0) {
+        if (this.flowers.length > 0) {
             // new v1.4
-            turnPortion = 256 / this.flowers.Count
-            leftOverDegrees = 256 - turnPortion * this.flowers.Count
+            turnPortion = 256 / this.flowers.length
+            leftOverDegrees = 256 - turnPortion * this.flowers.length
             if (leftOverDegrees > 0) {
-                addition = umath.safedivExcept(leftOverDegrees, this.flowers.Count, 0)
+                addition = safedivExcept(leftOverDegrees, this.flowers.length, 0)
             } else {
                 addition = 0
             }
             carryOver = 0
-            for (i = this.flowers.Count - 1; i >= 0; i--) {
-                addThisTime = trunc(addition + carryOver)
+            for (i = this.flowers.length - 1; i >= 0; i--) {
+                addThisTime = Math.trunc(addition + carryOver)
                 carryOver = carryOver + addition - addThisTime
                 if (carryOver < 0) {
                     carryOver = 0
@@ -714,17 +686,17 @@ export class PdInflorescence {
                 //  straggly lines in branched inflorescences.
                 return
             }
-            if ((this.plant.pInflor[self.gender].internodeLength_mm === 0.0)) {
+            if ((this.plant.pInflor[this.gender].internodeLength_mm === 0.0)) {
                 return
             }
-            propFullSize = umath.safedivExcept(this.liveBiomass_pctMPB, this.plant.pInflor[this.gender].optimalBiomass_pctMPB, 0)
-            len = this.lengthOrWidthAtAgeForFraction(this.plant.pInflor[self.gender].internodeLength_mm, propFullSize)
-            width = this.lengthOrWidthAtAgeForFraction(this.plant.pInflor[self.gender].internodeWidth_mm, propFullSize)
-            zAngle = this.angleWithSway(this.plant.pInflor[self.gender].angleBetweenInternodes)
+            propFullSize = safedivExcept(this.liveBiomass_pctMPB, this.plant.pInflor[this.gender].optimalBiomass_pctMPB, 0)
+            length = this.lengthOrWidthAtAgeForFraction(this.plant.pInflor[this.gender].internodeLength_mm, propFullSize)
+            width = this.lengthOrWidthAtAgeForFraction(this.plant.pInflor[this.gender].internodeWidth_mm, propFullSize)
+            zAngle = this.angleWithSway(this.plant.pInflor[this.gender].angleBetweenInternodes)
             yAngle = this.angleWithSway(0)
-            this.drawStemSegment(len, width, zAngle, yAngle, this.plant.pInflor[self.gender].stalkColor, upart.kDontTaper, u3dexport.kExportPartInflorescenceInternodeFemale, upart.kDontUseAmendment)
-        } catch (Exception e) {
-            usupport.messageForExceptionType(e, "PdInflorescence.drawInternode")
+            this.drawStemSegment(length, width, zAngle, yAngle, this.plant.pInflor[this.gender].stalkColor, kDontTaper, ExportPart.kExportPartInflorescenceInternodeFemale, kDontUseAmendment)
+        } catch (e) {
+            messageForExceptionType(e, "PdInflorescence.drawInternode")
         }
     }
     
@@ -734,39 +706,33 @@ export class PdInflorescence {
         
         result = 0.0
         try {
-            ageBounded = umath.min(this.plant.pInflor[self.gender].daysToAllFlowersCreated, this.daysSinceStartedMakingFlowers)
-            if (this.plant.pInflor[self.gender].daysToAllFlowersCreated !== 0) {
-                result = umath.safedivExcept(starting * ageBounded, this.plant.pInflor[self.gender].daysToAllFlowersCreated, 0) * fraction
+            ageBounded = min(this.plant.pInflor[this.gender].daysToAllFlowersCreated, this.daysSinceStartedMakingFlowers)
+            if (this.plant.pInflor[this.gender].daysToAllFlowersCreated !== 0) {
+                result = safedivExcept(starting * ageBounded, this.plant.pInflor[this.gender].daysToAllFlowersCreated, 0) * fraction
             } else {
                 result = starting * ageBounded * fraction
             }
-        } catch (Exception e) {
-            usupport.messageForExceptionType(e, "PdInflorescence.lengthOrWidthAtAgeForFraction")
+        } catch (e) {
+            messageForExceptionType(e, "PdInflorescence.lengthOrWidthAtAgeForFraction")
         }
         return result
     }
     
     flower(index: int): PdFlowerFruit {
-        let result = new PdFlowerFruit()
-        result = this.flowers.Items[index]
-        return result
+        return this.flowers[index]
     }
     
     partType(): int {
-        let result = 0
-        result = uplant.kPartTypeInflorescence
-        return result
+        return PartType.kPartTypeInflorescence
     }
     
     classAndVersionInformation(cvir: PdClassAndVersionInformationRecord): void {
-        cvir.classNumber = uclasses.kPdInflorescence
+        cvir.classNumber = ClassId.kPdInflorescence
         cvir.versionNumber = 0
         cvir.additionNumber = 0
     }
     
     streamDataWithFiler(filer: PdFiler, cvir: PdClassAndVersionInformationRecord): void {
-        let i: long
-        
         PdPlantPart.prototype.streamDataWithFiler.call(this, filer, cvir)
         this.daysSinceStartedMakingFlowers = filer.streamSmallint(this.daysSinceStartedMakingFlowers)
         this.numFlowersEachDay = filer.streamSmallint(this.numFlowersEachDay)
@@ -778,11 +744,11 @@ export class PdInflorescence {
         if (filer.isReading()) {
             this.meristemThatCreatedMe = null
         }
-        this.flowers.streamUsingFiler(filer, ufruit.PdFlowerFruit)
-        if (filer.isReading() && (this.flowers.Count > 0)) {
-            for (i = 0; i <= this.flowers.Count - 1; i++) {
+        TListCollection_streamUsingFiler(this.flowers, filer, () => new PdFlowerFruit())
+        if (filer.isReading() && (this.flowers.length > 0)) {
+            for (let i = 0; i < this.flowers.length; i++) {
                 // fix up plant in flowers if needed 
-                (ufruit.PdFlowerFruit(this.flowers.Items[i])).plant = this.plant
+                this.flowers[i].plant = this.plant
             }
         }
     }
