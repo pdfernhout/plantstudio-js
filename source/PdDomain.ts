@@ -6,7 +6,8 @@ import { TRect } from "./TRect"
 import { SinglePoint, strToBool, strToFloatWithCommaCheck } from "./usupport"
 import { PdSectionManager } from "./PdSectionManager"
 import { PdParameterManager } from "./PdParameterManager"
-import { ExportFormats, FileExport3DOptionsStructure, nameFor3DExportType, ExportPart, Axis } from "./U3dexport";
+import { ExportFormats, FileExport3DOptionsStructure, nameFor3DExportType, ExportPart, Axis } from "./U3dexport"
+import { PdPlantManager } from "./temporary"
 
 // const
 const kMaxWizardQuestions = 30
@@ -253,7 +254,7 @@ export class PdDomain {
     registrationCode: string = ""
     unregisteredExportCountBeforeThisSession: short = 0
     unregisteredExportCountThisSession: short = 0
-    // TODO: FIX plantManager: PdPlantManager = new PdPlantManager()
+    plantManager: PdPlantManager = new PdPlantManager()
     parameterManager: PdParameterManager = new PdParameterManager()
     sectionManager: PdSectionManager = new PdSectionManager()
     // TODO: FIX hintManager: PdHintManager = new PdHintManager()
@@ -294,13 +295,12 @@ export class PdDomain {
         // v1.5
         // TODO: FIX usupport.setDecimalSeparator()
         // create empty managers 
-        // TODO: FIX this.plantManager = uplantmn.PdPlantManager().create()
         // TODO: FIX this.parameterManager = uparams.PdParameterManager().create()
         // TODO: FIX this.sectionManager = usection.PdSectionManager().create()
         // TODO: FIX this.hintManager = uhints.PdHintManager().create()
         // TODO: FIX this.iniLines = delphi_compatability.TStringList.create
         // non-standard defaults 
-        // TODO: FIX this.plantManager.plantDrawScale_PixelsPerMm = 1.0
+        this.plantManager.plantDrawScale_PixelsPerMm = 1.0
         this.plantDrawScaleWhenDrawingCopy_PixelsPerMm = 1.0
         // TODO: Moved makeParameters call from startupLoading -- is this OK? Need to remove duplicate commented code there eventually
         this.parameterManager.makeParameters()

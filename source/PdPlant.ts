@@ -1,6 +1,6 @@
 // PdPlant was unit Uplant
 
-import { PdStreamableObject, DebugPrint, ucursor, MainForm, PdBitmap, PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof, TListCollection_streamUsingFiler, CursorMode, TimeSeriesForm } from "./temporary"
+import { PdStreamableObject, DebugPrint, ucursor, MainForm, PdBitmap, PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof, TListCollection_streamUsingFiler, CursorMode, TimeSeriesForm, TTransparentMode, setPixelFormatBasedOnScreenForBitmap, TFPPenStyle, TFPBrushStyle, fillBitmap } from "./temporary"
 import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor, ColorDefs, StrToIntDef, IntToStr, compareTextIgnoreCase, arrayRemove, TextFile, writeln, eof } from "./common"
 import { KfObject3D, kEmbeddedInPlant, kAdjustForOrigin } from "./KfObject3D"
 import { TPoint } from "./TPoint"
@@ -485,7 +485,7 @@ export class PdPlant extends PdStreamableObject {
         cache.Width = 1
         cache.Height = 1
         cache.Transparent = true
-        cache.TransparentMode = delphi_compatability.TTransparentMode.tmFixed
+        cache.TransparentMode = TTransparentMode.tmFixed
         cache.TransparentColor = domain.options.backgroundColor
     }
     
@@ -549,8 +549,10 @@ export class PdPlant extends PdStreamableObject {
             throw new Error("Problem: Null turtle in method PdPlant.draw.")
         }
         if (this.turtle.drawingSurface.pane !== null) {
-            this.turtle.drawingSurface.pane.Brush.Style = delphi_compatability.TFPBrushStyle.bsSolid
-            this.turtle.drawingSurface.pane.Pen.Style = delphi_compatability.TFPPenStyle.psSolid
+            /* TODO: Use or remove brush and pen style
+            this.turtle.drawingSurface.pane.Brush.Style = TFPBrushStyle.bsSolid
+            this.turtle.drawingSurface.pane.Pen.Style = TFPPenStyle.psSolid
+            */
         }
         this.turtle.setLineColor(ColorDefs.clGreen)
         this.turtle.push()
@@ -670,7 +672,7 @@ export class PdPlant extends PdStreamableObject {
         return result
     }
     
-    drawOn(destCanvas: TCanvas): void {
+    drawOn(destCanvas: CanvasRenderingContext2D | null): void {
         let realBasePoint_pixels: TPoint
         
         this.turtle = KfTurtle.defaultStartUsing()
@@ -821,7 +823,7 @@ export class PdPlant extends PdStreamableObject {
             this.setBasePoint_pixels(new TPoint(this.basePoint_pixels().X - this.boundsRect_pixels().Left, this.basePoint_pixels().Y - this.boundsRect_pixels().Top))
             this.resizeCacheIfNecessary(this.previewCache, new TPoint(this.boundsRect_pixels().width, this.boundsRect_pixels().height), kInMainWindow)
             this.previewCache.TransparentColor = domain.options.transparentColor
-            ubmpsupport.fillBitmap(this.previewCache, domain.options.transparentColor)
+            fillBitmap(this.previewCache, domain.options.transparentColor)
             // showing progress here is mainly for really complicated plants; most plants won't need it
             let showProgress = (!MainForm.drawing) && (domain.options.showPlantDrawingProgress)
             if (showProgress) {
@@ -888,7 +890,7 @@ export class PdPlant extends PdStreamableObject {
         changed = false
         this.resizeCacheIfNecessary(cache, size, kNotInMainWindow)
         if (immediate) {
-            ubmpsupport.fillBitmap(cache, domain.options.backgroundColor)
+            fillBitmap(cache, domain.options.backgroundColor)
         }
         this.turtle = KfTurtle.defaultStartUsing()
         try {
@@ -949,7 +951,7 @@ export class PdPlant extends PdStreamableObject {
             }
             if ((this.fixedPreviewScale || this.fixedDrawPosition || changed) && (immediate)) {
                 // final drawing 
-                ubmpsupport.fillBitmap(cache, domain.options.backgroundColor)
+                fillBitmap(cache, domain.options.backgroundColor)
                 this.setTurtleUpForPreview(this.drawingScale_PixelsPerMm, drawPosition)
                 // nothing-messes up paint
                 try {
@@ -996,7 +998,7 @@ export class PdPlant extends PdStreamableObject {
             this.previewCache.Width = 1
             this.previewCache.Height = 1
             this.previewCache.Transparent = true
-            this.previewCache.TransparentMode = delphi_compatability.TTransparentMode.tmFixed
+            this.previewCache.TransparentMode = TTransparentMode.tmFixed
             this.previewCache.TransparentColor = domain.options.backgroundColor
         }
     }
@@ -1011,7 +1013,7 @@ export class PdPlant extends PdStreamableObject {
         // you also need to realize the palette anytime you bitblt (copyRect) from this
         // bitmap to a display surface (timage, paint box, draw grid, etc).
         // use the global function copyBitmapToCanvasWithGlobalPalette in umain.
-        ubmpsupport.setPixelFormatBasedOnScreenForBitmap(cache)
+        setPixelFormatBasedOnScreenForBitmap(cache)
         if ((cache.Width !== size.X) || (cache.Height !== size.Y)) {
             try {
                 // end special code
@@ -1252,7 +1254,7 @@ export class PdPlant extends PdStreamableObject {
     }
     
     pointColorMatch(xPixel: long, yPixel: long): boolean {
-        const testPixelColor: TColor = this.previewCache.Canvas.Pixels[xPixel, yPixel]
+        const testPixelColor: TColor = this.previewCache.getPixel(xPixel, yPixel)
         return testPixelColor !== domain.options.transparentColor
     }
     
@@ -1297,7 +1299,7 @@ export class PdPlant extends PdStreamableObject {
                 y = yPixel + 1
                 break
         }
-        const testPixelColor: TColor = this.previewCache.Canvas.Pixels[x, y]
+        const testPixelColor: TColor = this.previewCache.getPixel(x, y)
         return testPixelColor !== domain.options.transparentColor
     }
     
