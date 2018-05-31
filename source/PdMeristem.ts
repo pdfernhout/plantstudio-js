@@ -110,7 +110,7 @@ export class PdMeristem extends PdPlantPart {
         }
         if (!this.plant.pMeristem.secondaryBranchingIsAllowed) {
             firstOnBranch = this.phytomerAttachedTo.firstPhytomerOnBranch()
-            if ((firstOnBranch !== this.plant.firstPhytomer)) {
+            if (firstOnBranch !== this.plant.firstPhytomer) {
                 result = false
                 return result
             }
@@ -153,7 +153,7 @@ export class PdMeristem extends PdPlantPart {
         try {
             shouldCreatePhytomer = false
             optimalInitialBiomass_pctMPB = this.optimalInitialPhytomerBiomass_pctMPB()
-            if ((this.liveBiomass_pctMPB >= optimalInitialBiomass_pctMPB)) {
+            if (this.liveBiomass_pctMPB >= optimalInitialBiomass_pctMPB) {
                 shouldCreatePhytomer = true
             } else {
                 minBiomassNeeded_pctMPB = optimalInitialBiomass_pctMPB * this.plant.pInternode.minFractionOfOptimalInitialBiomassToCreateInternode_frn
@@ -184,7 +184,7 @@ export class PdMeristem extends PdPlantPart {
             }
             shouldCreateInflorescence = false
             optimalInitialBiomass_pctMPB = PdInflorescence.optimalInitialBiomass_pctMPB(this.plant, this.gender)
-            if ((this.liveBiomass_pctMPB >= optimalInitialBiomass_pctMPB)) {
+            if (this.liveBiomass_pctMPB >= optimalInitialBiomass_pctMPB) {
                 shouldCreateInflorescence = true
             } else {
                 minBiomassNeeded_pctMPB = optimalInitialBiomass_pctMPB * this.plant.pInternode.minFractionOfOptimalInitialBiomassToCreateInternode_frn
@@ -416,7 +416,7 @@ export class PdMeristem extends PdPlantPart {
         newMeristem = new PdMeristem(this.plant)
         newMeristem.setIfApical(false)
         newMeristem.phytomerAttachedTo = this.phytomerAttachedTo
-        if ((direction === Direction.kDirectionLeft)) {
+        if (direction === Direction.kDirectionLeft) {
             this.phytomerAttachedTo.leftBranchPlantPart = newMeristem
         } else {
             this.phytomerAttachedTo.rightBranchPlantPart = newMeristem
@@ -561,10 +561,10 @@ export class PdMeristem extends PdPlantPart {
         }
         newPhytomer = PdInternode.NewWithPlantFractionOfInitialOptimalSize(this.plant, fractionOfFullSize)
         newPhytomer.phytomerAttachedTo = this.phytomerAttachedTo
-        if ((this.phytomerAttachedTo !== null)) {
+        if (this.phytomerAttachedTo !== null) {
             if (this.isApical) {
                 this.phytomerAttachedTo.nextPlantPart = newPhytomer
-                if ((this.plant.pMeristem.branchingIsSympodial)) {
+                if (this.plant.pMeristem.branchingIsSympodial) {
                     this.setIfActive(false)
                 }
                 // axillary 
@@ -622,7 +622,7 @@ export class PdMeristem extends PdPlantPart {
     }
     
     draw(): void {
-        if ((this.plant.pAxillaryBud.tdoParams.scaleAtFullSize === 0)) {
+        if (this.plant.pAxillaryBud.tdoParams.scaleAtFullSize === 0) {
             return
         }
         //Draw meristem (only if buds are enlarged as in Brussels sprouts). Since this only very rarely happens,
@@ -762,7 +762,7 @@ export class PdMeristem extends PdPlantPart {
                 numAlready = this.plant.numAxillaryActiveReproductiveMeristemsOrInflorescences
                 inflorProb = safedivExcept(numExpected - numAlready, this.plant.numAxillaryInactiveReproductiveMeristems, 0)
             }
-            if ((numExpected <= 3)) {
+            if (numExpected <= 3) {
                 //If there are only a few inflorescences on the plant, don't mess with probability; place on
                 //  first few meristems.
                 inflorProb = 1.0

@@ -481,7 +481,7 @@ export class PdDomain {
         }
         // move to next after section
         i += 1
-        while ((i <= this.iniLines.Count - 1)) {
+        while (i <= this.iniLines.Count - 1) {
             // only read up until next section - don't want to get same name from different section
             aLine = trim(this.iniLines.Strings[i])
             if ((len(aLine) > 0) && (aLine[1] === "[")) {
@@ -502,7 +502,7 @@ export class PdDomain {
         let found: boolean
         let aLine: string
         
-        if ((this.iniLines === null)) {
+        if (this.iniLines === null) {
             return
         }
         i = this.sectionStartIndexInIniLines(section)
@@ -515,7 +515,7 @@ export class PdDomain {
             found = false
             // move to next after section
             i += 1
-            while ((i <= this.iniLines.Count - 1)) {
+            while (i <= this.iniLines.Count - 1) {
                 // only read up until next section - don't want to get same name from different section
                 aLine = trim(this.iniLines.Strings[i])
                 if ((len(aLine) > 0) && (aLine[1] === "[")) {
@@ -580,7 +580,7 @@ export class PdDomain {
             return
         }
         this.iniLines.Delete(i)
-        while ((i <= this.iniLines.Count - 1)) {
+        while (i <= this.iniLines.Count - 1) {
             aLine = trim(this.iniLines.Strings[i])
             if ((len(aLine) > 0) && (aLine[1] === "[")) {
                 break

@@ -111,9 +111,9 @@ export class PdInflorescence extends PdPlantPart {
                 if ((this.flowers.length <= 0) && (this.numFlowers > 0)) {
                     // make first flower on first day
                     this.createFlower()
-                } else if ((this.flowers.length < this.numFlowers)) {
-                    if ((this.daysBetweenFlowerAppearances > 0)) {
-                        if ((this.daysSinceLastFlowerAppeared >= this.daysBetweenFlowerAppearances)) {
+                } else if (this.flowers.length < this.numFlowers) {
+                    if (this.daysBetweenFlowerAppearances > 0) {
+                        if (this.daysSinceLastFlowerAppeared >= this.daysBetweenFlowerAppearances) {
                             this.createFlower()
                             this.daysSinceLastFlowerAppeared = 0
                         } else {
@@ -149,7 +149,7 @@ export class PdInflorescence extends PdPlantPart {
             return
         }
         try {
-            if ((mode !== Activity.kActivityDraw)) {
+            if (mode !== Activity.kActivityDraw) {
                 if (this.flowers.length > 0) {
                     for (i = 0; i < this.flowers.length; i++) {
                         this.flowers[i].traverseActivity(mode, traverser)
@@ -165,7 +165,7 @@ export class PdInflorescence extends PdPlantPart {
                 case Activity.kActivityDemandVegetative:
                     break
                 case Activity.kActivityDemandReproductive:
-                    if ((this.age > this.plant.pInflor[this.gender].maxDaysToGrow)) {
+                    if (this.age > this.plant.pInflor[this.gender].maxDaysToGrow) {
                         // no vegetative demand 
                         this.biomassDemand_pctMPB = 0.0
                         return
@@ -362,10 +362,10 @@ export class PdInflorescence extends PdPlantPart {
             }
             this.calculateColors()
             turtle.ifExporting_startNestedGroupOfPlantParts(this.genderString() + " inflorescence", this.genderString() + "Inflor", NestingType.kNestingTypeInflorescence)
-            if ((this.flowers.length > 0)) {
+            if (this.flowers.length > 0) {
                 this.drawBracts()
                 this.drawPeduncle()
-                if ((this.plant.pInflor[this.gender].isHead)) {
+                if (this.plant.pInflor[this.gender].isHead) {
                     this.drawHead()
                 } else {
                     this.drawApex(this.plant.pInflor[this.gender].numFlowersOnMainBranch, 0, true)
@@ -541,10 +541,10 @@ export class PdInflorescence extends PdPlantPart {
             //     this is the only part drawn. If the inflorescence is apical, the stalk may be longer (e.g. in bolting
             //     plants) and is specified by a different parameter.
             zAngle = 0
-            if ((this.phytomerAttachedTo !== null)) {
-                if ((this.phytomerAttachedTo.leftBranchPlantPart === this)) {
+            if (this.phytomerAttachedTo !== null) {
+                if (this.phytomerAttachedTo.leftBranchPlantPart === this) {
                     zAngle = this.plant.pInflor[this.gender].peduncleAngleFromVegetativeStem
-                } else if ((this.phytomerAttachedTo.rightBranchPlantPart === this)) {
+                } else if (this.phytomerAttachedTo.rightBranchPlantPart === this) {
                     zAngle = this.plant.pInflor[this.gender].peduncleAngleFromVegetativeStem
                     turtle.rotateX(128)
                 } else if (this.isApical) {
@@ -569,7 +569,7 @@ export class PdInflorescence extends PdPlantPart {
         //This message is sent when the inflorescence is branched. The decision to create a branch is
         //     made before the message is sent. Note the check if all flowers have been drawn; this prevents
         //     scrawly lines with no flowers.
-        if ((this.plant.turtle === null)) {
+        if (this.plant.turtle === null) {
             return
         }
         const turtle: KfTurtle = this.plant.turtle
@@ -590,7 +590,7 @@ export class PdInflorescence extends PdPlantPart {
         let propFullSize: float
         let flowerIndex: int
 
-        if ((this.plant.turtle === null)) {
+        if (this.plant.turtle === null) {
             return
         }
         const turtle: KfTurtle = this.plant.turtle
@@ -611,7 +611,7 @@ export class PdInflorescence extends PdPlantPart {
             length = this.lengthOrWidthAtAgeForFraction(this.plant.pInflor[this.gender].pedicelLength_mm, propFullSize)
             width = this.lengthOrWidthAtAgeForFraction(this.plant.pInflor[this.gender].internodeWidth_mm, propFullSize)
             angle = this.angleWithSway(this.plant.pInflor[this.gender].pedicelAngle)
-            if ((this.plant.pInflor[this.gender].flowersDrawTopToBottom)) {
+            if (this.plant.pInflor[this.gender].flowersDrawTopToBottom) {
                 flowerIndex = internodeCount
             } else {
                 flowerIndex = this.flowers.length - internodeCount + 1
@@ -686,7 +686,7 @@ export class PdInflorescence extends PdPlantPart {
                 //  straggly lines in branched inflorescences.
                 return
             }
-            if ((this.plant.pInflor[this.gender].internodeLength_mm === 0.0)) {
+            if (this.plant.pInflor[this.gender].internodeLength_mm === 0.0) {
                 return
             }
             propFullSize = safedivExcept(this.liveBiomass_pctMPB, this.plant.pInflor[this.gender].optimalBiomass_pctMPB, 0)

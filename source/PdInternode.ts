@@ -183,7 +183,7 @@ export class PdInternode extends PdPlantPart {
             return
         }
         try {
-            if ((mode !== Activity.kActivityDraw)) {
+            if (mode !== Activity.kActivityDraw) {
                 if (this.leftLeaf !== null) {
                     this.leftLeaf.traverseActivity(mode, traverser)
                 }
@@ -327,13 +327,13 @@ export class PdInternode extends PdPlantPart {
     
     calculateInternodeAngle(): void {
         if (this.isFirstPhytomer) {
-            if ((this.plant.pInternode.firstInternodeCurvingIndex === 0)) {
+            if (this.plant.pInternode.firstInternodeCurvingIndex === 0) {
                 this.internodeAngle = 0
             } else {
                 this.internodeAngle = 64.0 / 100.0 * (this.plant.randomNumberGenerator.randomNormalPercent(this.plant.pInternode.firstInternodeCurvingIndex))
             }
         } else {
-            if ((this.plant.pInternode.curvingIndex === 0)) {
+            if (this.plant.pInternode.curvingIndex === 0) {
                 this.internodeAngle = 0
             } else {
                 this.internodeAngle = 64.0 / 100.0 * (this.plant.randomNumberGenerator.randomNormalPercent(this.plant.pInternode.curvingIndex))
@@ -464,14 +464,14 @@ export class PdInternode extends PdPlantPart {
         let width: float
         let zAngle: float
         
-        if ((this.plant.turtle === null)) {
+        if (this.plant.turtle === null) {
             return
         }
         zAngle = this.internodeAngle
-        if ((this.phytomerAttachedTo !== null)) {
-            if ((this.phytomerAttachedTo.leftBranchPlantPart === this)) {
+        if (this.phytomerAttachedTo !== null) {
+            if (this.phytomerAttachedTo.leftBranchPlantPart === this) {
                 zAngle = zAngle + this.plant.pMeristem.branchingAngle
-            } else if ((this.phytomerAttachedTo.rightBranchPlantPart === this)) {
+            } else if (this.phytomerAttachedTo.rightBranchPlantPart === this) {
                 zAngle = zAngle + this.plant.pMeristem.branchingAngle
                 this.plant.turtle.rotateX(128)
             }
@@ -528,13 +528,13 @@ export class PdInternode extends PdPlantPart {
     }
     
     checkIfSeedlingLeavesHaveAbscissed(): void {
-        if ((!this.isFirstPhytomer)) {
+        if (!this.isFirstPhytomer) {
             //If first phytomer, only want to draw seedling leaves for some time after emergence.
             //  For monopodial plant, stop drawing seedling leaves some number of nodes after emergence (parameter).
             //  For sympodial plant, this doesn't work; use age of meristem instead; age is set as constant.
             return
         }
-        if ((this.plant.pMeristem.branchingIsSympodial)) {
+        if (this.plant.pMeristem.branchingIsSympodial) {
             if (this.age < 10) {
                 return
             }

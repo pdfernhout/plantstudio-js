@@ -279,7 +279,7 @@ export class KfTurtle {
     
     ifExporting_excludeStem(length: float): boolean {
         let result = false
-        if ((this.drawingSurface instanceof KfDrawingSurfaceForPOV)) {
+        if (this.drawingSurface instanceof KfDrawingSurfaceForPOV) {
             result = (length <= this.drawingSurface.options.pov_minLineLengthToWrite)
         }
         return result

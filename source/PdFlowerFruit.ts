@@ -428,7 +428,7 @@ export class PdFlowerFruit extends PdPlantPart {
         let scale: float
         let layerType: short
         
-        if ((this.plant.turtle === null)) {
+        if (this.plant.turtle === null) {
             return
         }
         turtle = this.plant.turtle
@@ -452,12 +452,12 @@ export class PdFlowerFruit extends PdPlantPart {
     }
     
     drawPistilsAndStamens(drawAsOpening: boolean): void {        
-        if ((this.plant.turtle === null)) {
+        if (this.plant.turtle === null) {
             return
         }
         const turtle: KfTurtle = this.plant.turtle
         turtle.push()
-        if ((this.plant.pFlower[this.gender].numPistils > 0)) {
+        if (this.plant.pFlower[this.gender].numPistils > 0) {
             if (((this.plant.pFlower[this.gender].styleLength_mm > 0) && (this.plant.pFlower[this.gender].styleWidth_mm > 0)) || (this.plant.pFlower[this.gender].tdoParams[FloralPart.kPistils].scaleAtFullSize > 0)) {
                 turtle.ifExporting_startNestedGroupOfPlantParts("pistils", "Pistils", NestingType.kNestingTypeFloralLayers)
             }
@@ -688,7 +688,7 @@ export class PdFlowerFruit extends PdPlantPart {
     
     drawCircleOfTdos(tdo: KfObject3D, faceColor: TColorRef, backfaceColor: TColorRef, pullBackAngle: float, scale: float, numParts: int, partsArranged: boolean, open: boolean, dxfIndex: short): void {
         try {
-            if ((scale <= 0.0)) {
+            if (scale <= 0.0) {
                 // v1.3
                 // v1.3
                 return

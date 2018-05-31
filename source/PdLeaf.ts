@@ -245,7 +245,7 @@ export class PdLeaf extends PdPlantPart {
     }
     
     drawWithDirection(direction: float): void {
-        if ((this.plant.turtle === null)) {
+        if (this.plant.turtle === null) {
             return
         }
         const turtle: KfTurtle = this.plant.turtle
@@ -280,7 +280,7 @@ export class PdLeaf extends PdPlantPart {
                 const scale = (this.propFullSize * (this.plant.pSeedlingLeaf.leafTdoParams.scaleAtFullSize / 100.0)) * 1.0
                 this.DrawLeafOrLeaflet(scale)
             } else {
-                if ((this.plant.pLeaf.stipuleTdoParams.scaleAtFullSize > 0)) {
+                if (this.plant.pLeaf.stipuleTdoParams.scaleAtFullSize > 0) {
                     this.drawStipule()
                 }
                 if ((this.plant.pLeaf.compoundNumLeaflets <= 1) || this.plant.turtle.drawOptions.simpleLeavesOnly) {
@@ -290,7 +290,7 @@ export class PdLeaf extends PdPlantPart {
                 } else {
                     this.drawStemSegment(length, width, angle, 0, this.plant.pLeaf.petioleColor, kDontTaper, ExportPart.kExportPartPetiole, kUseAmendment)
                     turtle.ifExporting_startNestedGroupOfPlantParts("compound leaf", "CompoundLeaf", NestingType.kNestingTypeCompoundLeaf)
-                    if ((this.plant.pLeaf.compoundPinnateOrPalmate === CompoundLeafStyle.kCompoundLeafPinnate)) {
+                    if (this.plant.pLeaf.compoundPinnateOrPalmate === CompoundLeafStyle.kCompoundLeafPinnate) {
                         this.drawCompoundLeafPinnate()
                     } else {
                         this.drawCompoundLeafPalmate()
@@ -307,7 +307,7 @@ export class PdLeaf extends PdPlantPart {
     }
     
     wiltLeaf(): void {
-        if ((this.plant.turtle === null)) {
+        if (this.plant.turtle === null) {
             //  var
             //    angle: integer; 
             return
@@ -421,12 +421,12 @@ export class PdLeaf extends PdPlantPart {
             return
         }
         for (i = this.plant.pLeaf.compoundNumLeaflets; i >= 1; i--) {
-            if ((this.plant.pLeaf.compoundPinnateLeafletArrangement === LeafArrangement.kArrangementOpposite)) {
+            if (this.plant.pLeaf.compoundPinnateLeafletArrangement === LeafArrangement.kArrangementOpposite) {
                 if ((i !== 1) && (i % 2 === 1)) {
                     // v2 added opposite leaflets
                     this.drawCompoundLeafInternode(i)
                 }
-            } else if ((i !== 1)) {
+            } else if (i !== 1) {
                 this.drawCompoundLeafInternode(i)
             }
             turtle.push()

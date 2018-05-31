@@ -28,3 +28,7 @@ Commented frift down to above following statements -- which can put them in wron
 e.g. // no response 
 
 In ufruit, ended up with self.gender instead of this.gender -- why?
+
+Find extra parens in if statements:
+  replace: \(\([^)]*\)\) \{
+  with: ($1) {

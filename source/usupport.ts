@@ -477,7 +477,7 @@ export function boundForString(boundString: string, fieldType: int, number: FIX_
     } else if ((boundString === "PI*2") && (fieldType === uparams.kFieldFloat)) {
         piTimesTwo = UNRESOLVED.pi * 2.0
         number = piTimesTwo
-    } else if ((boundString === "")) {
+    } else if (boundString === "") {
         if (fieldType === uparams.kFieldFloat) {
             number = 0.0
         } else {
@@ -597,15 +597,15 @@ export function messageForExceptionType(e: Exception, methodName: string): void 
     if (e === null) {
         return
     }
-    if ((e instanceof UNRESOLVED.EZeroDivide)) {
+    if (e instanceof UNRESOLVED.EZeroDivide) {
         errorString = "Problem: Floating-point divide by zero error in method " + methodName + "."
-    } else if ((e instanceof UNRESOLVED.EDivByZero)) {
+    } else if (e instanceof UNRESOLVED.EDivByZero) {
         errorString = "Problem: Integer divide by zero in method " + methodName + "."
-    } else if ((e instanceof UNRESOLVED.EInvalidOp)) {
+    } else if (e instanceof UNRESOLVED.EInvalidOp) {
         errorString = "Problem: Invalid floating-point operation in method " + methodName + "."
-    } else if ((e instanceof UNRESOLVED.EOverFlow)) {
+    } else if (e instanceof UNRESOLVED.EOverFlow) {
         errorString = "Problem: Floating-point overflow in method " + methodName + "."
-    } else if ((e instanceof UNRESOLVED.EUnderFlow)) {
+    } else if (e instanceof UNRESOLVED.EUnderFlow) {
         errorString = "Problem: Floating-point underflow in method " + methodName + "."
     } else {
         errorString = "Problem in method " + methodName + "."

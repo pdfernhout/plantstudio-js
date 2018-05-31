@@ -266,7 +266,7 @@ export class KfDrawingSurface {
         if (this.pane === null) {
             return
         }
-        if ((triangle.isLine)) {
+        if (triangle.isLine) {
             // do nothing if round fails or assign to integer fails
             try {
                 // draw line

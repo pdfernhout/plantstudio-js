@@ -83,7 +83,7 @@ export class KfMatrix {
         // bound angle and convert to index
         // not doing try except around round for speed here - could fail ...
         let boundedAngleIndex = intround(angle) % kFastTrigArraySize
-        if ((boundedAngleIndex < 0)) {
+        if (boundedAngleIndex < 0) {
             boundedAngleIndex = kFastTrigArraySize + boundedAngleIndex
         }
         const cosAngle = CosCache[boundedAngleIndex]
@@ -107,7 +107,7 @@ export class KfMatrix {
         // bound angle and convert to index
         // not doing try except around round for speed here - could fail ...
         let boundedAngleIndex = intround(angle) % kFastTrigArraySize
-        if ((boundedAngleIndex < 0)) {
+        if (boundedAngleIndex < 0) {
             boundedAngleIndex = kFastTrigArraySize + boundedAngleIndex
         }
         const cosAngle = CosCache[boundedAngleIndex]
@@ -158,7 +158,7 @@ export class KfMatrix {
         // bound angle and convert to index
         // not doing try except around round for speed here - could fail ...
         let boundedAngleIndex = intround(angle) % kFastTrigArraySize
-        if ((boundedAngleIndex < 0)) {
+        if (boundedAngleIndex < 0) {
             boundedAngleIndex = kFastTrigArraySize + boundedAngleIndex
         }
         const cosAngle = CosCache[boundedAngleIndex]
@@ -188,12 +188,12 @@ export class KfMatrix {
         try {
             result = 0
             let temp = (this.a2 * this.a2) + (this.c2 * this.c2)
-            if ((temp < 0.0)) {
+            if (temp < 0.0) {
                 temp = 0.0
             }
             temp = Math.sqrt(temp)
-            if ((temp === 0.0)) {
-                if ((this.b2 < 0)) {
+            if (temp === 0.0) {
+                if (this.b2 < 0) {
                     result = 64
                 } else {
                     result = 256 - 64
@@ -215,12 +215,12 @@ export class KfMatrix {
         try {
             result = 0
             let temp = (this.a0 * this.a0) + (this.c0 * this.c0)
-            if ((temp < 0.0)) {
+            if (temp < 0.0) {
                 temp = 0.0
             }
             temp = Math.sqrt(temp)
-            if ((temp === 0.0)) {
-                if ((this.b0 < 0)) {
+            if (temp === 0.0) {
+                if (this.b0 < 0) {
                     result = 64
                 } else {
                     result = 256 - 64
@@ -242,12 +242,12 @@ export class KfMatrix {
         try {
             result = 0
             let temp = (this.a1 * this.a1) + (this.c1 * this.c1)
-            if ((temp < 0.0)) {
+            if (temp < 0.0) {
                 temp = 0.0
             }
             temp = Math.sqrt(temp)
-            if ((temp === 0.0)) {
-                if ((this.b1 < 0)) {
+            if (temp === 0.0) {
+                if (this.b1 < 0) {
                     result = 64
                 } else {
                     result = 256 - 64

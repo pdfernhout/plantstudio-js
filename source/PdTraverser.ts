@@ -206,7 +206,7 @@ export class PdTraverser {
     }
     
     traversePlant(traversalCount: long): void {
-        if ((this.currentPhytomer === null)) {
+        if (this.currentPhytomer === null) {
             return
         }
         if (!this.plant.turtle) {
@@ -222,14 +222,14 @@ export class PdTraverser {
                 case TraverseDirection.kTraverseLeft:
                     phytomerTraversing.traversingDirection += 1
                     if (phytomerTraversing.leftBranchPlantPart !== null) {
-                        if ((this.mode === Activity.kActivityDraw)) {
+                        if (this.mode === Activity.kActivityDraw) {
                             this.plant.turtle.push()
                         }
                         phytomerTraversing.leftBranchPlantPart.traverseActivity(this.mode, this)
                         if ((phytomerTraversing.leftBranchPlantPart.isPhytomer())) {
                             phytomerTraversing = <PdInternode>phytomerTraversing.leftBranchPlantPart
                             phytomerTraversing.traversingDirection = TraverseDirection.kTraverseLeft
-                        } else if ((this.mode === Activity.kActivityDraw)) {
+                        } else if (this.mode === Activity.kActivityDraw) {
                             this.plant.turtle.pop()
                         }
                     }
@@ -237,14 +237,14 @@ export class PdTraverser {
                 case TraverseDirection.kTraverseRight:
                     phytomerTraversing.traversingDirection += 1
                     if (phytomerTraversing.rightBranchPlantPart !== null) {
-                        if ((this.mode === Activity.kActivityDraw)) {
+                        if (this.mode === Activity.kActivityDraw) {
                             this.plant.turtle.push()
                         }
                         phytomerTraversing.rightBranchPlantPart.traverseActivity(this.mode, this)
                         if ((phytomerTraversing.rightBranchPlantPart.isPhytomer())) {
                             phytomerTraversing = <PdInternode>phytomerTraversing.rightBranchPlantPart
                             phytomerTraversing.traversingDirection = TraverseDirection.kTraverseLeft
-                        } else if ((this.mode === Activity.kActivityDraw)) {
+                        } else if (this.mode === Activity.kActivityDraw) {
                             this.plant.turtle.pop()
                         }
                     }
@@ -252,7 +252,7 @@ export class PdTraverser {
                 case TraverseDirection.kTraverseNext:
                     phytomerTraversing.traversingDirection += 1
                     if (phytomerTraversing.nextPlantPart !== null) {
-                        if ((this.mode === Activity.kActivityDraw)) {
+                        if (this.mode === Activity.kActivityDraw) {
                             this.plant.turtle.push()
                             this.plant.turtle.rotateX(this.plant.pGeneral.phyllotacticRotationAngle * 256 / 360)
                         }
@@ -260,7 +260,7 @@ export class PdTraverser {
                         if ((phytomerTraversing.nextPlantPart.isPhytomer())) {
                             phytomerTraversing = <PdInternode>phytomerTraversing.nextPlantPart
                             phytomerTraversing.traversingDirection = TraverseDirection.kTraverseLeft
-                        } else if ((this.mode === Activity.kActivityDraw)) {
+                        } else if (this.mode === Activity.kActivityDraw) {
                             this.plant.turtle.pop()
                         }
                     }
@@ -272,13 +272,13 @@ export class PdTraverser {
                         break
                     }
                     phytomerTraversing = phytomerTraversing.phytomerAttachedTo
-                    if ((this.mode === Activity.kActivityFree)) {
+                    if (this.mode === Activity.kActivityFree) {
                         // TODO: Use or remove: lastPhytomer.free
-                        if ((phytomerTraversing.traversingDirection === TraverseDirection.kTraverseLeft + 1)) {
+                        if (phytomerTraversing.traversingDirection === TraverseDirection.kTraverseLeft + 1) {
                             phytomerTraversing.leftBranchPlantPart = null
-                        } else if ((phytomerTraversing.traversingDirection === TraverseDirection.kTraverseRight + 1)) {
+                        } else if (phytomerTraversing.traversingDirection === TraverseDirection.kTraverseRight + 1) {
                             phytomerTraversing.rightBranchPlantPart = null
-                        } else if ((phytomerTraversing.traversingDirection === TraverseDirection.kTraverseNext + 1)) {
+                        } else if (phytomerTraversing.traversingDirection === TraverseDirection.kTraverseNext + 1) {
                             phytomerTraversing.nextPlantPart = null
                         }
                     }
@@ -295,7 +295,7 @@ export class PdTraverser {
                 case TraverseDirection.kTraverseNone:
                     throw new Error("Problem: TraverseDirection.kTraverseNone encountered in method PdTraverser.traversePlant.")
             }
-            if ((traversalCount !== 0)) {
+            if (traversalCount !== 0) {
                 i += 1
             }
             if ((this.mode === Activity.kActivityDraw) && (this.showDrawingProgress)) {

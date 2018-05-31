@@ -542,11 +542,11 @@ export class PdPlantPart extends PdStreamableObject {
         showHighlights = domain.options.showHighlightingForNonHiddenPosedParts && (this.plant.turtle.writingTo === ExportFormats.kScreen) && (!domain.drawingToMakeCopyBitmap) && (!this.plant.drawingIntoPreviewCache)
         if (iHaveAnAmendment || myParentHasAnAmendment) {
             result = false
-            if ((iHaveAnAmendment && iAmSelectedInTheMainWindow && showHighlights)) {
+            if (iHaveAnAmendment && iAmSelectedInTheMainWindow && showHighlights) {
                 color = domain.options.selectedPosedColor
             } else if ((iHaveAnAmendment && myAmendmentSaysIAmHidden) || (iDontHaveAnAmendment && myParentHasAnAmendment && myParentsAmendmentSaysIAmHidden)) {
                 color = domain.options.ghostingColor
-            } else if ((iHaveAnAmendment && showHighlights)) {
+            } else if (iHaveAnAmendment && showHighlights) {
                 color = domain.options.nonHiddenPosedColor
             } else {
                 result = true

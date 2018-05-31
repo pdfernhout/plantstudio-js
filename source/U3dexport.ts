@@ -540,7 +540,7 @@ export class KfFileExportSurface extends KfDrawingSurface {
     
     outputType(): short {
         let result = -1
-        if ((this instanceof KfDrawingSurfaceForDXF)) {
+        if (this instanceof KfDrawingSurfaceForDXF) {
             result = ExportFormats.kDXF
         } else if (this instanceof KfDrawingSurfaceForPOV) {
             result = ExportFormats.kPOV
@@ -1422,7 +1422,7 @@ export class KfDrawingSurfaceForOBJ extends KfTextFileExportSurface {
                 writeln(materialsFile, "# Materials for file " + usupport.stringUpTo(ExtractFileName(this.materialsFileName), ".") + ".obj")
                 writeln(materialsFile, "# Created by PlantStudio http://www.kurtz-fernhout.com")
                 writeln(materialsFile, "# These files must be in the same directory for the materials to be read correctly.")
-                for (i = 0; i <= this.numMaterialsStored - 1; i++) {
+                for (i = 0; i < this.numMaterialsStored; i++) {
                     if (this.materialNames[i] === "") {
                         //newmtl name
                         //Ka  0.1 0.0 0.0
@@ -1434,7 +1434,7 @@ export class KfDrawingSurfaceForOBJ extends KfTextFileExportSurface {
                         continue
                     }
                     writeln(materialsFile, "newmtl " + this.materialNames[i])
-                    colorString = valueString(UNRESOLVED.GetRValue(this.materialColors[i]) / 255.0) + " " + valueString(UNRESOLVED.GetGValue(this.materialColors[i]) / 255.0) + " " + valueString(UNRESOLVED.GetBValue(this.materialColors[i]) / 255.0)
+                    colorString = valueString(getRValue(this.materialColors[i]) / 255.0) + " " + valueString(getGValue(this.materialColors[i]) / 255.0) + " " + valueString(getBValue(this.materialColors[i]) / 255.0)
                     writeln(materialsFile, "Ka  " + colorString)
                     writeln(materialsFile, "Kd  " + colorString)
                     writeln(materialsFile, "Ks  " + colorString)

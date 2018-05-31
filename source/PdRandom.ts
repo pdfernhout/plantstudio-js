@@ -88,7 +88,7 @@ export class PdRandom extends PdStreamableObject {
     randomPercent(): float {
         const k: float = intround(this.seed / 127773)
         this.seed = intround((16807 * (this.seed - (k * 127773))) - (k * 2846))
-        if ((this.seed < 0.0)) {
+        if (this.seed < 0.0) {
             this.seed = this.seed + 2147483647
         }
         const result = intround(max(0, (min(100, (this.seed * 0.0000000004656612875 * 100.0)))))
@@ -98,7 +98,7 @@ export class PdRandom extends PdStreamableObject {
     zeroToOne(): float {
         const k: float = intround(this.seed / 127773)
         this.seed = intround((16807 * (this.seed - (k * 127773))) - (k * 2846))
-        if ((this.seed < 0.0)) {
+        if (this.seed < 0.0) {
             this.seed = this.seed + 2147483647
         }
         const result: float = (max(0.0, (min(1.0, (this.seed * 0.0000000004656612875))))) * 1.0

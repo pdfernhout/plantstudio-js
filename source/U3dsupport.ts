@@ -73,7 +73,7 @@ export function fastTrigSin(angle: float): float {
     } catch (e) {
         boundedAngle = 0
     }
-    if ((boundedAngle < 0)) {
+    if (boundedAngle < 0) {
         boundedAngle = kFastTrigArraySize + boundedAngle
     }
     return SinCache[boundedAngle]

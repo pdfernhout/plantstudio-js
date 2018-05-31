@@ -470,7 +470,7 @@ export class PdPlant extends PdStreamableObject {
     }
     
     freeAllDrawingPlantParts(): void {
-        if ((this.firstPhytomer !== null)) {
+        if (this.firstPhytomer !== null) {
             const traverser: PdTraverser = new PdTraverser(this)
             traverser.traverseWholePlant(Activity.kActivityFree)
             this.firstPhytomer = null
@@ -560,7 +560,7 @@ export class PdPlant extends PdStreamableObject {
         this.turtle.rotateY(this.yRotation * 256 / 360)
         this.turtle.rotateZ(this.zRotation * 256 / 360)
         this.turtle.drawingSurface.lineColor = ColorDefs.clGreen
-        if ((this.firstPhytomer !== null)) {
+        if (this.firstPhytomer !== null) {
             const traverser: PdTraverser = new PdTraverser(this)
             traverser.plantPartsDrawnAtStart = this.plantPartsDrawnAtStart
             // if not drawing 3D objects, probably drawing just to get bounds
@@ -574,7 +574,7 @@ export class PdPlant extends PdStreamableObject {
     
     countPlantParts(): void {
         this.totalPlantParts = 0
-        if ((this.firstPhytomer !== null)) {
+        if (this.firstPhytomer !== null) {
             const traverser: PdTraverser = new PdTraverser(this)
             traverser.traverseWholePlant(Activity.kActivityCountPlantParts)
             this.totalPlantParts = traverser.totalPlantParts
@@ -582,7 +582,7 @@ export class PdPlant extends PdStreamableObject {
     }
     
     countPlantPartsFor3DOutput(outputType: short, stemCylinderFaces: short): void { 
-        if ((this.firstPhytomer !== null)) {
+        if (this.firstPhytomer !== null) {
             const traverser: PdTraverser = new PdTraverser(this)
             traverser.traverseWholePlant(Activity.kActivityCountPointsAndTrianglesFor3DExport)
             this.totalPlantParts = traverser.totalPlantParts
@@ -617,7 +617,7 @@ export class PdPlant extends PdStreamableObject {
             result = result + this.previewCache.bitmapMemorySize() / 1024.0
         }
         this.totalMemoryUsed_K = result
-        if ((this.firstPhytomer !== null)) {
+        if (this.firstPhytomer !== null) {
             // plant parts
             const traverser: PdTraverser = new PdTraverser(this)
             traverser.traverseWholePlant(Activity.kActivityCountTotalMemoryUse)
@@ -1846,12 +1846,12 @@ export class PdPlant extends PdStreamableObject {
                     }
                     break
                 case kGeneralAgeAtMaturity:
-                    if ((this.age > v)) {
+                    if (this.age > v) {
                         this.setAge(v)
                     }
                     break
             }
-            if ((ft === FieldType.kFieldColor)) {
+            if (ft === FieldType.kFieldColor) {
                 this.needToRecalculateColors = true
             }
         }
@@ -2499,7 +2499,7 @@ export class PdPlant extends PdStreamableObject {
             }
             const traverser: PdTraverser = new PdTraverser(this)
             try {
-                if ((this.firstPhytomer === null)) {
+                if (this.firstPhytomer === null) {
                     // If first day, create first phytomer. Assume seed reserves are placed into this phytomer.
                     firstMeristem = new PdMeristem(this)
                     this.firstPhytomer = firstMeristem.createFirstPhytomer()
@@ -2629,7 +2629,7 @@ export class PdPlant extends PdStreamableObject {
     }
     
     report(): void {
-        if ((this.firstPhytomer !== null)) {
+        if (this.firstPhytomer !== null) {
             DebugPrint("---------------------- Start plant report")
             const traverser: PdTraverser = new PdTraverser(this)
             traverser.traverseWholePlant(Activity.kActivityReport)
@@ -2644,7 +2644,7 @@ export class PdPlant extends PdStreamableObject {
         }
         for (let i = 0; i < this.amendments.length; i++) {
             const amendment = this.amendments[i]
-            if ((amendment.partID === partID)) {
+            if (amendment.partID === partID) {
                 return amendment
             }
         }

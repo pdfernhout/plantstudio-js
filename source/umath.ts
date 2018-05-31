@@ -104,9 +104,9 @@ function pow(number: double, exponent: double): double {
 export function power(number: double, exponent: double): double {
     let result = 0.0
     try {
-        if ((number > 0.0)) {
+        if (number > 0.0) {
             result = pow(number, exponent)
-        } else if ((number === 0.0)) {
+        } else if (number === 0.0) {
             if (exponent === 0.0) {
                 result = 1.0
                 throw new Error("Problem: Zero raised to zero power.")
@@ -250,7 +250,7 @@ function safeExpWithResult(x: double): [double, boolean] {
 function safediv(x: float, y: float): float {
     let result = 0.0
     try {
-        if ((y !== 0.0)) {
+        if (y !== 0.0) {
             result = x / y
         } else {
             result = 0.0
@@ -268,7 +268,7 @@ function safediv(x: float, y: float): float {
 export function safedivExcept(x: float, y: float, exceptionResult: float): float {
     let result = 0.0
     try {
-        if ((y !== 0.0)) {
+        if (y !== 0.0) {
             result = x / y
         } else {
             result = exceptionResult
@@ -414,7 +414,7 @@ export function calcSCurveCoeffsWithResult(sCurve: SCurveStructure): boolean {
 }
 
 export function transferSCurveValue(direction: int, param: SCurveStructure, index: int, value: number): number {
-    if ((direction === kGetField)) {
+    if (direction === kGetField) {
         switch (index) {
             case 0:
                 value = param.x1

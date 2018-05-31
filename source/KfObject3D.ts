@@ -953,7 +953,7 @@ export class KfObject3D extends PdStreamableObject {
         nameString = replacePunctuationWithUnderscores(this.getName())
         writeln(outputFile, "// POV-format INC file of PlantStudio v1.x 3D object")
         writeln(outputFile, "//     \"" + this.getName() + "\"")
-        if ((!embeddedInPlant)) {
+        if (!embeddedInPlant) {
             writeln(outputFile, "// include this file in a POV file thus to use it:")
             writeln(outputFile, "//     #include \"" + stringUpTo(ExtractFileName(fileName), ".") + ".inc\"")
             writeln(outputFile, "//     object { " + nameString + " }")
