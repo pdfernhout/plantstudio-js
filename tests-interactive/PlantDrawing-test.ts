@@ -9,6 +9,12 @@ import { PdPlant } from "../source/PdPlant"
 import { PdDomain } from "../source/PdDomain"
 
 PdDomain.createDefault()
+const plant = new PdPlant()
+
+// Grow the plant a bit
+for (let i = 0; i < 1; i++) {
+    plant.nextDay()
+}
 
 let yAngle = 0
 
@@ -24,7 +30,6 @@ function initDrawingSurface(drawingSurface: KfDrawingSurface) {
 }
 
 function drawPlant() {
-    const plant = new PdPlant()
     plant.drawOn(null)
 }
 

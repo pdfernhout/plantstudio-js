@@ -119,8 +119,8 @@ const kExactAge = true
 
 // record
 export class BreedingAndTimeSeriesOptionsStructure {
-    mutationStrengths: short[] /* kMaxBreedingSections + 1 */
-    firstPlantWeights: short[] /* kMaxBreedingSections + 1 */
+    mutationStrengths: short[] = Array(kMaxBreedingSections + 1)
+    firstPlantWeights: short[] = Array(kMaxBreedingSections + 1)
     getNonNumericalParametersFrom: short
     mutateAndBlendColorValues: boolean
     chooseTdosRandomlyFromCurrentLibrary: boolean
@@ -136,7 +136,7 @@ export class BreedingAndTimeSeriesOptionsStructure {
 // v2.0
 // record
 export class TdoParamsStructure {
-    object3D: KfObject3D
+    object3D: KfObject3D = new KfObject3D()
     xRotationBeforeDraw: float
     yRotationBeforeDraw: float
     zRotationBeforeDraw: float
@@ -163,7 +163,7 @@ export class ParamsGeneral {
     isDicot: boolean
     maleFlowersAreSeparate: boolean
     ageAtMaturity: short
-    growthSCurve: SCurveStructure
+    growthSCurve: SCurveStructure = new SCurveStructure()
     ageAtWhichFloweringStarts: short
     fractionReproductiveAllocationAtMaturity_frn: float
     wiltingPercent: float
@@ -2427,7 +2427,6 @@ export class PdPlant extends PdStreamableObject {
                 this.freeAllDrawingPlantParts()
             }
             if (hasFirstPhytomer) {
-                this.firstPhytomer = null
                 this.firstPhytomer = new PdInternode()
                 if (this.firstPhytomer !== null) {
                     this.firstPhytomer.plant = this

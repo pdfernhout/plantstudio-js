@@ -561,7 +561,7 @@ export class PdMeristem extends PdPlantPart {
         }
         newPhytomer = PdInternode.NewWithPlantFractionOfInitialOptimalSize(this.plant, fractionOfFullSize)
         newPhytomer.phytomerAttachedTo = this.phytomerAttachedTo
-        if (this.phytomerAttachedTo !== null) {
+        if (this.phytomerAttachedTo) {
             if (this.isApical) {
                 this.phytomerAttachedTo.nextPlantPart = newPhytomer
                 if (this.plant.pMeristem.branchingIsSympodial) {

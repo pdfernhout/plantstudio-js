@@ -158,7 +158,6 @@ export class PdPlantStatistics {
 export class PdTraverser {
     plant: PdPlant
     filer: PdFiler
-    // TODO: currentPhytomer was TObject -- is typing as PdInternode OK here?
     currentPhytomer: PdInternode
     point: TPoint = new TPoint()
     total: float = 0.0
@@ -209,8 +208,8 @@ export class PdTraverser {
         if (this.currentPhytomer === null) {
             return
         }
-        if (!this.plant.turtle) {
-            throw new Error("null turtle in traversePlant")
+        if (this.mode === Activity.kActivityDraw && !this.plant.turtle) {
+            throw new Error("null turtle in traversePlant for kActivityDraw")
         }
         let phytomerTraversing: PdInternode = this.currentPhytomer
         let i = 0
@@ -223,14 +222,14 @@ export class PdTraverser {
                     phytomerTraversing.traversingDirection += 1
                     if (phytomerTraversing.leftBranchPlantPart !== null) {
                         if (this.mode === Activity.kActivityDraw) {
-                            this.plant.turtle.push()
+                            this.plant.turtle!.push()
                         }
                         phytomerTraversing.leftBranchPlantPart.traverseActivity(this.mode, this)
                         if ((phytomerTraversing.leftBranchPlantPart.isPhytomer())) {
                             phytomerTraversing = <PdInternode>phytomerTraversing.leftBranchPlantPart
                             phytomerTraversing.traversingDirection = TraverseDirection.kTraverseLeft
                         } else if (this.mode === Activity.kActivityDraw) {
-                            this.plant.turtle.pop()
+                            this.plant.turtle!.pop()
                         }
                     }
                     break
@@ -238,14 +237,14 @@ export class PdTraverser {
                     phytomerTraversing.traversingDirection += 1
                     if (phytomerTraversing.rightBranchPlantPart !== null) {
                         if (this.mode === Activity.kActivityDraw) {
-                            this.plant.turtle.push()
+                            this.plant.turtle!.push()
                         }
                         phytomerTraversing.rightBranchPlantPart.traverseActivity(this.mode, this)
                         if ((phytomerTraversing.rightBranchPlantPart.isPhytomer())) {
                             phytomerTraversing = <PdInternode>phytomerTraversing.rightBranchPlantPart
                             phytomerTraversing.traversingDirection = TraverseDirection.kTraverseLeft
                         } else if (this.mode === Activity.kActivityDraw) {
-                            this.plant.turtle.pop()
+                            this.plant.turtle!.pop()
                         }
                     }
                     break
@@ -253,15 +252,15 @@ export class PdTraverser {
                     phytomerTraversing.traversingDirection += 1
                     if (phytomerTraversing.nextPlantPart !== null) {
                         if (this.mode === Activity.kActivityDraw) {
-                            this.plant.turtle.push()
-                            this.plant.turtle.rotateX(this.plant.pGeneral.phyllotacticRotationAngle * 256 / 360)
+                            this.plant.turtle!.push()
+                            this.plant.turtle!.rotateX(this.plant.pGeneral.phyllotacticRotationAngle * 256 / 360)
                         }
                         phytomerTraversing.nextPlantPart.traverseActivity(this.mode, this)
                         if ((phytomerTraversing.nextPlantPart.isPhytomer())) {
                             phytomerTraversing = <PdInternode>phytomerTraversing.nextPlantPart
                             phytomerTraversing.traversingDirection = TraverseDirection.kTraverseLeft
                         } else if (this.mode === Activity.kActivityDraw) {
-                            this.plant.turtle.pop()
+                            this.plant.turtle!.pop()
                         }
                     }
                     break
@@ -286,7 +285,7 @@ export class PdTraverser {
                         //special drawing stuff - if returning from left or right branch draw, pop turtle
                         //	if (phytomerTraversing.traversingDirection = TraverseDirection.kTraverseLeft + 1)
                         //           or (phytomerTraversing.traversingDirection =  TraverseDirection.kTraverseRight + 1)  then 
-                        this.plant.turtle.pop()
+                        this.plant.turtle!.pop()
                     }
                     if (this.mode === Activity.kActivityCalculateBiomassForGravity) {
                         phytomerTraversing.traverseActivity(this.mode, this)
