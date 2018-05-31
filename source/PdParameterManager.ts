@@ -2,7 +2,7 @@
 
 import { short, float, int, long, IntToStr, compareTextIgnoreCase } from "./common"
 import { domain } from "./PdDomain"
-import { CreateParameters, CreateParameters_SecondHalf } from "./umakepm"
+import { CreateParameters } from "./umakepm"
 import { PdParameter, FieldType, IndexType } from "./PdParameter"
 
 export class PdParameterManager {
