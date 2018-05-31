@@ -1,7 +1,7 @@
 // PdInternode was unit uintern
 
 import { PdPlantPart, kDontTaper, kUseAmendment } from "./PdPlantPart"
-import { TColorRef, float, long, int, byte, IntToStr } from "./common"
+import { TColorRef, float, long, int, byte, IntToStr, short } from "./common"
 import { PdPlant, PartType, Direction, LeafArrangement } from "./PdPlant"
 import { PdPlantDrawingAmendment } from "./PdPlantDrawingAmendment"
 import { PdFiler, PdClassAndVersionInformationRecord } from "./temporary"
@@ -13,6 +13,9 @@ import { KfTurtle } from "./KfTurtle"
 import { KfObject3D } from "./KfObject3D"
 import { TRect } from "./TRect"
 import { ExportPart } from "./U3dexport"
+import { PdLeaf } from "./PdLeaf";
+import { PdMeristem } from "./PdMeristem";
+import { PdInflorescence } from "./PdInflorescence";
 
 export class PdInternode extends PdPlantPart {
     leftBranchPlantPart: PdPlantPart | null = null
@@ -106,7 +109,8 @@ export class PdInternode extends PdPlantPart {
             this.leftLeaf.parentAmendment = amendmentToPass
         }
         if (this.rightLeaf !== null) {
-            this.leftLeaf.parentAmendment = amendmentToPass
+            // ORIGINAL: BUG in original as copied amendmentToPass to leftLeaf instead of rightLeaf
+            this.rightLeaf.parentAmendment = amendmentToPass
         }
     }
     
@@ -578,16 +582,15 @@ export class PdInternode extends PdPlantPart {
         //reading or writing the plant part subobject phytomers will be done by traverser
         //for now, just need to create these objects if needed and set plant and phytomerAttachedTo
         //if it is an inflorescence - read it now
-        this.streamPlantPart(filer, this.leftBranchPlantPart)
-        this.streamPlantPart(filer, this.rightBranchPlantPart)
-        this.streamPlantPart(filer, this.nextPlantPart)
-        this.streamPlantPart(filer, this.leftLeaf)
-        this.streamPlantPart(filer, this.rightLeaf)
+        this.leftBranchPlantPart = this.streamPlantPart(filer, this.leftBranchPlantPart)
+        this.rightBranchPlantPart = this.streamPlantPart(filer, this.rightBranchPlantPart)
+        this.nextPlantPart = this.streamPlantPart(filer, this.nextPlantPart)
+        this.leftLeaf = <PdLeaf>this.streamPlantPart(filer, this.leftLeaf)
+        this.rightLeaf = <PdLeaf>this.streamPlantPart(filer, this.rightLeaf)
     }
     
-    streamPlantPart(filer: PdFiler, plantPart: PdPlantPart | null): void {
-        raise "method streamPlantPart had assigned to var parameter plantPart not added to return -- fixup manually"
-        let partType: short
+    streamPlantPart(filer: PdFiler, plantPart: PdPlantPart | null): PdPlantPart | null {
+        let partType: short = 0
         
         if (filer.isWriting()) {
             if (plantPart === null) {
@@ -616,8 +619,7 @@ export class PdInternode extends PdPlantPart {
                     plantPart = null
                     break
                 case PartType.kPartTypeMeristem:
-                    plantPart = new PdMeristem()
-                    plantPart.plant = this.plant
+                    plantPart = new PdMeristem(this.plant)
                     ;(<PdMeristem>plantPart).phytomerAttachedTo = this
                     plantPart.streamUsingFiler(filer)
                     break
@@ -643,6 +645,7 @@ export class PdInternode extends PdPlantPart {
                     break
             }
         }
+        return plantPart
     }
     
 }
