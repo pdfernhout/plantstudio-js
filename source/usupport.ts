@@ -1,4 +1,4 @@
-import { float, StrToFloat, int, byte, long, compareTextIgnoreCase, short, readln, TextFile, StrToIntDef, TColorRef, ord, intround, getBValue, getRValue, getGValue } from "./common"
+import { float, StrToFloat, int, byte, long, compareTextIgnoreCase, short, readln, TextFile, StrToIntDef, TColorRef, ord, intround, getBValue, getRValue, getGValue, double } from "./common"
 import { DebugPrint } from "./temporary"
 import { KfStringStream } from "./KfStringStream"
 import { intMax, max, min, intMin } from "./umath"
@@ -139,6 +139,8 @@ export function hexUnencode(encodedString: string): string {
     return result
 }
 
+*/
+
 export function strToFloatWithCommaCheck(aString: string): double {
     let result = 0.0
     if (found(",", aString)) {
@@ -147,6 +149,8 @@ export function strToFloatWithCommaCheck(aString: string): double {
     result = StrToFloat(aString)
     return result
 }
+
+/*
 
 export function makeEnterWorkAsTab(form: TForm, activeControl: TControl, key: char): void {
     if (form === null) {
@@ -326,17 +330,11 @@ export function replacePunctuationWithUnderscores(aString: string): string {
     return result
 }
 
-/*
-
 export function replaceCommasWithPeriods(aString: string): string {
     let result = ""
-    let i: int
-    let isComma: boolean
-    
-    result = ""
-    if (len(aString) > 0) {
-        for (i = 1; i <= len(aString); i++) {
-            isComma = aString[i] === ","
+    if (aString.length > 0) {
+        for (let i = 1; i <= aString.length; i++) {
+            const isComma = aString[i] === ","
             if (!isComma) {
                 result = result + aString[i]
             } else {
@@ -348,10 +346,10 @@ export function replaceCommasWithPeriods(aString: string): string {
 }
 
 export function found(substring: string, fullString: string): boolean {
-    let result = false
-    result = UNRESOLVED.pos(substring, fullString) > 0
-    return result
+    return fullString.includes(substring)
 }
+
+/*
 
 export function trimQuotesFromFirstAndLast(theString: string): string {
     let result = ""

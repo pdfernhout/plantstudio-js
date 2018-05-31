@@ -145,3 +145,53 @@ export function ord(character: string) {
 export function odd(value: number) {
     return (value % 2) == 1
 }
+
+export class TFileStream {
+    contents: byte[] = []
+    position = 0
+    // TODO: Maybe don't need fileName in TFileStream?
+    fileName = ""
+    fileMode = 0
+
+    static fmCreate = 1
+    static fmShareExclusive = 2
+
+    static soFromBeginning = 4
+    static soFromCurrent = 8
+    static soFromEnd = 16
+
+    constructor(fileName: string, fileMode: number) {
+        this.fileName = fileName
+        this.fileMode = fileMode
+    }
+
+    WriteBuffer(buffer: number | number[], length: number) {
+        if (Array.isArray(buffer)){
+            for (let i = 0; i < Math.min(buffer.length, length); i++) {
+                this.contents[this.position++] = buffer[i] & 255
+            } 
+        } else {
+            this.contents[this.position++] = buffer & 255
+        }
+    }
+
+    get Position() {
+        return this.position
+    }
+
+    get Size() {
+        return this.contents.length
+    }
+
+    Seek(offset: number, origin: number) {
+        if (origin === TFileStream.soFromBeginning) {
+            this.position = offset
+        } else if (origin === TFileStream.soFromCurrent) {
+            this.position = this.position + offset
+        } else if (origin === TFileStream.soFromEnd) {
+            this.position = this.contents.length + offset
+        } else {
+            throw new Error("Unexpected Seek origin: " + origin)
+        }
+    }
+}

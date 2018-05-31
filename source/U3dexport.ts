@@ -1,4 +1,4 @@
-import { short, int, float, long, TColorRef, IntToStr, TextFile, writeln, ExtractFileName, ExtractFilePath, byte, write, getBValue, getRValue, getGValue, ColorDefs, odd } from "./common"
+import { short, int, float, long, TColorRef, IntToStr, TextFile, writeln, ExtractFileName, ExtractFilePath, byte, write, getBValue, getRValue, getGValue, ColorDefs, odd, TFileStream } from "./common"
 import { KfPoint3D } from "./KfPoint3D"
 import { FileType, valueString, stringUpTo, replacePunctuationWithUnderscores, support_rgb, SaveFileNamesStructure } from "./usupport"
 import { domain } from "./PdDomain"
@@ -82,13 +82,18 @@ export enum ExportFormats {
 const kLayerOutputAllTogether = 0
 const kLayerOutputByTypeOfPlantPart = 1
 const kLayerOutputByPlantPart = 2
+
 const kWriteColor = true
 const kDontWriteColor = false
+
 const kMax3DPoints = 65536
 const kMax3DFaces = 65536
-const kX = 0
-const kY = 1
-const kZ = 2
+
+export enum Axis {
+    kX = 0,
+    kY = 1,
+    kZ = 2,
+}
 
 
 // export part types
@@ -126,7 +131,7 @@ export interface Triangle {
 
 // generic
 // record
-export interface FileExport3DOptionsStructure {
+export class FileExport3DOptionsStructure {
     exportType: short
     layeringOption: short
     stemCylinderFaces: short
@@ -142,7 +147,7 @@ export interface FileExport3DOptionsStructure {
     makeTrianglesDoubleSided: boolean
     dxf_whereToGetColors: short
     dxf_wholePlantColorIndex: short
-    dxf_plantPartColorIndexes: short[] /* kExportPartLast + 1 */
+    dxf_plantPartColorIndexes: short[] = Array(ExportPart.kExportPartLast + 1)
     pov_minLineLengthToWrite: float
     pov_minTdoScaleToWrite: float
     pov_commentOutUnionAtEnd: boolean
@@ -186,12 +191,11 @@ function fileTypeFor3DExportType(outputType: short): short {
             break
         default:
             throw new Error("Problem: Invalid export type in TMainForm.fileTypeFor3DExportType.")
-            break
     }
     return result
 }
 
-function nameFor3DExportType(anOutputType: short): string {
+export function nameFor3DExportType(anOutputType: short): string {
     let result = ""
     switch (anOutputType) {
         case ExportFormats.kDXF:
@@ -214,7 +218,6 @@ function nameFor3DExportType(anOutputType: short): string {
             break
         default:
             throw new Error("Problem: Invalid type in PdDomain.sectionNumberFor3DExportType.")
-            break
     }
     return result
 }
@@ -388,7 +391,7 @@ function getInfoForDXFPartType(index: short): [string, string] {
 export class KfFileExportSurface extends KfDrawingSurface {
     fileName: string = ""
     scale: float = 0.0
-    options: FileExport3DOptionsStructure = new FileExport3DOptionsStructure()
+    options: FileExport3DOptionsStructure
     currentPlantNameLong: string = ""
     currentPlantNameShort: string = ""
     currentPlantIsTranslated: boolean = false
@@ -468,9 +471,9 @@ export class KfFileExportSurface extends KfDrawingSurface {
         if (this.numPoints >= kMax3DPoints) {
             throw new Error("Problem: Too many points in 3D export.")
         }
-        this.points[this.numPoints].x = this.pressedOrNot(this.scale * point.x, kX)
-        this.points[this.numPoints].y = this.pressedOrNot(this.scale * point.y, kY)
-        this.points[this.numPoints].z = this.pressedOrNot(this.scale * point.z, kZ)
+        this.points[this.numPoints].x = this.pressedOrNot(this.scale * point.x, Axis.kX)
+        this.points[this.numPoints].y = this.pressedOrNot(this.scale * point.y, Axis.kY)
+        this.points[this.numPoints].z = this.pressedOrNot(this.scale * point.z, Axis.kZ)
         this.numPoints += 1
     }
     
@@ -675,29 +678,29 @@ export class KfDrawingSurfaceForDXF extends KfTextFileExportSurface {
             }
         }
         writeln(this.outputFile, "10")
-        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * point1.x, kX)))
+        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * point1.x, Axis.kX)))
         writeln(this.outputFile, "20")
-        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * -point1.y, kY)))
+        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * -point1.y, Axis.kY)))
         writeln(this.outputFile, "30")
-        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * point1.z, kZ)))
+        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * point1.z, Axis.kZ)))
         writeln(this.outputFile, "11")
-        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * point2.x, kX)))
+        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * point2.x, Axis.kX)))
         writeln(this.outputFile, "21")
-        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * -point2.y, kY)))
+        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * -point2.y, Axis.kY)))
         writeln(this.outputFile, "31")
-        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * point2.z, kZ)))
+        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * point2.z, Axis.kZ)))
         writeln(this.outputFile, "12")
-        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * point3.x, kX)))
+        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * point3.x, Axis.kX)))
         writeln(this.outputFile, "22")
-        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * -point3.y, kY)))
+        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * -point3.y, Axis.kY)))
         writeln(this.outputFile, "32")
-        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * point3.z, kZ)))
+        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * point3.z, Axis.kZ)))
         writeln(this.outputFile, "13")
-        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * point4.x, kX)))
+        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * point4.x, Axis.kX)))
         writeln(this.outputFile, "23")
-        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * -point4.y, kY)))
+        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * -point4.y, Axis.kY)))
         writeln(this.outputFile, "33")
-        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * point4.z, kZ)))
+        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * point4.z, Axis.kZ)))
     }
     
     basicDrawLineFromTo(startPoint: KfPoint3D, endPoint: KfPoint3D): void {
@@ -926,7 +929,7 @@ export class KfDrawingSurfaceForPOV extends KfTextFileExportSurface {
         const endPointFinal: KfPoint3D = endPoint
         this.doIndenting()
         write(this.outputFile, "cylinder { ")
-        writeln(this.outputFile, "<" + valueString((this.pressedOrNot(this.scale * startPoint.x, kX))) + ", " + valueString(this.pressedOrNot(this.scale * -startPoint.y, kY)) + ", " + valueString(this.pressedOrNot(this.scale * startPoint.z, kZ)) + ">, <" + valueString(this.pressedOrNot(this.scale * endPointFinal.x, kX)) + ", " + valueString(this.pressedOrNot(this.scale * -endPointFinal.y, kY)) + ", " + valueString(this.pressedOrNot(this.scale * endPointFinal.z, kZ)) + ">, " + valueString(this.scale * this.currentWidth) + " }")
+        writeln(this.outputFile, "<" + valueString((this.pressedOrNot(this.scale * startPoint.x, Axis.kX))) + ", " + valueString(this.pressedOrNot(this.scale * -startPoint.y, Axis.kY)) + ", " + valueString(this.pressedOrNot(this.scale * startPoint.z, Axis.kZ)) + ">, <" + valueString(this.pressedOrNot(this.scale * endPointFinal.x, Axis.kX)) + ", " + valueString(this.pressedOrNot(this.scale * -endPointFinal.y, Axis.kY)) + ", " + valueString(this.pressedOrNot(this.scale * endPointFinal.z, Axis.kZ)) + ">, " + valueString(this.scale * this.currentWidth) + " }")
     }
     
     basicDrawTriangle(triangle: KfTriangle): void {
@@ -936,9 +939,9 @@ export class KfDrawingSurfaceForPOV extends KfTextFileExportSurface {
         this.doIndenting()
         write(this.outputFile, "triangle { <")
         // all y values must be negative because it seems our coordinate systems are different
-        write(this.outputFile, valueString(this.pressedOrNot(this.scale * p1.x, kX)) + ", " + valueString(this.pressedOrNot(this.scale * -p1.y, kY)) + ", " + valueString(this.pressedOrNot(this.scale * p1.z, kZ)) + ">, <")
-        write(this.outputFile, valueString(this.pressedOrNot(this.scale * p2.x, kX)) + ", " + valueString(this.pressedOrNot(this.scale * -p2.y, kY)) + ", " + valueString(this.pressedOrNot(this.scale * p2.z, kZ)) + ">, <")
-        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * p3.x, kX)) + ", " + valueString(this.pressedOrNot(this.scale * -p3.y, kY)) + ", " + valueString(this.pressedOrNot(this.scale * p3.z, kZ)) + "> }")
+        write(this.outputFile, valueString(this.pressedOrNot(this.scale * p1.x, Axis.kX)) + ", " + valueString(this.pressedOrNot(this.scale * -p1.y, Axis.kY)) + ", " + valueString(this.pressedOrNot(this.scale * p1.z, Axis.kZ)) + ">, <")
+        write(this.outputFile, valueString(this.pressedOrNot(this.scale * p2.x, Axis.kX)) + ", " + valueString(this.pressedOrNot(this.scale * -p2.y, Axis.kY)) + ", " + valueString(this.pressedOrNot(this.scale * p2.z, Axis.kZ)) + ">, <")
+        writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * p3.x, Axis.kX)) + ", " + valueString(this.pressedOrNot(this.scale * -p3.y, Axis.kY)) + ", " + valueString(this.pressedOrNot(this.scale * p3.z, Axis.kZ)) + "> }")
     }
     
     writeRegistrationReminder(p1: KfPoint3D, p2: KfPoint3D, p3: KfPoint3D, p4: KfPoint3D): void {
@@ -1199,7 +1202,7 @@ export class KfDrawingSurfaceForVRML extends KfTextFileExportSurface {
                 this.writeThenIndent("point [")
                 this.doIndenting()
                 for (i = 0; i <= this.numPoints - 1; i++) {
-                    write(this.outputFile, valueString(this.pressedOrNot(this.scale * this.points[i].x, kX)) + " " + valueString(this.pressedOrNot(this.scale * -this.points[i].y, kY)) + " " + valueString(this.pressedOrNot(this.scale * this.points[i].z, kZ)))
+                    write(this.outputFile, valueString(this.pressedOrNot(this.scale * this.points[i].x, Axis.kX)) + " " + valueString(this.pressedOrNot(this.scale * -this.points[i].y, Axis.kY)) + " " + valueString(this.pressedOrNot(this.scale * this.points[i].z, Axis.kZ)))
                     if (i < this.numPoints - 1) {
                         write(this.outputFile, ", ")
                     }
@@ -1238,7 +1241,7 @@ export class KfDrawingSurfaceForVRML extends KfTextFileExportSurface {
                 this.writeThenIndent("point [")
                 this.doIndenting()
                 for (i = 0; i <= this.numPoints - 1; i++) {
-                    write(this.outputFile, valueString(this.pressedOrNot(this.scale * this.points[i].x, kX)) + " " + valueString(this.pressedOrNot(this.scale * -this.points[i].y, kY)) + " " + valueString(this.pressedOrNot(this.scale * this.points[i].z, kZ)))
+                    write(this.outputFile, valueString(this.pressedOrNot(this.scale * this.points[i].x, Axis.kX)) + " " + valueString(this.pressedOrNot(this.scale * -this.points[i].y, Axis.kY)) + " " + valueString(this.pressedOrNot(this.scale * this.points[i].z, Axis.kZ)))
                     if (i < this.numPoints - 1) {
                         write(this.outputFile, ", ")
                     }
@@ -1413,13 +1416,16 @@ export class KfDrawingSurfaceForOBJ extends KfTextFileExportSurface {
         if (this.numMaterialsStored <= 0) {
             return
         }
-        if (usupport.getFileSaveInfo(usupport.kFileTypeMTL, usupport.kDontAskForFileName, this.materialsFileName, fileInfo)) {
+        // TODO: Unfinished writeMaterialDescriptionsToFile
+        alert("TODO: Unfinished writeMaterialDescriptionsToFile")
+        /*
+        if (usupport.getFileSaveInfo(FileType.kFileTypeMTL, usupport.kDontAskForFileName, this.materialsFileName, fileInfo)) {
             AssignFile(materialsFile, fileInfo.tempFile)
             try {
                 usupport.setDecimalSeparator()
                 Rewrite(materialsFile)
                 usupport.startFileSave(fileInfo)
-                writeln(materialsFile, "# Materials for file " + usupport.stringUpTo(ExtractFileName(this.materialsFileName), ".") + ".obj")
+                writeln(materialsFile, "# Materials for file " + stringUpTo(ExtractFileName(this.materialsFileName), ".") + ".obj")
                 writeln(materialsFile, "# Created by PlantStudio http://www.kurtz-fernhout.com")
                 writeln(materialsFile, "# These files must be in the same directory for the materials to be read correctly.")
                 for (i = 0; i < this.numMaterialsStored; i++) {
@@ -1448,6 +1454,7 @@ export class KfDrawingSurfaceForOBJ extends KfTextFileExportSurface {
                 usupport.cleanUpAfterFileSave(fileInfo)
             }
         }
+        */
     }
     
     storeMaterialDescription(aName: string, aColor: TColorRef): void {
@@ -1485,7 +1492,7 @@ export class KfDrawingSurfaceForOBJ extends KfTextFileExportSurface {
         writeln(this.outputFile)
         writeln(this.outputFile, "# " + IntToStr(this.numPoints) + " vertices")
         for (let i = 0; i < this.numPoints; i++) {
-            writeln(this.outputFile, "v " + valueString(this.pressedOrNot(this.scale * this.points[i].x, kX)) + " " + valueString(this.pressedOrNot(this.scale * -this.points[i].y, kY)) + " " + valueString(this.pressedOrNot(this.scale * this.points[i].z, kZ)))
+            writeln(this.outputFile, "v " + valueString(this.pressedOrNot(this.scale * this.points[i].x, Axis.kX)) + " " + valueString(this.pressedOrNot(this.scale * -this.points[i].y, Axis.kY)) + " " + valueString(this.pressedOrNot(this.scale * this.points[i].z, Axis.kZ)))
         }
         writeln(this.outputFile)
         writeln(this.outputFile, "# " + IntToStr(this.numFaces) + " faces")
@@ -1516,11 +1523,11 @@ export class KfDrawingSurfaceForOBJ extends KfTextFileExportSurface {
 }
 
 export class KfBinaryFileExportSurface extends KfFileExportSurface {
-    stream: TFileStream = new TFileStream()
-    chunkStartStack: any[] = []
+    stream: TFileStream
+    chunkStartStack: int[] = []
     
     startFile(): void {
-        this.stream = delphi_compatability.TFileStream().Create(this.fileName, delphi_compatability.fmCreate || UNRESOLVED.fmShareExclusive)
+        this.stream = new TFileStream(this.fileName, TFileStream.fmCreate || TFileStream.fmShareExclusive)
     }
     
     endFile(): void {
@@ -1639,9 +1646,9 @@ export class KfDrawingSurfaceFor3DS extends KfBinaryFileExportSurface {
         this.startChunk(0x4110)
         this.writeWord(this.numPoints)
         for (let i = 0; i < this.numPoints; i++) {
-            this.writeFloat(this.pressedOrNot(this.scale * this.points[i].x, kX))
-            this.writeFloat(this.pressedOrNot(this.scale * this.points[i].y, kY))
-            this.writeFloat(this.pressedOrNot(this.scale * this.points[i].z, kZ))
+            this.writeFloat(this.pressedOrNot(this.scale * this.points[i].x, Axis.kX))
+            this.writeFloat(this.pressedOrNot(this.scale * this.points[i].y, Axis.kY))
+            this.writeFloat(this.pressedOrNot(this.scale * this.points[i].z, Axis.kZ))
         }
         this.finishChunk(0x4110)
         // 4120H 	FACE_ARRAY may be followed by smooth_group short nfaces;
@@ -1689,28 +1696,23 @@ export class KfDrawingSurfaceFor3DS extends KfBinaryFileExportSurface {
     
     pushChunkStart(): void {
         const position: int = this.stream.Position
-        this.chunkStartStack.push(UNRESOLVED.Pointer(position))
+        this.chunkStartStack.push(position)
     }
     
     popChunkStartAndFixupChunkSize(): void {
-        let chunkSize: int
-        let startSize: int
-        let totalSize: int
-        let lastIndex: int
-        
-        totalSize = this.stream.Size
-        lastIndex = this.chunkStartStack.length - 1
+        const totalSize: int = this.stream.Size
+        const lastIndex: int = this.chunkStartStack.length - 1
         if (lastIndex < 0) {
             // should check if -1
             throw new Error("Problem with stack indexing for 3DS writing in method KfDrawingSurfaceFor3DS.popChunkStartAndFixupChunkSize.")
         }
-        startSize = this.chunkStartStack[lastIndex]
+        const startSize: int = this.chunkStartStack[lastIndex]
         this.chunkStartStack.length = lastIndex
-        chunkSize = totalSize - startSize
+        const chunkSize: int = totalSize - startSize
         // skip two to avoid overwriting chunk type
-        this.stream.Seek(startSize + 2, delphi_compatability.soFromBeginning)
+        this.stream.Seek(startSize + 2, TFileStream.soFromBeginning)
         this.writeDword(chunkSize)
-        this.stream.Seek(0, delphi_compatability.soFromEnd)
+        this.stream.Seek(0, TFileStream.soFromEnd)
     }
     
     startChunk(chunkID: int): void {
@@ -1791,9 +1793,9 @@ export class KfDrawingSurfaceForLWO extends KfBinaryFileExportSurface {
         // points
         this.startChunk("PNTS")
         for (let i = 0; i < this.numPoints; i++) {
-            this.writeFloat(this.pressedOrNot(this.scale * this.points[i].x, kX))
-            this.writeFloat(this.pressedOrNot(this.scale * this.points[i].y, kY))
-            this.writeFloat(this.pressedOrNot(this.scale * this.points[i].z, kZ))
+            this.writeFloat(this.pressedOrNot(this.scale * this.points[i].x, Axis.kX))
+            this.writeFloat(this.pressedOrNot(this.scale * this.points[i].y, Axis.kY))
+            this.writeFloat(this.pressedOrNot(this.scale * this.points[i].z, Axis.kZ))
         }
         this.finishChunk()
         if (this.options.writeColors) {
@@ -1932,7 +1934,7 @@ export class KfDrawingSurfaceForLWO extends KfBinaryFileExportSurface {
     
     pushChunkStart(): void {
         const position: int = this.stream.Position
-        this.chunkStartStack.push(UNRESOLVED.Pointer(position))
+        this.chunkStartStack.push(position)
     }
     
     popChunkStartAndFixupChunkSize(): void {
@@ -1946,10 +1948,10 @@ export class KfDrawingSurfaceForLWO extends KfBinaryFileExportSurface {
         this.chunkStartStack.length = lastIndex
         const chunkSize: int = totalSize - startSize
         // skip back four
-        this.stream.Seek(startSize - 4, delphi_compatability.soFromBeginning)
+        this.stream.Seek(startSize - 4, TFileStream.soFromBeginning)
         // lwo chunk sizes do not include the header
         this.writeDword(chunkSize)
-        this.stream.Seek(0, delphi_compatability.soFromEnd)
+        this.stream.Seek(0, TFileStream.soFromEnd)
     }
     
     startChunk(chunkName: string): void {

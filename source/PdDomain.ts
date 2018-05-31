@@ -1,11 +1,12 @@
 // unit Udomain
 
-import { short, float, TColorRef, long } from "./common"
+import { short, float, TColorRef, long, StrToInt, IntToStr } from "./common"
 import { TPoint } from "./TPoint"
 import { TRect } from "./TRect"
-import { SinglePoint } from "./usupport"
+import { SinglePoint, strToBool, strToFloatWithCommaCheck } from "./usupport"
 import { PdSectionManager } from "./PdSectionManager"
 import { PdParameterManager } from "./PdParameterManager"
+import { ExportFormats, FileExport3DOptionsStructure, nameFor3DExportType, ExportPart, Axis } from "./U3dexport";
 
 // const
 const kMaxWizardQuestions = 30
@@ -241,7 +242,7 @@ export class PdDomain {
     options: DomainOptionsStructure = new DomainOptionsStructure()
     // TODO: FIX breedingAndTimeSeriesOptions: BreedingAndTimeSeriesOptionsStructure = new BreedingAndTimeSeriesOptionsStructure()
     bitmapOptions: BitmapOptionsStructure = new BitmapOptionsStructure()
-    // TODO: FIX exportOptionsFor3D: FileExport3DOptionsStructure[] /* k3DExportTypeLast + 1 */ = Array(k3DExportTypeLast + 1)
+    exportOptionsFor3D: FileExport3DOptionsStructure[] = Array(ExportFormats.k3DExportTypeLast + 1)
     nozzleOptions: NozzleOptionsStructure = new NozzleOptionsStructure()
     animationOptions: NumberedAnimationOptionsStructure = new NumberedAnimationOptionsStructure()
     registered: boolean = false
@@ -303,6 +304,8 @@ export class PdDomain {
         this.plantDrawScaleWhenDrawingCopy_PixelsPerMm = 1.0
         // TODO: Moved makeParameters call from startupLoading -- is this OK? Need to remove duplicate commented code there eventually
         this.parameterManager.makeParameters()
+        // TODO: Temporary -- replace with startup loading
+        this.getProfileInformationFromFile("TODO getProfileInformationFromFile")
     }
 
     // TODO: Remove stub plantDrawOffset_mm
@@ -589,8 +592,16 @@ export class PdDomain {
         }
     }
     
+    */
     // --------------------------------------------------------------------------------- ini file load/save
+
+    // TODO: Replace stub stringForSectionAndKey
+    stringForSectionAndKey(section: string, key: string, defaultString: string): string {
+        return defaultString
+    }
+
     getProfileInformationFromFile(fileName: string): void {
+        /*
         let i: short
         let j: short
         let section: string
@@ -620,54 +631,54 @@ export class PdDomain {
         }
         // ------------------------------------------- preferences
         section = iniSections[kSectionPrefs]
-        this.options.openMostRecentFileAtStart = usupport.strToBool(this.stringForSectionAndKey(section, "Open most recent file at start", "true"))
-        this.options.ignoreWindowSettingsInFile = usupport.strToBool(this.stringForSectionAndKey(section, "Ignore window settings saved in files", "false"))
-        this.options.cachePlantBitmaps = usupport.strToBool(this.stringForSectionAndKey(section, "Draw plants into separate bitmaps", "true"))
+        this.options.openMostRecentFileAtStart = strToBool(this.stringForSectionAndKey(section, "Open most recent file at start", "true"))
+        this.options.ignoreWindowSettingsInFile = strToBool(this.stringForSectionAndKey(section, "Ignore window settings saved in files", "false"))
+        this.options.cachePlantBitmaps = strToBool(this.stringForSectionAndKey(section, "Draw plants into separate bitmaps", "true"))
         this.options.memoryLimitForPlantBitmaps_MB = StrToInt(this.stringForSectionAndKey(section, "Memory limit for plant bitmaps (in MB)", "5"))
         this.options.maxPartsPerPlant_thousands = StrToInt(this.stringForSectionAndKey(section, "Max parts per plant (in thousands)", "10"))
-        this.options.hideWelcomeForm = usupport.strToBool(this.stringForSectionAndKey(section, "Hide welcome window", "false"))
+        this.options.hideWelcomeForm = strToBool(this.stringForSectionAndKey(section, "Hide welcome window", "false"))
         this.options.backgroundColor = StrToInt(this.stringForSectionAndKey(section, "Background color", IntToStr(delphi_compatability.clWhite)))
         this.options.transparentColor = StrToInt(this.stringForSectionAndKey(section, "Transparent color", IntToStr(delphi_compatability.clWhite)))
-        this.options.showSelectionRectangle = usupport.strToBool(this.stringForSectionAndKey(section, "Show selection rectangle", "true"))
-        this.options.showBoundsRectangle = usupport.strToBool(this.stringForSectionAndKey(section, "Show bounding rectangle", "false"))
+        this.options.showSelectionRectangle = strToBool(this.stringForSectionAndKey(section, "Show selection rectangle", "true"))
+        this.options.showBoundsRectangle = strToBool(this.stringForSectionAndKey(section, "Show bounding rectangle", "false"))
         this.options.resizeRectSize = StrToInt(this.stringForSectionAndKey(section, "Resizing rectangle size", "6"))
         this.options.pasteRectSize = StrToInt(this.stringForSectionAndKey(section, "Paste rectangle size", "100"))
         this.options.firstSelectionRectangleColor = StrToInt(this.stringForSectionAndKey(section, "First selection rectangle color", IntToStr(delphi_compatability.clRed)))
         this.options.multiSelectionRectangleColor = StrToInt(this.stringForSectionAndKey(section, "Multi selection rectangle color", IntToStr(delphi_compatability.clBlue)))
-        this.options.draw3DObjects = usupport.strToBool(this.stringForSectionAndKey(section, "Draw 3D objects", "true"))
-        this.options.drawStems = usupport.strToBool(this.stringForSectionAndKey(section, "Draw stems", "true"))
-        this.options.fillPolygons = usupport.strToBool(this.stringForSectionAndKey(section, "Fill polygons", "true"))
+        this.options.draw3DObjects = strToBool(this.stringForSectionAndKey(section, "Draw 3D objects", "true"))
+        this.options.drawStems = strToBool(this.stringForSectionAndKey(section, "Draw stems", "true"))
+        this.options.fillPolygons = strToBool(this.stringForSectionAndKey(section, "Fill polygons", "true"))
         this.options.drawSpeed = StrToInt(this.stringForSectionAndKey(section, "Draw speed (boxes/frames/solids)", IntToStr(kDrawBest)))
-        this.options.drawLinesBetweenPolygons = usupport.strToBool(this.stringForSectionAndKey(section, "Draw lines between polygons", "true"))
-        this.options.sortPolygons = usupport.strToBool(this.stringForSectionAndKey(section, "Sort polygons", "true"))
-        this.options.draw3DObjectsAsBoundingRectsOnly = usupport.strToBool(this.stringForSectionAndKey(section, "Draw 3D objects as squares", "false"))
-        this.options.showPlantDrawingProgress = usupport.strToBool(this.stringForSectionAndKey(section, "Show drawing progress", "true"))
-        this.options.useMetricUnits = usupport.strToBool(this.stringForSectionAndKey(section, "Use metric units", "true"))
+        this.options.drawLinesBetweenPolygons = strToBool(this.stringForSectionAndKey(section, "Draw lines between polygons", "true"))
+        this.options.sortPolygons = strToBool(this.stringForSectionAndKey(section, "Sort polygons", "true"))
+        this.options.draw3DObjectsAsBoundingRectsOnly = strToBool(this.stringForSectionAndKey(section, "Draw 3D objects as squares", "false"))
+        this.options.showPlantDrawingProgress = strToBool(this.stringForSectionAndKey(section, "Show drawing progress", "true"))
+        this.options.useMetricUnits = strToBool(this.stringForSectionAndKey(section, "Use metric units", "true"))
         this.options.undoLimit = StrToInt(this.stringForSectionAndKey(section, "Actions to keep in undo list", "50"))
         this.options.undoLimitOfPlants = StrToInt(this.stringForSectionAndKey(section, "Plants to keep in undo list", "10"))
         this.options.rotationIncrement = StrToInt(this.stringForSectionAndKey(section, "Rotation button increment", "10"))
-        this.options.showLongHintsForButtons = usupport.strToBool(this.stringForSectionAndKey(section, "Show long hints for buttons", "true"))
-        this.options.showHintsForParameters = usupport.strToBool(this.stringForSectionAndKey(section, "Show hints for parameters", "true"))
+        this.options.showLongHintsForButtons = strToBool(this.stringForSectionAndKey(section, "Show long hints for buttons", "true"))
+        this.options.showHintsForParameters = strToBool(this.stringForSectionAndKey(section, "Show hints for parameters", "true"))
         this.options.pauseBeforeHint = StrToInt(this.stringForSectionAndKey(section, "Pause before hint", "1"))
         this.options.pauseDuringHint = StrToInt(this.stringForSectionAndKey(section, "Pause during hint", "60"))
-        this.options.noteEditorWrapLines = usupport.strToBool(this.stringForSectionAndKey(section, "Wrap lines in note editor", "true"))
-        this.options.updateTimeSeriesPlantsOnParameterChange = usupport.strToBool(this.stringForSectionAndKey(section, "Update time series plants on parameter change", "true"))
+        this.options.noteEditorWrapLines = strToBool(this.stringForSectionAndKey(section, "Wrap lines in note editor", "true"))
+        this.options.updateTimeSeriesPlantsOnParameterChange = strToBool(this.stringForSectionAndKey(section, "Update time series plants on parameter change", "true"))
         this.options.mainWindowViewMode = StrToInt(this.stringForSectionAndKey(section, "Main window view option (all/one)", "0"))
         this.options.nudgeDistance = StrToInt(this.stringForSectionAndKey(section, "Distance plant moves with Control-arrow key", "5"))
         this.options.resizeKeyUpMultiplierPercent = StrToInt(this.stringForSectionAndKey(section, "Percent size increase with Control-Shift-up-arrow key", "110"))
         this.options.parametersFontSize = StrToInt(this.stringForSectionAndKey(section, "Parameter panels font size", "8"))
         this.options.mainWindowOrientation = StrToInt(this.stringForSectionAndKey(section, "Main window orientation (horiz/vert)", "0"))
         this.options.lineContrastIndex = StrToInt(this.stringForSectionAndKey(section, "Contrast index for lines on polygons", "3"))
-        this.options.sortTdosAsOneItem = usupport.strToBool(this.stringForSectionAndKey(section, "Sort 3D objects as one item", "true"))
+        this.options.sortTdosAsOneItem = strToBool(this.stringForSectionAndKey(section, "Sort 3D objects as one item", "true"))
         this.options.circlePointSizeInTdoEditor = StrToInt(this.stringForSectionAndKey(section, "3D object editor point size", "8"))
         this.options.partsInTdoEditor = StrToInt(this.stringForSectionAndKey(section, "3D object editor parts", "1"))
-        this.options.fillTrianglesInTdoEditor = usupport.strToBool(this.stringForSectionAndKey(section, "3D object editor fill triangles", "true"))
-        this.options.drawLinesInTdoEditor = usupport.strToBool(this.stringForSectionAndKey(section, "3D object editor draw lines", "true"))
-        this.options.showWindowOnException = usupport.strToBool(this.stringForSectionAndKey(section, "Show numerical exceptions window on exception", "false"))
-        this.options.logToFileOnException = usupport.strToBool(this.stringForSectionAndKey(section, "Log to file on exception", "false"))
-        this.options.showGhostingForHiddenParts = usupport.strToBool(this.stringForSectionAndKey(section, "Ghost hidden parts", "false"))
-        this.options.showHighlightingForNonHiddenPosedParts = usupport.strToBool(this.stringForSectionAndKey(section, "Highlight posed parts", "true"))
-        this.options.showPosingAtAll = usupport.strToBool(this.stringForSectionAndKey(section, "Show posing", "true"))
+        this.options.fillTrianglesInTdoEditor = strToBool(this.stringForSectionAndKey(section, "3D object editor fill triangles", "true"))
+        this.options.drawLinesInTdoEditor = strToBool(this.stringForSectionAndKey(section, "3D object editor draw lines", "true"))
+        this.options.showWindowOnException = strToBool(this.stringForSectionAndKey(section, "Show numerical exceptions window on exception", "false"))
+        this.options.logToFileOnException = strToBool(this.stringForSectionAndKey(section, "Log to file on exception", "false"))
+        this.options.showGhostingForHiddenParts = strToBool(this.stringForSectionAndKey(section, "Ghost hidden parts", "false"))
+        this.options.showHighlightingForNonHiddenPosedParts = strToBool(this.stringForSectionAndKey(section, "Highlight posed parts", "true"))
+        this.options.showPosingAtAll = strToBool(this.stringForSectionAndKey(section, "Show posing", "true"))
         this.options.ghostingColor = StrToInt(this.stringForSectionAndKey(section, "Ghosting color", IntToStr(delphi_compatability.clSilver)))
         this.options.nonHiddenPosedColor = StrToInt(this.stringForSectionAndKey(section, "Posed color", IntToStr(delphi_compatability.clBlue)))
         this.options.selectedPosedColor = StrToInt(this.stringForSectionAndKey(section, "Posed selected color", IntToStr(delphi_compatability.clRed)))
@@ -681,51 +692,55 @@ export class PdDomain {
         this.tdoEditorWindowRect = usupport.stringToRect(this.stringForSectionAndKey(section, "3D object editor window position", "100 100 400 400"))
         this.breederWindowRect = usupport.stringToRect(this.stringForSectionAndKey(section, "Breeder position", "100 100 400 350"))
         this.timeSeriesWindowRect = usupport.stringToRect(this.stringForSectionAndKey(section, "Time series position", "150 150 250 150"))
-        for (i = 1; i <= u3dexport.k3DExportTypeLast; i++) {
+        */
+       
+        for (let i = 1; i <= ExportFormats.k3DExportTypeLast; i++) {
             // ------------------------------------------- 3d export options
-            section = iniSections[this.sectionNumberFor3DExportType(i)]
-            typeName = u3dexport.nameFor3DExportType(i)
+            const section = iniSections[this.sectionNumberFor3DExportType(i)]
+            const typeName = nameFor3DExportType(i)
             // ------------------------------------------- options in common for all
             this.exportOptionsFor3D[i].exportType = StrToInt(this.stringForSectionAndKey(section, typeName + " which plants to draw (selected/visible/all)", "0"))
             this.exportOptionsFor3D[i].layeringOption = StrToInt(this.stringForSectionAndKey(section, typeName + " layering option (all/by type/by part)", "1"))
             this.exportOptionsFor3D[i].stemCylinderFaces = StrToInt(this.stringForSectionAndKey(section, typeName + " stem cylinder sides", "5"))
-            this.exportOptionsFor3D[i].translatePlantsToWindowPositions = usupport.strToBool(this.stringForSectionAndKey(section, typeName + " translate plants to match window positions", "true"))
-            if (i === u3dexport.k3DS) {
+            this.exportOptionsFor3D[i].translatePlantsToWindowPositions = strToBool(this.stringForSectionAndKey(section, typeName + " translate plants to match window positions", "true"))
+            if (i === ExportFormats.k3DS) {
                 this.exportOptionsFor3D[i].lengthOfShortName = StrToInt(this.stringForSectionAndKey(section, typeName + " length of plant name", "2"))
             } else {
                 this.exportOptionsFor3D[i].lengthOfShortName = StrToInt(this.stringForSectionAndKey(section, typeName + " length of plant name", "8"))
             }
-            this.exportOptionsFor3D[i].writePlantNumberInFrontOfName = usupport.strToBool(this.stringForSectionAndKey(section, typeName + " write plant number in front of name", "false"))
-            this.exportOptionsFor3D[i].writeColors = usupport.strToBool(this.stringForSectionAndKey(section, typeName + " write colors", "true"))
+            this.exportOptionsFor3D[i].writePlantNumberInFrontOfName = strToBool(this.stringForSectionAndKey(section, typeName + " write plant number in front of name", "false"))
+            this.exportOptionsFor3D[i].writeColors = strToBool(this.stringForSectionAndKey(section, typeName + " write colors", "true"))
             this.exportOptionsFor3D[i].xRotationBeforeDraw = StrToInt(this.stringForSectionAndKey(section, typeName + " X rotation before drawing", "0"))
             this.exportOptionsFor3D[i].overallScalingFactor_pct = StrToInt(this.stringForSectionAndKey(section, typeName + " scaling factor (percent)", "100"))
-            this.exportOptionsFor3D[i].pressPlants = usupport.strToBool(this.stringForSectionAndKey(section, typeName + " press plants", "false"))
-            this.exportOptionsFor3D[i].directionToPressPlants = StrToInt(this.stringForSectionAndKey(section, typeName + " press dimension (x/y/z)", IntToStr(u3dexport.kY)))
-            this.exportOptionsFor3D[i].makeTrianglesDoubleSided = usupport.strToBool(this.stringForSectionAndKey(section, typeName + " double sided", "true"))
-            if (i === u3dexport.kDXF) {
+            this.exportOptionsFor3D[i].pressPlants = strToBool(this.stringForSectionAndKey(section, typeName + " press plants", "false"))
+            this.exportOptionsFor3D[i].directionToPressPlants = StrToInt(this.stringForSectionAndKey(section, typeName + " press dimension (x/y/z)", IntToStr(Axis.kY)))
+            this.exportOptionsFor3D[i].makeTrianglesDoubleSided = strToBool(this.stringForSectionAndKey(section, typeName + " double sided", "true"))
+            if (i === ExportFormats.kDXF) {
                 // ------------------------------------------- special options
                 this.exportOptionsFor3D[i].dxf_whereToGetColors = StrToInt(this.stringForSectionAndKey(section, "DXF colors option (by type/by part/all)", "0"))
                 // lime
                 this.exportOptionsFor3D[i].dxf_wholePlantColorIndex = StrToInt(this.stringForSectionAndKey(section, "DXF whole plant color index", "2"))
-                for (j = 0; j <= ExportPart.kExportPartLast; j++) {
+                for (let j = 0; j <= ExportPart.kExportPartLast; j++) {
                     // lime
                     this.exportOptionsFor3D[i].dxf_plantPartColorIndexes[j] = StrToInt(this.stringForSectionAndKey(section, "DXF color indexes " + IntToStr(j + 1), "2"))
                 }
-            } else if (i === u3dexport.kPOV) {
-                this.exportOptionsFor3D[i].pov_minLineLengthToWrite = usupport.strToFloatWithCommaCheck(this.stringForSectionAndKey(section, "POV minimum line length to write (mm)", "0.01"))
-                this.exportOptionsFor3D[i].pov_minTdoScaleToWrite = usupport.strToFloatWithCommaCheck(this.stringForSectionAndKey(section, "POV minimum 3D object scale to write", "0.01"))
-                this.exportOptionsFor3D[i].pov_commentOutUnionAtEnd = usupport.strToBool(this.stringForSectionAndKey(section, "POV comment out union of plants at end", "false"))
-            } else if (i === u3dexport.kVRML) {
+            } else if (i === ExportFormats.kPOV) {
+                this.exportOptionsFor3D[i].pov_minLineLengthToWrite = strToFloatWithCommaCheck(this.stringForSectionAndKey(section, "POV minimum line length to write (mm)", "0.01"))
+                this.exportOptionsFor3D[i].pov_minTdoScaleToWrite = strToFloatWithCommaCheck(this.stringForSectionAndKey(section, "POV minimum 3D object scale to write", "0.01"))
+                this.exportOptionsFor3D[i].pov_commentOutUnionAtEnd = strToBool(this.stringForSectionAndKey(section, "POV comment out union of plants at end", "false"))
+            } else if (i === ExportFormats.kVRML) {
                 this.exportOptionsFor3D[i].vrml_version = StrToInt(this.stringForSectionAndKey(section, "VRML version", "1"))
             }
-            if ((i === u3dexport.kPOV) || (i === u3dexport.kVRML)) {
-                this.exportOptionsFor3D[i].nest_LeafAndPetiole = usupport.strToBool(this.stringForSectionAndKey(section, typeName + " nest leaves with petioles", "true"))
-                this.exportOptionsFor3D[i].nest_CompoundLeaf = usupport.strToBool(this.stringForSectionAndKey(section, typeName + " compound leaves", "true"))
-                this.exportOptionsFor3D[i].nest_Inflorescence = usupport.strToBool(this.stringForSectionAndKey(section, typeName + " nest inflorescences", "true"))
-                this.exportOptionsFor3D[i].nest_PedicelAndFlowerFruit = usupport.strToBool(this.stringForSectionAndKey(section, typeName + " nest flowers/fruits with pedicels", "true"))
-                this.exportOptionsFor3D[i].nest_FloralLayers = usupport.strToBool(this.stringForSectionAndKey(section, typeName + " nest pistils and stamens", "true"))
+            if ((i === ExportFormats.kPOV) || (i === ExportFormats.kVRML)) {
+                this.exportOptionsFor3D[i].nest_LeafAndPetiole = strToBool(this.stringForSectionAndKey(section, typeName + " nest leaves with petioles", "true"))
+                this.exportOptionsFor3D[i].nest_CompoundLeaf = strToBool(this.stringForSectionAndKey(section, typeName + " compound leaves", "true"))
+                this.exportOptionsFor3D[i].nest_Inflorescence = strToBool(this.stringForSectionAndKey(section, typeName + " nest inflorescences", "true"))
+                this.exportOptionsFor3D[i].nest_PedicelAndFlowerFruit = strToBool(this.stringForSectionAndKey(section, typeName + " nest flowers/fruits with pedicels", "true"))
+                this.exportOptionsFor3D[i].nest_FloralLayers = strToBool(this.stringForSectionAndKey(section, typeName + " nest pistils and stamens", "true"))
             }
         }
+
+        /*
         // ------------------------------------------- wizard
         section = iniSections[kSectionWizard]
         // meristems
@@ -766,7 +781,7 @@ export class PdDomain {
             // the wizard will default the tdo names when it comes up, we don't have to do it here
             this.options.wizardTdoNames[i] = this.stringForSectionAndKey(section, "Wizard 3D objects " + IntToStr(i), "")
         }
-        this.options.wizardShowFruit = usupport.strToBool(this.stringForSectionAndKey(section, "Wizard show fruit", "false"))
+        this.options.wizardShowFruit = strToBool(this.stringForSectionAndKey(section, "Wizard show fruit", "false"))
         // ------------------------------------------- custom colors
         section = iniSections[kCustomColors]
         for (i = 0; i <= kMaxCustomColors - 1; i++) {
@@ -782,19 +797,19 @@ export class PdDomain {
         this.bitmapOptions.height_pixels = StrToInt(this.stringForSectionAndKey(section, "Picture height (pixels)", "400"))
         this.bitmapOptions.width_in = usupport.strToFloatWithCommaCheck(this.stringForSectionAndKey(section, "Picture width (inches)", "2.0"))
         this.bitmapOptions.height_in = usupport.strToFloatWithCommaCheck(this.stringForSectionAndKey(section, "Picture height (inches)", "2.0"))
-        this.bitmapOptions.preserveAspectRatio = usupport.strToBool(this.stringForSectionAndKey(section, "Preserve aspect ratio", "true"))
+        this.bitmapOptions.preserveAspectRatio = strToBool(this.stringForSectionAndKey(section, "Preserve aspect ratio", "true"))
         this.bitmapOptions.jpegCompressionRatio = StrToInt(this.stringForSectionAndKey(section, "JPEG compression quality ratio (1-100)", "50"))
         // -------------------------------------------  printing
         section = iniSections[kSectionPrinting]
-        this.bitmapOptions.printPreserveAspectRatio = usupport.strToBool(this.stringForSectionAndKey(section, "Preserve aspect ratio", "true"))
+        this.bitmapOptions.printPreserveAspectRatio = strToBool(this.stringForSectionAndKey(section, "Preserve aspect ratio", "true"))
         this.bitmapOptions.printWidth_in = usupport.strToFloatWithCommaCheck(this.stringForSectionAndKey(section, "Print width (inches)", "4.0"))
         this.bitmapOptions.printHeight_in = usupport.strToFloatWithCommaCheck(this.stringForSectionAndKey(section, "Print height (inches)", "4.0"))
         this.bitmapOptions.printLeftMargin_in = usupport.strToFloatWithCommaCheck(this.stringForSectionAndKey(section, "Print left margin (inches)", "1.0"))
         this.bitmapOptions.printTopMargin_in = usupport.strToFloatWithCommaCheck(this.stringForSectionAndKey(section, "Print top margin (inches)", "1.0"))
         this.bitmapOptions.printRightMargin_in = usupport.strToFloatWithCommaCheck(this.stringForSectionAndKey(section, "Print right margin (inches)", "1.0"))
         this.bitmapOptions.printBottomMargin_in = usupport.strToFloatWithCommaCheck(this.stringForSectionAndKey(section, "Print bottom margin (inches)", "1.0"))
-        this.bitmapOptions.printBorderInner = usupport.strToBool(this.stringForSectionAndKey(section, "Print inner border", "false"))
-        this.bitmapOptions.printBorderOuter = usupport.strToBool(this.stringForSectionAndKey(section, "Print outer border", "false"))
+        this.bitmapOptions.printBorderInner = strToBool(this.stringForSectionAndKey(section, "Print inner border", "false"))
+        this.bitmapOptions.printBorderOuter = strToBool(this.stringForSectionAndKey(section, "Print outer border", "false"))
         this.bitmapOptions.printBorderWidthInner = StrToInt(this.stringForSectionAndKey(section, "Inner border width (pixels)", "1"))
         this.bitmapOptions.printBorderWidthOuter = StrToInt(this.stringForSectionAndKey(section, "Outer border width (pixels)", "1"))
         this.bitmapOptions.printBorderColorInner = StrToInt(this.stringForSectionAndKey(section, "Inner border color", "0"))
@@ -815,8 +830,8 @@ export class PdDomain {
             this.breedingAndTimeSeriesOptions.firstPlantWeights[i] = StrToInt(this.stringForSectionAndKey(section, "First plant weight " + IntToStr(i + 1), "50"))
         }
         this.breedingAndTimeSeriesOptions.getNonNumericalParametersFrom = StrToInt(this.stringForSectionAndKey(section, "Non-numeric", "5"))
-        this.breedingAndTimeSeriesOptions.mutateAndBlendColorValues = usupport.strToBool(this.stringForSectionAndKey(section, "Vary colors", "false"))
-        this.breedingAndTimeSeriesOptions.chooseTdosRandomlyFromCurrentLibrary = usupport.strToBool(this.stringForSectionAndKey(section, "Vary 3D objects", "false"))
+        this.breedingAndTimeSeriesOptions.mutateAndBlendColorValues = strToBool(this.stringForSectionAndKey(section, "Vary colors", "false"))
+        this.breedingAndTimeSeriesOptions.chooseTdosRandomlyFromCurrentLibrary = strToBool(this.stringForSectionAndKey(section, "Vary 3D objects", "false"))
         // -------------------------------------------  nozzles
         section = iniSections[kSectionNozzle]
         this.nozzleOptions.exportType = StrToInt(this.stringForSectionAndKey(section, "Which plants to make nozzle from (selected/visible/all)", "0"))
@@ -889,7 +904,11 @@ export class PdDomain {
             overrideValues.free
         }
         this.boundProfileInformation()
+
+    */
     }
+
+    /*
     
     storeProfileInformation(): void {
         let i: short
@@ -1431,33 +1450,36 @@ export class PdDomain {
         return result
     }
     
+    */
+
     sectionNumberFor3DExportType(anOutputType: short): short {
         let result = 0
         switch (anOutputType) {
-            case u3dexport.kDXF:
+            case ExportFormats.kDXF:
                 result = kSectionDXF
                 break
-            case u3dexport.kPOV:
+            case ExportFormats.kPOV:
                 result = kSectionPOV
                 break
-            case u3dexport.k3DS:
+            case ExportFormats.k3DS:
                 result = kSection3DS
                 break
-            case u3dexport.kOBJ:
+            case ExportFormats.kOBJ:
                 result = kSectionOBJ
                 break
-            case u3dexport.kVRML:
+            case ExportFormats.kVRML:
                 result = kSectionVRML
                 break
-            case u3dexport.kLWO:
+            case ExportFormats.kLWO:
                 result = kSectionLWO
                 break
             default:
-                throw new GeneralException.create("Problem: Invalid type in PdDomain.sectionNumberFor3DExportType.")
-                break
+                throw new Error("Problem: Invalid type in PdDomain.sectionNumberFor3DExportType.")
         }
         return result
     }
+
+    /*
     
     plantDrawOffset_mm(): SinglePoint {
         let result = new SinglePoint()
