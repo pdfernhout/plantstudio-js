@@ -1,7 +1,7 @@
 // KfObject3D was unit Utdo
 
 import { float, long, ColorDefs, int, IntToStr, short, StrToFloat, intround, arrayRemove, compareTextIgnoreCase, StrToIntDef, MessageDialog, TextFile, TMemo, writeln, eof, readln, write, TColorRef, getRValue, getGValue, getBValue, ExtractFileName } from "./common"
-import { PdStreamableObject, PdClassAndVersionInformationRecord, PdFiler, ExportFormats, FIX_sizeof, TListCollection_streamUsingFiler } from "./temporary";
+import { PdStreamableObject, PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof, TListCollection_streamUsingFiler } from "./temporary";
 import { KfPoint3D, KfPoint3D_matchXYZ, KfPoint3D_setXYZ, KfPoint3D_addPointToBoundsRect, KfPoint3D_subtract } from "./KfPoint3D";
 import { KfIndexTriangle } from "./KfIndexTriangle";
 import { KfTriangle } from "./KfTriangle";
@@ -11,6 +11,7 @@ import { KfTurtle } from "./KfTurtle";
 import { KfStringStream } from "./KfStringStream";
 import { stringUpTo, digitValueString, replacePunctuationWithUnderscores } from "./usupport";
 import { ClassId } from "./uclasses";
+import { KfFileExportSurface, ExportFormats } from "./U3dexport";
 
 /* TODO: Remove unused imports 
 from conversion_common import *
@@ -373,13 +374,12 @@ export class KfObject3D extends PdStreamableObject {
     }
     
     write3DExportElements(turtle: KfTurtle, scale: float, partID: short): void {
-        let fileExportSurface: KfFileExportSurface
         let triangle: KfIndexTriangle
         let firstPtIndex: long
         
         // do NOT pass the array on because a tdo could be really big
         // some write out lists of points then triangles; some draw each triangle
-        fileExportSurface = turtle.fileExportSurface()
+        const fileExportSurface: KfFileExportSurface | null = turtle.fileExportSurface()
         if (fileExportSurface === null) {
             throw new Error("Problem: No 3D drawing surface in method KfObject3D.write3DExportElements.")
         }

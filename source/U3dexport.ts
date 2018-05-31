@@ -219,7 +219,7 @@ function nameFor3DExportType(anOutputType: short): string {
     return result
 }
 
-function longNameForDXFPartType(index: short): string {
+export function longNameForDXFPartType(index: short): string {
     let longName: string
     let shortName: string
     
@@ -227,7 +227,7 @@ function longNameForDXFPartType(index: short): string {
     return longName
 }
 
-function shortNameForDXFPartType(index: short): string {
+export function shortNameForDXFPartType(index: short): string {
     let longName: string
     let shortName: string
     

@@ -93,17 +93,12 @@ export const TraverserGlobals = {
     worstDeadColor: 0,
 }
 
-
 // -------------------------------------------------------------------------- linear growth functions 
 function linearGrowthWithFactorResult(current: float, optimal: float, minDays: int, growthFactor: float): float {
     let result = 0.0
-    let amountNeeded: float
-    let maxPossible: float
-    
-    result = 0.0
     try {
-        amountNeeded = optimal - current
-        maxPossible = safedivExcept(optimal, minDays, optimal)
+        let amountNeeded = optimal - current
+        const maxPossible = safedivExcept(optimal, minDays, optimal)
         amountNeeded = max(0.0, min(amountNeeded, maxPossible))
         result = amountNeeded * growthFactor
     } catch (e) {
@@ -113,12 +108,9 @@ function linearGrowthWithFactorResult(current: float, optimal: float, minDays: i
 }
 
 export function linearGrowthWithFactor(current: float, optimal: float, minDays: int, growthFactor: float): float {
-    let amountNeeded: float
-    let maxPossible: float
-    
     try {
-        amountNeeded = optimal - current
-        maxPossible = safedivExcept(optimal, minDays, optimal)
+        let amountNeeded = optimal - current
+        const maxPossible = safedivExcept(optimal, minDays, optimal)
         amountNeeded = max(0.0, min(amountNeeded, maxPossible))
         current = current + amountNeeded * growthFactor
     } catch (e) {
@@ -129,13 +121,9 @@ export function linearGrowthWithFactor(current: float, optimal: float, minDays: 
 
 export function linearGrowthResult(current: float, optimal: float, minDays: int): float {
     let result = 0.0
-    let amountNeeded: float
-    let maxPossible: float
-    
-    result = 0.0
     try {
-        amountNeeded = optimal - current
-        maxPossible = safedivExcept(optimal, minDays, optimal)
+        let amountNeeded = optimal - current
+        const maxPossible = safedivExcept(optimal, minDays, optimal)
         amountNeeded = max(0.0, min(amountNeeded, maxPossible))
         result = amountNeeded
     } catch (e) {
@@ -145,12 +133,9 @@ export function linearGrowthResult(current: float, optimal: float, minDays: int)
 }
 
 function linearGrowth(current: float, optimal: float, minDays: int): float {
-    let amountNeeded: float
-    let maxPossible: float
-    
     try {
-        amountNeeded = optimal - current
-        maxPossible = safedivExcept(optimal, minDays, optimal)
+        let amountNeeded = optimal - current
+        const maxPossible = safedivExcept(optimal, minDays, optimal)
         amountNeeded = max(0.0, min(amountNeeded, maxPossible))
         current = current + amountNeeded
     } catch (e) {
@@ -176,11 +161,8 @@ export class PdPlantStatistics {
     }
     
     totalBiomass_pctMPB(): float {
-        let result = 0.0
-        let i: short
-        
-        result = 0.0
-        for (i = 0; i <= Statistics.kStatisticsPartTypeLast; i++) {
+        let result = 0.0 
+        for (let i = 0; i <= Statistics.kStatisticsPartTypeLast; i++) {
             result = result + this.liveBiomass_pctMPB[i]
             result = result + this.deadBiomass_pctMPB[i]
         }
@@ -302,29 +284,27 @@ export class PdTraverser {
                 case TraverseDirection.kTraverseDone:
                     phytomerTraversing.traversingDirection = TraverseDirection.kTraverseNone
                     const lastPhytomer: PdInternode = phytomerTraversing
+                    if (phytomerTraversing.phytomerAttachedTo === null) {
+                        break
+                    }
                     phytomerTraversing = phytomerTraversing.phytomerAttachedTo
                     if ((this.mode === Activity.kActivityFree)) {
                         // TODO: Use or remove: lastPhytomer.free
-                        if (phytomerTraversing !== null) {
-                            if ((phytomerTraversing.traversingDirection === TraverseDirection.kTraverseLeft + 1)) {
-                                phytomerTraversing.leftBranchPlantPart = null
-                            } else if ((phytomerTraversing.traversingDirection === TraverseDirection.kTraverseRight + 1)) {
-                                phytomerTraversing.rightBranchPlantPart = null
-                            } else if ((phytomerTraversing.traversingDirection === TraverseDirection.kTraverseNext + 1)) {
-                                phytomerTraversing.nextPlantPart = null
-                            }
+                        if ((phytomerTraversing.traversingDirection === TraverseDirection.kTraverseLeft + 1)) {
+                            phytomerTraversing.leftBranchPlantPart = null
+                        } else if ((phytomerTraversing.traversingDirection === TraverseDirection.kTraverseRight + 1)) {
+                            phytomerTraversing.rightBranchPlantPart = null
+                        } else if ((phytomerTraversing.traversingDirection === TraverseDirection.kTraverseNext + 1)) {
+                            phytomerTraversing.nextPlantPart = null
                         }
                     }
-                    if (phytomerTraversing === null) {
-                        break
-                    }
-                    if ((this.mode === Activity.kActivityDraw)) {
+                    if (this.mode === Activity.kActivityDraw) {
                         //special drawing stuff - if returning from left or right branch draw, pop turtle
                         //	if (phytomerTraversing.traversingDirection = TraverseDirection.kTraverseLeft + 1)
                         //           or (phytomerTraversing.traversingDirection =  TraverseDirection.kTraverseRight + 1)  then 
                         this.plant.turtle.pop()
                     }
-                    if ((this.mode === Activity.kActivityCalculateBiomassForGravity)) {
+                    if (this.mode === Activity.kActivityCalculateBiomassForGravity) {
                         phytomerTraversing.traverseActivity(this.mode, this)
                     }
                     break
