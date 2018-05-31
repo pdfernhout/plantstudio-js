@@ -2316,18 +2316,20 @@ export class PdPlant extends PdStreamableObject {
             tdoFruit = this.pFruit.tdoParams.object3D
             tdoRoot = this.pRoot.tdoParams.object3D
         } else {
+            /* TODO: Use or remove null setting -- issue where these TDOs aren'ts expected to be null elsewhere
             tdoSeedlingLeaf = null
             tdoLeaf = null
             tdoStipule = null
             tdoInflorBractFemale = null
             tdoInflorBractMale = null
-            for (let partType = 0; partType <= kHighestFloralPartConstant; partType++) {
+            for (let partType = 0; partType <= FloralPart.kHighestFloralPartConstant; partType++) {
                 femaleFlowerTdos[partType] = null
                 maleFlowerTdos[partType] = null
             }
             tdoAxillaryBud = null
             tdoFruit = null
             tdoRoot = null
+            */
         }
 
         this.pGeneral = filer.streamBytes(this.pGeneral, FIX_sizeof(this.pGeneral))
@@ -2345,23 +2347,23 @@ export class PdPlant extends PdStreamableObject {
 
         // reset pointers if reading and stream 3d objects 
         if (filer.isReading()) {
-            this.pSeedlingLeaf.leafTdoParams.object3D = tdoSeedlingLeaf
+            this.pSeedlingLeaf.leafTdoParams.object3D = tdoSeedlingLeaf!
         }
         this.pSeedlingLeaf.leafTdoParams.object3D.streamUsingFiler(filer)
         if (filer.isReading()) {
-            this.pLeaf.leafTdoParams.object3D = tdoLeaf
+            this.pLeaf.leafTdoParams.object3D = tdoLeaf!
         }
         this.pLeaf.leafTdoParams.object3D.streamUsingFiler(filer)
         if (filer.isReading()) {
-            this.pLeaf.stipuleTdoParams.object3D = tdoStipule
+            this.pLeaf.stipuleTdoParams.object3D = tdoStipule!
         }
         this.pLeaf.stipuleTdoParams.object3D.streamUsingFiler(filer)
         if (filer.isReading()) {
-            this.pInflor[Gender.kGenderFemale].bractTdoParams.object3D = tdoInflorBractFemale
+            this.pInflor[Gender.kGenderFemale].bractTdoParams.object3D = tdoInflorBractFemale!
         }
         this.pInflor[Gender.kGenderFemale].bractTdoParams.object3D.streamUsingFiler(filer)
         if (filer.isReading()) {
-            this.pInflor[Gender.kGenderMale].bractTdoParams.object3D = tdoInflorBractMale
+            this.pInflor[Gender.kGenderMale].bractTdoParams.object3D = tdoInflorBractMale!
         }
         this.pInflor[Gender.kGenderMale].bractTdoParams.object3D.streamUsingFiler(filer)
         for (let partType = 0; partType <= FloralPart.kHighestFloralPartConstant; partType++) {
@@ -2375,15 +2377,15 @@ export class PdPlant extends PdStreamableObject {
             this.pFlower[Gender.kGenderMale].tdoParams[partType].object3D.streamUsingFiler(filer)
         }
         if (filer.isReading()) {
-            this.pAxillaryBud.tdoParams.object3D = tdoAxillaryBud
+            this.pAxillaryBud.tdoParams.object3D = tdoAxillaryBud!
         }
         this.pAxillaryBud.tdoParams.object3D.streamUsingFiler(filer)
         if (filer.isReading()) {
-            this.pFruit.tdoParams.object3D = tdoFruit
+            this.pFruit.tdoParams.object3D = tdoFruit!
         }
         this.pFruit.tdoParams.object3D.streamUsingFiler(filer)
         if (filer.isReading()) {
-            this.pRoot.tdoParams.object3D = tdoRoot
+            this.pRoot.tdoParams.object3D = tdoRoot!
         }
         this.pRoot.tdoParams.object3D.streamUsingFiler(filer)
         this.randomNumberGenerator.streamUsingFiler(filer)
