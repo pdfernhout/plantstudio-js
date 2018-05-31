@@ -1,5 +1,5 @@
 import * as o from "ospec"
-import { fastTrigCos } from "../source/U3dsupport";
+import { fastTrigCos } from "../source/U3dsupport"
 
 o.spec("U3dsupport", () => {
 

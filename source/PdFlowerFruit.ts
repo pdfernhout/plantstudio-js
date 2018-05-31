@@ -1,17 +1,17 @@
 // PdFlowerFruit was unit ufruit
 
-import { float, short, long, int, TColorRef } from "./common";
-import { PdPlantPart, kDontUseAmendment } from "./PdPlantPart";
-import { PdPlant, FlowerFruitStage, Gender, FloralPart, DrawFlowerStage, PartType } from "./PdPlant";
-import { Activity, PdTraverser, linearGrowthResult, Statistics } from "./PdTraverser";
-import { safedivExcept, max, scurve, min, pointsAreCloseEnough } from "./umath";
-import { messageForExceptionType } from "./usupport";
-import { ExportPart, NestingType } from "./U3dexport";
-import { KfTurtle } from "./KfTurtle";
-import { TRect } from "./TRect";
-import { KfObject3D } from "./KfObject3D";
-import { PdClassAndVersionInformationRecord, PdFiler } from "./temporary";
-import { ClassId } from "./uclasses";
+import { float, short, long, int, TColorRef } from "./common"
+import { PdPlantPart, kDontUseAmendment } from "./PdPlantPart"
+import { PdPlant, FlowerFruitStage, Gender, FloralPart, DrawFlowerStage, PartType } from "./PdPlant"
+import { Activity, PdTraverser, linearGrowthResult, Statistics } from "./PdTraverser"
+import { safedivExcept, max, scurve, min, pointsAreCloseEnough } from "./umath"
+import { messageForExceptionType } from "./usupport"
+import { ExportPart, NestingType } from "./U3dexport"
+import { KfTurtle } from "./KfTurtle"
+import { TRect } from "./TRect"
+import { KfObject3D } from "./KfObject3D"
+import { PdClassAndVersionInformationRecord, PdFiler } from "./temporary"
+import { ClassId } from "./uclasses"
 
 // const
 const kDrawFlowerAsOpening = true

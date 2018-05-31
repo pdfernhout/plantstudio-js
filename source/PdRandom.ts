@@ -1,17 +1,9 @@
 // PdRandom from unit Urandom
 
-import { PdStreamableObject, PdClassAndVersionInformationRecord, PdFiler } from "./temporary";
-import { long, short, byte, float, int, intround } from "./common";
-import { max, min } from "./umath";
-import { ClassId } from "./uclasses";
-
-/* TODO: Remove unused imports
-from conversion_common import *
-import uclasses
-import umath
-import ufiler
-import delphi_compatability
-*/
+import { PdStreamableObject, PdClassAndVersionInformationRecord, PdFiler } from "./temporary"
+import { long, short, byte, float, int, intround } from "./common"
+import { max, min } from "./umath"
+import { ClassId } from "./uclasses"
 
 export class PdRandom extends PdStreamableObject {
     // long type is a 32-bit signed Integer -2147483648 to 2147483647

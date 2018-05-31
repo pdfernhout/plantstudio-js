@@ -1,6 +1,6 @@
 import * as o from "ospec"
 import { KfObject3D } from "../source/KfObject3D"
-import { KfPoint3D } from "../source/KfPoint3D";
+import { KfPoint3D } from "../source/KfPoint3D"
 
 const exampleTDOMemo = `start 3D object
 Name=Tutorial leaf

@@ -4,8 +4,8 @@ import { float, ColorDefs, short, int, StrToFloat, byte, long } from "./common"
 import { TRect } from "./TRect"
 import { PdTraverser } from "./PdTraverser"
 import { PdPlant } from "./PdPlant"
-import { PdPlantPart } from "./PdPlantPart";
-import { SinglePoint } from "./usupport";
+import { PdPlantPart } from "./PdPlantPart"
+import { SinglePoint } from "./usupport"
 
 // TODO: Fix copied code from utdo
 export const kMaximumRecordedPoints = 10000

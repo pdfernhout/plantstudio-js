@@ -1,21 +1,9 @@
-import { short, float, int, long, IntToStr, compareTextIgnoreCase } from "./common";
-import { domain } from "./PdDomain";
-import { CreateParameters, CreateParameters_SecondHalf } from "./umakepm";
-import { PdParameter, FieldType, IndexType } from "./PdParameter";
-
 // unit Uparams
 
-/* TODO: Remove unused imports
-from conversion_common import *
-import udomain
-import umakepm
-import uunits
-import usection
-import usupport
-import uexcept
-import ucollect
-import delphi_compatability
-*/
+import { short, float, int, long, IntToStr, compareTextIgnoreCase } from "./common"
+import { domain } from "./PdDomain"
+import { CreateParameters, CreateParameters_SecondHalf } from "./umakepm"
+import { PdParameter, FieldType, IndexType } from "./PdParameter"
 
 export class PdParameterManager {
     parameters: PdParameter[] = []

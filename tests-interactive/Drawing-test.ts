@@ -1,10 +1,10 @@
 import * as m from "mithril"
 import { KfDrawingSurface } from "../source/KfDrawingSurface"
 import { TPoint } from "../source/TPoint"
-import { KfPoint3D } from "../source/KfPoint3D";
-import { KfTurtle } from "../source/KfTurtle";
-import { TRect } from "../source/TRect";
-import { KfObject3D } from "../source/KfObject3D";
+import { KfPoint3D } from "../source/KfPoint3D"
+import { KfTurtle } from "../source/KfTurtle"
+import { TRect } from "../source/TRect"
+import { KfObject3D } from "../source/KfObject3D"
 
 let yAngle = 0
 

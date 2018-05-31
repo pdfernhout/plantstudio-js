@@ -1,6 +1,6 @@
 // unit Uclasses
 
-import { PdClassAndVersionInformationRecord, PdStreamableObject } from "./temporary";
+import { PdClassAndVersionInformationRecord, PdStreamableObject } from "./temporary"
 
 // const
 export enum ClassId {

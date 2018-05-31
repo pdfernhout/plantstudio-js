@@ -14,27 +14,8 @@ import { KfPoint3D } from "./KfPoint3D"
 import { domain } from "./PdDomain"
 import { ClassId } from "./uclasses"
 import { TPoint } from "./TPoint"
-import { messageForExceptionType, darkerColor } from "./usupport";
-import { ExportFormats, ExportPart, longNameForDXFPartType, shortNameForDXFPartType } from "./U3dexport";
-
-/* TODO: Remove unused imports
-from conversion_common import *
-import umain
-import udebug
-import udomain
-import uclasses
-import u3dsupport
-import u3dexport
-import uturtle
-import utravers
-import uamendmt
-import utdo
-import ufiler
-import usupport
-import umath
-import uplant
-import delphi_compatability
-*/
+import { messageForExceptionType, darkerColor } from "./usupport"
+import { ExportFormats, ExportPart, longNameForDXFPartType, shortNameForDXFPartType } from "./U3dexport"
 
 // const
 const kAddingBiomassToPlant = true

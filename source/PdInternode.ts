@@ -1,18 +1,18 @@
 // PdInternode was unit uintern
 
-import { PdPlantPart, kDontTaper, kUseAmendment } from "./PdPlantPart";
-import { TColorRef, float, long, int, byte, IntToStr } from "./common";
-import { PdPlant, PartType, Direction, LeafArrangement } from "./PdPlant";
-import { PdPlantDrawingAmendment } from "./PdPlantDrawingAmendment";
-import { PdFiler, PdClassAndVersionInformationRecord } from "./temporary";
-import { max, pointsAreCloseEnough, min, safedivExcept } from "./umath";
-import { messageForExceptionType, blendColors } from "./usupport";
-import { Activity, Statistics, PdTraverser, TraverseDirection, linearGrowthResult, linearGrowthWithFactor } from "./PdTraverser";
-import { ClassId } from "./uclasses";
-import { KfTurtle } from "./KfTurtle";
-import { KfObject3D } from "./KfObject3D";
-import { TRect } from "./TRect";
-import { ExportPart } from "./U3dexport";
+import { PdPlantPart, kDontTaper, kUseAmendment } from "./PdPlantPart"
+import { TColorRef, float, long, int, byte, IntToStr } from "./common"
+import { PdPlant, PartType, Direction, LeafArrangement } from "./PdPlant"
+import { PdPlantDrawingAmendment } from "./PdPlantDrawingAmendment"
+import { PdFiler, PdClassAndVersionInformationRecord } from "./temporary"
+import { max, pointsAreCloseEnough, min, safedivExcept } from "./umath"
+import { messageForExceptionType, blendColors } from "./usupport"
+import { Activity, Statistics, PdTraverser, TraverseDirection, linearGrowthResult, linearGrowthWithFactor } from "./PdTraverser"
+import { ClassId } from "./uclasses"
+import { KfTurtle } from "./KfTurtle"
+import { KfObject3D } from "./KfObject3D"
+import { TRect } from "./TRect"
+import { ExportPart } from "./U3dexport"
 
 export class PdInternode extends PdPlantPart {
     leftBranchPlantPart: PdPlantPart | null = null

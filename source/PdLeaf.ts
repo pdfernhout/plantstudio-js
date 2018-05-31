@@ -1,17 +1,17 @@
 // PdLeaf was unit uleaf
 
-import { SCurveStructure, safedivExcept, max, min, scurve, pointsAreCloseEnough } from "./umath";
-import { PdPlantPart, kDontTaper, kUseAmendment, kDontUseAmendment } from "./PdPlantPart";
-import { float, int, odd, TColorRef } from "./common";
-import { PdPlant, CompoundLeafStyle, Direction, PartType, LeafArrangement } from "./PdPlant";
-import { PdTraverser, Activity, linearGrowthResult, Statistics } from "./PdTraverser";
-import { ExportPart, NestingType } from "./U3dexport";
-import { messageForExceptionType } from "./usupport";
-import { KfObject3D } from "./KfObject3D";
-import { KfTurtle } from "./KfTurtle";
-import { TRect } from "./TRect";
-import { PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof } from "./temporary";
-import { ClassId } from "./uclasses";
+import { SCurveStructure, safedivExcept, max, min, scurve, pointsAreCloseEnough } from "./umath"
+import { PdPlantPart, kDontTaper, kUseAmendment, kDontUseAmendment } from "./PdPlantPart"
+import { float, int, odd, TColorRef } from "./common"
+import { PdPlant, CompoundLeafStyle, Direction, PartType, LeafArrangement } from "./PdPlant"
+import { PdTraverser, Activity, linearGrowthResult, Statistics } from "./PdTraverser"
+import { ExportPart, NestingType } from "./U3dexport"
+import { messageForExceptionType } from "./usupport"
+import { KfObject3D } from "./KfObject3D"
+import { KfTurtle } from "./KfTurtle"
+import { TRect } from "./TRect"
+import { PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof } from "./temporary"
+import { ClassId } from "./uclasses"
 
 const kNumCompoundLeafRandomSwayIndexes = 49
 

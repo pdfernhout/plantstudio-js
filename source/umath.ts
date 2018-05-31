@@ -1,22 +1,12 @@
 // unit umath
 
-import { float, int, double, FloatToStr } from "./common";
-import { ifError } from "assert";
-import { TPoint } from "./TPoint";
-import { KfStringStream } from "./KfStringStream";
-import { DebugPrint } from "./temporary";
-import { FieldType } from "./PdParameter";
-import { digitValueString, boundForString } from "./usupport";
-
-/* TODO: Remove unnedded imports
-from conversion_common import *
-import uparams
-import usstream
-import udebug
-import uunits
-import usupport
-import delphi_compatability
-*/
+import { float, int, double, FloatToStr } from "./common"
+import { ifError } from "assert"
+import { TPoint } from "./TPoint"
+import { KfStringStream } from "./KfStringStream"
+import { DebugPrint } from "./temporary"
+import { FieldType } from "./PdParameter"
+import { digitValueString, boundForString } from "./usupport"
 
 // record
 export class SCurveStructure {

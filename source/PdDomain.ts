@@ -1,31 +1,11 @@
-import { short, float, TColorRef, long } from "./common";
-import { TPoint } from "./TPoint";
-import { TRect } from "./TRect";
-import { SinglePoint } from "./usupport";
-import { PdSectionManager } from "./PdSectionManager";
-import { PdParameterManager } from "./PdParameterManager";
-
 // unit Udomain
 
-/* TODO: Remove unused imports
-from conversion_common import *
-import uwait
-import usstream
-import uregistersupport
-import uwizard
-import umain
-import utimeser
-import usplash
-import umath
-import usupport
-import u3dexport
-import uhints
-import usection
-import uparams
-import uplant
-import uplantmn
-import delphi_compatability
-*/
+import { short, float, TColorRef, long } from "./common"
+import { TPoint } from "./TPoint"
+import { TRect } from "./TRect"
+import { SinglePoint } from "./usupport"
+import { PdSectionManager } from "./PdSectionManager"
+import { PdParameterManager } from "./PdParameterManager"
 
 // const
 const kMaxWizardQuestions = 30

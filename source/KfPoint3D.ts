@@ -1,5 +1,5 @@
 import { float, long, intround } from "./common"
-import { TRect } from "./TRect";
+import { TRect } from "./TRect"
 
 export class KfPoint3D {
     x: float

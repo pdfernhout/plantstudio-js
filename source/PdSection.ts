@@ -1,4 +1,4 @@
-import { short } from "./common";
+import { short } from "./common"
 
 // const
 const kMaxSectionItems = 200

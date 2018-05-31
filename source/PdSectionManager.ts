@@ -1,9 +1,9 @@
 // PdSectionManager was unit Usection
 
-import { short } from "./common";
-import { PdParameter } from "./PdParameter";
-import { domain } from "./PdDomain";
-import { PdSection } from "./PdSection";
+import { short } from "./common"
+import { PdParameter } from "./PdParameter"
+import { domain } from "./PdDomain"
+import { PdSection } from "./PdSection"
 
 export class PdSectionManager {
     sections: PdSection[] = []

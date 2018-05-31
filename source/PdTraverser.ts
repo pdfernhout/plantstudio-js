@@ -1,30 +1,14 @@
 // PdTraverser was unit Utravers
 
-import { float, int, TColorRef, short, long } from "./common";
-import { max, safedivExcept, min } from "./umath";
-import { PdFiler, MainForm } from "./temporary";
-import { PdPlant } from "./PdPlant";
-import { TPoint } from "./TPoint";
-import { messageForExceptionType } from "./usupport";
-import { PdPlantPart } from "./PdPlantPart";
-import { PdInternode } from "./PdInternode";
-import { ExportPart } from "./U3dexport";
-
-/* TODO: Remove unneeded imports
-from conversion_common import *
-import ubreedr
-import utimeser
-import umain
-import uintern
-import udebug
-import umath
-import usupport
-import u3dexport
-import ufiler
-import upart
-import uplant
-import delphi_compatability
-*/
+import { float, int, TColorRef, short, long } from "./common"
+import { max, safedivExcept, min } from "./umath"
+import { PdFiler, MainForm } from "./temporary"
+import { PdPlant } from "./PdPlant"
+import { TPoint } from "./TPoint"
+import { messageForExceptionType } from "./usupport"
+import { PdPlantPart } from "./PdPlantPart"
+import { PdInternode } from "./PdInternode"
+import { ExportPart } from "./U3dexport"
 
 export enum TraverseDirection {
     kTraverseNone = 0,

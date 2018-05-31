@@ -4,13 +4,6 @@ import { float, int, intround, byte, TColor, short, long } from "./common"
 import { TPoint } from "./TPoint"
 import { KfPoint3D } from "./KfPoint3D"
 
-/* TODO: Remove these imports
-from conversion_common import *
-import usupport
-import utdo
-import delphi_compatability
-*/
-
 export const kFastTrigArraySize = 256
 const kDirectionClockwise = 1
 const kDirectionCounterClockwise = -1

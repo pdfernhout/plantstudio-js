@@ -1,4 +1,4 @@
-import { short, float, int } from "./common";
+import { short, float, int } from "./common"
 
 export enum FieldType {
     kFieldUndefined = 0,

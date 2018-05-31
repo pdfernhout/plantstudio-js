@@ -1,4 +1,4 @@
-import { long, StrToIntDef, float, StrToFloat } from "./common";
+import { long, StrToIntDef, float, StrToFloat } from "./common"
 
 // KfStringStream was unit Usstream
 

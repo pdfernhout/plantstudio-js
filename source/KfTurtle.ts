@@ -9,22 +9,7 @@ import { TPoint } from "./TPoint"
 import { TRect } from "./TRect"
 import { KfMatrix } from "./KfMatrix"
 import { KfTriangle } from "./KfTriangle"
-import { KfFileExportSurface, KfDrawingSurfaceForPOV, KfDrawingSurfaceForDXF, KfDrawingSurfaceFor3DS, KfDrawingSurfaceForOBJ, KfDrawingSurfaceForVRML, KfDrawingSurfaceForLWO, ExportFormats } from "./U3dexport";
-
-/* TODO: Remove unused imports
-from conversion_common import *
-import udebug
-import umain
-import utravers
-import umath
-import usupport
-import u3dexport
-import u3dsupport
-import udrawingsurface
-import utdo
-import ucollect
-import delphi_compatability
-*/
+import { KfFileExportSurface, KfDrawingSurfaceForPOV, KfDrawingSurfaceForDXF, KfDrawingSurfaceFor3DS, KfDrawingSurfaceForOBJ, KfDrawingSurfaceForVRML, KfDrawingSurfaceForLWO, ExportFormats } from "./U3dexport"
 
 // const
 const kInitialTurtleMatrixStackDepth = 250

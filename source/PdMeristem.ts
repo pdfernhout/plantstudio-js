@@ -1,15 +1,15 @@
 // PdMeristem was unit umerist
 
-import { PdInternode, PdClassAndVersionInformationRecord, PdFiler } from "./temporary";
-import { PdPlant, Gender, PartType, LeafArrangement } from "./PdPlant";
-import { short, long, float, int } from "./common";
-import { PdPlantPart } from "./PdPlantPart";
-import { messageForExceptionType } from "./usupport";
-import { min, max, safedivExcept, pointsAreCloseEnough } from "./umath";
-import { Activity, Statistics, PdTraverser, linearGrowthResult } from "./PdTraverser";
-import { TRect } from "./TRect";
-import { ClassId } from "./uclasses";
-import { ExportPart } from "./U3dexport";
+import { PdInternode, PdClassAndVersionInformationRecord, PdFiler } from "./temporary"
+import { PdPlant, Gender, PartType, LeafArrangement } from "./PdPlant"
+import { short, long, float, int } from "./common"
+import { PdPlantPart } from "./PdPlantPart"
+import { messageForExceptionType } from "./usupport"
+import { min, max, safedivExcept, pointsAreCloseEnough } from "./umath"
+import { Activity, Statistics, PdTraverser, linearGrowthResult } from "./PdTraverser"
+import { TRect } from "./TRect"
+import { ClassId } from "./uclasses"
+import { ExportPart } from "./U3dexport"
 
 export class PdMeristem extends PdPlantPart {
     phytomerAttachedTo: PdInternode = new PdInternode()

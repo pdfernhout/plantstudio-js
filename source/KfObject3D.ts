@@ -1,32 +1,17 @@
 // KfObject3D was unit Utdo
 
 import { float, long, ColorDefs, int, IntToStr, short, StrToFloat, intround, arrayRemove, compareTextIgnoreCase, StrToIntDef, MessageDialog, TextFile, TMemo, writeln, eof, readln, write, TColorRef, getRValue, getGValue, getBValue, ExtractFileName } from "./common"
-import { PdStreamableObject, PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof, TListCollection_streamUsingFiler } from "./temporary";
-import { KfPoint3D, KfPoint3D_matchXYZ, KfPoint3D_setXYZ, KfPoint3D_addPointToBoundsRect, KfPoint3D_subtract } from "./KfPoint3D";
-import { KfIndexTriangle } from "./KfIndexTriangle";
-import { KfTriangle } from "./KfTriangle";
-import { TRect } from "./TRect";
-import { TPoint } from "./TPoint";
-import { KfTurtle } from "./KfTurtle";
-import { KfStringStream } from "./KfStringStream";
-import { stringUpTo, digitValueString, replacePunctuationWithUnderscores } from "./usupport";
-import { ClassId } from "./uclasses";
-import { KfFileExportSurface, ExportFormats } from "./U3dexport";
-
-/* TODO: Remove unused imports 
-from conversion_common import *
-import u3dexport
-import u3dsupport
-import uplant
-import udebug
-import usupport
-import uclasses
-import uturtle
-import ufiler
-import usstream
-import ucollect
-import delphi_compatability
-*/
+import { PdStreamableObject, PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof, TListCollection_streamUsingFiler } from "./temporary"
+import { KfPoint3D, KfPoint3D_matchXYZ, KfPoint3D_setXYZ, KfPoint3D_addPointToBoundsRect, KfPoint3D_subtract } from "./KfPoint3D"
+import { KfIndexTriangle } from "./KfIndexTriangle"
+import { KfTriangle } from "./KfTriangle"
+import { TRect } from "./TRect"
+import { TPoint } from "./TPoint"
+import { KfTurtle } from "./KfTurtle"
+import { KfStringStream } from "./KfStringStream"
+import { stringUpTo, digitValueString, replacePunctuationWithUnderscores } from "./usupport"
+import { ClassId } from "./uclasses"
+import { KfFileExportSurface, ExportFormats } from "./U3dexport"
 
 // const
 const kMaximumRecordedPoints = 10000

@@ -1,21 +1,9 @@
-import { float, StrToFloat, int, byte, long, compareTextIgnoreCase, short, readln, TextFile, StrToIntDef, TColorRef, ord, intround, getBValue, getRValue, getGValue } from "./common";
-import { DebugPrint } from "./temporary";
-import { KfStringStream } from "./KfStringStream";
-import { intMax, max, min, intMin } from "./umath";
+import { float, StrToFloat, int, byte, long, compareTextIgnoreCase, short, readln, TextFile, StrToIntDef, TColorRef, ord, intround, getBValue, getRValue, getGValue } from "./common"
+import { DebugPrint } from "./temporary"
+import { KfStringStream } from "./KfStringStream"
+import { intMax, max, min, intMin } from "./umath"
 
 // unit Usupport
-
-/* Remove unneeded imports
-from conversion_common import *
-import umain
-import udomain
-import uwait
-import ucursor
-import usstream
-import umath
-import uparams
-import delphi_compatability
-*/
 
 // var
 // TODO: Use or remove: let iniFileChanged: boolean

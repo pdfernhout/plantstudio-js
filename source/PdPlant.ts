@@ -17,39 +17,10 @@ import { PdSection } from "./PdSection"
 import { PdPlantDrawingAmendment, kStartAmendmentString } from "./PdPlantDrawingAmendment"
 import { PdPlantPart } from "./PdPlantPart"
 import { SinglePoint, messageForExceptionType, support_rgb, boundForString, stringUpTo, strToBool, stringBeyond, tolerantReadln, trimLeftAndRight, boolToStr, rgbStringToColor, digitValueString } from "./usupport"
-import { Plant_directTransferField, kFruitSCurve, kLeafSCurve, kGeneralGrowthSCurve, kGeneralAgeAtMaturity, kFlowerMaleBudOption, kFlowerFemaleBudOption, kLeafCompoundPinnateArrangement, kMeristemAndLeafArrangement, kLeafCompoundPinnateOrPalmate, kGeneralStartingSeedForRandomNumberGenerator, kStateBasePointY } from "./utransfr";
-import { KfFileExportSurface, ExportPart, ExportFormats, KfDrawingSurfaceFor3DS } from "./U3dexport";
-import { PdMeristem } from "./PdMeristem";
-import { PdInternode } from "./PdInternode";
-
-/* Remove unused imports
-from conversion_common import *
-import ubmpsupport
-import ucursor
-import utimeser
-import usection
-import uclasses
-import utransfr
-import uintern
-import umerist
-import upart
-import utravers
-import u3dexport
-import umain
-import udomain
-import udebug
-import uamendmt
-import usupport
-import ubitmap
-import uparams
-import ufiler
-import uturtle
-import umath
-import ucollect
-import urandom
-import utdo
-import delphi_compatability
-*/
+import { Plant_directTransferField, kFruitSCurve, kLeafSCurve, kGeneralGrowthSCurve, kGeneralAgeAtMaturity, kFlowerMaleBudOption, kFlowerFemaleBudOption, kLeafCompoundPinnateArrangement, kMeristemAndLeafArrangement, kLeafCompoundPinnateOrPalmate, kGeneralStartingSeedForRandomNumberGenerator, kStateBasePointY } from "./utransfr"
+import { KfFileExportSurface, ExportPart, ExportFormats, KfDrawingSurfaceFor3DS } from "./U3dexport"
+import { PdMeristem } from "./PdMeristem"
+import { PdInternode } from "./PdInternode"
 
 // const
 export enum Gender {
