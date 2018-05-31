@@ -5,6 +5,10 @@ import { KfPoint3D } from "../source/KfPoint3D"
 import { KfTurtle } from "../source/KfTurtle"
 import { TRect } from "../source/TRect"
 import { KfObject3D } from "../source/KfObject3D"
+import { PdPlant } from "../source/PdPlant"
+import { PdDomain } from "../source/PdDomain"
+
+PdDomain.createDefault()
 
 let yAngle = 0
 
@@ -68,12 +72,19 @@ end 3D object`.split("\n")
     tdo.draw(turtle, 1.0, "test", "test", 0, 0)
 }
 
+function drawPlant() {
+    const plant = new PdPlant()
+    turtle.xyz(300, 300, 0)
+    plant.draw()
+}
+
 function redrawEverything() {
     initDrawingSurface()
     turtle.reset()
     drawingSurface.recordingStart()
     // drawWithTurtle()
-    drawWithTDO()
+    // drawWithTDO()
+    drawPlant()
     drawingSurface.recordingStop()
     drawingSurface.recordingDraw()
 }
@@ -94,27 +105,9 @@ const MyComponent = {
                 const context = canvas.getContext("2d")
                 if (!context) return
 
-                /*
-                context.beginPath()
-                context.arc(300, 300, 30, 0, 2 * Math.PI)
-                context.stroke()
-                */
-
-                /*
-                context.beginPath()
-                context.moveTo(0, 0)
-                context.lineTo(300, 100)
-                context.closePath()
-                context.strokeStyle = "#00FFFF"
-                context.stroke()
-                */
                 drawingSurface.pane = context
-                // drawATriangle()
                 drawingSurface.recordingDraw()
-                console.log("drawingSurface", drawingSurface)
-
-                // TODO: Do something with drawingSurface here
-                
+                console.log("drawingSurface", drawingSurface)               
             },
             onclick: () => {
                 console.log("onclick")

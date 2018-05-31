@@ -287,6 +287,10 @@ export class PdDomain {
     static createDefault(): boolean {
         let result = false
         domain = new PdDomain()
+        // TODO: Moved makeParameters call from startupLoading -- is this OK? Need to remove duplicate commented code there eventually
+        domain.parameterManager.makeParameters()
+        // TODO: Temporary -- replace with startup loading
+        domain.getProfileInformationFromFile("TODO getProfileInformationFromFile")
         // TODO: FIX result = domain.startupLoading()
         return result
     }
@@ -302,10 +306,10 @@ export class PdDomain {
         // non-standard defaults 
         this.plantManager.plantDrawScale_PixelsPerMm = 1.0
         this.plantDrawScaleWhenDrawingCopy_PixelsPerMm = 1.0
-        // TODO: Moved makeParameters call from startupLoading -- is this OK? Need to remove duplicate commented code there eventually
-        this.parameterManager.makeParameters()
-        // TODO: Temporary -- replace with startup loading
-        this.getProfileInformationFromFile("TODO getProfileInformationFromFile")
+
+        for (let i = 0; i <= ExportFormats.k3DExportTypeLast; i++) {
+            this.exportOptionsFor3D[i] = new FileExport3DOptionsStructure()
+        }
     }
 
     // TODO: Remove stub plantDrawOffset_mm

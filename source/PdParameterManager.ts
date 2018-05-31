@@ -176,7 +176,6 @@ export class PdParameterManager {
     
     makeParameters(): void {
         CreateParameters(this)
-        CreateParameters_SecondHalf(this)
     }
     
 }
