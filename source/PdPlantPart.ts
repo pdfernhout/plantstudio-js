@@ -422,7 +422,7 @@ export class PdPlantPart extends PdStreamableObject {
                 turtle.rotateX(i * 256 / faces)
                 turtle.rotateZ(64)
                 turtle.moveInMillimeters(pipeRadius)
-                startPoints[i] = turtle.position()
+                startPoints[i] = turtle.positionCopy()
                 turtle.pop()
             }
         } else {
@@ -438,7 +438,7 @@ export class PdPlantPart extends PdStreamableObject {
             turtle.rotateX(i * 256 / faces)
             turtle.rotateZ(64)
             turtle.moveInMillimeters(pipeRadius)
-            endPoints[i] = turtle.position()
+            endPoints[i] = turtle.positionCopy()
             turtle.pop()
         }
         // draw pipe faces from stored points

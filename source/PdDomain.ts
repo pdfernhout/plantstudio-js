@@ -1,6 +1,6 @@
 // unit Udomain
 
-import { short, float, TColorRef, long, StrToInt, IntToStr } from "./common"
+import { short, float, TColorRef, long, StrToInt, IntToStr, ColorDefs } from "./common"
 import { TPoint } from "./TPoint"
 import { TRect } from "./TRect"
 import { SinglePoint, strToBool, strToFloatWithCommaCheck } from "./usupport"
@@ -633,26 +633,29 @@ export class PdDomain {
         for (i = 0; i <= kMaxRecentFiles - 1; i++) {
             this.options.recentFiles[i] = this.stringForSectionAndKey(section, "File" + IntToStr(i + 1), "")
         }
+
+        */
         // ------------------------------------------- preferences
-        section = iniSections[kSectionPrefs]
+        // Todo: Use or remove and replace next line: section = iniSections[kSectionPrefs]
+        const section = ""
         this.options.openMostRecentFileAtStart = strToBool(this.stringForSectionAndKey(section, "Open most recent file at start", "true"))
         this.options.ignoreWindowSettingsInFile = strToBool(this.stringForSectionAndKey(section, "Ignore window settings saved in files", "false"))
         this.options.cachePlantBitmaps = strToBool(this.stringForSectionAndKey(section, "Draw plants into separate bitmaps", "true"))
         this.options.memoryLimitForPlantBitmaps_MB = StrToInt(this.stringForSectionAndKey(section, "Memory limit for plant bitmaps (in MB)", "5"))
         this.options.maxPartsPerPlant_thousands = StrToInt(this.stringForSectionAndKey(section, "Max parts per plant (in thousands)", "10"))
         this.options.hideWelcomeForm = strToBool(this.stringForSectionAndKey(section, "Hide welcome window", "false"))
-        this.options.backgroundColor = StrToInt(this.stringForSectionAndKey(section, "Background color", IntToStr(delphi_compatability.clWhite)))
-        this.options.transparentColor = StrToInt(this.stringForSectionAndKey(section, "Transparent color", IntToStr(delphi_compatability.clWhite)))
+        this.options.backgroundColor = StrToInt(this.stringForSectionAndKey(section, "Background color", IntToStr(ColorDefs.clWhite)))
+        this.options.transparentColor = StrToInt(this.stringForSectionAndKey(section, "Transparent color", IntToStr(ColorDefs.clWhite)))
         this.options.showSelectionRectangle = strToBool(this.stringForSectionAndKey(section, "Show selection rectangle", "true"))
         this.options.showBoundsRectangle = strToBool(this.stringForSectionAndKey(section, "Show bounding rectangle", "false"))
         this.options.resizeRectSize = StrToInt(this.stringForSectionAndKey(section, "Resizing rectangle size", "6"))
         this.options.pasteRectSize = StrToInt(this.stringForSectionAndKey(section, "Paste rectangle size", "100"))
-        this.options.firstSelectionRectangleColor = StrToInt(this.stringForSectionAndKey(section, "First selection rectangle color", IntToStr(delphi_compatability.clRed)))
-        this.options.multiSelectionRectangleColor = StrToInt(this.stringForSectionAndKey(section, "Multi selection rectangle color", IntToStr(delphi_compatability.clBlue)))
+        this.options.firstSelectionRectangleColor = StrToInt(this.stringForSectionAndKey(section, "First selection rectangle color", IntToStr(ColorDefs.clRed)))
+        this.options.multiSelectionRectangleColor = StrToInt(this.stringForSectionAndKey(section, "Multi selection rectangle color", IntToStr(ColorDefs.clBlue)))
         this.options.draw3DObjects = strToBool(this.stringForSectionAndKey(section, "Draw 3D objects", "true"))
         this.options.drawStems = strToBool(this.stringForSectionAndKey(section, "Draw stems", "true"))
         this.options.fillPolygons = strToBool(this.stringForSectionAndKey(section, "Fill polygons", "true"))
-        this.options.drawSpeed = StrToInt(this.stringForSectionAndKey(section, "Draw speed (boxes/frames/solids)", IntToStr(kDrawBest)))
+        this.options.drawSpeed = StrToInt(this.stringForSectionAndKey(section, "Draw speed (boxes/frames/solids)", IntToStr(DrawMode.kDrawBest)))
         this.options.drawLinesBetweenPolygons = strToBool(this.stringForSectionAndKey(section, "Draw lines between polygons", "true"))
         this.options.sortPolygons = strToBool(this.stringForSectionAndKey(section, "Sort polygons", "true"))
         this.options.draw3DObjectsAsBoundingRectsOnly = strToBool(this.stringForSectionAndKey(section, "Draw 3D objects as squares", "false"))
@@ -683,9 +686,11 @@ export class PdDomain {
         this.options.showGhostingForHiddenParts = strToBool(this.stringForSectionAndKey(section, "Ghost hidden parts", "false"))
         this.options.showHighlightingForNonHiddenPosedParts = strToBool(this.stringForSectionAndKey(section, "Highlight posed parts", "true"))
         this.options.showPosingAtAll = strToBool(this.stringForSectionAndKey(section, "Show posing", "true"))
-        this.options.ghostingColor = StrToInt(this.stringForSectionAndKey(section, "Ghosting color", IntToStr(delphi_compatability.clSilver)))
-        this.options.nonHiddenPosedColor = StrToInt(this.stringForSectionAndKey(section, "Posed color", IntToStr(delphi_compatability.clBlue)))
-        this.options.selectedPosedColor = StrToInt(this.stringForSectionAndKey(section, "Posed selected color", IntToStr(delphi_compatability.clRed)))
+        this.options.ghostingColor = StrToInt(this.stringForSectionAndKey(section, "Ghosting color", IntToStr(ColorDefs.clSilver)))
+        this.options.nonHiddenPosedColor = StrToInt(this.stringForSectionAndKey(section, "Posed color", IntToStr(ColorDefs.clBlue)))
+        this.options.selectedPosedColor = StrToInt(this.stringForSectionAndKey(section, "Posed selected color", IntToStr(ColorDefs.clRed)))
+        
+        /*
         // ------------------------------------------- settings
         section = iniSections[kSectionSettings]
         this.mainWindowRect = usupport.stringToRect(this.stringForSectionAndKey(section, "Window position", "50 50 500 350"))

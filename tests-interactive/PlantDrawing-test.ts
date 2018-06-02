@@ -41,6 +41,7 @@ function redrawEverything() {
     try {
         initDrawingSurface(turtle.drawingSurface)
         turtle.drawOptions.draw3DObjects = true
+        turtle.drawOptions.sortPolygons = false
         turtle.drawingSurface.recordingStart()
     } finally {
         KfTurtle.defaultStopUsing()
@@ -55,7 +56,7 @@ function redrawEverything() {
     }
 }
 
-redrawEverything()
+// redrawEverything()
 
 const MyComponent = { 
     view: () => m("div", 
@@ -72,13 +73,15 @@ const MyComponent = {
                 if (!context) return
 
                 const turtle = KfTurtle.defaultStartUsing()
+                initDrawingSurface(turtle.drawingSurface)
                 try {
-                    turtle.drawingSurface.pane = context
-                    turtle.drawingSurface.recordingDraw()
+                    // turtle.drawingSurface.pane = context
+                    // turtle.drawingSurface.recordingDraw()
                     console.log("drawingSurface", turtle.drawingSurface)    
                 } finally {
                     KfTurtle.defaultStopUsing()
-                }           
+                }     
+                plant.drawOn(context)      
             },
             onclick: () => {
                 console.log("onclick")

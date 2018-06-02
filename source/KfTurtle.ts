@@ -67,7 +67,7 @@ export class KfTurtle {
     matrixStack: KfMatrix[] = []
     numMatrixesUsed: long = 0
     currentMatrix: KfMatrix = new KfMatrix()
-    recordedPoints: KfPoint3D[] /* kMaximumRecordedPoints + 1 */ = Array(kMaximumRecordedPoints + 1)
+    recordedPoints: KfPoint3D[] = Array(kMaximumRecordedPoints + 1)
     recordedPointsInUse: long = 0
     scale_pixelsPerMm: float = 1.0
     drawingSurface: KfDrawingSurface = new KfDrawingSurface(null)
@@ -479,8 +479,31 @@ export class KfTurtle {
         this.drawingSurface.lineWidth = oldWidth
         debugDrawInMillimeters(this, mm)
     }
+
+    drawAxis(): void {
+        const oldColor = this.drawingSurface.lineColor
+        const oldWidth = this.drawingSurface.lineWidth
+        this.drawingSurface.lineWidth = 2
+        this.drawingSurface.lineColor = ColorDefs.clRed
+        this.push()
+        // will flip so draw Y (sic)
+        this.rotateZ(64)
+        debugDrawAxis(this, 100.0)
+        this.pop()
+        this.drawingSurface.lineWidth = 1
+        this.drawingSurface.lineColor = ColorDefs.clBlue
+        this.push()
+        // will flip so draw Z (sic)
+        this.rotateY(64)
+        debugDrawAxis(this, 100.0)
+        this.pop()
+        this.drawingSurface.lineColor = oldColor
+        this.drawingSurface.lineWidth = oldWidth
+    }
     
     drawInMillimeters(mm: float, partID: long): KfTriangle | null {
+        // Added drawAxis call added for debugging
+        // For debugging: this.drawAxis()
         let result: KfTriangle | null = null
         const oldPosition = this.positionCopy()
         this.currentMatrix.move(this.millimetersToPixels(mm))

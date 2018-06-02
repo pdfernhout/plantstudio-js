@@ -25,6 +25,7 @@ export const ColorDefs = {
     clRed: 0xFF0000,
     clSilver: 0xC0C0C0,
     clTeal: 0x808000,
+    clWhite: 0xFFFFFF,
     clYellow: 0x00FFFF,
 }
 

@@ -137,17 +137,18 @@ export class BreedingAndTimeSeriesOptionsStructure {
 // record
 export class TdoParamsStructure {
     object3D: KfObject3D = new KfObject3D()
-    xRotationBeforeDraw: float
-    yRotationBeforeDraw: float
-    zRotationBeforeDraw: float
-    faceColor: TColorRef
-    backfaceColor: TColorRef
-    alternateFaceColor: TColorRef
-    alternateBackfaceColor: TColorRef
-    scaleAtFullSize: float
-    repetitions: short
-    radiallyArranged: boolean
-    pullBackAngle: float
+    xRotationBeforeDraw: float = 0
+    yRotationBeforeDraw: float = 0
+    zRotationBeforeDraw: float = 0
+    faceColor: TColorRef = ColorDefs.clGreen
+    backfaceColor: TColorRef = ColorDefs.clRed
+    alternateFaceColor: TColorRef = ColorDefs.clLime
+    alternateBackfaceColor: TColorRef = ColorDefs.clBlue
+    scaleAtFullSize: float = 1
+    repetitions: short = 5
+    radiallyArranged: boolean = false
+    // TODO: This initializer is needed for pullBackAngle (unless other fix is made); maybe doe not need other numeric ones
+    pullBackAngle: float = 0
 }
 
 // alternate colors used only for fruit, so far - ripe vs. unripe
@@ -760,6 +761,8 @@ export class PdPlant extends PdStreamableObject {
                 turtle.drawOptions.drawLines = domain.options.drawLinesBetweenPolygons
                 turtle.drawOptions.lineContrastIndex = domain.options.lineContrastIndex
                 break
+            default:
+                throw new Error("domain.options.drawSpeed choice is not supported: " + domain.options.drawSpeed)
         }
     }
     
