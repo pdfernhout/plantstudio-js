@@ -13,8 +13,8 @@ import { ColorDefs } from "../source/common";
 PdDomain.createDefault()
 const plant = new PdPlant()
 plant.defaultAllParameters()
-plant.basePoint_mm.x = 250
-plant.basePoint_mm.y = 400
+plant.basePoint_mm.x = 400
+plant.basePoint_mm.y = 450
 const amendment = new PdPlantDrawingAmendment()
 amendment.partID = plant.firstPhytomer!.partID
 amendment.addRotations = true
@@ -25,6 +25,7 @@ domain.options.selectedPosedColor = ColorDefs.clGreen
 domain.options.nonHiddenPosedColor = ColorDefs.clGreen
 
 let plantAge = 90
+let zoom = 10
 
 function growPlant() {
     plant.reset()
@@ -45,7 +46,7 @@ function randomize() {
 const MyComponent = { 
     view: () => m("div", 
         m("canvas.ba", {
-            width: 500,
+            width: 800,
             height: 500,
             onupdate(vnode: m.VnodeDOM) {
                 const canvas = <HTMLCanvasElement>vnode.dom
@@ -80,6 +81,15 @@ const MyComponent = {
             growPlant()
         }}),
         m("span.ml2", plantAge),
+        m("br"),
+        m("br"),
+        "Zoom",
+        m("input[type=range].ml4", { min: 1, max: 100, value: zoom, oninput: (event: any) => {
+            // console.log("slider", event, event.target.value)
+            zoom = parseInt(event.target.value)
+            plant.drawingScale_PixelsPerMm = zoom / 10
+        }}),
+        m("span.ml2", zoom),
         m("br"),
         m("br"),
         m("button", { onclick: randomize } , "Randomize")
