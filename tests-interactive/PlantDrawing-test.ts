@@ -6,7 +6,7 @@ import { KfTurtle } from "../source/KfTurtle"
 import { TRect } from "../source/TRect"
 import { KfObject3D } from "../source/KfObject3D"
 import { PdPlant } from "../source/PdPlant"
-import { PdDomain } from "../source/PdDomain"
+import { PdDomain, domain } from "../source/PdDomain"
 import { PdPlantDrawingAmendment } from "../source/PdPlantDrawingAmendment";
 import { ColorDefs } from "../source/common";
 
@@ -18,10 +18,11 @@ plant.basePoint_mm.y = 400
 const amendment = new PdPlantDrawingAmendment()
 amendment.partID = plant.firstPhytomer!.partID
 amendment.addRotations = true
-amendment.faceColor = ColorDefs.clGreen
-amendment.backfaceColor = ColorDefs.clGreen
-amendment.lineColor = ColorDefs.clGreen
 plant.addAmendment(amendment)
+
+// Turn off posed color for now
+domain.options.selectedPosedColor = ColorDefs.clGreen
+domain.options.nonHiddenPosedColor = ColorDefs.clGreen
 
 let plantAge = 90
 
