@@ -13,19 +13,29 @@ import { ColorDefs } from "../source/common";
 PdDomain.createDefault()
 const plant = new PdPlant()
 plant.defaultAllParameters()
-plant.basePoint_mm.x = 300
-plant.basePoint_mm.y = 300
-const ammendment = new PdPlantDrawingAmendment()
-ammendment.partID = plant.firstPhytomer!.partID
-ammendment.addRotations = true
-plant.addAmendment(ammendment)
+plant.basePoint_mm.x = 250
+plant.basePoint_mm.y = 400
+const amendment = new PdPlantDrawingAmendment()
+amendment.partID = plant.firstPhytomer!.partID
+amendment.addRotations = true
+amendment.faceColor = ColorDefs.clGreen
+amendment.backfaceColor = ColorDefs.clGreen
+amendment.lineColor = ColorDefs.clGreen
+plant.addAmendment(amendment)
 
-// Grow the plant a bit
-for (let i = 0; i < 90; i++) {
-    plant.nextDay()
+let plantAge = 90
+
+function growPlant() {
+    plant.reset()
+    // Grow the plant a bit
+    for (let i = 0; i < plantAge; i++) {
+        plant.nextDay()
+    }
 }
 
+growPlant()
 
+// plant.firstPhytomer!.amendment = amendment
 
 const MyComponent = { 
     view: () => m("div", 
@@ -45,14 +55,26 @@ const MyComponent = {
             },
             onclick: () => {
                 console.log("onclick")
-                ammendment.xRotation += 4
+                amendment.xRotation += 4
             }
         }),
         m("div", { style: "user-select: none" }, "Click canvas to rotate leaf"),
-        m("input[type=range]", { min: 0, max: 256, value: ammendment.xRotation, oninput: (event: any) => {
+        m("br"),
+        "Rotation",
+        m("input[type=range].ml2", { min: 0, max: 365, value: amendment.xRotation, oninput: (event: any) => {
             // console.log("slider", event, event.target.value)
-            ammendment.xRotation = parseInt(event.target.value)
-        }})
+            amendment.xRotation = parseInt(event.target.value)
+        }}),
+        m("span.ml2", amendment.xRotation),
+        m("br"),
+        m("br"),
+        "Age",
+        m("input[type=range].ml4", { min: 0, max: 100, value: plantAge, oninput: (event: any) => {
+            // console.log("slider", event, event.target.value)
+            plantAge = parseInt(event.target.value)
+            growPlant()
+        }}),
+        m("span.ml2", plantAge)
     )
 }
 
