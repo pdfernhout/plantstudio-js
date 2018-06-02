@@ -215,7 +215,7 @@ export class KfObject3D extends PdStreamableObject {
         this.triangles.push(aTriangle)
     }
     
-    // TODO: Maybe rmeove triangleForIndex or at least adjust it to be zero-based index
+    // TODO: Maybe remove triangleForIndex or at least adjust it to be zero-based index
     triangleForIndex(anIndex: long): KfIndexTriangle {
         if ((anIndex < 1) || (anIndex > this.triangles.length)) {
             throw new Error("Problem: Triangle index out of range in method KfObject3D.triangleForIndex.")

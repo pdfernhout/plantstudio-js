@@ -39,7 +39,7 @@ export class KfDrawingSurface {
     lineWidth: float = 0.0
     circlePointRadius: short = 0
     sortTdosAsOneItem: boolean = false
-    
+
     // ----------------------- KfDrawingSurface creating/destroying 
 
     constructor(context: CanvasRenderingContext2D | null) {
@@ -290,7 +290,7 @@ export class KfDrawingSurface {
         // Make an array of four points
         const pointArray: TPoint[] = [new TPoint(), new TPoint(), new TPoint(), new TPoint()]
 
-        // TODO: Can probably drop last extra duplicate point because JavaScritp drawing will close polygon
+        // TODO: Can probably drop last extra duplicate point because JavaScript drawing will close polygon
 
         for (let i = 0; i <= 3; i++) {
             let aPoint: KfPoint3D
