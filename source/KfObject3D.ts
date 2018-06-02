@@ -42,7 +42,7 @@ const kPointAllocationIncrement = 8
 
 function betweenBrackets(aString: string): string {
     // lose letter and [ on front, lose ] on back 
-    return aString.substring(2, aString.length - 2)
+    return aString.substring(2, aString.length - 1)
 }
 
 export class KfObject3D extends PdStreamableObject {

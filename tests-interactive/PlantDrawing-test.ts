@@ -10,9 +10,12 @@ import { PdDomain } from "../source/PdDomain"
 
 PdDomain.createDefault()
 const plant = new PdPlant()
+plant.defaultAllParameters()
+plant.basePoint_mm.x = 300
+plant.basePoint_mm.y = 300
 
 // Grow the plant a bit
-for (let i = 0; i < 1; i++) {
+for (let i = 0; i < 90; i++) {
     plant.nextDay()
 }
 
@@ -37,8 +40,7 @@ function redrawEverything() {
     let turtle = KfTurtle.defaultStartUsing()
     try {
         initDrawingSurface(turtle.drawingSurface)
-        turtle.reset()
-        turtle.xyz(300, 300, 0)
+        turtle.drawOptions.draw3DObjects = true
         turtle.drawingSurface.recordingStart()
     } finally {
         KfTurtle.defaultStopUsing()
