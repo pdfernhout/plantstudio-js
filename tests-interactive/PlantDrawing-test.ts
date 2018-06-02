@@ -37,6 +37,10 @@ growPlant()
 
 // plant.firstPhytomer!.amendment = amendment
 
+function randomize() {
+    plant.randomize()
+}
+
 const MyComponent = { 
     view: () => m("div", 
         m("canvas.ba", {
@@ -74,7 +78,10 @@ const MyComponent = {
             plantAge = parseInt(event.target.value)
             growPlant()
         }}),
-        m("span.ml2", plantAge)
+        m("span.ml2", plantAge),
+        m("br"),
+        m("br"),
+        m("button", { onclick: randomize } , "Randomize")
     )
 }
 
