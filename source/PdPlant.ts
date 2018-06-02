@@ -2512,9 +2512,10 @@ export class PdPlant extends PdStreamableObject {
                     // If first day, create first phytomer. Assume seed reserves are placed into this phytomer.
                     firstMeristem = new PdMeristem(this)
                     this.firstPhytomer = firstMeristem.createFirstPhytomer()
+                    // Must tell firstPhytomer to recalculate internode angle because it did not know it was the
+                    // first phytomer until after drawing plant got this pointer back.
                     if (this.firstPhytomer === null) {
-                        // Must tell firstPhytomer to recalculate internode angle because it did not know it was the
-                        //      first phytomer until after drawing plant got this pointer back.
+                        // TODO: This was probably a check for a failed allocation in Delphi and can be removed in JavaScript?
                         return
                     }
                     this.firstPhytomer.setAsFirstPhytomer()

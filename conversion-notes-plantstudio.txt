@@ -24,7 +24,7 @@ Superclass definition wrong -- does not use extends
 
 Calling super methods is wrong e.g. KfTextFileExportSurface.prototype.endPlant.call(this)
 
-Commented frift down to above following statements -- which can put them in wrong place
+Commented drift down to above following statements -- which can put them in wrong place
 e.g. // no response 
 
 In ufruit, ended up with self.gender instead of this.gender -- why?
@@ -32,3 +32,11 @@ In ufruit, ended up with self.gender instead of this.gender -- why?
 Find extra parens in if statements:
   replace: \(\([^)]*\)\) \{
   with: ($1) {
+
+Delphi case does not use break because everythign is a statement.
+So, if there is a break for a loop inside a case,
+it will be misinterpreted by JavaScript switch which can and usually must break in a case for the case itself.
+Example: utravers procedure PdTraverser.traversePlant(traversalCount: longint); 
+  if phytomerTraversing = nil then break;
+Likely you will have to label the enclosing loop and use a labelled break statement; see: 
+https://stackoverflow.com/questions/183161/best-way-to-break-from-nested-loops-in-javascript

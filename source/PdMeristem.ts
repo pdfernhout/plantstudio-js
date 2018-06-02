@@ -18,7 +18,7 @@ import { KfTurtle } from "./KfTurtle"
 import { KfObject3D } from "./KfObject3D"
 
 export class PdMeristem extends PdPlantPart {
-    phytomerAttachedTo: PdInternode
+    phytomerAttachedTo: PdInternode = <any>null
     daysCreatingThisPlantPart: long = 0
     isActive: boolean = false
     isApical: boolean = false

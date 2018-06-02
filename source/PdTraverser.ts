@@ -213,7 +213,7 @@ export class PdTraverser {
         }
         let phytomerTraversing: PdInternode = this.currentPhytomer
         let i = 0
-        while (i <= traversalCount) {
+        loopToBreak: while (i <= traversalCount) {
             if (this.finished) {
                 return
             }
@@ -268,7 +268,7 @@ export class PdTraverser {
                     phytomerTraversing.traversingDirection = TraverseDirection.kTraverseNone
                     const lastPhytomer: PdInternode = phytomerTraversing
                     if (phytomerTraversing.phytomerAttachedTo === null) {
-                        break
+                        break loopToBreak
                     }
                     phytomerTraversing = phytomerTraversing.phytomerAttachedTo
                     if (this.mode === Activity.kActivityFree) {
