@@ -37,8 +37,8 @@ export function messageForExceptionType(e: Error, methodName: string): void {
 }
 
 // TODO: Fix support_rgb from usupport
-export function support_rgb(R: byte, G: byte, B: byte): long {
-    return R << 16 + G << 8 + B 
+export function support_rgb(r: byte, g: byte, b: byte): long {
+    return (r << 16) + (g << 8) + b
 }
 
 // record
