@@ -29,6 +29,9 @@ const kMinHeightOnScreen = 20
 
 // global functions 
 
+const littleEndian = true
+
+// TODO: EFFICIENCY: This is terribly ineffienct with so much buffer allocation
 export class PdFiler {
     stream: TFileStream
     mode: PdFilerMode
@@ -79,73 +82,166 @@ export class PdFiler {
     }
     
     // simple types
-    streamBytes(bytes: FIX_MISSING_ARG_TYPE, size: long): void {
+    private streamBytes(bytes: ArrayBuffer, size: long): void {
+        const view = new Uint8ClampedArray(bytes)
         switch (this.mode) {
             case PdFilerMode.filerModeReading:
-                bytes = this.stream.read(bytes, size)
+                const bytesRead = this.stream.ReadBytes(size)
+                if (bytesRead.length !== size) {
+                    throw new Error("Missing bytes read in streamBytes")
+                }
+                for (let i = 0; i < size; i++) {
+                    view[i] = bytesRead[i]
+                }
                 break
             case PdFilerMode.filerModeWriting:
-                this.stream.write(bytes, size)
+                const bytesToWrite: byte[] = []
+                for (let i = 0; i < size; i++) {
+                    bytesToWrite.push(view[i])
+                }          
+                this.stream.WriteBuffer(bytesToWrite, size)
                 break
             case PdFilerMode.filerModeCounting:
                 this.bytesStreamed = this.bytesStreamed + size
                 break
         }
-        return bytes
     }
     
     streamClassAndVersionInformation(cvir: PdClassAndVersionInformationRecord): void {
-        switch (this.mode) {
-            case PdFilerMode.filerModeReading:
-                cvir = this.stream.read(cvir, FIX_sizeof(PdClassAndVersionInformationRecord))
-                break
-            case PdFilerMode.filerModeWriting:
-                this.stream.write(cvir, FIX_sizeof(PdClassAndVersionInformationRecord))
-                break
-            case PdFilerMode.filerModeCounting:
-                this.bytesStreamed = this.bytesStreamed + FIX_sizeof(PdClassAndVersionInformationRecord)
-                break
-        }
+        cvir.classNumber = this.streamSmallint(cvir.classNumber)
+        cvir.versionNumber = this.streamSmallint(cvir.versionNumber)
+        cvir.additionNumber = this.streamSmallint(cvir.additionNumber)
     }
     
-    streamShortString(aString: string): void {
+    // TODO: IMPORTANT: Problem handling non-ASCII characters
+    streamShortString(aString: string): string {
+        let result = aString
+        let stringLength
+        const bytes = new ArrayBuffer(256)
+        const view = new Uint8ClampedArray(bytes)
         switch (this.mode) {
             case PdFilerMode.filerModeReading:
-                aString[0] = this.streamBytes(aString[0], 1)
-                aString[1] = this.streamBytes(aString[1], ord(aString[0]))
+                this.streamBytes(bytes, 1)
+                stringLength = view[0]
+                this.streamBytes(bytes, stringLength)
+                result = ""
+                for (let i = 0; i < stringLength; i++) {
+                    result = result + String.fromCharCode(view[i])
+                }
                 break
             case PdFilerMode.filerModeWriting:
-                aString = this.streamBytes(aString, aString.length + 1)
+                stringLength = aString.length
+                view[0] = stringLength
+                for (let i = 0; i < stringLength; i++) {
+                    // TODO: Will munge characetr if out of ASCII range
+                    view[i + 1] = aString.charCodeAt(i)
+                }
+                this.streamBytes(bytes, aString.length + 1)
                 break
             case PdFilerMode.filerModeCounting:
-                this.bytesStreamed = this.bytesStreamed + aString.length + 1
+                this.streamBytes(bytes, aString.length + 1)
                 break
         }
-        return aString
+        return result
     }
     
-    streamBoolean(aBoolean: boolean): void {
-        aBoolean = this.streamBytes(aBoolean, 1)
+    streamBoolean(aBoolean: boolean): boolean {
+        let result = aBoolean
+        const bytes = new ArrayBuffer(1)
+        const view = new Uint8ClampedArray(bytes)
+        switch (this.mode) {
+            case PdFilerMode.filerModeReading:
+                this.streamBytes(bytes, 1)
+                result = view[0] ? true : false
+                break
+            case PdFilerMode.filerModeWriting:
+                view[0] = aBoolean ? 1 : 0
+                this.streamBytes(bytes, 1)
+                break
+            case PdFilerMode.filerModeCounting:
+                this.streamBytes(bytes, 1)
+                break
+        }
         return aBoolean
     }
     
     streamSmallint(aSmallint: short): short {
-        aSmallint = this.streamBytes(aSmallint, 2)
+        let result = aSmallint
+        const bytes = new ArrayBuffer(2)
+        const view = new DataView(bytes)
+        switch (this.mode) {
+            case PdFilerMode.filerModeReading:
+                this.streamBytes(bytes, 2)
+                result = view.getInt16(0, littleEndian)
+                break
+            case PdFilerMode.filerModeWriting:
+                view.setInt16(0, aSmallint, littleEndian)
+                this.streamBytes(bytes, 2)
+                break
+            case PdFilerMode.filerModeCounting:
+                this.streamBytes(bytes, 2)
+                break
+        }
         return aSmallint
     }
     
     streamLongint(aLongint: long): long {
-        aLongint = this.streamBytes(aLongint, 4)
+        let result = aLongint
+        const bytes = new ArrayBuffer(4)
+        const view = new DataView(bytes)
+        switch (this.mode) {
+            case PdFilerMode.filerModeReading:
+                this.streamBytes(bytes, 4)
+                result = view.getInt32(0, littleEndian)
+                break
+            case PdFilerMode.filerModeWriting:
+                view.setInt32(0, aLongint, littleEndian)
+                this.streamBytes(bytes, 4)
+                break
+            case PdFilerMode.filerModeCounting:
+                this.streamBytes(bytes, 4)
+                break
+        }
         return aLongint
     }
     
-    streamByte(aByte: byte): void {
-        aByte = this.streamBytes(aByte, 1)
-        return aByte
+    streamByte(aByte: byte): byte {
+        let result = aByte
+        const bytes = new ArrayBuffer(1)
+        const view = new Uint8ClampedArray(bytes)
+        switch (this.mode) {
+            case PdFilerMode.filerModeReading:
+                this.streamBytes(bytes, 1)
+                result = view[0]
+                break
+            case PdFilerMode.filerModeWriting:
+                view[0] = aByte
+                this.streamBytes(bytes, 1)
+                break
+            case PdFilerMode.filerModeCounting:
+                this.bytesStreamed = this.bytesStreamed + 1
+                break
+        }
+        return result
     }
     
     streamSingle(aSingle: float): float {
-        aSingle = this.streamBytes(aSingle, 4)
+        let result = aSingle
+        const bytes = new ArrayBuffer(4)
+        const view = new DataView(bytes)
+        switch (this.mode) {
+            case PdFilerMode.filerModeReading:
+                this.streamBytes(bytes, 4)
+                result = view.getFloat32(0, littleEndian)
+                break
+            case PdFilerMode.filerModeWriting:
+                view.setFloat32(0, aSingle, littleEndian)
+                this.streamBytes(bytes, 4)
+                break
+            case PdFilerMode.filerModeCounting:
+                this.streamBytes(bytes, 4)
+                break
+        }
         return aSingle
     }
     
@@ -161,8 +257,24 @@ export class PdFiler {
         aRect.Bottom = this.streamSmallint(aRect.Bottom)
     }
 
-    streamColorRef(aColorRef: TColorRef): void {
-        aColorRef = this.streamBytes(aColorRef, 4)
+    streamColorRef(aColorRef: TColorRef): TColorRef {
+        let result = aColorRef
+        const bytes = new ArrayBuffer(4)
+        const view = new DataView(bytes)
+        switch (this.mode) {
+            case PdFilerMode.filerModeReading:
+                this.streamBytes(bytes, 4)
+                result = view.getUint32(0, littleEndian)
+                break
+            case PdFilerMode.filerModeWriting:
+                view.setUint32(0, aColorRef, littleEndian)
+                this.streamBytes(bytes, 4)
+                break
+            case PdFilerMode.filerModeCounting:
+                this.streamBytes(bytes, 4)
+                break
+        }
+        return aColorRef
     }
     
     // class level streaming

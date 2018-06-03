@@ -182,6 +182,14 @@ export class TFileStream {
         }
     }
 
+    ReadBytes(length: number) {
+        const result = []
+        for (let i = 0; i < length; i++) {
+            result.push(this.contents[this.position++])
+        }
+        return result;
+    }
+
     get Position() {
         return this.position
     }
