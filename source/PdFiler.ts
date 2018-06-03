@@ -1,11 +1,9 @@
-// unit Ufiler
+// PdFiler was unit Ufiler
 
-from conversion_common import *
-import uclasses
-import usupport
-import delphi_compatability
+import { TRect } from "./TRect"
+import { short, long, byte, float, double, TColor, TColorRef } from "./common"
+import { TPoint } from "./TPoint"
 
-//
 //  For every streamable object,
 //  	Set class number to constant from uclasses.
 //    Increment version number if change streamed structure (watch out for base class streaming changes!).
@@ -13,7 +11,7 @@ import delphi_compatability
 //      In addition case, check additions number in streamDataWithFiler.
 //      When create new version, you should usually reset additions to zero and
 //      	remove additions testing code in streaming.
-//  
+
 // record
 export interface PdClassAndVersionInformationRecord {
     classNumber: short
@@ -27,8 +25,9 @@ export enum PdFilerMode { filerModeReading, filerModeWriting, filerModeCounting 
 const kMinWidthOnScreen = 40
 const kMinHeightOnScreen = 20
 
-
 // global functions 
+
+/*
 function StreamFormPositionInfoWithFiler(filer: PdFiler, cvir: PdClassAndVersionInformationRecord, form: TForm): void {
     let tempBoundsRect: TRect
     let tempVisible: boolean
@@ -100,21 +99,21 @@ function StreamComboBoxItemIndexToTempVarWithFiler(filer: PdFiler, cvir: PdClass
     }
     return saveIndex
 }
-
+*/
 
 export class PdFiler {
     stream: TStream = new TStream()
-    mode: PdFilerMode = new PdFilerMode()
+    mode: PdFilerMode
     bytesStreamed: long = 0
     resourceProvider: TObject = new TObject()
     
-    //an object that can be used to look up shared resource references
+    // an object that can be used to look up shared resource references
     createWithStream(aStream: TStream): void {
         this.stream = aStream
         if (this.stream === null) {
             this.setToCountingMode()
         }
-        //should test type of stream to auomatically set reading or writing mode
+        // should test type of stream to auomatically set reading or writing mode
     }
     
     setToReadingMode(): void {
@@ -158,8 +157,8 @@ export class PdFiler {
         return result
     }
     
-    //simple types
-    //simple types
+    // simple types
+    // simple types
     streamBytes(bytes: FIX_MISSING_ARG_TYPE, size: long): void {
         switch (this.mode) {
             case PdFilerMode.filerModeReading:
@@ -196,10 +195,10 @@ export class PdFiler {
                 aString[1] = this.streamBytes(aString[1], ord(aString[0]))
                 break
             case PdFilerMode.filerModeWriting:
-                aString = this.streamBytes(aString, len(aString) + 1)
+                aString = this.streamBytes(aString, aString.length + 1)
                 break
             case PdFilerMode.filerModeCounting:
-                this.bytesStreamed = this.bytesStreamed + len(aString) + 1
+                this.bytesStreamed = this.bytesStreamed + aString.length + 1
                 break
         }
         return aString
@@ -210,7 +209,7 @@ export class PdFiler {
         
         switch (this.mode) {
             case PdFilerMode.filerModeReading:
-                //make sure write out extra zero at end
+                // make sure write out extra zero at end
                 theLength = this.streamLongint(theLength)
                 UNRESOLVED.setlength(aString, theLength)
                 if (theLength > 0) {
@@ -218,21 +217,21 @@ export class PdFiler {
                 }
                 break
             case PdFilerMode.filerModeWriting:
-                theLength = len(aString)
+                theLength = aString.length
                 theLength = this.streamLongint(theLength)
                 if (theLength > 0) {
                     aString.PDF_FIX_POINTER_ACCESS = this.streamBytes(aString.PDF_FIX_POINTER_ACCESS, theLength + 1)
                 }
                 break
             case PdFilerMode.filerModeCounting:
-                this.bytesStreamed = this.bytesStreamed + len(aString) + 1
+                this.bytesStreamed = this.bytesStreamed + aString.length + 1
                 break
         }
     }
     
-    //maybe problem in 32 bits - depends how big a string string alloc can return
-    //need to stream "aPChar^" not just "aPChar".  The first is the array,
-    //the second is just the space occupied by the pointer - and is a bug
+    // maybe problem in 32 bits - depends how big a string string alloc can return
+    // need to stream "aPChar^" not just "aPChar".  The first is the array,
+    // the second is just the space occupied by the pointer - and is a bug
     streamPChar(aPChar: "UNFINISHED_FIX_THIS_PCHAR_INIT"): void {
         let stringLength: long
         
@@ -327,10 +326,10 @@ export class PdFiler {
     }
     
     streamSingleArray(anArray: float[]): void {
-        //var i: integer;
+        // var i: integer;
         anArray = this.streamBytes(anArray, FIX_sizeof(anArray))
-        //if this doesn't work, use loop
-        //for i := 0 to high(anArray) do self.streamSingle(anArray[i]);
+        // if this doesn't work, use loop
+        // for i := 0 to high(anArray) do self.streamSingle(anArray[i]);
         return anArray
     }
     
@@ -354,9 +353,9 @@ export class PdFiler {
         return aComp
     }
     
-    //common types
-    //common types
-    //win 32 defines these to be made of longints, so just stream smalls..
+    // common types
+    // common types
+    // win 32 defines these to be made of longints, so just stream smalls..
     streamPoint(aPoint: TPoint): void {
         raise "method streamPoint had assigned to var parameter aPoint not added to return -- fixup manually"
         let x: short
@@ -365,7 +364,8 @@ export class PdFiler {
         if (this.isReading()) {
             x = this.streamSmallint(x)
             y = this.streamSmallint(y)
-            aPoint = Point(x, y)
+            aPoint.X = x
+            aPoint.Y = y
         } else {
             x = aPoint.X
             y = aPoint.Y
@@ -416,12 +416,12 @@ export class PdFiler {
         }
     }
     
-    //streams 32 bit locations
+    // streams 32 bit locations
     streamBigPoint(aPoint: TPoint): void {
         aPoint = this.streamBytes(aPoint, FIX_sizeof(delphi_compatability.TPoint))
     }
     
-    //streams 32 bit locations
+    // streams 32 bit locations
     streamBigRect(aRect: TRect): void {
         aRect = this.streamBytes(aRect, FIX_sizeof(delphi_compatability.TRect))
     }
@@ -447,8 +447,8 @@ export class PdFiler {
         aWindowState = this.streamBytes(aWindowState, FIX_sizeof(UNRESOLVED.TWindowState))
     }
     
-    //this function assumes the objects in the string list are nil or are
-    //StreamableObject subclasses and are listed in the CreateStreamableObject function
+    // this function assumes the objects in the string list are nil or are
+    // StreamableObject subclasses and are listed in the CreateStreamableObject function
     streamStringList(aStringList: TStringList): void {
         let theCount: long
         let i: long
@@ -461,7 +461,7 @@ export class PdFiler {
             if (theCount > 0) {
                 for (i = 0; i <= theCount - 1; i++) {
                     theString = aStringList.Strings[i]
-                    //could stream ansi ? - won't work in gsim
+                    // could stream ansi ? - won't work in gsim
                     theString = this.streamShortString(theString)
                     aStreamableObject = aStringList.Objects[i]
                     this.streamOrCreateObject(aStreamableObject)
@@ -472,10 +472,10 @@ export class PdFiler {
             theCount = this.streamLongint(theCount)
             if (theCount > 0) {
                 for (i = 0; i <= theCount - 1; i++) {
-                    //could stream ansi ? - won't work in gsim
+                    // could stream ansi ? - won't work in gsim
                     theString = this.streamShortString(theString)
                     aStringList.Add(theString)
-                    //needs to be nil when passed to next call for a read
+                    // needs to be nil when passed to next call for a read
                     aStreamableObject = null
                     this.streamOrCreateObject(aStreamableObject)
                     if (aStreamableObject !== null) {
@@ -516,15 +516,15 @@ export class PdFiler {
         aCursor = this.streamBytes(aCursor, FIX_sizeof(delphi_compatability.TCursor))
     }
     
-    //uses memory stream which is somewhat inefficient because
-    //of the double copying and memory allocation.
-    //TIcon cannot be written mre easily because of
-    //private fields which would need to be accessed for size and data.
-    //Unfortunately TIcon only provides ways to read and write assuming
-    //the whole stream is made of the icon
-    //copy from is also inefficient because it allocates a buffer -
-    //probably could copy more directly from one stream to another
-    //since one is a memory stream and is already in memory
+    // uses memory stream which is somewhat inefficient because
+    // of the double copying and memory allocation.
+    // TIcon cannot be written mre easily because of
+    // private fields which would need to be accessed for size and data.
+    // Unfortunately TIcon only provides ways to read and write assuming
+    // the whole stream is made of the icon
+    // copy from is also inefficient because it allocates a buffer -
+    // probably could copy more directly from one stream to another
+    // since one is a memory stream and is already in memory
     streamIcon(anIcon: TIcon): void {
         let memoryStream: TMemoryStream
         let iconSize: long
@@ -532,7 +532,7 @@ export class PdFiler {
         memoryStream = delphi_compatability.TMemoryStream.create
         if (this.isReading()) {
             iconSize = this.streamLongint(iconSize)
-            //put icon in memory stream
+            // put icon in memory stream
             memoryStream.CopyFrom(this.stream, iconSize)
             memoryStream.Position = 0
             anIcon.LoadFromStream(memoryStream)
@@ -541,13 +541,13 @@ export class PdFiler {
             memoryStream.Position = 0
             iconSize = memoryStream.Size
             iconSize = this.streamLongint(iconSize)
-            //put memory stream in other stream
+            // put memory stream in other stream
             this.stream.CopyFrom(memoryStream, iconSize)
         }
         memoryStream.free
     }
     
-    //class level streaming
+    // class level streaming
     save(fileName: string, objectToSave: PdStreamableObject): void {
         let fileStream: TFileStream
         let filer: PdFiler
@@ -566,7 +566,7 @@ export class PdFiler {
         }
     }
     
-    //class save/load functions
+    // class save/load functions
     load(fileName: string, objectToLoad: PdStreamableObject): void {
         let fileStream: TFileStream
         let filer: PdFiler
@@ -600,7 +600,7 @@ export class PdFiler {
         } else if ((UNRESOLVED.CompareText(exeDirectory, UNRESOLVED.copy(path, 1, len(exeDirectory))) === 0)) {
             result = UNRESOLVED.copy(filename, len(exeDirectory) + 1, 256)
             if (FileExists(currentDirectory + result)) {
-                //don't relativize if file is also in current directory
+                // don't relativize if file is also in current directory
                 result = filename
             }
         }
@@ -634,7 +634,7 @@ export class PdFiler {
             this.streamClassAndVersionInformation(cvir)
             anObject = uclasses.CreateStreamableObjectFromClassAndVersionInformation(cvir)
             if (anObject !== null) {
-                //reset the stream because object will reread its information
+                // reset the stream because object will reread its information
                 this.setStreamPosition(oldPosition)
                 anObject.streamUsingFiler(this)
             }
@@ -655,9 +655,9 @@ export class PdFiler {
 
 export class PdStreamableObject {
     
-    //PdStreamableObject
-    //use for auto creating classes when type not known
-    //use for checking if structure has changed
+    // PdStreamableObject
+    // use for auto creating classes when type not known
+    // use for checking if structure has changed
     classAndVersionInformation(cvir: PdClassAndVersionInformationRecord): void {
         cvir.classNumber = uclasses.kPdStreamableObject
         cvir.versionNumber = 0
@@ -666,27 +666,27 @@ export class PdStreamableObject {
     }
     
     streamDataWithFiler(filer: PdFiler, cvir: PdClassAndVersionInformationRecord): void {
-        //does nothing for this class - sublcasses should override
+        // does nothing for this class - subclasses should override
     }
     
-    //return true if should read data - false if this function read it
-    //this fuction needs to be overriden if it will read the data instead of raising exception
-    //exception handlers need to skip over data if desired
-    //skip it code - filer.setStreamPosition(filer.getStreamPosition + size); - note this might fail
-    //if size is some crazy number outside of stream.  The might not get nic error message...
+    // return true if should read data - false if this function read it
+    // this fuction needs to be overriden if it will read the data instead of raising exception
+    // exception handlers need to skip over data if desired
+    // skip it code - filer.setStreamPosition(filer.getStreamPosition + size); - note this might fail
+    // if size is some crazy number outside of stream.  The might not get nic error message...
     verifyClassAndVersionInformation(filer: PdFiler, size: long, cvirRead: PdClassAndVersionInformationRecord, cvirClass: PdClassAndVersionInformationRecord): boolean {
         let result = false
         if (cvirRead.classNumber !== cvirClass.classNumber) {
             throw new PdExceptionFilerUnexpectedClassNumber().createWithSizeAndMessage(size, "Problem reading file.  This file may be corrupt. (Expected class " + IntToStr(cvirClass.classNumber) + " read class " + IntToStr(cvirRead.classNumber) + ")")
-            //filer.setStreamPosition(filer.getStreamPosition + size);
+            // filer.setStreamPosition(filer.getStreamPosition + size);
             //  	result := false;
             //    exit;  
         }
         if (cvirRead.versionNumber !== cvirClass.versionNumber) {
-            //assuming that later can read earlier or will issue error
-            //if caller wants to recover - can manually create object and read size bytes
+            // assuming that later can read earlier or will issue error
+            // if caller wants to recover - can manually create object and read size bytes
             throw new PdExceptionFilerUnexpectedVersionNumber().createWithSizeAndMessage(size, "Problem reading file.  This file is of a different version than the program. (Class " + IntToStr(cvirClass.classNumber) + " version " + IntToStr(cvirClass.versionNumber) + " cannot read version " + IntToStr(cvirRead.versionNumber) + ")")
-            //filer.setStreamPosition(filer.getStreamPosition + size);
+            // filer.setStreamPosition(filer.getStreamPosition + size);
             //  	result := false;
             //    exit;
         }
@@ -694,7 +694,7 @@ export class PdStreamableObject {
         return result
     }
     
-    //stream out class ref num which can be used for loading
+    // stream out class ref num which can be used for loading
     streamUsingFiler(filer: PdFiler): void {
         let theSize: long
         let endPosition: long
@@ -713,7 +713,7 @@ export class PdStreamableObject {
             this.streamDataWithFiler(filer, cvirClass)
             endPosition = filer.getStreamPosition()
             filer.setStreamPosition(sizePosition)
-            //size does not include itself or object header
+            // size does not include itself or object header
             theSize = endPosition - startPosition
             theSize = filer.streamLongint(theSize)
             filer.setStreamPosition(endPosition)
@@ -726,7 +726,7 @@ export class PdStreamableObject {
             }
             endPosition = filer.getStreamPosition()
             if (endPosition < startPosition + theSize) {
-                //handle if haven't read everything due to additions or other version handling...
+                // handle if haven't read everything due to additions or other version handling...
                 filer.setStreamPosition(startPosition + theSize)
             } else if (endPosition > startPosition + theSize) {
                 throw new PdExceptionFilerReadPastEndOfObject.create("Problem reading file: Read past the end of class " + IntToStr(cvirRead.classNumber) + " ver " + IntToStr(cvirRead.versionNumber) + " add " + IntToStr(cvirRead.additionNumber))
@@ -734,24 +734,24 @@ export class PdStreamableObject {
         }
     }
     
-    //sublasses that include references to other subcomponent objects should instantiate them in an oveeride of this method
-    //don't forget to use override in subclasses!
+    // sublasses that include references to other subcomponent objects should instantiate them in an oveeride of this method
+    // don't forget to use override in subclasses!
     create(): void {
         TObject.prototype.create.call(this)
     }
     
-    //don't forget to use override in subclasses!
-    //copy this object to another.  This uses a memory stream rather than
-    //field by field copies.  This is done because it is easier to maintain
-    //(especiallyf for complex objects like the drawing plant).  Otherwise
-    //every change to an objects fields would necessitae maintaining a copy
-    //function.  This is slightly less efficient than field by field,
-    //however presumeably copy won't be called that often so the speed difference
-    //(double the time or more?) will not be noticed.  Note that this can fail
-    //if there is no memory for the stream or filer or any subobjects in
-    //the copy
-    //when using this for plants, be careful to set the soil patch
-    //in the copy to something desireable before calling
+    // don't forget to use override in subclasses!
+    // copy this object to another.  This uses a memory stream rather than
+    // field by field copies.  This is done because it is easier to maintain
+    // (especiallyf for complex objects like the drawing plant).  Otherwise
+    // every change to an objects fields would necessitae maintaining a copy
+    // function.  This is slightly less efficient than field by field,
+    // however presumeably copy won't be called that often so the speed difference
+    // (double the time or more?) will not be noticed.  Note that this can fail
+    // if there is no memory for the stream or filer or any subobjects in
+    // the copy
+    // when using this for plants, be careful to set the soil patch
+    // in the copy to something desireable before calling
     copyTo(newCopy: PdStreamableObject): void {
         let memoryStream: TMemoryStream
         let filer: PdFiler
@@ -763,7 +763,7 @@ export class PdStreamableObject {
         filer = PdFiler().createWithStream(memoryStream)
         filer.setToWritingMode()
         this.streamUsingFiler(filer)
-        //move to start of stream
+        // move to start of stream
         memoryStream.Seek(0, 0)
         filer.setToReadingMode()
         newCopy.streamUsingFiler(filer)
@@ -820,14 +820,14 @@ export class PdExceptionFilerReadPastEndOfObject {
 }
 
 //
-//{ when i switched to all 32-bit, i looked at this and it was all commented out and never used. so
+// { when i switched to all 32-bit, i looked at this and it was all commented out and never used. so
 //  i am taking it out. }
 //    class procedure copyFile(Source, Dest: shortstring);
-//class procedure PdFiler.copyFile(Source, Dest: shortstring);
-//(*var
+// class procedure PdFiler.copyFile(Source, Dest: shortstring);
+// (*var
 //  SourceHand, DestHand: Integer;
 //  OpenBuf: TOFStruct;
-//begin
+// begin
 //  { Place null-terminators at the end of the strings, so we can emulate a }
 //  { PChar.  Note that (for safety) this will truncate a string if it is   }
 //  { 255 characters long, but that's beyond the DOS filename limit anyway. }
@@ -853,4 +853,4 @@ export class PdExceptionFilerReadPastEndOfObject {
 //    LZClose(SourceHand);
 //    LZClose(DestHand);
 //  end;
-//end; 
+// end; 
