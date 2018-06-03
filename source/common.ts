@@ -200,3 +200,9 @@ export class TFileStream {
         }
     }
 }
+
+export class TMemoryStream extends TFileStream {
+    constructor() {
+        super("", 0)
+    }
+}
