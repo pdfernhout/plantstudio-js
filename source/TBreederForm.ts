@@ -4,9 +4,10 @@ import { TRect } from "./TRect"
 import { TPoint } from "./TPoint"
 import { MainForm, TFPBrushStyle, ucursor } from "./temporary"
 import { BreederVariation, domain, DrawMode } from "./PdDomain"
-import { intround, short, long, ColorDefs, int, IntToStr } from "./common"
+import { intround, short, long, ColorDefs, int, IntToStr, MessageDialog } from "./common"
 import { PdPlant } from "./PdPlant"
 import { PdGeneration } from "./PdGeneration"
+import { PdCommand } from "./PdCommand";
 
 let BreederForm: TBreederForm
 
@@ -415,7 +416,7 @@ export class TBreederForm {
         let row: long
         let plant: PdPlant
         
-        Accept = (Source !== null) && (Sender !== null) && ((Sender === Source) || (Source === umain.MainForm.drawingPaintBox) || (Source === umain.MainForm.plantListDrawGrid) || (Source === utimeser.TimeSeriesForm.grid))
+        Accept = (Source !== null) && (Sender !== null) && ((Sender === Source) || (Source === MainForm.drawingPaintBox) || (Source === MainForm.plantListDrawGrid) || (Source === utimeser.TimeSeriesForm.grid))
         if ((Accept)) {
             plant = this.plantAtMouse(X, Y)
             if (plant === null) {
@@ -438,7 +439,6 @@ export class TBreederForm {
         let plant: PdPlant
         let plantToReplace: PdPlant
         let newCommand: PdCommand
-        let newPlants: TList
         let newPlant: PdPlant
         
         if (delphi_compatability.Application.terminated) {
@@ -455,16 +455,16 @@ export class TBreederForm {
         if (plant === null) {
             return
         }
-        if ((Target === umain.MainForm.drawingPaintBox) || (Target === umain.MainForm.plantListDrawGrid)) {
+        if ((Target === MainForm.drawingPaintBox) || (Target === MainForm.plantListDrawGrid)) {
             // make paste command - wants list of plants 
             newPlant = new PdPlant()
             plant.copyTo(newPlant)
             this.numBreederPlantsCopiedThisSession += 1
             newPlant.setName("Breeder plant " + IntToStr(this.numBreederPlantsCopiedThisSession))
-            if ((Target === umain.MainForm.drawingPaintBox)) {
+            if ((Target === MainForm.drawingPaintBox)) {
                 newPlant.moveTo(new TPoint(X, Y))
             } else {
-                newPlant.moveTo(umain.MainForm.standardPastePosition())
+                newPlant.moveTo(MainForm.standardPastePosition())
             }
             if (!domain.viewPlantsInMainWindowOnePlantAtATime()) {
                 // v2.1
@@ -472,13 +472,13 @@ export class TBreederForm {
             }
             //to save memory - don't need it in main window
             newPlant.shrinkPreviewCache()
-            newPlants = delphi_compatability.TList().Create()
-            newPlants.Add(newPlant)
-            newCommand = updcom.PdPasteCommand().createWithListOfPlantsAndOldSelectedList(newPlants, umain.MainForm.selectedPlants)
+            const newPlants: PdPlant[] = []
+            newPlants.push(newPlant)
+            newCommand = updcom.PdPasteCommand().createWithListOfPlantsAndOldSelectedList(newPlants, MainForm.selectedPlants)
             updcom.PdPasteCommand(newCommand).useSpecialPastePosition = true
             try {
                 ucursor.cursor_startWait()
-                umain.MainForm.doCommand(newCommand)
+                MainForm.doCommand(newCommand)
             } finally {
                 //command has another list, so we must free this one
                 newPlants.free
@@ -504,7 +504,7 @@ export class TBreederForm {
             newCommand = updcom.PdReplaceBreederPlant().createWithPlantRowAndColumn(plant, row, col)
             try {
                 ucursor.cursor_startWait()
-                umain.MainForm.doCommand(newCommand)
+                MainForm.doCommand(newCommand)
             } finally {
                 ucursor.cursor_stopWait()
             }
@@ -523,7 +523,7 @@ export class TBreederForm {
             return
         }
         newCommand = updcom.PdReplaceBreederPlant().createWithPlantRowAndColumn(aPlant, row, col)
-        umain.MainForm.doCommand(newCommand)
+        MainForm.doCommand(newCommand)
     }
     
     // ------------------------------------------------------------- responding to commands 
@@ -752,7 +752,7 @@ export class TBreederForm {
         let row: long
         
         result = null
-        col, row = this.plantsDrawGrid.MouseToCell(x, y, col, row)
+        [col, row] = this.plantsDrawGrid.MouseToCell(x, y)
         if (!this.inGrid(row, col)) {
             return result
         }
@@ -762,11 +762,11 @@ export class TBreederForm {
     
     // ----------------------------------------------------------------------------- menu 
     BreederMenuUndoClick(Sender: TObject): void {
-        umain.MainForm.MenuEditUndoClick(Sender)
+        MainForm.MenuEditUndoClick(Sender)
     }
     
     BreederMenuRedoClick(Sender: TObject): void {
-        umain.MainForm.MenuEditRedoClick(Sender)
+        MainForm.MenuEditRedoClick(Sender)
     }
     
     BreederMenuCopyClick(Sender: TObject): void {
@@ -787,16 +787,16 @@ export class TBreederForm {
         domain.plantManager.copyPlantsInListToPrivatePlantClipboard(copyList)
         plant.setName(saveName)
         //sets our paste menu also
-        umain.MainForm.updatePasteMenuForClipboardContents()
+        MainForm.updatePasteMenuForClipboardContents()
     }
     
     BreederMenuSendCopyToMainWindowClick(Sender: TObject): void {
         this.BreederMenuCopyClick(this)
-        umain.MainForm.MenuEditPasteClick(umain.MainForm)
+        MainForm.MenuEditPasteClick(MainForm)
     }
     
     BreederMenuUndoRedoListClick(Sender: TObject): void {
-        umain.MainForm.UndoMenuEditUndoRedoListClick(umain.MainForm)
+        MainForm.UndoMenuEditUndoRedoListClick(MainForm)
     }
     
     BreederMenuPasteClick(Sender: TObject): void {
@@ -819,7 +819,7 @@ export class TBreederForm {
         newPlant = new PdPlant()
         domain.plantManager.pasteFirstPlantFromPrivatePlantClipboardToPlant(newPlant)
         newCommand = updcom.PdReplaceBreederPlant().createWithPlantRowAndColumn(newPlant, this.selectedRow, column)
-        umain.MainForm.doCommand(newCommand)
+        MainForm.doCommand(newCommand)
         //command will free plant if paste is undone
     }
     
@@ -842,7 +842,7 @@ export class TBreederForm {
         newCommand = updcom.PdBreedFromParentsCommand().createWithInfo(this.generations, generationToBreed.firstSelectedPlant(), generationToBreed.secondSelectedPlant(), this.selectedRow, domain.breedingAndTimeSeriesOptions.percentMaxAge / 100.0, updcom.kDontCreateFirstGeneration)
         generationToBreed.firstParent = generationToBreed.firstSelectedPlant()
         generationToBreed.secondParent = generationToBreed.secondSelectedPlant()
-        umain.MainForm.doCommand(newCommand)
+        MainForm.doCommand(newCommand)
     }
     
     BreederMenuMakeTimeSeriesClick(Sender: TObject): void {
@@ -852,11 +852,11 @@ export class TBreederForm {
             return
         }
         newCommand = updcom.PdMakeTimeSeriesCommand().createWithNewPlant(this.primarySelectedPlant())
-        umain.MainForm.doCommand(newCommand)
+        MainForm.doCommand(newCommand)
     }
     
     fullWarning(): void {
-        MessageDialog("The breeder is full. " + chr(13) + chr(13) + "You must delete some rows" + chr(13) + "(or increase the number of rows allowed in the breeder options) " + chr(13) + "before you can breed more plants.", mtWarning, {mbOK, }, 0)
+        MessageDialog("The breeder is full.\n\nYou must delete some rows\nor increase the number of rows allowed in the breeder options)\n\nbefore you can breed more plants.", "mtWarning", {mbOK: true, }, 0)
     }
     
     BreederMenuDeleteRowClick(Sender: TObject): void {
@@ -866,7 +866,7 @@ export class TBreederForm {
             return
         }
         newCommand = updcom.PdDeleteBreederGenerationCommand().createWithGeneration(this.selectedGeneration())
-        umain.MainForm.doCommand(newCommand)
+        MainForm.doCommand(newCommand)
     }
     
     BreederMenuDeleteAllClick(Sender: TObject): void {
@@ -876,35 +876,32 @@ export class TBreederForm {
             return
         }
         newCommand = updcom.PdDeleteAllBreederGenerationsCommand().create()
-        umain.MainForm.doCommand(newCommand)
+        MainForm.doCommand(newCommand)
     }
     
     BreederMenuRandomizeClick(Sender: TObject): void {
         let newCommand: PdCommand
-        let randomizeList: TList
-        let aGeneration: PdGeneration
-        let i: short
         let plant: PdPlant
         
-        aGeneration = this.selectedGeneration()
+        const aGeneration = this.selectedGeneration()
         if (aGeneration === null) {
             return
         }
         if (aGeneration.selectedPlants.length <= 0) {
             return
         }
-        randomizeList = delphi_compatability.TList().Create()
+        const randomizeList: PdPlant[] = []
         try {
-            for (i = 0; i <= aGeneration.selectedPlants.length - 1; i++) {
+            for (let i = 0; i < aGeneration.selectedPlants.length; i++) {
                 plant = aGeneration.selectedPlants[i]
-                randomizeList.Add(plant)
+                randomizeList.push(plant)
             }
             newCommand = updcom.PdRandomizeCommand().createWithListOfPlants(randomizeList)
-            (newCommand).isInBreeder = true
+            newCommand.isInBreeder = true
             ucursor.cursor_startWait()
-            umain.MainForm.doCommand(newCommand)
+            MainForm.doCommand(newCommand)
         } finally {
-            //command has another list, so we must free this one
+            // command has another list, so we must free this one
             randomizeList.free
             ucursor.cursor_stopWait()
         }
@@ -933,9 +930,9 @@ export class TBreederForm {
                 }
             }
             newCommand = updcom.PdRandomizeCommand().createWithListOfPlants(randomizeList)
-            (newCommand).isInBreeder = true
-            (newCommand).isRandomizeAllInBreeder = true
-            umain.MainForm.doCommand(newCommand)
+            newCommand.isInBreeder = true
+            newCommand.isRandomizeAllInBreeder = true
+            MainForm.doCommand(newCommand)
         } finally {
             randomizeList.free
             ucursor.cursor_stopWait()
@@ -985,7 +982,7 @@ export class TBreederForm {
         options = domain.breedingAndTimeSeriesOptions
         options.mutateAndBlendColorValues = this.BreederMenuVaryColors.checked
         newCommand = updcom.PdChangeBreedingAndTimeSeriesOptionsCommand().createWithOptionsAndDomainOptions(options, domain.options)
-        umain.MainForm.doCommand(newCommand)
+        MainForm.doCommand(newCommand)
     }
     
     BreederMenuVary3DObjectsClick(Sender: TObject): void {
@@ -996,7 +993,7 @@ export class TBreederForm {
         options = domain.breedingAndTimeSeriesOptions
         options.chooseTdosRandomlyFromCurrentLibrary = this.BreederMenuVary3DObjects.checked
         newCommand = updcom.PdChangeBreedingAndTimeSeriesOptionsCommand().createWithOptionsAndDomainOptions(options, domain.options)
-        umain.MainForm.doCommand(newCommand)
+        MainForm.doCommand(newCommand)
     }
     
     changeBreederAndTimeSeriesOptions(tabIndexToShow: short): void {
@@ -1020,7 +1017,7 @@ export class TBreederForm {
             response = optionsForm.ShowModal()
             if (response === mrOK) {
                 newCommand = updcom.PdChangeBreedingAndTimeSeriesOptionsCommand().createWithOptionsAndDomainOptions(optionsForm.options, optionsForm.domainOptions)
-                umain.MainForm.doCommand(newCommand)
+                MainForm.doCommand(newCommand)
             }
         } finally {
             optionsForm.free
@@ -1150,7 +1147,7 @@ export class TBreederForm {
     // ----------------------------------------------------------------------------- *palette stuff 
     GetPalette(): HPALETTE {
         let result = new HPALETTE()
-        result = umain.MainForm.paletteImage.Picture.Bitmap.Palette
+        result = MainForm.paletteImage.Picture.Bitmap.Palette
         return result
     }
     
@@ -1186,19 +1183,19 @@ export class TBreederForm {
     }
     
     BreederMenuOptionsFastDrawClick(Sender: TObject): void {
-        umain.MainForm.MenuOptionsFastDrawClick(umain.MainForm)
+        MainForm.MenuOptionsFastDrawClick(MainForm)
     }
     
     BreederMenuOptionsMediumDrawClick(Sender: TObject): void {
-        umain.MainForm.MenuOptionsMediumDrawClick(umain.MainForm)
+        MainForm.MenuOptionsMediumDrawClick(MainForm)
     }
     
     BreederMenuOptionsBestDrawClick(Sender: TObject): void {
-        umain.MainForm.MenuOptionsBestDrawClick(umain.MainForm)
+        MainForm.MenuOptionsBestDrawClick(MainForm)
     }
     
     BreederMenuOptionsCustomDrawClick(Sender: TObject): void {
-        umain.MainForm.MenuOptionsCustomDrawClick(umain.MainForm)
+        MainForm.MenuOptionsCustomDrawClick(MainForm)
     }
     
 }

@@ -6,6 +6,7 @@ import { PdTraverser } from "./PdTraverser"
 import { PdPlant } from "./PdPlant"
 import { PdPlantPart } from "./PdPlantPart"
 import { SinglePoint, support_rgb } from "./usupport"
+import { PdCommand } from "./PdCommand";
 
 // TODO: Fix copied code from utdo
 export const kMaximumRecordedPoints = 10000
@@ -109,6 +110,7 @@ export const MainForm = {
     selectedPlantPartID: null,
     plantFileChanged: false,
     setPlantFileChanged: (changed: boolean) => {},
+    doCommand: (command: PdCommand) => {},
 }
 
 // TODO: Fix PdBitmap stub
