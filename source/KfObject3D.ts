@@ -860,13 +860,11 @@ export class KfObject3D extends PdStreamableObject {
         this.ensureEnoughSpaceForNewPointData(this.pointsInUse)
         if (this.pointsInUse > 0) {
             for (let i = 0; i < this.pointsInUse; i++) {
-                if (filer.isWriting()) {
-                    tempPoint = this.points[i]
-                }
-                tempPoint = filer.streamBytes(tempPoint, FIX_sizeof(tempPoint))
-                if (filer.isReading()) {
-                    this.points[i] = tempPoint
-                }
+                tempPoint = this.points[i]
+                // Stream KfPoint3D structure
+                tempPoint.x = filer.streamSingle(tempPoint.x)
+                tempPoint.y = filer.streamSingle(tempPoint.y)
+                tempPoint.z = filer.streamSingle(tempPoint.z)
             }
         }
         if (filer.isReading()) {
@@ -886,7 +884,7 @@ export class KfObject3D extends PdStreamableObject {
                 result = result + this.triangles[i].instanceSize
             }
         }
-        result = result + this.pointsAllocated * FIX_sizeof(KfPoint3D)
+        result = result + this.pointsAllocated * 12 // size of KfPoint3D
         return result
     }
     

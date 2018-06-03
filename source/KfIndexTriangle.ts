@@ -37,7 +37,9 @@ export class KfIndexTriangle extends PdStreamableObject {
     
     streamDataWithFiler(filer: PdFiler, cvir: PdClassAndVersionInformationRecord): void {
         super.streamDataWithFiler(filer, cvir)
-        this.pointIndexes = filer.streamBytes(this.pointIndexes, FIX_sizeof(this.pointIndexes))
+        this.pointIndexes[0] = filer.streamLongint(this.pointIndexes[0])
+        this.pointIndexes[1] = filer.streamLongint(this.pointIndexes[1])
+        this.pointIndexes[2] = filer.streamLongint(this.pointIndexes[2])
     }
     
 }
