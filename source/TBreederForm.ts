@@ -770,18 +770,16 @@ export class TBreederForm {
     }
     
     BreederMenuCopyClick(Sender: TObject): void {
-        let plant: PdPlant
         let copyList: TList
-        let saveName: string
-        
-        plant = this.primarySelectedPlant()
+
+        const plant = this.primarySelectedPlant()
         if (plant === null) {
             return
         }
         copyList = delphi_compatability.TList().Create()
         copyList.Add(plant)
         // temporarily change plant name to make copy, then put back 
-        saveName = plant.getName()
+        const saveName = plant.getName()
         this.numBreederPlantsCopiedThisSession += 1
         plant.setName("Breeder plant " + IntToStr(this.numBreederPlantsCopiedThisSession))
         domain.plantManager.copyPlantsInListToPrivatePlantClipboard(copyList)
@@ -1142,36 +1140,6 @@ export class TBreederForm {
     
     helpButtonClick(Sender: TObject): void {
         delphi_compatability.Application.HelpJump("Breeding_plants_using_the_breeder")
-    }
-    
-    // ----------------------------------------------------------------------------- *palette stuff 
-    GetPalette(): HPALETTE {
-        let result = new HPALETTE()
-        result = MainForm.paletteImage.Picture.Bitmap.Palette
-        return result
-    }
-    
-    PaletteChanged(Foreground: boolean): boolean {
-        let result = false
-        let oldPalette: HPALETTE
-        let palette: HPALETTE
-        let windowHandle: HWnd
-        let DC: HDC
-        
-        palette = this.GetPalette()
-        if (palette !== 0) {
-            DC = this.GetDeviceContext(windowHandle)
-            oldPalette = UNRESOLVED.selectPalette(DC, palette, !Foreground)
-            if ((UNRESOLVED.realizePalette(DC) !== 0) && (!delphi_compatability.Application.terminated) && (this.plantsDrawGrid !== null)) {
-                // if palette changed, repaint drawing 
-                this.plantsDrawGrid.Invalidate()
-            }
-            UNRESOLVED.selectPalette(DC, oldPalette, true)
-            UNRESOLVED.realizePalette(DC)
-            UNRESOLVED.releaseDC(windowHandle, DC)
-        }
-        result = PdForm.prototype.PaletteChanged.call(this, Foreground)
-        return result
     }
     
     BreederMenuHelpOnBreedingClick(Sender: TObject): void {

@@ -7,6 +7,7 @@ import { PdPlant } from "./PdPlant"
 import { PdPlantPart } from "./PdPlantPart"
 import { SinglePoint, support_rgb } from "./usupport"
 import { PdCommand } from "./PdCommand";
+import { TPoint } from "./TPoint";
 
 // TODO: Fix copied code from utdo
 export const kMaximumRecordedPoints = 10000
@@ -111,6 +112,11 @@ export const MainForm = {
     plantFileChanged: false,
     setPlantFileChanged: (changed: boolean) => {},
     doCommand: (command: PdCommand) => {},
+    updateMenusForUndoRedo: () => {},
+    MenuEditUndoClick: (Sender: any) => {},
+    MenuEditRedoClick: (Sender: any) => {},
+    updatePasteMenuForClipboardContents: () => {},
+    standardPastePosition: () => new TPoint(),
 }
 
 // TODO: Fix PdBitmap stub
