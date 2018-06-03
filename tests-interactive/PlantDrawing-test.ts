@@ -44,7 +44,7 @@ function randomize() {
 }
 
 const MyComponent = { 
-    view: () => m("div", 
+    view: () => m("div.ma2", 
         m("canvas.ba", {
             width: 800,
             height: 500,
@@ -61,13 +61,13 @@ const MyComponent = {
             },
             onclick: () => {
                 console.log("onclick")
-                amendment.xRotation += 4
+                amendment.xRotation = (amendment.xRotation + 4) % 360
             }
         }),
         m("div", { style: "user-select: none" }, "Click canvas to rotate leaf"),
         m("br"),
         "Rotation",
-        m("input[type=range].ml2", { min: 0, max: 365, value: amendment.xRotation, oninput: (event: any) => {
+        m("input[type=range].ml2", { min: 0, max: 360, value: amendment.xRotation, oninput: (event: any) => {
             // console.log("slider", event, event.target.value)
             amendment.xRotation = parseInt(event.target.value)
         }}),
