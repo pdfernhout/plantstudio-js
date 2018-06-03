@@ -61,6 +61,10 @@ export function arrayRemove(theArray: Array<any>, item: any) {
     }
 }
 
+export function arrayInsert(theArray: Array<any>, index: number, item: any) {
+    theArray.splice(index, 0, item)
+}
+
 export function compareTextIgnoreCase(a: string, b: string): boolean {
     return a.toUpperCase() === b.toUpperCase()
 }

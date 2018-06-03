@@ -76,14 +76,16 @@ const kDontDrawNow = false
 const kMutation = 0
 const kWeight = 1
 
-const kMaxBreedingSections = 20
+export const kMaxBreedingSections = 20
 
-const kFromFirstPlant = 0
-const kFromSecondPlant = 1
-const kFromProbabilityBasedOnWeightsForSection = 2
-const kFromPlantWithGreaterWeightForSectionIfEqualFirstPlant = 3
-const kFromPlantWithGreaterWeightForSectionIfEqualSecondPlant = 4
-const kFromPlantWithGreaterWeightForSectionIfEqualChooseRandomly = 5
+export enum FromPlant {
+    kFromFirstPlant = 0,
+    kFromSecondPlant = 1,
+    kFromProbabilityBasedOnWeightsForSection = 2,
+    kFromPlantWithGreaterWeightForSectionIfEqualFirstPlant = 3,
+    kFromPlantWithGreaterWeightForSectionIfEqualSecondPlant = 4,
+    kFromPlantWithGreaterWeightForSectionIfEqualChooseRandomly = 5,
+}
 
 const kPlantAsTextStartString = "start PlantStudio plant"
 const kPlantAsTextEndString = "end PlantStudio plant"
@@ -2037,7 +2039,7 @@ export class PdPlant extends PdStreamableObject {
                                 newBoolean = firstBoolean
                             } else {
                                 secondBoolean = secondPlant.transferField(kGetField, secondBoolean, param.fieldNumber, param.fieldType, 0, false, null)
-                                if (this.pickPlantToCopyNonNumericalParameterFrom(options, sectionIndex) === kFromFirstPlant) {
+                                if (this.pickPlantToCopyNonNumericalParameterFrom(options, sectionIndex) === FromPlant.kFromFirstPlant) {
                                     newBoolean = firstBoolean
                                 } else {
                                     newBoolean = secondBoolean
@@ -2079,7 +2081,7 @@ export class PdPlant extends PdStreamableObject {
                                 newInteger = firstInteger
                             } else {
                                 secondInteger = secondPlant.transferField(kGetField, secondInteger, param.fieldNumber, param.fieldType, 0, false, null)
-                                if (this.pickPlantToCopyNonNumericalParameterFrom(options, sectionIndex) === kFromFirstPlant) {
+                                if (this.pickPlantToCopyNonNumericalParameterFrom(options, sectionIndex) === FromPlant.kFromFirstPlant) {
                                     newInteger = firstInteger
                                 } else {
                                     newInteger = secondInteger
@@ -2095,7 +2097,7 @@ export class PdPlant extends PdStreamableObject {
                             } else {
                                 secondColor = secondPlant.transferField(kGetField, secondColor, param.fieldNumber, param.fieldType, 0, false, null)
                                 if (!options.mutateAndBlendColorValues) {
-                                    if (this.pickPlantToCopyNonNumericalParameterFrom(options, sectionIndex) === kFromFirstPlant) {
+                                    if (this.pickPlantToCopyNonNumericalParameterFrom(options, sectionIndex) === FromPlant.kFromFirstPlant) {
                                         newColor = firstColor
                                     } else {
                                         newColor = secondColor
@@ -2116,7 +2118,7 @@ export class PdPlant extends PdStreamableObject {
                                     newSCurve = firstSCurve
                                 } else {
                                     secondPlant.transferWholeSCurve(kGetField, secondSCurve, param.fieldNumber, param.fieldType, false, null)
-                                    if (this.pickPlantToCopyNonNumericalParameterFrom(options, sectionIndex) === kFromFirstPlant) {
+                                    if (this.pickPlantToCopyNonNumericalParameterFrom(options, sectionIndex) === FromPlant.kFromFirstPlant) {
                                         newSCurve = firstSCurve
                                     } else {
                                         newSCurve = secondSCurve
@@ -2161,7 +2163,7 @@ export class PdPlant extends PdStreamableObject {
                                 let secondTdo: KfObject3D = new KfObject3D()
                                 secondTdo = secondPlant.transferField(kGetField, secondTdo, param.fieldNumber, param.fieldType, 0, false, null)
                                 if (!options.chooseTdosRandomlyFromCurrentLibrary) {
-                                    if (this.pickPlantToCopyNonNumericalParameterFrom(options, sectionIndex) === kFromFirstPlant) {
+                                    if (this.pickPlantToCopyNonNumericalParameterFrom(options, sectionIndex) === FromPlant.kFromFirstPlant) {
                                         newTdo.copyFrom(firstTdo)
                                     } else {
                                         newTdo.copyFrom(secondTdo)
@@ -2196,46 +2198,46 @@ export class PdPlant extends PdStreamableObject {
     }
     
     pickPlantToCopyNonNumericalParameterFrom(options: BreedingAndTimeSeriesOptionsStructure, sectionIndex: short): short {
-        let result = kFromFirstPlant
+        let result = FromPlant.kFromFirstPlant
         switch (options.getNonNumericalParametersFrom) {
-            case kFromFirstPlant:
-                result = kFromFirstPlant
+            case FromPlant.kFromFirstPlant:
+                result = FromPlant.kFromFirstPlant
                 break
-            case kFromSecondPlant:
-                result = kFromSecondPlant
+            case FromPlant.kFromSecondPlant:
+                result = FromPlant.kFromSecondPlant
                 break
-            case kFromProbabilityBasedOnWeightsForSection:
+            case FromPlant.kFromProbabilityBasedOnWeightsForSection:
                 if (this.breedingGenerator.zeroToOne() < options.firstPlantWeights[sectionIndex] / 100.0) {
-                    result = kFromFirstPlant
+                    result = FromPlant.kFromFirstPlant
                 } else {
-                    result = kFromSecondPlant
+                    result = FromPlant.kFromSecondPlant
                 }
                 break
-            case kFromPlantWithGreaterWeightForSectionIfEqualFirstPlant:
+            case FromPlant.kFromPlantWithGreaterWeightForSectionIfEqualFirstPlant:
                 if (options.firstPlantWeights[sectionIndex] >= 50) {
-                    result = kFromFirstPlant
+                    result = FromPlant.kFromFirstPlant
                 } else {
-                    result = kFromSecondPlant
+                    result = FromPlant.kFromSecondPlant
                 }
                 break
-            case kFromPlantWithGreaterWeightForSectionIfEqualSecondPlant:
+            case FromPlant.kFromPlantWithGreaterWeightForSectionIfEqualSecondPlant:
                 if (options.firstPlantWeights[sectionIndex] > 50) {
-                    result = kFromFirstPlant
+                    result = FromPlant.kFromFirstPlant
                 } else {
-                    result = kFromSecondPlant
+                    result = FromPlant.kFromSecondPlant
                 }
                 break
-            case kFromPlantWithGreaterWeightForSectionIfEqualChooseRandomly:
+            case FromPlant.kFromPlantWithGreaterWeightForSectionIfEqualChooseRandomly:
                 if (options.firstPlantWeights[sectionIndex] > 50) {
-                    result = kFromFirstPlant
+                    result = FromPlant.kFromFirstPlant
                 } else if (options.firstPlantWeights[sectionIndex] < 50) {
                     // 50/50
-                    result = kFromSecondPlant
+                    result = FromPlant.kFromSecondPlant
                 } else {
                     if (this.breedingGenerator.zeroToOne() <= 0.5) {
-                        result = kFromFirstPlant
+                        result = FromPlant.kFromFirstPlant
                     } else {
-                        result = kFromSecondPlant
+                        result = FromPlant.kFromSecondPlant
                     }
                 }
                 break

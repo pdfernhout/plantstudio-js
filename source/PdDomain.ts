@@ -8,6 +8,7 @@ import { PdSectionManager } from "./PdSectionManager"
 import { PdParameterManager } from "./PdParameterManager"
 import { ExportFormats, FileExport3DOptionsStructure, nameFor3DExportType, ExportPart, Axis } from "./U3dexport"
 import { PdPlantManager } from "./temporary"
+import { BreedingAndTimeSeriesOptionsStructure, kMaxBreedingSections } from "./PdPlant"
 
 // const
 const kMaxWizardQuestions = 30
@@ -246,7 +247,7 @@ export class PdDomain {
     lastOpenedPlantFileName: string = ""
     plantFileLoaded: boolean = false
     options: DomainOptionsStructure = new DomainOptionsStructure()
-    // TODO: FIX breedingAndTimeSeriesOptions: BreedingAndTimeSeriesOptionsStructure = new BreedingAndTimeSeriesOptionsStructure()
+    breedingAndTimeSeriesOptions: BreedingAndTimeSeriesOptionsStructure = new BreedingAndTimeSeriesOptionsStructure()
     bitmapOptions: BitmapOptionsStructure = new BitmapOptionsStructure()
     exportOptionsFor3D: FileExport3DOptionsStructure[] = Array(ExportFormats.k3DExportTypeLast + 1)
     nozzleOptions: NozzleOptionsStructure = new NozzleOptionsStructure()
@@ -640,9 +641,12 @@ export class PdDomain {
         }
 
         */
+
+        // TODO:Remove next line and get sections to work loaded from somewhere
+        const section = ""
+
         // ------------------------------------------- preferences
         // Todo: Use or remove and replace next line: section = iniSections[kSectionPrefs]
-        const section = ""
         this.options.openMostRecentFileAtStart = strToBool(this.stringForSectionAndKey(section, "Open most recent file at start", "true"))
         this.options.ignoreWindowSettingsInFile = strToBool(this.stringForSectionAndKey(section, "Ignore window settings saved in files", "false"))
         this.options.cachePlantBitmaps = strToBool(this.stringForSectionAndKey(section, "Draw plants into separate bitmaps", "true"))
@@ -796,12 +800,14 @@ export class PdDomain {
             this.options.wizardTdoNames[i] = this.stringForSectionAndKey(section, "Wizard 3D objects " + IntToStr(i), "")
         }
         this.options.wizardShowFruit = strToBool(this.stringForSectionAndKey(section, "Wizard show fruit", "false"))
+        
         // ------------------------------------------- custom colors
         section = iniSections[kCustomColors]
         for (i = 0; i <= kMaxCustomColors - 1; i++) {
             this.options.customColors[i] = StrToInt(this.stringForSectionAndKey(section, "Custom color " + IntToStr(i + 1), "0"))
         }
         // with options
+        
         // -------------------------------------------  export (2D)
         section = iniSections[kSectionExport]
         this.bitmapOptions.exportType = StrToInt(this.stringForSectionAndKey(section, "Which plants to draw (selected/visible/all/drawing)", IntToStr(kIncludeSelectedPlants)))
@@ -813,6 +819,7 @@ export class PdDomain {
         this.bitmapOptions.height_in = usupport.strToFloatWithCommaCheck(this.stringForSectionAndKey(section, "Picture height (inches)", "2.0"))
         this.bitmapOptions.preserveAspectRatio = strToBool(this.stringForSectionAndKey(section, "Preserve aspect ratio", "true"))
         this.bitmapOptions.jpegCompressionRatio = StrToInt(this.stringForSectionAndKey(section, "JPEG compression quality ratio (1-100)", "50"))
+        
         // -------------------------------------------  printing
         section = iniSections[kSectionPrinting]
         this.bitmapOptions.printPreserveAspectRatio = strToBool(this.stringForSectionAndKey(section, "Preserve aspect ratio", "true"))
@@ -828,8 +835,10 @@ export class PdDomain {
         this.bitmapOptions.printBorderWidthOuter = StrToInt(this.stringForSectionAndKey(section, "Outer border width (pixels)", "1"))
         this.bitmapOptions.printBorderColorInner = StrToInt(this.stringForSectionAndKey(section, "Inner border color", "0"))
         this.bitmapOptions.printBorderColorOuter = StrToInt(this.stringForSectionAndKey(section, "Outer border color", "0"))
+        */
+
         // -------------------------------------------  breeding
-        section = iniSections[kSectionBreeding]
+        // TODO: Use or remove: section = iniSections[kSectionBreeding]
         this.breedingAndTimeSeriesOptions.plantsPerGeneration = StrToInt(this.stringForSectionAndKey(section, "Plants per generation", "5"))
         this.breedingAndTimeSeriesOptions.percentMaxAge = StrToInt(this.stringForSectionAndKey(section, "Percent max age", "100"))
         this.breedingAndTimeSeriesOptions.variationType = StrToInt(this.stringForSectionAndKey(section, "Variation (low/med/high/custom/none)", "1"))
@@ -837,21 +846,24 @@ export class PdDomain {
         this.breedingAndTimeSeriesOptions.thumbnailHeight = StrToInt(this.stringForSectionAndKey(section, "Thumbnail height", "80"))
         this.breedingAndTimeSeriesOptions.maxGenerations = StrToInt(this.stringForSectionAndKey(section, "Max generations", "30"))
         this.breedingAndTimeSeriesOptions.numTimeSeriesStages = StrToInt(this.stringForSectionAndKey(section, "Time series stages", "5"))
-        for (i = 0; i <= uplant.kMaxBreedingSections - 1; i++) {
-            this.breedingAndTimeSeriesOptions.mutationStrengths[i] = StrToInt(this.stringForSectionAndKey(section, "Mutation " + IntToStr(i + 1), IntToStr(kMediumMutation)))
+        for (let i = 0; i <= kMaxBreedingSections - 1; i++) {
+            this.breedingAndTimeSeriesOptions.mutationStrengths[i] = StrToInt(this.stringForSectionAndKey(section, "Mutation " + IntToStr(i + 1), IntToStr(MutationRate.kMediumMutation)))
         }
-        for (i = 0; i <= uplant.kMaxBreedingSections - 1; i++) {
+        for (let i = 0; i <= kMaxBreedingSections - 1; i++) {
             this.breedingAndTimeSeriesOptions.firstPlantWeights[i] = StrToInt(this.stringForSectionAndKey(section, "First plant weight " + IntToStr(i + 1), "50"))
         }
         this.breedingAndTimeSeriesOptions.getNonNumericalParametersFrom = StrToInt(this.stringForSectionAndKey(section, "Non-numeric", "5"))
         this.breedingAndTimeSeriesOptions.mutateAndBlendColorValues = strToBool(this.stringForSectionAndKey(section, "Vary colors", "false"))
         this.breedingAndTimeSeriesOptions.chooseTdosRandomlyFromCurrentLibrary = strToBool(this.stringForSectionAndKey(section, "Vary 3D objects", "false"))
+        
+        /*
         // -------------------------------------------  nozzles
         section = iniSections[kSectionNozzle]
         this.nozzleOptions.exportType = StrToInt(this.stringForSectionAndKey(section, "Which plants to make nozzle from (selected/visible/all)", "0"))
         this.nozzleOptions.resolution_pixelsPerInch = StrToInt(this.stringForSectionAndKey(section, "Nozzle resolution", IntToStr(kDefaultResolution)))
         this.nozzleOptions.colorType = UNRESOLVED.TPixelFormat(StrToInt(this.stringForSectionAndKey(section, "Nozzle colors (screen/2/16/256/15-bit/16-bit/24-bit/32-bit)", "6")))
         this.nozzleOptions.backgroundColor = StrToInt(this.stringForSectionAndKey(section, "Nozzle background color", IntToStr(delphi_compatability.clWhite)))
+        
         // -------------------------------------------  animations
         section = iniSections[kSectionAnimation]
         this.animationOptions.animateBy = StrToInt(this.stringForSectionAndKey(section, "Animate by (x rotation/age)", "0"))
@@ -860,6 +872,7 @@ export class PdDomain {
         this.animationOptions.resolution_pixelsPerInch = StrToInt(this.stringForSectionAndKey(section, "Resolution", IntToStr(kDefaultResolution)))
         // 24 bit
         this.animationOptions.colorType = UNRESOLVED.TPixelFormat(StrToInt(this.stringForSectionAndKey(section, "Animation colors (screen/2/16/256/15-bit/16-bit/24-bit/32-bit)", "6")))
+        
         // -------------------------------------------  registration
         section = iniSections[kSectionRegistration]
         this.registrationName = this.stringForSectionAndKey(section, "R4", "")
@@ -877,6 +890,7 @@ export class PdDomain {
             this.unregisteredExportCountBeforeThisSession = readInt / kEncryptingMultiplierForUnregisteredExportCount
             this.unregisteredExportCountThisSession = 0
         }
+        
         // -------------------------------------------  parameter overrides
         section = iniSections[kSectionOverrides]
         overrideKeys = delphi_compatability.TStringList.create
