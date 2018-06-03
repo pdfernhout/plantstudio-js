@@ -1,11 +1,9 @@
-import { long, arrayRemove } from "./common";
-import { TPoint } from "./TPoint";
-import { capitalize } from "./usupport";
-import { MainForm } from "./temporary";
+// PdCommandList was unit Ucommand
 
-// unit Ucommand
-
-export enum TrackPhase { trackPress, trackMove, trackRelease }
+import { long, arrayRemove } from "./common"
+import { TPoint } from "./TPoint"
+import { capitalize } from "./usupport"
+import { PdCommand, TrackPhase } from "./PdCommand"
 
 // const
 const kMaxDescriptionLength = 40
@@ -20,56 +18,6 @@ function limitDescription(description: string): string {
 
 // const
 const kMinMoveDistance = 2
-
-export class PdCommand {
-    canUndo: boolean = false
-    done: boolean = false
-    // default commandChangesPlantFile to true, since most commands change file,
-    //    if command does not change file, set to false after call to inherited create 
-    commandChangesPlantFile: boolean = true
-    plantFileChangedBeforeCommand: boolean = false
-    
-    doCommand(): void {
-        this.done = true
-        if (this.commandChangesPlantFile) {
-            this.plantFileChangedBeforeCommand = MainForm.plantFileChanged
-            if (MainForm !== null) {
-                MainForm.setPlantFileChanged(true)
-            }
-        }
-        // subclass should override and call inherited
-    }
-    
-    undoCommand(): void {
-        this.done = false
-        if (this.commandChangesPlantFile) {
-            if (MainForm !== null) {
-                MainForm.setPlantFileChanged(this.plantFileChangedBeforeCommand)
-            }
-        }
-        // subclass should override and call inherited
-    }
-    
-    redoCommand(): void {
-        this.doCommand()
-        // subclass may override and call inherited doCommand
-    }
-    
-    description(): string {
-        return "*command description*"
-    }
-    
-    numberOfStoredLargeObjects(): long {
-        // subclasses may override but only if they keep copies of large objects
-        return 0
-    }
-    
-    TrackMouse(aTrackPhase: TrackPhase, anchorPoint: TPoint, previousPoint: TPoint, nextPoint: TPoint, mouseDidMove: boolean, rightButtonDown: boolean): PdCommand {
-        // sublasses should override if needed
-        return this
-    }
-    
-}
 
 export class PdCommandList {
     commands: PdCommand[] = []
