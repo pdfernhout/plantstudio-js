@@ -1,23 +1,19 @@
-// unit Ucommand
+import { long, arrayRemove } from "./common";
+import { TPoint } from "./TPoint";
+import { capitalize } from "./usupport";
+import { MainForm } from "./temporary";
 
-from conversion_common import *
-import updcom
-import umain
-import usupport
-import ucollect
-import delphi_compatability
+// unit Ucommand
 
 export enum TrackPhase { trackPress, trackMove, trackRelease }
 
 // const
 const kMaxDescriptionLength = 40
 
-
 function limitDescription(description: string): string {
-    let result = ""
-    result = description
-    if (len(description) > kMaxDescriptionLength) {
-        result = UNRESOLVED.copy(description, 1, kMaxDescriptionLength - 4) + " ..."
+    let result = description
+    if (description.length > kMaxDescriptionLength) {
+        result = description.substring(0, kMaxDescriptionLength - 4) + " ..."
     }
     return result
 }
@@ -25,108 +21,68 @@ function limitDescription(description: string): string {
 // const
 const kMinMoveDistance = 2
 
-
-
 export class PdCommand {
     canUndo: boolean = false
     done: boolean = false
-    commandChangesPlantFile: boolean = false
+    // default commandChangesPlantFile to true, since most commands change file,
+    //    if command does not change file, set to false after call to inherited create 
+    commandChangesPlantFile: boolean = true
     plantFileChangedBeforeCommand: boolean = false
-    
-    create(): void {
-        TObject.prototype.create.call(this)
-        this.canUndo = true
-        this.done = false
-        // default commandChangesPlantFile to true, since most commands change file,
-        //    if command does not change file, set to false after call to inherited create 
-        this.commandChangesPlantFile = true
-        this.plantFileChangedBeforeCommand = false
-    }
-    
-    destroy(): void {
-        //sublass could override
-        TObject.prototype.destroy.call(this)
-    }
     
     doCommand(): void {
         this.done = true
         if (this.commandChangesPlantFile) {
-            this.plantFileChangedBeforeCommand = umain.plantFileChanged
-            if (umain.MainForm !== null) {
-                umain.MainForm.setPlantFileChanged(true)
+            this.plantFileChangedBeforeCommand = MainForm.plantFileChanged
+            if (MainForm !== null) {
+                MainForm.setPlantFileChanged(true)
             }
         }
-        //subclass should override and call inherited
+        // subclass should override and call inherited
     }
     
     undoCommand(): void {
         this.done = false
         if (this.commandChangesPlantFile) {
-            if (umain.MainForm !== null) {
-                umain.MainForm.setPlantFileChanged(this.plantFileChangedBeforeCommand)
+            if (MainForm !== null) {
+                MainForm.setPlantFileChanged(this.plantFileChangedBeforeCommand)
             }
         }
-        //sublass should override and call inherited
+        // subclass should override and call inherited
     }
     
     redoCommand(): void {
         this.doCommand()
-        //sublass may override and call inherited doCommand
+        // subclass may override and call inherited doCommand
     }
     
     description(): string {
-        let result = ""
-        result = "*command description*"
-        return result
+        return "*command description*"
     }
     
     numberOfStoredLargeObjects(): long {
-        let result = 0
-        result = 0
-        //subclasses may override but only if they keep copies of large objects
-        return result
+        // subclasses may override but only if they keep copies of large objects
+        return 0
     }
     
     TrackMouse(aTrackPhase: TrackPhase, anchorPoint: TPoint, previousPoint: TPoint, nextPoint: TPoint, mouseDidMove: boolean, rightButtonDown: boolean): PdCommand {
-        let result = new PdCommand()
-        //sublasses should override if needed
-        result = this
-        return result
+        // sublasses should override if needed
+        return this
     }
     
 }
 
 export class PdCommandList {
-    commands: TListCollection = new TListCollection()
-    lastDoneCommandIndex: long = 0
-    undoLimit: long = 0
-    objectUndoLimit: long = 0
-    mouseCommand: PdCommand = new PdCommand()
+    commands: PdCommand[] = []
+    lastDoneCommandIndex: long = -1
+    undoLimit: long = 50
+    objectUndoLimit: long = 10
+    mouseCommand: PdCommand | null = null
     anchorPoint: TPoint = new TPoint()
     previousPoint: TPoint = new TPoint()
     rightButtonDown: boolean = false
     
-    //PdCommandList
-    create(): void {
-        TObject.prototype.create.call(this)
-        this.commands = ucollect.TListCollection().Create()
-        this.lastDoneCommandIndex = -1
-        this.undoLimit = 50
-        this.objectUndoLimit = 10
-    }
-    
-    destroy(): void {
-        this.commands.free
-        this.commands = null
-        //if mouseCoOmmand <> nil then error condition - ignoring for now - not released
-        //could only happend if quitting somehow in middle of action
-        TObject.prototype.destroy.call(this)
-    }
-    
     command(index: long): PdCommand {
-        let result = new PdCommand()
-        result = PdCommand(this.commands.Items[index])
-        return result
+        return this.commands[index]
     }
     
     setNewUndoLimit(newLimit: long): void {
@@ -143,14 +99,13 @@ export class PdCommandList {
         }
     }
     
-    //free any command more than the number passed in
+    // free any command more than the number passed in
     freeCommandsAboveLimit(theLimit: long): void {
         let theCommand: PdCommand
         
-        while ((this.commands.Count > theLimit) && (this.commands.Count > 0)) {
+        while ((this.commands.length > theLimit) && (this.commands.length > 0)) {
             theCommand = this.command(0)
-            this.commands.Delete(0)
-            theCommand.free
+            this.commands.splice(0, 1)
             this.lastDoneCommandIndex -= 1
             if (this.lastDoneCommandIndex < -1) {
                 this.lastDoneCommandIndex = -1
@@ -159,14 +114,10 @@ export class PdCommandList {
     }
     
     freeCommandsAboveObjectLimit(objectLimit: long): void {
-        let theCommand: PdCommand
-        let objectCount: long
-        
-        objectCount = this.objectCountInCommandList()
-        while ((objectCount > objectLimit) && (this.commands.Count > 0)) {
-            theCommand = this.command(0)
-            this.commands.Delete(0)
-            theCommand.free
+        let objectCount = this.objectCountInCommandList()
+        while ((objectCount > objectLimit) && (this.commands.length > 0)) {
+            const theCommand = this.command(0)
+            this.commands.splice(0, 1)
             this.lastDoneCommandIndex -= 1
             if (this.lastDoneCommandIndex < -1) {
                 this.lastDoneCommandIndex = -1
@@ -177,59 +128,52 @@ export class PdCommandList {
     
     objectCountInCommandList(): long {
         let result = 0
-        let i: long
-        
-        result = 0
-        if (this.commands.Count <= 0) {
+        if (this.commands.length <= 0) {
             return result
         }
-        for (i = 0; i <= this.commands.Count - 1; i++) {
+        for (let i = 0; i <= this.commands.length - 1; i++) {
             result = result + this.command(i).numberOfStoredLargeObjects()
         }
         return result
     }
     
     doCommand(newCommand: PdCommand): void {
-        let i: long
-        let theCommand: PdCommand
-        
         if (this.isRedoEnabled()) {
-            for (i = this.commands.Count - 1; i >= this.lastDoneCommandIndex + 1; i--) {
-                //remove any extra commands after the current
-                //do this first to free memory for command
-                theCommand = this.command(i)
-                this.commands.Delete(i)
-                theCommand.free
+            for (let i = this.commands.length - 1; i >= this.lastDoneCommandIndex + 1; i--) {
+                // remove any extra commands after the current
+                // do this first to free memory for command
+                const theCommand = this.command(i)
+                this.commands.splice(i, 1)
             }
         }
         // first see if there are too many objects and if so, scroll them 
         this.freeCommandsAboveObjectLimit(this.objectUndoLimit - 1)
-        //see if too many commands are stored and if so, scroll them
+        // see if too many commands are stored and if so, scroll them
         this.freeCommandsAboveLimit(this.undoLimit - 1)
-        //now do this command
-        //may fail in which case won't add
+        // now do this command
+        // may fail in which case won't add
         newCommand.doCommand()
-        this.commands.Add(newCommand)
+        this.commands.push(newCommand)
         this.lastDoneCommandIndex += 1
     }
     
-    //added nextMouseCommand in these three functions to deal with unhandled exceptions occurring
-    //during mouse commands.  This way, the command will not be further processed.
-    //This may occasionally leak - the mouse command should be the one responsible for freeing
-    //itself and returning nil if a problem occurs
-    //returns whether the command finished tracking without freeing itself
-    mouseDown(newCommand: PdCommand, point: Tpoint): boolean {
+    // added nextMouseCommand in these three functions to deal with unhandled exceptions occurring
+    // during mouse commands.  This way, the command will not be further processed.
+    // This may occasionally leak - the mouse command should be the one responsible for freeing
+    // itself and returning nil if a problem occurs
+    // returns whether the command finished tracking without freeing itself
+    mouseDown(newCommand: PdCommand, point: TPoint): boolean {
         let result = false
         let nextMouseCommand: PdCommand
         
         result = false
         if (this.mouseCommand !== null) {
-            //check if need to clear mouse command
+            // check if need to clear mouse command
             this.mouseUp(point)
         }
         this.mouseCommand = null
         if (newCommand !== null) {
-            //save mouse command and start it
+            // save mouse command and start it
             this.anchorPoint = point
             this.previousPoint = point
             nextMouseCommand = newCommand
@@ -240,9 +184,7 @@ export class PdCommandList {
     }
     
     mouseMove(point: TPoint): void {
-        let nextMouseCommand: PdCommand
-        
-        nextMouseCommand = this.mouseCommand
+        const nextMouseCommand = this.mouseCommand
         this.mouseCommand = null
         if (nextMouseCommand !== null) {
             this.mouseCommand = nextMouseCommand.TrackMouse(TrackPhase.trackMove, this.anchorPoint, this.previousPoint, point, this.didMouseMove(point), this.rightButtonDown)
@@ -251,9 +193,7 @@ export class PdCommandList {
     }
     
     mouseUp(point: TPoint): void {
-        let nextMouseCommand: PdCommand
-        
-        nextMouseCommand = this.mouseCommand
+        let nextMouseCommand = this.mouseCommand
         this.mouseCommand = null
         if (nextMouseCommand !== null) {
             nextMouseCommand = nextMouseCommand.TrackMouse(TrackPhase.trackRelease, this.anchorPoint, this.previousPoint, point, this.didMouseMove(point), this.rightButtonDown)
@@ -265,7 +205,7 @@ export class PdCommandList {
     
     didMouseMove(point: TPoint): boolean {
         let result = false
-        result = (abs(point.x - this.anchorPoint.X) > kMinMoveDistance) || (abs(point.y - this.anchorPoint.Y) > kMinMoveDistance)
+        result = (Math.abs(point.X - this.anchorPoint.X) > kMinMoveDistance) || (Math.abs(point.Y - this.anchorPoint.Y) > kMinMoveDistance)
         return result
     }
     
@@ -277,7 +217,7 @@ export class PdCommandList {
     
     isRedoEnabled(): boolean {
         let result = false
-        result = this.lastDoneCommandIndex < (this.commands.Count - 1)
+        result = this.lastDoneCommandIndex < (this.commands.length - 1)
         return result
     }
     
@@ -294,7 +234,7 @@ export class PdCommandList {
     
     redoDescription(): string {
         let result = ""
-        if (this.lastDoneCommandIndex < (this.commands.Count - 1)) {
+        if (this.lastDoneCommandIndex < (this.commands.length - 1)) {
             result = this.command(this.lastDoneCommandIndex + 1).description()
             result = limitDescription(result)
         } else {
@@ -311,53 +251,47 @@ export class PdCommandList {
     }
     
     redoLast(): void {
-        if (this.lastDoneCommandIndex < (this.commands.Count - 1)) {
+        if (this.lastDoneCommandIndex < (this.commands.length - 1)) {
             this.command(this.lastDoneCommandIndex + 1).redoCommand()
             this.lastDoneCommandIndex += 1
         }
     }
     
-    fillListWithUndoableStrings(aList: TStringList): void {
-        let i: int
-        
+    fillListWithUndoableStrings(aList: string[]): void {
         if (aList === null) {
             return
         }
         if (this.lastDoneCommandIndex >= 0) {
-            for (i = this.lastDoneCommandIndex; i >= 0; i--) {
-                aList.Add(usupport.capitalize(this.command(i).description()))
+            for (let i = this.lastDoneCommandIndex; i >= 0; i--) {
+                aList.push(capitalize(this.command(i).description()))
             }
         }
     }
     
-    fillListWithRedoableStrings(aList: TStringList): void {
-        let i: int
-        
+    fillListWithRedoableStrings(aList: string[]): void {
         if (aList === null) {
             return
         }
-        if (this.lastDoneCommandIndex < (this.commands.Count - 1)) {
-            for (i = this.lastDoneCommandIndex + 1; i <= this.commands.Count - 1; i++) {
-                aList.Add(usupport.capitalize(this.command(i).description()))
+        if (this.lastDoneCommandIndex < (this.commands.length - 1)) {
+            for (let i = this.lastDoneCommandIndex + 1; i < this.commands.length; i++) {
+                aList.push(capitalize(this.command(i).description()))
             }
         }
     }
     
-    lastCommandDone(): PdCommand {
-        let result = new PdCommand()
-        result = null
-        if (this.lastDoneCommandIndex < (this.commands.Count - 1)) {
-            result = this.command(this.lastDoneCommandIndex + 1)
+    lastCommandDone(): PdCommand | null {
+        if (this.lastDoneCommandIndex < (this.commands.length - 1)) {
+            return this.command(this.lastDoneCommandIndex + 1)
         }
-        return result
+        return null
     }
     
     removeCommand(aCommand: PdCommand): void {
         if (aCommand.done) {
             // assume this command has been undone previously 
-            throw new GeneralException.create("Problem: Command not undone; in PdCommandList.removeCommand.")
+            throw new Error("Problem: Command not undone; in PdCommandList.removeCommand.")
         }
-        this.commands.Remove(aCommand)
+        arrayRemove(this.commands, aCommand)
     }
     
 }

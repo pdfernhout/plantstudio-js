@@ -366,19 +366,22 @@ export function trimQuotesFromFirstAndLast(theString: string): string {
     return result
 }
 
+*/
+
 export function capitalize(aString: string): string {
     let result = ""
-    result = ""
-    if (len(aString) <= 0) {
+    if (aString.length <= 0) {
         return result
     }
-    if (len(aString) === 1) {
-        result = uppercase(aString)
+    if (aString.length === 1) {
+        result = aString.toUpperCase()
     } else {
-        result = uppercase(UNRESOLVED.copy(aString, 1, 1)) + UNRESOLVED.copy(aString, 2, len(aString) - 1)
+        result = aString[0].toUpperCase() + aString.substring(1)
     }
     return result
 }
+
+/*
 
 export function readUntilTab(theFile: textFile): string {
     let result = ""

@@ -107,6 +107,8 @@ export const MainForm = {
     updateParameterValuesWithUpdateListForPlant: (something: any, updateList: any[]) => {},
     showDrawProgress: (value: number) => {},
     selectedPlantPartID: null,
+    plantFileChanged: false,
+    setPlantFileChanged: (changed: boolean) => {},
 }
 
 // TODO: Fix PdBitmap stub
