@@ -1,11 +1,12 @@
-import { TRect } from "./TRect";
-import { TPoint } from "./TPoint";
-import { MainForm, TFPBrushStyle } from "./temporary";
-import { BreederVariation, domain, DrawMode } from "./PdDomain";
-import { intround, short, long, ColorDefs, int } from "./common";
-import { PdPlant } from "./PdPlant";
-
 // TBreederForm was unit Ubreedr
+
+import { TRect } from "./TRect"
+import { TPoint } from "./TPoint"
+import { MainForm, TFPBrushStyle, ucursor } from "./temporary"
+import { BreederVariation, domain, DrawMode } from "./PdDomain"
+import { intround, short, long, ColorDefs, int, IntToStr } from "./common"
+import { PdPlant } from "./PdPlant"
+import { PdGeneration } from "./PdGeneration"
 
 let BreederForm: TBreederForm
 
@@ -155,7 +156,7 @@ export class TBreederForm {
         if (delphi_compatability.Application.terminated) {
             return
         }
-        if (this.generations.Count <= 0) {
+        if (this.generations.length <= 0) {
             this.emptyWarningPanel.BringToFront()
         } else if (this.needToRedrawFromChangeToDrawOptions) {
             this.redrawPlants(kDontConsiderIfPreviewCacheIsUpToDate)
@@ -209,12 +210,12 @@ export class TBreederForm {
         this.vary3DObjects.Down = domain.breedingAndTimeSeriesOptions.chooseTdosRandomlyFromCurrentLibrary
         this.redoCaption()
         atLeastOnePlantHasChangedAge = false
-        if (this.generations.Count > 0) {
-            for (genCount = 0; genCount <= this.generations.Count - 1; genCount++) {
-                generation = ugener.PdGeneration(this.generations.Items[genCount])
-                if (generation.plants.Count > 0) {
-                    for (plCount = 0; plCount <= generation.plants.Count - 1; plCount++) {
-                        plant = uplant.PdPlant(generation.plants.Items[plCount])
+        if (this.generations.length > 0) {
+            for (genCount = 0; genCount <= this.generations.length - 1; genCount++) {
+                generation = this.generations[genCount]
+                if (generation.plants.length > 0) {
+                    for (plCount = 0; plCount <= generation.plants.length - 1; plCount++) {
+                        plant = generation.plants[plCount]
                         newAge = intround(domain.breedingAndTimeSeriesOptions.percentMaxAge / 100.0 * plant.pGeneral.ageAtMaturity)
                         if (plant.age !== newAge) {
                             plant.setAge(newAge)
@@ -236,11 +237,11 @@ export class TBreederForm {
         let plCount: short
         
         if (!considerIfPreviewCacheIsUpToDate) {
-            for (genCount = 0; genCount <= this.generations.Count - 1; genCount++) {
-                generation = ugener.PdGeneration(this.generations.Items[genCount])
-                if (generation.plants.Count > 0) {
-                    for (plCount = 0; plCount <= generation.plants.Count - 1; plCount++) {
-                        plant = uplant.PdPlant(generation.plants.Items[plCount])
+            for (genCount = 0; genCount <= this.generations.length - 1; genCount++) {
+                generation = this.generations[genCount]
+                if (generation.plants.length > 0) {
+                    for (plCount = 0; plCount <= generation.plants.length - 1; plCount++) {
+                        plant = generation.plants[plCount]
                         plant.previewCacheUpToDate = false
                     }
                 }
@@ -252,7 +253,6 @@ export class TBreederForm {
     
     plantsDrawGridDrawCell(Sender: TObject, Col: long, Row: long, rect: TRect, State: TGridDrawState): void {
         let generation: PdGeneration
-        let plant: PdPlant
         let textDrawRect: TRect = new TRect()
         
         try {
@@ -265,13 +265,13 @@ export class TBreederForm {
                 this.plantsDrawGrid.Canvas.Brush.Color = ColorDefs.clWhite
                 this.plantsDrawGrid.Canvas.Pen.Color = this.plantsDrawGrid.Canvas.Brush.Color
                 this.plantsDrawGrid.Canvas.Rectangle(rect.Left, rect.Top, rect.Right, rect.Bottom)
-                if (Row > this.generations.Count - 1) {
+                if (Row > this.generations.length - 1) {
                     return
                 }
                 //if row = selectedRow then
                 //plantsDrawGrid.canvas.font.color := clWhite;
-                textDrawRect.Left = rect.Left + usupport.rWidth(rect) / 2 - this.plantsDrawGrid.Canvas.TextWidth(IntToStr(Row + 1)) / 2
-                textDrawRect.Top = rect.Top + usupport.rHeight(rect) / 2 - this.plantsDrawGrid.Canvas.TextHeight("0") / 2
+                textDrawRect.Left = rect.Left + rect.width / 2 - this.plantsDrawGrid.Canvas.TextWidth(IntToStr(Row + 1)) / 2
+                textDrawRect.Top = rect.Top + rect.height / 2 - this.plantsDrawGrid.Canvas.TextHeight("0") / 2
                 this.plantsDrawGrid.Canvas.TextOut(textDrawRect.Left, textDrawRect.Top, IntToStr(Row + 1))
                 return
             } else {
@@ -284,7 +284,7 @@ export class TBreederForm {
             if (generation === null) {
                 return
             }
-            plant = generation.plantForIndex(Col - 1)
+            const plant = generation.plantForIndex(Col - 1)
             if (plant === null) {
                 return
             }
@@ -376,12 +376,12 @@ export class TBreederForm {
         let generation: PdGeneration
         
         [col, row] = this.plantsDrawGrid.MouseToCell(X, Y)
-        if ((row >= 0) && (row <= this.generations.Count - 1)) {
-            generation = ugener.PdGeneration(this.generations.Items[row])
+        if ((row >= 0) && (row <= this.generations.length - 1)) {
+            generation = this.generations[row]
             if (generation !== null) {
                 this.selectGeneration(generation)
-                if ((col >= 1) && (col - 1 <= generation.plants.Count - 1)) {
-                    plant = uplant.PdPlant(generation.plants.Items[col - 1])
+                if ((col >= 1) && (col - 1 <= generation.plants.length - 1)) {
+                    plant = generation.plants[col - 1]
                     if (plant !== null) {
                         generation.selectPlant(plant, (delphi_compatability.TShiftStateEnum.ssShift in Shift))
                     } else {
@@ -457,12 +457,12 @@ export class TBreederForm {
         }
         if ((Target === umain.MainForm.drawingPaintBox) || (Target === umain.MainForm.plantListDrawGrid)) {
             // make paste command - wants list of plants 
-            newPlant = uplant.PdPlant().create()
+            newPlant = new PdPlant()
             plant.copyTo(newPlant)
             this.numBreederPlantsCopiedThisSession += 1
             newPlant.setName("Breeder plant " + IntToStr(this.numBreederPlantsCopiedThisSession))
             if ((Target === umain.MainForm.drawingPaintBox)) {
-                newPlant.moveTo(Point(X, Y))
+                newPlant.moveTo(new TPoint(X, Y))
             } else {
                 newPlant.moveTo(umain.MainForm.standardPastePosition())
             }
@@ -527,10 +527,8 @@ export class TBreederForm {
     }
     
     // ------------------------------------------------------------- responding to commands 
-    replacePlantInRow(oldPlant: PdPlant, newPlant: PdPlant, row: short): void {
-        let generation: PdGeneration
-        
-        generation = this.generationForIndex(row)
+    replacePlantInRow(oldPlant: PdPlant, newPlant: PdPlant, row: short): void { 
+        const generation = this.generationForIndex(row)
         if (generation === null) {
             throw new Error("Problem: Invalid row in method TBreederForm.replacePlantInRow.")
         }
@@ -539,17 +537,15 @@ export class TBreederForm {
     }
     
     forgetGenerationsListBelowRow(aRow: short): void {
-        while (this.generations.Count - 1 > aRow) {
+        while (this.generations.length - 1 > aRow) {
             this.forgetLastGeneration()
         }
     }
     
-    addGenerationsFromListBelowRow(aRow: short, aGenerationsList: TList): void {
-        let i: short
-        
-        if (aRow + 1 <= aGenerationsList.Count - 1) {
-            for (i = aRow + 1; i <= aGenerationsList.Count - 1; i++) {
-                this.addGeneration(ugener.PdGeneration(aGenerationsList.Items[i]))
+    addGenerationsFromListBelowRow(aRow: short, aGenerationsList: PdGeneration[]): void {
+        if (aRow + 1 <= aGenerationsList.length - 1) {
+            for (let i = aRow + 1; i < aGenerationsList.length; i++) {
+                this.addGeneration(aGenerationsList[i])
             }
         }
     }
@@ -561,17 +557,17 @@ export class TBreederForm {
     forgetLastGeneration(): void {
         let lastGeneration: PdGeneration
         
-        if (this.generations.Count <= 0) {
+        if (this.generations.length <= 0) {
             return
         }
-        lastGeneration = ugener.PdGeneration(this.generations.Items[this.generations.Count - 1])
+        lastGeneration = this.generations[this.generations.length - 1]
         this.generations.Remove(lastGeneration)
     }
     
     selectGeneration(aGeneration: PdGeneration): void {
         let lastFullyVisibleRow: short
         
-        this.selectedRow = this.generations.IndexOf(aGeneration)
+        this.selectedRow = this.generations.indexOf(aGeneration)
         lastFullyVisibleRow = this.plantsDrawGrid.TopRow + this.plantsDrawGrid.VisibleRowCount - 1
         if (this.selectedRow > lastFullyVisibleRow) {
             this.plantsDrawGrid.TopRow = this.plantsDrawGrid.TopRow + (this.selectedRow - lastFullyVisibleRow)
@@ -586,8 +582,8 @@ export class TBreederForm {
         let generation: PdGeneration
         
         this.selectedRow = -1
-        for (genCount = 0; genCount <= this.generations.Count - 1; genCount++) {
-            generation = ugener.PdGeneration(this.generations.Items[genCount])
+        for (genCount = 0; genCount <= this.generations.length - 1; genCount++) {
+            generation = this.generations[genCount]
             generation.deselectAllPlants()
         }
     }
@@ -604,13 +600,13 @@ export class TBreederForm {
             this.WindowState = delphi_compatability.TWindowState.wsNormal
         }
         this.internalChange = false
-        if (this.plantsDrawGrid.RowCount < this.generations.Count) {
-            this.plantsDrawGrid.RowCount = this.generations.Count
+        if (this.plantsDrawGrid.RowCount < this.generations.length) {
+            this.plantsDrawGrid.RowCount = this.generations.length
         }
         this.plantsDrawGrid.Invalidate()
         this.plantsDrawGrid.Update()
         this.redoCaption()
-        if (this.generations.Count <= 0) {
+        if (this.generations.length <= 0) {
             this.emptyWarningPanel.BringToFront()
         } else {
             this.emptyWarningPanel.SendToBack()
@@ -624,11 +620,11 @@ export class TBreederForm {
         let plant: PdPlant
         let cellRectOver: TRect
         
-        for (genCount = 0; genCount <= this.generations.Count - 1; genCount++) {
-            generation = ugener.PdGeneration(this.generations.Items[genCount])
-            if (generation.plants.Count > 0) {
-                for (plCount = 0; plCount <= generation.plants.Count - 1; plCount++) {
-                    plant = uplant.PdPlant(generation.plants.Items[plCount])
+        for (genCount = 0; genCount <= this.generations.length - 1; genCount++) {
+            generation = this.generations[genCount]
+            if (generation.plants.length > 0) {
+                for (plCount = 0; plCount <= generation.plants.length - 1; plCount++) {
+                    plant = generation.plants[plCount]
                     if (plant === aPlant) {
                         cellRectOver = this.plantsDrawGrid.CellRect(plCount + 1, genCount)
                         this.plantsDrawGridDrawCell(this, plCount + 1, genCount, cellRectOver, {UNRESOLVED.gdFocused, UNRESOLVED.gdSelected, })
@@ -674,11 +670,11 @@ export class TBreederForm {
     //  end;
     //    
     redoCaption(): void {
-        if (this.generations.Count === 1) {
+        if (this.generations.length === 1) {
             // new v1.4
             this.Caption = "Breeder (1 generation)"
         } else {
-            this.Caption = "Breeder (" + IntToStr(this.generations.Count) + " generations)"
+            this.Caption = "Breeder (" + IntToStr(this.generations.length) + " generations)"
         }
         //
         //  self.caption := self.caption + ', numbers ';
@@ -703,7 +699,7 @@ export class TBreederForm {
     updateMenusForChangeToGenerations(): void {
         let havePlants: boolean
         
-        havePlants = this.generations.Count > 0
+        havePlants = this.generations.length > 0
         this.BreederMenuDeleteAll.enabled = havePlants
         this.BreederMenuRandomizeAll.enabled = havePlants
         this.updateMenusForChangeToSelection()
@@ -731,31 +727,23 @@ export class TBreederForm {
     }
     
     updatePasteMenuForClipboardContents(): void {
-        this.BreederMenuPaste.enabled = (this.primarySelectedPlant() !== null) && (domain.plantManager.privatePlantClipboard.Count > 0)
+        this.BreederMenuPaste.enabled = (this.primarySelectedPlant() !== null) && (domain.plantManager.privatePlantClipboard.length > 0)
         this.BreederPopupMenuPaste.enabled = this.BreederMenuPaste.enabled
     }
     
-    selectedGeneration(): PdGeneration {
-        let result = new PdGeneration()
-        result = null
-        if ((this.selectedRow < 0) || (this.selectedRow > this.generations.Count - 1)) {
-            return result
+    selectedGeneration(): PdGeneration | null {
+        if ((this.selectedRow < 0) || (this.selectedRow > this.generations.length - 1)) {
+            return null
         }
-        result = ugener.PdGeneration(this.generations.Items[this.selectedRow])
-        return result
+        return this.generations[this.selectedRow]
     }
     
-    primarySelectedPlant(): PdPlant {
-        let result = new PdPlant()
-        let generation: PdGeneration
-        
-        result = null
-        generation = this.selectedGeneration()
+    primarySelectedPlant(): PdPlant | null {
+        const generation = this.selectedGeneration()
         if (generation === null) {
-            return result
+            return null
         }
-        result = generation.firstSelectedPlant()
-        return result
+        return generation.firstSelectedPlant()
     }
     
     plantAtMouse(x: short, y: short): PdPlant {
@@ -812,25 +800,23 @@ export class TBreederForm {
     }
     
     BreederMenuPasteClick(Sender: TObject): void {
-        let generation: PdGeneration
-        let plant: PdPlant
         let newPlant: PdPlant
         let newCommand: PdCommand
         let column: short
         
-        if (domain.plantManager.privatePlantClipboard.Count <= 0) {
+        if (domain.plantManager.privatePlantClipboard.length <= 0) {
             return
         }
-        generation = this.selectedGeneration()
+        const generation = this.selectedGeneration()
         if (generation === null) {
             return
         }
-        plant = generation.firstSelectedPlant()
+        const plant = generation.firstSelectedPlant()
         if (plant === null) {
             return
         }
-        column = generation.plants.IndexOf(plant) + 1
-        newPlant = uplant.PdPlant().create()
+        column = generation.plants.indexOf(plant) + 1
+        newPlant = new PdPlant()
         domain.plantManager.pasteFirstPlantFromPrivatePlantClipboardToPlant(newPlant)
         newCommand = updcom.PdReplaceBreederPlant().createWithPlantRowAndColumn(newPlant, this.selectedRow, column)
         umain.MainForm.doCommand(newCommand)
@@ -841,7 +827,7 @@ export class TBreederForm {
         let generationToBreed: PdGeneration
         let newCommand: PdCommand
         
-        if ((this.selectedRow < 0) || (this.selectedRow > this.generations.Count - 1)) {
+        if ((this.selectedRow < 0) || (this.selectedRow > this.generations.length - 1)) {
             return
         }
         if (this.selectedRow >= domain.breedingAndTimeSeriesOptions.maxGenerations - 1) {
@@ -849,8 +835,8 @@ export class TBreederForm {
             this.fullWarning()
             return
         }
-        generationToBreed = ugener.PdGeneration(this.generations.Items[this.selectedRow])
-        if (generationToBreed.selectedPlants.Count <= 0) {
+        generationToBreed = this.generations[this.selectedRow]
+        if (generationToBreed.selectedPlants.length <= 0) {
             return
         }
         newCommand = updcom.PdBreedFromParentsCommand().createWithInfo(this.generations, generationToBreed.firstSelectedPlant(), generationToBreed.secondSelectedPlant(), this.selectedRow, domain.breedingAndTimeSeriesOptions.percentMaxAge / 100.0, updcom.kDontCreateFirstGeneration)
@@ -886,7 +872,7 @@ export class TBreederForm {
     BreederMenuDeleteAllClick(Sender: TObject): void {
         let newCommand: PdCommand
         
-        if (this.generations.Count <= 0) {
+        if (this.generations.length <= 0) {
             return
         }
         newCommand = updcom.PdDeleteAllBreederGenerationsCommand().create()
@@ -904,13 +890,13 @@ export class TBreederForm {
         if (aGeneration === null) {
             return
         }
-        if (aGeneration.selectedPlants.Count <= 0) {
+        if (aGeneration.selectedPlants.length <= 0) {
             return
         }
         randomizeList = delphi_compatability.TList().Create()
         try {
-            for (i = 0; i <= aGeneration.selectedPlants.Count - 1; i++) {
-                plant = uplant.PdPlant(aGeneration.selectedPlants.Items[i])
+            for (i = 0; i <= aGeneration.selectedPlants.length - 1; i++) {
+                plant = aGeneration.selectedPlants[i]
                 randomizeList.Add(plant)
             }
             newCommand = updcom.PdRandomizeCommand().createWithListOfPlants(randomizeList)
@@ -926,24 +912,22 @@ export class TBreederForm {
     
     BreederMenuRandomizeAllClick(Sender: TObject): void {
         let generation: PdGeneration
-        let i: short
-        let j: short
         let newCommand: PdCommand
         let randomizeList: TList
         
-        if (this.generations.Count <= 0) {
+        if (this.generations.length <= 0) {
             return
         }
         randomizeList = null
         try {
             ucursor.cursor_startWait()
             randomizeList = delphi_compatability.TList().Create()
-            if (this.generations.Count > 0) {
-                for (i = 0; i <= this.generations.Count - 1; i++) {
-                    generation = ugener.PdGeneration(this.generations.Items[i])
-                    if (generation.plants.Count > 0) {
-                        for (j = 0; j <= generation.plants.Count - 1; j++) {
-                            randomizeList.Add(uplant.PdPlant(generation.plants.Items[j]))
+            if (this.generations.length > 0) {
+                for (let i = 0; i <= this.generations.length - 1; i++) {
+                    generation = this.generations[i]
+                    if (generation.plants.length > 0) {
+                        for (let j = 0; j <= generation.plants.length - 1; j++) {
+                            randomizeList.Add(generation.plants[j])
                         }
                     }
                 }
@@ -1108,7 +1092,7 @@ export class TBreederForm {
     inGrid(row: short, column: short): boolean {
         let result = false
         result = true
-        if ((row < 0) || (row > this.generations.Count - 1)) {
+        if ((row < 0) || (row > this.generations.length - 1)) {
             result = false
         }
         if ((column < 1) || (column - 1 > this.plantsDrawGrid.ColCount - 1)) {
@@ -1118,32 +1102,24 @@ export class TBreederForm {
     }
     
     generationForIndex(index: short): PdGeneration {
-        let result = new PdGeneration()
-        result = null
         if (index < 0) {
-            return result
+            return null
         }
-        if (index > this.generations.Count - 1) {
-            return result
+        if (index > this.generations.length - 1) {
+            return null
         }
-        if (this.generations.Items[index] === null) {
-            return result
+        if (this.generations[index] === null) {
+            return null
         }
-        result = ugener.PdGeneration(this.generations.Items[index])
-        return result
+        return this.generations[index]
     }
     
     plantForRowAndColumn(row: short, column: short): PdPlant {
-        let result = new PdPlant()
-        let generation: PdGeneration
-        
-        result = null
-        generation = this.generationForIndex(row)
+        const generation: PdGeneration = this.generationForIndex(row)
         if (generation === null) {
-            return result
+            return null
         }
-        result = generation.plantForIndex(column - 1)
-        return result
+        return generation.plantForIndex(column - 1)
     }
     
     // ---------------------------------------------------------------------------- resizing 
