@@ -2363,45 +2363,56 @@ export class PdPlant extends PdStreamableObject {
             this.pSeedlingLeaf.leafTdoParams.object3D = tdoSeedlingLeaf!
         }
         this.pSeedlingLeaf.leafTdoParams.object3D.streamUsingFiler(filer)
+
         if (filer.isReading()) {
             this.pLeaf.leafTdoParams.object3D = tdoLeaf!
         }
         this.pLeaf.leafTdoParams.object3D.streamUsingFiler(filer)
+
         if (filer.isReading()) {
             this.pLeaf.stipuleTdoParams.object3D = tdoStipule!
         }
         this.pLeaf.stipuleTdoParams.object3D.streamUsingFiler(filer)
+
         if (filer.isReading()) {
             this.pInflor[Gender.kGenderFemale].bractTdoParams.object3D = tdoInflorBractFemale!
         }
         this.pInflor[Gender.kGenderFemale].bractTdoParams.object3D.streamUsingFiler(filer)
+
         if (filer.isReading()) {
             this.pInflor[Gender.kGenderMale].bractTdoParams.object3D = tdoInflorBractMale!
         }
         this.pInflor[Gender.kGenderMale].bractTdoParams.object3D.streamUsingFiler(filer)
+
         for (let partType = 0; partType <= FloralPart.kHighestFloralPartConstant; partType++) {
             if (filer.isReading()) {
                 this.pFlower[Gender.kGenderFemale].tdoParams[partType].object3D = femaleFlowerTdos[partType]
             }
             this.pFlower[Gender.kGenderFemale].tdoParams[partType].object3D.streamUsingFiler(filer)
+
             if (filer.isReading()) {
                 this.pFlower[Gender.kGenderMale].tdoParams[partType].object3D = maleFlowerTdos[partType]
             }
             this.pFlower[Gender.kGenderMale].tdoParams[partType].object3D.streamUsingFiler(filer)
         }
+
         if (filer.isReading()) {
             this.pAxillaryBud.tdoParams.object3D = tdoAxillaryBud!
         }
         this.pAxillaryBud.tdoParams.object3D.streamUsingFiler(filer)
+
         if (filer.isReading()) {
             this.pFruit.tdoParams.object3D = tdoFruit!
         }
         this.pFruit.tdoParams.object3D.streamUsingFiler(filer)
+
         if (filer.isReading()) {
             this.pRoot.tdoParams.object3D = tdoRoot!
         }
         this.pRoot.tdoParams.object3D.streamUsingFiler(filer)
+
         this.randomNumberGenerator.streamUsingFiler(filer)
+        
         this.breedingGenerator.streamUsingFiler(filer)
 
         // biomass info 

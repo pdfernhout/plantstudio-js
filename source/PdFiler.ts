@@ -125,27 +125,27 @@ export class PdFiler {
     }
     
     streamBoolean(aBoolean: boolean): void {
-        aBoolean = this.streamBytes(aBoolean, FIX_sizeof(boolean))
+        aBoolean = this.streamBytes(aBoolean, 1)
         return aBoolean
     }
     
     streamSmallint(aSmallint: short): short {
-        aSmallint = this.streamBytes(aSmallint, FIX_sizeof(smallint))
+        aSmallint = this.streamBytes(aSmallint, 2)
         return aSmallint
     }
     
     streamLongint(aLongint: long): long {
-        aLongint = this.streamBytes(aLongint, FIX_sizeof(longint))
+        aLongint = this.streamBytes(aLongint, 4)
         return aLongint
     }
     
     streamByte(aByte: byte): void {
-        aByte = this.streamBytes(aByte, FIX_sizeof(byte))
+        aByte = this.streamBytes(aByte, 1)
         return aByte
     }
     
     streamSingle(aSingle: float): float {
-        aSingle = this.streamBytes(aSingle, FIX_sizeof(single))
+        aSingle = this.streamBytes(aSingle, 4)
         return aSingle
     }
     
@@ -162,7 +162,7 @@ export class PdFiler {
     }
 
     streamColorRef(aColorRef: TColorRef): void {
-        aColorRef = this.streamBytes(aColorRef, FIX_sizeof(delphi_compatability.TColorRef))
+        aColorRef = this.streamBytes(aColorRef, 4)
     }
     
     // class level streaming
