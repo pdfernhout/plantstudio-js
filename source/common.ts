@@ -159,11 +159,13 @@ export class TFileStream {
     fileMode = 0
 
     static fmCreate = 1
-    static fmShareExclusive = 2
+    static fmOpenWrite = 2
+    static fmOpenRead = 4
+    static fmShareExclusive = 8
 
-    static soFromBeginning = 4
-    static soFromCurrent = 8
-    static soFromEnd = 16
+    static soFromBeginning = 1
+    static soFromCurrent = 2
+    static soFromEnd = 3
 
     constructor(fileName: string, fileMode: number) {
         this.fileName = fileName

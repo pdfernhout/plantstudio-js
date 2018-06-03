@@ -1,9 +1,10 @@
 // PdFiler was unit Ufiler
 
 import { TRect } from "./TRect"
-import { short, long, byte, float, double, TColor, TColorRef, IntToStr, TMemoryStream } from "./common"
+import { short, long, byte, float, double, TColor, TColorRef, IntToStr, TMemoryStream, TFileStream } from "./common"
 import { TPoint } from "./TPoint"
 import { ClassId } from "./uclasses";
+import { SinglePoint } from "./usupport";
 
 //  For every streamable object,
 //  	Set class number to constant from uclasses.
@@ -29,13 +30,12 @@ const kMinHeightOnScreen = 20
 // global functions 
 
 export class PdFiler {
-    stream: TStream = new TStream()
+    stream: TFileStream
     mode: PdFilerMode
     bytesStreamed: long = 0
-    resourceProvider: TObject = new TObject()
-    
-    // an object that can be used to look up shared resource references
-    constructor(aStream: TStream) {
+
+    // TODO: Maybe fixup TFileStream so has TStream superclass and is defined that way here?
+    constructor(aStream: TFileStream) {
         this.stream = aStream
         if (this.stream === null) {
             this.setToCountingMode()
@@ -67,21 +67,15 @@ export class PdFiler {
     }
     
     isReading(): boolean {
-        let result = false
-        result = this.mode === PdFilerMode.filerModeReading
-        return result
+        return this.mode === PdFilerMode.filerModeReading
     }
     
     isWriting(): boolean {
-        let result = false
-        result = this.mode === PdFilerMode.filerModeWriting
-        return result
+        return this.mode === PdFilerMode.filerModeWriting
     }
     
     isCounting(): boolean {
-        let result = false
-        result = this.mode === PdFilerMode.filerModeCounting
-        return result
+        return this.mode === PdFilerMode.filerModeCounting
     }
     
     // simple types
@@ -135,7 +129,7 @@ export class PdFiler {
         return aBoolean
     }
     
-    streamSmallint(aSmallint: short): void {
+    streamSmallint(aSmallint: short): short {
         aSmallint = this.streamBytes(aSmallint, FIX_sizeof(smallint))
         return aSmallint
     }
@@ -150,103 +144,49 @@ export class PdFiler {
         return aByte
     }
     
-    streamSingle(aSingle: float): void {
+    streamSingle(aSingle: float): float {
         aSingle = this.streamBytes(aSingle, FIX_sizeof(single))
         return aSingle
     }
     
     streamSinglePoint(aPoint: SinglePoint): void {
-        raise "method streamSinglePoint had assigned to var parameter aPoint not added to return -- fixup manually"
-        let x: float
-        let y: float
-        
-        if (this.isReading()) {
-            x = this.streamSingle(x)
-            y = this.streamSingle(y)
-            aPoint = usupport.setSinglePoint(x, y)
-        } else {
-            x = aPoint.x
-            y = aPoint.y
-            x = this.streamSingle(x)
-            y = this.streamSingle(y)
-        }
+        aPoint.x = this.streamSingle(aPoint.x)
+        aPoint.y = this.streamSingle(aPoint.x)
     }
     
     streamRect(aRect: TRect): void {
-        raise "method streamRect had assigned to var parameter aRect not added to return -- fixup manually"
-        let top: short
-        let left: short
-        let bottom: short
-        let right: short
-        
-        if (this.isReading()) {
-            left = this.streamSmallint(left)
-            top = this.streamSmallint(top)
-            right = this.streamSmallint(right)
-            bottom = this.streamSmallint(bottom)
-            aRect = Rect(left, top, right, bottom)
-        } else {
-            left = aRect.Left
-            top = aRect.Top
-            right = aRect.Right
-            bottom = aRect.Bottom
-            left = this.streamSmallint(left)
-            top = this.streamSmallint(top)
-            right = this.streamSmallint(right)
-            bottom = this.streamSmallint(bottom)
-        }
+        aRect.Left = this.streamSmallint(aRect.Left)
+        aRect.Top = this.streamSmallint(aRect.Top)
+        aRect.Right = this.streamSmallint(aRect.Right)
+        aRect.Bottom = this.streamSmallint(aRect.Bottom)
     }
 
-    streamRect(aColorRef: TColorRef): void {
+    streamColorRef(aColorRef: TColorRef): void {
         aColorRef = this.streamBytes(aColorRef, FIX_sizeof(delphi_compatability.TColorRef))
     }
     
     // class level streaming
     save(fileName: string, objectToSave: PdStreamableObject): void {
-        let fileStream: TFileStream
-        let filer: PdFiler
-        
-        fileStream = delphi_compatability.TFileStream().Create(fileName, delphi_compatability.fmOpenWrite || delphi_compatability.fmCreate)
-        try {
-            filer = PdFiler().createWithStream(fileStream)
-            filer.setToWritingMode()
-            try {
-                objectToSave.streamUsingFiler(filer)
-            } finally {
-                filer.free
-            }
-        } finally {
-            fileStream.free
-        }
+        const fileStream = new TFileStream(fileName, TFileStream.fmOpenWrite | TFileStream.fmCreate)
+        const filer = new PdFiler(fileStream)
+        filer.setToWritingMode()
+        objectToSave.streamUsingFiler(filer)
     }
     
     // class save/load functions
     load(fileName: string, objectToLoad: PdStreamableObject): void {
-        let fileStream: TFileStream
-        let filer: PdFiler
-        
-        fileStream = delphi_compatability.TFileStream().Create(fileName, delphi_compatability.fmOpenRead)
-        try {
-            filer = PdFiler().createWithStream(fileStream)
-            filer.setToReadingMode()
-            try {
-                objectToLoad.streamUsingFiler(filer)
-            } finally {
-                filer.free
-            }
-        } finally {
-            fileStream.free
-        }
+        const fileStream = new TFileStream(fileName, TFileStream.fmOpenRead)
+        const filer = new PdFiler(fileStream)
+        filer.setToReadingMode()
+        objectToLoad.streamUsingFiler(filer)
     }
     
     getStreamPosition(): long {
-        let result = 0
-        result = this.stream.Position
-        return result
+        return this.stream.Position
     }
     
     setStreamPosition(position: long): void {
-        this.stream.Position = position
+        this.stream.position = position
     }
     
 }
