@@ -1,7 +1,7 @@
 // PdFiler was unit Ufiler
 
 import { TRect } from "./TRect"
-import { short, long, byte, float, double, TColor, TColorRef } from "./common"
+import { short, long, byte, float, double, TColor, TColorRef, IntToStr } from "./common"
 import { TPoint } from "./TPoint"
 
 //  For every streamable object,
@@ -47,7 +47,7 @@ export class PdFiler {
         this.bytesStreamed = 0
         if (this.stream === null) {
             // was LoadStr( )
-            throw new delphi_compatability.EReadError.create(UNRESOLVED.SReadError)
+            throw new Error("SReadError")
         }
     }
     
@@ -56,7 +56,7 @@ export class PdFiler {
         this.bytesStreamed = 0
         if (this.stream === null) {
             // was LoadStr( )
-            throw new delphi_compatability.EWriteError.create(UNRESOLVED.SWriteError)
+            throw new Error("SWriteError")
         }
     }
     
@@ -259,7 +259,7 @@ export class PdStreamableObject {
         cvir.classNumber = uclasses.kPdStreamableObject
         cvir.versionNumber = 0
         cvir.additionNumber = 0
-        throw new GeneralException.create("Problem: Subclass should override; in method PdStreamableObject.classAndVersionInformation.")
+        throw new Error("Problem: Subclass should override; in method PdStreamableObject.classAndVersionInformation.")
     }
     
     streamDataWithFiler(filer: PdFiler, cvir: PdClassAndVersionInformationRecord): void {
@@ -274,7 +274,7 @@ export class PdStreamableObject {
     verifyClassAndVersionInformation(filer: PdFiler, size: long, cvirRead: PdClassAndVersionInformationRecord, cvirClass: PdClassAndVersionInformationRecord): boolean {
         let result = false
         if (cvirRead.classNumber !== cvirClass.classNumber) {
-            throw new PdExceptionFilerUnexpectedClassNumber().createWithSizeAndMessage(size, "Problem reading file.  This file may be corrupt. (Expected class " + IntToStr(cvirClass.classNumber) + " read class " + IntToStr(cvirRead.classNumber) + ")")
+            throw new Error("Problem reading file at: " + size + ". This file may be corrupt. (Expected class " + IntToStr(cvirClass.classNumber) + " read class " + IntToStr(cvirRead.classNumber) + ")")
             // filer.setStreamPosition(filer.getStreamPosition + size);
             //  	result := false;
             //    exit;  
@@ -282,7 +282,7 @@ export class PdStreamableObject {
         if (cvirRead.versionNumber !== cvirClass.versionNumber) {
             // assuming that later can read earlier or will issue error
             // if caller wants to recover - can manually create object and read size bytes
-            throw new PdExceptionFilerUnexpectedVersionNumber().createWithSizeAndMessage(size, "Problem reading file.  This file is of a different version than the program. (Class " + IntToStr(cvirClass.classNumber) + " version " + IntToStr(cvirClass.versionNumber) + " cannot read version " + IntToStr(cvirRead.versionNumber) + ")")
+            throw new Error("Problem reading file at: " + size + ". This file is of a different version than the program. (Class " + IntToStr(cvirClass.classNumber) + " version " + IntToStr(cvirClass.versionNumber) + " cannot read version " + IntToStr(cvirRead.versionNumber) + ")")
             // filer.setStreamPosition(filer.getStreamPosition + size);
             //  	result := false;
             //    exit;
@@ -326,7 +326,7 @@ export class PdStreamableObject {
                 // handle if haven't read everything due to additions or other version handling...
                 filer.setStreamPosition(startPosition + theSize)
             } else if (endPosition > startPosition + theSize) {
-                throw new PdExceptionFilerReadPastEndOfObject.create("Problem reading file: Read past the end of class " + IntToStr(cvirRead.classNumber) + " ver " + IntToStr(cvirRead.versionNumber) + " add " + IntToStr(cvirRead.additionNumber))
+                throw new Error("Problem reading file: Read past the end of class " + IntToStr(cvirRead.classNumber) + " ver " + IntToStr(cvirRead.versionNumber) + " add " + IntToStr(cvirRead.additionNumber))
             }
         }
     }
@@ -354,7 +354,7 @@ export class PdStreamableObject {
         let filer: PdFiler
         
         if (this.classType !== newCopy.classType) {
-            throw new GeneralException.create("Problem: copyTo can only be used with objects of identical class types; in method PdStreamableObject.copyTo.")
+            throw new Error("Problem: copyTo can only be used with objects of identical class types; in method PdStreamableObject.copyTo.")
         }
         memoryStream = delphi_compatability.TMemoryStream.create
         filer = PdFiler().createWithStream(memoryStream)
