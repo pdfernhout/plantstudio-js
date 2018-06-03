@@ -120,6 +120,7 @@ export enum DrawFlowerStage {
 const kNotExactAge = false
 const kExactAge = true
 
+// TODO: Fields are probably not alligned so not backward compatible
 
 // record
 export class BreedingAndTimeSeriesOptionsStructure {
@@ -151,8 +152,28 @@ export class TdoParamsStructure {
     scaleAtFullSize: float = 1
     repetitions: short = 5
     radiallyArranged: boolean = false
-    // TODO: This initializer is needed for pullBackAngle (unless other fix is made); maybe doe not need other numeric ones
+    // TODO: This initializer is needed for pullBackAngle (unless other fix is made); maybe does not need other numeric initializers?
     pullBackAngle: float = 0
+
+    streamUsingFile(filer: PdFiler) {
+        let tempObject3DPointer: long = 0
+
+        // for backward compatibility, object3D needs to be written by caller
+        tempObject3DPointer = filer.streamLongint(tempObject3DPointer)
+        
+        this.xRotationBeforeDraw = filer.streamSingle(this.xRotationBeforeDraw)
+        this.yRotationBeforeDraw = filer.streamSingle(this.yRotationBeforeDraw)
+        this.zRotationBeforeDraw = filer.streamSingle(this.zRotationBeforeDraw)
+        this.faceColor = filer.streamColorRef(this.faceColor)
+        this.backfaceColor = filer.streamColorRef(this.backfaceColor)
+        this.alternateFaceColor = filer.streamColorRef(this.alternateFaceColor)
+        this.alternateBackfaceColor = filer.streamColorRef(this.alternateBackfaceColor)
+        this.scaleAtFullSize = filer.streamSingle(this.scaleAtFullSize)
+        this.repetitions = filer.streamSmallint(this.repetitions)
+        this.radiallyArranged = filer.streamBoolean(this.radiallyArranged)
+        this.pullBackAngle = filer.streamSingle(this.pullBackAngle)
+    }
+    
 }
 
 // alternate colors used only for fruit, so far - ripe vs. unripe
@@ -173,6 +194,23 @@ export class ParamsGeneral {
     fractionReproductiveAllocationAtMaturity_frn: float
     wiltingPercent: float
     phyllotacticRotationAngle: float
+
+    streamUsingFile(filer: PdFiler) {
+        this.randomSway = filer.streamSingle(this.randomSway)
+        this.startingSeedForRandomNumberGenerator = filer.streamSmallint(this.startingSeedForRandomNumberGenerator)
+        this.numApicalInflors = filer.streamSmallint(this.numApicalInflors)
+        this.numAxillaryInflors = filer.streamSmallint(this.numAxillaryInflors)
+        this.lineDivisions = filer.streamSmallint(this.lineDivisions)
+        this.isDicot = filer.streamBoolean(this.isDicot)
+        this.maleFlowersAreSeparate = filer.streamBoolean(this.maleFlowersAreSeparate)
+        this.ageAtMaturity = filer.streamSmallint(this.ageAtMaturity)
+        this.growthSCurve: SCurveStructure = new SCurveStructure()
+        this.ageAtWhichFloweringStarts = filer.streamSmallint(this.ageAtWhichFloweringStarts)
+        this.fractionReproductiveAllocationAtMaturity_frn = filer.streamSingle(this.fractionReproductiveAllocationAtMaturity_frn)
+        this.wiltingPercent = filer.streamSingle(this.wiltingPercent)
+        this.phyllotacticRotationAngle = filer.streamSingle(this.phyllotacticRotationAngle)
+
+    }
 }
 
 // was longint, but want it in a param panel
@@ -200,6 +238,29 @@ export class ParamsLeaf {
     fractionOfLiveBiomassWhenAbscisses_frn: float
     petioleTaperIndex: short
     compoundPinnateLeafletArrangement: short
+
+    streamUsingFile(filer: PdFiler) {
+        this.leafTdoParams: TdoParamsStructure = new TdoParamsStructure()
+        this.stipuleTdoParams: TdoParamsStructure = new TdoParamsStructure()
+        this.sCurveParams: SCurveStructure = new SCurveStructure()
+        this.petioleColor = filer.streamColorRef(this.petioleColor)
+        this.optimalBiomass_pctMPB = filer.streamSingle(this.optimalBiomass_pctMPB)
+        this.optimalFractionOfOptimalBiomassAtCreation_frn = filer.streamSingle(this.optimalFractionOfOptimalBiomassAtCreation_frn)
+        this.minDaysToGrow = filer.streamSmallint(this.minDaysToGrow)
+        this.maxDaysToGrow = filer.streamSmallint(this.maxDaysToGrow)
+        this.petioleLengthAtOptimalBiomass_mm = filer.streamSingle(this.petioleLengthAtOptimalBiomass_mm)
+        this.petioleWidthAtOptimalBiomass_mm = filer.streamSingle(this.petioleWidthAtOptimalBiomass_mm)
+        this.petioleAngle = filer.streamSingle(this.petioleAngle)
+        this.compoundRachisToPetioleRatio = filer.streamSingle(this.compoundRachisToPetioleRatio)
+        this.compoundPinnateOrPalmate = filer.streamSmallint(this.compoundPinnateOrPalmate)
+        this.compoundNumLeaflets = filer.streamSmallint(this.compoundNumLeaflets)
+        this.compoundCurveAngleAtStart = filer.streamSingle(this.compoundCurveAngleAtStart)
+        this.compoundCurveAngleAtFullSize = filer.streamSingle(this.compoundCurveAngleAtFullSize)
+        this.fractionOfLiveBiomassWhenAbscisses_frn = filer.streamSingle(this.fractionOfLiveBiomassWhenAbscisses_frn)
+        this.petioleTaperIndex = filer.streamSmallint(this.petioleTaperIndex)
+        this.compoundPinnateLeafletArrangement = filer.streamSmallint(this.compoundPinnateLeafletArrangement)
+
+    }
 }
 
 // ENUM
@@ -208,6 +269,11 @@ export class ParamsLeaf {
 export class ParamsSeedlingLeaf {
     leafTdoParams: TdoParamsStructure = new TdoParamsStructure()
     nodesOnStemWhenFallsOff: short
+
+    streamUsingFile(filer: PdFiler) {
+
+        
+    }
 }
 
 // access->pInternode 
@@ -235,6 +301,32 @@ export class ParamsInternode {
     lengthMultiplierDueToBolting: float
     minDaysToBolt: short
     maxDaysToBolt: short
+
+    streamUsingFile(filer: PdFiler) {
+        this.faceColor = filer.streamColorRef(this.faceColor)
+        this.backfaceColor = filer.streamColorRef(this.backfaceColor)
+        this.curvingIndex = filer.streamSingle(this.curvingIndex)
+        this.firstInternodeCurvingIndex = filer.streamSingle(this.firstInternodeCurvingIndex)
+        this.minFractionOfOptimalInitialBiomassToCreateInternode_frn = filer.streamSingle(this.minFractionOfOptimalInitialBiomassToCreateInternode_frn)
+        this.minDaysToCreateInternode = filer.streamSmallint(this.minDaysToCreateInternode)
+        this.maxDaysToCreateInternodeIfOverMinFraction = filer.streamSmallint(this.maxDaysToCreateInternodeIfOverMinFraction)
+        this.optimalFinalBiomass_pctMPB = filer.streamSingle(this.optimalFinalBiomass_pctMPB)
+        this.canRecoverFromStuntingDuringCreation = filer.streamBoolean(this.canRecoverFromStuntingDuringCreation)
+        this.minDaysToAccumulateBiomass = filer.streamSmallint(this.minDaysToAccumulateBiomass)
+        this.maxDaysToAccumulateBiomass = filer.streamSmallint(this.maxDaysToAccumulateBiomass)
+        this.minDaysToExpand = filer.streamSmallint(this.minDaysToExpand)
+        this.maxDaysToExpand = filer.streamSmallint(this.maxDaysToExpand)
+        this.lengthAtOptimalFinalBiomassAndExpansion_mm = filer.streamSingle(this.lengthAtOptimalFinalBiomassAndExpansion_mm)
+        this.lengthMultiplierDueToBiomassAccretion = filer.streamSingle(this.lengthMultiplierDueToBiomassAccretion)
+        this.lengthMultiplierDueToExpansion = filer.streamSingle(this.lengthMultiplierDueToExpansion)
+        this.widthAtOptimalFinalBiomassAndExpansion_mm = filer.streamSingle(this.widthAtOptimalFinalBiomassAndExpansion_mm)
+        this.widthMultiplierDueToBiomassAccretion = filer.streamSingle(this.widthMultiplierDueToBiomassAccretion)
+        this.widthMultiplierDueToExpansion = filer.streamSingle(this.widthMultiplierDueToExpansion)
+        this.lengthMultiplierDueToBolting = filer.streamSingle(this.lengthMultiplierDueToBolting)
+        this.minDaysToBolt = filer.streamSmallint(this.minDaysToBolt)
+        this.maxDaysToBolt = filer.streamSmallint(this.maxDaysToBolt)
+        
+    }
 }
 
 // creation 
@@ -273,6 +365,34 @@ export class ParamsFlower {
             this.tdoParams[i] = new TdoParamsStructure()
         }
     }
+
+    streamUsingFile(filer: PdFiler) {
+        this.tdoParams: TdoParamsStructure[] = Array(FloralPart.kSepals + 1)
+        this.budDrawingOption = filer.streamSmallint(this.budDrawingOption)
+        this.optimalBiomass_pctMPB = filer.streamSingle(this.optimalBiomass_pctMPB)
+        this.minFractionOfOptimalInitialBiomassToCreateFlower_frn = filer.streamSingle(this.minFractionOfOptimalInitialBiomassToCreateFlower_frn)
+        this.minDaysToCreateFlowerBud = filer.streamSmallint(this.minDaysToCreateFlowerBud)
+        this.maxDaysToCreateFlowerBudIfOverMinFraction = filer.streamSmallint(this.maxDaysToCreateFlowerBudIfOverMinFraction)
+        this.minFractionOfOptimalBiomassToOpenFlower_frn = filer.streamSingle(this.minFractionOfOptimalBiomassToOpenFlower_frn)
+        this.minDaysToOpenFlower = filer.streamSmallint(this.minDaysToOpenFlower)
+        this.minDaysToGrow = filer.streamSmallint(this.minDaysToGrow)
+        this.maxDaysToGrowIfOverMinFraction = filer.streamSmallint(this.maxDaysToGrowIfOverMinFraction)
+        this.minDaysBeforeSettingFruit = filer.streamSmallint(this.minDaysBeforeSettingFruit)
+        this.daysBeforeDrop = filer.streamSmallint(this.daysBeforeDrop)
+        this.minFractionOfOptimalBiomassToCreateFruit_frn = filer.streamSingle(this.minFractionOfOptimalBiomassToCreateFruit_frn)
+        this.numPistils = filer.streamSmallint(this.numPistils)
+        this.styleLength_mm = filer.streamSingle(this.styleLength_mm)
+        this.styleWidth_mm = filer.streamSingle(this.styleWidth_mm)
+        this.styleTaperIndex = filer.streamSmallint(this.styleTaperIndex)
+        this.styleColor = filer.streamColorRef(this.styleColor)
+        this.numStamens = filer.streamSmallint(this.numStamens)
+        this.filamentLength_mm = filer.streamSingle(this.filamentLength_mm)
+        this.filamentWidth_mm = filer.streamSingle(this.filamentWidth_mm)
+        this.filamentTaperIndex = filer.streamSmallint(this.filamentTaperIndex)
+        this.filamentColor = filer.streamColorRef(this.filamentColor)
+    
+        
+    }
 }
 
 // access->pInflor 
@@ -308,12 +428,52 @@ export class ParamsInflorescence {
     stalkColor: TColorRef
     pedicelColor: TColorRef
     pedicelTaperIndex: short
+
+    streamUsingFile(filer: PdFiler) {
+        this.bractTdoParams: TdoParamsStructure = new TdoParamsStructure()
+        this.optimalBiomass_pctMPB = filer.streamSingle(this.optimalBiomass_pctMPB)
+        this.minFractionOfOptimalBiomassToCreateInflorescence_frn = filer.streamSingle(this.minFractionOfOptimalBiomassToCreateInflorescence_frn)
+        this.minDaysToCreateInflorescence = filer.streamSmallint(this.minDaysToCreateInflorescence)
+        this.maxDaysToCreateInflorescenceIfOverMinFraction = filer.streamSmallint(this.maxDaysToCreateInflorescenceIfOverMinFraction)
+        this.minFractionOfOptimalBiomassToMakeFlowers_frn = filer.streamSingle(this.minFractionOfOptimalBiomassToMakeFlowers_frn)
+        this.minDaysToGrow = filer.streamSmallint(this.minDaysToGrow)
+        this.maxDaysToGrow = filer.streamSmallint(this.maxDaysToGrow)
+        this.peduncleLength_mm = filer.streamSingle(this.peduncleLength_mm)
+        this.internodeLength_mm = filer.streamSingle(this.internodeLength_mm)
+        this.internodeWidth_mm = filer.streamSingle(this.internodeWidth_mm)
+        this.pedicelLength_mm = filer.streamSingle(this.pedicelLength_mm)
+        this.pedicelAngle = filer.streamSingle(this.pedicelAngle)
+        this.branchAngle = filer.streamSingle(this.branchAngle)
+        this.angleBetweenInternodes = filer.streamSingle(this.angleBetweenInternodes)
+        this.peduncleAngleFromVegetativeStem = filer.streamSingle(this.peduncleAngleFromVegetativeStem)
+        this.apicalStalkAngleFromVegetativeStem = filer.streamSingle(this.apicalStalkAngleFromVegetativeStem)
+        this.terminalStalkLength_mm = filer.streamSingle(this.terminalStalkLength_mm)
+        this.numFlowersPerBranch = filer.streamSmallint(this.numFlowersPerBranch)
+        this.numFlowersOnMainBranch = filer.streamSmallint(this.numFlowersOnMainBranch)
+        this.daysToAllFlowersCreated = filer.streamSmallint(this.daysToAllFlowersCreated)
+        this.numBranches = filer.streamSmallint(this.numBranches)
+        this.branchesAreAlternate = filer.streamBoolean(this.branchesAreAlternate)
+        this.isHead = filer.streamBoolean(this.isHead)
+        this.isTerminal = filer.streamBoolean(this.isTerminal)
+        this.flowersDrawTopToBottom = filer.streamBoolean(this.flowersDrawTopToBottom)
+        this.flowersSpiralOnStem = filer.streamBoolean(this.flowersSpiralOnStem)
+        this.stalkColor = filer.streamColorRef(this.stalkColor)
+        this.pedicelColor = filer.streamColorRef(this.pedicelColor)
+        this.pedicelTaperIndex = filer.streamSmallint(this.pedicelTaperIndex)
+        
+    }
 }
 
 // access->pAxillaryBud 
 // record
 export class ParamsAxillaryBud {
     tdoParams: TdoParamsStructure = new TdoParamsStructure()
+
+    streamUsingFile(filer: PdFiler) {
+        this.tdoParams: TdoParamsStructure = new TdoParamsStructure()
+
+        
+    }
 }
 
 // access->pMeristem 
@@ -326,6 +486,17 @@ export class ParamsMeristem {
     branchingIsSympodial: boolean
     branchingAndLeafArrangement: short
     secondaryBranchingIsAllowed: boolean
+
+    streamUsingFile(filer: PdFiler) {
+        this.branchingIndex = filer.streamSingle(this.branchingIndex)
+        this.branchingDistance = filer.streamSingle(this.branchingDistance)
+        this.branchingAngle = filer.streamSingle(this.branchingAngle)
+        this.determinateProbability = filer.streamSingle(this.determinateProbability)
+        this.branchingIsSympodial = filer.streamBoolean(this.branchingIsSympodial)
+        this.branchingAndLeafArrangement = filer.streamSmallint(this.branchingAndLeafArrangement)
+        this.secondaryBranchingIsAllowed = filer.streamBoolean(this.secondaryBranchingIsAllowed)
+        
+    }
 }
 
 // access->pFruit 
@@ -338,6 +509,17 @@ export class ParamsFruit {
     maxDaysToGrow: short
     stalkStrengthIndex: float
     daysToRipen: short
+
+    streamUsingFile(filer: PdFiler) {
+        this.tdoParams: TdoParamsStructure = new TdoParamsStructure()
+        this.sCurveParams: SCurveStructure = new SCurveStructure()
+        this.optimalBiomass_pctMPB = filer.streamSingle(this.optimalBiomass_pctMPB)
+        this.minDaysToGrow = filer.streamSmallint(this.minDaysToGrow)
+        this.maxDaysToGrow = filer.streamSmallint(this.maxDaysToGrow)
+        this.stalkStrengthIndex = filer.streamSingle(this.stalkStrengthIndex)
+        this.daysToRipen = filer.streamSmallint(this.daysToRipen)
+        
+    }
 }
 
 // access->pRoot 
@@ -345,6 +527,12 @@ export class ParamsFruit {
 export class ParamsRoot {
     tdoParams: TdoParamsStructure = new TdoParamsStructure()
     showsAboveGround: boolean
+
+    streamUsingFile(filer: PdFiler) {
+        this.tdoParams: TdoParamsStructure = new TdoParamsStructure()
+        this.showsAboveGround = filer.streamBoolean(this.showsAboveGround)
+        
+    }
 }
 
 // const

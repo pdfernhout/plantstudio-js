@@ -40,3 +40,8 @@ Example: utravers procedure PdTraverser.traversePlant(traversalCount: longint);
   if phytomerTraversing = nil then break;
 Likely you will have to label the enclosing loop and use a labelled break statement; see: 
 https://stackoverflow.com/questions/183161/best-way-to-break-from-nested-loops-in-javascript
+
+Convert definitions (with this added) into streaming (example for float)
+   (this\.[^:]*): float
+   $1 = filer.streamSingle($1)
+(Adding "this." after copying the class field definitions prevents the initial declarations from being changed.)
