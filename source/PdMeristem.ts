@@ -1,6 +1,5 @@
 // PdMeristem was unit umerist
 
-import { PdClassAndVersionInformationRecord, PdFiler } from "./temporary"
 import { PdPlant, Gender, PartType, LeafArrangement, Direction } from "./PdPlant"
 import { short, long, float, int } from "./common"
 import { PdPlantPart } from "./PdPlantPart"
@@ -16,6 +15,7 @@ import { PdInflorescence } from "./PdInflorescence"
 import { domain } from "./PdDomain"
 import { KfTurtle } from "./KfTurtle"
 import { KfObject3D } from "./KfObject3D"
+import { PdClassAndVersionInformationRecord, PdFiler } from "./PdFiler"
 
 export class PdMeristem extends PdPlantPart {
     phytomerAttachedTo: PdInternode = <any>null

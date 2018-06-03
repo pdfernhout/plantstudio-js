@@ -1,9 +1,10 @@
 // PdRandom from unit Urandom
 
-import { PdStreamableObject, PdClassAndVersionInformationRecord, PdFiler } from "./temporary"
 import { long, short, byte, float, int, intround } from "./common"
 import { max, min } from "./umath"
 import { ClassId } from "./uclasses"
+import { PdStreamableObject } from "./PdStreamableObject";
+import { PdClassAndVersionInformationRecord, PdFiler } from "./PdFiler";
 
 export class PdRandom extends PdStreamableObject {
     // long type is a 32-bit signed Integer -2147483648 to 2147483647

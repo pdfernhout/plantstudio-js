@@ -6,6 +6,11 @@ import { ClassId } from "./uclasses";
 
 export class PdStreamableObject {
     
+    // TODO: Decide what to do about instanceSize -- otherwise size estimates are too small
+    get instanceSize() {
+        return 100
+    }
+
     // PdStreamableObject
     // use for auto creating classes when type not known
     // use for checking if structure has changed

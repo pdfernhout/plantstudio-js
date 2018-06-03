@@ -8,76 +8,14 @@ import { PdPlantPart } from "./PdPlantPart"
 import { SinglePoint, support_rgb } from "./usupport"
 import { PdCommand } from "./PdCommand";
 import { TPoint } from "./TPoint";
+import { PdFiler } from "./PdFiler";
+import { PdStreamableObject } from "./PdStreamableObject";
 
 // TODO: Fix copied code from utdo
 export const kMaximumRecordedPoints = 10000
 export const kTdoLineContrastIndex = 10
 export const kTdoForeColor = ColorDefs.clSilver
 export const kTdoBackColor = ColorDefs.clGray
-
-// TODO: Implement PdStreamableObject
-export class PdStreamableObject {
-    instanceSize = 0
-
-    streamDataWithFiler(filer: PdFiler, cvir: PdClassAndVersionInformationRecord): void {
-        throw new Error("TODO")
-    }
-
-    streamUsingFiler(filer: PdFiler) {
-        throw new Error("TODO")
-    }
-}
-
-// TODO: Replace PdClassAndVersionInformationRecord from Ufiler
-export interface PdClassAndVersionInformationRecord {
-    classNumber: short
-    versionNumber: short
-    additionNumber: short
-}
-
-// TODO: Replace PdFiler from Ufiler
-export class PdFiler {
-    isReading() {
-        return true
-    }
-    isWriting() {
-        return false
-    }
-    streamBytes(bytes: any, size: number): any {
-        return bytes
-    }
-    streamLongint(value: any): any {
-        return value
-    }
-    streamShortString(text: string): string {
-        return text
-    }
-    streamSmallint(value: any): any {
-        return value
-    }
-    streamByte(value: any): any {
-        return value
-    }
-    streamSingle(value: any): any {
-        return value
-    }
-    streamSinglePoint(point: SinglePoint): void {
-    }
-    streamRect(rect: TRect): void {
-    }
-    streamBoolean(value: boolean): boolean {
-        return value
-    }
-    streamColorRef(value: number): number {
-        return value
-    }
-
-}
-
-// TODO: Fix FIX_sizeof with alternate approach to object size measurement
-export function FIX_sizeof(object: Object): number {
-    return 0
-}
 
 // TODO: Fix DebugPrint from udebug that should have result stored somewhere
 export function DebugPrint(aMessage: string): void {

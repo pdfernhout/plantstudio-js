@@ -12,9 +12,10 @@ import { PdFlowerFruit } from "./PdFlowerFruit"
 import { KfTurtle } from "./KfTurtle"
 import { TRect } from "./TRect"
 import { NestingType, ExportPart } from "./U3dexport"
-import { PdClassAndVersionInformationRecord, PdFiler, TListCollection_streamUsingFiler, DebugPrint } from "./temporary"
+import { TListCollection_streamUsingFiler, DebugPrint } from "./temporary"
 import { ClassId } from "./uclasses"
 import { domain } from "./PdDomain"
+import { PdClassAndVersionInformationRecord, PdFiler } from "./PdFiler";
 
 export class PdInflorescence extends PdPlantPart {
     flowers: PdFlowerFruit[] = []

@@ -1,6 +1,7 @@
 import { long } from "./common"
-import { PdStreamableObject, PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof } from "./temporary"
 import { ClassId } from "./uclasses"
+import { PdStreamableObject } from "./PdStreamableObject";
+import { PdClassAndVersionInformationRecord, PdFiler } from "./PdFiler";
 
 export class KfIndexTriangle extends PdStreamableObject {
     pointIndexes: long[] = [0, 0, 0]

@@ -10,8 +10,8 @@ import { messageForExceptionType } from "./usupport"
 import { KfObject3D } from "./KfObject3D"
 import { KfTurtle } from "./KfTurtle"
 import { TRect } from "./TRect"
-import { PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof } from "./temporary"
 import { ClassId } from "./uclasses"
+import { PdClassAndVersionInformationRecord, PdFiler } from "./PdFiler";
 
 const kNumCompoundLeafRandomSwayIndexes = 49
 

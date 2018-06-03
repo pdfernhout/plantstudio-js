@@ -10,8 +10,8 @@ import { ExportPart, NestingType } from "./U3dexport"
 import { KfTurtle } from "./KfTurtle"
 import { TRect } from "./TRect"
 import { KfObject3D } from "./KfObject3D"
-import { PdClassAndVersionInformationRecord, PdFiler } from "./temporary"
 import { ClassId } from "./uclasses"
+import { PdClassAndVersionInformationRecord, PdFiler } from "./PdFiler"
 
 // const
 const kDrawFlowerAsOpening = true

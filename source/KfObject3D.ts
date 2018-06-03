@@ -1,7 +1,7 @@
 // KfObject3D was unit Utdo
 
 import { float, long, ColorDefs, int, IntToStr, short, StrToFloat, intround, arrayRemove, compareTextIgnoreCase, StrToIntDef, MessageDialog, TextFile, TMemo, writeln, eof, readln, write, TColorRef, getRValue, getGValue, getBValue, ExtractFileName } from "./common"
-import { PdStreamableObject, PdClassAndVersionInformationRecord, PdFiler, FIX_sizeof, TListCollection_streamUsingFiler } from "./temporary"
+import { TListCollection_streamUsingFiler } from "./temporary"
 import { KfPoint3D, KfPoint3D_matchXYZ, KfPoint3D_setXYZ, KfPoint3D_addPointToBoundsRect, KfPoint3D_subtract } from "./KfPoint3D"
 import { KfIndexTriangle } from "./KfIndexTriangle"
 import { KfTriangle } from "./KfTriangle"
@@ -12,6 +12,8 @@ import { KfStringStream } from "./KfStringStream"
 import { stringUpTo, digitValueString, replacePunctuationWithUnderscores } from "./usupport"
 import { ClassId } from "./uclasses"
 import { KfFileExportSurface, ExportFormats } from "./U3dexport"
+import { PdClassAndVersionInformationRecord, PdFiler } from "./PdFiler"
+import { PdStreamableObject } from "./PdStreamableObject"
 
 // const
 const kMaximumRecordedPoints = 10000

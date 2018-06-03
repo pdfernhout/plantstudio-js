@@ -4,7 +4,6 @@ import { PdPlantPart, kDontTaper, kUseAmendment } from "./PdPlantPart"
 import { TColorRef, float, long, int, byte, IntToStr, short } from "./common"
 import { PdPlant, PartType, Direction, LeafArrangement } from "./PdPlant"
 import { PdPlantDrawingAmendment } from "./PdPlantDrawingAmendment"
-import { PdFiler, PdClassAndVersionInformationRecord } from "./temporary"
 import { max, pointsAreCloseEnough, min, safedivExcept } from "./umath"
 import { messageForExceptionType, blendColors } from "./usupport"
 import { Activity, Statistics, PdTraverser, TraverseDirection, linearGrowthResult, linearGrowthWithFactor } from "./PdTraverser"
@@ -13,9 +12,10 @@ import { KfTurtle } from "./KfTurtle"
 import { KfObject3D } from "./KfObject3D"
 import { TRect } from "./TRect"
 import { ExportPart } from "./U3dexport"
-import { PdLeaf } from "./PdLeaf";
-import { PdMeristem } from "./PdMeristem";
-import { PdInflorescence } from "./PdInflorescence";
+import { PdLeaf } from "./PdLeaf"
+import { PdMeristem } from "./PdMeristem"
+import { PdInflorescence } from "./PdInflorescence"
+import { PdClassAndVersionInformationRecord, PdFiler } from "./PdFiler"
 
 export class PdInternode extends PdPlantPart {
     leftBranchPlantPart: PdPlantPart | null = null
