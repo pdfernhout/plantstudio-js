@@ -156,7 +156,7 @@ export class TdoParamsStructure {
     // TODO: This initializer is needed for pullBackAngle (unless other fix is made); maybe does not need other numeric initializers?
     pullBackAngle: float = 0
 
-    streamUsingFile(filer: PdFiler) {
+    streamUsingFiler(filer: PdFiler) {
         let tempObject3DPointer: long = 0
 
         // for backward compatibility, object3D needs to be written by caller
@@ -196,7 +196,7 @@ export class ParamsGeneral {
     wiltingPercent: float
     phyllotacticRotationAngle: float
 
-    streamUsingFile(filer: PdFiler) {
+    streamUsingFiler(filer: PdFiler) {
         this.randomSway = filer.streamSingle(this.randomSway)
         this.startingSeedForRandomNumberGenerator = filer.streamSmallint(this.startingSeedForRandomNumberGenerator)
         this.numApicalInflors = filer.streamSmallint(this.numApicalInflors)
@@ -205,12 +205,11 @@ export class ParamsGeneral {
         this.isDicot = filer.streamBoolean(this.isDicot)
         this.maleFlowersAreSeparate = filer.streamBoolean(this.maleFlowersAreSeparate)
         this.ageAtMaturity = filer.streamSmallint(this.ageAtMaturity)
-        this.growthSCurve: SCurveStructure = new SCurveStructure()
+        this.growthSCurve.streamUsingFiler(filer)
         this.ageAtWhichFloweringStarts = filer.streamSmallint(this.ageAtWhichFloweringStarts)
         this.fractionReproductiveAllocationAtMaturity_frn = filer.streamSingle(this.fractionReproductiveAllocationAtMaturity_frn)
         this.wiltingPercent = filer.streamSingle(this.wiltingPercent)
         this.phyllotacticRotationAngle = filer.streamSingle(this.phyllotacticRotationAngle)
-
     }
 }
 
@@ -240,10 +239,10 @@ export class ParamsLeaf {
     petioleTaperIndex: short
     compoundPinnateLeafletArrangement: short
 
-    streamUsingFile(filer: PdFiler) {
-        this.leafTdoParams: TdoParamsStructure = new TdoParamsStructure()
-        this.stipuleTdoParams: TdoParamsStructure = new TdoParamsStructure()
-        this.sCurveParams: SCurveStructure = new SCurveStructure()
+    streamUsingFiler(filer: PdFiler) {
+        this.leafTdoParams.streamUsingFiler(filer)
+        this.stipuleTdoParams.streamUsingFiler(filer)
+        this.sCurveParams.streamUsingFiler(filer)
         this.petioleColor = filer.streamColorRef(this.petioleColor)
         this.optimalBiomass_pctMPB = filer.streamSingle(this.optimalBiomass_pctMPB)
         this.optimalFractionOfOptimalBiomassAtCreation_frn = filer.streamSingle(this.optimalFractionOfOptimalBiomassAtCreation_frn)
@@ -271,9 +270,7 @@ export class ParamsSeedlingLeaf {
     leafTdoParams: TdoParamsStructure = new TdoParamsStructure()
     nodesOnStemWhenFallsOff: short
 
-    streamUsingFile(filer: PdFiler) {
-
-        
+    streamUsingFiler(filer: PdFiler) {  
     }
 }
 
@@ -303,7 +300,7 @@ export class ParamsInternode {
     minDaysToBolt: short
     maxDaysToBolt: short
 
-    streamUsingFile(filer: PdFiler) {
+    streamUsingFiler(filer: PdFiler) {
         this.faceColor = filer.streamColorRef(this.faceColor)
         this.backfaceColor = filer.streamColorRef(this.backfaceColor)
         this.curvingIndex = filer.streamSingle(this.curvingIndex)
@@ -325,8 +322,7 @@ export class ParamsInternode {
         this.widthMultiplierDueToExpansion = filer.streamSingle(this.widthMultiplierDueToExpansion)
         this.lengthMultiplierDueToBolting = filer.streamSingle(this.lengthMultiplierDueToBolting)
         this.minDaysToBolt = filer.streamSmallint(this.minDaysToBolt)
-        this.maxDaysToBolt = filer.streamSmallint(this.maxDaysToBolt)
-        
+        this.maxDaysToBolt = filer.streamSmallint(this.maxDaysToBolt)   
     }
 }
 
@@ -367,8 +363,11 @@ export class ParamsFlower {
         }
     }
 
-    streamUsingFile(filer: PdFiler) {
-        this.tdoParams: TdoParamsStructure[] = Array(FloralPart.kSepals + 1)
+    streamUsingFiler(filer: PdFiler) {
+        for (let i = 0; i < this.tdoParams.length; i++) {
+            this.tdoParams[i].streamUsingFiler(filer)
+        }
+
         this.budDrawingOption = filer.streamSmallint(this.budDrawingOption)
         this.optimalBiomass_pctMPB = filer.streamSingle(this.optimalBiomass_pctMPB)
         this.minFractionOfOptimalInitialBiomassToCreateFlower_frn = filer.streamSingle(this.minFractionOfOptimalInitialBiomassToCreateFlower_frn)
@@ -391,8 +390,6 @@ export class ParamsFlower {
         this.filamentWidth_mm = filer.streamSingle(this.filamentWidth_mm)
         this.filamentTaperIndex = filer.streamSmallint(this.filamentTaperIndex)
         this.filamentColor = filer.streamColorRef(this.filamentColor)
-    
-        
     }
 }
 
@@ -430,8 +427,8 @@ export class ParamsInflorescence {
     pedicelColor: TColorRef
     pedicelTaperIndex: short
 
-    streamUsingFile(filer: PdFiler) {
-        this.bractTdoParams: TdoParamsStructure = new TdoParamsStructure()
+    streamUsingFiler(filer: PdFiler) {
+        this.bractTdoParams.streamUsingFiler(filer)
         this.optimalBiomass_pctMPB = filer.streamSingle(this.optimalBiomass_pctMPB)
         this.minFractionOfOptimalBiomassToCreateInflorescence_frn = filer.streamSingle(this.minFractionOfOptimalBiomassToCreateInflorescence_frn)
         this.minDaysToCreateInflorescence = filer.streamSmallint(this.minDaysToCreateInflorescence)
@@ -461,7 +458,6 @@ export class ParamsInflorescence {
         this.stalkColor = filer.streamColorRef(this.stalkColor)
         this.pedicelColor = filer.streamColorRef(this.pedicelColor)
         this.pedicelTaperIndex = filer.streamSmallint(this.pedicelTaperIndex)
-        
     }
 }
 
@@ -470,10 +466,8 @@ export class ParamsInflorescence {
 export class ParamsAxillaryBud {
     tdoParams: TdoParamsStructure = new TdoParamsStructure()
 
-    streamUsingFile(filer: PdFiler) {
-        this.tdoParams: TdoParamsStructure = new TdoParamsStructure()
-
-        
+    streamUsingFiler(filer: PdFiler) {
+        this.tdoParams.streamUsingFiler(filer)
     }
 }
 
@@ -488,7 +482,7 @@ export class ParamsMeristem {
     branchingAndLeafArrangement: short
     secondaryBranchingIsAllowed: boolean
 
-    streamUsingFile(filer: PdFiler) {
+    streamUsingFiler(filer: PdFiler) {
         this.branchingIndex = filer.streamSingle(this.branchingIndex)
         this.branchingDistance = filer.streamSingle(this.branchingDistance)
         this.branchingAngle = filer.streamSingle(this.branchingAngle)
@@ -496,7 +490,6 @@ export class ParamsMeristem {
         this.branchingIsSympodial = filer.streamBoolean(this.branchingIsSympodial)
         this.branchingAndLeafArrangement = filer.streamSmallint(this.branchingAndLeafArrangement)
         this.secondaryBranchingIsAllowed = filer.streamBoolean(this.secondaryBranchingIsAllowed)
-        
     }
 }
 
@@ -511,9 +504,9 @@ export class ParamsFruit {
     stalkStrengthIndex: float
     daysToRipen: short
 
-    streamUsingFile(filer: PdFiler) {
-        this.tdoParams: TdoParamsStructure = new TdoParamsStructure()
-        this.sCurveParams: SCurveStructure = new SCurveStructure()
+    streamUsingFiler(filer: PdFiler) {
+        this.tdoParams.streamUsingFiler(filer)
+        this.sCurveParams.streamUsingFiler(filer)
         this.optimalBiomass_pctMPB = filer.streamSingle(this.optimalBiomass_pctMPB)
         this.minDaysToGrow = filer.streamSmallint(this.minDaysToGrow)
         this.maxDaysToGrow = filer.streamSmallint(this.maxDaysToGrow)
@@ -529,10 +522,9 @@ export class ParamsRoot {
     tdoParams: TdoParamsStructure = new TdoParamsStructure()
     showsAboveGround: boolean
 
-    streamUsingFile(filer: PdFiler) {
-        this.tdoParams: TdoParamsStructure = new TdoParamsStructure()
+    streamUsingFiler(filer: PdFiler) {
+        this.tdoParams.streamUsingFiler(filer)
         this.showsAboveGround = filer.streamBoolean(this.showsAboveGround)
-        
     }
 }
 
@@ -2479,16 +2471,6 @@ export class PdPlant extends PdStreamableObject {
     }
     
     streamDataWithFiler(filer: PdFiler, cvir: PdClassAndVersionInformationRecord): void {
-        let tdoSeedlingLeaf: KfObject3D
-        let tdoLeaf: KfObject3D
-        let tdoStipule: KfObject3D
-        let tdoAxillaryBud: KfObject3D
-        let tdoInflorBractFemale: KfObject3D
-        let tdoInflorBractMale: KfObject3D
-        let tdoFruit: KfObject3D
-        let tdoRoot: KfObject3D
-        let femaleFlowerTdos: KfObject3D[] = Array(FloralPart.kHighestFloralPartConstant + 1)
-        let maleFlowerTdos: KfObject3D[] = Array(FloralPart.kHighestFloralPartConstant + 1)
         let hasFirstPhytomer: boolean = false
         
         super.streamDataWithFiler(filer, cvir)
@@ -2505,101 +2487,32 @@ export class PdPlant extends PdStreamableObject {
         this.indexWhenRemoved = filer.streamSmallint(this.indexWhenRemoved)
         this.selectedIndexWhenRemoved = filer.streamSmallint(this.selectedIndexWhenRemoved)
 
-        if (filer.isReading()) {
-            // save pointers to 3d objects if reading because they will get written over during streaming of structures 
-            tdoSeedlingLeaf = this.pSeedlingLeaf.leafTdoParams.object3D
-            tdoLeaf = this.pLeaf.leafTdoParams.object3D
-            tdoStipule = this.pLeaf.stipuleTdoParams.object3D
-            tdoInflorBractFemale = this.pInflor[Gender.kGenderFemale].bractTdoParams.object3D
-            tdoInflorBractMale = this.pInflor[Gender.kGenderMale].bractTdoParams.object3D
-            for (let partType = 0; partType <= FloralPart.kHighestFloralPartConstant; partType++) {
-                femaleFlowerTdos[partType] = this.pFlower[Gender.kGenderFemale].tdoParams[partType].object3D
-                maleFlowerTdos[partType] = this.pFlower[Gender.kGenderMale].tdoParams[partType].object3D
-            }
-            tdoAxillaryBud = this.pAxillaryBud.tdoParams.object3D
-            tdoFruit = this.pFruit.tdoParams.object3D
-            tdoRoot = this.pRoot.tdoParams.object3D
-        } else {
-            /* TODO: Use or remove null setting -- issue where these TDOs aren'ts expected to be null elsewhere
-            tdoSeedlingLeaf = null
-            tdoLeaf = null
-            tdoStipule = null
-            tdoInflorBractFemale = null
-            tdoInflorBractMale = null
-            for (let partType = 0; partType <= FloralPart.kHighestFloralPartConstant; partType++) {
-                femaleFlowerTdos[partType] = null
-                maleFlowerTdos[partType] = null
-            }
-            tdoAxillaryBud = null
-            tdoFruit = null
-            tdoRoot = null
-            */
-        }
+        // These methods do not stream the TDOs for legacy compatibility but instread stream 32-bit pointer placeholder of 0
+        this.pGeneral.streamUsingFiler(filer)
+        this.pMeristem.streamUsingFiler(filer)
+        this.pInternode.streamUsingFiler(filer)
+        this.pLeaf.streamUsingFiler(filer)
+        this.pSeedlingLeaf.streamUsingFiler(filer)
+        this.pAxillaryBud.streamUsingFiler(filer)
+        this.pInflor[Gender.kGenderMale].streamUsingFiler(filer)
+        this.pInflor[Gender.kGenderFemale].streamUsingFiler(filer)
+        this.pFlower[Gender.kGenderMale].streamUsingFiler(filer)
+        this.pFlower[Gender.kGenderFemale].streamUsingFiler(filer)
+        this.pFruit.streamUsingFiler(filer)
+        this.pRoot.streamUsingFiler(filer)
 
-        this.pGeneral = filer.streamBytes(this.pGeneral, FIX_sizeof(this.pGeneral))
-        this.pMeristem = filer.streamBytes(this.pMeristem, FIX_sizeof(this.pMeristem))
-        this.pInternode = filer.streamBytes(this.pInternode, FIX_sizeof(this.pInternode))
-        this.pLeaf = filer.streamBytes(this.pLeaf, FIX_sizeof(this.pLeaf))
-        this.pSeedlingLeaf = filer.streamBytes(this.pSeedlingLeaf, FIX_sizeof(this.pSeedlingLeaf))
-        this.pAxillaryBud = filer.streamBytes(this.pAxillaryBud, FIX_sizeof(this.pAxillaryBud))
-        this.pInflor[Gender.kGenderMale] = filer.streamBytes(this.pInflor[Gender.kGenderMale], FIX_sizeof(this.pInflor))
-        this.pInflor[Gender.kGenderFemale] = filer.streamBytes(this.pInflor[Gender.kGenderFemale], FIX_sizeof(this.pInflor))
-        this.pFlower[Gender.kGenderMale] = filer.streamBytes(this.pFlower[Gender.kGenderMale], FIX_sizeof(this.pFlower))
-        this.pFlower[Gender.kGenderFemale] = filer.streamBytes(this.pFlower[Gender.kGenderFemale], FIX_sizeof(this.pFlower))
-        this.pFruit = filer.streamBytes(this.pFruit, FIX_sizeof(this.pFruit))
-        this.pRoot = filer.streamBytes(this.pRoot, FIX_sizeof(this.pRoot))
-
-        // reset pointers if reading and stream 3d objects 
-        if (filer.isReading()) {
-            this.pSeedlingLeaf.leafTdoParams.object3D = tdoSeedlingLeaf!
-        }
+        // Stream all TDOs separately afterwards for legacy compatibility
         this.pSeedlingLeaf.leafTdoParams.object3D.streamUsingFiler(filer)
-
-        if (filer.isReading()) {
-            this.pLeaf.leafTdoParams.object3D = tdoLeaf!
-        }
         this.pLeaf.leafTdoParams.object3D.streamUsingFiler(filer)
-
-        if (filer.isReading()) {
-            this.pLeaf.stipuleTdoParams.object3D = tdoStipule!
-        }
         this.pLeaf.stipuleTdoParams.object3D.streamUsingFiler(filer)
-
-        if (filer.isReading()) {
-            this.pInflor[Gender.kGenderFemale].bractTdoParams.object3D = tdoInflorBractFemale!
-        }
         this.pInflor[Gender.kGenderFemale].bractTdoParams.object3D.streamUsingFiler(filer)
-
-        if (filer.isReading()) {
-            this.pInflor[Gender.kGenderMale].bractTdoParams.object3D = tdoInflorBractMale!
-        }
         this.pInflor[Gender.kGenderMale].bractTdoParams.object3D.streamUsingFiler(filer)
-
         for (let partType = 0; partType <= FloralPart.kHighestFloralPartConstant; partType++) {
-            if (filer.isReading()) {
-                this.pFlower[Gender.kGenderFemale].tdoParams[partType].object3D = femaleFlowerTdos[partType]
-            }
             this.pFlower[Gender.kGenderFemale].tdoParams[partType].object3D.streamUsingFiler(filer)
-
-            if (filer.isReading()) {
-                this.pFlower[Gender.kGenderMale].tdoParams[partType].object3D = maleFlowerTdos[partType]
-            }
             this.pFlower[Gender.kGenderMale].tdoParams[partType].object3D.streamUsingFiler(filer)
         }
-
-        if (filer.isReading()) {
-            this.pAxillaryBud.tdoParams.object3D = tdoAxillaryBud!
-        }
         this.pAxillaryBud.tdoParams.object3D.streamUsingFiler(filer)
-
-        if (filer.isReading()) {
-            this.pFruit.tdoParams.object3D = tdoFruit!
-        }
         this.pFruit.tdoParams.object3D.streamUsingFiler(filer)
-
-        if (filer.isReading()) {
-            this.pRoot.tdoParams.object3D = tdoRoot!
-        }
         this.pRoot.tdoParams.object3D.streamUsingFiler(filer)
 
         this.randomNumberGenerator.streamUsingFiler(filer)

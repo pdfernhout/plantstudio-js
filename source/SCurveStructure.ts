@@ -5,6 +5,7 @@ import { FieldType } from "./PdParameter"
 import { int, double, float, FloatToStr } from "./common"
 import { safeLn, safediv, safedivWithResult, safeLnWithResult, ErrorMessage, safeExp, safeExpWithResult } from "./umath"
 import { KfStringStream } from "./KfStringStream"
+import { PdFiler } from "./PdFiler";
 
 // const
 // these consts are really defined in uplant.pas but we don't want to include it - keep current
@@ -19,6 +20,15 @@ export class SCurveStructure {
     y2: float
     c1: float
     c2: float
+
+    streamUsingFiler(filer: PdFiler) {
+        this.x1 = filer.streamSingle(this.x1)
+        this.y1 = filer.streamSingle(this.y1)
+        this.x2 = filer.streamSingle(this.x2)
+        this.y2 = filer.streamSingle(this.y2)
+        this.c1 = filer.streamSingle(this.c1)
+        this.c2 = filer.streamSingle(this.c2)
+    }
 }
 
 // s curves 

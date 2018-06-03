@@ -556,14 +556,7 @@ export class PdLeaf extends PdPlantPart {
     streamDataWithFiler(filer: PdFiler, cvir: PdClassAndVersionInformationRecord): void {
         super.streamDataWithFiler(filer, cvir)
 
-        // Stream the sCurve structure
-        this.sCurveParams.x1 = filer.streamSingle(this.sCurveParams.x1)
-        this.sCurveParams.y1 = filer.streamSingle(this.sCurveParams.y1)
-        this.sCurveParams.x2 = filer.streamSingle(this.sCurveParams.x2)
-        this.sCurveParams.y2 = filer.streamSingle(this.sCurveParams.y2)
-        this.sCurveParams.c1 = filer.streamSingle(this.sCurveParams.c1)
-        this.sCurveParams.c2 = filer.streamSingle(this.sCurveParams.c2)
-
+        this.sCurveParams.streamUsingFiler(filer)
         this.propFullSize = filer.streamSingle(this.propFullSize)
         this.biomassAtCreation_pctMPB = filer.streamSingle(this.biomassAtCreation_pctMPB)
         this.isSeedlingLeaf = filer.streamBoolean(this.isSeedlingLeaf)
