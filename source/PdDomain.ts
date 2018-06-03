@@ -13,19 +13,24 @@ import { PdPlantManager } from "./temporary"
 const kMaxWizardQuestions = 30
 const kMaxWizardColors = 2
 const kMaxWizardTdos = 3
+
 const kMainWindowOrientationHorizontal = 0
 const kMainWindowOrientationVertical = 1
 const kMaxMainWindowOrientations = 1
+
 const kIncludeSelectedPlants = 0
 const kIncludeVisiblePlants = 1
 const kIncludeAllPlants = 2
 const kIncludeDrawingAreaContents = 3
 const kMaxIncludeOption = 3
-const kBreederVariationLow = 0
-const kBreederVariationMedium = 1
-const kBreederVariationHigh = 2
-const kBreederVariationCustom = 3
-const kBreederVariationNoNumeric = 4
+
+export enum BreederVariation {
+    kBreederVariationLow = 0,
+    kBreederVariationMedium = 1,
+    kBreederVariationHigh = 2,
+    kBreederVariationCustom = 3,
+    kBreederVariationNoNumeric = 4,
+}
 
 export enum MutationRate {
     kNoMutation = 0,

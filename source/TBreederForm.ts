@@ -1,47 +1,34 @@
-// unit Ubreedr
+import { TRect } from "./TRect";
+import { TPoint } from "./TPoint";
+import { MainForm, TFPBrushStyle } from "./temporary";
+import { BreederVariation, domain, DrawMode } from "./PdDomain";
+import { intround, short, long, ColorDefs, int } from "./common";
+import { PdPlant } from "./PdPlant";
 
-from conversion_common import *
-import ubmpsupport
-import utimeser
-import updcom
-import ucommand
-import umain
-import umath
-import ucursor
-import usupport
-import ubrdopt
-import udomain
-import updform
-import ugener
-import uplant
-import ucollect
-import delphi_compatability
+// TBreederForm was unit Ubreedr
 
-// var
 let BreederForm: TBreederForm
 
-
-// const
 const kRedrawPlants = true
 const kDontRedrawPlants = false
+
 const kConsiderIfPreviewCacheIsUpToDate = true
 const kDontConsiderIfPreviewCacheIsUpToDate = false
 
-
-// const
 const kSelectionIsInFirstColumn = true
 const kSelectionIsNotInFirstColumn = false
+
 const kFirstColumnWidth = 20
 const kBetweenGap = 4
+
 const kOptionTabSize = 0
 const kOptionTabMutation = 1
 const kOptionTabBlending = 2
 const kOptionTabNonNumeric = 3
 const kOptionTabTdos = 4
 
-
-
 export class TBreederForm {
+    /*
     plantsDrawGrid: TDrawGrid = new TDrawGrid()
     BreederMenu: TMainMenu = new TMainMenu()
     BreederMenuEdit: TMenuItem = new TMenuItem()
@@ -104,6 +91,7 @@ export class TBreederForm {
     N8: TMenuItem = new TMenuItem()
     breedButton: TSpeedButton = new TSpeedButton()
     BreederMenuUndoRedoList: TMenuItem = new TMenuItem()
+    */
     selectedRow: short = 0
     generations: TListCollection = new TListCollection()
     dragPlantStartPoint: TPoint = new TPoint()
@@ -112,8 +100,10 @@ export class TBreederForm {
     internalChange: boolean = false
     drawing: boolean = false
     needToRedrawFromChangeToDrawOptions: boolean = false
+    /* TODO: User or remove PdForm superclass
     TBreederForm.prototype = new PdForm()
     TBreederForm.prototype.constructor = TBreederForm
+    */
     
     //$R *.DFM
     // ---------------------------------------------------------------------------- creation/destruction 
@@ -124,7 +114,7 @@ export class TBreederForm {
         this.plantsDrawGrid.DragCursor = ucursor.crDragPlant
         this.Position = delphi_compatability.TPosition.poDesigned
         // keep window on screen - left corner of title bar 
-        tempBoundsRect = udomain.domain.breederWindowRect
+        tempBoundsRect = domain.breederWindowRect
         if ((tempBoundsRect.Left !== 0) || (tempBoundsRect.Right !== 0) || (tempBoundsRect.Top !== 0) || (tempBoundsRect.Bottom !== 0)) {
             if (tempBoundsRect.Left > delphi_compatability.Screen.Width - umain.kMinWidthOnScreen) {
                 tempBoundsRect.Left = delphi_compatability.Screen.Width - umain.kMinWidthOnScreen
@@ -134,25 +124,25 @@ export class TBreederForm {
             }
             this.SetBounds(tempBoundsRect.Left, tempBoundsRect.Top, tempBoundsRect.Right, tempBoundsRect.Bottom)
         }
-        switch (udomain.domain.options.drawSpeed) {
-            case udomain.kDrawFast:
+        switch (domain.options.drawSpeed) {
+            case DrawMode.kDrawFast:
                 this.BreederMenuOptionsFastDraw.checked = true
                 break
-            case udomain.kDrawMedium:
+            case DrawMode.kDrawMedium:
                 this.BreederMenuOptionsMediumDraw.checked = true
                 break
-            case udomain.kDrawBest:
+            case DrawMode.kDrawBest:
                 this.BreederMenuOptionsBestDraw.checked = true
                 break
-            case udomain.kDrawCustom:
+            case DrawMode.kDrawCustom:
                 this.BreederMenuOptionsCustomDraw.checked = true
                 break
         }
         this.updateForChangeToDomainOptions()
         this.updateMenusForChangeToGenerations()
         //to get redo messages
-        umain.MainForm.updateMenusForUndoRedo()
-        this.lightUpCell = Point(-1, -1)
+        MainForm.updateMenusForUndoRedo()
+        this.lightUpCell = new TPoint(-1, -1)
         this.emptyWarningPanel.SendToBack()
     }
     
@@ -182,41 +172,41 @@ export class TBreederForm {
         let newAge: int
         let atLeastOnePlantHasChangedAge: boolean
         
-        if (this.plantsDrawGrid.ColCount !== udomain.domain.breedingAndTimeSeriesOptions.plantsPerGeneration + 1) {
-            this.plantsDrawGrid.ColCount = udomain.domain.breedingAndTimeSeriesOptions.plantsPerGeneration + 1
+        if (this.plantsDrawGrid.ColCount !== domain.breedingAndTimeSeriesOptions.plantsPerGeneration + 1) {
+            this.plantsDrawGrid.ColCount = domain.breedingAndTimeSeriesOptions.plantsPerGeneration + 1
         }
-        if (((this.plantsDrawGrid.DefaultColWidth !== udomain.domain.breedingAndTimeSeriesOptions.thumbnailWidth) || (this.plantsDrawGrid.DefaultRowHeight !== udomain.domain.breedingAndTimeSeriesOptions.thumbnailHeight))) {
-            this.plantsDrawGrid.DefaultColWidth = udomain.domain.breedingAndTimeSeriesOptions.thumbnailWidth
+        if (((this.plantsDrawGrid.DefaultColWidth !== domain.breedingAndTimeSeriesOptions.thumbnailWidth) || (this.plantsDrawGrid.DefaultRowHeight !== domain.breedingAndTimeSeriesOptions.thumbnailHeight))) {
+            this.plantsDrawGrid.DefaultColWidth = domain.breedingAndTimeSeriesOptions.thumbnailWidth
             this.plantsDrawGrid.ColWidths[0] = kFirstColumnWidth
-            this.plantsDrawGrid.DefaultRowHeight = udomain.domain.breedingAndTimeSeriesOptions.thumbnailHeight
+            this.plantsDrawGrid.DefaultRowHeight = domain.breedingAndTimeSeriesOptions.thumbnailHeight
             this.redrawPlants(kDontConsiderIfPreviewCacheIsUpToDate)
         }
-        switch (udomain.domain.breedingAndTimeSeriesOptions.variationType) {
-            case udomain.kBreederVariationLow:
+        switch (domain.breedingAndTimeSeriesOptions.variationType) {
+            case BreederVariation.kBreederVariationLow:
                 this.BreederMenuVariationLow.checked = true
                 this.variationLow.Down = true
                 break
-            case udomain.kBreederVariationMedium:
+            case BreederVariation.kBreederVariationMedium:
                 this.BreederMenuVariationMedium.checked = true
                 this.variationMedium.Down = true
                 break
-            case udomain.kBreederVariationHigh:
+            case BreederVariation.kBreederVariationHigh:
                 this.BreederMenuVariationHigh.checked = true
                 this.variationHigh.Down = true
                 break
-            case udomain.kBreederVariationCustom:
+            case BreederVariation.kBreederVariationCustom:
                 this.BreederMenuVariationCustom.checked = true
                 this.variationCustom.Down = true
                 break
-            case udomain.kBreederVariationNoNumeric:
+            case BreederVariation.kBreederVariationNoNumeric:
                 this.BreederMenuVariationNone.checked = true
                 this.variationNoneNumeric.Down = true
                 break
         }
-        this.BreederMenuVaryColors.checked = udomain.domain.breedingAndTimeSeriesOptions.mutateAndBlendColorValues
-        this.varyColors.Down = udomain.domain.breedingAndTimeSeriesOptions.mutateAndBlendColorValues
-        this.BreederMenuVary3DObjects.checked = udomain.domain.breedingAndTimeSeriesOptions.chooseTdosRandomlyFromCurrentLibrary
-        this.vary3DObjects.Down = udomain.domain.breedingAndTimeSeriesOptions.chooseTdosRandomlyFromCurrentLibrary
+        this.BreederMenuVaryColors.checked = domain.breedingAndTimeSeriesOptions.mutateAndBlendColorValues
+        this.varyColors.Down = domain.breedingAndTimeSeriesOptions.mutateAndBlendColorValues
+        this.BreederMenuVary3DObjects.checked = domain.breedingAndTimeSeriesOptions.chooseTdosRandomlyFromCurrentLibrary
+        this.vary3DObjects.Down = domain.breedingAndTimeSeriesOptions.chooseTdosRandomlyFromCurrentLibrary
         this.redoCaption()
         atLeastOnePlantHasChangedAge = false
         if (this.generations.Count > 0) {
@@ -225,7 +215,7 @@ export class TBreederForm {
                 if (generation.plants.Count > 0) {
                     for (plCount = 0; plCount <= generation.plants.Count - 1; plCount++) {
                         plant = uplant.PdPlant(generation.plants.Items[plCount])
-                        newAge = intround(udomain.domain.breedingAndTimeSeriesOptions.percentMaxAge / 100.0 * plant.pGeneral.ageAtMaturity)
+                        newAge = intround(domain.breedingAndTimeSeriesOptions.percentMaxAge / 100.0 * plant.pGeneral.ageAtMaturity)
                         if (plant.age !== newAge) {
                             plant.setAge(newAge)
                             atLeastOnePlantHasChangedAge = true
@@ -260,42 +250,40 @@ export class TBreederForm {
         this.plantsDrawGrid.Update()
     }
     
-    plantsDrawGridDrawCell(Sender: TObject, Col: long, Row: long, Rect: TRect, State: TGridDrawState): void {
+    plantsDrawGridDrawCell(Sender: TObject, Col: long, Row: long, rect: TRect, State: TGridDrawState): void {
         let generation: PdGeneration
         let plant: PdPlant
-        let textDrawRect: TRect
+        let textDrawRect: TRect = new TRect()
         
         try {
             this.plantsDrawGrid.Canvas.Font = this.plantsDrawGrid.Font
-            this.plantsDrawGrid.Canvas.Font.Color = delphi_compatability.clBlack
+            this.plantsDrawGrid.Canvas.Font.Color = ColorDefs.clBlack
             if (Col === 0) {
                 //if (row = selectedRow) and (generations.count > 0) then
                 //plantsDrawGrid.canvas.brush.color := clBlue
                 //else
-                this.plantsDrawGrid.Canvas.Brush.Color = delphi_compatability.clWhite
+                this.plantsDrawGrid.Canvas.Brush.Color = ColorDefs.clWhite
                 this.plantsDrawGrid.Canvas.Pen.Color = this.plantsDrawGrid.Canvas.Brush.Color
-                this.plantsDrawGrid.Canvas.Rectangle(Rect.left, Rect.top, Rect.right, Rect.bottom)
+                this.plantsDrawGrid.Canvas.Rectangle(rect.Left, rect.Top, rect.Right, rect.Bottom)
                 if (Row > this.generations.Count - 1) {
                     return
                 }
                 //if row = selectedRow then
                 //plantsDrawGrid.canvas.font.color := clWhite;
-                textDrawRect.Left = Rect.left + usupport.rWidth(Rect) / 2 - this.plantsDrawGrid.Canvas.TextWidth(IntToStr(Row + 1)) / 2
-                textDrawRect.Top = Rect.top + usupport.rHeight(Rect) / 2 - this.plantsDrawGrid.Canvas.TextHeight("0") / 2
+                textDrawRect.Left = rect.Left + usupport.rWidth(rect) / 2 - this.plantsDrawGrid.Canvas.TextWidth(IntToStr(Row + 1)) / 2
+                textDrawRect.Top = rect.Top + usupport.rHeight(rect) / 2 - this.plantsDrawGrid.Canvas.TextHeight("0") / 2
                 this.plantsDrawGrid.Canvas.TextOut(textDrawRect.Left, textDrawRect.Top, IntToStr(Row + 1))
                 return
             } else {
-                this.plantsDrawGrid.Canvas.Brush.Color = delphi_compatability.clWhite
+                this.plantsDrawGrid.Canvas.Brush.Color = ColorDefs.clWhite
                 this.plantsDrawGrid.Canvas.Pen.Width = 1
-                this.plantsDrawGrid.Canvas.Pen.Color = delphi_compatability.clWhite
-                this.plantsDrawGrid.Canvas.Rectangle(Rect.left, Rect.top, Rect.right, Rect.bottom)
+                this.plantsDrawGrid.Canvas.Pen.Color = ColorDefs.clWhite
+                this.plantsDrawGrid.Canvas.Rectangle(rect.Left, rect.Top, rect.Right, rect.Bottom)
             }
-            generation = null
             generation = this.generationForIndex(Row)
             if (generation === null) {
                 return
             }
-            plant = null
             plant = generation.plantForIndex(Col - 1)
             if (plant === null) {
                 return
@@ -303,41 +291,39 @@ export class TBreederForm {
             if (!plant.previewCacheUpToDate) {
                 // draw plant 
                 // draw gray solid box to show delay for drawing plant cache
-                this.plantsDrawGrid.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsSolid
-                this.plantsDrawGrid.Canvas.Brush.Color = delphi_compatability.clSilver
-                this.plantsDrawGrid.Canvas.Pen.Color = delphi_compatability.clSilver
-                //FIX unresolved WITH expression: Rect
-                this.plantsDrawGrid.Canvas.Rectangle(this.Left + 1, this.Top + 1, UNRESOLVED.right, UNRESOLVED.bottom)
+                this.plantsDrawGrid.Canvas.Brush.Style = TFPBrushStyle.bsSolid
+                this.plantsDrawGrid.Canvas.Brush.Color = ColorDefs.clSilver
+                this.plantsDrawGrid.Canvas.Pen.Color = ColorDefs.clSilver
+                this.plantsDrawGrid.Canvas.Rectangle(rect.Left + 1, rect.Top + 1, rect.Right, rect.Bottom)
                 // draw plant preview cache
                 plant.fixedPreviewScale = false
                 plant.fixedDrawPosition = false
-                plant.drawPreviewIntoCache(Point(this.plantsDrawGrid.DefaultColWidth, this.plantsDrawGrid.DefaultRowHeight), uplant.kDontConsiderDomainScale, umain.kDrawNow)
+                plant.drawPreviewIntoCache(new TPoint(this.plantsDrawGrid.DefaultColWidth, this.plantsDrawGrid.DefaultRowHeight), uplant.kDontConsiderDomainScale, umain.kDrawNow)
             }
             plant.previewCache.Transparent = false
-            ubmpsupport.copyBitmapToCanvasWithGlobalPalette(plant.previewCache, this.plantsDrawGrid.Canvas, Rect)
+            ubmpsupport.copyBitmapToCanvasWithGlobalPalette(plant.previewCache, this.plantsDrawGrid.Canvas, rect)
             // draw selection rectangle 
-            this.plantsDrawGrid.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsClear
+            this.plantsDrawGrid.Canvas.Brush.Style = TFPBrushStyle.bsClear
             this.plantsDrawGrid.Canvas.Pen.Width = 2
             if ((Col === this.lightUpCell.X) && (Row === this.lightUpCell.Y)) {
-                this.plantsDrawGrid.Canvas.Pen.Color = delphi_compatability.clAqua
+                this.plantsDrawGrid.Canvas.Pen.Color = ColorDefs.clAqua
             } else if (Row === this.selectedRow) {
                 if (plant === generation.firstSelectedPlant()) {
-                    this.plantsDrawGrid.Canvas.Pen.Color = udomain.domain.options.firstSelectionRectangleColor
+                    this.plantsDrawGrid.Canvas.Pen.Color = domain.options.firstSelectionRectangleColor
                 } else if (plant === generation.secondSelectedPlant()) {
-                    this.plantsDrawGrid.Canvas.Pen.Color = udomain.domain.options.multiSelectionRectangleColor
+                    this.plantsDrawGrid.Canvas.Pen.Color = domain.options.multiSelectionRectangleColor
                 } else {
-                    this.plantsDrawGrid.Canvas.Pen.Color = delphi_compatability.clSilver
+                    this.plantsDrawGrid.Canvas.Pen.Color = ColorDefs.clSilver
                 }
             } else {
-                this.plantsDrawGrid.Canvas.Pen.Color = delphi_compatability.clSilver
+                this.plantsDrawGrid.Canvas.Pen.Color = ColorDefs.clSilver
             }
-            //FIX unresolved WITH expression: Rect
-            this.plantsDrawGrid.Canvas.Rectangle(this.Left + 1, this.Top + 1, UNRESOLVED.right, UNRESOLVED.bottom)
+            this.plantsDrawGrid.Canvas.Rectangle(rect.Left + 1, rect.Top + 1, rect.Right, rect.Bottom)
             if (plant === generation.firstParent) {
                 // draw parent indicator 
-                this.plantsDrawGrid.Canvas.TextOut(Rect.left + 4, Rect.top + 2, "p1")
+                this.plantsDrawGrid.Canvas.TextOut(rect.Left + 4, rect.Top + 2, "p1")
             } else if (plant === generation.secondParent) {
-                this.plantsDrawGrid.Canvas.TextOut(Rect.left + 4, Rect.top + 2, "p2")
+                this.plantsDrawGrid.Canvas.TextOut(rect.Left + 4, rect.Top + 2, "p2")
             }
         } finally {
             ucursor.cursor_stopWait()
@@ -389,7 +375,7 @@ export class TBreederForm {
         let oldSelectedRow: int
         let generation: PdGeneration
         
-        col, row = this.plantsDrawGrid.MouseToCell(X, Y, col, row)
+        [col, row] = this.plantsDrawGrid.MouseToCell(X, Y)
         if ((row >= 0) && (row <= this.generations.Count - 1)) {
             generation = ugener.PdGeneration(this.generations.Items[row])
             if (generation !== null) {
@@ -436,10 +422,10 @@ export class TBreederForm {
                 Accept = false
                 return Accept
             }
-            col, row = this.plantsDrawGrid.MouseToCell(X, Y, col, row)
+            [col, row] = this.plantsDrawGrid.MouseToCell(X, Y)
             if ((col !== this.lightUpCell.X) || (row !== this.lightUpCell.Y)) {
                 this.invalidateGridCell(this.lightUpCell.X, this.lightUpCell.Y)
-                this.lightUpCell = Point(col, row)
+                this.lightUpCell = new TPoint(col, row)
                 this.invalidateGridCell(col, row)
             }
         }
@@ -460,7 +446,7 @@ export class TBreederForm {
         }
         // remove lightup on cell before resetting cell
         this.invalidateGridCell(this.lightUpCell.X, this.lightUpCell.Y)
-        this.lightUpCell = Point(-1, -1)
+        this.lightUpCell = new TPoint(-1, -1)
         if (Target === null) {
             return
         }
@@ -480,7 +466,7 @@ export class TBreederForm {
             } else {
                 newPlant.moveTo(umain.MainForm.standardPastePosition())
             }
-            if (!udomain.domain.viewPlantsInMainWindowOnePlantAtATime()) {
+            if (!domain.viewPlantsInMainWindowOnePlantAtATime()) {
                 // v2.1
                 newPlant.calculateDrawingScaleToLookTheSameWithDomainScale()
             }
@@ -503,7 +489,7 @@ export class TBreederForm {
             utimeser.TimeSeriesForm.copyPlantToPoint(plant, X, Y)
         } else if (Target === Sender) {
             // get plant being replaced 
-            col, row = this.plantsDrawGrid.MouseToCell(X, Y, col, row)
+            [col, row] = this.plantsDrawGrid.MouseToCell(X, Y)
             if (!this.inGrid(row, col)) {
                 return
             }
@@ -531,7 +517,7 @@ export class TBreederForm {
         let plant: PdPlant
         let newCommand: PdCommand
         
-        col, row = this.plantsDrawGrid.MouseToCell(x, y, col, row)
+        [col, row] = this.plantsDrawGrid.MouseToCell(x, y)
         plant = this.plantForRowAndColumn(row, col)
         if (plant === null) {
             return
@@ -546,7 +532,7 @@ export class TBreederForm {
         
         generation = this.generationForIndex(row)
         if (generation === null) {
-            throw new GeneralException.create("Problem: Invalid row in method TBreederForm.replacePlantInRow.")
+            throw new Error("Problem: Invalid row in method TBreederForm.replacePlantInRow.")
         }
         generation.replacePlant(oldPlant, newPlant)
         this.updateForChangeToPlant(newPlant)
@@ -745,7 +731,7 @@ export class TBreederForm {
     }
     
     updatePasteMenuForClipboardContents(): void {
-        this.BreederMenuPaste.enabled = (this.primarySelectedPlant() !== null) && (udomain.domain.plantManager.privatePlantClipboard.Count > 0)
+        this.BreederMenuPaste.enabled = (this.primarySelectedPlant() !== null) && (domain.plantManager.privatePlantClipboard.Count > 0)
         this.BreederPopupMenuPaste.enabled = this.BreederMenuPaste.enabled
     }
     
@@ -810,7 +796,7 @@ export class TBreederForm {
         saveName = plant.getName()
         this.numBreederPlantsCopiedThisSession += 1
         plant.setName("Breeder plant " + IntToStr(this.numBreederPlantsCopiedThisSession))
-        udomain.domain.plantManager.copyPlantsInListToPrivatePlantClipboard(copyList)
+        domain.plantManager.copyPlantsInListToPrivatePlantClipboard(copyList)
         plant.setName(saveName)
         //sets our paste menu also
         umain.MainForm.updatePasteMenuForClipboardContents()
@@ -832,7 +818,7 @@ export class TBreederForm {
         let newCommand: PdCommand
         let column: short
         
-        if (udomain.domain.plantManager.privatePlantClipboard.Count <= 0) {
+        if (domain.plantManager.privatePlantClipboard.Count <= 0) {
             return
         }
         generation = this.selectedGeneration()
@@ -845,7 +831,7 @@ export class TBreederForm {
         }
         column = generation.plants.IndexOf(plant) + 1
         newPlant = uplant.PdPlant().create()
-        udomain.domain.plantManager.pasteFirstPlantFromPrivatePlantClipboardToPlant(newPlant)
+        domain.plantManager.pasteFirstPlantFromPrivatePlantClipboardToPlant(newPlant)
         newCommand = updcom.PdReplaceBreederPlant().createWithPlantRowAndColumn(newPlant, this.selectedRow, column)
         umain.MainForm.doCommand(newCommand)
         //command will free plant if paste is undone
@@ -858,7 +844,7 @@ export class TBreederForm {
         if ((this.selectedRow < 0) || (this.selectedRow > this.generations.Count - 1)) {
             return
         }
-        if (this.selectedRow >= udomain.domain.breedingAndTimeSeriesOptions.maxGenerations - 1) {
+        if (this.selectedRow >= domain.breedingAndTimeSeriesOptions.maxGenerations - 1) {
             // check if there is room in the breeder - this command will make one new generation 
             this.fullWarning()
             return
@@ -867,7 +853,7 @@ export class TBreederForm {
         if (generationToBreed.selectedPlants.Count <= 0) {
             return
         }
-        newCommand = updcom.PdBreedFromParentsCommand().createWithInfo(this.generations, generationToBreed.firstSelectedPlant(), generationToBreed.secondSelectedPlant(), this.selectedRow, udomain.domain.breedingAndTimeSeriesOptions.percentMaxAge / 100.0, updcom.kDontCreateFirstGeneration)
+        newCommand = updcom.PdBreedFromParentsCommand().createWithInfo(this.generations, generationToBreed.firstSelectedPlant(), generationToBreed.secondSelectedPlant(), this.selectedRow, domain.breedingAndTimeSeriesOptions.percentMaxAge / 100.0, updcom.kDontCreateFirstGeneration)
         generationToBreed.firstParent = generationToBreed.firstSelectedPlant()
         generationToBreed.secondParent = generationToBreed.secondSelectedPlant()
         umain.MainForm.doCommand(newCommand)
@@ -973,25 +959,25 @@ export class TBreederForm {
     }
     
     BreederMenuVariationNoneClick(Sender: TObject): void {
-        udomain.domain.breedingAndTimeSeriesOptions.variationType = udomain.kBreederVariationNoNumeric
+        domain.breedingAndTimeSeriesOptions.variationType = udomain.kBreederVariationNoNumeric
         this.BreederMenuVariationNone.checked = true
         this.redoCaption()
     }
     
     BreederMenuVariationLowClick(Sender: TObject): void {
-        udomain.domain.breedingAndTimeSeriesOptions.variationType = udomain.kBreederVariationLow
+        domain.breedingAndTimeSeriesOptions.variationType = udomain.kBreederVariationLow
         this.BreederMenuVariationLow.checked = true
         this.redoCaption()
     }
     
     BreederMenuVariationMediumClick(Sender: TObject): void {
-        udomain.domain.breedingAndTimeSeriesOptions.variationType = udomain.kBreederVariationMedium
+        domain.breedingAndTimeSeriesOptions.variationType = udomain.kBreederVariationMedium
         this.BreederMenuVariationMedium.checked = true
         this.redoCaption()
     }
     
     BreederMenuVariationHighClick(Sender: TObject): void {
-        udomain.domain.breedingAndTimeSeriesOptions.variationType = udomain.kBreederVariationHigh
+        domain.breedingAndTimeSeriesOptions.variationType = udomain.kBreederVariationHigh
         // this is to deal with if it was turned off by not having a library
         // v2.0 removed - this is separate now
         // domain.breedingAndTimeSeriesOptions.chooseTdosRandomlyFromCurrentLibrary := true;
@@ -1012,9 +998,9 @@ export class TBreederForm {
         let options: BreedingAndTimeSeriesOptionsStructure
         
         this.BreederMenuVaryColors.checked = !this.BreederMenuVaryColors.checked
-        options = udomain.domain.breedingAndTimeSeriesOptions
+        options = domain.breedingAndTimeSeriesOptions
         options.mutateAndBlendColorValues = this.BreederMenuVaryColors.checked
-        newCommand = updcom.PdChangeBreedingAndTimeSeriesOptionsCommand().createWithOptionsAndDomainOptions(options, udomain.domain.options)
+        newCommand = updcom.PdChangeBreedingAndTimeSeriesOptionsCommand().createWithOptionsAndDomainOptions(options, domain.options)
         umain.MainForm.doCommand(newCommand)
     }
     
@@ -1023,9 +1009,9 @@ export class TBreederForm {
         let options: BreedingAndTimeSeriesOptionsStructure
         
         this.BreederMenuVary3DObjects.checked = !this.BreederMenuVary3DObjects.checked
-        options = udomain.domain.breedingAndTimeSeriesOptions
+        options = domain.breedingAndTimeSeriesOptions
         options.chooseTdosRandomlyFromCurrentLibrary = this.BreederMenuVary3DObjects.checked
-        newCommand = updcom.PdChangeBreedingAndTimeSeriesOptionsCommand().createWithOptionsAndDomainOptions(options, udomain.domain.options)
+        newCommand = updcom.PdChangeBreedingAndTimeSeriesOptionsCommand().createWithOptionsAndDomainOptions(options, domain.options)
         umain.MainForm.doCommand(newCommand)
     }
     
@@ -1036,17 +1022,17 @@ export class TBreederForm {
         let response: int
         
         if (tabIndexToShow === kOptionTabMutation) {
-            udomain.domain.breedingAndTimeSeriesOptions.variationType = udomain.kBreederVariationCustom
+            domain.breedingAndTimeSeriesOptions.variationType = udomain.kBreederVariationCustom
             this.BreederMenuVariationCustom.checked = true
             this.redoCaption()
         }
         optionsForm = ubrdopt.TBreedingOptionsForm().create(this)
         if (optionsForm === null) {
-            throw new GeneralException.create("Problem: Could not create breeding options window.")
+            throw new Error("Problem: Could not create breeding options window.")
         }
         try {
             optionsForm.breedingOptions.pageIndex = tabIndexToShow
-            optionsForm.initializeWithBreedingAndTimeSeriesOptionsAndDomainOptions(udomain.domain.breedingAndTimeSeriesOptions, udomain.domain.options)
+            optionsForm.initializeWithBreedingAndTimeSeriesOptionsAndDomainOptions(domain.breedingAndTimeSeriesOptions, domain.options)
             response = optionsForm.ShowModal()
             if (response === mrOK) {
                 newCommand = updcom.PdChangeBreedingAndTimeSeriesOptionsCommand().createWithOptionsAndDomainOptions(optionsForm.options, optionsForm.domainOptions)
