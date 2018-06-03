@@ -1,6 +1,6 @@
 // PdLeaf was unit uleaf
 
-import { SCurveStructure, safedivExcept, max, min, scurve, pointsAreCloseEnough } from "./umath"
+import { safedivExcept, max, min, pointsAreCloseEnough } from "./umath"
 import { PdPlantPart, kDontTaper, kUseAmendment, kDontUseAmendment } from "./PdPlantPart"
 import { float, int, odd, TColorRef } from "./common"
 import { PdPlant, CompoundLeafStyle, Direction, PartType, LeafArrangement } from "./PdPlant"
@@ -12,6 +12,7 @@ import { KfTurtle } from "./KfTurtle"
 import { TRect } from "./TRect"
 import { ClassId } from "./uclasses"
 import { PdClassAndVersionInformationRecord, PdFiler } from "./PdFiler";
+import { SCurveStructure, scurve } from "./SCurveStructure"
 
 const kNumCompoundLeafRandomSwayIndexes = 49
 
