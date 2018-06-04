@@ -137,6 +137,46 @@ export class BreedingAndTimeSeriesOptionsStructure {
     thumbnailHeight: short
     maxGenerations: short
     numTimeSeriesStages: short
+
+    /* TODO: Remove BreedingAndTimeSeriesOptionsStructure>streamUsingFiler if not used
+    streamUsingFiler(filer: PdFiler) {
+        for (let i = 0; i < this.mutationStrengths.length; i++) {
+            this.mutationStrengths[i] = filer.streamSmallint(this.mutationStrengths[i])
+        }
+        for (let i = 0; i < this.firstPlantWeights.length; i++) {
+            this.firstPlantWeights[i] = filer.streamSmallint(this.firstPlantWeights[i])
+        }
+        this.getNonNumericalParametersFrom = filer.streamSmallint(this.getNonNumericalParametersFrom)
+        this.mutateAndBlendColorValues = filer.streamBoolean(this.mutateAndBlendColorValues)
+        this.chooseTdosRandomlyFromCurrentLibrary = filer.streamBoolean(this.chooseTdosRandomlyFromCurrentLibrary)
+        this.percentMaxAge = filer.streamSmallint(this.percentMaxAge)
+        this.plantsPerGeneration = filer.streamSmallint(this.plantsPerGeneration)
+        this.variationType = filer.streamSmallint(this.variationType)
+        this.thumbnailWidth = filer.streamSmallint(this.thumbnailWidth)
+        this.thumbnailHeight = filer.streamSmallint(this.thumbnailHeight)
+        this.maxGenerations = filer.streamSmallint(this.maxGenerations)
+        this.numTimeSeriesStages = filer.streamSmallint(this.numTimeSeriesStages)
+    }
+    */
+
+    copyTo(other: BreedingAndTimeSeriesOptionsStructure) {
+        for (let i = 0; i < this.mutationStrengths.length; i++) {
+            other.mutationStrengths[i] = this.mutationStrengths[i]
+        }
+        for (let i = 0; i < this.firstPlantWeights.length; i++) {
+            other.firstPlantWeights[i] = this.firstPlantWeights[i]
+        }
+        other.getNonNumericalParametersFrom = this.getNonNumericalParametersFrom
+        other.mutateAndBlendColorValues = this.mutateAndBlendColorValues
+        other.chooseTdosRandomlyFromCurrentLibrary = this.chooseTdosRandomlyFromCurrentLibrary
+        other.percentMaxAge = this.percentMaxAge
+        other.plantsPerGeneration = this.plantsPerGeneration
+        other.variationType = this.variationType
+        other.thumbnailWidth = this.thumbnailWidth
+        other.thumbnailHeight = this.thumbnailHeight
+        other.maxGenerations = this.maxGenerations
+        other.numTimeSeriesStages = this.numTimeSeriesStages
+    }
 }
 
 // v2.0

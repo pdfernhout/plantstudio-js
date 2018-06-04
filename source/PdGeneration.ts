@@ -78,14 +78,8 @@ export class PdGeneration {
     }
     
     breedFromParents(aFirstParent: PdPlant, aSecondParent: PdPlant, fractionOfMaxAge: float): void {
-        let newPlant: PdPlant
-        let newAge: short
-        let fileNameWithPath: string
-        let newTdo: KfObject3D
         let inputFile: TextFile
-        let tdos: KfObject3D[] = []
-        let localOptions: BreedingAndTimeSeriesOptionsStructure = new BreedingAndTimeSeriesOptionsStructure()
-        
+
         this.firstParent = aFirstParent
         if (this.firstParent === null) {
             return
@@ -104,8 +98,11 @@ export class PdGeneration {
             MessageDialog("Because you didn't choose a 3D object library, the breeder won't be able\nto randomly choose 3D objects for your breeding offspring.\n\nYou can choose a library later by choosing Custom from the Variation menu\nand choosing a 3D object library there.", "mtWarning", {mbOK: true, }, 0)
         }
 
+        const tdos: KfObject3D[] = []
+
         if (domain.breedingAndTimeSeriesOptions.chooseTdosRandomlyFromCurrentLibrary) {
-            fileNameWithPath = domain.defaultTdoLibraryFileName
+            /* TODO implement random TDO choice in breedFromParents
+            const fileNameWithPath = domain.defaultTdoLibraryFileName
             if (!FileExists(fileNameWithPath)) {
                 domain.breedingAndTimeSeriesOptions.chooseTdosRandomlyFromCurrentLibrary = false
             } else {
@@ -114,7 +111,7 @@ export class PdGeneration {
                 try {
                     Reset(inputFile)
                     while (!eof(inputFile)) {
-                        newTdo = new KfObject3D()
+                        const newTdo = new KfObject3D()
                         newTdo.readFromFileStream(inputFile, utdo.kInTdoLibrary)
                         tdos.push(newTdo)
                     }
@@ -122,17 +119,19 @@ export class PdGeneration {
                     CloseFile(inputFile)
                 }
             }
+            */
         }
         for (let i = 0; i <= domain.breedingAndTimeSeriesOptions.plantsPerGeneration - 1; i++) {
-            newPlant = new PdPlant()
+            const newPlant = new PdPlant()
             this.plants.push(newPlant)
             newPlant.reset()
             if (domain.breedingAndTimeSeriesOptions.variationType !== BreederVariation.kBreederVariationNoNumeric) {
                 newPlant.randomize()
             }
-            this.setLocalOptionsToDomainOptions(localOptions)
+            const localOptions: BreedingAndTimeSeriesOptionsStructure = new BreedingAndTimeSeriesOptionsStructure()
+            this.setLocalOptionsFromDomainOptions(localOptions)
             newPlant.useBreedingOptionsAndPlantsToSetParameters(localOptions, this.firstParent, this.secondParent, tdos)
-            newAge = intround(newPlant.pGeneral.ageAtMaturity * fractionOfMaxAge)
+            const newAge: short = intround(newPlant.pGeneral.ageAtMaturity * fractionOfMaxAge)
             newPlant.setAge(intMin(newAge, newPlant.pGeneral.ageAtMaturity))
             // v2.0 plants take rotation angles from first parent
             newPlant.xRotation = this.firstParent.xRotation
@@ -141,11 +140,8 @@ export class PdGeneration {
         }
     }
     
-    setLocalOptionsToDomainOptions(localOptions: BreedingAndTimeSeriesOptionsStructure): void {
-        raise "method setLocalOptionsToDomainOptions had assigned to var parameter localOptions not added to return -- fixup manually"
-        let i: short
-        
-        for (i = 0; i <= kMaxBreedingSections; i++) {
+    setLocalOptionsFromDomainOptions(localOptions: BreedingAndTimeSeriesOptionsStructure): void {
+        for (let i = 0; i <= kMaxBreedingSections; i++) {
             // defaults
             localOptions.firstPlantWeights[i] = 50
         }
@@ -155,25 +151,25 @@ export class PdGeneration {
         localOptions.chooseTdosRandomlyFromCurrentLibrary = domain.breedingAndTimeSeriesOptions.chooseTdosRandomlyFromCurrentLibrary
         switch (domain.breedingAndTimeSeriesOptions.variationType) {
             case BreederVariation.kBreederVariationLow:
-                for (i = 0; i <= kMaxBreedingSections; i++) {
+                for (let i = 0; i <= kMaxBreedingSections; i++) {
                     localOptions.mutationStrengths[i] = MutationRate.kLowMutation
                 }
                 break
             case BreederVariation.kBreederVariationMedium:
-                for (i = 0; i <= kMaxBreedingSections; i++) {
+                for (let i = 0; i <= kMaxBreedingSections; i++) {
                     localOptions.mutationStrengths[i] = MutationRate.kMediumMutation
                 }
                 break
             case BreederVariation.kBreederVariationHigh:
-                for (i = 0; i <= kMaxBreedingSections; i++) {
+                for (let i = 0; i <= kMaxBreedingSections; i++) {
                     localOptions.mutationStrengths[i] = MutationRate.kHighMutation
                 }
                 break
             case BreederVariation.kBreederVariationCustom:
-                localOptions = domain.breedingAndTimeSeriesOptions
+                domain.breedingAndTimeSeriesOptions.copyTo(localOptions)
                 break
             case BreederVariation.kBreederVariationNoNumeric:
-                for (i = 0; i <= kMaxBreedingSections; i++) {
+                for (let i = 0; i <= kMaxBreedingSections; i++) {
                     localOptions.mutationStrengths[i] = MutationRate.kNoMutation
                 }
                 break

@@ -1343,7 +1343,10 @@ export class PdDomain {
         }
     }
     
+    */
     checkForExistingDefaultTdoLibrary(): boolean {
+        return false
+        /* TODO: implement checkForExistingDefaultTdoLibrary
         let result = false
         // returns false if user wants to cancel action
         result = true
@@ -1353,7 +1356,10 @@ export class PdDomain {
             result = this.defaultTdoLibraryFileName !== ""
         }
         return result
+        */
     }
+
+    /*
     
     totalUnregisteredExportsAtThisMoment(): short {
         let result = 0

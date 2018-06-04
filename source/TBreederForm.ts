@@ -95,7 +95,7 @@ export class TBreederForm {
     BreederMenuUndoRedoList: TMenuItem = new TMenuItem()
     */
     selectedRow: short = 0
-    generations: TListCollection = new TListCollection()
+    generations: PdGeneration[] = []
     dragPlantStartPoint: TPoint = new TPoint()
     lightUpCell: TPoint = new TPoint()
     numBreederPlantsCopiedThisSession: long = 0
@@ -551,7 +551,7 @@ export class TBreederForm {
     }
     
     addGeneration(newGeneration: PdGeneration): void {
-        this.generations.Add(newGeneration)
+        this.generations.push(newGeneration)
     }
     
     forgetLastGeneration(): void {
@@ -770,14 +770,12 @@ export class TBreederForm {
     }
     
     BreederMenuCopyClick(Sender: TObject): void {
-        let copyList: TList
-
         const plant = this.primarySelectedPlant()
         if (plant === null) {
             return
         }
-        copyList = delphi_compatability.TList().Create()
-        copyList.Add(plant)
+        const copyList: PdPlant[] = []
+        copyList.push(plant)
         // temporarily change plant name to make copy, then put back 
         const saveName = plant.getName()
         this.numBreederPlantsCopiedThisSession += 1
@@ -906,33 +904,27 @@ export class TBreederForm {
     }
     
     BreederMenuRandomizeAllClick(Sender: TObject): void {
-        let generation: PdGeneration
-        let newCommand: PdCommand
-        let randomizeList: TList
-        
         if (this.generations.length <= 0) {
             return
         }
-        randomizeList = null
         try {
             ucursor.cursor_startWait()
-            randomizeList = delphi_compatability.TList().Create()
+            const randomizeList = PdPlant[]
             if (this.generations.length > 0) {
                 for (let i = 0; i <= this.generations.length - 1; i++) {
-                    generation = this.generations[i]
+                    const generation: PdGeneration = this.generations[i]
                     if (generation.plants.length > 0) {
                         for (let j = 0; j <= generation.plants.length - 1; j++) {
-                            randomizeList.Add(generation.plants[j])
+                            randomizeList.push(generation.plants[j])
                         }
                     }
                 }
             }
-            newCommand = updcom.PdRandomizeCommand().createWithListOfPlants(randomizeList)
+            const newCommand: PdCommand = updcom.PdRandomizeCommand().createWithListOfPlants(randomizeList)
             newCommand.isInBreeder = true
             newCommand.isRandomizeAllInBreeder = true
             MainForm.doCommand(newCommand)
         } finally {
-            randomizeList.free
             ucursor.cursor_stopWait()
         }
     }
