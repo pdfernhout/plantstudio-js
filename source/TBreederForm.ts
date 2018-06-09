@@ -8,7 +8,7 @@ import { intround, short, long, ColorDefs, int, IntToStr, MessageDialog, arrayRe
 import { PdPlant, BreedingAndTimeSeriesOptionsStructure } from "./PdPlant"
 import { PdGeneration } from "./PdGeneration"
 import { PdCommand } from "./PdCommand"
-import { TDrawGrid } from "./TDrawGrid"
+import { TDrawGrid, TGridDrawState } from "./TDrawGrid"
 
 let BreederForm: TBreederForm
 
@@ -148,9 +148,6 @@ export class TBreederForm {
     }
     
     FormActivate(event: any): void {
-        if (delphi_compatability.Application.terminated) {
-            return
-        }
         if (this.generations.length <= 0) {
             this.emptyWarningPanel.BringToFront()
         } else if (this.needToRedrawFromChangeToDrawOptions) {
@@ -342,9 +339,6 @@ export class TBreederForm {
         let generation: PdGeneration
         let plant: PdPlant
         
-        if (delphi_compatability.Application.terminated) {
-            return
-        }
         // had selection here, moved to mouse down because double-click makes extra mouse up, seems okay so far
     }
     
@@ -414,9 +408,6 @@ export class TBreederForm {
     }
     
     plantsDrawGridEndDrag(event: any, Target: TObject, X: int, Y: int): void {
-        if (delphi_compatability.Application.terminated) {
-            return
-        }
         // remove lightup on cell before resetting cell
         this.invalidateGridCell(this.lightUpCell.X, this.lightUpCell.Y)
         this.lightUpCell = new TPoint(-1, -1)
@@ -587,7 +578,7 @@ export class TBreederForm {
                     const plant: PdPlant = generation.plants[plCount]
                     if (plant === aPlant) {
                         const cellRectOver: TRect = this.plantsDrawGrid.CellRect(plCount + 1, genCount)
-                        this.plantsDrawGridDrawCell(this, plCount + 1, genCount, cellRectOver, {UNRESOLVED.gdFocused, UNRESOLVED.gdSelected, })
+                        this.plantsDrawGridDrawCell(this, plCount + 1, genCount, cellRectOver, { gdFocused: true, gdSelected: true })
                         return
                     }
                 }
@@ -862,7 +853,7 @@ export class TBreederForm {
         }
         try {
             ucursor.cursor_startWait()
-            const randomizeList = PdPlant[]
+            const randomizeList: PdPlant[] = []
             if (this.generations.length > 0) {
                 for (let i = 0; i <= this.generations.length - 1; i++) {
                     const generation: PdGeneration = this.generations[i]
@@ -1047,9 +1038,6 @@ export class TBreederForm {
     
     // ---------------------------------------------------------------------------- resizing 
     FormResize(event: any): void {
-        if (delphi_compatability.Application.terminated) {
-            return
-        }
         if (this.generations === null) {
             return
         }

@@ -166,4 +166,5 @@ export const TimeSeriesForm = {
 
 export class PdPlantManager {
     plantDrawScale_PixelsPerMm: number = 1.0
+    privatePlantClipboard: PdPlant[] = []
 }
