@@ -7,12 +7,12 @@ import { domain, BreederVariation, MutationRate } from "./PdDomain"
 import { intMin } from "./umath"
 
 export class PdGeneration {
-    firstParent: PdPlant = new PdPlant()
-    secondParent: PdPlant = new PdPlant()
+    firstParent: PdPlant | null = null
+    secondParent: PdPlant | null = null
     selectedPlants: PdPlant[] = []
     plants: PdPlant[] = []
     
-    constructor(parentOne: PdPlant, parentTwo: PdPlant, fractionOfMaxAge: float): void {
+    constructor(parentOne: PdPlant | null, parentTwo: PdPlant | null, fractionOfMaxAge: float) {
         let newPlant: PdPlant
         
         // note: this is only used right now in the PdBreedFromParentsCommand command, so some things might not
