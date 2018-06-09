@@ -51,13 +51,10 @@ let numPlantsCreatedThisSession: long
 
 function plantNamesForDescription(aList: PdPlant[]): string {
     let result = ""
-    let firstPlant: PdPlant
-    
-    result = ""
     if ((aList === null) || (aList.length <= 0)) {
         return result
     }
-    firstPlant = uplant.PdPlant(aList[0])
+    const firstPlant = aList[0]
     if (firstPlant !== null) {
         result = " plant \"" + firstPlant.getName() + "\""
         if (aList.length > 1) {
@@ -73,7 +70,6 @@ const kGapBetweenArrangedPlants = 5
 
 function nameForDirection(direction: short): string {
     let result = ""
-    result = ""
     switch (direction) {
         case kRotateX:
             result = "X"
@@ -317,7 +313,7 @@ export class PdCenterDrawingCommand extends PdCommand {
         this.oldScale_PixelsPerMm = domain.plantDrawScale_PixelsPerMm()
         this.oldOffset_mm = domain.plantDrawOffset_mm()
         MainForm.fitVisiblePlantsInDrawingArea(kDrawNow, umain.kScaleAndMove, umain.kAlwaysMove)
-        MainForm.recalculateAllPlantBoundsRects(uplant.kDontDrawNow)
+        MainForm.recalculateAllPlantBoundsRects(kDontDrawNow)
         this.newScale_pixelsPerMm = domain.plantDrawScale_PixelsPerMm()
         this.newOffset_mm = domain.plantDrawOffset_mm()
     }
@@ -521,15 +517,14 @@ export class PdNewCommand extends PdCommand {
     newPlant: PdPlant
     useWizardPlant: boolean = false
     wizardPlant: PdPlant
-    oldSelectedList: TList = new TList()
+    oldSelectedList: PdPlant[] = []
     
     // v2.0
-    constructor(aPlant: PdPlant, anOldSelectedList: TList) {
+    constructor(aPlant: PdPlant, anOldSelectedList: PdPlant[]) {
         super()
         this.useWizardPlant = true
         this.wizardPlant = aPlant
         // selected list is just pointers, this doesn't take control of them
-        this.oldSelectedList = delphi_compatability.TList().Create()
         if ((anOldSelectedList !== null) && (anOldSelectedList.length > 0)) {
             for (let i = 0; i <= anOldSelectedList.length - 1; i++) {
                 this.oldSelectedList.push(anOldSelectedList[i])
@@ -539,7 +534,6 @@ export class PdNewCommand extends PdCommand {
     
     numberOfStoredLargeObjects(): long {
         let result = 0
-        result = 0
         if ((!this.done) && (this.newPlant !== null)) {
             result += 1
         }
@@ -721,10 +715,10 @@ export class PdDeleteAmendmentCommand extends PdCommand {
 export class PdEditAmendmentCommand extends PdCommand {
     plant: PdPlant
     field: string = ""
-    oldAmendment: PdPlantDrawingAmendment = new PdPlantDrawingAmendment()
-    newAmendment: PdPlantDrawingAmendment = new PdPlantDrawingAmendment()
+    oldAmendment: PdPlantDrawingAmendment | null = null
+    newAmendment: PdPlantDrawingAmendment
     
-    constructor(aPlant: PdPlant, aNewAmendment: PdPlantDrawingAmendment, aField: string): void {
+    constructor(aPlant: PdPlant, aNewAmendment: PdPlantDrawingAmendment, aField: string) {
         super()
         this.plant = aPlant
         this.field = aField
@@ -752,10 +746,6 @@ export class PdEditAmendmentCommand extends PdCommand {
     }
     
     undoCommand(): void {
-        let oldString: string
-        let index: int
-        let oldItemIndex: int
-        
         super.undoCommand()
         MainForm.invalidateDrawingRect(this.plant.boundsRect_pixels())
         this.plant.removeAmendment(this.newAmendment)
@@ -1142,7 +1132,7 @@ export class PdResizePlantsCommand extends PdCommandWithListOfPlants {
                 ucursor.cursor_startWait()
             }
             this.invalidateCombinedPlantRects()
-            this.newValues.clear()
+            this.newValues.length = 0
             if (this.plantList.length > 0) {
                 for (let i = 0; i <= this.plantList.length - 1; i++) {
                     this.plant = this.plantList[i]
@@ -1795,7 +1785,7 @@ export class PdAlignPlantsCommand extends PdCommandWithListOfPlants {
         let offset: TPoint = new TPoint()
         
         super.doCommand()
-        this.newPoints.clear()
+        this.newPoints.length = 0
         this.invalidateCombinedPlantRects()
         if (this.plantList.length > 0) {
             for (let i = 0; i <= this.plantList.length - 1; i++) {
@@ -1834,7 +1824,7 @@ export class PdAlignPlantsCommand extends PdCommandWithListOfPlants {
         if (this.plantList.length > 0) {
             for (let i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = this.plantList[i]
-                this.plant.moveTo(PdPointValue(this.values[i]).savePoint)
+                this.plant.moveTo(this.values[i].savePoint)
                 if (domain.options.cachePlantBitmaps) {
                     this.plant.recalculateBoundsForOffsetChange()
                 }
@@ -1850,7 +1840,7 @@ export class PdAlignPlantsCommand extends PdCommandWithListOfPlants {
         if (this.plantList.length > 0) {
             for (let i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = this.plantList[i]
-                this.plant.moveTo(PdPointValue(this.newPoints[i]).savePoint)
+                this.plant.moveTo(this.newPoints[i].savePoint)
                 if (domain.options.cachePlantBitmaps) {
                     this.plant.recalculateBoundsForOffsetChange()
                 }
@@ -1955,7 +1945,7 @@ export class PdRotateCommand extends PdCommandWithListOfPlants {
             if (this.plantList.length > 0) {
                 for (let i = 0; i <= this.plantList.length - 1; i++) {
                     this.plant = this.plantList[i]
-                    newRotation = PdSingleValue(this.values[i]).saveSingle + this.offsetRotation
+                    newRotation = this.values[i].saveSingle + this.offsetRotation
                     if (newRotation < -360) {
                         newRotation = 360 - (Math.abs(newRotation) - 360)
                     }
@@ -1999,7 +1989,7 @@ export class PdRotateCommand extends PdCommandWithListOfPlants {
                 if (this.plantList.length > 0) {
                     for (let i = 0; i <= this.plantList.length - 1; i++) {
                         this.plant = this.plantList[i]
-                        newRotation = PdSingleValue(this.values[i]).saveSingle + this.offsetRotation
+                        newRotation = this.values[i].saveSingle + this.offsetRotation
                         if (newRotation < -360) {
                             newRotation = 360 - (Math.abs(newRotation) - 360)
                         }
@@ -2030,21 +2020,21 @@ export class PdRotateCommand extends PdCommandWithListOfPlants {
                 switch (this.rotateDirection) {
                     case kRotateX:
                         if (this.offsetRotation !== 0) {
-                            this.plant.xRotation = min(360, max(-360, PdSingleValue(this.values[i]).saveSingle + this.offsetRotation))
+                            this.plant.xRotation = min(360, max(-360, this.values[i].saveSingle + this.offsetRotation))
                         } else {
                             this.plant.xRotation = this.newRotation
                         }
                         break
                     case kRotateY:
                         if (this.offsetRotation !== 0) {
-                            this.plant.yRotation = min(360, max(-360, PdSingleValue(this.values[i]).saveSingle + this.offsetRotation))
+                            this.plant.yRotation = min(360, max(-360, this.values[i].saveSingle + this.offsetRotation))
                         } else {
                             this.plant.yRotation = this.newRotation
                         }
                         break
                     case kRotateZ:
                         if (this.offsetRotation !== 0) {
-                            this.plant.zRotation = min(360, max(-360, PdSingleValue(this.values[i]).saveSingle + this.offsetRotation))
+                            this.plant.zRotation = min(360, max(-360, this.values[i].saveSingle + this.offsetRotation))
                         } else {
                             this.plant.zRotation = this.newRotation
                         }
@@ -2065,13 +2055,13 @@ export class PdRotateCommand extends PdCommandWithListOfPlants {
                 this.plant = this.plantList[i]
                 switch (this.rotateDirection) {
                     case kRotateX:
-                        this.plant.xRotation = PdSingleValue(this.values[i]).saveSingle
+                        this.plant.xRotation = this.values[i].saveSingle
                         break
                     case kRotateY:
-                        this.plant.yRotation = PdSingleValue(this.values[i]).saveSingle
+                        this.plant.yRotation = this.values[i].saveSingle
                         break
                     case kRotateZ:
-                        this.plant.zRotation = PdSingleValue(this.values[i]).saveSingle
+                        this.plant.zRotation = this.values[i].saveSingle
                         break
                 }
                 this.plant.recalculateBounds(kDrawNow)
@@ -2133,9 +2123,9 @@ export class PdResetRotationsCommand extends PdCommandWithListOfPlants {
         if (this.plantList.length > 0) {
             for (let i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = this.plantList[i]
-                this.plant.xRotation = PdXYZValue(this.values[i]).x
-                this.plant.yRotation = PdXYZValue(this.values[i]).y
-                this.plant.zRotation = PdXYZValue(this.values[i]).z
+                this.plant.xRotation = this.values[i].x
+                this.plant.yRotation = this.values[i].y
+                this.plant.zRotation = this.values[i].z
                 this.plant.recalculateBounds(kDrawNow)
             }
         }
@@ -2183,7 +2173,7 @@ export class PdChangeDrawingScaleCommand extends PdCommandWithListOfPlants {
         if (this.plantList.length > 0) {
             for (let i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = this.plantList[i]
-                this.plant.drawingScale_PixelsPerMm = PdSingleValue(this.values[i]).saveSingle
+                this.plant.drawingScale_PixelsPerMm = this.values[i].saveSingle
                 this.plant.recalculateBounds(kDrawNow)
             }
         }
