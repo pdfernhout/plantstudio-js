@@ -1,6 +1,6 @@
 // unit updcom
 
-import { long, short, float, TColorRef, int } from "./common"
+import { long, short, float, TColorRef, int, intround, IntToStr } from "./common"
 import { PdPlant } from "./PdPlant"
 import { TPoint } from "./TPoint"
 import { PdCommand, TrackPhase } from "./PdCommand"
@@ -8,6 +8,7 @@ import { domain, DomainOptionsStructure } from "./PdDomain"
 import { MainForm, ucursor } from "./temporary"
 import { SinglePoint } from "./usupport";
 import { FileExport3DOptionsStructure } from "./U3dexport"
+import { min, safedivExcept } from "./umath"
 
 // const
 const kRotateNotInitialized = 0
@@ -81,12 +82,12 @@ function nameForDirection(direction: short): string {
 
 // ================ value objects 
 
-// value classes to save information about each plant in list 
+// value classes to save information about each plant in list
+
 export class PdBooleanValue {
     saveBoolean: boolean = false
     
-
-    createWithBoolean(aBoolean: boolean): void {
+    constructor(aBoolean: boolean) {
         this.saveBoolean = aBoolean
     }
     
@@ -95,7 +96,7 @@ export class PdBooleanValue {
 export class PdPointValue {
     savePoint: TPoint = new TPoint()
     
-    createWithPoint(aPoint: TPoint): void {
+    constructor(aPoint: TPoint) {
         this.savePoint = aPoint
     }
     
@@ -104,7 +105,7 @@ export class PdPointValue {
 export class PdSingleValue {
     saveSingle: float = 0.0
     
-    createWithSingle(aSingle: float): void {
+    constructor(aSingle: float) {
         this.saveSingle = aSingle
     }
     
@@ -114,7 +115,7 @@ export class PdSinglePointValue {
     x: float = 0.0
     y: float = 0.0
     
-    createWithSingleXY(anX: float, aY: float): void {
+    constructor(anX: float, aY: float) {
         this.x = anX
         this.y = aY
     }
@@ -126,7 +127,7 @@ export class PdXYZValue {
     y: float = 0.0
     z: float = 0.0
     
-    createWithXYZ(anX: float, aY: float, aZ: float): void {
+    constructor(anX: float, aY: float, aZ: float) {
         this.x = anX
         this.y = aY
         this.z = aZ
@@ -137,7 +138,7 @@ export class PdXYZValue {
 export class PdSmallintValue {
     saveSmallint: short = 0
     
-    createWithSmallint(aSmallint: short): void {
+    constructor(aSmallint: short) {
         this.saveSmallint = aSmallint
     }
     
@@ -146,7 +147,7 @@ export class PdSmallintValue {
 export class PdLongintValue {
     saveLongint: long = 0
     
-    createWithLongint(aLongint: long): void {
+    constructor(aLongint: long) {
         this.saveLongint = aLongint
     }
     
@@ -155,13 +156,14 @@ export class PdLongintValue {
 export class PdColorValue {
     saveColor: TColorRef = 0
     
-    createWithColor(aColor: TColorRef): void {
+    constructor(aColor: TColorRef) {
         this.saveColor = aColor
     }
     
 }
 
-// -------------------------------------- commands that affect only the drawing area (and domain options) 
+// ================ commands that affect only the drawing area (and domain options) 
+
 export class PdScrollCommand extends PdCommand {
     dragStartPoint: TPoint = new TPoint()
     oldOffset_mm: SinglePoint = new SinglePoint()
@@ -219,7 +221,6 @@ export class PdChangeMagnificationCommand extends PdCommand {
     clickPoint: SinglePoint = new SinglePoint()
     shift: boolean = false
     
-    // -------------------------------------------------------- PdChangeMagnificationCommand 
     createWithNewScaleAndPoint(aNewScale: float, aPoint: TPoint): void {
         PdCommand.prototype.create.call(this)
         this.newScale_pixelsPerMm = aNewScale
@@ -240,16 +241,16 @@ export class PdChangeMagnificationCommand extends PdCommand {
             this.startDragPoint = nextPoint
         } else if (aTrackPhase === TrackPhase.trackMove) {
         } else if (aTrackPhase === TrackPhase.trackRelease) {
-            size = Point(abs(nextPoint.X - this.startDragPoint.X), abs(this.startDragPoint.Y - nextPoint.Y))
+            size = new TPoint(Math.abs(nextPoint.X - this.startDragPoint.X), Math.abs(this.startDragPoint.Y - nextPoint.Y))
             if ((size.X > 10) && (size.Y > 10)) {
                 // have min size in case they move the mouse by mistake
-                this.clickPoint.x = umath.min(nextPoint.X, this.startDragPoint.X) + abs(nextPoint.X - this.startDragPoint.X) / 2
-                this.clickPoint.y = umath.min(nextPoint.Y, this.startDragPoint.Y) + abs(nextPoint.Y - this.startDragPoint.Y) / 2
-                newScaleX = umath.safedivExcept(domain.plantDrawScale_PixelsPerMm() * MainForm.drawingPaintBox.Width, size.X, 1.0)
-                newScaleY = umath.safedivExcept(domain.plantDrawScale_PixelsPerMm() * MainForm.drawingPaintBox.Height, size.Y, 1.0)
+                this.clickPoint.x = min(nextPoint.X, this.startDragPoint.X) + Math.abs(nextPoint.X - this.startDragPoint.X) / 2
+                this.clickPoint.y = min(nextPoint.Y, this.startDragPoint.Y) + Math.abs(nextPoint.Y - this.startDragPoint.Y) / 2
+                newScaleX = safedivExcept(domain.plantDrawScale_PixelsPerMm() * MainForm.drawingPaintBox.Width, size.X, 1.0)
+                newScaleY = safedivExcept(domain.plantDrawScale_PixelsPerMm() * MainForm.drawingPaintBox.Height, size.Y, 1.0)
                 this.oldScale_PixelsPerMm = domain.plantDrawScale_PixelsPerMm()
                 this.oldOffset_mm = domain.plantDrawOffset_mm()
-                this.newScale_pixelsPerMm = umath.min(newScaleX, newScaleY)
+                this.newScale_pixelsPerMm = min(newScaleX, newScaleY)
             } else {
                 this.clickPoint.x = nextPoint.X
                 this.clickPoint.y = nextPoint.Y
@@ -281,7 +282,7 @@ export class PdChangeMagnificationCommand extends PdCommand {
         PdCommand.prototype.undoCommand.call(this)
         domain.plantManager.plantDrawOffset_mm = this.oldOffset_mm
         if (this.oldScale_PixelsPerMm !== 0.0) {
-            MainForm.magnifyOrReduce(this.oldScale_PixelsPerMm, Point(0, 0), umain.kDrawNow)
+            MainForm.magnifyOrReduce(this.oldScale_PixelsPerMm, new TPoint(0, 0), umain.kDrawNow)
         }
     }
     
@@ -303,7 +304,6 @@ export class PdCenterDrawingCommand extends PdCommand {
     oldOffset_mm: SinglePoint = new SinglePoint()
     newOffset_mm: SinglePoint = new SinglePoint()
     
-    // -------------------------------------------------------- PdCenterDrawingCommand 
     doCommand(): void {
         PdCommand.prototype.doCommand.call(this)
         this.oldScale_PixelsPerMm = domain.plantDrawScale_PixelsPerMm()
@@ -319,7 +319,7 @@ export class PdCenterDrawingCommand extends PdCommand {
         domain.plantManager.plantDrawOffset_mm = this.oldOffset_mm
         MainForm.recalculateAllPlantBoundsRects(umain.kDrawNow)
         if (this.oldScale_PixelsPerMm !== 0.0) {
-            MainForm.magnifyOrReduce(this.oldScale_PixelsPerMm, Point(0, 0), umain.kDrawNow)
+            MainForm.magnifyOrReduce(this.oldScale_PixelsPerMm, new TPoint(0, 0), umain.kDrawNow)
         }
     }
     
@@ -328,7 +328,7 @@ export class PdCenterDrawingCommand extends PdCommand {
         domain.plantManager.plantDrawOffset_mm = this.newOffset_mm
         MainForm.recalculateAllPlantBoundsRects(umain.kDrawNow)
         if (this.newScale_pixelsPerMm !== 0.0) {
-            MainForm.magnifyOrReduce(this.newScale_pixelsPerMm, Point(0, 0), umain.kDrawNow)
+            MainForm.magnifyOrReduce(this.newScale_pixelsPerMm, new TPoint(0, 0), umain.kDrawNow)
         }
     }
     
@@ -392,7 +392,6 @@ export class PdChangeDomainOptionsCommand extends PdCommand {
     oldOptions: DomainOptionsStructure = new DomainOptionsStructure()
     newOptions: DomainOptionsStructure = new DomainOptionsStructure()
     
-    // -------------------------------------------------------- PdChangeDomainOptionsCommand 
     createWithOptions(aNewOptions: DomainOptionsStructure): void {
         PdCommand.prototype.create.call(this)
         this.commandChangesPlantFile = false
@@ -425,7 +424,6 @@ export class PdChangeDomain3DOptionsCommand extends PdCommand {
     oldOptions: FileExport3DOptionsStructure = new FileExport3DOptionsStructure()
     newOptions: FileExport3DOptionsStructure = new FileExport3DOptionsStructure()
     
-    // -------------------------------------------------------- PdChangeDomain3DOptionsCommand 
     createWithOptionsAndType(aNewOptions: FileExport3DOptionsStructure, anOutputType: short): void {
         PdCommand.prototype.create.call(this)
         this.outputType = anOutputType
@@ -637,7 +635,6 @@ export class PdNewCommand extends PdCommand {
 export class PdSendBackwardOrForwardCommand extends PdCommand {
     backward: boolean = false
     
-    // ----------------------------------------------------------- PdSendBackwardOrForwardCommand 
     createWithBackwardOrForward(aBackward: boolean): void {
         PdCommand.prototype.create.call(this)
         this.backward = aBackward
@@ -1226,9 +1223,9 @@ export class PdResizePlantsCommand extends PdCommandWithListOfPlants {
                 } else {
                     aspectRatio = 1.0
                 }
-                this.aspectRatios.push(PdSingleValue().createWithSingle(aspectRatio))
-                this.values.push(PdSingleValue().createWithSingle(this.plant.drawingScale_PixelsPerMm))
-                this.oldSizes.push(PdPointValue().createWithPoint(Point(usupport.rWidth(this.plant.boundsRect_pixels()), usupport.rHeight(this.plant.boundsRect_pixels()))))
+                this.aspectRatios.push(new PdSingleValue(aspectRatio))
+                this.values.push(new PdSingleValue(this.plant.drawingScale_PixelsPerMm))
+                this.oldSizes.push(new PdPointValue(Point(usupport.rWidth(this.plant.boundsRect_pixels()), usupport.rHeight(this.plant.boundsRect_pixels()))))
             }
         }
     }
@@ -1253,7 +1250,7 @@ export class PdResizePlantsCommand extends PdCommandWithListOfPlants {
                 this.saveInitialValues()
                 this.initialized = true
                 this.doneInMouseCommand = true
-                this.offset = Point(0, 0)
+                this.offset = new TPoint(0, 0)
                 PdCommandWithListOfPlants.prototype.doCommand.call(this)
                 return result
             }
@@ -1314,7 +1311,7 @@ export class PdResizePlantsCommand extends PdCommandWithListOfPlants {
                             this.plant.drawingScale_PixelsPerMm = oldScale
                         }
                     }
-                    this.newValues.push(PdSingleValue().createWithSingle(this.plant.drawingScale_PixelsPerMm))
+                    this.newValues.push(new PdSingleValue(this.plant.drawingScale_PixelsPerMm))
                     this.plant.recalculateBounds(umain.kDrawNow)
                 }
             }
@@ -1403,8 +1400,8 @@ export class PdResizePlantsToSameWidthOrHeightCommand extends PdCommandWithListO
         if (this.plantList.length > 0) {
             for (i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = uplant.PdPlant(this.plantList[i])
-                this.values.push(PdSingleValue().createWithSingle(this.plant.drawingScale_PixelsPerMm))
-                this.oldSizes.push(PdPointValue().createWithPoint(Point(usupport.rWidth(this.plant.boundsRect_pixels()), usupport.rHeight(this.plant.boundsRect_pixels()))))
+                this.values.push(new PdSingleValue(this.plant.drawingScale_PixelsPerMm))
+                this.oldSizes.push(new PdPointValue(Point(usupport.rWidth(this.plant.boundsRect_pixels()), usupport.rHeight(this.plant.boundsRect_pixels()))))
             }
         }
     }
@@ -1435,11 +1432,11 @@ export class PdResizePlantsToSameWidthOrHeightCommand extends PdCommandWithListO
                     this.plant = uplant.PdPlant(this.plantList[i])
                     this.plant.recalculateBounds(umain.kDontDrawYet)
                     if (this.changeWidth) {
-                        this.plant.drawingScale_PixelsPerMm = umath.safedivExcept(this.plant.drawingScale_PixelsPerMm * this.newWidth, usupport.rWidth(this.plant.boundsRect_pixels()), 0.1)
+                        this.plant.drawingScale_PixelsPerMm = safedivExcept(this.plant.drawingScale_PixelsPerMm * this.newWidth, usupport.rWidth(this.plant.boundsRect_pixels()), 0.1)
                     } else {
-                        this.plant.drawingScale_PixelsPerMm = umath.safedivExcept(this.plant.drawingScale_PixelsPerMm * this.newHeight, usupport.rHeight(this.plant.boundsRect_pixels()), 0.1)
+                        this.plant.drawingScale_PixelsPerMm = safedivExcept(this.plant.drawingScale_PixelsPerMm * this.newHeight, usupport.rHeight(this.plant.boundsRect_pixels()), 0.1)
                     }
-                    this.newValues.push(PdSingleValue().createWithSingle(this.plant.drawingScale_PixelsPerMm))
+                    this.newValues.push(new PdSingleValue(this.plant.drawingScale_PixelsPerMm))
                     this.plant.recalculateBounds(umain.kDrawNow)
                 }
             }
@@ -1513,9 +1510,9 @@ export class PdPackPlantsCommand extends PdCommandWithListOfPlants {
         if (this.plantList.length > 0) {
             for (i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = uplant.PdPlant(this.plantList[i])
-                this.values.push(PdSingleValue().createWithSingle(this.plant.drawingScale_PixelsPerMm))
-                this.oldPoints.push(PdPointValue().createWithPoint(this.plant.basePoint_pixels()))
-                this.oldSizes.push(PdPointValue().createWithPoint(Point(usupport.rWidth(this.plant.boundsRect_pixels()), usupport.rHeight(this.plant.boundsRect_pixels()))))
+                this.values.push(new PdSingleValue(this.plant.drawingScale_PixelsPerMm))
+                this.oldPoints.push(new PdPointValue(this.plant.basePoint_pixels()))
+                this.oldSizes.push(new PdPointValue(Point(usupport.rWidth(this.plant.boundsRect_pixels()), usupport.rHeight(this.plant.boundsRect_pixels()))))
             }
         }
     }
@@ -1573,14 +1570,14 @@ export class PdPackPlantsCommand extends PdCommandWithListOfPlants {
                     this.plant.recalculateBounds(umain.kDontDrawYet)
                     plantScaleChanged = false
                     // calculate new scale (resize based on average height)
-                    newScale = umath.safedivExcept(this.plant.drawingScale_PixelsPerMm * averageHeight, usupport.rHeight(this.plant.boundsRect_pixels()) * 1.0, 0.1)
-                    if (abs(newScale - this.plant.drawingScale_PixelsPerMm) > this.plant.drawingScale_PixelsPerMm / 20.0) {
+                    newScale = safedivExcept(this.plant.drawingScale_PixelsPerMm * averageHeight, usupport.rHeight(this.plant.boundsRect_pixels()) * 1.0, 0.1)
+                    if (Math.abs(newScale - this.plant.drawingScale_PixelsPerMm) > this.plant.drawingScale_PixelsPerMm / 20.0) {
                         // don't rescale and redraw plant if scale hardly changes
                         plantScaleChanged = true
                         this.plant.drawingScale_PixelsPerMm = newScale
                         this.plant.recalculateBounds(umain.kDontDrawYet)
                     }
-                    this.newScales.push(PdSingleValue().createWithSingle(this.plant.drawingScale_PixelsPerMm))
+                    this.newScales.push(new PdSingleValue(this.plant.drawingScale_PixelsPerMm))
                     // calculate new position
                     offset.X = this.plant.basePoint_pixels().X - this.plant.boundsRect_pixels().Left
                     offset.Y = this.plant.basePoint_pixels().Y - this.plant.boundsRect_pixels().Top
@@ -1597,7 +1594,7 @@ export class PdPackPlantsCommand extends PdCommandWithListOfPlants {
                         newPoint.Y = tallestHeight + kGapBetweenArrangedPlants + offset.Y
                     }
                     this.plant.moveTo(newPoint)
-                    this.newPoints.push(PdPointValue().createWithPoint(this.plant.basePoint_pixels()))
+                    this.newPoints.push(new PdPointValue(this.plant.basePoint_pixels()))
                     if (plantScaleChanged) {
                         this.plant.recalculateBounds(umain.kDrawNow)
                     } else {
@@ -1630,7 +1627,7 @@ export class PdPackPlantsCommand extends PdCommandWithListOfPlants {
                     oldScale = this.plant.drawingScale_PixelsPerMm
                     this.plant.drawingScale_PixelsPerMm = PdSingleValue(this.values[i]).saveSingle
                     this.plant.moveTo(PdPointValue(this.oldPoints[i]).savePoint)
-                    if (abs(this.plant.drawingScale_PixelsPerMm - oldScale) > this.plant.drawingScale_PixelsPerMm / 20.0) {
+                    if (Math.abs(this.plant.drawingScale_PixelsPerMm - oldScale) > this.plant.drawingScale_PixelsPerMm / 20.0) {
                         // don't rescale and redraw plant if scale hardly changes
                         this.plant.recalculateBounds(umain.kDrawNow)
                     } else {
@@ -1659,7 +1656,7 @@ export class PdPackPlantsCommand extends PdCommandWithListOfPlants {
                     oldScale = this.plant.drawingScale_PixelsPerMm
                     this.plant.drawingScale_PixelsPerMm = PdSingleValue(this.newScales[i]).saveSingle
                     this.plant.moveTo(PdPointValue(this.newPoints[i]).savePoint)
-                    if (abs(this.plant.drawingScale_PixelsPerMm - oldScale) > this.plant.drawingScale_PixelsPerMm / 20.0) {
+                    if (Math.abs(this.plant.drawingScale_PixelsPerMm - oldScale) > this.plant.drawingScale_PixelsPerMm / 20.0) {
                         // don't rescale and redraw plant if scale hardly changes
                         this.plant.recalculateBounds(umain.kDrawNow)
                     } else {
@@ -1699,7 +1696,7 @@ export class PdChangeMainWindowViewingOptionCommand extends PdCommandWithListOfP
         this.commandChangesPlantFile = false
         if (this.plantList.length > 0) {
             for (i = 0; i <= this.plantList.length - 1; i++) {
-                this.values.push(PdBooleanValue().createWithBoolean(uplant.PdPlant(this.plantList[i]).hidden))
+                this.values.push(new PdBooleanValue(uplant.PdPlant(this.plantList[i]).hidden))
             }
         }
         this.selectedList = delphi_compatability.TList().Create()
@@ -1826,7 +1823,7 @@ export class PdDragCommand extends PdCommandWithListOfPlants {
         if (this.plantList.length > 0) {
             for (i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = uplant.PdPlant(this.plantList[i])
-                this.values.push(PdPointValue().createWithPoint(this.plant.basePoint_pixels()))
+                this.values.push(new PdPointValue(this.plant.basePoint_pixels()))
             }
         }
         this.offset = anOffset
@@ -1841,7 +1838,7 @@ export class PdDragCommand extends PdCommandWithListOfPlants {
         if (this.plantList.length > 0) {
             for (i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = uplant.PdPlant(this.plantList[i])
-                this.values.push(PdPointValue().createWithPoint(this.plant.basePoint_pixels()))
+                this.values.push(new PdPointValue(this.plant.basePoint_pixels()))
             }
         }
         this.newPoint = aNewPoint
@@ -1860,7 +1857,7 @@ export class PdDragCommand extends PdCommandWithListOfPlants {
                 if (this.plantList.length > 0) {
                     for (i = 0; i <= this.plantList.length - 1; i++) {
                         this.plant = uplant.PdPlant(this.plantList[i])
-                        this.values.push(PdPointValue().createWithPoint(this.plant.basePoint_pixels()))
+                        this.values.push(new PdPointValue(this.plant.basePoint_pixels()))
                     }
                 }
                 this.initialized = true
@@ -2002,7 +1999,7 @@ export class PdAlignPlantsCommand extends PdCommandWithListOfPlants {
         if (this.plantList.length > 0) {
             for (i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = uplant.PdPlant(this.plantList[i])
-                this.values.push(PdPointValue().createWithPoint(this.plant.basePoint_pixels()))
+                this.values.push(new PdPointValue(this.plant.basePoint_pixels()))
             }
         }
         this.newPoints = []
@@ -2045,7 +2042,7 @@ export class PdAlignPlantsCommand extends PdCommandWithListOfPlants {
                         break
                 }
                 this.plant.moveTo(newPoint)
-                this.newPoints.push(PdPointValue().createWithPoint(this.plant.basePoint_pixels()))
+                this.newPoints.push(new PdPointValue(this.plant.basePoint_pixels()))
                 if (domain.options.cachePlantBitmaps) {
                     this.plant.recalculateBoundsForOffsetChange()
                 }
@@ -2123,13 +2120,13 @@ export class PdRotateCommand extends PdCommandWithListOfPlants {
                 this.plant = uplant.PdPlant(this.plantList[i])
                 switch (this.rotateDirection) {
                     case kRotateX:
-                        this.values.push(PdSingleValue().createWithSingle(this.plant.xRotation))
+                        this.values.push(new PdSingleValue(this.plant.xRotation))
                         break
                     case kRotateY:
-                        this.values.push(PdSingleValue().createWithSingle(this.plant.yRotation))
+                        this.values.push(new PdSingleValue(this.plant.yRotation))
                         break
                     case kRotateZ:
-                        this.values.push(PdSingleValue().createWithSingle(this.plant.zRotation))
+                        this.values.push(new PdSingleValue(this.plant.zRotation))
                         break
                 }
             }
@@ -2152,7 +2149,7 @@ export class PdRotateCommand extends PdCommandWithListOfPlants {
             if (this.rotateDirection === kRotateNotInitialized) {
                 if (rightButtonDown) {
                     this.rotateDirection = kRotateZ
-                } else if (abs(nextPoint.X - this.startDragPoint.X) > abs(nextPoint.Y - this.startDragPoint.Y)) {
+                } else if (Math.abs(nextPoint.X - this.startDragPoint.X) > Math.abs(nextPoint.Y - this.startDragPoint.Y)) {
                     this.rotateDirection = kRotateX
                 } else {
                     this.rotateDirection = kRotateY
@@ -2162,13 +2159,13 @@ export class PdRotateCommand extends PdCommandWithListOfPlants {
                         this.plant = uplant.PdPlant(this.plantList[i])
                         switch (this.rotateDirection) {
                             case kRotateX:
-                                this.values.push(PdSingleValue().createWithSingle(this.plant.xRotation))
+                                this.values.push(new PdSingleValue(this.plant.xRotation))
                                 break
                             case kRotateY:
-                                this.values.push(PdSingleValue().createWithSingle(this.plant.yRotation))
+                                this.values.push(new PdSingleValue(this.plant.yRotation))
                                 break
                             case kRotateZ:
-                                this.values.push(PdSingleValue().createWithSingle(this.plant.zRotation))
+                                this.values.push(new PdSingleValue(this.plant.zRotation))
                                 break
                         }
                     }
@@ -2191,7 +2188,7 @@ export class PdRotateCommand extends PdCommandWithListOfPlants {
                     this.plant = uplant.PdPlant(this.plantList[i])
                     newRotation = PdSingleValue(this.values[i]).saveSingle + this.offsetRotation
                     if (newRotation < -360) {
-                        newRotation = 360 - (abs(newRotation) - 360)
+                        newRotation = 360 - (Math.abs(newRotation) - 360)
                     }
                     if (newRotation > 360) {
                         newRotation = -360 + (newRotation - 360)
@@ -2219,7 +2216,7 @@ export class PdRotateCommand extends PdCommandWithListOfPlants {
                 if (this.plantList.length > 0) {
                     for (i = 0; i <= this.plantList.length - 1; i++) {
                         this.plant = uplant.PdPlant(this.plantList[i])
-                        this.values.push(PdSingleValue().createWithSingle(this.plant.xRotation))
+                        this.values.push(new PdSingleValue(this.plant.xRotation))
                     }
                 }
                 this.rotateDirection = kRotateX
@@ -2235,7 +2232,7 @@ export class PdRotateCommand extends PdCommandWithListOfPlants {
                         this.plant = uplant.PdPlant(this.plantList[i])
                         newRotation = PdSingleValue(this.values[i]).saveSingle + this.offsetRotation
                         if (newRotation < -360) {
-                            newRotation = 360 - (abs(newRotation) - 360)
+                            newRotation = 360 - (Math.abs(newRotation) - 360)
                         }
                         if (newRotation > 360) {
                             newRotation = -360 + (newRotation - 360)
@@ -2266,21 +2263,21 @@ export class PdRotateCommand extends PdCommandWithListOfPlants {
                 switch (this.rotateDirection) {
                     case kRotateX:
                         if (this.offsetRotation !== 0) {
-                            this.plant.xRotation = umath.min(360, umath.max(-360, PdSingleValue(this.values[i]).saveSingle + this.offsetRotation))
+                            this.plant.xRotation = min(360, umath.max(-360, PdSingleValue(this.values[i]).saveSingle + this.offsetRotation))
                         } else {
                             this.plant.xRotation = this.newRotation
                         }
                         break
                     case kRotateY:
                         if (this.offsetRotation !== 0) {
-                            this.plant.yRotation = umath.min(360, umath.max(-360, PdSingleValue(this.values[i]).saveSingle + this.offsetRotation))
+                            this.plant.yRotation = min(360, umath.max(-360, PdSingleValue(this.values[i]).saveSingle + this.offsetRotation))
                         } else {
                             this.plant.yRotation = this.newRotation
                         }
                         break
                     case kRotateZ:
                         if (this.offsetRotation !== 0) {
-                            this.plant.zRotation = umath.min(360, umath.max(-360, PdSingleValue(this.values[i]).saveSingle + this.offsetRotation))
+                            this.plant.zRotation = min(360, umath.max(-360, PdSingleValue(this.values[i]).saveSingle + this.offsetRotation))
                         } else {
                             this.plant.zRotation = this.newRotation
                         }
@@ -2340,7 +2337,7 @@ export class PdResetRotationsCommand extends PdCommandWithListOfPlants {
         if (this.plantList.length > 0) {
             for (i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = uplant.PdPlant(this.plantList[i])
-                this.values.push(PdXYZValue().createWithXYZ(this.plant.xRotation, this.plant.yRotation, this.plant.zRotation))
+                this.values.push(new PdXYZValue(this.plant.xRotation, this.plant.yRotation, this.plant.zRotation))
                 this.plant.xRotation = 0
                 this.plant.yRotation = 0
                 this.plant.zRotation = 0
@@ -2405,7 +2402,7 @@ export class PdChangeDrawingScaleCommand extends PdCommandWithListOfPlants {
         this.newScale = aNewScale
         if (this.plantList.length > 0) {
             for (i = 0; i <= this.plantList.length - 1; i++) {
-                this.values.push(PdSingleValue().createWithSingle(uplant.PdPlant(this.plantList[i]).drawingScale_PixelsPerMm))
+                this.values.push(new PdSingleValue(uplant.PdPlant(this.plantList[i]).drawingScale_PixelsPerMm))
             }
         }
     }
@@ -2458,7 +2455,7 @@ export class PdChangePlantAgeCommand extends PdCommandWithListOfPlants {
         this.newAge = aNewAge
         if (this.plantList.length > 0) {
             for (i = 0; i <= this.plantList.length - 1; i++) {
-                this.values.push(PdSmallintValue().createWithSmallint(uplant.PdPlant(this.plantList[i]).age))
+                this.values.push(new PdSmallint(uplant.PdPlant(this.plantList[i]).age))
             }
         }
     }
@@ -2530,7 +2527,7 @@ export class PdAnimatePlantCommand extends PdCommandWithListOfPlants {
         PdCommandWithListOfPlants.prototype.createWithListOfPlants.call(this, aList)
         if (this.plantList.length > 0) {
             for (i = 0; i <= this.plantList.length - 1; i++) {
-                this.values.push(PdSmallintValue().createWithSmallint(uplant.PdPlant(this.plantList[i]).age))
+                this.values.push(new PdSmallint(uplant.PdPlant(this.plantList[i]).age))
             }
         }
     }
@@ -2648,7 +2645,7 @@ export class PdHideOrShowCommand extends PdCommandWithListOfPlants {
         this.hide = aHide
         if (this.plantList.length > 0) {
             for (i = 0; i <= this.plantList.length - 1; i++) {
-                this.values.push(PdBooleanValue().createWithBoolean(uplant.PdPlant(this.plantList[i]).hidden))
+                this.values.push(new PdBooleanValue(uplant.PdPlant(this.plantList[i]).hidden))
             }
         }
     }
@@ -2661,13 +2658,13 @@ export class PdHideOrShowCommand extends PdCommandWithListOfPlants {
         this.commandChangesPlantFile = false
         if (this.plantList.length > 0) {
             for (i = 0; i <= this.plantList.length - 1; i++) {
-                this.values.push(PdBooleanValue().createWithBoolean(uplant.PdPlant(this.plantList[i]).hidden))
+                this.values.push(new PdBooleanValue(uplant.PdPlant(this.plantList[i]).hidden))
             }
         }
         this.newValues = []
         if (aHideList.length > 0) {
             for (i = 0; i <= aHideList.length - 1; i++) {
-                this.newValues.push(PdBooleanValue().createWithBoolean(PdBooleanValue(aHideList[i]).saveBoolean))
+                this.newValues.push(new PdBooleanValue(PdBooleanValue(aHideList[i]).saveBoolean))
             }
         }
     }
@@ -2752,13 +2749,13 @@ export class PdRandomizeCommand extends PdCommandWithListOfPlants {
             if (this.plantList.length > 0) {
                 for (i = 0; i <= this.plantList.length - 1; i++) {
                     this.plant = uplant.PdPlant(this.plantList[i])
-                    this.oldSeeds.push(PdSmallintValue().createWithSmallint(this.plant.pGeneral.startingSeedForRandomNumberGenerator))
-                    this.oldBreedingSeeds.push(PdLongintValue().createWithLongint(this.plant.breedingGenerator.seed))
-                    this.oldXRotations.push(PdSingleValue().createWithSingle(this.plant.xRotation))
+                    this.oldSeeds.push(new PdSmallint(this.plant.pGeneral.startingSeedForRandomNumberGenerator))
+                    this.oldBreedingSeeds.push(new PdLongintValue(this.plant.breedingGenerator.seed))
+                    this.oldXRotations.push(new PdSingleValue(this.plant.xRotation))
                     this.plant.randomize()
-                    this.newSeeds.push(PdSmallintValue().createWithSmallint(this.plant.pGeneral.startingSeedForRandomNumberGenerator))
-                    this.newBreedingSeeds.push(PdLongintValue().createWithLongint(this.plant.breedingGenerator.seed))
-                    this.newXRotations.push(PdSingleValue().createWithSingle(this.plant.xRotation))
+                    this.newSeeds.push(new PdSmallint(this.plant.pGeneral.startingSeedForRandomNumberGenerator))
+                    this.newBreedingSeeds.push(new PdLongintValue(this.plant.breedingGenerator.seed))
+                    this.newXRotations.push(new PdSingleValue(this.plant.xRotation))
                     if (this.isInBreeder) {
                         this.plant.previewCacheUpToDate = false
                     } else {
@@ -3291,7 +3288,7 @@ export class PdChangeRealValueCommand extends PdChangeValueCommand {
             for (i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = uplant.PdPlant(this.plantList[i])
                 oldValue = this.plant.editTransferField(umath.kGetField, oldValue, this.fieldNumber, uparams.kFieldFloat, this.arrayIndex, this.regrow)
-                this.values.push(PdSingleValue().createWithSingle(oldValue))
+                this.values.push(new PdSingleValue(oldValue))
             }
         }
     }
@@ -3369,7 +3366,7 @@ export class PdChangeSCurvePointValueCommand extends PdChangeValueCommand {
                 this.plant = uplant.PdPlant(this.plantList[i])
                 oldX = this.plant.editTransferField(umath.kGetField, oldX, this.fieldNumber, uparams.kFieldFloat, this.pointIndex * 2, this.regrow)
                 oldY = this.plant.editTransferField(umath.kGetField, oldY, this.fieldNumber, uparams.kFieldFloat, this.pointIndex * 2 + 1, this.regrow)
-                this.values.push(PdSinglePointValue().createWithSingleXY(oldX, oldY))
+                this.values.push(new PdSinglePointValue(oldX, oldY))
             }
         }
     }
@@ -3446,7 +3443,7 @@ export class PdChangeColorValueCommand extends PdChangeValueCommand {
             for (i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = uplant.PdPlant(this.plantList[i])
                 oldValue = this.plant.editTransferField(umath.kGetField, oldValue, this.fieldNumber, uparams.kFieldColor, uparams.kNotArray, this.regrow)
-                this.values.push(PdColorValue().createWithColor(oldValue))
+                this.values.push(new PdColorValue(oldValue))
             }
         }
     }
@@ -3593,7 +3590,7 @@ export class PdChangeSmallintValueCommand extends PdChangeValueCommand {
             for (i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = uplant.PdPlant(this.plantList[i])
                 oldValue = this.plant.editTransferField(umath.kGetField, oldValue, this.fieldNumber, uparams.kFieldSmallint, this.arrayIndex, this.regrow)
-                this.values.push(PdSmallintValue().createWithSmallint(oldValue))
+                this.values.push(new PdSmallint(oldValue))
             }
         }
     }
@@ -3663,7 +3660,7 @@ export class PdChangeBooleanValueCommand extends PdChangeValueCommand {
             for (i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = uplant.PdPlant(this.plantList[i])
                 oldValue = this.plant.editTransferField(umath.kGetField, oldValue, this.fieldNumber, uparams.kFieldBoolean, this.arrayIndex, this.regrow)
-                this.values.push(PdBooleanValue().createWithBoolean(oldValue))
+                this.values.push(new PdBooleanValue(oldValue))
             }
         }
     }
@@ -4265,8 +4262,7 @@ export class PdDeleteAllBreederGenerationsCommand extends PdCommand {
 export class PdChangeNumberOfTimeSeriesStagesCommand extends PdCommand {
     newNumber: short = 0
     oldNumber: short = 0
-
-    // -------------------------------------------------------- PdChangeNumberOfTimeSeriesStagesCommand 
+ 
     createWithNewNumberOfStages(aNumber: short): void {
         PdCommand.prototype.create.call(this)
         this.commandChangesPlantFile = false
@@ -4297,7 +4293,6 @@ export class PdChangeNumberOfTimeSeriesStagesCommand extends PdCommand {
 export class PdDeleteTimeSeriesCommand extends PdCommand {
     plants: TListCollection = new TListCollection()
     
-    // -------------------------------------------------------- PdDeleteTimeSeriesCommand 
     create(): void {
         let i: short
         

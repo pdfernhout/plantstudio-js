@@ -171,5 +171,6 @@ export const TimeSeriesForm = {
 
 export class PdPlantManager {
     plantDrawScale_PixelsPerMm: number = 1.0
+    plantDrawOffset_mm: SinglePoint = new SinglePoint()
     privatePlantClipboard: PdPlant[] = []
 }
