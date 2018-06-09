@@ -495,16 +495,6 @@ export class PdEditNoteCommand extends PdCommand {
         this.newStrings = aNewStrings
     }
     
-    destroy(): void {
-        if (this.done) {
-            this.oldStrings.free
-            this.oldStrings = null
-        } else {
-            this.newStrings.free
-            this.newStrings = null
-        }
-    }
-    
     doCommand(): void {
         PdCommand.prototype.doCommand.call(this)
         this.plant.noteLines = this.newStrings
@@ -543,21 +533,6 @@ export class PdNewCommand extends PdCommand {
                 this.oldSelectedList.push(anOldSelectedList[i])
             }
         }
-    }
-    
-    destroy(): void {
-        this.oldSelectedList.free
-        this.oldSelectedList = null
-        if ((!this.done) && (this.newPlant !== null)) {
-            // free created plant if change was undone 
-            this.newPlant.free
-            this.newPlant = null
-        }
-        if ((this.useWizardPlant) && (this.wizardPlant !== null)) {
-            this.wizardPlant.free
-            this.wizardPlant = null
-        }
-        PdCommand.prototype.destroy.call(this)
     }
     
     numberOfStoredLargeObjects(): long {
@@ -679,13 +654,6 @@ export class PdCreateAmendmentCommand extends PdCommand {
         this.newAmendment = aNewAmendment
     }
     
-    destroy(): void {
-        if (!this.done) {
-            this.newAmendment.free
-            this.newAmendment = null
-        }
-    }
-    
     doCommand(): void {
         PdCommand.prototype.doCommand.call(this)
         MainForm.invalidateDrawingRect(this.plant.boundsRect_pixels())
@@ -724,13 +692,6 @@ export class PdDeleteAmendmentCommand extends PdCommand {
         }
         // we take ownership of this and delete it if done
         this.amendment = anAmendment
-    }
-    
-    destroy(): void {
-        if (this.done) {
-            this.amendment.free
-            this.amendment = null
-        }
     }
     
     doCommand(): void {
@@ -775,16 +736,6 @@ export class PdEditAmendmentCommand extends PdCommand {
         // we take ownership of this and delete it if undone
         this.newAmendment = aNewAmendment
         this.oldAmendment = this.plant.amendmentForPartID(this.newAmendment.partID)
-    }
-    
-    destroy(): void {
-        if (this.done) {
-            this.oldAmendment.free
-            this.oldAmendment = null
-        } else {
-            this.newAmendment.free
-            this.newAmendment = null
-        }
     }
     
     doCommand(): void {
@@ -945,33 +896,6 @@ export class PdCommandWithListOfPlants extends PdCommand {
         }
     }
     
-    destroy(): void {
-        let amendment: PdPlantDrawingAmendment
-        let aList: TList
-        
-        this.plantList.free
-        this.plantList = null
-        this.values.free
-        this.values = null
-        if ((this.done) && (this.removesPlantAmendments)) {
-            if ((this.listOfAmendmentLists !== null) && (this.listOfAmendmentLists.length > 0)) {
-                for (let i = 0; i <= this.listOfAmendmentLists.length - 1; i++) {
-                    aList = delphi_compatability.TList(this.listOfAmendmentLists[i])
-                    if (aList.length > 0) {
-                        for (let j = 0; j <= aList.length - 1; j++) {
-                            amendment = uamendmt.PdPlantDrawingAmendment(aList[j])
-                            amendment.free
-                        }
-                    }
-                    aList.free
-                }
-            }
-        }
-        this.listOfAmendmentLists.free
-        this.listOfAmendmentLists = null
-        PdCommand.prototype.destroy.call(this)
-    }
-    
     doCommand(): void {
         let atLeastOnePlantHadAmendments: boolean
         let aList: TList
@@ -1045,12 +969,6 @@ export class PdChangeSelectedPlantsCommand extends PdCommandWithListOfPlants {
                 this.newList.push(aNewList[i])
             }
         }
-    }
-    
-    destroy(): void {
-        this.newList.free
-        this.newList = null
-        PdCommandWithListOfPlants.prototype.destroy.call(this)
     }
     
     doCommand(): void {
@@ -1202,16 +1120,6 @@ export class PdResizePlantsCommand extends PdCommandWithListOfPlants {
                 this.oldSizes.push(new PdPointValue(new TPoint(this.plant.boundsRect_pixels().width, this.plant.boundsRect_pixels().height)))
             }
         }
-    }
-    
-    destroy(): void {
-        this.newValues.free
-        this.newValues = null
-        this.oldSizes.free
-        this.oldSizes = null
-        this.aspectRatios.free
-        this.aspectRatios = null
-        PdCommandWithListOfPlants.prototype.destroy.call(this)
     }
     
     TrackMouse(aTrackPhase: TrackPhase, anchorPoint: TPoint, previousPoint: TPoint, nextPoint: TPoint, mouseDidMove: boolean, rightButtonDown: boolean): PdCommand {
@@ -1373,14 +1281,6 @@ export class PdResizePlantsToSameWidthOrHeightCommand extends PdCommandWithListO
         }
     }
     
-    destroy(): void {
-        this.newValues.free
-        this.newValues = null
-        this.oldSizes.free
-        this.oldSizes = null
-        PdCommandWithListOfPlants.prototype.destroy.call(this)
-    }
-    
     doCommand(): void {
         let newScaleX: float
         let newScaleY: float
@@ -1475,18 +1375,6 @@ export class PdPackPlantsCommand extends PdCommandWithListOfPlants {
                 this.oldSizes.push(new PdPointValue(new TPoint(this.plant.boundsRect_pixels().width, this.plant.boundsRect_pixels().height)))
             }
         }
-    }
-    
-    destroy(): void {
-        this.newScales.free
-        this.newScales = null
-        this.oldSizes.free
-        this.oldSizes = null
-        this.newPoints.free
-        this.newPoints = null
-        this.oldPoints.free
-        this.oldPoints = null
-        PdCommandWithListOfPlants.prototype.destroy.call(this)
     }
     
     doCommand(): void {
@@ -1662,12 +1550,6 @@ export class PdChangeMainWindowViewingOptionCommand extends PdCommandWithListOfP
         }
         this.oldMainWindowViewingOption = domain.options.mainWindowViewMode
         this.newMainWindowViewingOption = aNewOption
-    }
-    
-    destroy(): void {
-        this.selectedList.free
-        this.selectedList = null
-        PdCommandWithListOfPlants.prototype.destroy.call(this)
     }
     
     doCommand(): void {
@@ -1945,12 +1827,6 @@ export class PdAlignPlantsCommand extends PdCommandWithListOfPlants {
         this.newPoints = []
         this.focusRect = aRect
         this.alignDirection = aDirection
-    }
-    
-    destroy(): void {
-        this.newPoints.free
-        this.newPoints = null
-        PdCommandWithListOfPlants.prototype.destroy.call(this)
     }
     
     doCommand(): void {
@@ -2569,12 +2445,6 @@ export class PdHideOrShowCommand extends PdCommandWithListOfPlants {
         }
     }
     
-    destroy(): void {
-        this.newValues.free
-        this.newValues = null
-        PdCommandWithListOfPlants.prototype.destroy.call(this)
-    }
-    
     doCommand(): void {
         PdCommandWithListOfPlants.prototype.doCommand.call(this)
         MainForm.hideOrShowSomePlants(this.plantList, this.newValues, this.hide, umain.kDontDrawYet)
@@ -2618,21 +2488,6 @@ export class PdRandomizeCommand extends PdCommandWithListOfPlants {
         this.oldXRotations = []
         this.newXRotations = []
         this.setUpToRemoveAmendmentsWhenDone()
-    }
-    
-    destroy(): void {
-        this.oldSeeds.free
-        this.oldSeeds = null
-        this.oldBreedingSeeds.free
-        this.oldBreedingSeeds = null
-        this.newSeeds.free
-        this.newSeeds = null
-        this.newBreedingSeeds.free
-        this.newBreedingSeeds = null
-        this.oldXRotations.free
-        this.oldXRotations = null
-        this.newXRotations.free
-        this.newXRotations = null
     }
     
     doCommand(): void {
@@ -2790,20 +2645,6 @@ export class PdPasteCommand extends PdCommandWithListOfPlants {
         }
     }
     
-    destroy(): void {
-        this.oldSelectedList.free
-        this.oldSelectedList = null
-        if ((!this.done) && (this.plantList !== null) && (this.plantList.length > 0)) {
-            for (let i = 0; i <= this.plantList.length - 1; i++) {
-                // free copies of pasted plants if change was undone 
-                this.plant = this.plantList[i]
-                this.plant.free
-            }
-        }
-        //will free plantList TList
-        PdCommandWithListOfPlants.prototype.destroy.call(this)
-    }
-    
     numberOfStoredLargeObjects(): long {
         let result = 0
         result = 0
@@ -2874,20 +2715,6 @@ export class PdDuplicateCommand extends PdCommandWithListOfPlants {
     createWithListOfPlants(aList: TList): void {
         PdCommandWithListOfPlants.prototype.createWithListOfPlants.call(this, aList)
         this.newPlants = delphi_compatability.TList().Create()
-    }
-    
-    destroy(): void {
-        if ((!this.done) && (this.newPlants !== null) && (this.newPlants.length > 0)) {
-            for (let i = 0; i <= this.newPlants.length - 1; i++) {
-                // free copies of created plants if change was undone 
-                this.plant = uplant.PdPlant(this.newPlants[i])
-                this.plant.free
-            }
-        }
-        this.newPlants.free
-        this.newPlants = null
-        //will free plantList
-        PdCommandWithListOfPlants.prototype.destroy.call(this)
     }
     
     numberOfStoredLargeObjects(): long {
@@ -3020,19 +2847,6 @@ export class PdRemoveCommand extends PdCommandWithListOfPlants {
         PdCommandWithListOfPlants.prototype.createWithListOfPlants.call(this, aList)
         this.removedPlants = delphi_compatability.TList().Create()
         this.copyToClipboard = aCopyToClipboard
-    }
-    
-    destroy(): void {
-        if ((this.done) && (this.removedPlants !== null) && (this.removedPlants.length > 0)) {
-            for (let i = 0; i <= this.removedPlants.length - 1; i++) {
-                // free copies of cut plants if change was done 
-                this.plant = uplant.PdPlant(this.removedPlants[i])
-                this.plant.free
-            }
-        }
-        this.removedPlants.free
-        this.removedPlants = null
-        PdCommandWithListOfPlants.prototype.destroy.call(this)
     }
     
     numberOfStoredLargeObjects(): long {
@@ -3377,13 +3191,6 @@ export class PdChangeTdoValueCommand extends PdChangeValueCommand {
         }
     }
     
-    destroy(): void {
-        this.newTdo.free
-        this.newTdo = null
-        // value tdos will be freed by values listCollection 
-        PdChangeValueCommand.prototype.destroy.call(this)
-    }
-    
     doCommand(): void {
         PdChangeValueCommand.prototype.doCommand.call(this)
         try {
@@ -3606,28 +3413,6 @@ export class PdBreedFromParentsCommand extends PdCommand {
         }
     }
     
-    destroy(): void {
-        let lastGeneration: PdGeneration
-        
-        if (this.done) {
-            while (this.oldGenerations.length - 1 > this.row) {
-                // free all generations below row 
-                lastGeneration = ugener.PdGeneration(this.oldGenerations[this.oldGenerations.length - 1])
-                this.oldGenerations.Remove(lastGeneration)
-                lastGeneration.free
-            }
-            // free new generation (and first generation if created, if not it will be nil) 
-        } else {
-            this.firstGeneration.free
-            this.firstGeneration = null
-            this.newGeneration.free
-            this.newGeneration = null
-        }
-        this.oldGenerations.free
-        this.oldGenerations = null
-        PdCommand.prototype.destroy.call(this)
-    }
-    
     numberOfStoredLargeObjects(): long {
         let result = 0
         let generation: PdGeneration
@@ -3771,17 +3556,6 @@ export class PdReplaceBreederPlant extends PdCommand {
         this.column = aColumn
     }
     
-    destroy(): void {
-        if (this.done) {
-            this.originalPlant.free
-            this.originalPlant = null
-        } else {
-            this.newPlant.free
-            this.newPlant = null
-        }
-        PdCommand.prototype.destroy.call(this)
-    }
-    
     numberOfStoredLargeObjects(): long {
         let result = 0
         //has one plant in either case (done or undone)
@@ -3833,27 +3607,6 @@ export class PdMakeTimeSeriesCommand extends PdCommand {
         }
         this.oldPlants = delphi_compatability.TList().Create()
         this.newPlants = delphi_compatability.TList().Create()
-    }
-    
-    destroy(): void {
-        if (this.done) {
-            if ((this.oldPlants !== null) && (this.oldPlants.length > 0)) {
-                for (let i = 0; i <= this.oldPlants.length - 1; i++) {
-                    uplant.PdPlant(this.oldPlants[i]).free
-                }
-            }
-        } else {
-            if ((this.newPlants !== null) && (this.newPlants.length > 0)) {
-                for (let i = 0; i <= this.newPlants.length - 1; i++) {
-                    uplant.PdPlant(this.newPlants[i]).free
-                }
-            }
-        }
-        this.oldPlants.free
-        this.oldPlants = null
-        this.newPlants.free
-        this.newPlants = null
-        PdCommand.prototype.destroy.call(this)
     }
     
     numberOfStoredLargeObjects(): long {
@@ -3983,14 +3736,6 @@ export class PdDeleteBreederGenerationCommand extends PdCommand {
         }
     }
     
-    destroy(): void {
-        if (this.done) {
-            this.generation.free
-            this.generation = null
-        }
-        PdCommand.prototype.destroy.call(this)
-    }
-    
     numberOfStoredLargeObjects(): long {
         let result = 0
         result = 0
@@ -4037,15 +3782,6 @@ export class PdDeleteAllBreederGenerationsCommand extends PdCommand {
                 this.generations.push(ubreedr.BreederForm.generations[i])
             }
         }
-    }
-    
-    destroy(): void {
-        if (!this.done) {
-            this.generations.clearPointersWithoutDeletingObjects()
-        }
-        this.generations.free
-        this.generations = null
-        PdCommand.prototype.destroy.call(this)
     }
     
     numberOfStoredLargeObjects(): long {
@@ -4132,15 +3868,6 @@ export class PdDeleteTimeSeriesCommand extends PdCommand {
                 this.plants.push(utimeser.TimeSeriesForm.plants[i])
             }
         }
-    }
-    
-    destroy(): void {
-        if (!this.done) {
-            this.plants.clearPointersWithoutDeletingObjects()
-        }
-        this.plants.free
-        this.plants = null
-        PdCommand.prototype.destroy.call(this)
     }
     
     numberOfStoredLargeObjects(): long {
