@@ -8,7 +8,7 @@ import { domain, DomainOptionsStructure } from "./PdDomain"
 import { ucursor } from "./temporary"
 import { SinglePoint, digitValueString } from "./usupport";
 import { FileExport3DOptionsStructure } from "./U3dexport"
-import { min, safedivExcept, intMax, max } from "./umath"
+import { min, safedivExcept, intMax, max, intMin } from "./umath"
 import { TRect } from "./TRect"
 import { PdPlantDrawingAmendment } from "./PdPlantDrawingAmendment"
 
@@ -196,14 +196,14 @@ export class PdScrollCommand extends PdCommand {
     // PdDragCommand.doCommand should do nothing
     redoCommand(): void {
         // not redo
-        PdCommand.prototype.doCommand.call(this)
+        super.doCommand()
         domain.plantManager.plantDrawOffset_mm = this.newOffSet_mm
         MainForm.recalculateAllPlantBoundsRectsForOffsetChange()
         MainForm.invalidateEntireDrawing()
     }
     
     undoCommand(): void {
-        PdCommand.prototype.undoCommand.call(this)
+        super.undoCommand()
         domain.plantManager.plantDrawOffset_mm = this.oldOffset_mm
         MainForm.recalculateAllPlantBoundsRectsForOffsetChange()
         MainForm.invalidateEntireDrawing()
@@ -272,9 +272,9 @@ export class PdChangeMagnificationCommand extends PdCommand {
     }
     
     doCommand(): void {
-        let clickTPoint: TPoint
+        let clickTPoint: TPoint= new TPoint()
         
-        PdCommand.prototype.doCommand.call(this)
+        super.doCommand()
         if (this.newScale_pixelsPerMm !== 0.0) {
             clickTPoint.X = intround(this.clickPoint.x)
             clickTPoint.Y = intround(this.clickPoint.y)
@@ -284,7 +284,7 @@ export class PdChangeMagnificationCommand extends PdCommand {
     }
     
     undoCommand(): void {
-        PdCommand.prototype.undoCommand.call(this)
+        super.undoCommand()
         domain.plantManager.plantDrawOffset_mm = this.oldOffset_mm
         if (this.oldScale_PixelsPerMm !== 0.0) {
             MainForm.magnifyOrReduce(this.oldScale_PixelsPerMm, new TPoint(0, 0), kDrawNow)
@@ -310,7 +310,7 @@ export class PdCenterDrawingCommand extends PdCommand {
     newOffset_mm: SinglePoint = new SinglePoint()
     
     doCommand(): void {
-        PdCommand.prototype.doCommand.call(this)
+        super.doCommand()
         this.oldScale_PixelsPerMm = domain.plantDrawScale_PixelsPerMm()
         this.oldOffset_mm = domain.plantDrawOffset_mm()
         MainForm.fitVisiblePlantsInDrawingArea(kDrawNow, umain.kScaleAndMove, umain.kAlwaysMove)
@@ -320,7 +320,7 @@ export class PdCenterDrawingCommand extends PdCommand {
     }
     
     undoCommand(): void {
-        PdCommand.prototype.undoCommand.call(this)
+        super.undoCommand()
         domain.plantManager.plantDrawOffset_mm = this.oldOffset_mm
         MainForm.recalculateAllPlantBoundsRects(kDrawNow)
         if (this.oldScale_PixelsPerMm !== 0.0) {
@@ -329,7 +329,7 @@ export class PdCenterDrawingCommand extends PdCommand {
     }
     
     redoCommand(): void {
-        PdCommand.prototype.doCommand.call(this)
+        super.doCommand()
         domain.plantManager.plantDrawOffset_mm = this.newOffset_mm
         MainForm.recalculateAllPlantBoundsRects(kDrawNow)
         if (this.newScale_pixelsPerMm !== 0.0) {
@@ -362,7 +362,7 @@ export class PdChangeMainWindowOrientationCommand extends PdCommand {
     }
     
     doCommand(): void {
-        PdCommand.prototype.doCommand.call(this)
+        super.doCommand()
         try {
             ucursor.cursor_startWait()
             domain.options.mainWindowOrientation = this.newWindowOrientation
@@ -373,7 +373,7 @@ export class PdChangeMainWindowOrientationCommand extends PdCommand {
     }
     
     undoCommand(): void {
-        PdCommand.prototype.undoCommand.call(this)
+        super.undoCommand()
         try {
             ucursor.cursor_startWait()
             domain.options.mainWindowOrientation = this.oldWindowOrientation
@@ -405,13 +405,13 @@ export class PdChangeDomainOptionsCommand extends PdCommand {
     }
     
     doCommand(): void {
-        PdCommand.prototype.doCommand.call(this)
+        super.doCommand()
         domain.options = this.newOptions
         MainForm.updateForChangeToDomainOptions()
     }
     
     undoCommand(): void {
-        PdCommand.prototype.undoCommand.call(this)
+        super.undoCommand()
         domain.options = this.oldOptions
         MainForm.updateForChangeToDomainOptions()
     }
@@ -438,19 +438,17 @@ export class PdChangeDomain3DOptionsCommand extends PdCommand {
     }
     
     doCommand(): void {
-        PdCommand.prototype.doCommand.call(this)
+        super.doCommand()
         domain.exportOptionsFor3D[this.outputType] = this.newOptions
     }
     
     undoCommand(): void {
-        PdCommand.prototype.undoCommand.call(this)
+        super.undoCommand()
         domain.exportOptionsFor3D[this.outputType] = this.oldOptions
     }
     
     description(): string {
-        let result = ""
-        result = "change " + usupport.nameStringForFileType(u3dexport.fileTypeFor3DExportType(this.outputType)) + " output options"
-        return result
+        return "change " + usupport.nameStringForFileType(u3dexport.fileTypeFor3DExportType(this.outputType)) + " output options"
     }
     
 }
@@ -468,21 +466,19 @@ export class PdRenameCommand extends PdCommand {
     }
     
     doCommand(): void {
-        PdCommand.prototype.doCommand.call(this)
+        super.doCommand()
         this.plant.setName(this.newName)
         MainForm.updateForRenamingPlant(this.plant)
     }
     
     undoCommand(): void {
-        PdCommand.prototype.undoCommand.call(this)
+        super.undoCommand()
         this.plant.setName(this.oldName)
         MainForm.updateForRenamingPlant(this.plant)
     }
     
     description(): string {
-        let result = ""
-        result = "rename \"" + this.oldName + "\" to \"" + this.newName + "\""
-        return result
+        return "rename \"" + this.oldName + "\" to \"" + this.newName + "\""
     }
     
 }
@@ -501,21 +497,19 @@ export class PdEditNoteCommand extends PdCommand {
     }
     
     doCommand(): void {
-        PdCommand.prototype.doCommand.call(this)
+        super.doCommand()
         this.plant.noteLines = this.newStrings
         MainForm.updateForChangeToPlantNote(this.plant)
     }
     
     undoCommand(): void {
-        PdCommand.prototype.undoCommand.call(this)
+        super.undoCommand()
         this.plant.noteLines = this.oldStrings
         MainForm.updateForChangeToPlantNote(this.plant)
     }
     
     description(): string {
-        let result = ""
-        result = "change note for \"" + this.plant.getName() + "\""
-        return result
+        return "change note for \"" + this.plant.getName() + "\""
     }
     
 }
@@ -553,7 +547,7 @@ export class PdNewCommand extends PdCommand {
     }
     
     doCommand(): void {
-        PdCommand.prototype.doCommand.call(this)
+        super.doCommand()
         this.newPlant = new PdPlant()
         try {
             ucursor.cursor_startWait()
@@ -580,7 +574,7 @@ export class PdNewCommand extends PdCommand {
     }
     
     undoCommand(): void {
-        PdCommand.prototype.undoCommand.call(this)
+        super.undoCommand()
         arrayRemove(domain.plantManager.plants, this.newPlant)
         MainForm.removeSelectedPlant(this.newPlant)
         if (this.oldSelectedList.length > 0) {
@@ -593,7 +587,7 @@ export class PdNewCommand extends PdCommand {
     }
     
     redoCommand(): void {
-        PdCommand.prototype.doCommand.call(this)
+        super.doCommand()
         MainForm.deselectAllPlants()
         domain.plantManager.plants.push(this.newPlant)
         MainForm.addSelectedPlant(this.newPlant, kAddAtEnd)
@@ -601,9 +595,7 @@ export class PdNewCommand extends PdCommand {
     }
     
     description(): string {
-        let result = ""
-        result = "create new plant"
-        return result
+        return "create new plant"
     }
     
 }
@@ -660,7 +652,7 @@ export class PdCreateAmendmentCommand extends PdCommand {
     }
     
     doCommand(): void {
-        PdCommand.prototype.doCommand.call(this)
+        super.doCommand()
         MainForm.invalidateDrawingRect(this.plant.boundsRect_pixels())
         this.plant.addAmendment(this.newAmendment)
         this.plant.recalculateBounds(kDrawNow)
@@ -669,7 +661,7 @@ export class PdCreateAmendmentCommand extends PdCommand {
     }
     
     undoCommand(): void {
-        PdCommand.prototype.undoCommand.call(this)
+        super.undoCommand()
         MainForm.invalidateDrawingRect(this.plant.boundsRect_pixels())
         this.plant.removeAmendment(this.newAmendment)
         this.plant.recalculateBounds(kDrawNow)
@@ -678,9 +670,7 @@ export class PdCreateAmendmentCommand extends PdCommand {
     }
     
     description(): string {
-        let result = ""
-        result = "pose part " + IntToStr(this.newAmendment.partID) + " in plant \"" + this.plant.getName() + "\""
-        return result
+        return "pose part " + IntToStr(this.newAmendment.partID) + " in plant \"" + this.plant.getName() + "\""
     }
     
 }
@@ -700,7 +690,7 @@ export class PdDeleteAmendmentCommand extends PdCommand {
     }
     
     doCommand(): void {
-        PdCommand.prototype.doCommand.call(this)
+        super.doCommand()
         MainForm.invalidateDrawingRect(this.plant.boundsRect_pixels())
         this.plant.removeAmendment(this.amendment)
         this.plant.recalculateBounds(kDrawNow)
@@ -709,7 +699,7 @@ export class PdDeleteAmendmentCommand extends PdCommand {
     }
     
     undoCommand(): void {
-        PdCommand.prototype.undoCommand.call(this)
+        super.undoCommand()
         MainForm.invalidateDrawingRect(this.plant.boundsRect_pixels())
         this.plant.addAmendment(this.amendment)
         this.plant.recalculateBounds(kDrawNow)
@@ -747,7 +737,7 @@ export class PdEditAmendmentCommand extends PdCommand {
         let index: int
         let oldItemIndex: int
         
-        PdCommand.prototype.doCommand.call(this)
+        super.doCommand()
         MainForm.invalidateDrawingRect(this.plant.boundsRect_pixels())
         if (this.oldAmendment !== null) {
             this.plant.removeAmendment(this.oldAmendment)
@@ -763,7 +753,7 @@ export class PdEditAmendmentCommand extends PdCommand {
         let index: int
         let oldItemIndex: int
         
-        PdCommand.prototype.undoCommand.call(this)
+        super.undoCommand()
         MainForm.invalidateDrawingRect(this.plant.boundsRect_pixels())
         this.plant.removeAmendment(this.newAmendment)
         if (this.oldAmendment !== null) {
@@ -832,7 +822,7 @@ export class PdSelectPosingPartCommand extends PdCommand {
     doCommand(): void {
         // selected posed part not saved
         this.commandChangesPlantFile = false
-        PdCommand.prototype.doCommand.call(this)
+        super.doCommand()
         MainForm.selectedPlantPartID = this.newPartID
         MainForm.selectedPlantPartType = this.newPartType
         MainForm.updatePosingForSelectedPlantPart()
@@ -840,7 +830,7 @@ export class PdSelectPosingPartCommand extends PdCommand {
     }
     
     undoCommand(): void {
-        PdCommand.prototype.undoCommand.call(this)
+        super.undoCommand()
         MainForm.selectedPlantPartID = this.oldPartID
         MainForm.selectedPlantPartType = this.oldPartType
         MainForm.updatePosingForSelectedPlantPart()
@@ -904,7 +894,7 @@ export class PdCommandWithListOfPlants extends PdCommand {
         let atLeastOnePlantHadAmendments: boolean
         let aList: TList
         
-        PdCommand.prototype.doCommand.call(this)
+        super.doCommand()
         if (!this.removesPlantAmendments) {
             return
         }
@@ -927,7 +917,7 @@ export class PdCommandWithListOfPlants extends PdCommand {
         let atLeastOnePlantHadAmendments: boolean
         let aList: TList
         
-        PdCommand.prototype.undoCommand.call(this)
+        super.undoCommand()
         if (!this.removesPlantAmendments) {
             return
         }
@@ -2263,7 +2253,7 @@ export class PdChangePlantAgeCommand extends PdCommandWithListOfPlants {
                     this.plant = this.plantList[i]
                     // if primary selected plant has longer lifespan than other selected plants, cut off age
                     //        at max for those plants 
-                    this.plant.setAge(umath.intMin(this.newAge, this.plant.pGeneral.ageAtMaturity))
+                    this.plant.setAge(intMin(this.newAge, this.plant.pGeneral.ageAtMaturity))
                     this.plant.recalculateBounds(kDrawNow)
                 }
             }
@@ -2876,8 +2866,8 @@ export class PdRemoveCommand extends PdCommandWithListOfPlants {
             // don't remove plants from plant manager and MainForm.selectedPlants until all indexes have been recorded 
             this.plant = this.plantList[i]
             this.removedPlants.push(this.plant)
-            this.plant.indexWhenRemoved = domain.plantManager.plants.IndexOf(this.plant)
-            this.plant.selectedIndexWhenRemoved = MainForm.selectedPlants.IndexOf(this.plant)
+            this.plant.indexWhenRemoved = domain.plantManager.plants.indexOf(this.plant)
+            this.plant.selectedIndexWhenRemoved = MainForm.selectedPlants.indexOf(this.plant)
         }
         if (this.plantList.length > 0) {
             for (let i = 0; i <= this.plantList.length - 1; i++) {
@@ -3442,7 +3432,7 @@ export class PdBreedFromParentsCommand extends PdCommand {
     doCommand(): void {
         let generationBred: PdGeneration
         
-        PdCommand.prototype.doCommand.call(this)
+        super.doCommand()
         try {
             ucursor.cursor_startWait()
             this.rowSelectedAtStart = ubreedr.BreederForm.selectedRow
@@ -3479,7 +3469,7 @@ export class PdBreedFromParentsCommand extends PdCommand {
     undoCommand(): void {
         let generationBred: PdGeneration
         
-        PdCommand.prototype.undoCommand.call(this)
+        super.undoCommand()
         // tell the breeder to forget about the generation(s) created by this command, and if there were any generations
         //    wiped out by it, tell the breeder to restore pointers to all generations that were forgotten 
         ubreedr.BreederForm.forgetLastGeneration()
@@ -3501,7 +3491,7 @@ export class PdBreedFromParentsCommand extends PdCommand {
     redoCommand(): void {
         let generationBred: PdGeneration
         
-        PdCommand.prototype.doCommand.call(this)
+        super.doCommand()
         // tell breeder to forget about other generations below the selected row (the whole list if from the main window) 
         ubreedr.BreederForm.forgetGenerationsListBelowRow(this.row)
         if (this.firstGeneration !== null) {
@@ -3567,7 +3557,7 @@ export class PdReplaceBreederPlant extends PdCommand {
     }
     
     doCommand(): void {
-        PdCommand.prototype.doCommand.call(this)
+        super.doCommand()
         this.originalPlant = ubreedr.BreederForm.plantForRowAndColumn(this.row, this.column)
         if (this.originalPlant === null) {
             throw new Error("Problem: Invalid row and column in method PdReplaceBreederPlant.doCommand.")
@@ -3578,12 +3568,12 @@ export class PdReplaceBreederPlant extends PdCommand {
     }
     
     undoCommand(): void {
-        PdCommand.prototype.undoCommand.call(this)
+        super.undoCommand()
         ubreedr.BreederForm.replacePlantInRow(this.newPlant, this.originalPlant, this.row)
     }
     
     redoCommand(): void {
-        PdCommand.prototype.doCommand.call(this)
+        super.doCommand()
         ubreedr.BreederForm.replacePlantInRow(this.originalPlant, this.newPlant, this.row)
     }
     
@@ -3628,7 +3618,7 @@ export class PdMakeTimeSeriesCommand extends PdCommand {
     }
     
     doCommand(): void {
-        PdCommand.prototype.doCommand.call(this)
+        super.doCommand()
         if (utimeser.TimeSeriesForm.plants.length > 0) {
             for (let i = 0; i <= utimeser.TimeSeriesForm.plants.length - 1; i++) {
                 this.oldPlants.push(utimeser.TimeSeriesForm.plants[i])
@@ -3646,7 +3636,7 @@ export class PdMakeTimeSeriesCommand extends PdCommand {
     }
     
     undoCommand(): void {
-        PdCommand.prototype.undoCommand.call(this)
+        super.undoCommand()
         utimeser.TimeSeriesForm.plants.clearPointersWithoutDeletingObjects()
         if (this.oldPlants.length > 0) {
             for (let i = 0; i <= this.oldPlants.length - 1; i++) {
@@ -3657,7 +3647,7 @@ export class PdMakeTimeSeriesCommand extends PdCommand {
     }
     
     redoCommand(): void {
-        PdCommand.prototype.doCommand.call(this)
+        super.doCommand()
         utimeser.TimeSeriesForm.plants.clearPointersWithoutDeletingObjects()
         if (this.newPlants.length > 0) {
             for (let i = 0; i <= this.newPlants.length - 1; i++) {
@@ -3698,7 +3688,7 @@ export class PdChangeBreedingAndTimeSeriesOptionsCommand extends PdCommand {
     }
     
     doCommand(): void {
-        PdCommand.prototype.doCommand.call(this)
+        super.doCommand()
         domain.breedingAndTimeSeriesOptions = this.newOptions
         domain.options = this.newDomainOptions
         ubreedr.BreederForm.updateForChangeToDomainOptions()
@@ -3706,7 +3696,7 @@ export class PdChangeBreedingAndTimeSeriesOptionsCommand extends PdCommand {
     }
     
     undoCommand(): void {
-        PdCommand.prototype.undoCommand.call(this)
+        super.undoCommand()
         domain.breedingAndTimeSeriesOptions = this.oldOptions
         domain.options = this.oldDomainOptions
         ubreedr.BreederForm.updateForChangeToDomainOptions()
@@ -3733,7 +3723,7 @@ export class PdDeleteBreederGenerationCommand extends PdCommand {
         if (this.generation === null) {
             throw new Error("Problem: Nil generation in method PdDeleteBreederGenerationCommand.createWithGeneration.")
         }
-        this.row = ubreedr.BreederForm.generations.IndexOf(this.generation)
+        this.row = ubreedr.BreederForm.generations.indexOf(this.generation)
         if (this.row < 0) {
             throw new Error("Problem: Generation not in list in method PdDeleteBreederGenerationCommand.createWithGeneration.")
         }
@@ -3751,8 +3741,8 @@ export class PdDeleteBreederGenerationCommand extends PdCommand {
     doCommand(): void {
         let index: short
         
-        PdCommand.prototype.doCommand.call(this)
-        index = ubreedr.BreederForm.generations.IndexOf(this.generation)
+        super.doCommand()
+        index = ubreedr.BreederForm.generations.indexOf(this.generation)
         arrayRemove(ubreedr.BreederForm.generations, this.generation)
         if (index > 0) {
             ubreedr.BreederForm.selectedRow = index - 1
@@ -3761,9 +3751,9 @@ export class PdDeleteBreederGenerationCommand extends PdCommand {
     }
     
     undoCommand(): void {
-        PdCommand.prototype.undoCommand.call(this)
+        super.undoCommand()
         arrayInsert(ubreedr.BreederForm.generations, this.row, this.generation)
-        ubreedr.BreederForm.selectedRow = ubreedr.BreederForm.generations.IndexOf(this.generation)
+        ubreedr.BreederForm.selectedRow = ubreedr.BreederForm.generations.indexOf(this.generation)
         ubreedr.BreederForm.updateForChangeToGenerations()
     }
     
@@ -3804,13 +3794,13 @@ export class PdDeleteAllBreederGenerationsCommand extends PdCommand {
     }
     
     doCommand(): void {
-        PdCommand.prototype.doCommand.call(this)
+        super.doCommand()
         ubreedr.BreederForm.generations.clearPointersWithoutDeletingObjects()
         ubreedr.BreederForm.updateForChangeToGenerations()
     }
     
     undoCommand(): void {
-        PdCommand.prototype.undoCommand.call(this)
+        super.undoCommand()
         if (this.generations.length > 0) {
             for (let i = 0; i <= this.generations.length - 1; i++) {
                 ubreedr.BreederForm.generations.push(this.generations[i])
@@ -3842,13 +3832,13 @@ export class PdChangeNumberOfTimeSeriesStagesCommand extends PdCommand {
     }
     
     doCommand(): void {
-        PdCommand.prototype.doCommand.call(this)
+        super.doCommand()
         domain.breedingAndTimeSeriesOptions.numTimeSeriesStages = this.newNumber
         utimeser.TimeSeriesForm.updateForChangeToDomainOptions()
     }
     
     undoCommand(): void {
-        PdCommand.prototype.undoCommand.call(this)
+        super.undoCommand()
         domain.breedingAndTimeSeriesOptions.numTimeSeriesStages = this.oldNumber
         utimeser.TimeSeriesForm.updateForChangeToDomainOptions()
     }
@@ -3884,13 +3874,13 @@ export class PdDeleteTimeSeriesCommand extends PdCommand {
     }
     
     doCommand(): void {
-        PdCommand.prototype.doCommand.call(this)
+        super.doCommand()
         utimeser.TimeSeriesForm.plants.clearPointersWithoutDeletingObjects()
         utimeser.TimeSeriesForm.updateForChangeToPlants(utimeser.kDontRecalculateScale)
     }
     
     undoCommand(): void {
-        PdCommand.prototype.undoCommand.call(this)
+        super.undoCommand()
         if (this.plants.length > 0) {
             for (let i = 0; i <= this.plants.length - 1; i++) {
                 utimeser.TimeSeriesForm.plants.push(this.plants[i])

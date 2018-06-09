@@ -65,14 +65,20 @@ export enum DrawMode {
 
 const kMinOutputCylinderFaces = 3
 const kMaxOutputCylinderFaces = 20
+
 const kDefaultV1IniFileName = "PlantStudio.ini"
 const kDefaultV2IniFileName = "PlantStudio2.ini"
+
 const kV2IniAddition = "_v2"
+
 const kMaxRecentFiles = 10
+
 const kViewPlantsInMainWindowFreeFloating = 1
 const kViewPlantsInMainWindowOneAtATime = 2
+
 const kMaxUnregExportsAllowed = 20
 const kMaxUnregExportsPerSessionAfterMaxReached = 2
+
 const kInPlantMover = true
 const kNotInPlantMover = false
 
@@ -1534,21 +1540,16 @@ export class PdDomain {
         result = this.plantManager.plantDrawScale_PixelsPerMm
         return result
     }
-    
-    viewPlantsInMainWindowFreeFloating(): boolean {
-        let result = false
-        result = this.options.mainWindowViewMode === kViewPlantsInMainWindowFreeFloating
-        return result
-    }
-    
-    viewPlantsInMainWindowOnePlantAtATime(): boolean {
-        let result = false
-        result = this.options.mainWindowViewMode === kViewPlantsInMainWindowOneAtATime
-        return result
-    }
 
     */
     
+    viewPlantsInMainWindowFreeFloating(): boolean {
+        return this.options.mainWindowViewMode === kViewPlantsInMainWindowFreeFloating
+    }
+    
+    viewPlantsInMainWindowOnePlantAtATime(): boolean {
+        return this.options.mainWindowViewMode === kViewPlantsInMainWindowOneAtATime
+    }
 }
 
 // TODO: Someone needs to call this after all files are loaded:
