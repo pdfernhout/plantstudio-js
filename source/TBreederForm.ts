@@ -7,7 +7,8 @@ import { BreederVariation, domain, DrawMode } from "./PdDomain"
 import { intround, short, long, ColorDefs, int, IntToStr, MessageDialog, arrayRemove } from "./common"
 import { PdPlant, BreedingAndTimeSeriesOptionsStructure } from "./PdPlant"
 import { PdGeneration } from "./PdGeneration"
-import { PdCommand } from "./PdCommand";
+import { PdCommand } from "./PdCommand"
+import { TDrawGrid } from "./TDrawGrid"
 
 let BreederForm: TBreederForm
 
@@ -30,8 +31,8 @@ const kOptionTabNonNumeric = 3
 const kOptionTabTdos = 4
 
 export class TBreederForm {
-    /*
     plantsDrawGrid: TDrawGrid = new TDrawGrid()
+    /*
     BreederMenu: TMainMenu = new TMainMenu()
     BreederMenuEdit: TMenuItem = new TMenuItem()
     BreederMenuCopy: TMenuItem = new TMenuItem()
