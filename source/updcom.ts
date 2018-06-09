@@ -226,8 +226,8 @@ export class PdChangeMagnificationCommand extends PdCommand {
     clickPoint: SinglePoint = new SinglePoint()
     shift: boolean = false
     
-    createWithNewScaleAndPoint(aNewScale: float, aPoint: TPoint): void {
-        PdCommand.prototype.create.call(this)
+    constructor(aNewScale: float, aPoint: TPoint) {
+        super()
         this.newScale_pixelsPerMm = aNewScale
         this.oldScale_PixelsPerMm = domain.plantDrawScale_PixelsPerMm()
         this.oldOffset_mm = domain.plantDrawOffset_mm()
@@ -353,8 +353,8 @@ export class PdChangeMainWindowOrientationCommand extends PdCommand {
     oldWindowOrientation: short = 0
     newWindowOrientation: short = 0
     
-    createWithNewOrientation(aNewOrientation: short): void {
-        PdCommand.prototype.create.call(this)
+    constructor(aNewOrientation: short) {
+        super()
         // hidden flag not saved
         this.commandChangesPlantFile = false
         this.newWindowOrientation = aNewOrientation
@@ -397,8 +397,8 @@ export class PdChangeDomainOptionsCommand extends PdCommand {
     oldOptions: DomainOptionsStructure = new DomainOptionsStructure()
     newOptions: DomainOptionsStructure = new DomainOptionsStructure()
     
-    createWithOptions(aNewOptions: DomainOptionsStructure): void {
-        PdCommand.prototype.create.call(this)
+    constructor(aNewOptions: DomainOptionsStructure) {
+        super()
         this.commandChangesPlantFile = false
         this.newOptions = aNewOptions
         this.oldOptions = domain.options
@@ -429,8 +429,8 @@ export class PdChangeDomain3DOptionsCommand extends PdCommand {
     oldOptions: FileExport3DOptionsStructure = new FileExport3DOptionsStructure()
     newOptions: FileExport3DOptionsStructure = new FileExport3DOptionsStructure()
     
-    createWithOptionsAndType(aNewOptions: FileExport3DOptionsStructure, anOutputType: short): void {
-        PdCommand.prototype.create.call(this)
+    constructor(aNewOptions: FileExport3DOptionsStructure, anOutputType: short) {
+        super()
         this.outputType = anOutputType
         this.commandChangesPlantFile = false
         this.newOptions = aNewOptions
@@ -460,8 +460,8 @@ export class PdRenameCommand extends PdCommand {
     oldName: string = ""
     newName: string = ""
     
-    createWithPlantAndNewName(aPlant: PdPlant, aNewName: string): void {
-        PdCommand.prototype.create.call(this)
+    constructor(aPlant: PdPlant, aNewName: string) {
+        super()
         this.plant = aPlant
         this.oldName = this.plant.getName()
         this.newName = aNewName
@@ -492,8 +492,8 @@ export class PdEditNoteCommand extends PdCommand {
     oldStrings: TStringList = new TStringList()
     newStrings: TStringList = new TStringList()
     
-    createWithPlantAndNewTStrings(aPlant: PdPlant, aNewStrings: TStrings): void {
-        PdCommand.prototype.create.call(this)
+    constructor(aPlant: PdPlant, aNewStrings: TStrings) {
+        super()
         this.plant = aPlant
         this.oldStrings = this.plant.noteLines
         // we take ownership of this list and delete it if undone
@@ -527,8 +527,8 @@ export class PdNewCommand extends PdCommand {
     oldSelectedList: TList = new TList()
     
     // v2.0
-    createWithWizardPlantAndOldSelectedList(aPlant: PdPlant, anOldSelectedList: TList): void {
-        PdCommand.prototype.create.call(this)
+    constructor(aPlant: PdPlant, anOldSelectedList: TList) {
+        super()
         this.useWizardPlant = true
         this.wizardPlant = aPlant
         // selected list is just pointers, this doesn't take control of them
@@ -611,8 +611,8 @@ export class PdNewCommand extends PdCommand {
 export class PdSendBackwardOrForwardCommand extends PdCommand {
     backward: boolean = false
     
-    createWithBackwardOrForward(aBackward: boolean): void {
-        PdCommand.prototype.create.call(this)
+    constructor(aBackward: boolean) {
+        super()
         this.backward = aBackward
     }
     
@@ -649,8 +649,8 @@ export class PdCreateAmendmentCommand extends PdCommand {
     plant: PdPlant
     newAmendment: PdPlantDrawingAmendment = new PdPlantDrawingAmendment()
     
-    createWithPlantAndAmendment(aPlant: PdPlant, aNewAmendment: PdPlantDrawingAmendment): void {
-        PdCommand.prototype.create.call(this)
+    constructor(aPlant: PdPlant, aNewAmendment: PdPlantDrawingAmendment) {
+        super()
         this.plant = aPlant
         if (aNewAmendment === null) {
             throw new Error("Problem: Nil new amendment; in PdCreateAmendmentCommand.createWithPlantAndAmendment.")
@@ -689,8 +689,8 @@ export class PdDeleteAmendmentCommand extends PdCommand {
     plant: PdPlant
     amendment: PdPlantDrawingAmendment = new PdPlantDrawingAmendment()
     
-    createWithPlantAndAmendment(aPlant: PdPlant, anAmendment: PdPlantDrawingAmendment): void {
-        PdCommand.prototype.create.call(this)
+    constructor(aPlant: PdPlant, anAmendment: PdPlantDrawingAmendment) {
+        super()
         this.plant = aPlant
         if (anAmendment === null) {
             throw new Error("Problem: Nil amendment; in PdDeleteAmendmentCommand.createWithPlantAndAmendment.")
@@ -731,8 +731,8 @@ export class PdEditAmendmentCommand extends PdCommand {
     oldAmendment: PdPlantDrawingAmendment = new PdPlantDrawingAmendment()
     newAmendment: PdPlantDrawingAmendment = new PdPlantDrawingAmendment()
     
-    createWithPlantAndAmendmentAndField(aPlant: PdPlant, aNewAmendment: PdPlantDrawingAmendment, aField: string): void {
-        PdCommand.prototype.create.call(this)
+    constructor(aPlant: PdPlant, aNewAmendment: PdPlantDrawingAmendment, aField: string): void {
+        super()
         this.plant = aPlant
         this.field = aField
         if (aNewAmendment === null) {
@@ -818,8 +818,8 @@ export class PdSelectPosingPartCommand extends PdCommand {
     oldPartType: string = ""
     newPartType: string = ""
     
-    createWithPlantAndPartIDsAndTypes(aPlant: PdPlant, aNewPartID: long, anOldPartID: long, aNewPartType: string, anOldPartType: string): void {
-        PdCommand.prototype.create.call(this)
+    constructor(aPlant: PdPlant, aNewPartID: long, anOldPartID: long, aNewPartType: string, anOldPartType: string): void {
+        super()
         // selected posed part not saved
         this.commandChangesPlantFile = false
         this.plant = aPlant
@@ -861,16 +861,15 @@ export class PdSelectPosingPartCommand extends PdCommand {
 
 // ---------------------------------- commands that affect a list of plants, usually in a minor way 
 export class PdCommandWithListOfPlants extends PdCommand {
-    plantList: TList = new TList()
+    plantList: PdSingleValue[] = []
     values: TListCollection = new TListCollection()
     plant: PdPlant
     removesPlantAmendments: boolean = false
     listOfAmendmentLists: TList = new TList()
     
     // for temporary use
-    createWithListOfPlants(aList: TList): void {
-        PdCommand.prototype.create.call(this)
-        this.plantList = delphi_compatability.TList().Create()
+    constructor(aList: TList) {
+        super()
         if (aList.length > 0) {
             for (let i = 0; i <= aList.length - 1; i++) {
                 this.plantList.push(aList[i])
@@ -1835,8 +1834,7 @@ export class PdAlignPlantsCommand extends PdCommandWithListOfPlants {
     }
     
     doCommand(): void {
-        let newPoint: TPoint
-        let offset: TPoint
+        let offset: TPoint = new TPoint()
         
         PdCommandWithListOfPlants.prototype.doCommand.call(this)
         this.newPoints.clear()
@@ -1844,7 +1842,7 @@ export class PdAlignPlantsCommand extends PdCommandWithListOfPlants {
         if (this.plantList.length > 0) {
             for (let i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = this.plantList[i]
-                newPoint = this.plant.basePoint_pixels()
+                const newPoint: TPoint = this.plant.basePoint_pixels()
                 offset.X = this.plant.basePoint_pixels().X - this.plant.boundsRect_pixels().Left
                 offset.Y = this.plant.basePoint_pixels().Y - this.plant.boundsRect_pixels().Top
                 switch (this.alignDirection) {
@@ -1918,9 +1916,9 @@ export class PdRotateCommand extends PdCommandWithListOfPlants {
     offsetRotation: float = 0.0
     startDragPoint: TPoint = new TPoint()
     
-    createWithListOfPlantsDirectionAndNewRotation(aList: TList, aRotateDirection: short, aNewRotation: short): void {
-        // create using this constructor if this is from clicking on a spinEdit 
-        PdCommandWithListOfPlants.prototype.createWithListOfPlants.call(this, aList)
+    constructor(aList: TList, aRotateDirection: short, aNewRotation: short) {
+        // create using this constructor if this is from clicking on a spinEdit
+        super(aList)
         this.rotateDirection = aRotateDirection
         this.newRotation = aNewRotation
         if (this.newRotation < -360) {
@@ -3395,8 +3393,8 @@ export class PdBreedFromParentsCommand extends PdCommand {
     createFirstGeneration: boolean = false
     rowSelectedAtStart: short = 0
     
-    createWithInfo(existingGenerations: TListCollection, aFirstParent: PdPlant, aSecondParent: PdPlant, aRow: short, aFractionOfMaxAge: float, aCreateFirstGeneration: boolean): void {
-        PdCommand.prototype.create.call(this)
+    constructor(existingGenerations: TListCollection, aFirstParent: PdPlant, aSecondParent: PdPlant, aRow: short, aFractionOfMaxAge: float, aCreateFirstGeneration: boolean) {
+        super()
         this.commandChangesPlantFile = false
         this.firstParent = aFirstParent
         if (this.firstParent === null) {
@@ -3550,8 +3548,8 @@ export class PdReplaceBreederPlant extends PdCommand {
     row: short = 0
     column: short = 0
     
-    createWithPlantRowAndColumn(aPlant: PdPlant, aRow: short, aColumn: short): void {
-        PdCommand.prototype.create.call(this)
+    constructor(aPlant: PdPlant, aRow: short, aColumn: short) {
+        super()
         this.commandChangesPlantFile = false
         this.plantDraggedFrom = aPlant
         if (this.plantDraggedFrom === null) {
@@ -3603,8 +3601,8 @@ export class PdMakeTimeSeriesCommand extends PdCommand {
     newPlant: PdPlant
     isPaste: boolean = false
     
-    createWithNewPlant(aNewPlant: PdPlant): void {
-        PdCommand.prototype.create.call(this)
+    constructor(aNewPlant: PdPlant) {
+        super()
         this.commandChangesPlantFile = false
         this.newPlant = aNewPlant
         if (this.newPlant === null) {
@@ -3690,8 +3688,8 @@ export class PdChangeBreedingAndTimeSeriesOptionsCommand extends PdCommand {
     oldDomainOptions: DomainOptionsStructure = new DomainOptionsStructure()
     newDomainOptions: DomainOptionsStructure = new DomainOptionsStructure()
 
-    createWithOptionsAndDomainOptions(anOptions: BreedingAndTimeSeriesOptionsStructure, aDomainOptions: DomainOptionsStructure): void {
-        PdCommand.prototype.create.call(this)
+    constructor(anOptions: BreedingAndTimeSeriesOptionsStructure, aDomainOptions: DomainOptionsStructure) {
+        super()
         this.commandChangesPlantFile = false
         this.newOptions = anOptions
         this.oldOptions = domain.breedingAndTimeSeriesOptions
@@ -3728,8 +3726,8 @@ export class PdDeleteBreederGenerationCommand extends PdCommand {
     generation: PdGeneration = new PdGeneration()
     row: short = 0
     
-    createWithGeneration(aGeneration: PdGeneration): void {
-        PdCommand.prototype.create.call(this)
+    constructor(aGeneration: PdGeneration) {
+        super()
         this.commandChangesPlantFile = false
         this.generation = aGeneration
         if (this.generation === null) {
@@ -3836,8 +3834,8 @@ export class PdChangeNumberOfTimeSeriesStagesCommand extends PdCommand {
     newNumber: short = 0
     oldNumber: short = 0
  
-    createWithNewNumberOfStages(aNumber: short): void {
-        PdCommand.prototype.create.call(this)
+    constructor(aNumber: short) {
+        super()
         this.commandChangesPlantFile = false
         this.newNumber = aNumber
         this.oldNumber = domain.breedingAndTimeSeriesOptions.numTimeSeriesStages
