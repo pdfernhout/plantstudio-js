@@ -60,6 +60,7 @@ export const MainForm = {
     updateForChangeToPlantSelections() {},
     invalidateEntireDrawing() {},
     recalculateAllPlantBoundsRectsForOffsetChange() {},
+    updateForChangeToSelectedPlantsDrawingScale() {},
 }
 
 // TODO: Fix PdBitmap stub

@@ -73,8 +73,8 @@ const kDontCheckForUnreadParams = false
 const kConsiderDomainScale = true
 const kDontConsiderDomainScale = false
 
-const kDrawNow = true
-const kDontDrawNow = false
+export const kDrawNow = true
+export const kDontDrawNow = false
 
 const kMutation = 0
 const kWeight = 1
