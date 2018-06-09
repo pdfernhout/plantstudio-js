@@ -55,6 +55,11 @@ export const MainForm = {
     MenuEditRedoClick: (Sender: any) => {},
     updatePasteMenuForClipboardContents: () => {},
     standardPastePosition: () => new TPoint(),
+    invalidateDrawingRect(rect: TRect) {},
+    updatePoseInfo() {},
+    updateForChangeToPlantSelections() {},
+    invalidateEntireDrawing() {},
+    recalculateAllPlantBoundsRectsForOffsetChange() {},
 }
 
 // TODO: Fix PdBitmap stub
