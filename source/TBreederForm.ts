@@ -821,8 +821,6 @@ export class TBreederForm {
     }
     
     BreederMenuRandomizeClick(event: any): void {
-        let plant: PdPlant
-        
         const aGeneration = this.selectedGeneration()
         if (aGeneration === null) {
             return
@@ -833,7 +831,7 @@ export class TBreederForm {
         const randomizeList: PdPlant[] = []
         try {
             for (let i = 0; i < aGeneration.selectedPlants.length; i++) {
-                plant = aGeneration.selectedPlants[i]
+                const plant = aGeneration.selectedPlants[i]
                 randomizeList.push(plant)
             }
             const newCommand = new PdRandomizeCommand(randomizeList)

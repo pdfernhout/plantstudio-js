@@ -8,6 +8,8 @@ export interface TGridDrawState {
 export class TDrawGrid {
     RowCount = 1
     ColCount = 1
+    TopRow = 0
+    VisibleRowCount = 1
     DefaultColWidth = 40
     DefaultRowHeight = 40
     ColWidths: number[] = [40]
