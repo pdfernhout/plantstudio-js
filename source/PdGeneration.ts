@@ -77,7 +77,7 @@ export class PdGeneration {
         return null
     }
     
-    breedFromParents(aFirstParent: PdPlant, aSecondParent: PdPlant, fractionOfMaxAge: float): void {
+    breedFromParents(aFirstParent: PdPlant | null, aSecondParent: PdPlant | null, fractionOfMaxAge: float): void {
         let inputFile: TextFile
 
         this.firstParent = aFirstParent

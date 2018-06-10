@@ -9,6 +9,7 @@ import { PdPlant, BreedingAndTimeSeriesOptionsStructure } from "./PdPlant"
 import { PdGeneration } from "./PdGeneration"
 import { PdCommand } from "./PdCommand"
 import { TDrawGrid, TGridDrawState } from "./TDrawGrid"
+import { PdBreedFromParentsCommand, PdMakeTimeSeriesCommand, PdDeleteBreederGenerationCommand, PdDeleteAllBreederGenerationsCommand, PdRandomizeCommand, PdChangeBreedingAndTimeSeriesOptionsCommand, PdPasteCommand, PdReplaceBreederPlant } from "./updcom"
 
 let BreederForm: TBreederForm
 
@@ -438,17 +439,15 @@ export class TBreederForm {
             newPlant.shrinkPreviewCache()
             const newPlants: PdPlant[] = []
             newPlants.push(newPlant)
-            const newCommand: PdCommand = updcom.PdPasteCommand().createWithListOfPlantsAndOldSelectedList(newPlants, MainForm.selectedPlants)
-            updcom.PdPasteCommand(newCommand).useSpecialPastePosition = true
+            const newCommand = new PdPasteCommand(newPlants, MainForm.selectedPlants)
+            newCommand.useSpecialPastePosition = true
             try {
                 ucursor.cursor_startWait()
                 MainForm.doCommand(newCommand)
             } finally {
-                //command has another list, so we must free this one
-                newPlants.free
                 ucursor.cursor_stopWait()
             }
-            //command will free plant if paste is undone
+            // command will free plant if paste is undone
         } else if (Target === utimeser.TimeSeriesForm.grid) {
             utimeser.TimeSeriesForm.copyPlantToPoint(plant, X, Y)
         } else if (Target === Sender) {
@@ -467,7 +466,7 @@ export class TBreederForm {
                 return
             }
             // make replace command 
-            const newCommand: PdCommand = updcom.PdReplaceBreederPlant().createWithPlantRowAndColumn(plant, row, col)
+            const newCommand: PdCommand = new PdReplaceBreederPlant(plant, row, col)
             try {
                 ucursor.cursor_startWait()
                 MainForm.doCommand(newCommand)
@@ -486,7 +485,7 @@ export class TBreederForm {
         if (plant === null) {
             return
         }
-        const newCommand: PdCommand = updcom.PdReplaceBreederPlant().createWithPlantRowAndColumn(aPlant, row, col)
+        const newCommand: PdCommand = new PdReplaceBreederPlant(aPlant, row, col)
         MainForm.doCommand(newCommand)
     }
     
@@ -762,7 +761,7 @@ export class TBreederForm {
         column = generation.plants.indexOf(plant) + 1
         newPlant = new PdPlant()
         domain.plantManager.pasteFirstPlantFromPrivatePlantClipboardToPlant(newPlant)
-        newCommand = updcom.PdReplaceBreederPlant().createWithPlantRowAndColumn(newPlant, this.selectedRow, column)
+        newCommand = new PdReplaceBreederPlant(newPlant, this.selectedRow, column)
         MainForm.doCommand(newCommand)
         //command will free plant if paste is undone
     }
@@ -783,7 +782,7 @@ export class TBreederForm {
         if (generationToBreed.selectedPlants.length <= 0) {
             return
         }
-        newCommand = updcom.PdBreedFromParentsCommand().createWithInfo(this.generations, generationToBreed.firstSelectedPlant(), generationToBreed.secondSelectedPlant(), this.selectedRow, domain.breedingAndTimeSeriesOptions.percentMaxAge / 100.0, updcom.kDontCreateFirstGeneration)
+        newCommand = new PdBreedFromParentsCommand(this.generations, generationToBreed.firstSelectedPlant(), generationToBreed.secondSelectedPlant(), this.selectedRow, domain.breedingAndTimeSeriesOptions.percentMaxAge / 100.0, kDontCreateFirstGeneration)
         generationToBreed.firstParent = generationToBreed.firstSelectedPlant()
         generationToBreed.secondParent = generationToBreed.secondSelectedPlant()
         MainForm.doCommand(newCommand)
@@ -791,11 +790,12 @@ export class TBreederForm {
     
     BreederMenuMakeTimeSeriesClick(event: any): void {
         let newCommand: PdCommand
-        
-        if (this.primarySelectedPlant() === null) {
+
+        const aPlant = this.primarySelectedPlant()
+        if (aPlant === null) {
             return
         }
-        newCommand = updcom.PdMakeTimeSeriesCommand().createWithNewPlant(this.primarySelectedPlant())
+        newCommand = new PdMakeTimeSeriesCommand(aPlant)
         MainForm.doCommand(newCommand)
     }
     
@@ -804,10 +804,11 @@ export class TBreederForm {
     }
     
     BreederMenuDeleteRowClick(event: any): void { 
-        if (this.selectedGeneration() === null) {
+        const aGeneration = this.selectedGeneration()
+        if (aGeneration === null) {
             return
         }
-        const newCommand: PdCommand = updcom.PdDeleteBreederGenerationCommand().createWithGeneration(this.selectedGeneration())
+        const newCommand: PdCommand = new PdDeleteBreederGenerationCommand(aGeneration)
         MainForm.doCommand(newCommand)
     }
     
@@ -815,12 +816,11 @@ export class TBreederForm {
         if (this.generations.length <= 0) {
             return
         }
-        const newCommand: PdCommand = updcom.PdDeleteAllBreederGenerationsCommand().create()
+        const newCommand: PdCommand = new PdDeleteAllBreederGenerationsCommand()
         MainForm.doCommand(newCommand)
     }
     
     BreederMenuRandomizeClick(event: any): void {
-        let newCommand: PdCommand
         let plant: PdPlant
         
         const aGeneration = this.selectedGeneration()
@@ -836,13 +836,11 @@ export class TBreederForm {
                 plant = aGeneration.selectedPlants[i]
                 randomizeList.push(plant)
             }
-            newCommand = updcom.PdRandomizeCommand().createWithListOfPlants(randomizeList)
+            const newCommand = new PdRandomizeCommand(randomizeList)
             newCommand.isInBreeder = true
             ucursor.cursor_startWait()
             MainForm.doCommand(newCommand)
         } finally {
-            // command has another list, so we must free this one
-            randomizeList.free
             ucursor.cursor_stopWait()
         }
     }
@@ -864,7 +862,7 @@ export class TBreederForm {
                     }
                 }
             }
-            const newCommand: PdCommand = updcom.PdRandomizeCommand().createWithListOfPlants(randomizeList)
+            const newCommand = new PdRandomizeCommand(randomizeList)
             newCommand.isInBreeder = true
             newCommand.isRandomizeAllInBreeder = true
             MainForm.doCommand(newCommand)
@@ -912,7 +910,7 @@ export class TBreederForm {
         this.BreederMenuVaryColors.checked = !this.BreederMenuVaryColors.checked
         const options: BreedingAndTimeSeriesOptionsStructure = domain.breedingAndTimeSeriesOptions
         options.mutateAndBlendColorValues = this.BreederMenuVaryColors.checked
-        const newCommand: PdCommand = updcom.PdChangeBreedingAndTimeSeriesOptionsCommand().createWithOptionsAndDomainOptions(options, domain.options)
+        const newCommand: PdCommand = new PdChangeBreedingAndTimeSeriesOptionsCommand(options, domain.options)
         MainForm.doCommand(newCommand)
     }
     
@@ -920,7 +918,7 @@ export class TBreederForm {
         this.BreederMenuVary3DObjects.checked = !this.BreederMenuVary3DObjects.checked
         const options: BreedingAndTimeSeriesOptionsStructure = domain.breedingAndTimeSeriesOptions
         options.chooseTdosRandomlyFromCurrentLibrary = this.BreederMenuVary3DObjects.checked
-        const newCommand: PdCommand = updcom.PdChangeBreedingAndTimeSeriesOptionsCommand().createWithOptionsAndDomainOptions(options, domain.options)
+        const newCommand: PdCommand = new PdChangeBreedingAndTimeSeriesOptionsCommand(options, domain.options)
         MainForm.doCommand(newCommand)
     }
     
@@ -938,7 +936,7 @@ export class TBreederForm {
         optionsForm.initializeWithBreedingAndTimeSeriesOptionsAndDomainOptions(domain.breedingAndTimeSeriesOptions, domain.options)
         const response: int = optionsForm.ShowModal()
         if (response === mrOK) {
-            const newCommand: PdCommand = updcom.PdChangeBreedingAndTimeSeriesOptionsCommand().createWithOptionsAndDomainOptions(optionsForm.options, optionsForm.domainOptions)
+            const newCommand: PdCommand = new PdChangeBreedingAndTimeSeriesOptionsCommand(optionsForm.options, optionsForm.domainOptions)
             MainForm.doCommand(newCommand)
         }
     }

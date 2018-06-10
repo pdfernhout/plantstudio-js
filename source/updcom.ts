@@ -25,22 +25,31 @@ const kRotateNotInitialized = 0
 const kRotateX = 1
 const kRotateY = 2
 const kRotateZ = 3
+
 const kCopyToClipboard = true
 const kDontCopyToClipboard = false
+
 const kNewPlantAge = 5
 const kNewPlantPosition = 100
+
 const kHide = true
 const kShow = false
+
 const kSendBackward = true
 const kBringForward = false
+
 const kPasteMoveDistance = 40
-const kCreateFirstGeneration = true
-const kDontCreateFirstGeneration = false
+
+export const kCreateFirstGeneration = true
+export const kDontCreateFirstGeneration = false
+
 const kAddAtEnd = -1
+
 const kUp = 0
 const kDown = 1
 const kLeft = 2
 const kRight = 3
+
 const kChangeWidth = true
 const kChangeHeight = false
 
@@ -3280,7 +3289,7 @@ export class PdChangeBooleanValueCommand extends PdChangeValueCommand {
 
 export class PdBreedFromParentsCommand extends PdCommand {
     firstParent: PdPlant
-    secondParent: PdPlant
+    secondParent: PdPlant | null
     fractionOfMaxAge: float = 0.0
     row: short = 0
     oldGenerations: PdGeneration[] = []
@@ -3289,13 +3298,13 @@ export class PdBreedFromParentsCommand extends PdCommand {
     createFirstGeneration: boolean = false
     rowSelectedAtStart: short = 0
     
-    constructor(existingGenerations: PdGeneration[], aFirstParent: PdPlant, aSecondParent: PdPlant, aRow: short, aFractionOfMaxAge: float, aCreateFirstGeneration: boolean) {
+    constructor(existingGenerations: PdGeneration[], aFirstParent: PdPlant | null, aSecondParent: PdPlant | null, aRow: short, aFractionOfMaxAge: float, aCreateFirstGeneration: boolean) {
         super()
         this.commandChangesPlantFile = false
-        this.firstParent = aFirstParent
-        if (this.firstParent === null) {
+        if (aFirstParent === null) {
             throw new Error("Problem: Need at least one parent in method PdBreedFromParentsCommand.createWithInfo.")
         }
+        this.firstParent = aFirstParent
         this.secondParent = aSecondParent
         this.fractionOfMaxAge = aFractionOfMaxAge
         this.row = aRow
@@ -3499,10 +3508,10 @@ export class PdMakeTimeSeriesCommand extends PdCommand {
     constructor(aNewPlant: PdPlant) {
         super()
         this.commandChangesPlantFile = false
-        this.newPlant = aNewPlant
-        if (this.newPlant === null) {
+        if (aNewPlant === null) {
             throw new Error("Problem: Nil plant in method PdMakeTimeSeriesCommand.createWithNewPlant.")
         }
+        this.newPlant = aNewPlant
     }
     
     numberOfStoredLargeObjects(): long {

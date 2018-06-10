@@ -2225,7 +2225,7 @@ export class PdPlant extends PdStreamableObject {
     }
     
     // ------------------------------------------------------------------------------- breeding 
-    useBreedingOptionsAndPlantsToSetParameters(options: BreedingAndTimeSeriesOptionsStructure, firstPlant: PdPlant, secondPlant: PdPlant, tdos: KfObject3D[]): void {
+    useBreedingOptionsAndPlantsToSetParameters(options: BreedingAndTimeSeriesOptionsStructure, firstPlant: PdPlant, secondPlant: PdPlant | null, tdos: KfObject3D[]): void {
         let firstBoolean: boolean = false
         let secondBoolean: boolean = false
         let newBoolean: boolean = false
