@@ -4,14 +4,14 @@ import { long, short, float, TColorRef, int, intround, IntToStr, arrayRemove, ar
 import { PdPlant, kDrawNow, kDontDrawNow, BreedingAndTimeSeriesOptionsStructure, TransferDirection } from "./PdPlant"
 import { TPoint } from "./TPoint"
 import { PdCommand, TrackPhase } from "./PdCommand"
-import { domain, DomainOptionsStructure } from "./PdDomain"
-import { ucursor } from "./temporary"
+import { domain, DomainOptionsStructure, ViewPlants } from "./PdDomain"
+import { ucursor, kScaleAndMove, kAlwaysMove, kDontRecalculateScale, kRecalculateScale } from "./temporary"
 import { SinglePoint, digitValueString, nameStringForFileType } from "./usupport";
 import { FileExport3DOptionsStructure, fileTypeFor3DExportType } from "./U3dexport"
 import { min, safedivExcept, intMax, max, intMin } from "./umath"
 import { TRect } from "./TRect"
 import { PdPlantDrawingAmendment } from "./PdPlantDrawingAmendment"
-import { PdParameter, FieldType } from "./PdParameter"
+import { PdParameter, FieldType, kNotArray } from "./PdParameter"
 import { KfObject3D } from "./KfObject3D"
 import { PdGeneration } from "./PdGeneration"
 
@@ -314,7 +314,7 @@ export class PdCenterDrawingCommand extends PdCommand {
         super.doCommand()
         this.oldScale_PixelsPerMm = domain.plantDrawScale_PixelsPerMm()
         this.oldOffset_mm = domain.plantDrawOffset_mm()
-        MainForm.fitVisiblePlantsInDrawingArea(kDrawNow, umain.kScaleAndMove, umain.kAlwaysMove)
+        MainForm.fitVisiblePlantsInDrawingArea(kDrawNow, kScaleAndMove, kAlwaysMove)
         MainForm.recalculateAllPlantBoundsRects(kDontDrawNow)
         this.newScale_pixelsPerMm = domain.plantDrawScale_PixelsPerMm()
         this.newOffset_mm = domain.plantDrawOffset_mm()
@@ -921,10 +921,14 @@ export class PdCommandWithListOfPlants extends PdCommand {
     }
     
     invalidateCombinedPlantRects(): void {
-        const redrawRect: TRect = new TRect(0, 0, 0, 0)
+        let redrawRect: TRect = new TRect(0, 0, 0, 0)
         if (this.plantList.length > 0) {
             for (let i = 0; i <= this.plantList.length - 1; i++) {
-                delphi_compatability.UnionRect(redrawRect, redrawRect, this.plantList[i].boundsRect_pixels())
+                if (i === 0) {
+                    redrawRect = this.plantList[i].boundsRect_pixels()
+                } else {
+                    redrawRect = redrawRect.union(this.plantList[i].boundsRect_pixels())
+                }
             }
         }
         MainForm.invalidateDrawingRect(redrawRect)
@@ -1509,7 +1513,7 @@ export class PdChangeMainWindowViewingOptionCommand extends PdCommandWithListOfP
             ucursor.cursor_startWait()
             domain.options.mainWindowViewMode = this.newMainWindowViewingOption
             switch (this.newMainWindowViewingOption) {
-                case udomain.kViewPlantsInMainWindowOneAtATime:
+                case ViewPlants.kViewPlantsInMainWindowOneAtATime:
                     this.oldScale_PixelsPerMm = domain.plantDrawScale_PixelsPerMm()
                     this.oldOffset_mm = domain.plantDrawOffset_mm()
                     MainForm.deselectAllPlantsButFirst()
@@ -1521,11 +1525,11 @@ export class PdChangeMainWindowViewingOptionCommand extends PdCommandWithListOfP
                     this.newScale_pixelsPerMm = domain.plantDrawScale_PixelsPerMm()
                     this.newOffset_mm = domain.plantDrawOffset_mm()
                     break
-                case udomain.kViewPlantsInMainWindowFreeFloating:
+                case ViewPlants.kViewPlantsInMainWindowFreeFloating:
                     this.oldScale_PixelsPerMm = domain.plantDrawScale_PixelsPerMm()
                     this.oldOffset_mm = domain.plantDrawOffset_mm()
                     MainForm.hideOrShowSomePlants(this.plantList, null, kShow, kDontDrawNow)
-                    MainForm.fitVisiblePlantsInDrawingArea(kDontDrawNow, umain.kScaleAndMove, umain.kAlwaysMove)
+                    MainForm.fitVisiblePlantsInDrawingArea(kDontDrawNow, kScaleAndMove, kAlwaysMove)
                     // first drawing gets correct bounds rects so numbers get counted for progress bar - messy
                     MainForm.recalculateAllPlantBoundsRects(kDontDrawNow)
                     MainForm.recalculateAllPlantBoundsRects(kDrawNow)
@@ -1546,7 +1550,7 @@ export class PdChangeMainWindowViewingOptionCommand extends PdCommandWithListOfP
             ucursor.cursor_startWait()
             domain.options.mainWindowViewMode = this.oldMainWindowViewingOption
             switch (this.newMainWindowViewingOption) {
-                case udomain.kViewPlantsInMainWindowOneAtATime:
+                case ViewPlants.kViewPlantsInMainWindowOneAtATime:
                     MainForm.recalculateAllPlantBoundsRects(kDrawNow)
                     MainForm.invalidateSelectedPlantRectangles()
                     domain.plantManager.plantDrawScale_PixelsPerMm = this.oldScale_PixelsPerMm
@@ -1554,7 +1558,7 @@ export class PdChangeMainWindowViewingOptionCommand extends PdCommandWithListOfP
                     // restore original hidden flags - all plants 
                     // not used
                     MainForm.hideOrShowSomePlants(this.plantList, this.values, false, kDontDrawNow)
-                    MainForm.fitVisiblePlantsInDrawingArea(kDontDrawNow, umain.kScaleAndMove, umain.kAlwaysMove)
+                    MainForm.fitVisiblePlantsInDrawingArea(kDontDrawNow, kScaleAndMove, kAlwaysMove)
                     MainForm.recalculateAllPlantBoundsRects(kDrawNow)
                     // MainForm.invalidateSelectedPlantRectangles;
                     MainForm.invalidateEntireDrawing()
@@ -1567,13 +1571,13 @@ export class PdChangeMainWindowViewingOptionCommand extends PdCommandWithListOfP
                     }
                     MainForm.updateForChangeToPlantSelections()
                     break
-                case udomain.kViewPlantsInMainWindowFreeFloating:
+                case ViewPlants.kViewPlantsInMainWindowFreeFloating:
                     domain.plantManager.plantDrawScale_PixelsPerMm = this.oldScale_PixelsPerMm
                     domain.plantManager.plantDrawOffset_mm = this.oldOffset_mm
                     // restore original hidden flags - all plants 
                     // not used
                     MainForm.hideOrShowSomePlants(this.plantList, this.values, false, kDontDrawNow)
-                    MainForm.fitVisiblePlantsInDrawingArea(kDontDrawNow, umain.kScaleAndMove, umain.kAlwaysMove)
+                    MainForm.fitVisiblePlantsInDrawingArea(kDontDrawNow, kScaleAndMove, kAlwaysMove)
                     MainForm.recalculateAllPlantBoundsRects(kDrawNow)
                     // MainForm.invalidateSelectedPlantRectangles;
                     MainForm.invalidateEntireDrawing()
@@ -2358,10 +2362,10 @@ export class PdAnimatePlantCommand extends PdCommandWithListOfPlants {
 
 export class PdHideOrShowCommand extends PdCommandWithListOfPlants {
     hide: boolean = false
-    newValues: PdBooleanValue[] = []
+    newValues: PdBooleanValue[] | null = null
     
-    createWithListOfPlantsAndHideOrShow(aList: PdPlant[], aHide: boolean): void {
-        PdCommandWithListOfPlants.prototype.createWithListOfPlants.call(this, aList)
+    constructor(aList: PdPlant[], aHide: boolean, aHideList: PdBooleanValue[] | null = null) {
+        super(aList)
         // hidden flag not saved
         this.commandChangesPlantFile = false
         this.hide = aHide
@@ -2370,19 +2374,8 @@ export class PdHideOrShowCommand extends PdCommandWithListOfPlants {
                 this.values.push(new PdBooleanValue(this.plantList[i].hidden))
             }
         }
-    }
-    
-    createWithListOfPlantsAndListOfHides(aList: PdPlant[], aHideList: PdBooleanValue[]): void {
-        PdCommandWithListOfPlants.prototype.createWithListOfPlants.call(this, aList)
-        // hidden flag not saved
-        this.commandChangesPlantFile = false
-        if (this.plantList.length > 0) {
-            for (let i = 0; i <= this.plantList.length - 1; i++) {
-                this.values.push(new PdBooleanValue(this.plantList[i].hidden))
-            }
-        }
-        this.newValues = []
-        if (aHideList.length > 0) {
+        if (aHideList && aHideList.length > 0) {
+            this.newValues = []
             for (let i = 0; i <= aHideList.length - 1; i++) {
                 this.newValues.push(new PdBooleanValue(aHideList[i].saveBoolean))
             }
@@ -2669,7 +2662,7 @@ export class PdDuplicateCommand extends PdCommandWithListOfPlants {
             if (!this.done) {
                 return result
             }
-            if (!delphi_compatability.PtInRect(MainForm.drawingPaintBox.ClientRect, nextPoint)) {
+            if (!MainForm.drawingPaintBox.ClientRect.contains(nextPoint)) {
                 this.undoCommand()
                 result = null
             } else {
@@ -3034,7 +3027,7 @@ export class PdChangeColorValueCommand extends PdChangeValueCommand {
             for (let i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = this.plantList[i]
                 let oldValue: TColorRef = 0
-                oldValue = this.plant.editTransferField(TransferDirection.kGetField, oldValue, this.fieldNumber, FieldType.kFieldColor, uparams.kNotArray, this.regrow)
+                oldValue = this.plant.editTransferField(TransferDirection.kGetField, oldValue, this.fieldNumber, FieldType.kFieldColor, kNotArray, this.regrow)
                 this.values.push(new PdColorValue(oldValue))
             }
         }
@@ -3050,7 +3043,7 @@ export class PdChangeColorValueCommand extends PdChangeValueCommand {
             if (this.plantList.length > 0) {
                 for (let i = 0; i <= this.plantList.length - 1; i++) {
                     this.plant = this.plantList[i]
-                    this.newColor = this.plant.editTransferField(TransferDirection.kSetField, this.newColor, this.fieldNumber, FieldType.kFieldColor, uparams.kNotArray, this.regrow)
+                    this.newColor = this.plant.editTransferField(TransferDirection.kSetField, this.newColor, this.fieldNumber, FieldType.kFieldColor, kNotArray, this.regrow)
                     this.plant.recalculateBounds(kDrawNow)
                 }
             }
@@ -3071,7 +3064,7 @@ export class PdChangeColorValueCommand extends PdChangeValueCommand {
             for (let i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = this.plantList[i]
                 oldValue = this.values[i].saveColor
-                oldValue = this.plant.editTransferField(TransferDirection.kSetField, oldValue, this.fieldNumber, FieldType.kFieldColor, uparams.kNotArray, this.regrow)
+                oldValue = this.plant.editTransferField(TransferDirection.kSetField, oldValue, this.fieldNumber, FieldType.kFieldColor, kNotArray, this.regrow)
                 this.plant.recalculateBounds(kDrawNow)
             }
         }
@@ -3097,7 +3090,7 @@ export class PdChangeTdoValueCommand extends PdChangeValueCommand {
             for (let i = 0; i <= this.plantList.length - 1; i++) {
                 let valueTdo = new KfObject3D()
                 this.plant = this.plantList[i]
-                valueTdo = this.plant.editTransferField(TransferDirection.kGetField, valueTdo, this.fieldNumber, FieldType.kFieldThreeDObject, uparams.kNotArray, this.regrow)
+                valueTdo = this.plant.editTransferField(TransferDirection.kGetField, valueTdo, this.fieldNumber, FieldType.kFieldThreeDObject, kNotArray, this.regrow)
                 this.values.push(valueTdo)
             }
         }
@@ -3113,7 +3106,7 @@ export class PdChangeTdoValueCommand extends PdChangeValueCommand {
             if (this.plantList.length > 0) {
                 for (let i = 0; i <= this.plantList.length - 1; i++) {
                     this.plant = this.plantList[i]
-                    this.newTdo = this.plant.editTransferField(TransferDirection.kSetField, this.newTdo, this.fieldNumber, FieldType.kFieldThreeDObject, uparams.kNotArray, this.regrow)
+                    this.newTdo = this.plant.editTransferField(TransferDirection.kSetField, this.newTdo, this.fieldNumber, FieldType.kFieldThreeDObject, kNotArray, this.regrow)
                     this.plant.recalculateBounds(kDrawNow)
                 }
             }
@@ -3134,7 +3127,7 @@ export class PdChangeTdoValueCommand extends PdChangeValueCommand {
             for (let i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = this.plantList[i]
                 oldValue = this.values[i]
-                oldValue = this.plant.editTransferField(TransferDirection.kSetField, oldValue, this.fieldNumber, FieldType.kFieldThreeDObject, uparams.kNotArray, this.regrow)
+                oldValue = this.plant.editTransferField(TransferDirection.kSetField, oldValue, this.fieldNumber, FieldType.kFieldThreeDObject, kNotArray, this.regrow)
                 this.plant.recalculateBounds(kDrawNow)
             }
         }
@@ -3542,7 +3535,7 @@ export class PdMakeTimeSeriesCommand extends PdCommand {
                 this.newPlants.push(TimeSeriesForm.plants[i])
             }
         }
-        TimeSeriesForm.updateForChangeToPlants(utimeser.kRecalculateScale)
+        TimeSeriesForm.updateForChangeToPlants(kRecalculateScale)
     }
     
     undoCommand(): void {
@@ -3553,7 +3546,7 @@ export class PdMakeTimeSeriesCommand extends PdCommand {
                 TimeSeriesForm.plants.push(this.oldPlants[i])
             }
         }
-        TimeSeriesForm.updateForChangeToPlants(utimeser.kDontRecalculateScale)
+        TimeSeriesForm.updateForChangeToPlants(kDontRecalculateScale)
     }
     
     redoCommand(): void {
@@ -3564,7 +3557,7 @@ export class PdMakeTimeSeriesCommand extends PdCommand {
                 TimeSeriesForm.plants.push(this.newPlants[i])
             }
         }
-        TimeSeriesForm.updateForChangeToPlants(utimeser.kDontRecalculateScale)
+        TimeSeriesForm.updateForChangeToPlants(kDontRecalculateScale)
     }
     
     description(): string {
@@ -3777,7 +3770,7 @@ export class PdDeleteTimeSeriesCommand extends PdCommand {
     doCommand(): void {
         super.doCommand()
         TimeSeriesForm.plants.clearPointersWithoutDeletingObjects()
-        TimeSeriesForm.updateForChangeToPlants(utimeser.kDontRecalculateScale)
+        TimeSeriesForm.updateForChangeToPlants(kDontRecalculateScale)
     }
     
     undoCommand(): void {
@@ -3787,7 +3780,7 @@ export class PdDeleteTimeSeriesCommand extends PdCommand {
                 TimeSeriesForm.plants.push(this.plants[i])
             }
         }
-        TimeSeriesForm.updateForChangeToPlants(utimeser.kDontRecalculateScale)
+        TimeSeriesForm.updateForChangeToPlants(kDontRecalculateScale)
     }
     
     // redo same as do

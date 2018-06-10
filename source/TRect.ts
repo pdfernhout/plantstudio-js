@@ -1,5 +1,6 @@
 import { int } from "./common"
 import { TPoint } from "./TPoint"
+import { min, max } from "./umath";
 
 export class TRect {
     Left: int
@@ -55,5 +56,9 @@ export class TRect {
 
     inflate(width: number, height: number) {
         return new TRect(this.Left - width, this.Top - height, this.Right + width, this.Bottom + height)
+    }
+
+    union(other: TRect) {
+        return new TRect(min(this.Left, other.Left), min(this.Top, other.Top), max(this.Right, other.Right), max(this.Bottom, other.Bottom))
     }
 }

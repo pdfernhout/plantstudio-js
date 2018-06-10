@@ -73,8 +73,10 @@ const kV2IniAddition = "_v2"
 
 const kMaxRecentFiles = 10
 
-const kViewPlantsInMainWindowFreeFloating = 1
-const kViewPlantsInMainWindowOneAtATime = 2
+export enum ViewPlants {
+    kViewPlantsInMainWindowFreeFloating = 1,
+    kViewPlantsInMainWindowOneAtATime = 2,
+}
 
 const kMaxUnregExportsAllowed = 20
 const kMaxUnregExportsPerSessionAfterMaxReached = 2

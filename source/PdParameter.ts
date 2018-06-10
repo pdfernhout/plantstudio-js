@@ -26,7 +26,7 @@ export enum TransferType {
 }
 
 // TOOD: Should kNotArray go with FieldType?
-const kNotArray = -1
+export const kNotArray = -1
 
 // FieldType 
 //note: the longint type is NOT for use for parameters (in param panels or breeding).
