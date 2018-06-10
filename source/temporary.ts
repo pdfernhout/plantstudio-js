@@ -175,4 +175,5 @@ export class PdPlantManager {
     plantDrawOffset_mm: SinglePoint = new SinglePoint()
     privatePlantClipboard: PdPlant[] = []
     plants: PdPlant[] = []
+    addPlant(plant: PdPlant) { this.plants.push(plant) }
 }

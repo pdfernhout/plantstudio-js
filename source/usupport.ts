@@ -998,117 +998,121 @@ export function makeFileNameFrom(aString: string): string {
     return result
 }
 
+*/
+
 export function nameStringForFileType(fileType: short): string {
     let result = ""
     switch (fileType) {
-        case kFileTypeAny:
+        case FileType.kFileTypeAny:
             result = ""
             break
-        case kFileTypePlant:
+        case FileType.kFileTypePlant:
             result = "Plant"
             break
-        case kFileTypeTabbedText:
+        case FileType.kFileTypeTabbedText:
             result = "Tabbed text"
             break
-        case kFileTypeStrategy:
+        case FileType.kFileTypeStrategy:
             result = "Strategy"
             break
-        case kFileTypeIni:
+        case FileType.kFileTypeIni:
             result = "Ini"
             break
-        case kFileTypeExceptionList:
+        case FileType.kFileTypeExceptionList:
             result = "Exception list"
             break
-        case kFileTypeBitmap:
+        case FileType.kFileTypeBitmap:
             result = "Bitmap"
             break
-        case kFileTypeTdo:
+        case FileType.kFileTypeTdo:
             result = "3D object"
             break
-        case kFileTypeDXF:
+        case FileType.kFileTypeDXF:
             result = "DXF"
             break
-        case kFileTypeINC:
+        case FileType.kFileTypeINC:
             result = "POV Include file"
             break
-        case kFileType3DS:
+        case FileType.kFileType3DS:
             result = "3DS"
             break
-        case kFileTypeProgramInfo:
+        case FileType.kFileTypeProgramInfo:
             result = "Program Info"
             break
-        case kFileTypeJPEG:
+        case FileType.kFileTypeJPEG:
             result = "JPEG"
             break
-        case kFileTypeOBJ:
+        case FileType.kFileTypeOBJ:
             result = "OBJ"
             break
-        case kFileTypeMTL:
+        case FileType.kFileTypeMTL:
             result = "MTL"
             break
-        case kFileTypeVRML:
+        case FileType.kFileTypeVRML:
             result = "VRML"
             break
-        case kFileTypeLWO:
+        case FileType.kFileTypeLWO:
             result = "LWO"
             break
     }
     return result
 }
 
+/*
+
 export function extensionForFileType(fileType: short): string {
     let result = ""
     result = ""
     switch (fileType) {
-        case kFileTypeAny:
+        case FileType.kFileTypeAny:
             result = "*"
             break
-        case kFileTypePlant:
+        case FileType.kFileTypePlant:
             result = "pla"
             break
-        case kFileTypeTabbedText:
+        case FileType.kFileTypeTabbedText:
             result = "tab"
             break
-        case kFileTypeStrategy:
+        case FileType.kFileTypeStrategy:
             result = "str"
             break
-        case kFileTypeIni:
+        case FileType.kFileTypeIni:
             result = "ini"
             break
-        case kFileTypeExceptionList:
+        case FileType.kFileTypeExceptionList:
             result = "nex"
             break
-        case kFileTypeBitmap:
+        case FileType.kFileTypeBitmap:
             result = "bmp"
             break
-        case kFileTypeTdo:
+        case FileType.kFileTypeTdo:
             result = "tdo"
             break
-        case kFileTypeDXF:
+        case FileType.kFileTypeDXF:
             result = "dxf"
             break
-        case kFileTypeINC:
+        case FileType.kFileTypeINC:
             result = "inc"
             break
-        case kFileType3DS:
+        case FileType.kFileType3DS:
             result = "3ds"
             break
-        case kFileTypeProgramInfo:
+        case FileType.kFileTypeProgramInfo:
             result = "txt"
             break
-        case kFileTypeJPEG:
+        case FileType.kFileTypeJPEG:
             result = "jpg"
             break
-        case kFileTypeOBJ:
+        case FileType.kFileTypeOBJ:
             result = "obj"
             break
-        case kFileTypeMTL:
+        case FileType.kFileTypeMTL:
             result = "mtl"
             break
-        case kFileTypeVRML:
+        case FileType.kFileTypeVRML:
             result = "wrl"
             break
-        case kFileTypeLWO:
+        case FileType.kFileTypeLWO:
             result = "lwo"
             break
     }
@@ -1120,7 +1124,7 @@ export function filterStringForFileType(fileType: short, includeAllFiles: boolea
     let extension: string
     
     extension = extensionForFileType(fileType)
-    if (fileType === kFileTypeAny) {
+    if (fileType === FileType.kFileTypeAny) {
         result = "All files (*.*)|*.*"
     } else if (includeAllFiles) {
         result = nameStringForFileType(fileType) + " files (*." + extension + ")|*." + extension + "|All files (*.*)|*.*"
@@ -1161,7 +1165,7 @@ export function getFileOpenInfo(fileType: short, suggestedFile: string, aTitle: 
         openDialog.DefaultExt = extensionForFileType(fileType)
         openDialog.Options = openDialog.Options + {delphi_compatability.TOpenOption.ofPathMustExist, delphi_compatability.TOpenOption.ofFileMustExist, delphi_compatability.TOpenOption.ofHideReadOnly, }
         if (openDialog.Execute()) {
-            if ((delphi_compatability.TOpenOption.ofExtensionDifferent in openDialog.Options) && (fileType !== kFileTypeAny)) {
+            if ((delphi_compatability.TOpenOption.ofExtensionDifferent in openDialog.Options) && (fileType !== FileType.kFileTypeAny)) {
                 ShowMessage("The file (" + openDialog.FileName + ") does not have the correct extension (" + openDialog.DefaultExt + ").")
                 return result
             } else {
@@ -1312,28 +1316,28 @@ export function fileIsExportFile(fileType: short): boolean {
     let result = false
     result = false
     switch (fileType) {
-        case kFileTypeBitmap:
+        case FileType.kFileTypeBitmap:
             result = true
             break
-        case kFileTypeDXF:
+        case FileType.kFileTypeDXF:
             result = true
             break
-        case kFileTypeINC:
+        case FileType.kFileTypeINC:
             result = true
             break
-        case kFileType3DS:
+        case FileType.kFileType3DS:
             result = true
             break
-        case kFileTypeJPEG:
+        case FileType.kFileTypeJPEG:
             result = true
             break
-        case kFileTypeOBJ:
+        case FileType.kFileTypeOBJ:
             result = true
             break
-        case kFileTypeVRML:
+        case FileType.kFileTypeVRML:
             result = true
             break
-        case kFileTypeLWO:
+        case FileType.kFileTypeLWO:
             result = true
             break
     }

@@ -65,6 +65,11 @@ export enum Direction {
 const kGetField = 0
 const kSetField = 1
 
+export enum TransferDirection {
+    kGetField = 0,
+    kSetField = 1,
+}
+
 const kPlantNameLength = 80
 
 const kCheckForUnreadParams = true

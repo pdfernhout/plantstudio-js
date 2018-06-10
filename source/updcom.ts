@@ -1,22 +1,24 @@
 // unit updcom
 
-import { long, short, float, TColorRef, int, intround, IntToStr, arrayRemove, arrayInsert } from "./common"
-import { PdPlant, kDrawNow, kDontDrawNow, BreedingAndTimeSeriesOptionsStructure } from "./PdPlant"
+import { long, short, float, TColorRef, int, intround, IntToStr, arrayRemove, arrayInsert, getRValue, getGValue, getBValue } from "./common"
+import { PdPlant, kDrawNow, kDontDrawNow, BreedingAndTimeSeriesOptionsStructure, TransferDirection } from "./PdPlant"
 import { TPoint } from "./TPoint"
 import { PdCommand, TrackPhase } from "./PdCommand"
 import { domain, DomainOptionsStructure } from "./PdDomain"
 import { ucursor } from "./temporary"
-import { SinglePoint, digitValueString } from "./usupport";
-import { FileExport3DOptionsStructure } from "./U3dexport"
+import { SinglePoint, digitValueString, nameStringForFileType } from "./usupport";
+import { FileExport3DOptionsStructure, fileTypeFor3DExportType } from "./U3dexport"
 import { min, safedivExcept, intMax, max, intMin } from "./umath"
 import { TRect } from "./TRect"
 import { PdPlantDrawingAmendment } from "./PdPlantDrawingAmendment"
-import { PdParameter } from "./PdParameter";
-import { KfObject3D } from "./KfObject3D";
-import { PdGeneration } from "./PdGeneration";
+import { PdParameter, FieldType } from "./PdParameter"
+import { KfObject3D } from "./KfObject3D"
+import { PdGeneration } from "./PdGeneration"
 
-// TODO: temporary
+// TODO: temporary fix MainForm and BreederForm and TimeSeriesForm
 const MainForm: any = undefined
+const BreederForm: any = undefined
+const TimeSeriesForm: any = undefined
 
 // const
 const kRotateNotInitialized = 0
@@ -173,7 +175,7 @@ export class PdScrollCommand extends PdCommand {
     oldOffset_mm: SinglePoint = new SinglePoint()
     newOffSet_mm: SinglePoint = new SinglePoint()
     
-    TrackMouse(aTrackPhase: TrackPhase, anchorPoint: TPoint, previousPoint: TPoint, nextPoint: TPoint, mouseDidMove: boolean, rightButtonDown: boolean): PdCommand {
+    TrackMouse(aTrackPhase: TrackPhase, anchorPoint: TPoint, previousPoint: TPoint, nextPoint: TPoint, mouseDidMove: boolean, rightButtonDown: boolean): PdCommand | null {
         let result = new PdCommand()
         result = this
         if (aTrackPhase === TrackPhase.trackPress) {
@@ -234,7 +236,7 @@ export class PdChangeMagnificationCommand extends PdCommand {
         this.clickPoint.y = aPoint.Y
     }
     
-    TrackMouse(aTrackPhase: TrackPhase, anchorPoint: TPoint, previousPoint: TPoint, nextPoint: TPoint, mouseDidMove: boolean, rightButtonDown: boolean): PdCommand {
+    TrackMouse(aTrackPhase: TrackPhase, anchorPoint: TPoint, previousPoint: TPoint, nextPoint: TPoint, mouseDidMove: boolean, rightButtonDown: boolean): PdCommand | null {
         let result = new PdCommand()
         let size: TPoint
         let newScaleX: float
@@ -447,7 +449,7 @@ export class PdChangeDomain3DOptionsCommand extends PdCommand {
     }
     
     description(): string {
-        return "change " + usupport.nameStringForFileType(u3dexport.fileTypeFor3DExportType(this.outputType)) + " output options"
+        return "change " + nameStringForFileType(fileTypeFor3DExportType(this.outputType)) + " output options"
     }
     
 }
@@ -484,10 +486,10 @@ export class PdRenameCommand extends PdCommand {
 
 export class PdEditNoteCommand extends PdCommand {
     plant: PdPlant
-    oldStrings: TStringList = new TStringList()
-    newStrings: TStringList = new TStringList()
+    oldStrings: string[]
+    newStrings: string[]
     
-    constructor(aPlant: PdPlant, aNewStrings: TStrings) {
+    constructor(aPlant: PdPlant, aNewStrings: string[]) {
         super()
         this.plant = aPlant
         this.oldStrings = this.plant.noteLines
@@ -801,7 +803,7 @@ export class PdSelectPosingPartCommand extends PdCommand {
     oldPartType: string = ""
     newPartType: string = ""
     
-    constructor(aPlant: PdPlant, aNewPartID: long, anOldPartID: long, aNewPartType: string, anOldPartType: string): void {
+    constructor(aPlant: PdPlant, aNewPartID: long, anOldPartID: long, aNewPartType: string, anOldPartType: string) {
         super()
         // selected posed part not saved
         this.commandChangesPlantFile = false
@@ -931,13 +933,12 @@ export class PdCommandWithListOfPlants extends PdCommand {
 }
 
 export class PdChangeSelectedPlantsCommand extends PdCommandWithListOfPlants {
-    newList: TList = new TList()
+    newList: PdPlant[] = []
     
-    constructor(aList: TList, aNewList: TList) {
+    constructor(aList: PdPlant[], aNewList: PdPlant[]) {
         super(aList)
         // which plants are selected not saved
         this.commandChangesPlantFile = false
-        this.newList = delphi_compatability.TList().Create()
         if (aNewList.length > 0) {
             for (let i = 0; i <= aNewList.length - 1; i++) {
                 this.newList.push(aNewList[i])
@@ -1089,9 +1090,8 @@ export class PdResizePlantsCommand extends PdCommandWithListOfPlants {
         }
     }
     
-    TrackMouse(aTrackPhase: TrackPhase, anchorPoint: TPoint, previousPoint: TPoint, nextPoint: TPoint, mouseDidMove: boolean, rightButtonDown: boolean): PdCommand {
-        let result = new PdCommand()
-        result = this
+    TrackMouse(aTrackPhase: TrackPhase, anchorPoint: TPoint, previousPoint: TPoint, nextPoint: TPoint, mouseDidMove: boolean, rightButtonDown: boolean): PdCommand | null {
+        let result: PdCommand | null = this
         if (aTrackPhase === TrackPhase.trackPress) {
             this.dragStartPoint = nextPoint
         } else if ((aTrackPhase === TrackPhase.trackMove) && (mouseDidMove)) {
@@ -1111,7 +1111,6 @@ export class PdResizePlantsCommand extends PdCommandWithListOfPlants {
         } else if (aTrackPhase === TrackPhase.trackRelease) {
             if ((!mouseDidMove) || (!this.initialized)) {
                 result = null
-                this.free
             }
         }
         return result
@@ -1314,7 +1313,7 @@ export class PdPackPlantsCommand extends PdCommandWithListOfPlants {
     oldPoints: PdPointValue[] = []
     focusRect: TRect = new TRect()
     
-    constructor(aList: TList, aFocusRect: TRect) {
+    constructor(aList: PdPlant[]    , aFocusRect: TRect) {
         super(aList)
         this.saveInitialValues()
         this.focusRect = aFocusRect
@@ -1339,7 +1338,6 @@ export class PdPackPlantsCommand extends PdCommandWithListOfPlants {
         let tallestHeight: int
         let offset: TPoint = new TPoint()
         let newPoint: TPoint = new TPoint()
-        let lastPlant: PdPlant
         let totalHeight: int
         let averageHeight: int
         let remainingX: int
@@ -1353,7 +1351,7 @@ export class PdPackPlantsCommand extends PdCommandWithListOfPlants {
         this.invalidateCombinedPlantRects()
         this.newScales.length = 0
         this.newPoints.length = 0
-        lastPlant = null
+        let lastPlant: PdPlant | null = null
         totalHeight = 0
         tallestHeight = 0
         try {
@@ -1479,7 +1477,7 @@ export class PdPackPlantsCommand extends PdCommandWithListOfPlants {
 }
 
 export class PdChangeMainWindowViewingOptionCommand extends PdCommandWithListOfPlants {
-    selectedList: TList = new TList()
+    selectedList: PdPlant[] = []
     oldScale_PixelsPerMm: float = 0.0
     newScale_pixelsPerMm: float = 0.0
     oldOffset_mm: SinglePoint = new SinglePoint()
@@ -1487,7 +1485,7 @@ export class PdChangeMainWindowViewingOptionCommand extends PdCommandWithListOfP
     oldMainWindowViewingOption: short = 0
     newMainWindowViewingOption: short = 0
     
-    constructor(aList: TList, aSelectedList: TList, aNewOption: short) {
+    constructor(aList: PdPlant[], aSelectedList: PdPlant[], aNewOption: short) {
         super(aList)
         // hidden flag not saved
         this.commandChangesPlantFile = false
@@ -1496,10 +1494,9 @@ export class PdChangeMainWindowViewingOptionCommand extends PdCommandWithListOfP
                 this.values.push(new PdBooleanValue(this.plantList[i].hidden))
             }
         }
-        this.selectedList = delphi_compatability.TList().Create()
         if (aSelectedList.length > 0) {
             for (let i = 0; i <= aSelectedList.length - 1; i++) {
-                this.selectedList.push(uplant.PdPlant(aSelectedList[i]))
+                this.selectedList.push(aSelectedList[i])
             }
         }
         this.oldMainWindowViewingOption = domain.options.mainWindowViewMode
@@ -1565,7 +1562,7 @@ export class PdChangeMainWindowViewingOptionCommand extends PdCommandWithListOfP
                     MainForm.selectedPlants.Clear()
                     if (this.selectedList.length > 0) {
                         for (let i = 0; i <= this.selectedList.length - 1; i++) {
-                            MainForm.selectedPlants.push(uplant.PdPlant(this.selectedList[i]))
+                            MainForm.selectedPlants.push(this.selectedList[i])
                         }
                     }
                     MainForm.updateForChangeToPlantSelections()
@@ -1628,10 +1625,8 @@ export class PdDragCommand extends PdCommandWithListOfPlants {
         return this
     }
     
-    TrackMouse(aTrackPhase: TrackPhase, anchorPoint: TPoint, previousPoint: TPoint, nextPoint: TPoint, mouseDidMove: boolean, rightButtonDown: boolean): PdCommand {
-        let result = new PdCommand()
-        
-        result = this
+    TrackMouse(aTrackPhase: TrackPhase, anchorPoint: TPoint, previousPoint: TPoint, nextPoint: TPoint, mouseDidMove: boolean, rightButtonDown: boolean): PdCommand | null {
+        let result: PdCommand | null = this
         if (aTrackPhase === TrackPhase.trackPress) {
             this.dragStartPoint = nextPoint
         } else if (aTrackPhase === TrackPhase.trackMove) {
@@ -1652,7 +1647,7 @@ export class PdDragCommand extends PdCommandWithListOfPlants {
                 if (this.plantList.length > 0) {
                     for (let i = 0; i <= this.plantList.length - 1; i++) {
                         this.plant = this.plantList[i]
-                        this.plant.moveTo(PdPointValue(this.values[i]).savePoint)
+                        this.plant.moveTo(this.values[i].savePoint)
                         this.plant.moveBy(this.offset)
                         if (domain.options.cachePlantBitmaps) {
                             this.plant.recalculateBoundsForOffsetChange()
@@ -1666,7 +1661,6 @@ export class PdDragCommand extends PdCommandWithListOfPlants {
         } else if (aTrackPhase === TrackPhase.trackRelease) {
             if (!mouseDidMove) {
                 result = null
-                this.free
             }
         }
         return result
@@ -1710,7 +1704,7 @@ export class PdDragCommand extends PdCommandWithListOfPlants {
         if (this.plantList.length > 0) {
             for (let i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = this.plantList[i]
-                this.plant.moveTo(PdPointValue(this.values[i]).savePoint)
+                this.plant.moveTo(this.values[i].savePoint)
                 if (domain.options.cachePlantBitmaps) {
                     this.plant.recalculateBoundsForOffsetChange()
                 }
@@ -1764,11 +1758,11 @@ export class PdDragCommand extends PdCommandWithListOfPlants {
 }
 
 export class PdAlignPlantsCommand extends PdCommandWithListOfPlants {
-    newPoints: TListCollection = new TListCollection()
+    newPoints: PdPointValue[] = []
     focusRect: TRect = new TRect()
     alignDirection: short = 0
     
-    constructor(aList: TList, aRect: TRect, aDirection: short) {
+    constructor(aList: PdPlant[], aRect: TRect, aDirection: short) {
         super(aList)
         if (this.plantList.length > 0) {
             for (let i = 0; i <= this.plantList.length - 1; i++) {
@@ -1864,7 +1858,7 @@ export class PdRotateCommand extends PdCommandWithListOfPlants {
     offsetRotation: float = 0.0
     startDragPoint: TPoint = new TPoint()
     
-    constructor(aList: TList, aRotateDirection: short, aNewRotation: short) {
+    constructor(aList: PdPlant[], aRotateDirection: short, aNewRotation: short) {
         // create using this constructor if this is from clicking on a spinEdit
         super(aList)
         this.rotateDirection = aRotateDirection
@@ -1893,11 +1887,10 @@ export class PdRotateCommand extends PdCommandWithListOfPlants {
         }
     }
     
-    TrackMouse(aTrackPhase: TrackPhase, anchorPoint: TPoint, previousPoint: TPoint, nextPoint: TPoint, mouseDidMove: boolean, rightButtonDown: boolean): PdCommand {
-        let result = new PdCommand()
+    TrackMouse(aTrackPhase: TrackPhase, anchorPoint: TPoint, previousPoint: TPoint, nextPoint: TPoint, mouseDidMove: boolean, rightButtonDown: boolean): PdCommand | null {
+        let result: PdCommand = this
         let newRotation: float
         
-        result = this
         if (aTrackPhase === TrackPhase.trackPress) {
             // assume that if this function is called, the command was not already initialized
             //    from clicking on a spinEdit, so we have no values and no rotateDirection 
@@ -2144,7 +2137,7 @@ export class PdResetRotationsCommand extends PdCommandWithListOfPlants {
 export class PdChangeDrawingScaleCommand extends PdCommandWithListOfPlants {
     newScale: float = 0.0
     
-    constructor(aList: TList, aNewScale: float): void {
+    constructor(aList: PdPlant[], aNewScale: float) {
         super(aList)
         this.newScale = aNewScale
         if (this.plantList.length > 0) {
@@ -2341,7 +2334,7 @@ export class PdAnimatePlantCommand extends PdCommandWithListOfPlants {
             if (this.plantList.length > 0) {
                 for (let i = 0; i <= this.plantList.length - 1; i++) {
                     this.plant = this.plantList[i]
-                    this.plant.setAge(PdSmallintValue(this.values[i]).saveSmallint)
+                    this.plant.setAge(this.values[i].saveSmallint)
                     this.plant.recalculateBounds(kDrawNow)
                 }
             }
@@ -2365,9 +2358,9 @@ export class PdAnimatePlantCommand extends PdCommandWithListOfPlants {
 
 export class PdHideOrShowCommand extends PdCommandWithListOfPlants {
     hide: boolean = false
-    newValues: TListCollection = new TListCollection()
+    newValues: PdBooleanValue[] = []
     
-    createWithListOfPlantsAndHideOrShow(aList: TList, aHide: boolean): void {
+    createWithListOfPlantsAndHideOrShow(aList: PdPlant[], aHide: boolean): void {
         PdCommandWithListOfPlants.prototype.createWithListOfPlants.call(this, aList)
         // hidden flag not saved
         this.commandChangesPlantFile = false
@@ -2379,7 +2372,7 @@ export class PdHideOrShowCommand extends PdCommandWithListOfPlants {
         }
     }
     
-    createWithListOfPlantsAndListOfHides(aList: TList, aHideList: TListCollection): void {
+    createWithListOfPlantsAndListOfHides(aList: PdPlant[], aHideList: PdBooleanValue[]): void {
         PdCommandWithListOfPlants.prototype.createWithListOfPlants.call(this, aList)
         // hidden flag not saved
         this.commandChangesPlantFile = false
@@ -2391,7 +2384,7 @@ export class PdHideOrShowCommand extends PdCommandWithListOfPlants {
         this.newValues = []
         if (aHideList.length > 0) {
             for (let i = 0; i <= aHideList.length - 1; i++) {
-                this.newValues.push(new PdBooleanValue(PdBooleanValue(aHideList[i]).saveBoolean))
+                this.newValues.push(new PdBooleanValue(aHideList[i].saveBoolean))
             }
         }
     }
@@ -2430,7 +2423,7 @@ export class PdRandomizeCommand extends PdCommandWithListOfPlants {
     isInBreeder: boolean = false
     isRandomizeAllInBreeder: boolean = false
     
-    constructor(aList: TList): void {
+    constructor(aList: PdPlant[]) {
         super(aList)
         this.setUpToRemoveAmendmentsWhenDone()
     }
@@ -2462,9 +2455,9 @@ export class PdRandomizeCommand extends PdCommandWithListOfPlants {
             if (this.isInBreeder) {
                 if (this.plantList.length === 1) {
                     this.plant = this.plantList[0]
-                    ubreedr.BreederForm.updateForChangeToPlant(this.plant)
+                    BreederForm.updateForChangeToPlant(this.plant)
                 } else {
-                    ubreedr.BreederForm.updateForChangeToGenerations()
+                    BreederForm.updateForChangeToGenerations()
                 }
             } else {
                 this.invalidateCombinedPlantRects()
@@ -2503,9 +2496,9 @@ export class PdRandomizeCommand extends PdCommandWithListOfPlants {
             if (this.isInBreeder) {
                 if (this.plantList.length === 1) {
                     this.plant = this.plantList[0]
-                    ubreedr.BreederForm.updateForChangeToPlant(this.plant)
+                    BreederForm.updateForChangeToPlant(this.plant)
                 } else {
-                    ubreedr.BreederForm.updateForChangeToGenerations()
+                    BreederForm.updateForChangeToGenerations()
                 }
             } else {
                 this.invalidateCombinedPlantRects()
@@ -2544,9 +2537,9 @@ export class PdRandomizeCommand extends PdCommandWithListOfPlants {
             if (this.isInBreeder) {
                 if (this.plantList.length === 1) {
                     this.plant = this.plantList[0]
-                    ubreedr.BreederForm.updateForChangeToPlant(this.plant)
+                    BreederForm.updateForChangeToPlant(this.plant)
                 } else {
-                    ubreedr.BreederForm.updateForChangeToGenerations()
+                    BreederForm.updateForChangeToGenerations()
                 }
             } else {
                 this.invalidateCombinedPlantRects()
@@ -2662,11 +2655,10 @@ export class PdDuplicateCommand extends PdCommandWithListOfPlants {
         return result
     }
     
-    TrackMouse(aTrackPhase: TrackPhase, anchorPoint: TPoint, previousPoint: TPoint, nextPoint: TPoint, mouseDidMove: boolean, rightButtonDown: boolean): PdCommand {
-        let result = new PdCommand()
+    TrackMouse(aTrackPhase: TrackPhase, anchorPoint: TPoint, previousPoint: TPoint, nextPoint: TPoint, mouseDidMove: boolean, rightButtonDown: boolean): PdCommand | null {
+        let result: PdCommand | null = this
         let originalPlant: PdPlant
         
-        result = this
         if (aTrackPhase === TrackPhase.trackPress) {
         } else if (aTrackPhase === TrackPhase.trackMove) {
             if (!this.done && mouseDidMove) {
@@ -2680,7 +2672,6 @@ export class PdDuplicateCommand extends PdCommandWithListOfPlants {
             if (!delphi_compatability.PtInRect(MainForm.drawingPaintBox.ClientRect, nextPoint)) {
                 this.undoCommand()
                 result = null
-                this.free
             } else {
                 this.offset.X = nextPoint.X - this.startDragPoint.X
                 this.offset.Y = nextPoint.Y - this.startDragPoint.Y
@@ -2702,15 +2693,12 @@ export class PdDuplicateCommand extends PdCommandWithListOfPlants {
         } else if (aTrackPhase === TrackPhase.trackRelease) {
             if (!mouseDidMove) {
                 result = null
-                this.free
             }
         }
         return result
     }
     
     doCommand(): void {
-        let plantCopy: PdPlant
-        
         if (this.done) {
             // should have been done in the mouse down, unless it was done by a menu command 
             return
@@ -2723,7 +2711,7 @@ export class PdDuplicateCommand extends PdCommandWithListOfPlants {
         MainForm.deselectAllPlants()
         for (let i = 0; i <= this.plantList.length - 1; i++) {
             this.plant = this.plantList[i]
-            plantCopy = new PdPlant()
+            const plantCopy = new PdPlant()
             this.plant.copyTo(plantCopy)
             plantCopy.shrinkPreviewCache()
             plantCopy.setName("Copy of " + plantCopy.getName())
@@ -2897,13 +2885,13 @@ export class PdChangeRealValueCommand extends PdChangeValueCommand {
     
     constructor(aList: PdPlant[], aNewValue: float, aFieldNumber: short, anArrayIndex: short, aRegrow: boolean) {
         super(aList, aFieldNumber, aRegrow)
-        let oldValue: float
+        let oldValue: float = 0
         this.newValue = aNewValue
         this.arrayIndex = anArrayIndex
         if (this.plantList.length > 0) {
             for (let i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = this.plantList[i]
-                oldValue = this.plant.editTransferField(umath.kGetField, oldValue, this.fieldNumber, uparams.kFieldFloat, this.arrayIndex, this.regrow)
+                oldValue = this.plant.editTransferField(TransferDirection.kGetField, oldValue, this.fieldNumber, FieldType.kFieldFloat, this.arrayIndex, this.regrow)
                 this.values.push(new PdSingleValue(oldValue))
             }
         }
@@ -2919,7 +2907,7 @@ export class PdChangeRealValueCommand extends PdChangeValueCommand {
             if (this.plantList.length > 0) {
                 for (let i = 0; i <= this.plantList.length - 1; i++) {
                     this.plant = this.plantList[i]
-                    this.newValue = this.plant.editTransferField(umath.kSetField, this.newValue, this.fieldNumber, uparams.kFieldFloat, this.arrayIndex, this.regrow)
+                    this.newValue = this.plant.editTransferField(TransferDirection.kSetField, this.newValue, this.fieldNumber, FieldType.kFieldFloat, this.arrayIndex, this.regrow)
                     this.plant.recalculateBounds(kDrawNow)
                 }
             }
@@ -2932,15 +2920,13 @@ export class PdChangeRealValueCommand extends PdChangeValueCommand {
     }
     
     undoCommand(): void {
-        let oldValue: float
-        
         PdChangeValueCommand.prototype.undoCommand.call(this)
         this.invalidateCombinedPlantRects()
         if (this.plantList.length > 0) {
             for (let i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = this.plantList[i]
-                oldValue = this.values[i].saveSingle
-                oldValue = this.plant.editTransferField(umath.kSetField, oldValue, this.fieldNumber, uparams.kFieldFloat, this.arrayIndex, this.regrow)
+                let oldValue: float = this.values[i].saveSingle
+                oldValue = this.plant.editTransferField(TransferDirection.kSetField, oldValue, this.fieldNumber, FieldType.kFieldFloat, this.arrayIndex, this.regrow)
                 this.plant.recalculateBounds(kDrawNow)
             }
         }
@@ -2948,8 +2934,7 @@ export class PdChangeRealValueCommand extends PdChangeValueCommand {
     }
     
     description(): string {
-        let result = ""
-        result = PdChangeValueCommand.prototype.description.call(this)
+        let result = super.description()
         result = "change " + result
         if (this.arrayIndex !== -1) {
             result = result + " (" + IntToStr(this.arrayIndex + 1) + ")"
@@ -2967,8 +2952,8 @@ export class PdChangeSCurvePointValueCommand extends PdChangeValueCommand {
     
     constructor(aList: PdPlant[], aNewX: float, aNewY: float, aFieldNumber: short, aPointIndex: short, aRegrow: boolean) {
         super(aList, aFieldNumber, aRegrow)
-        let oldX: float
-        let oldY: float
+        let oldX: float = 0
+        let oldY: float = 0
         
         this.newX = aNewX
         this.newY = aNewY
@@ -2976,8 +2961,8 @@ export class PdChangeSCurvePointValueCommand extends PdChangeValueCommand {
         if (this.plantList.length > 0) {
             for (let i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = this.plantList[i]
-                oldX = this.plant.editTransferField(umath.kGetField, oldX, this.fieldNumber, uparams.kFieldFloat, this.pointIndex * 2, this.regrow)
-                oldY = this.plant.editTransferField(umath.kGetField, oldY, this.fieldNumber, uparams.kFieldFloat, this.pointIndex * 2 + 1, this.regrow)
+                oldX = this.plant.editTransferField(TransferDirection.kGetField, oldX, this.fieldNumber, FieldType.kFieldFloat, this.pointIndex * 2, this.regrow)
+                oldY = this.plant.editTransferField(TransferDirection.kGetField, oldY, this.fieldNumber, FieldType.kFieldFloat, this.pointIndex * 2 + 1, this.regrow)
                 this.values.push(new PdSinglePointValue(oldX, oldY))
             }
         }
@@ -2995,11 +2980,11 @@ export class PdChangeSCurvePointValueCommand extends PdChangeValueCommand {
                     this.plant = this.plantList[i]
                     // first time, set values without calculating
                     this.plant.changingWholeSCurves = true
-                    this.newX = this.plant.editTransferField(umath.kSetField, this.newX, this.fieldNumber, uparams.kFieldFloat, this.pointIndex * 2, this.regrow)
-                    this.newY = this.plant.editTransferField(umath.kSetField, this.newY, this.fieldNumber, uparams.kFieldFloat, this.pointIndex * 2 + 1, this.regrow)
+                    this.newX = this.plant.editTransferField(TransferDirection.kSetField, this.newX, this.fieldNumber, FieldType.kFieldFloat, this.pointIndex * 2, this.regrow)
+                    this.newY = this.plant.editTransferField(TransferDirection.kSetField, this.newY, this.fieldNumber, FieldType.kFieldFloat, this.pointIndex * 2 + 1, this.regrow)
                     // second time, now that both values are set, set first one again to calc s curve
                     this.plant.changingWholeSCurves = false
-                    this.newX = this.plant.editTransferField(umath.kSetField, this.newX, this.fieldNumber, uparams.kFieldFloat, this.pointIndex * 2, this.regrow)
+                    this.newX = this.plant.editTransferField(TransferDirection.kSetField, this.newX, this.fieldNumber, FieldType.kFieldFloat, this.pointIndex * 2, this.regrow)
                     this.plant.recalculateBounds(kDrawNow)
                 }
             }
@@ -3022,8 +3007,8 @@ export class PdChangeSCurvePointValueCommand extends PdChangeValueCommand {
                 this.plant = this.plantList[i]
                 oldX = this.values[i].x
                 oldY = this.values[i].y
-                oldX = this.plant.editTransferField(umath.kSetField, oldX, this.fieldNumber, uparams.kFieldFloat, this.pointIndex * 2, this.regrow)
-                oldY = this.plant.editTransferField(umath.kSetField, oldY, this.fieldNumber, uparams.kFieldFloat, this.pointIndex * 2 + 1, this.regrow)
+                oldX = this.plant.editTransferField(TransferDirection.kSetField, oldX, this.fieldNumber, FieldType.kFieldFloat, this.pointIndex * 2, this.regrow)
+                oldY = this.plant.editTransferField(TransferDirection.kSetField, oldY, this.fieldNumber, FieldType.kFieldFloat, this.pointIndex * 2 + 1, this.regrow)
                 this.plant.recalculateBounds(kDrawNow)
             }
         }
@@ -3049,7 +3034,7 @@ export class PdChangeColorValueCommand extends PdChangeValueCommand {
             for (let i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = this.plantList[i]
                 let oldValue: TColorRef = 0
-                oldValue = this.plant.editTransferField(umath.kGetField, oldValue, this.fieldNumber, uparams.kFieldColor, uparams.kNotArray, this.regrow)
+                oldValue = this.plant.editTransferField(TransferDirection.kGetField, oldValue, this.fieldNumber, FieldType.kFieldColor, uparams.kNotArray, this.regrow)
                 this.values.push(new PdColorValue(oldValue))
             }
         }
@@ -3065,7 +3050,7 @@ export class PdChangeColorValueCommand extends PdChangeValueCommand {
             if (this.plantList.length > 0) {
                 for (let i = 0; i <= this.plantList.length - 1; i++) {
                     this.plant = this.plantList[i]
-                    this.newColor = this.plant.editTransferField(umath.kSetField, this.newColor, this.fieldNumber, uparams.kFieldColor, uparams.kNotArray, this.regrow)
+                    this.newColor = this.plant.editTransferField(TransferDirection.kSetField, this.newColor, this.fieldNumber, FieldType.kFieldColor, uparams.kNotArray, this.regrow)
                     this.plant.recalculateBounds(kDrawNow)
                 }
             }
@@ -3086,7 +3071,7 @@ export class PdChangeColorValueCommand extends PdChangeValueCommand {
             for (let i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = this.plantList[i]
                 oldValue = this.values[i].saveColor
-                oldValue = this.plant.editTransferField(umath.kSetField, oldValue, this.fieldNumber, uparams.kFieldColor, uparams.kNotArray, this.regrow)
+                oldValue = this.plant.editTransferField(TransferDirection.kSetField, oldValue, this.fieldNumber, FieldType.kFieldColor, uparams.kNotArray, this.regrow)
                 this.plant.recalculateBounds(kDrawNow)
             }
         }
@@ -3094,9 +3079,8 @@ export class PdChangeColorValueCommand extends PdChangeValueCommand {
     }
     
     description(): string {
-        let result = ""
-        result = PdChangeValueCommand.prototype.description.call(this)
-        result = "change " + result + " to (R " + IntToStr(UNRESOLVED.getRValue(this.newColor)) + ", G " + IntToStr(UNRESOLVED.getGValue(this.newColor)) + ", B " + IntToStr(UNRESOLVED.getBValue(this.newColor)) + ")" + " in " + plantNamesForDescription(this.plantList)
+        let result = super.description()
+        result = "change " + result + " to (R " + IntToStr(getRValue(this.newColor)) + ", G " + IntToStr(getGValue(this.newColor)) + ", B " + IntToStr(getBValue(this.newColor)) + ")" + " in " + plantNamesForDescription(this.plantList)
         return result
     }
     
@@ -3113,7 +3097,7 @@ export class PdChangeTdoValueCommand extends PdChangeValueCommand {
             for (let i = 0; i <= this.plantList.length - 1; i++) {
                 let valueTdo = new KfObject3D()
                 this.plant = this.plantList[i]
-                valueTdo = this.plant.editTransferField(umath.kGetField, valueTdo, this.fieldNumber, uparams.kFieldThreeDObject, uparams.kNotArray, this.regrow)
+                valueTdo = this.plant.editTransferField(TransferDirection.kGetField, valueTdo, this.fieldNumber, FieldType.kFieldThreeDObject, uparams.kNotArray, this.regrow)
                 this.values.push(valueTdo)
             }
         }
@@ -3129,7 +3113,7 @@ export class PdChangeTdoValueCommand extends PdChangeValueCommand {
             if (this.plantList.length > 0) {
                 for (let i = 0; i <= this.plantList.length - 1; i++) {
                     this.plant = this.plantList[i]
-                    this.newTdo = this.plant.editTransferField(umath.kSetField, this.newTdo, this.fieldNumber, uparams.kFieldThreeDObject, uparams.kNotArray, this.regrow)
+                    this.newTdo = this.plant.editTransferField(TransferDirection.kSetField, this.newTdo, this.fieldNumber, FieldType.kFieldThreeDObject, uparams.kNotArray, this.regrow)
                     this.plant.recalculateBounds(kDrawNow)
                 }
             }
@@ -3150,7 +3134,7 @@ export class PdChangeTdoValueCommand extends PdChangeValueCommand {
             for (let i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = this.plantList[i]
                 oldValue = this.values[i]
-                oldValue = this.plant.editTransferField(umath.kSetField, oldValue, this.fieldNumber, uparams.kFieldThreeDObject, uparams.kNotArray, this.regrow)
+                oldValue = this.plant.editTransferField(TransferDirection.kSetField, oldValue, this.fieldNumber, FieldType.kFieldThreeDObject, uparams.kNotArray, this.regrow)
                 this.plant.recalculateBounds(kDrawNow)
             }
         }
@@ -3177,7 +3161,7 @@ export class PdChangeSmallintValueCommand extends PdChangeValueCommand {
             for (let i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = this.plantList[i]
                 let oldValue: short = 0
-                oldValue = this.plant.editTransferField(umath.kGetField, oldValue, this.fieldNumber, uparams.kFieldSmallint, this.arrayIndex, this.regrow)
+                oldValue = this.plant.editTransferField(TransferDirection.kGetField, oldValue, this.fieldNumber, FieldType.kFieldSmallint, this.arrayIndex, this.regrow)
                 this.values.push(new PdSmallintValue(oldValue))
             }
         }
@@ -3193,7 +3177,7 @@ export class PdChangeSmallintValueCommand extends PdChangeValueCommand {
             if (this.plantList.length > 0) {
                 for (let i = 0; i <= this.plantList.length - 1; i++) {
                     this.plant = this.plantList[i]
-                    this.newValue = this.plant.editTransferField(umath.kSetField, this.newValue, this.fieldNumber, uparams.kFieldSmallint, this.arrayIndex, this.regrow)
+                    this.newValue = this.plant.editTransferField(TransferDirection.kSetField, this.newValue, this.fieldNumber, FieldType.kFieldSmallint, this.arrayIndex, this.regrow)
                     this.plant.recalculateBounds(kDrawNow)
                 }
             }
@@ -3214,7 +3198,7 @@ export class PdChangeSmallintValueCommand extends PdChangeValueCommand {
             for (let i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = this.plantList[i]
                 oldValue = this.values[i].saveSmallint
-                oldValue = this.plant.editTransferField(umath.kSetField, oldValue, this.fieldNumber, uparams.kFieldSmallint, this.arrayIndex, this.regrow)
+                oldValue = this.plant.editTransferField(TransferDirection.kSetField, oldValue, this.fieldNumber, FieldType.kFieldSmallint, this.arrayIndex, this.regrow)
                 this.plant.recalculateBounds(kDrawNow)
             }
         }
@@ -3241,7 +3225,7 @@ export class PdChangeBooleanValueCommand extends PdChangeValueCommand {
             for (let i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = this.plantList[i]
                 let oldValue: boolean = false
-                oldValue = this.plant.editTransferField(umath.kGetField, oldValue, this.fieldNumber, uparams.kFieldBoolean, this.arrayIndex, this.regrow)
+                oldValue = this.plant.editTransferField(TransferDirection.kGetField, oldValue, this.fieldNumber, FieldType.kFieldBoolean, this.arrayIndex, this.regrow)
                 this.values.push(new PdBooleanValue(oldValue))
             }
         }
@@ -3257,7 +3241,7 @@ export class PdChangeBooleanValueCommand extends PdChangeValueCommand {
             if (this.plantList.length > 0) {
                 for (let i = 0; i <= this.plantList.length - 1; i++) {
                     this.plant = this.plantList[i]
-                    this.newValue = this.plant.editTransferField(umath.kSetField, this.newValue, this.fieldNumber, uparams.kFieldBoolean, this.arrayIndex, this.regrow)
+                    this.newValue = this.plant.editTransferField(TransferDirection.kSetField, this.newValue, this.fieldNumber, FieldType.kFieldBoolean, this.arrayIndex, this.regrow)
                     this.plant.recalculateBounds(kDrawNow)
                 }
             }
@@ -3278,7 +3262,7 @@ export class PdChangeBooleanValueCommand extends PdChangeValueCommand {
             for (let i = 0; i <= this.plantList.length - 1; i++) {
                 this.plant = this.plantList[i]
                 oldValue = this.values[i].saveBoolean
-                oldValue = this.plant.editTransferField(umath.kSetField, oldValue, this.fieldNumber, uparams.kFieldBoolean, this.arrayIndex, this.regrow)
+                oldValue = this.plant.editTransferField(TransferDirection.kSetField, oldValue, this.fieldNumber, FieldType.kFieldBoolean, this.arrayIndex, this.regrow)
                 this.plant.recalculateBounds(kDrawNow)
             }
         }
@@ -3325,7 +3309,7 @@ export class PdBreedFromParentsCommand extends PdCommand {
         this.createFirstGeneration = aCreateFirstGeneration
         if (this.row < 0) {
             // from main window 
-            this.row = ubreedr.BreederForm.selectedRow
+            this.row = BreederForm.selectedRow
         }
         if (existingGenerations.length > 0) {
             for (let i = 0; i <= existingGenerations.length - 1; i++) {
@@ -3363,7 +3347,7 @@ export class PdBreedFromParentsCommand extends PdCommand {
         super.doCommand()
         try {
             ucursor.cursor_startWait()
-            this.rowSelectedAtStart = ubreedr.BreederForm.selectedRow
+            this.rowSelectedAtStart = BreederForm.selectedRow
             if (this.createFirstGeneration) {
                 // if command created from main window, create first generation to put in breeder 
                 this.firstGeneration = new PdGeneration(this.firstParent, this.secondParent, this.fractionOfMaxAge)
@@ -3372,12 +3356,12 @@ export class PdBreedFromParentsCommand extends PdCommand {
             this.newGeneration = new PdGeneration(null, null, 1.0)
             this.newGeneration.breedFromParents(this.firstParent, this.secondParent, this.fractionOfMaxAge)
             // tell breeder to forget about other generations below the selected row  
-            ubreedr.BreederForm.forgetGenerationsListBelowRow(this.row)
+            BreederForm.forgetGenerationsListBelowRow(this.row)
             if (this.firstGeneration !== null) {
-                ubreedr.BreederForm.addGeneration(this.firstGeneration)
-                ubreedr.BreederForm.selectGeneration(this.firstGeneration)
+                BreederForm.addGeneration(this.firstGeneration)
+                BreederForm.selectGeneration(this.firstGeneration)
             }
-            ubreedr.BreederForm.updateForChangeToGenerations()
+            BreederForm.updateForChangeToGenerations()
             if (this.row <= this.oldGenerations.length - 1) {
                 // set the firstParent and secondParent pointers in the generation that was bred (either the firstGeneration
                 //      or the generation selected in the breeder) 
@@ -3386,9 +3370,9 @@ export class PdBreedFromParentsCommand extends PdCommand {
                 generationBred.secondParent = generationBred.secondSelectedPlant()
             }
             // add and select the new generation in the breeder 
-            ubreedr.BreederForm.addGeneration(this.newGeneration)
-            ubreedr.BreederForm.selectGeneration(this.newGeneration)
-            ubreedr.BreederForm.updateForChangeToGenerations()
+            BreederForm.addGeneration(this.newGeneration)
+            BreederForm.selectGeneration(this.newGeneration)
+            BreederForm.updateForChangeToGenerations()
         } finally {
             ucursor.cursor_stopWait()
         }
@@ -3400,20 +3384,20 @@ export class PdBreedFromParentsCommand extends PdCommand {
         super.undoCommand()
         // tell the breeder to forget about the generation(s) created by this command, and if there were any generations
         //    wiped out by it, tell the breeder to restore pointers to all generations that were forgotten 
-        ubreedr.BreederForm.forgetLastGeneration()
+        BreederForm.forgetLastGeneration()
         if (this.firstGeneration !== null) {
-            ubreedr.BreederForm.forgetLastGeneration()
+            BreederForm.forgetLastGeneration()
         }
-        ubreedr.BreederForm.updateForChangeToGenerations()
-        ubreedr.BreederForm.addGenerationsFromListBelowRow(this.row, this.oldGenerations)
-        ubreedr.BreederForm.selectedRow = this.rowSelectedAtStart
+        BreederForm.updateForChangeToGenerations()
+        BreederForm.addGenerationsFromListBelowRow(this.row, this.oldGenerations)
+        BreederForm.selectedRow = this.rowSelectedAtStart
         if (this.row <= this.oldGenerations.length - 1) {
             // set parent pointers of generation that was bred (firstGeneration or generation selected) to nil 
-            generationBred = ugener.PdGeneration(this.oldGenerations[this.row])
+            generationBred = this.oldGenerations[this.row]
             generationBred.firstParent = null
             generationBred.secondParent = null
         }
-        ubreedr.BreederForm.updateForChangeToGenerations()
+        BreederForm.updateForChangeToGenerations()
     }
     
     redoCommand(): void {
@@ -3421,23 +3405,23 @@ export class PdBreedFromParentsCommand extends PdCommand {
         
         super.doCommand()
         // tell breeder to forget about other generations below the selected row (the whole list if from the main window) 
-        ubreedr.BreederForm.forgetGenerationsListBelowRow(this.row)
+        BreederForm.forgetGenerationsListBelowRow(this.row)
         if (this.firstGeneration !== null) {
-            ubreedr.BreederForm.addGeneration(this.firstGeneration)
-            ubreedr.BreederForm.selectGeneration(this.firstGeneration)
+            BreederForm.addGeneration(this.firstGeneration)
+            BreederForm.selectGeneration(this.firstGeneration)
         }
-        ubreedr.BreederForm.updateForChangeToGenerations()
+        BreederForm.updateForChangeToGenerations()
         if (this.row <= this.oldGenerations.length - 1) {
             // set the firstParent and secondParent pointers in the generation that was bred (either the firstGeneration
             //    or the generation selected in the breeder) 
-            generationBred = ugener.PdGeneration(this.oldGenerations[this.row])
+            generationBred = this.oldGenerations[this.row]
             generationBred.firstParent = generationBred.firstSelectedPlant()
             generationBred.secondParent = generationBred.secondSelectedPlant()
         }
         // add and select the new generation in the breeder 
-        ubreedr.BreederForm.addGeneration(this.newGeneration)
-        ubreedr.BreederForm.selectGeneration(this.newGeneration)
-        ubreedr.BreederForm.updateForChangeToGenerations()
+        BreederForm.addGeneration(this.newGeneration)
+        BreederForm.selectGeneration(this.newGeneration)
+        BreederForm.updateForChangeToGenerations()
     }
     
     description(): string {
@@ -3486,23 +3470,23 @@ export class PdReplaceBreederPlant extends PdCommand {
     
     doCommand(): void {
         super.doCommand()
-        this.originalPlant = ubreedr.BreederForm.plantForRowAndColumn(this.row, this.column)
+        this.originalPlant = BreederForm.plantForRowAndColumn(this.row, this.column)
         if (this.originalPlant === null) {
             throw new Error("Problem: Invalid row and column in method PdReplaceBreederPlant.doCommand.")
         }
         this.newPlant = new PdPlant()
         this.plantDraggedFrom.copyTo(this.newPlant)
-        ubreedr.BreederForm.replacePlantInRow(this.originalPlant, this.newPlant, this.row)
+        BreederForm.replacePlantInRow(this.originalPlant, this.newPlant, this.row)
     }
     
     undoCommand(): void {
         super.undoCommand()
-        ubreedr.BreederForm.replacePlantInRow(this.newPlant, this.originalPlant, this.row)
+        BreederForm.replacePlantInRow(this.newPlant, this.originalPlant, this.row)
     }
     
     redoCommand(): void {
         super.doCommand()
-        ubreedr.BreederForm.replacePlantInRow(this.originalPlant, this.newPlant, this.row)
+        BreederForm.replacePlantInRow(this.originalPlant, this.newPlant, this.row)
     }
     
     description(): string {
@@ -3514,8 +3498,8 @@ export class PdReplaceBreederPlant extends PdCommand {
 }
 
 export class PdMakeTimeSeriesCommand extends PdCommand {
-    oldPlants: TList = new TList()
-    newPlants: TList = new TList()
+    oldPlants: PdPlant[] = []
+    newPlants: PdPlant[] = []
     newPlant: PdPlant
     isPaste: boolean = false
     
@@ -3526,8 +3510,6 @@ export class PdMakeTimeSeriesCommand extends PdCommand {
         if (this.newPlant === null) {
             throw new Error("Problem: Nil plant in method PdMakeTimeSeriesCommand.createWithNewPlant.")
         }
-        this.oldPlants = delphi_compatability.TList().Create()
-        this.newPlants = delphi_compatability.TList().Create()
     }
     
     numberOfStoredLargeObjects(): long {
@@ -3547,42 +3529,42 @@ export class PdMakeTimeSeriesCommand extends PdCommand {
     
     doCommand(): void {
         super.doCommand()
-        if (utimeser.TimeSeriesForm.plants.length > 0) {
-            for (let i = 0; i <= utimeser.TimeSeriesForm.plants.length - 1; i++) {
-                this.oldPlants.push(utimeser.TimeSeriesForm.plants[i])
+        if (TimeSeriesForm.plants.length > 0) {
+            for (let i = 0; i <= TimeSeriesForm.plants.length - 1; i++) {
+                this.oldPlants.push(TimeSeriesForm.plants[i])
             }
         }
-        utimeser.TimeSeriesForm.plants.clearPointersWithoutDeletingObjects()
+        TimeSeriesForm.plants.clearPointersWithoutDeletingObjects()
         // redraws in updateForChangeToPlants
-        utimeser.TimeSeriesForm.initializeWithPlant(this.newPlant, kDontDrawNow)
-        if (utimeser.TimeSeriesForm.plants.length > 0) {
-            for (let i = 0; i <= utimeser.TimeSeriesForm.plants.length - 1; i++) {
-                this.newPlants.push(utimeser.TimeSeriesForm.plants[i])
+        TimeSeriesForm.initializeWithPlant(this.newPlant, kDontDrawNow)
+        if (TimeSeriesForm.plants.length > 0) {
+            for (let i = 0; i <= TimeSeriesForm.plants.length - 1; i++) {
+                this.newPlants.push(TimeSeriesForm.plants[i])
             }
         }
-        utimeser.TimeSeriesForm.updateForChangeToPlants(utimeser.kRecalculateScale)
+        TimeSeriesForm.updateForChangeToPlants(utimeser.kRecalculateScale)
     }
     
     undoCommand(): void {
         super.undoCommand()
-        utimeser.TimeSeriesForm.plants.clearPointersWithoutDeletingObjects()
+        TimeSeriesForm.plants.clearPointersWithoutDeletingObjects()
         if (this.oldPlants.length > 0) {
             for (let i = 0; i <= this.oldPlants.length - 1; i++) {
-                utimeser.TimeSeriesForm.plants.push(this.oldPlants[i])
+                TimeSeriesForm.plants.push(this.oldPlants[i])
             }
         }
-        utimeser.TimeSeriesForm.updateForChangeToPlants(utimeser.kDontRecalculateScale)
+        TimeSeriesForm.updateForChangeToPlants(utimeser.kDontRecalculateScale)
     }
     
     redoCommand(): void {
         super.doCommand()
-        utimeser.TimeSeriesForm.plants.clearPointersWithoutDeletingObjects()
+        TimeSeriesForm.plants.clearPointersWithoutDeletingObjects()
         if (this.newPlants.length > 0) {
             for (let i = 0; i <= this.newPlants.length - 1; i++) {
-                utimeser.TimeSeriesForm.plants.push(this.newPlants[i])
+                TimeSeriesForm.plants.push(this.newPlants[i])
             }
         }
-        utimeser.TimeSeriesForm.updateForChangeToPlants(utimeser.kDontRecalculateScale)
+        TimeSeriesForm.updateForChangeToPlants(utimeser.kDontRecalculateScale)
     }
     
     description(): string {
@@ -3619,16 +3601,16 @@ export class PdChangeBreedingAndTimeSeriesOptionsCommand extends PdCommand {
         super.doCommand()
         domain.breedingAndTimeSeriesOptions = this.newOptions
         domain.options = this.newDomainOptions
-        ubreedr.BreederForm.updateForChangeToDomainOptions()
-        utimeser.TimeSeriesForm.updateForChangeToDomainOptions()
+        BreederForm.updateForChangeToDomainOptions()
+        TimeSeriesForm.updateForChangeToDomainOptions()
     }
     
     undoCommand(): void {
         super.undoCommand()
         domain.breedingAndTimeSeriesOptions = this.oldOptions
         domain.options = this.oldDomainOptions
-        ubreedr.BreederForm.updateForChangeToDomainOptions()
-        utimeser.TimeSeriesForm.updateForChangeToDomainOptions()
+        BreederForm.updateForChangeToDomainOptions()
+        TimeSeriesForm.updateForChangeToDomainOptions()
     }
     
     // redo is same as do 
@@ -3651,7 +3633,7 @@ export class PdDeleteBreederGenerationCommand extends PdCommand {
         if (this.generation === null) {
             throw new Error("Problem: Nil generation in method PdDeleteBreederGenerationCommand.createWithGeneration.")
         }
-        this.row = ubreedr.BreederForm.generations.indexOf(this.generation)
+        this.row = BreederForm.generations.indexOf(this.generation)
         if (this.row < 0) {
             throw new Error("Problem: Generation not in list in method PdDeleteBreederGenerationCommand.createWithGeneration.")
         }
@@ -3667,22 +3649,20 @@ export class PdDeleteBreederGenerationCommand extends PdCommand {
     }
     
     doCommand(): void {
-        let index: short
-        
         super.doCommand()
-        index = ubreedr.BreederForm.generations.indexOf(this.generation)
-        arrayRemove(ubreedr.BreederForm.generations, this.generation)
+        const index = BreederForm.generations.indexOf(this.generation)
+        arrayRemove(BreederForm.generations, this.generation)
         if (index > 0) {
-            ubreedr.BreederForm.selectedRow = index - 1
+            BreederForm.selectedRow = index - 1
         }
-        ubreedr.BreederForm.updateForChangeToGenerations()
+        BreederForm.updateForChangeToGenerations()
     }
     
     undoCommand(): void {
         super.undoCommand()
-        arrayInsert(ubreedr.BreederForm.generations, this.row, this.generation)
-        ubreedr.BreederForm.selectedRow = ubreedr.BreederForm.generations.indexOf(this.generation)
-        ubreedr.BreederForm.updateForChangeToGenerations()
+        arrayInsert(BreederForm.generations, this.row, this.generation)
+        BreederForm.selectedRow = BreederForm.generations.indexOf(this.generation)
+        BreederForm.updateForChangeToGenerations()
     }
     
     description(): string {
@@ -3692,26 +3672,23 @@ export class PdDeleteBreederGenerationCommand extends PdCommand {
 }
 
 export class PdDeleteAllBreederGenerationsCommand extends PdCommand {
-    generations: TListCollection = new TListCollection()
+    generations: PdGeneration[] = []
     
     create(): void {
         this.generations = []
-        if (ubreedr.BreederForm.generations.length > 0) {
-            for (let i = 0; i <= ubreedr.BreederForm.generations.length - 1; i++) {
-                this.generations.push(ubreedr.BreederForm.generations[i])
+        if (BreederForm.generations.length > 0) {
+            for (let i = 0; i <= BreederForm.generations.length - 1; i++) {
+                this.generations.push(BreederForm.generations[i])
             }
         }
     }
     
-    numberOfStoredLargeObjects(): long {
+    numberOfStoredLargeObjects(): long {  
         let result = 0
-        let generation: PdGeneration
-        
-        result = 0
         if (this.done) {
             if (this.generations.length > 0) {
                 for (let i = 0; i <= this.generations.length - 1; i++) {
-                    generation = this.generations[i]
+                    const generation = this.generations[i]
                     result = result + generation.plants.length
                 }
             }
@@ -3721,25 +3698,23 @@ export class PdDeleteAllBreederGenerationsCommand extends PdCommand {
     
     doCommand(): void {
         super.doCommand()
-        ubreedr.BreederForm.generations.clearPointersWithoutDeletingObjects()
-        ubreedr.BreederForm.updateForChangeToGenerations()
+        BreederForm.generations.clearPointersWithoutDeletingObjects()
+        BreederForm.updateForChangeToGenerations()
     }
     
     undoCommand(): void {
         super.undoCommand()
         if (this.generations.length > 0) {
             for (let i = 0; i <= this.generations.length - 1; i++) {
-                ubreedr.BreederForm.generations.push(this.generations[i])
+                BreederForm.generations.push(this.generations[i])
             }
         }
-        ubreedr.BreederForm.updateForChangeToGenerations()
+        BreederForm.updateForChangeToGenerations()
     }
     
     // redo same as do
     description(): string {
-        let result = ""
-        result = "delete all breeder generations"
-        return result
+        return "delete all breeder generations"
     }
     
 }
@@ -3760,13 +3735,13 @@ export class PdChangeNumberOfTimeSeriesStagesCommand extends PdCommand {
     doCommand(): void {
         super.doCommand()
         domain.breedingAndTimeSeriesOptions.numTimeSeriesStages = this.newNumber
-        utimeser.TimeSeriesForm.updateForChangeToDomainOptions()
+        TimeSeriesForm.updateForChangeToDomainOptions()
     }
     
     undoCommand(): void {
         super.undoCommand()
         domain.breedingAndTimeSeriesOptions.numTimeSeriesStages = this.oldNumber
-        utimeser.TimeSeriesForm.updateForChangeToDomainOptions()
+        TimeSeriesForm.updateForChangeToDomainOptions()
     }
     
     description(): string {
@@ -3778,13 +3753,13 @@ export class PdChangeNumberOfTimeSeriesStagesCommand extends PdCommand {
 }
 
 export class PdDeleteTimeSeriesCommand extends PdCommand {
-    plants: TListCollection = new TListCollection()
+    plants: PdPlant[] = []
     
     create(): void {
         this.plants = []
-        if (utimeser.TimeSeriesForm.plants.length > 0) {
-            for (let i = 0; i <= utimeser.TimeSeriesForm.plants.length - 1; i++) {
-                this.plants.push(utimeser.TimeSeriesForm.plants[i])
+        if (TimeSeriesForm.plants.length > 0) {
+            for (let i = 0; i <= TimeSeriesForm.plants.length - 1; i++) {
+                this.plants.push(TimeSeriesForm.plants[i])
             }
         }
     }
@@ -3801,18 +3776,18 @@ export class PdDeleteTimeSeriesCommand extends PdCommand {
     
     doCommand(): void {
         super.doCommand()
-        utimeser.TimeSeriesForm.plants.clearPointersWithoutDeletingObjects()
-        utimeser.TimeSeriesForm.updateForChangeToPlants(utimeser.kDontRecalculateScale)
+        TimeSeriesForm.plants.clearPointersWithoutDeletingObjects()
+        TimeSeriesForm.updateForChangeToPlants(utimeser.kDontRecalculateScale)
     }
     
     undoCommand(): void {
         super.undoCommand()
         if (this.plants.length > 0) {
             for (let i = 0; i <= this.plants.length - 1; i++) {
-                utimeser.TimeSeriesForm.plants.push(this.plants[i])
+                TimeSeriesForm.plants.push(this.plants[i])
             }
         }
-        utimeser.TimeSeriesForm.updateForChangeToPlants(utimeser.kDontRecalculateScale)
+        TimeSeriesForm.updateForChangeToPlants(utimeser.kDontRecalculateScale)
     }
     
     // redo same as do

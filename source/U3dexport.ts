@@ -168,7 +168,7 @@ export interface SingleOverlay {
 }
 
 // ------------------------------------------------------------------------------------------ index functions 
-function fileTypeFor3DExportType(outputType: short): short {
+export function fileTypeFor3DExportType(outputType: short): short {
     let result = 0
     switch (outputType) {
         case ExportFormats.kDXF:
