@@ -132,16 +132,16 @@ const kExactAge = true
 export class BreedingAndTimeSeriesOptionsStructure {
     mutationStrengths: short[] = Array(kMaxBreedingSections + 1)
     firstPlantWeights: short[] = Array(kMaxBreedingSections + 1)
-    getNonNumericalParametersFrom: short
-    mutateAndBlendColorValues: boolean
-    chooseTdosRandomlyFromCurrentLibrary: boolean
-    percentMaxAge: short
-    plantsPerGeneration: short
-    variationType: short
-    thumbnailWidth: short
-    thumbnailHeight: short
-    maxGenerations: short
-    numTimeSeriesStages: short
+    getNonNumericalParametersFrom: short = 0
+    mutateAndBlendColorValues: boolean = false
+    chooseTdosRandomlyFromCurrentLibrary: boolean = false
+    percentMaxAge: short = 0
+    plantsPerGeneration: short = 0
+    variationType: short = 0
+    thumbnailWidth: short = 0
+    thumbnailHeight: short = 0
+    maxGenerations: short = 0
+    numTimeSeriesStages: short = 0
 
     /* TODO: Remove BreedingAndTimeSeriesOptionsStructure>streamUsingFiler if not used
     streamUsingFiler(filer: PdFiler) {
@@ -227,19 +227,19 @@ export class TdoParamsStructure {
 // access->pGeneral 
 // record
 export class ParamsGeneral {
-    randomSway: float
-    startingSeedForRandomNumberGenerator: short
-    numApicalInflors: short
-    numAxillaryInflors: short
-    lineDivisions: short
-    isDicot: boolean
-    maleFlowersAreSeparate: boolean
-    ageAtMaturity: short
+    randomSway: float = 0
+    startingSeedForRandomNumberGenerator: short = 0
+    numApicalInflors: short = 0
+    numAxillaryInflors: short = 0
+    lineDivisions: short = 0
+    isDicot: boolean = false
+    maleFlowersAreSeparate: boolean = false
+    ageAtMaturity: short = 0
     growthSCurve: SCurveStructure = new SCurveStructure()
-    ageAtWhichFloweringStarts: short
-    fractionReproductiveAllocationAtMaturity_frn: float
-    wiltingPercent: float
-    phyllotacticRotationAngle: float
+    ageAtWhichFloweringStarts: short = 0
+    fractionReproductiveAllocationAtMaturity_frn: float = 0
+    wiltingPercent: float = 0
+    phyllotacticRotationAngle: float = 0
 
     streamUsingFiler(filer: PdFiler) {
         this.randomSway = filer.streamSingle(this.randomSway)
@@ -267,22 +267,22 @@ export class ParamsLeaf {
     leafTdoParams: TdoParamsStructure = new TdoParamsStructure()
     stipuleTdoParams: TdoParamsStructure = new TdoParamsStructure()
     sCurveParams: SCurveStructure = new SCurveStructure()
-    petioleColor: TColorRef
-    optimalBiomass_pctMPB: float
-    optimalFractionOfOptimalBiomassAtCreation_frn: float
-    minDaysToGrow: short
-    maxDaysToGrow: short
-    petioleLengthAtOptimalBiomass_mm: float
-    petioleWidthAtOptimalBiomass_mm: float
-    petioleAngle: float
-    compoundRachisToPetioleRatio: float
-    compoundPinnateOrPalmate: short
-    compoundNumLeaflets: short
-    compoundCurveAngleAtStart: float
-    compoundCurveAngleAtFullSize: float
-    fractionOfLiveBiomassWhenAbscisses_frn: float
-    petioleTaperIndex: short
-    compoundPinnateLeafletArrangement: short
+    petioleColor: TColorRef = 0
+    optimalBiomass_pctMPB: float = 0
+    optimalFractionOfOptimalBiomassAtCreation_frn: float = 0
+    minDaysToGrow: short = 0
+    maxDaysToGrow: short = 0
+    petioleLengthAtOptimalBiomass_mm: float = 0
+    petioleWidthAtOptimalBiomass_mm: float = 0
+    petioleAngle: float = 0
+    compoundRachisToPetioleRatio: float = 0
+    compoundPinnateOrPalmate: short = 0
+    compoundNumLeaflets: short = 0
+    compoundCurveAngleAtStart: float = 0
+    compoundCurveAngleAtFullSize: float = 0
+    fractionOfLiveBiomassWhenAbscisses_frn: float = 0
+    petioleTaperIndex: short = 0
+    compoundPinnateLeafletArrangement: short = 0
 
     streamUsingFiler(filer: PdFiler) {
         this.leafTdoParams.streamUsingFiler(filer)
@@ -313,7 +313,7 @@ export class ParamsLeaf {
 // record
 export class ParamsSeedlingLeaf {
     leafTdoParams: TdoParamsStructure = new TdoParamsStructure()
-    nodesOnStemWhenFallsOff: short
+    nodesOnStemWhenFallsOff: short = 0
 
     streamUsingFiler(filer: PdFiler) {  
     }
@@ -322,28 +322,28 @@ export class ParamsSeedlingLeaf {
 // access->pInternode 
 // record
 export class ParamsInternode {
-    faceColor: TColorRef
-    backfaceColor: TColorRef
-    curvingIndex: float
-    firstInternodeCurvingIndex: float
-    minFractionOfOptimalInitialBiomassToCreateInternode_frn: float
-    minDaysToCreateInternode: short
-    maxDaysToCreateInternodeIfOverMinFraction: short
-    optimalFinalBiomass_pctMPB: float
-    canRecoverFromStuntingDuringCreation: boolean
-    minDaysToAccumulateBiomass: short
-    maxDaysToAccumulateBiomass: short
-    minDaysToExpand: short
-    maxDaysToExpand: short
-    lengthAtOptimalFinalBiomassAndExpansion_mm: float
-    lengthMultiplierDueToBiomassAccretion: float
-    lengthMultiplierDueToExpansion: float
-    widthAtOptimalFinalBiomassAndExpansion_mm: float
-    widthMultiplierDueToBiomassAccretion: float
-    widthMultiplierDueToExpansion: float
-    lengthMultiplierDueToBolting: float
-    minDaysToBolt: short
-    maxDaysToBolt: short
+    faceColor: TColorRef = 0
+    backfaceColor: TColorRef = 0
+    curvingIndex: float = 0
+    firstInternodeCurvingIndex: float = 0
+    minFractionOfOptimalInitialBiomassToCreateInternode_frn: float = 0
+    minDaysToCreateInternode: short = 0
+    maxDaysToCreateInternodeIfOverMinFraction: short = 0
+    optimalFinalBiomass_pctMPB: float = 0
+    canRecoverFromStuntingDuringCreation: boolean = false
+    minDaysToAccumulateBiomass: short = 0
+    maxDaysToAccumulateBiomass: short = 0
+    minDaysToExpand: short = 0
+    maxDaysToExpand: short = 0
+    lengthAtOptimalFinalBiomassAndExpansion_mm: float = 0
+    lengthMultiplierDueToBiomassAccretion: float = 0
+    lengthMultiplierDueToExpansion: float = 0
+    widthAtOptimalFinalBiomassAndExpansion_mm: float = 0
+    widthMultiplierDueToBiomassAccretion: float = 0
+    widthMultiplierDueToExpansion: float = 0
+    lengthMultiplierDueToBolting: float = 0
+    minDaysToBolt: short = 0
+    maxDaysToBolt: short = 0
 
     streamUsingFiler(filer: PdFiler) {
         this.faceColor = filer.streamColorRef(this.faceColor)
@@ -379,28 +379,28 @@ export class ParamsInternode {
 // record
 export class ParamsFlower {
     tdoParams: TdoParamsStructure[] = Array(FloralPart.kSepals + 1)
-    budDrawingOption: short
-    optimalBiomass_pctMPB: float
-    minFractionOfOptimalInitialBiomassToCreateFlower_frn: float
-    minDaysToCreateFlowerBud: short
-    maxDaysToCreateFlowerBudIfOverMinFraction: short
-    minFractionOfOptimalBiomassToOpenFlower_frn: float
-    minDaysToOpenFlower: short
-    minDaysToGrow: short
-    maxDaysToGrowIfOverMinFraction: short
-    minDaysBeforeSettingFruit: short
-    daysBeforeDrop: short
-    minFractionOfOptimalBiomassToCreateFruit_frn: float
-    numPistils: short
-    styleLength_mm: float
-    styleWidth_mm: float
-    styleTaperIndex: short
-    styleColor: TColorRef
-    numStamens: short
-    filamentLength_mm: float
-    filamentWidth_mm: float
-    filamentTaperIndex: short
-    filamentColor: TColorRef
+    budDrawingOption: short = 0
+    optimalBiomass_pctMPB: float = 0
+    minFractionOfOptimalInitialBiomassToCreateFlower_frn: float = 0
+    minDaysToCreateFlowerBud: short = 0
+    maxDaysToCreateFlowerBudIfOverMinFraction: short = 0
+    minFractionOfOptimalBiomassToOpenFlower_frn: float = 0
+    minDaysToOpenFlower: short = 0
+    minDaysToGrow: short = 0
+    maxDaysToGrowIfOverMinFraction: short = 0
+    minDaysBeforeSettingFruit: short = 0
+    daysBeforeDrop: short = 0
+    minFractionOfOptimalBiomassToCreateFruit_frn: float = 0
+    numPistils: short = 0
+    styleLength_mm: float = 0
+    styleWidth_mm: float = 0
+    styleTaperIndex: short = 0
+    styleColor: TColorRef = 0
+    numStamens: short = 0
+    filamentLength_mm: float = 0
+    filamentWidth_mm: float = 0
+    filamentTaperIndex: short = 0
+    filamentColor: TColorRef = 0
 
     constructor() {
         for (let i = 0; i < this.tdoParams.length; i++) {
@@ -442,35 +442,35 @@ export class ParamsFlower {
 // record
 export class ParamsInflorescence {
     bractTdoParams: TdoParamsStructure = new TdoParamsStructure()
-    optimalBiomass_pctMPB: float
-    minFractionOfOptimalBiomassToCreateInflorescence_frn: float
-    minDaysToCreateInflorescence: short
-    maxDaysToCreateInflorescenceIfOverMinFraction: short
-    minFractionOfOptimalBiomassToMakeFlowers_frn: float
-    minDaysToGrow: short
-    maxDaysToGrow: short
-    peduncleLength_mm: float
-    internodeLength_mm: float
-    internodeWidth_mm: float
-    pedicelLength_mm: float
-    pedicelAngle: float
-    branchAngle: float
-    angleBetweenInternodes: float
-    peduncleAngleFromVegetativeStem: float
-    apicalStalkAngleFromVegetativeStem: float
-    terminalStalkLength_mm: float
-    numFlowersPerBranch: short
-    numFlowersOnMainBranch: short
-    daysToAllFlowersCreated: short
-    numBranches: short
-    branchesAreAlternate: boolean
-    isHead: boolean
-    isTerminal: boolean
-    flowersDrawTopToBottom: boolean
-    flowersSpiralOnStem: boolean
-    stalkColor: TColorRef
-    pedicelColor: TColorRef
-    pedicelTaperIndex: short
+    optimalBiomass_pctMPB: float = 0
+    minFractionOfOptimalBiomassToCreateInflorescence_frn: float = 0
+    minDaysToCreateInflorescence: short = 0
+    maxDaysToCreateInflorescenceIfOverMinFraction: short = 0
+    minFractionOfOptimalBiomassToMakeFlowers_frn: float = 0
+    minDaysToGrow: short = 0
+    maxDaysToGrow: short = 0
+    peduncleLength_mm: float = 0
+    internodeLength_mm: float = 0
+    internodeWidth_mm: float = 0
+    pedicelLength_mm: float = 0
+    pedicelAngle: float = 0
+    branchAngle: float = 0
+    angleBetweenInternodes: float = 0
+    peduncleAngleFromVegetativeStem: float = 0
+    apicalStalkAngleFromVegetativeStem: float = 0
+    terminalStalkLength_mm: float = 0
+    numFlowersPerBranch: short = 0
+    numFlowersOnMainBranch: short = 0
+    daysToAllFlowersCreated: short = 0
+    numBranches: short = 0
+    branchesAreAlternate: boolean = false
+    isHead: boolean = false
+    isTerminal: boolean = false
+    flowersDrawTopToBottom: boolean = false
+    flowersSpiralOnStem: boolean = false
+    stalkColor: TColorRef = 0
+    pedicelColor: TColorRef = 0
+    pedicelTaperIndex: short = 0
 
     streamUsingFiler(filer: PdFiler) {
         this.bractTdoParams.streamUsingFiler(filer)
@@ -519,13 +519,13 @@ export class ParamsAxillaryBud {
 // access->pMeristem 
 // record
 export class ParamsMeristem {
-    branchingIndex: float
-    branchingDistance: float
-    branchingAngle: float
-    determinateProbability: float
-    branchingIsSympodial: boolean
-    branchingAndLeafArrangement: short
-    secondaryBranchingIsAllowed: boolean
+    branchingIndex: float = 0
+    branchingDistance: float = 0
+    branchingAngle: float = 0
+    determinateProbability: float = 0
+    branchingIsSympodial: boolean = false
+    branchingAndLeafArrangement: short = 0
+    secondaryBranchingIsAllowed: boolean = false
 
     streamUsingFiler(filer: PdFiler) {
         this.branchingIndex = filer.streamSingle(this.branchingIndex)
@@ -543,11 +543,11 @@ export class ParamsMeristem {
 export class ParamsFruit {
     tdoParams: TdoParamsStructure = new TdoParamsStructure()
     sCurveParams: SCurveStructure = new SCurveStructure()
-    optimalBiomass_pctMPB: float
-    minDaysToGrow: short
-    maxDaysToGrow: short
-    stalkStrengthIndex: float
-    daysToRipen: short
+    optimalBiomass_pctMPB: float = 0
+    minDaysToGrow: short = 0
+    maxDaysToGrow: short = 0
+    stalkStrengthIndex: float = 0
+    daysToRipen: short = 0
 
     streamUsingFiler(filer: PdFiler) {
         this.tdoParams.streamUsingFiler(filer)
@@ -565,7 +565,7 @@ export class ParamsFruit {
 // record
 export class ParamsRoot {
     tdoParams: TdoParamsStructure = new TdoParamsStructure()
-    showsAboveGround: boolean
+    showsAboveGround: boolean = false
 
     streamUsingFiler(filer: PdFiler) {
         this.tdoParams.streamUsingFiler(filer)
@@ -940,7 +940,7 @@ export class PdPlant extends PdStreamableObject {
                     this.enforceMinimumBoundsRect()
                     this.expandBoundsRectForLineWidth()
                 }
-            } catch (e) {
+            } catch (e: any) {
                 messageForExceptionType(e, "PdPlant.drawOn")
             }
         } finally {
@@ -1103,7 +1103,7 @@ export class PdPlant extends PdStreamableObject {
             this.turtle.resetBoundsRect(this.basePoint_pixels())
             try {
                 this.draw()
-            } catch (e) {
+            } catch (e: any) {
                 messageForExceptionType(e, "PdPlant.fakeDrawToGetBounds")
             }
             this.setBoundsRect_pixels(this.getTurtleBoundsRect())
@@ -1143,7 +1143,7 @@ export class PdPlant extends PdStreamableObject {
                 // nothing-messes up paint
                 try {
                     this.draw()
-                } catch (e) {
+                } catch (e: any) {
                     // pass
                 }
                 this.setBoundsRect_pixels(this.getTurtleBoundsRect())
@@ -1174,7 +1174,7 @@ export class PdPlant extends PdStreamableObject {
                 // nothing-messes up paint
                 try {
                     this.draw()
-                } catch (e) {
+                } catch (e: any) {
                     // pass
                 }
                 this.setBoundsRect_pixels(this.getTurtleBoundsRect())
@@ -1195,7 +1195,7 @@ export class PdPlant extends PdStreamableObject {
                 // nothing-messes up paint
                 try {
                     this.draw()
-                } catch (e) {
+                } catch (e: any) {
                     // pass
                 }
             }
@@ -1261,7 +1261,7 @@ export class PdPlant extends PdStreamableObject {
                 if ((inMainWindow) && (cache === this.previewCache)) {
                     MainForm.updateForChangeToPlantBitmaps()
                 }
-            } catch (e) {
+            } catch (e: any) {
                 cache.Width = 1
                 cache.Height = 1
                 if ((inMainWindow) && (cache === this.previewCache)) {
@@ -2706,7 +2706,7 @@ export class PdPlant extends PdStreamableObject {
             } finally {
                 this.needToRecalculateColors = true
             }
-        } catch (e) {
+        } catch (e: any) {
             messageForExceptionType(e, "PdPlant.nextDay")
         }
     }
@@ -2782,7 +2782,7 @@ export class PdPlant extends PdStreamableObject {
                 // no demand 
                 undistributedBiomass_pctMPB = undistributedBiomass_pctMPB + biomassToAddOrRemove_pctMPB
             }
-        } catch (e) {
+        } catch (e: any) {
             messageForExceptionType(e, "PdPlant.allocateOrRemoveParticularBiomass")
         }
         return undistributedBiomass_pctMPB

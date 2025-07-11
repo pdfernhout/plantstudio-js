@@ -1,6 +1,6 @@
 // KfDrawingSurface -- was unit Udrawingsurface
 
-import { TColor, short, long, float, int, intround } from "./common"
+import { TColor, short, long, float, int, intround, ColorDefs } from "./common"
 import { KfPoint3D } from "./KfPoint3D"
 import { pointInTriangle } from "./U3dsupport"
 import { TPoint } from "./TPoint"
@@ -29,10 +29,10 @@ export class KfDrawingSurface {
     drawingLines: boolean = false
     fillingTriangles: boolean = true
     circlingPoints: boolean = false
-    foreColor: TColor
-    backColor: TColor
-    lineColor: TColor
-    circleColor: TColor
+    foreColor: TColor = ColorDefs.clGreen
+    backColor: TColor = ColorDefs.clLime
+    lineColor: TColor = ColorDefs.clBlack
+    circleColor: TColor = ColorDefs.clOlive
     numTrianglesUsed: long = 0
     triangles: KfTriangle[] = []
     recording: boolean = false

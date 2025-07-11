@@ -21,20 +21,20 @@ const kInitialTurtleMatrixStackDepth = 250
 // general options 
 // record
 export class PlantDrawOptionsStructure {
-    sortPolygons: boolean
-    drawLines: boolean
-    lineContrastIndex: short
-    wireFrame: boolean
-    straightLinesOnly: boolean
-    simpleLeavesOnly: boolean
-    drawStems: boolean
-    draw3DObjects: boolean
-    draw3DObjectsAsRects: boolean
-    circlePoints: boolean
-    circlePointRadius: short
-    sortTdosAsOneItem: boolean
-    drawingToMainWindow: boolean
-    drawBoundsRectsOnPlantParts: boolean
+    sortPolygons: boolean = false
+    drawLines: boolean = true
+    lineContrastIndex: short = 1
+    wireFrame: boolean = false
+    straightLinesOnly: boolean = false
+    simpleLeavesOnly: boolean = true
+    drawStems: boolean = true
+    draw3DObjects: boolean = true
+    draw3DObjectsAsRects: boolean = true
+    circlePoints: boolean = true
+    circlePointRadius: short = 10
+    sortTdosAsOneItem: boolean = true
+    drawingToMainWindow: boolean = false
+    drawBoundsRectsOnPlantParts: boolean = true
 }
 
 // var

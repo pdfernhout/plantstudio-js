@@ -17,7 +17,7 @@ const kMaxEvaluationTime_hours = 10
 export class SinglePoint {
     x: float
     y: float
-    reservedZ: float
+    reservedZ: float = 0
 
     constructor(x = 0.0, y = 0.0) {
         this.x = x

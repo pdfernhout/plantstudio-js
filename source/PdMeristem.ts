@@ -90,7 +90,7 @@ export class PdMeristem extends PdPlantPart {
                     this.setIfActive(true)
                 }
             }
-        } catch (e) {
+        } catch (e: any) {
             messageForExceptionType(e, "PdMeristem.nextDay")
         }
     }
@@ -167,7 +167,7 @@ export class PdMeristem extends PdPlantPart {
                 this.liveBiomass_pctMPB = 0.0
                 this.daysCreatingThisPlantPart = 0
             }
-        } catch (e) {
+        } catch (e: any) {
             messageForExceptionType(e, "PdMeristem.accumulateOrCreatePhytomer")
         }
     }
@@ -198,7 +198,7 @@ export class PdMeristem extends PdPlantPart {
                 this.liveBiomass_pctMPB = 0.0
                 this.daysCreatingThisPlantPart = 0
             }
-        } catch (e) {
+        } catch (e: any) {
             messageForExceptionType(e, "PdMeristem.accumulateOrCreateInflorescence")
         }
     }
@@ -238,7 +238,7 @@ export class PdMeristem extends PdPlantPart {
                         }
                         this.biomassDemand_pctMPB = linearGrowthResult(this.liveBiomass_pctMPB, optimalBiomass_pctMPB, this.plant.pInternode.minDaysToCreateInternode)
                         traverser.total = traverser.total + this.biomassDemand_pctMPB
-                    } catch (e) {
+                    } catch (e: any) {
                         messageForExceptionType(e, "PdMeristem.traverseActivity (vegetative demand)")
                     }
                     break
@@ -254,7 +254,7 @@ export class PdMeristem extends PdPlantPart {
                     try {
                         this.biomassDemand_pctMPB = linearGrowthResult(this.liveBiomass_pctMPB, this.plant.pInflor[this.gender].optimalBiomass_pctMPB, this.plant.pInflor[this.gender].minDaysToCreateInflorescence)
                         traverser.total = traverser.total + this.biomassDemand_pctMPB
-                    } catch (e) {
+                    } catch (e: any) {
                         messageForExceptionType(e, "PdMeristem.traverseActivity (reproductive demand)")
                     }
                     break
@@ -269,7 +269,7 @@ export class PdMeristem extends PdPlantPart {
                     }
                     try {
                         this.liveBiomass_pctMPB = this.liveBiomass_pctMPB + this.biomassDemand_pctMPB * traverser.fractionOfPotentialBiomass
-                    } catch (e) {
+                    } catch (e: any) {
                         messageForExceptionType(e, "PdMeristem.traverseActivity (vegetative growth)")
                     }
                     break
@@ -279,7 +279,7 @@ export class PdMeristem extends PdPlantPart {
                     }
                     try {
                         this.liveBiomass_pctMPB = this.liveBiomass_pctMPB + this.biomassDemand_pctMPB * traverser.fractionOfPotentialBiomass
-                    } catch (e) {
+                    } catch (e: any) {
                         messageForExceptionType(e, "PdMeristem.traverseActivity (reproductive growth)")
                     }
                     break
@@ -313,7 +313,7 @@ export class PdMeristem extends PdPlantPart {
                     try {
                         // a meristem can lose all of its biomass 
                         traverser.total = traverser.total + this.liveBiomass_pctMPB
-                    } catch (e) {
+                    } catch (e: any) {
                         messageForExceptionType(e, "PdMeristem.traverseActivity (removal request)")
                     }
                     break
@@ -329,7 +329,7 @@ export class PdMeristem extends PdPlantPart {
                     try {
                         // a meristem can lose all of its biomass 
                         traverser.total = traverser.total + this.liveBiomass_pctMPB
-                    } catch (e) {
+                    } catch (e: any) {
                         messageForExceptionType(e, "PdMeristem.traverseActivity (removal request)")
                     }
                     break
@@ -344,7 +344,7 @@ export class PdMeristem extends PdPlantPart {
                         biomassToRemove_pctMPB = this.liveBiomass_pctMPB * traverser.fractionOfPotentialBiomass
                         this.liveBiomass_pctMPB = this.liveBiomass_pctMPB - biomassToRemove_pctMPB
                         this.deadBiomass_pctMPB = this.deadBiomass_pctMPB + biomassToRemove_pctMPB
-                    } catch (e) {
+                    } catch (e: any) {
                         messageForExceptionType(e, "PdMeristem.traverseActivity (removal)")
                     }
                     break
@@ -359,7 +359,7 @@ export class PdMeristem extends PdPlantPart {
                         biomassToRemove_pctMPB = this.liveBiomass_pctMPB * traverser.fractionOfPotentialBiomass
                         this.liveBiomass_pctMPB = this.liveBiomass_pctMPB - biomassToRemove_pctMPB
                         this.deadBiomass_pctMPB = this.deadBiomass_pctMPB + biomassToRemove_pctMPB
-                    } catch (e) {
+                    } catch (e: any) {
                         messageForExceptionType(e, "PdMeristem.traverseActivity (removal)")
                     }
                     break
@@ -386,7 +386,7 @@ export class PdMeristem extends PdPlantPart {
                 default:
                     throw new Error("Problem: Unhandled mode in method PdMeristem.traverseActivity.")
             }
-        } catch (e) {
+        } catch (e: any) {
             messageForExceptionType(e, "PdMeristem.traverseActivity")
         }
     }
@@ -514,7 +514,7 @@ export class PdMeristem extends PdPlantPart {
             if (this.plant.pGeneral.isDicot) {
                 result.makeSecondSeedlingLeaf(this.optimalInitialPhytomerBiomass_pctMPB())
             }
-        } catch (e) {
+        } catch (e: any) {
             messageForExceptionType(e, "PdMeristem.createFirstPhytomer")
             throw new Error("Problem in PdMeristem.createFirstPhytomer")
         }
@@ -671,7 +671,7 @@ export class PdMeristem extends PdPlantPart {
                 tdo.zForSorting = minZ
             }
             turtle.ifExporting_endPlantPart()
-        } catch (e) {
+        } catch (e: any) {
             messageForExceptionType(e, "PdMeristem.draw")
         }
     }
@@ -773,7 +773,7 @@ export class PdMeristem extends PdPlantPart {
             } else {
                 result = false
             }
-        } catch (e) {
+        } catch (e: any) {
             result = false
             messageForExceptionType(e, "PdMeristem.willCreateInflorescence")
         }

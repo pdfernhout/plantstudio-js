@@ -1,7 +1,7 @@
 
 // Exported from: ../../plantstudio-js/converted_source/ubreedr.lfm
 
-import { m } from "mithril"
+import * as m from "mithril"
 import { caption } from "common"
 
 export function viewBreederForm() {

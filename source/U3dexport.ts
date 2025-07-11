@@ -132,31 +132,31 @@ export interface Triangle {
 // generic
 // record
 export class FileExport3DOptionsStructure {
-    exportType: short
-    layeringOption: short
-    stemCylinderFaces: short
-    translatePlantsToWindowPositions: boolean
-    lengthOfShortName: short
-    writePlantNumberInFrontOfName: boolean
-    writeColors: boolean
-    overallScalingFactor_pct: short
-    fileSize: float
-    xRotationBeforeDraw: short
-    pressPlants: boolean
-    directionToPressPlants: short
-    makeTrianglesDoubleSided: boolean
-    dxf_whereToGetColors: short
-    dxf_wholePlantColorIndex: short
+    exportType: short = 0
+    layeringOption: short = 0
+    stemCylinderFaces: short = 0
+    translatePlantsToWindowPositions: boolean = false
+    lengthOfShortName: short = 0
+    writePlantNumberInFrontOfName: boolean = false
+    writeColors: boolean = false
+    overallScalingFactor_pct: short = 0
+    fileSize: float = 0
+    xRotationBeforeDraw: short = 0
+    pressPlants: boolean = false
+    directionToPressPlants: short = 0
+    makeTrianglesDoubleSided: boolean = false
+    dxf_whereToGetColors: short = 0
+    dxf_wholePlantColorIndex: short = 0
     dxf_plantPartColorIndexes: short[] = Array(ExportPart.kExportPartLast + 1)
-    pov_minLineLengthToWrite: float
-    pov_minTdoScaleToWrite: float
-    pov_commentOutUnionAtEnd: boolean
-    nest_Inflorescence: boolean
-    nest_LeafAndPetiole: boolean
-    nest_CompoundLeaf: boolean
-    nest_PedicelAndFlowerFruit: boolean
-    nest_FloralLayers: boolean
-    vrml_version: short
+    pov_minLineLengthToWrite: float = 0
+    pov_minTdoScaleToWrite: float = 0
+    pov_commentOutUnionAtEnd: boolean = false
+    nest_Inflorescence: boolean = false
+    nest_LeafAndPetiole: boolean = false
+    nest_CompoundLeaf: boolean = false
+    nest_PedicelAndFlowerFruit: boolean = false
+    nest_FloralLayers: boolean = false
+    vrml_version: short = 0
 }
 
 // const
@@ -1523,7 +1523,7 @@ export class KfDrawingSurfaceForOBJ extends KfTextFileExportSurface {
 }
 
 export class KfBinaryFileExportSurface extends KfFileExportSurface {
-    stream: TFileStream
+    stream: TFileStream | null = null
     chunkStartStack: int[] = []
     
     startFile(): void {
@@ -1545,23 +1545,23 @@ export class KfBinaryFileExportSurface extends KfFileExportSurface {
             stringBuffer[i] = value[i].charCodeAt(0)
         }
         stringBuffer[value.length] = 0
-        this.stream.WriteBuffer(stringBuffer, value.length + 1)
+        this.stream!.WriteBuffer(stringBuffer, value.length + 1)
         // maybe should align on four byte boundaries for efficiency of seeks later?
     }
     
     writeByte(value: byte): void {
-        this.stream.WriteBuffer(value, 1)
+        this.stream!.WriteBuffer(value, 1)
     }
     
     writeWord(value: byte): void {
         let swappedBytes: byte[] = [0, 0]
         
         if (this.isLittleEndian()) {
-            this.stream.WriteBuffer(value, 2)
+            this.stream!.WriteBuffer(value, 2)
         } else {
             swappedBytes[1] = value && 255
             swappedBytes[0] = value >> 8
-            this.stream.WriteBuffer(swappedBytes, 2)
+            this.stream!.WriteBuffer(swappedBytes, 2)
         }
     }
     
@@ -1569,13 +1569,13 @@ export class KfBinaryFileExportSurface extends KfFileExportSurface {
         let swappedBytes: byte[] = [0, 0, 0, 0]
         
         if (this.isLittleEndian()) {
-            this.stream.WriteBuffer(value, 4)
+            this.stream!.WriteBuffer(value, 4)
         } else {
             swappedBytes[3] = value && 255
             swappedBytes[2] = (value >> 8) && 255
             swappedBytes[1] = (value >> 16) && 255
             swappedBytes[0] = (value >> 24) && 255
-            this.stream.WriteBuffer(swappedBytes, 4)
+            this.stream!.WriteBuffer(swappedBytes, 4)
         }
     }
     
@@ -1584,7 +1584,7 @@ export class KfBinaryFileExportSurface extends KfFileExportSurface {
         let swappedBytes: byte[] = [0, 0, 0, 0]
         
         if (this.isLittleEndian()) {
-            this.stream.WriteBuffer(value, 4)
+            this.stream!.WriteBuffer(value, 4)
         } else {
             /* TODO: PORT -- Implement writeFloat correctly for endianness
             convert.numeric = value
@@ -1695,12 +1695,12 @@ export class KfDrawingSurfaceFor3DS extends KfBinaryFileExportSurface {
     }
     
     pushChunkStart(): void {
-        const position: int = this.stream.Position
+        const position: int = this.stream!.Position
         this.chunkStartStack.push(position)
     }
     
     popChunkStartAndFixupChunkSize(): void {
-        const totalSize: int = this.stream.Size
+        const totalSize: int = this.stream!.Size
         const lastIndex: int = this.chunkStartStack.length - 1
         if (lastIndex < 0) {
             // should check if -1
@@ -1710,9 +1710,9 @@ export class KfDrawingSurfaceFor3DS extends KfBinaryFileExportSurface {
         this.chunkStartStack.length = lastIndex
         const chunkSize: int = totalSize - startSize
         // skip two to avoid overwriting chunk type
-        this.stream.Seek(startSize + 2, TFileStream.soFromBeginning)
+        this.stream!.Seek(startSize + 2, TFileStream.soFromBeginning)
         this.writeDword(chunkSize)
-        this.stream.Seek(0, TFileStream.soFromEnd)
+        this.stream!.Seek(0, TFileStream.soFromEnd)
     }
     
     startChunk(chunkID: int): void {
@@ -1933,12 +1933,12 @@ export class KfDrawingSurfaceForLWO extends KfBinaryFileExportSurface {
     }
     
     pushChunkStart(): void {
-        const position: int = this.stream.Position
+        const position: int = this.stream!.Position
         this.chunkStartStack.push(position)
     }
     
     popChunkStartAndFixupChunkSize(): void {
-        const totalSize: int = this.stream.Size
+        const totalSize: int = this.stream!.Size
         const lastIndex = this.chunkStartStack.length - 1
         if (lastIndex < 0) {
             // should check if -1
@@ -1948,10 +1948,10 @@ export class KfDrawingSurfaceForLWO extends KfBinaryFileExportSurface {
         this.chunkStartStack.length = lastIndex
         const chunkSize: int = totalSize - startSize
         // skip back four
-        this.stream.Seek(startSize - 4, TFileStream.soFromBeginning)
+        this.stream!.Seek(startSize - 4, TFileStream.soFromBeginning)
         // lwo chunk sizes do not include the header
         this.writeDword(chunkSize)
-        this.stream.Seek(0, TFileStream.soFromEnd)
+        this.stream!.Seek(0, TFileStream.soFromEnd)
     }
     
     startChunk(chunkName: string): void {

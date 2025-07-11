@@ -26,7 +26,7 @@ export class PdInflorescence extends PdPlantPart {
     daysSinceStartedMakingFlowers: short = 0
     isApical: boolean = false
     meristemThatCreatedMe: PdPlantPart | null = null
-    phytomerAttachedTo: PdInternode
+    phytomerAttachedTo: PdInternode | null = null
     fractionOfOptimalSizeWhenCreated: float = 0.0
     
     getName(): string {
@@ -78,7 +78,7 @@ export class PdInflorescence extends PdPlantPart {
                     this.daysBetweenFlowerAppearances = intround(safedivExcept(1.0 * daysToAllFlowers, 1.0 * this.numFlowers, 0))
                 }
             }
-        } catch (e) {
+        } catch (e: any) {
             messageForExceptionType(e, "PdInflorescence.InitializeGenderApicalOrAxillary")
         }
     }
@@ -131,7 +131,7 @@ export class PdInflorescence extends PdPlantPart {
                     }
                 }
             }
-        } catch (e) {
+        } catch (e: any) {
             messageForExceptionType(e, "PdInflorescence.nextDay")
         }
     }
@@ -174,7 +174,7 @@ export class PdInflorescence extends PdPlantPart {
                     try {
                         this.biomassDemand_pctMPB = linearGrowthResult(this.liveBiomass_pctMPB, this.plant.pInflor[this.gender].optimalBiomass_pctMPB, this.plant.pInflor[this.gender].minDaysToGrow)
                         traverser.total = traverser.total + this.biomassDemand_pctMPB
-                    } catch (e) {
+                    } catch (e: any) {
                         messageForExceptionType(e, "PdInflorescence.traverseActivity (reproductive demand)")
                     }
                     break
@@ -246,7 +246,7 @@ export class PdInflorescence extends PdPlantPart {
                 default:
                     throw new Error("Problem: Unhandled mode in method PdInflorescence.traverseActivity.")
             }
-        } catch (e) {
+        } catch (e: any) {
             messageForExceptionType(e, "PdInflorescence.traverseActivity")
         }
     }
@@ -374,7 +374,7 @@ export class PdInflorescence extends PdPlantPart {
             }
             turtle.ifExporting_endNestedGroupOfPlantParts(NestingType.kNestingTypeInflorescence)
             turtle.pop()
-        } catch (e) {
+        } catch (e: any) {
             messageForExceptionType(e, "PdInflorescence.draw")
         }
     }
@@ -561,7 +561,7 @@ export class PdInflorescence extends PdPlantPart {
             width = this.lengthOrWidthAtAgeForFraction(this.plant.pInflor[this.gender].internodeWidth_mm, propFullSize)
             //Use no angle here because phytomer makes the rotation before the inflorescence is drawn.
             this.drawStemSegment(length, width, zAngle, 0, this.plant.pInflor[this.gender].stalkColor, kDontTaper, ExportPart.kExportPartInflorescenceStalkFemale, kUseAmendment)
-        } catch (e) {
+        } catch (e: any) {
             messageForExceptionType(e, "PdInflorescence.drawPeduncle")
         }
     }
@@ -623,7 +623,7 @@ export class PdInflorescence extends PdPlantPart {
                 this.flowers[flowerIndex - 1].draw()
             }
             this.plant.turtle.ifExporting_endNestedGroupOfPlantParts(NestingType.kNestingTypePedicelAndFlowerFruit)
-        } catch (e) {
+        } catch (e: any) {
             messageForExceptionType(e, "PdInflorescence.drawFlower")
         }
     }
@@ -696,7 +696,7 @@ export class PdInflorescence extends PdPlantPart {
             zAngle = this.angleWithSway(this.plant.pInflor[this.gender].angleBetweenInternodes)
             yAngle = this.angleWithSway(0)
             this.drawStemSegment(length, width, zAngle, yAngle, this.plant.pInflor[this.gender].stalkColor, kDontTaper, ExportPart.kExportPartInflorescenceInternodeFemale, kDontUseAmendment)
-        } catch (e) {
+        } catch (e: any) {
             messageForExceptionType(e, "PdInflorescence.drawInternode")
         }
     }
@@ -713,7 +713,7 @@ export class PdInflorescence extends PdPlantPart {
             } else {
                 result = starting * ageBounded * fraction
             }
-        } catch (e) {
+        } catch (e: any) {
             messageForExceptionType(e, "PdInflorescence.lengthOrWidthAtAgeForFraction")
         }
         return result

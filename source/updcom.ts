@@ -55,7 +55,7 @@ const kChangeHeight = false
 
 
 // var
-let numPlantsCreatedThisSession: long
+let numPlantsCreatedThisSession: long = 0
 
 
 // ================ local functions
@@ -525,7 +525,7 @@ export class PdEditNoteCommand extends PdCommand {
 }
 
 export class PdNewCommand extends PdCommand {
-    newPlant: PdPlant
+    newPlant: PdPlant | null = null
     useWizardPlant: boolean = false
     wizardPlant: PdPlant
     oldSelectedList: PdPlant[] = []
@@ -597,7 +597,7 @@ export class PdNewCommand extends PdCommand {
     redoCommand(): void {
         super.doCommand()
         MainForm.deselectAllPlants()
-        domain.plantManager.plants.push(this.newPlant)
+        domain.plantManager.plants.push(this.newPlant!)
         MainForm.addSelectedPlant(this.newPlant, kAddAtEnd)
         MainForm.updateForChangeToPlantList()
     }
@@ -857,7 +857,7 @@ export class PdSelectPosingPartCommand extends PdCommand {
 export class PdCommandWithListOfPlants extends PdCommand {
     plantList: PdPlant[] = []
     values: any[] = []
-    plant: PdPlant
+    plant: PdPlant | null = null
     removesPlantAmendments: boolean = false
     listOfAmendmentLists: PdPlantDrawingAmendment[][] = []
     
@@ -3293,8 +3293,8 @@ export class PdBreedFromParentsCommand extends PdCommand {
     fractionOfMaxAge: float = 0.0
     row: short = 0
     oldGenerations: PdGeneration[] = []
-    newGeneration: PdGeneration
-    firstGeneration: PdGeneration
+    newGeneration: PdGeneration | null = null
+    firstGeneration: PdGeneration | null = null
     createFirstGeneration: boolean = false
     rowSelectedAtStart: short = 0
     
@@ -3446,8 +3446,8 @@ export class PdBreedFromParentsCommand extends PdCommand {
 }
 
 export class PdReplaceBreederPlant extends PdCommand {
-    originalPlant: PdPlant
-    newPlant: PdPlant
+    originalPlant: PdPlant | null = null
+    newPlant: PdPlant | null = null
     plantDraggedFrom: PdPlant
     row: short = 0
     column: short = 0

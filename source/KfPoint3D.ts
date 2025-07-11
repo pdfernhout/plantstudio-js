@@ -2,9 +2,9 @@ import { float, long, intround } from "./common"
 import { TRect } from "./TRect"
 
 export class KfPoint3D {
-    x: float
-    y: float
-    z: float
+    x: float = 0
+    y: float = 0
+    z: float = 0
 
     constructor(point?: KfPoint3D) {
         if (point) {

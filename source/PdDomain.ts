@@ -91,56 +91,56 @@ type TPixelFormat = number
 // v1.60
 // record
 export class BitmapOptionsStructure {
-    exportType: short
-    colorType: TPixelFormat
-    resolution_pixelsPerInch: short
-    width_pixels: short
-    height_pixels: short
-    width_in: float
-    height_in: float
-    preserveAspectRatio: boolean
-    jpegCompressionRatio: short
-    printPreserveAspectRatio: boolean
-    printBorderInner: boolean
-    printBorderOuter: boolean
-    printWidth_in: float
-    printHeight_in: float
-    printLeftMargin_in: float
-    printTopMargin_in: float
-    printRightMargin_in: float
-    printBottomMargin_in: float
-    printBorderWidthInner: short
-    printBorderWidthOuter: short
-    borderThickness: short
-    borderGap: short
-    printBorderColorInner: TColorRef
-    printBorderColorOuter: TColorRef
+    exportType: short = 0
+    colorType: TPixelFormat = 0
+    resolution_pixelsPerInch: short = 0
+    width_pixels: short = 0
+    height_pixels: short = 0
+    width_in: float = 0
+    height_in: float = 0
+    preserveAspectRatio: boolean = false
+    jpegCompressionRatio: short = 0
+    printPreserveAspectRatio: boolean = false
+    printBorderInner: boolean = false
+    printBorderOuter: boolean = false
+    printWidth_in: float = 0
+    printHeight_in: float = 0
+    printLeftMargin_in: float = 0
+    printTopMargin_in: float = 0
+    printRightMargin_in: float = 0
+    printBottomMargin_in: float = 0
+    printBorderWidthInner: short = 0
+    printBorderWidthOuter: short = 0
+    borderThickness: short = 0
+    borderGap: short = 0
+    printBorderColorInner: TColorRef = 0
+    printBorderColorOuter: TColorRef = 0
 }
 
 // 1 to 100
 // don't save these, they are for storing to use during printing only
 // record
 export class NozzleOptionsStructure {
-    exportType: short
-    resolution_pixelsPerInch: short
-    colorType: TPixelFormat
-    backgroundColor: TColorRef
-    cellSize: TPoint
-    cellCount: short
+    exportType: short = 0
+    resolution_pixelsPerInch: short = 0
+    colorType: TPixelFormat = 0
+    backgroundColor: TColorRef = 0
+    cellSize: TPoint = new TPoint()
+    cellCount: short = 0
 }
 
 // don't save in settings
 // don't save in settings
 // record
 export class NumberedAnimationOptionsStructure {
-    animateBy: short
-    xRotationIncrement: short
-    ageIncrement: short
-    resolution_pixelsPerInch: short
-    colorType: TPixelFormat
-    frameCount: short
-    scaledSize: TPoint
-    fileSize: long
+    animateBy: short = 0
+    xRotationIncrement: short = 0
+    ageIncrement: short = 0
+    resolution_pixelsPerInch: short = 0
+    colorType: TPixelFormat = 0
+    frameCount: short = 0
+    scaledSize: TPoint = new TPoint()
+    fileSize: long = 0
 }
 
 // don't save in settings
@@ -148,63 +148,63 @@ export class NumberedAnimationOptionsStructure {
 // don't save in settings
 // record
 export class DomainOptionsStructure {
-    hideWelcomeForm: boolean
-    openMostRecentFileAtStart: boolean
-    ignoreWindowSettingsInFile: boolean
-    cachePlantBitmaps: boolean
-    memoryLimitForPlantBitmaps_MB: short
-    maxPartsPerPlant_thousands: short
-    backgroundColor: TColorRef
-    transparentColor: TColorRef
-    showSelectionRectangle: boolean
-    showBoundsRectangle: boolean
-    resizeRectSize: short
-    pasteRectSize: short
-    firstSelectionRectangleColor: TColorRef
-    multiSelectionRectangleColor: TColorRef
-    draw3DObjects: boolean
-    drawStems: boolean
-    fillPolygons: boolean
-    drawSpeed: short
-    drawLinesBetweenPolygons: boolean
-    sortPolygons: boolean
-    draw3DObjectsAsBoundingRectsOnly: boolean
-    showPlantDrawingProgress: boolean
-    useMetricUnits: boolean
-    undoLimit: short
-    undoLimitOfPlants: short
-    rotationIncrement: short
-    showLongHintsForButtons: boolean
-    showHintsForParameters: boolean
-    pauseBeforeHint: short
-    pauseDuringHint: short
-    noteEditorWrapLines: boolean
-    updateTimeSeriesPlantsOnParameterChange: boolean
-    mainWindowViewMode: short
-    nudgeDistance: short
-    resizeKeyUpMultiplierPercent: short
-    parametersFontSize: short
-    mainWindowOrientation: short
-    lineContrastIndex: short
-    sortTdosAsOneItem: boolean
-    circlePointSizeInTdoEditor: short
-    partsInTdoEditor: short
-    fillTrianglesInTdoEditor: boolean
-    drawLinesInTdoEditor: boolean
-    showGhostingForHiddenParts: boolean
-    showHighlightingForNonHiddenPosedParts: boolean
-    showPosingAtAll: boolean
-    ghostingColor: TColorRef
-    nonHiddenPosedColor: TColorRef
-    selectedPosedColor: TColorRef
-    showWindowOnException: boolean
-    logToFileOnException: boolean
-    wizardChoices: string[] /* kMaxWizardQuestions + 1 */
-    wizardColors: TColorRef[] /* kMaxWizardColors + 1 */
-    wizardTdoNames: string[] /* kMaxWizardTdos + 1 */
-    wizardShowFruit: boolean
-    customColors: TColorRef[] /* kMaxCustomColors - 1 + 1 */
-    recentFiles: string[] /* kMaxRecentFiles - 1 + 1 */
+    hideWelcomeForm: boolean = false
+    openMostRecentFileAtStart: boolean = false
+    ignoreWindowSettingsInFile: boolean = false
+    cachePlantBitmaps: boolean = false
+    memoryLimitForPlantBitmaps_MB: short = 0
+    maxPartsPerPlant_thousands: short = 0
+    backgroundColor: TColorRef = 0
+    transparentColor: TColorRef = 0
+    showSelectionRectangle: boolean = false
+    showBoundsRectangle: boolean = false
+    resizeRectSize: short = 0
+    pasteRectSize: short = 0
+    firstSelectionRectangleColor: TColorRef = 0
+    multiSelectionRectangleColor: TColorRef = 0
+    draw3DObjects: boolean = false
+    drawStems: boolean = false
+    fillPolygons: boolean = false
+    drawSpeed: short = 0
+    drawLinesBetweenPolygons: boolean = false
+    sortPolygons: boolean = false
+    draw3DObjectsAsBoundingRectsOnly: boolean = false
+    showPlantDrawingProgress: boolean = false
+    useMetricUnits: boolean = false
+    undoLimit: short = 0
+    undoLimitOfPlants: short = 0
+    rotationIncrement: short = 0
+    showLongHintsForButtons: boolean = false
+    showHintsForParameters: boolean = false
+    pauseBeforeHint: short = 0
+    pauseDuringHint: short = 0
+    noteEditorWrapLines: boolean = false
+    updateTimeSeriesPlantsOnParameterChange: boolean = false
+    mainWindowViewMode: short = 0
+    nudgeDistance: short = 0
+    resizeKeyUpMultiplierPercent: short = 0
+    parametersFontSize: short = 0
+    mainWindowOrientation: short = 0
+    lineContrastIndex: short = 0
+    sortTdosAsOneItem: boolean = false
+    circlePointSizeInTdoEditor: short = 0
+    partsInTdoEditor: short = 0
+    fillTrianglesInTdoEditor: boolean = false
+    drawLinesInTdoEditor: boolean = false
+    showGhostingForHiddenParts: boolean = false
+    showHighlightingForNonHiddenPosedParts: boolean = false
+    showPosingAtAll: boolean = false
+    ghostingColor: TColorRef = 0
+    nonHiddenPosedColor: TColorRef = 0
+    selectedPosedColor: TColorRef = 0
+    showWindowOnException: boolean = false
+    logToFileOnException: boolean = false
+    wizardChoices: string[] = new Array(kMaxWizardQuestions + 1) /* kMaxWizardQuestions + 1 */
+    wizardColors: TColorRef[] = new Array(kMaxWizardColors + 1) /* kMaxWizardColors + 1 */
+    wizardTdoNames: string[] = new Array(kMaxWizardTdos + 1) /* kMaxWizardTdos + 1 */
+    wizardShowFruit: boolean = false
+    customColors: TColorRef[] = new Array(kMaxCustomColors) /* kMaxCustomColors - 1 + 1 */
+    recentFiles: string[] = new Array(kMaxRecentFiles)/* kMaxRecentFiles - 1 + 1 */
 }
 
 // var
@@ -1546,11 +1546,11 @@ export class PdDomain {
     */
     
     viewPlantsInMainWindowFreeFloating(): boolean {
-        return this.options.mainWindowViewMode === kViewPlantsInMainWindowFreeFloating
+        return this.options.mainWindowViewMode === ViewPlants.kViewPlantsInMainWindowFreeFloating
     }
     
     viewPlantsInMainWindowOnePlantAtATime(): boolean {
-        return this.options.mainWindowViewMode === kViewPlantsInMainWindowOneAtATime
+        return this.options.mainWindowViewMode === ViewPlants.kViewPlantsInMainWindowOneAtATime
     }
 }
 

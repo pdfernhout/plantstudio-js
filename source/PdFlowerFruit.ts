@@ -106,7 +106,7 @@ export class PdFlowerFruit extends PdPlantPart {
                     this.daysAccumulatingFruitBiomass += 1
                     break
             }
-        } catch (e) {
+        } catch (e: any) {
             messageForExceptionType(e, "PdFlowerFruit.nextDay")
         }
     }
@@ -304,7 +304,7 @@ export class PdFlowerFruit extends PdPlantPart {
                 default:
                     throw new Error("Problem: Unhandled mode for plant draw activity in method PdFlowerFruit.traverseActivity.")
             }
-        } catch (e) {
+        } catch (e: any) {
             messageForExceptionType(e, "PdFlowerFruit.traverseActivity")
         }
     }
@@ -418,7 +418,7 @@ export class PdFlowerFruit extends PdPlantPart {
             }
             this.hasBeenDrawn = true
             turtle.pop()
-        } catch (e) {
+        } catch (e: any) {
             messageForExceptionType(e, "PdFlowerFruit.draw")
         }
     }
@@ -754,7 +754,7 @@ export class PdFlowerFruit extends PdPlantPart {
                 turtle.pop()
             }
             turtle.pop()
-        } catch (e) {
+        } catch (e: any) {
             messageForExceptionType(e, "PdFlowerFruit.drawCircleOfTdos")
         }
     }

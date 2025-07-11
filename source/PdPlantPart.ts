@@ -208,7 +208,7 @@ export class PdPlantPart extends PdStreamableObject {
             } else {
                 result = 0.0
             }
-        } catch (e) {
+        } catch (e: any) {
             messageForExceptionType(e, "PdPlantPart.fractionLive")
         }
         return result

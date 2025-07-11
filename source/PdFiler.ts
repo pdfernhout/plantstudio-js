@@ -16,9 +16,9 @@ import { PdStreamableObject } from "./PdStreamableObject";
 
 // record
 export class PdClassAndVersionInformationRecord {
-    classNumber: short
-    versionNumber: short
-    additionNumber: short
+    classNumber: short = 0
+    versionNumber: short = 0
+    additionNumber: short = 0
 }
 
 export enum PdFilerMode { filerModeReading, filerModeWriting, filerModeCounting }
@@ -34,7 +34,7 @@ const littleEndian = true
 // TODO: EFFICIENCY: This is terribly ineffienct with so much buffer allocation
 export class PdFiler {
     stream: TFileStream
-    mode: PdFilerMode
+    mode: PdFilerMode = 0
     bytesStreamed: long = 0
 
     // TODO: Maybe fixup TFileStream so has TStream superclass and is defined that way here?

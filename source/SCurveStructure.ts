@@ -14,12 +14,12 @@ const kSetField = 1
 
 // record
 export class SCurveStructure {
-    x1: float
-    y1: float
-    x2: float
-    y2: float
-    c1: float
-    c2: float
+    x1: float = 0
+    y1: float = 0
+    x2: float = 0
+    y2: float = 0
+    c1: float = 0
+    c2: float = 0
 
     streamUsingFiler(filer: PdFiler) {
         this.x1 = filer.streamSingle(this.x1)

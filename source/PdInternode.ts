@@ -126,13 +126,13 @@ export class PdInternode extends PdPlantPart {
                     // must bound these because some accounting error is causing problems that should be fixed later 
                     tryExpansion = max(0.0, min(500.0, safedivExcept(this.liveBiomass_pctMPB - this.newBiomassForDay_pctMPB, this.liveBiomass_pctMPB, 0) * this.lengthExpansion + safedivExcept(this.newBiomassForDay_pctMPB, this.liveBiomass_pctMPB, 0) * 1.0))
                     this.lengthExpansion = tryExpansion
-                } catch (e) {
+                } catch (e: any) {
                     // pass
                 }
                 try {
                     tryExpansion = max(0.0, min(50.0, safedivExcept(this.liveBiomass_pctMPB - this.newBiomassForDay_pctMPB, this.liveBiomass_pctMPB, 0) * this.widthExpansion + safedivExcept(this.newBiomassForDay_pctMPB, this.liveBiomass_pctMPB, 0) * 1.0))
                     this.widthExpansion = tryExpansion
-                } catch (e) {
+                } catch (e: any) {
                     // pass
                 }
                 if (this.plant.floweringHasStarted) {
@@ -154,7 +154,7 @@ export class PdInternode extends PdPlantPart {
             }
             this.checkIfSeedlingLeavesHaveAbscissed()
             this.calculateDistanceFromFirstPhytomer()
-        } catch (e) {
+        } catch (e: any) {
             messageForExceptionType(e, "PdInternode.nextDay")
         }
     }
@@ -213,7 +213,7 @@ export class PdInternode extends PdPlantPart {
                         }
                         this.biomassDemand_pctMPB = linearGrowthResult(this.liveBiomass_pctMPB, targetBiomass_pctMPB, this.plant.pInternode.minDaysToAccumulateBiomass)
                         traverser.total = traverser.total + this.biomassDemand_pctMPB
-                    } catch (e) {
+                    } catch (e: any) {
                         messageForExceptionType(e, "PdInternode.traverseActivity (vegetative demand)")
                     }
                     break
@@ -228,7 +228,7 @@ export class PdInternode extends PdPlantPart {
                     try {
                         this.newBiomassForDay_pctMPB = max(0.0, this.biomassDemand_pctMPB * traverser.fractionOfPotentialBiomass)
                         this.liveBiomass_pctMPB = this.liveBiomass_pctMPB + this.newBiomassForDay_pctMPB
-                    } catch (e) {
+                    } catch (e: any) {
                         messageForExceptionType(e, "PdInternode.traverseActivity (vegetative growth)")
                     }
                     break
@@ -251,6 +251,7 @@ export class PdInternode extends PdPlantPart {
                 case Activity.kActivityReport:
                     break
                 case Activity.kActivityStream:
+                    if (traverser.filer === null) throw new Error("Unexpected null traverser.filer")
                     this.streamUsingFiler(traverser.filer)
                     break
                 case Activity.kActivityFree:
@@ -293,7 +294,7 @@ export class PdInternode extends PdPlantPart {
                 default:
                     throw new Error("Problem: Unhandled mode in method PdInternode.traverseActivity.")
             }
-        } catch (e) {
+        } catch (e: any) {
             messageForExceptionType(e, "PdInternode.traverseActivity")
         }
     }
@@ -454,7 +455,7 @@ export class PdInternode extends PdPlantPart {
             if (this.rightLeaf !== null) {
                 this.rightLeaf.drawWithDirection(Direction.kDirectionRight)
             }
-        } catch (e) {
+        } catch (e: any) {
             messageForExceptionType(e, "PdInternode.draw")
         }
     }

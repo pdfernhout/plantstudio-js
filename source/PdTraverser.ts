@@ -86,7 +86,7 @@ function linearGrowthWithFactorResult(current: float, optimal: float, minDays: i
         const maxPossible = safedivExcept(optimal, minDays, optimal)
         amountNeeded = max(0.0, min(amountNeeded, maxPossible))
         result = amountNeeded * growthFactor
-    } catch (e) {
+    } catch (e: any) {
         messageForExceptionType(e, "linearGrowthWithFactorResult")
     }
     return result
@@ -98,7 +98,7 @@ export function linearGrowthWithFactor(current: float, optimal: float, minDays: 
         const maxPossible = safedivExcept(optimal, minDays, optimal)
         amountNeeded = max(0.0, min(amountNeeded, maxPossible))
         current = current + amountNeeded * growthFactor
-    } catch (e) {
+    } catch (e: any) {
         messageForExceptionType(e, "linearGrowthWithFactor")
     }
     return current
@@ -111,7 +111,7 @@ export function linearGrowthResult(current: float, optimal: float, minDays: int)
         const maxPossible = safedivExcept(optimal, minDays, optimal)
         amountNeeded = max(0.0, min(amountNeeded, maxPossible))
         result = amountNeeded
-    } catch (e) {
+    } catch (e: any) {
         messageForExceptionType(e, "linearGrowthResult")
     }
     return result
@@ -123,7 +123,7 @@ function linearGrowth(current: float, optimal: float, minDays: int): float {
         const maxPossible = safedivExcept(optimal, minDays, optimal)
         amountNeeded = max(0.0, min(amountNeeded, maxPossible))
         current = current + amountNeeded
-    } catch (e) {
+    } catch (e: any) {
         messageForExceptionType(e, "linearGrowth")
     }
     return current
@@ -158,8 +158,8 @@ export class PdPlantStatistics {
 
 export class PdTraverser {
     plant: PdPlant
-    filer: PdFiler
-    currentPhytomer: PdInternode
+    filer: PdFiler | null = null
+    currentPhytomer: PdInternode | null = null
     point: TPoint = new TPoint()
     total: float = 0.0
     fractionOfPotentialBiomass: float = 0.0

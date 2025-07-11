@@ -43,7 +43,7 @@ export class PdLeaf extends PdPlantPart {
                     this.compoundLeafRandomSwayIndexes[i] = this.plant.randomNumberGenerator.zeroToOne()
                 }
             }
-        } catch (e) {
+        } catch (e: any) {
             messageForExceptionType(e, "PdLeaf.initializeFractionOfOptimalSize")
         }
     }
@@ -62,7 +62,7 @@ export class PdLeaf extends PdPlantPart {
         try {
             super.nextDay()
             this.checkIfHasAbscissed()
-        } catch (e) {
+        } catch (e: any) {
             messageForExceptionType(e, "PdLeaf.nextDay")
         }
     }
@@ -169,7 +169,7 @@ export class PdLeaf extends PdPlantPart {
                 default:
                     throw new Error("Problem: Unhandled mode in method PdLeaf.traverseActivity.")
             }
-        } catch (e) {
+        } catch (e: any) {
             messageForExceptionType(e, "PdLeaf.traverseActivity")
         }
     }
@@ -302,7 +302,7 @@ export class PdLeaf extends PdPlantPart {
             turtle.pop()
             turtle.ifExporting_endNestedGroupOfPlantParts(NestingType.kNestingTypeLeafAndPetiole)
             turtle.pop()
-        } catch (e) {
+        } catch (e: any) {
             messageForExceptionType(e, "PdLeaf.drawWithDirection")
         }
     }

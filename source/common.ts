@@ -216,3 +216,8 @@ export class TMemoryStream extends TFileStream {
         super("", 0)
     }
 }
+
+export function caption(text: string) {
+    // TODO: What should this do?
+    return text
+}
