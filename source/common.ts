@@ -129,6 +129,23 @@ export function readln(file: TextFile) {
     return result
 }
 
+export function AssignFile(file: TextFile, fileName: string) {
+    file.fileName = fileName
+}
+
+export function Rewrite(file: TextFile) {
+    file.contents = ""
+    file.position = 0
+}
+
+export function Reset(file: TextFile) {
+    file.position = 0
+}
+
+export function CloseFile(file: TextFile) {
+    // No Op
+}
+
 export function ExtractFileName(fileName: string) {
     const lastSlash = fileName.lastIndexOf("/")
     if (lastSlash !== -1) fileName = fileName.substring(lastSlash + 1)

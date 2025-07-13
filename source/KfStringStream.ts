@@ -16,7 +16,7 @@ function skipToProfileSection(fileStream: TextFile, section: string): boolean {
     //set separator to ']' so can read sections
     stream.separator = "]"
     result = false
-    while (!UNRESOLVED.eof(fileStream)) {
+    while (!eof(fileStream)) {
         UNRESOLVED.readln(fileStream, inputLine)
         stream.onString(inputLine)
         stream.skipSpaces()

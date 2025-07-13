@@ -390,12 +390,12 @@ export function readUntilTab(theFile: textFile): string {
     
     aChar = chr(0)
     result = ""
-    while (!UNRESOLVED.eof(theFile)) {
+    while (!eof(theFile)) {
         UNRESOLVED.read(theFile, aChar)
         if ((aChar !== chr(9)) && (aChar !== chr(10)) && (aChar !== chr(13))) {
             result = result + aChar
         } else {
-            if ((aChar === chr(13)) && !UNRESOLVED.eof(theFile)) {
+            if ((aChar === chr(13)) && !eof(theFile)) {
                 UNRESOLVED.read(theFile, aChar)
                 if (aChar !== chr(10)) {
                     throw new GeneralException.create("Problem: Something unexpected in file input.")
