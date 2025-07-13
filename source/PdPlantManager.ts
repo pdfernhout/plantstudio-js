@@ -386,7 +386,7 @@ export class PdPlantManager {
     // }
     
     // --------------------------------------------------------------------------------------- drawing 
-    drawOnInvalidRect(destCanvas: TCanvas, selectedPlants: PdPlant[], invalidRect: TRect, excludeInvisiblePlants: boolean, excludeNonSelectedPlants: boolean): void {
+    drawOnInvalidRect(destCanvas: CanvasRenderingContext2D, selectedPlants: PdPlant[], invalidRect: TRect, excludeInvisiblePlants: boolean, excludeNonSelectedPlants: boolean): void {
         let partsDrawn: long
         
         partsDrawn = 0
@@ -413,7 +413,12 @@ export class PdPlantManager {
                     try {
                         plant.computeBounds = true
                         if ((domain.options.cachePlantBitmaps) && (!domain.drawingToMakeCopyBitmap)) {
-                            destCanvas.Draw(plantRect.Left, plantRect.Top, plant.previewCache)
+                            // TODO -- FIX ME
+                            // destCanvas.Draw(plantRect.Left, plantRect.Top, plant.previewCache)
+                            // const context = plant.previewCache.Context
+                            // if (context) {
+                            //     destCanvas.drawImage(context.createImageData, plantRect.Left, plantRect.Top)
+                            // }
                         } else {
                             plant.drawOn(destCanvas)
                         }
