@@ -1,14 +1,15 @@
 // unit Uplantmn
 
 import { float, int, intround, IntToStr, long, short, ShowMessage, StrToFloat, StrToInt, StrToIntDef, TextFile, writeln } from "./common"
+import { KfObject3D, kInTdoLibrary, kStartTdoString } from "./KfObject3D"
 import { KfTurtle } from "./KfTurtle"
-import { domain } from "./PdDomain"
-import { PdPlant } from "./PdPlant"
+import { domain, ViewPlants } from "./PdDomain"
+import { kCheckForUnreadParams, kPlantAsTextEndString, PdPlant } from "./PdPlant"
 import { ucursor } from "./temporary"
 import { TPoint } from "./TPoint"
 import { TRect } from "./TRect"
 import { kPasteMoveDistance } from "./updcom"
-import { SinglePoint, SaveFileNamesStructure, rWidth, rHeight, stringBetween } from "./usupport"
+import { SinglePoint, SaveFileNamesStructure, rWidth, rHeight, stringBetween, setDecimalSeparator, strToBool, stringBeyond, stringUpTo, singlePointToString, digitValueString, boolToStr, FileType, setSinglePoint, pos, stringToSinglePoint, kDontAskForFileName } from "./usupport"
 
 function checkVersionNumberInPlantNameLine(aLine: string): void {
     let versionNumberString: string
@@ -116,63 +117,59 @@ export class PdPlantManager {
     loadPlantsFromFile(fileName: string, inPlantMover: boolean): void {
         let inputFile: TextFile
         let aLine: string
-        let plantName: string
-        let concentratedInFile: boolean
-        let concentratedLastTimeSaved: boolean
-        let lineCount: int
         
         AssignFile(inputFile, fileName)
         try {
             // v1.5
-            usupport.setDecimalSeparator()
+            setDecimalSeparator()
             Reset(inputFile)
-            this.plants.clear()
+            this.plants = []
             // defaults in case things are missing from file
-            this.plantDrawOffset_mm = usupport.setSinglePoint(0, 0)
+            this.plantDrawOffset_mm = setSinglePoint(0, 0)
             this.plantDrawScale_PixelsPerMm = 1.0
             this.mainWindowViewMode = domain.options.mainWindowViewMode
             this.mainWindowOrientation = domain.options.mainWindowOrientation
             this.showBoundsRectangle = domain.options.showBoundsRectangle
-            concentratedLastTimeSaved = false
             this.fitInVisibleAreaForConcentrationChange = false
             while (!UNRESOLVED.eof(inputFile)) {
                 // cfk testing
                 aLine = usupport.tolerantReadln(inputFile, aLine)
-                if ((aLine === "") || (UNRESOLVED.pos(";", aLine) === 1)) {
+                if ((aLine === "") || (pos(";", aLine) === 1)) {
                     continue
                 }
-                if (UNRESOLVED.pos("offset=", aLine) === 1) {
-                    this.plantDrawOffset_mm = usupport.stringToSinglePoint(usupport.stringBeyond(aLine, "="))
-                } else if (UNRESOLVED.pos("scale=", aLine) === 1) {
+                if (pos("offset=", aLine) === 1) {
+                    this.plantDrawOffset_mm = stringToSinglePoint(stringBeyond(aLine, "="))
+                } else if (pos("scale=", aLine) === 1) {
                     try {
-                        this.plantDrawScale_PixelsPerMm = intround(StrToFloat(usupport.stringBeyond(aLine, "=")) * 100.0) / 100.0
+                        this.plantDrawScale_PixelsPerMm = intround(StrToFloat(stringBeyond(aLine, "=")) * 100.0) / 100.0
                     } catch (e) {
                         this.plantDrawScale_PixelsPerMm = 1.0
                     }
-                } else if (UNRESOLVED.pos("concentrated=", aLine) === 1) {
-                    concentratedLastTimeSaved = domain.viewPlantsInMainWindowOnePlantAtATime()
+                } else if (pos("concentrated=", aLine) === 1) {
+                    let concentratedLastTimeSaved = domain.viewPlantsInMainWindowOnePlantAtATime()
+                    let concentratedInFile: boolean
                     if (domain.options.ignoreWindowSettingsInFile) {
                         // v2.1 if ignoring settings in file, use current settings, otherwise use what is in file
-                        concentratedInFile = (this.mainWindowViewMode === udomain.kViewPlantsInMainWindowOneAtATime)
+                        concentratedInFile = (this.mainWindowViewMode === ViewPlants.kViewPlantsInMainWindowOneAtATime)
                     } else {
-                        concentratedInFile = usupport.strToBool(usupport.stringBeyond(aLine, "="))
+                        concentratedInFile = strToBool(stringBeyond(aLine, "="))
                     }
                     if (concentratedInFile) {
-                        this.mainWindowViewMode = udomain.kViewPlantsInMainWindowOneAtATime
+                        this.mainWindowViewMode = ViewPlants.kViewPlantsInMainWindowOneAtATime
                     } else {
-                        this.mainWindowViewMode = udomain.kViewPlantsInMainWindowFreeFloating
+                        this.mainWindowViewMode = ViewPlants.kViewPlantsInMainWindowFreeFloating
                     }
                     if (!inPlantMover) {
                         domain.options.mainWindowViewMode = this.mainWindowViewMode
                     }
                     this.fitInVisibleAreaForConcentrationChange = concentratedInFile && !concentratedLastTimeSaved
-                } else if (UNRESOLVED.pos("orientation (top/side)=", aLine) === 1) {
+                } else if (pos("orientation (top/side)=", aLine) === 1) {
                     if (!domain.options.ignoreWindowSettingsInFile) {
                         // v2.1 only read if not ignoring settings in file
-                        this.mainWindowOrientation = StrToInt(usupport.stringBeyond(aLine, "="))
+                        this.mainWindowOrientation = StrToInt(stringBeyond(aLine, "="))
                     }
-                } else if (UNRESOLVED.pos("boxes=", aLine) === 1) {
-                    this.showBoundsRectangle = usupport.strToBool(usupport.stringBeyond(aLine, "="))
+                } else if (pos("boxes=", aLine) === 1) {
+                    this.showBoundsRectangle = strToBool(stringBeyond(aLine, "="))
                     if (!inPlantMover) {
                         domain.options.showBoundsRectangle = this.showBoundsRectangle
                     }
@@ -180,12 +177,12 @@ export class PdPlantManager {
                         umain.MainForm.updateForChangeToDomainOptions()
                         umain.MainForm.copyDrawingBitmapToPaintBox()
                     }
-                } else if (UNRESOLVED.pos("[", aLine) === 1) {
+                } else if (pos("[", aLine) === 1) {
                     // plant start line
                     checkVersionNumberInPlantNameLine(aLine)
                     const plant = new PdPlant()
-                    plantName = usupport.stringBeyond(aLine, "[")
-                    plantName = usupport.stringUpTo(plantName, "]")
+                    let plantName = stringBeyond(aLine, "[")
+                    plantName = stringUpTo(plantName, "]")
                     plant.setName(plantName)
                     domain.parameterManager.setAllReadFlagsToFalse()
                     // cfk change v1.3
@@ -195,23 +192,23 @@ export class PdPlantManager {
                     // of plant, so stop at absolute cutoff of 300 non-empty, non-comment lines (there are now 215 parameters).
                     // also stop reading if reach next plant square bracket or end of file.
                     // v2.0 increased number of params to 350 so 300 is problem, changed to 3000 to avoid this in future, oops
-                    lineCount = 0
-                    while ((UNRESOLVED.pos(uplant.kPlantAsTextEndString, aLine) <= 0) && (lineCount <= 3000)) {
+                    let lineCount = 0
+                    while ((pos(kPlantAsTextEndString, aLine) <= 0) && (lineCount <= 3000)) {
                         // aLine <> '' do
                         aLine = usupport.tolerantReadln(inputFile, aLine)
-                        if ((UNRESOLVED.pos("[", aLine) === 1) || (UNRESOLVED.eof(inputFile))) {
+                        if ((pos("[", aLine) === 1) || (UNRESOLVED.eof(inputFile))) {
                             // v1.60 reversed order of the next two lines -- fixes infinite loop when no end of plant
                             // v1.3 added check for next plant or eof
                             break
                         }
-                        if ((trim(aLine) === "") || (UNRESOLVED.pos(";", aLine) === 1)) {
+                        if ((trim(aLine) === "") || (pos(";", aLine) === 1)) {
                             // v1.3 added skip empty lines
                             continue
                         }
                         plant.readLineAndTdoFromPlantFile(aLine, inputFile)
                         lineCount = lineCount + 1
                     }
-                    plant.finishLoadingOrDefaulting(uplant.kCheckForUnreadParams)
+                    plant.finishLoadingOrDefaulting(kCheckForUnreadParams)
                     this.plants.push(plant)
                 }
             }
@@ -229,7 +226,7 @@ export class PdPlantManager {
         AssignFile(outputFile, fileName)
         try {
             // v1.5
-            usupport.setDecimalSeparator()
+            setDecimalSeparator()
             if (!inPlantMover) {
                 // update before writing out (keep as read in if in mover)
                 // plantDrawOffset_mm is used from here
@@ -241,9 +238,9 @@ export class PdPlantManager {
             Rewrite(outputFile)
             // v2.0
             writeln(outputFile, "; PlantStudio version 2.0 plant file")
-            writeln(outputFile, "offset=" + usupport.singlePointToString(this.plantDrawOffset_mm))
-            writeln(outputFile, "scale=" + usupport.digitValueString(this.plantDrawScale_PixelsPerMm))
-            if (this.mainWindowViewMode === udomain.kViewPlantsInMainWindowOneAtATime) {
+            writeln(outputFile, "offset=" + singlePointToString(this.plantDrawOffset_mm))
+            writeln(outputFile, "scale=" + digitValueString(this.plantDrawScale_PixelsPerMm))
+            if (this.mainWindowViewMode === ViewPlants.kViewPlantsInMainWindowOneAtATime) {
                 writeln(outputFile, "concentrated=true")
             } else {
                 writeln(outputFile, "concentrated=false")
@@ -251,7 +248,7 @@ export class PdPlantManager {
             // v2.0
             writeln(outputFile, "orientation (top/side)=" + IntToStr(this.mainWindowOrientation))
             // v2.0
-            writeln(outputFile, "boxes=" + usupport.boolToStr(this.showBoundsRectangle))
+            writeln(outputFile, "boxes=" + boolToStr(this.showBoundsRectangle))
             writeln(outputFile)
             for (let i = 0; i <= this.plants.length - 1; i++) {
                 const plant = this.plants[i]
@@ -267,50 +264,41 @@ export class PdPlantManager {
     
     // v1.11
     reconcileFileWithTdoLibrary(plantFileName: string, tdoLibrary: string): int {
-        let result = 0
-        let plantFileTdos: TListCollection
-        let libraryFileTdos: TListCollection
+        let plantFileTdos: KfObject3D[] = []
+        let libraryFileTdos: KfObject3D[] = []
         let plantFile: TextFile
         let tdoFile: TextFile
         let outputTdoFile: TextFile
-        let i: short
-        let j: short
-        let tdo: KfObject3d
-        let plantFileTdo: KfObject3d
-        let libraryTdo: KfObject3d
-        let matchInLibrary: boolean
         let aLine: string
         let fileInfo: SaveFileNamesStructure
         
-        result = 0
+        let result = 0
         if (!FileExists(plantFileName)) {
             // check that files exist
-            plantFileName = usupport.getFileOpenInfo(usupport.kFileTypePlant, plantFileName, "Choose a plant file")
+            plantFileName = usupport.getFileOpenInfo(FileType.kFileTypePlant, plantFileName, "Choose a plant file")
             if (plantFileName === "") {
                 return result
             }
         }
         if (!FileExists(tdoLibrary)) {
-            tdoLibrary = usupport.getFileOpenInfo(usupport.kFileTypeTdo, tdoLibrary, "Choose a 3D object library (tdo) file")
+            tdoLibrary = usupport.getFileOpenInfo(FileType.kFileTypeTdo, tdoLibrary, "Choose a 3D object library (tdo) file")
             if (tdoLibrary === "") {
                 return result
             }
         }
-        plantFileTdos = ucollect.TListCollection().Create()
-        libraryFileTdos = ucollect.TListCollection().Create()
         try {
             ucursor.cursor_startWait()
             // read tdos from plants
             AssignFile(plantFile, plantFileName)
             try {
                 // v1.5
-                usupport.setDecimalSeparator()
+                setDecimalSeparator()
                 Reset(plantFile)
                 while (!UNRESOLVED.eof(plantFile)) {
                     UNRESOLVED.readln(plantFile, aLine)
-                    if (UNRESOLVED.pos(utdo.kStartTdoString, aLine) > 0) {
-                        tdo = utdo.KfObject3D().create()
-                        tdo.readFromFileStream(plantFile, utdo.kInTdoLibrary)
+                    if (pos(kStartTdoString, aLine) > 0) {
+                        const tdo = new KfObject3D()
+                        tdo.readFromFileStream(plantFile, kInTdoLibrary)
                         plantFileTdos.push(tdo)
                     }
                 }
@@ -321,24 +309,24 @@ export class PdPlantManager {
             AssignFile(tdoFile, tdoLibrary)
             try {
                 // v1.5
-                usupport.setDecimalSeparator()
+                setDecimalSeparator()
                 Reset(tdoFile)
                 while (!UNRESOLVED.eof(tdoFile)) {
-                    tdo = utdo.KfObject3D().create()
-                    tdo.readFromFileStream(tdoFile, utdo.kInTdoLibrary)
+                    const tdo = new KfObject3D()
+                    tdo.readFromFileStream(tdoFile, kInTdoLibrary)
                     libraryFileTdos.push(tdo)
                 }
             } finally {
                 CloseFile(tdoFile)
             }
             if (plantFileTdos.length > 0) {
-                for (i = 0; i <= plantFileTdos.length - 1; i++) {
+                for (let i = 0; i <= plantFileTdos.length - 1; i++) {
                     // add plant tdos not in library list to library list
-                    plantFileTdo = utdo.KfObject3D(plantFileTdos[i])
-                    matchInLibrary = false
+                    const plantFileTdo = plantFileTdos[i]
+                    let matchInLibrary = false
                     if (libraryFileTdos.length > 0) {
-                        for (j = 0; j <= libraryFileTdos.length - 1; j++) {
-                            libraryTdo = utdo.KfObject3D(libraryFileTdos[j])
+                        for (let j = 0; j <= libraryFileTdos.length - 1; j++) {
+                            const libraryTdo = libraryFileTdos[j]
                             if (plantFileTdo.isSameAs(libraryTdo)) {
                                 matchInLibrary = true
                                 break
@@ -346,7 +334,7 @@ export class PdPlantManager {
                         }
                     }
                     if (!matchInLibrary) {
-                        tdo = utdo.KfObject3D().create()
+                        const tdo = new KfObject3D()
                         tdo.copyFrom(plantFileTdo)
                         libraryFileTdos.push(tdo)
                         result += 1
@@ -354,21 +342,21 @@ export class PdPlantManager {
                 }
             }
             if (result > 0) {
-                if (usupport.getFileSaveInfo(usupport.kFileTypeTdo, usupport.kDontAskForFileName, tdoLibrary, fileInfo)) {
+                if (usupport.getFileSaveInfo(FileType.kFileTypeTdo, kDontAskForFileName, tdoLibrary, fileInfo)) {
                     // if any tdos in plant file but not in library, rewrite library
                     AssignFile(outputTdoFile, fileInfo.tempFile)
                     try {
                         // v1.5
-                        usupport.setDecimalSeparator()
+                        setDecimalSeparator()
                         Rewrite(outputTdoFile)
                         usupport.startFileSave(fileInfo)
                         if (libraryFileTdos.length > 0) {
-                            for (i = 0; i <= libraryFileTdos.length - 1; i++) {
-                                tdo = UNRESOLVED.TObject(libraryFileTdos[i])
+                            for (let i = 0; i <= libraryFileTdos.length - 1; i++) {
+                                const tdo = libraryFileTdos[i]
                                 if (tdo === null) {
                                     continue
                                 }
-                                tdo.writeToFileStream(outputTdoFile, utdo.kInTdoLibrary)
+                                tdo.writeToFileStream(outputTdoFile, kInTdoLibrary)
                             }
                         }
                         fileInfo.writingWasSuccessful = true
@@ -379,8 +367,6 @@ export class PdPlantManager {
                 }
             }
         } finally {
-            plantFileTdos.free
-            libraryFileTdos.free
             ucursor.cursor_stopWait()
         }
         return result
@@ -400,10 +386,6 @@ export class PdPlantManager {
     
     // --------------------------------------------------------------------------------------- drawing 
     drawOnInvalidRect(destCanvas: TCanvas, selectedPlants: PdPlant[], invalidRect: TRect, excludeInvisiblePlants: boolean, excludeNonSelectedPlants: boolean): void {
-        let intersection: TRect
-        let plantRect: TRect
-        let intersectResult: boolean
-        let includePlant: boolean
         let partsDrawn: long
         
         partsDrawn = 0
@@ -411,13 +393,13 @@ export class PdPlantManager {
             for (let plantIndex = this.plants.length - 1; plantIndex >= 0; plantIndex--) {
                 // go through list backwards because list order is drawing order is from front to back
                 const plant = this.plants[plantIndex]
-                includePlant = false
-                plantRect = plant.boundsRect_pixels()
+                let includePlant = false
+                const plantRect = plant.boundsRect_pixels()
                 if ((plantRect.Left === 0) && (plantRect.Right === 0) && (plantRect.Top === 0) && (plantRect.Bottom === 0)) {
                     // if plant has just been read in, recalculate bounds rect by drawing it 
                     includePlant = true
                 }
-                intersectResult = delphi_compatability.IntersectRect(intersection, plantRect, invalidRect)
+                const intersectResult = plantRect.intersects(invalidRect)
                 includePlant = includePlant || intersectResult
                 if (excludeInvisiblePlants) {
                     includePlant = includePlant && !plant.hidden
@@ -505,14 +487,14 @@ export class PdPlantManager {
         let includeRect: TRect
         let includedPlants: PdPlant[] = []
         let translatePlants: boolean
-        let turtle: KfTurtle
         
-        usupport.setDecimalSeparator()
+        setDecimalSeparator()
         includeRect = this.combinedPlantBoundsRects(selectedPlants, excludeInvisiblePlants, excludeNonSelectedPlants)
         if ((rWidth(includeRect) <= 0) || (rHeight(includeRect) <= 0)) {
             return
         }
-        turtle = uturtle.KfTurtle().createFor3DOutput(outputType, fileName)
+        const turtle = new KfTurtle()
+        turtle.createFor3DOutput(outputType, fileName)
         try {
             turtle.start3DExportFile()
             if (this.plants.length > 0) {

@@ -373,11 +373,11 @@ export class PdDomain {
                     this.useIniFile = false
                 } else if (uppercase(UNRESOLVED.ParamStr(i)) === "/I") {
                     this.useIniFile = false
-                } else if (UNRESOLVED.pos("/I=", uppercase(UNRESOLVED.ParamStr(i))) === 1) {
+                } else if (pos("/I=", uppercase(UNRESOLVED.ParamStr(i))) === 1) {
                     this.iniFileName = UNRESOLVED.copy(UNRESOLVED.ParamStr(i), 4, len(UNRESOLVED.ParamStr(i)))
-                } else if (UNRESOLVED.pos("/I", uppercase(UNRESOLVED.ParamStr(i))) === 1) {
+                } else if (pos("/I", uppercase(UNRESOLVED.ParamStr(i))) === 1) {
                     this.iniFileName = UNRESOLVED.copy(UNRESOLVED.ParamStr(i), 3, len(UNRESOLVED.ParamStr(i)))
-                } else if ((this.plantFileName === "") && (UNRESOLVED.pos("/", uppercase(UNRESOLVED.ParamStr(i))) !== 1)) {
+                } else if ((this.plantFileName === "") && (pos("/", uppercase(UNRESOLVED.ParamStr(i))) !== 1)) {
                     this.plantFileName = UNRESOLVED.ParamStr(i)
                 } else {
                     ShowMessage("Improper parameter string " + UNRESOLVED.ParamStr(i))
@@ -965,7 +965,7 @@ export class PdDomain {
             }
             // files 
             section = iniSections[kSectionFiles]
-            if (UNRESOLVED.pos(uppercase(kUnsavedFileName), uppercase(this.lastOpenedPlantFileName)) === 0) {
+            if (pos(uppercase(kUnsavedFileName), uppercase(this.lastOpenedPlantFileName)) === 0) {
                 this.setStringForSectionAndKey(section, "Recent", this.lastOpenedPlantFileName)
             } else {
                 this.setStringForSectionAndKey(section, "Recent", "")
@@ -1378,7 +1378,7 @@ export class PdDomain {
     // ------------------------------------------------------------------- file/directory utilities 
     nameIsAbsolute(fileName: string): boolean {
         let result = false
-        result = ((UNRESOLVED.pos("\\", fileName) === 1) || (UNRESOLVED.pos(":", fileName) === 2))
+        result = ((pos("\\", fileName) === 1) || (pos(":", fileName) === 2))
         return result
     }
     

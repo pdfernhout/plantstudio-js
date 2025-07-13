@@ -72,7 +72,7 @@ export enum TransferDirection {
 
 const kPlantNameLength = 80
 
-const kCheckForUnreadParams = true
+export const kCheckForUnreadParams = true
 const kDontCheckForUnreadParams = false
 
 const kConsiderDomainScale = true
@@ -96,7 +96,7 @@ export enum FromPlant {
 }
 
 const kPlantAsTextStartString = "start PlantStudio plant"
-const kPlantAsTextEndString = "end PlantStudio plant"
+export const kPlantAsTextEndString = "end PlantStudio plant"
 
 const kStartNoteString = "=== start note"
 const kEndNoteString = "=== end note"

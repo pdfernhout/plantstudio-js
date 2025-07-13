@@ -22,7 +22,7 @@ export const kAdjustForOrigin = true
 export const kDontAdjustForOrigin = false
 
 export const kEmbeddedInPlant = true
-const kInTdoLibrary = false
+export const kInTdoLibrary = false
 const kStandAloneFile = false
 
 const kTdoForeColor = ColorDefs.clSilver
@@ -30,7 +30,7 @@ const kTdoBackColor = ColorDefs.clGray
 
 const kTdoLineContrastIndex = 10
 
-const kStartTdoString = "start 3D object"
+export const kStartTdoString = "start 3D object"
 const kEndTdoString = "end 3D object"
 
 

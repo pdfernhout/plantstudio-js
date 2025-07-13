@@ -77,7 +77,7 @@ const kWritingFailed = false
 
 const kNoSuggestedFile = ""
 const kAskForFileName = true
-const kDontAskForFileName = false
+export const kDontAskForFileName = false
 
 
 // const
@@ -804,54 +804,48 @@ export function stringToPoint(aString: string): TPoint {
     return result
 }
 
+*/
+
 export function setSinglePoint(x: float, y: float): SinglePoint {
-    let result = new SinglePoint()
-    result.x = x
-    result.y = y
+    let result = new SinglePoint(x, y)
     return result
 }
 
 export function singlePointToString(aPoint: SinglePoint): string {
-    let result = ""
-    result = digitValueString(aPoint.x) + "  " + digitValueString(aPoint.y)
+    const result = digitValueString(aPoint.x) + "  " + digitValueString(aPoint.y)
     return result
 }
 
-export function stringToSinglePoint(aString: string): SinglePoint {
-    let result = new SinglePoint()
-    let stream: KfStringStream
-    let token: string
-    
-    result = setSinglePoint(0, 0)
-    stream = usstream.KfStringStream.create
-    try {
-        stream.onStringSeparator(aString, " ")
-        token = stream.nextToken()
-        if (UNRESOLVED.pos(".", token) === 0) {
-            // if it was written as an integer, deal with that
-            result.x = StrToIntDef(token, 0)
-        } else {
-            try {
-                result.x = StrToFloat(token)
-            } catch (e) {
-                result.x = 0.0
-            }
+export function stringToSinglePoint(aString: string): SinglePoint {  
+    const result = setSinglePoint(0, 0)
+    const stream = new KfStringStream()
+
+    stream.onStringSeparator(aString, " ")
+    let token = stream.nextToken()
+    if (pos(".", token) === 0) {
+        // if it was written as an integer, deal with that
+        result.x = StrToIntDef(token, 0)
+    } else {
+        try {
+            result.x = StrToFloat(token)
+        } catch (e) {
+            result.x = 0.0
         }
-        token = stream.nextToken()
-        if (UNRESOLVED.pos(".", token) === 0) {
-            result.y = StrToIntDef(token, 0)
-        } else {
-            try {
-                result.y = StrToFloat(token)
-            } catch (e) {
-                result.y = 0.0
-            }
+    }
+    token = stream.nextToken()
+    if (pos(".", token) === 0) {
+        result.y = StrToIntDef(token, 0)
+    } else {
+        try {
+            result.y = StrToFloat(token)
+        } catch (e) {
+            result.y = 0.0
         }
-    } finally {
-        stream.free
     }
     return result
 }
+
+/*
 
 export function colorToRGBString(color: TColorRef): string {
     let result = ""
@@ -989,7 +983,7 @@ export function makeFileNameFrom(aString: string): string {
     result = aString
     done = false
     while (!done) {
-        spacePos = UNRESOLVED.pos(" ", result)
+        spacePos = pos(" ", result)
         done = (spacePos <= 0)
         if (!done) {
             UNRESOLVED.delete(result, spacePos, 1)
@@ -1417,3 +1411,12 @@ export function cleanUpAfterFileSave(fileInfo: SaveFileNamesStructure): void {
 }
 
 */
+
+export function setDecimalSeparator() {
+    // TODO: not sure yet what this should do
+}
+
+export function pos(aString: string, aLine: string): number {
+    // One-based result for Delphi compatibility
+    return aLine.indexOf(aString) + 1
+}
