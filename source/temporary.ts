@@ -17,11 +17,6 @@ export const kTdoLineContrastIndex = 10
 export const kTdoForeColor = ColorDefs.clSilver
 export const kTdoBackColor = ColorDefs.clGray
 
-// TODO: Fix DebugPrint from udebug that should have result stored somewhere
-export function DebugPrint(aMessage: string): void {
-    console.log("DebugPrint: " + aMessage)
-}
-
 // TODO: Fix ucursor stub from ucursor
 export const ucursor = {
     cursor_startWait: () => {},
@@ -169,14 +164,6 @@ export enum CursorMode {
 export const TimeSeriesForm = {
     updatePlantsFromParent(plant: PdPlant) {
     }
-}
-
-export class PdPlantManager {
-    plantDrawScale_PixelsPerMm: number = 1.0
-    plantDrawOffset_mm: SinglePoint = new SinglePoint()
-    privatePlantClipboard: PdPlant[] = []
-    plants: PdPlant[] = []
-    addPlant(plant: PdPlant) { this.plants.push(plant) }
 }
 
 // TODO: Replace with version from umain

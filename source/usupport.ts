@@ -1,8 +1,8 @@
 import { float, StrToFloat, int, byte, long, compareTextIgnoreCase, short, readln, TextFile, StrToIntDef, TColorRef, ord, intround, getBValue, getRValue, getGValue, double } from "./common"
-import { DebugPrint } from "./temporary"
 import { KfStringStream } from "./KfStringStream"
 import { intMax, max, min, intMin } from "./umath"
 import { TRect } from "./TRect"
+import { DebugPrint } from "./udebug"
 
 // unit Usupport
 

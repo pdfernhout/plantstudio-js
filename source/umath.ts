@@ -1,8 +1,8 @@
 // unit umath
 
 import { float, int, double, FloatToStr } from "./common"
-import { DebugPrint } from "./temporary"
 import { TPoint } from "./TPoint";
+import { DebugPrint } from "./udebug";
 
 // const
 const kPi = 3.141596

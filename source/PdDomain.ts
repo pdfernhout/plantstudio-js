@@ -7,8 +7,8 @@ import { SinglePoint, strToBool, strToFloatWithCommaCheck } from "./usupport"
 import { PdSectionManager } from "./PdSectionManager"
 import { PdParameterManager } from "./PdParameterManager"
 import { ExportFormats, FileExport3DOptionsStructure, nameFor3DExportType, ExportPart, Axis } from "./U3dexport"
-import { PdPlantManager } from "./temporary"
 import { BreedingAndTimeSeriesOptionsStructure, kMaxBreedingSections } from "./PdPlant"
+import { PdPlantManager } from "./PdPlantManager"
 
 // const
 const kMaxWizardQuestions = 30
