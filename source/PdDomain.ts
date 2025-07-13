@@ -475,7 +475,7 @@ export class PdDomain {
         
         result = -1
         i = 0
-        while (i <= this.iniLines.Count - 1) {
+        while (i <= this.iniLines.length - 1) {
             aLine = trim(this.iniLines.Strings[i])
             if ("[" + section + "]" === aLine) {
                 result = i
@@ -493,7 +493,7 @@ export class PdDomain {
         let aLine: string
         
         result = defaultString
-        if ((this.iniLines === null) || (this.iniLines.Count <= 0)) {
+        if ((this.iniLines === null) || (this.iniLines.length <= 0)) {
             return result
         }
         i = this.sectionStartIndexInIniLines(section)
@@ -502,7 +502,7 @@ export class PdDomain {
         }
         // move to next after section
         i += 1
-        while (i <= this.iniLines.Count - 1) {
+        while (i <= this.iniLines.length - 1) {
             // only read up until next section - don't want to get same name from different section
             aLine = trim(this.iniLines.Strings[i])
             if ((len(aLine) > 0) && (aLine[1] === "[")) {
@@ -529,14 +529,14 @@ export class PdDomain {
         i = this.sectionStartIndexInIniLines(section)
         if (i < 0) {
             // if no section found, add section at end and add this one item to it
-            this.iniLines.Add("[" + section + "]")
-            this.iniLines.Add(key + "=" + newString)
+            this.iniLines.push("[" + section + "]")
+            this.iniLines.push(key + "=" + newString)
             // section found
         } else {
             found = false
             // move to next after section
             i += 1
-            while (i <= this.iniLines.Count - 1) {
+            while (i <= this.iniLines.length - 1) {
                 // only read up until next section - don't want to get same name from different section
                 aLine = trim(this.iniLines.Strings[i])
                 if ((len(aLine) > 0) && (aLine[1] === "[")) {
@@ -551,11 +551,11 @@ export class PdDomain {
                 }
             }
             if (!found) {
-                if (i <= this.iniLines.Count - 1) {
+                if (i <= this.iniLines.length - 1) {
                     // if there was no match for the key, ADD a line to the section
                     this.iniLines.Insert(i, key + "=" + newString)
                 } else {
-                    this.iniLines.Add(key + "=" + newString)
+                    this.iniLines.push(key + "=" + newString)
                 }
             }
         }
@@ -565,7 +565,7 @@ export class PdDomain {
         let i: int
         let aLine: string
         
-        if ((this.iniLines === null) || (this.iniLines.Count <= 0)) {
+        if ((this.iniLines === null) || (this.iniLines.length <= 0)) {
             return
         }
         i = this.sectionStartIndexInIniLines(section)
@@ -574,16 +574,16 @@ export class PdDomain {
         }
         // move to next after section
         i += 1
-        while (i <= this.iniLines.Count - 1) {
+        while (i <= this.iniLines.length - 1) {
             aLine = trim(this.iniLines.Strings[i])
             if ((len(aLine) > 0) && (aLine[1] === "[")) {
                 break
             }
             if (getKeys) {
                 // values
-                aList.Add(trim(usupport.stringUpTo(this.iniLines.Strings[i], "=")))
+                aList.push(trim(usupport.stringUpTo(this.iniLines.Strings[i], "=")))
             } else {
-                aList.Add(usupport.stringBeyond(this.iniLines.Strings[i], "="))
+                aList.push(usupport.stringBeyond(this.iniLines.Strings[i], "="))
             }
             i += 1
         }
@@ -593,7 +593,7 @@ export class PdDomain {
         let i: int
         let aLine: string
         
-        if ((this.iniLines === null) || (this.iniLines.Count <= 0)) {
+        if ((this.iniLines === null) || (this.iniLines.length <= 0)) {
             return
         }
         i = this.sectionStartIndexInIniLines(section)
@@ -601,7 +601,7 @@ export class PdDomain {
             return
         }
         this.iniLines.Delete(i)
-        while (i <= this.iniLines.Count - 1) {
+        while (i <= this.iniLines.length - 1) {
             aLine = trim(this.iniLines.Strings[i])
             if ((len(aLine) > 0) && (aLine[1] === "[")) {
                 break
@@ -906,8 +906,8 @@ export class PdDomain {
         try {
             this.readSectionKeysOrValues(section, overrideKeys, kGetKeys)
             this.readSectionKeysOrValues(section, overrideValues, kGetValues)
-            if (overrideKeys.Count > 0) {
-                for (i = 0; i <= overrideKeys.Count - 1; i++) {
+            if (overrideKeys.length > 0) {
+                for (i = 0; i <= overrideKeys.length - 1; i++) {
                     key = overrideKeys.Strings[i]
                     // v2.1 changed to require section and param name for overrides
                     sectionName = trim(usupport.stringUpTo(key, ":"))
@@ -1171,9 +1171,9 @@ export class PdDomain {
             this.setStringForSectionAndKey(section, "Animation colors (screen/2/16/256/15-bit/16-bit/24-bit/32-bit)", IntToStr(ord(this.animationOptions.colorType)))
             // write parameter overrides
             section = iniSections[kSectionOverrides]
-            if (this.parameterManager.parameters.Count > 0) {
-                for (i = 0; i <= this.parameterManager.parameters.Count - 1; i++) {
-                    param = uparams.PdParameter(this.parameterManager.parameters.Items[i])
+            if (this.parameterManager.parameters.length > 0) {
+                for (i = 0; i <= this.parameterManager.parameters.length - 1; i++) {
+                    param = uparams.PdParameter(this.parameterManager.parameters[i])
                     if ((!param.cannotOverride) && (param.isOverridden)) {
                         // v2.1 added section name to override key
                         this.setStringForSectionAndKey(section, param.originalSectionName + ": " + param.name, usupport.digitValueString(param.lowerBoundOverride) + " " + usupport.digitValueString(param.upperBoundOverride) + " " + "(" + param.defaultValueStringOverride + ")")

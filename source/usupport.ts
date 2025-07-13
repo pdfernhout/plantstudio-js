@@ -2,6 +2,7 @@ import { float, StrToFloat, int, byte, long, compareTextIgnoreCase, short, readl
 import { DebugPrint } from "./temporary"
 import { KfStringStream } from "./KfStringStream"
 import { intMax, max, min, intMin } from "./umath"
+import { TRect } from "./TRect"
 
 // unit Usupport
 
@@ -543,13 +544,12 @@ export function stringBeyond(aString: string, aDelimiter: string): string {
     return result
 }
 
-/*
-
 export function stringBetween(startString: string, endString: string, wholeString: string): string {
-    let result = ""
-    result = stringUpTo(stringBeyond(trim(wholeString), startString), endString)
+    const result = stringUpTo(stringBeyond(wholeString.trim(), startString), endString)
     return result
 }
+
+/*
 
 // didn't use, don't know if works
 //function listOfStringsBetweenDelimiters(aString, aDelimiter: string): TStrings;
@@ -733,17 +733,17 @@ export function addRectToBoundsRect(boundsRect: TRect, newRect: TRect): void {
     }
 }
 
+*/
+
 export function rWidth(rect: TRect): int {
-    let result = 0
-    result = Rect.right - Rect.left
-    return result
+    return rect.Right - rect.Left
 }
 
 export function rHeight(rect: TRect): int {
-    let result = 0
-    result = Rect.bottom - Rect.top
-    return result
+    return rect.Bottom - rect.Top
 }
+
+/*
 
 export function zeroRect(rect: TRect): boolean {
     let result = false
@@ -768,7 +768,7 @@ export function stringToRect(aString: string): TRect {
     let result = new TRect()
     let stream: KfStringStream
     
-    result = Rect(0, 0, 0, 0)
+    result = new TRect(0, 0, 0, 0)
     stream = usstream.KfStringStream.create
     try {
         stream.onStringSeparator(aString, " ")
@@ -957,7 +957,7 @@ export function draw3DButton(ACanvas: TCanvas, Client: TRect, Selected: boolean,
 // ---------------------------------------------------------------------------- combo and list box utilities 
 export function currentObjectInComboBox(comboBox: TComboBox): TObject {
     let result = new TObject()
-    if (comboBox.Items.Count === 0) {
+    if (comboBox.Items.length === 0) {
         result = null
     } else if (comboBox.ItemIndex !== -1) {
         result = comboBox.Items.Objects[comboBox.ItemIndex]
@@ -969,7 +969,7 @@ export function currentObjectInComboBox(comboBox: TComboBox): TObject {
 
 export function currentObjectInListBox(listBox: TListBox): TObject {
     let result = new TObject()
-    if (listBox.Items.Count === 0) {
+    if (listBox.Items.length === 0) {
         result = null
     } else if (listBox.ItemIndex !== -1) {
         result = listBox.Items.Objects[listBox.ItemIndex]

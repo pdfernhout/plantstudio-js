@@ -38,7 +38,7 @@ const kShow = false
 const kSendBackward = true
 const kBringForward = false
 
-const kPasteMoveDistance = 40
+export const kPasteMoveDistance = 40
 
 export const kCreateFirstGeneration = true
 export const kDontCreateFirstGeneration = false
