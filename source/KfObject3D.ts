@@ -1,6 +1,6 @@
 // KfObject3D was unit Utdo
 
-import { float, long, ColorDefs, int, IntToStr, short, StrToFloat, intround, arrayRemove, compareTextIgnoreCase, StrToIntDef, MessageDialog, TextFile, TMemo, writeln, eof, readln, write, TColorRef, getRValue, getGValue, getBValue, ExtractFileName } from "./common"
+import { float, long, ColorDefs, int, IntToStr, short, StrToFloat, intround, arrayRemove, isInTextIgnoreCase, StrToIntDef, MessageDialog, TextFile, TMemo, writeln, eof, readln, write, TColorRef, getRValue, getGValue, getBValue, ExtractFileName } from "./common"
 import { TListCollection_streamUsingFiler } from "./temporary"
 import { KfPoint3D, KfPoint3D_matchXYZ, KfPoint3D_setXYZ, KfPoint3D_addPointToBoundsRect, KfPoint3D_subtract } from "./KfPoint3D"
 import { KfIndexTriangle } from "./KfIndexTriangle"
@@ -632,7 +632,7 @@ export class KfObject3D extends PdStreamableObject {
                 // cfk change for v1.6b2 mistake with origin, placed with comment
                 inputLine = readln(inputFile)
             }
-            if (!compareTextIgnoreCase(kStartTdoString, inputLine)) {
+            if (!isInTextIgnoreCase(kStartTdoString, inputLine)) {
                 throw new Error("Problem: Expected start of 3D object.")
             }
         }
@@ -670,7 +670,7 @@ export class KfObject3D extends PdStreamableObject {
         }
         this.adjustForOrigin()
         if (embeddedInPlant) {
-            if (!compareTextIgnoreCase(kEndTdoString, inputLine)) {
+            if (!isInTextIgnoreCase(kEndTdoString, inputLine)) {
                 throw new Error("Problem: Expected end of 3D object.")
             }
         }
@@ -770,13 +770,13 @@ export class KfObject3D extends PdStreamableObject {
             readingMemoLine += 1
         }
         // TODO: Seems like comparison with ORIGIN is unneeded here?
-        if ((inputLine.substring(0, 1) === ";") && (!compareTextIgnoreCase("ORIGIN", inputLine))) {
+        if ((inputLine.substring(0, 1) === ";") && (!isInTextIgnoreCase("ORIGIN", inputLine))) {
             // cfk change for v1.6b2 mistake with origin, placed with comment
             // skip commented lines 
             inputLine = aMemo[readingMemoLine]
             readingMemoLine += 1
         }
-        if (!compareTextIgnoreCase(kStartTdoString, inputLine)) {
+        if (!isInTextIgnoreCase(kStartTdoString, inputLine)) {
             throw new Error("Problem: Expected start of 3D object." + "\nGot: " + inputLine)
         }
 
@@ -789,7 +789,7 @@ export class KfObject3D extends PdStreamableObject {
                 continue
             }
             // TODO: Seems like comparison with ORIGIN is unneeded here?
-            if ((inputLine.substring(0, 1) === ";") && (!compareTextIgnoreCase("ORIGIN", inputLine))) {
+            if ((inputLine.substring(0, 1) === ";") && (!isInTextIgnoreCase("ORIGIN", inputLine))) {
                 // cfk change for v1.6b2 mistake with origin, placed with comment
                 // skip commented lines 
                 continue
@@ -797,20 +797,20 @@ export class KfObject3D extends PdStreamableObject {
             const stream = new KfStringStream(inputLine, "=")
             const fieldType: string = stream.nextToken()
             stream.spaceSeparator()
-            if (compareTextIgnoreCase("POINT", fieldType)) {
+            if (isInTextIgnoreCase("POINT", fieldType)) {
                 this.addPointString(stream)
-            } else if (compareTextIgnoreCase("ORIGIN", fieldType)) {
+            } else if (isInTextIgnoreCase("ORIGIN", fieldType)) {
                 this.setOriginPointIndex(StrToIntDef(stream.remainder, 0))
-            } else if (compareTextIgnoreCase("TRIANGLE", fieldType)) {
+            } else if (isInTextIgnoreCase("TRIANGLE", fieldType)) {
                 this.addTriangleString(stream)
-            } else if (compareTextIgnoreCase("NAME", fieldType)) {
+            } else if (isInTextIgnoreCase("NAME", fieldType)) {
                 this.setName(stream.remainder)
             } else {
                 break
             }
         }
         this.adjustForOrigin()
-        if (!compareTextIgnoreCase(kEndTdoString, inputLine)) {
+        if (!isInTextIgnoreCase(kEndTdoString, inputLine)) {
             throw new Error("Problem: Expected end of 3D object.")
         }
         

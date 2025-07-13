@@ -1,7 +1,7 @@
 // PdStreamableObject split from PdFiler / ufiler
 
 import { PdClassAndVersionInformationRecord, PdFiler } from "./PdFiler";
-import { long, TMemoryStream, IntToStr } from "./common";
+import { long, TMemoryStream, IntToStr, TFileStream } from "./common";
 import { ClassId } from "./uclasses";
 
 export class PdStreamableObject {
@@ -109,7 +109,7 @@ export class PdStreamableObject {
         filer.setToWritingMode()
         this.streamUsingFiler(filer)
         // move to start of stream
-        memoryStream.Seek(0, 0)
+        memoryStream.Seek(0, TFileStream.soFromBeginning)
         filer.setToReadingMode()
         newCopy.streamUsingFiler(filer)
     }

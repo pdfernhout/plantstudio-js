@@ -114,11 +114,11 @@ export class PdPlantManager {
     // }
     
     // --------------------------------------------------------------------------------------- input/output 
-    loadPlantsFromFile(fileName: string, inPlantMover: boolean): void {
+    loadPlantsFromFile(fileName: string, inPlantMover: boolean, fileContents: string): void {
         let inputFile: TextFile = new  TextFile()
         let aLine: string
         
-        AssignFile(inputFile, fileName)
+        AssignFile(inputFile, fileName, fileContents)
         try {
             // v1.5
             setDecimalSeparator()

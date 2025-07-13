@@ -69,6 +69,10 @@ export function compareTextIgnoreCase(a: string, b: string): boolean {
     return a.toUpperCase() === b.toUpperCase()
 }
 
+export function isInTextIgnoreCase(a: string, b: string): boolean {
+    return b.toUpperCase().includes(a.toUpperCase())
+}
+
 export function StrToIntDef(value: string, defaultValue: number) {
     const result = parseInt(value, 10)
     if (isNaN(result)) { return defaultValue }
@@ -129,8 +133,9 @@ export function readln(file: TextFile) {
     return result
 }
 
-export function AssignFile(file: TextFile, fileName: string) {
+export function AssignFile(file: TextFile, fileName: string, fileContents: string = "") {
     file.fileName = fileName
+    file.contents = fileContents
 }
 
 export function Rewrite(file: TextFile) {
