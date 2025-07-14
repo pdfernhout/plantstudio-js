@@ -10,24 +10,29 @@ import { PdDomain, domain } from "../source/PdDomain"
 import { PdPlantDrawingAmendment } from "../source/PdPlantDrawingAmendment";
 import { ColorDefs } from "../source/common";
 import { PdPlantManager } from "../source/PdPlantManager";
-// import { PdFiler } from "../source/PdFiler";
 
 PdDomain.createDefault()
 
 let plant: PdPlant | null = null
 const amendment = new PdPlantDrawingAmendment()
 
+// Turn off posed color for now
+domain.options.selectedPosedColor = ColorDefs.clGreen
+domain.options.nonHiddenPosedColor = ColorDefs.clGreen
+
+let plantAge = 90
+let zoom = 10
+
 async function createPlant() {
-    // PdFiler.load("test.pla", plant)
-    // plant.readLineAndTdoFromPlantFile()
     const plantManager = new PdPlantManager()
-    const response = await fetch("data/test.pla")
+    // const response = await fetch("../plants/test.pla")
+    const response = await fetch("../plants/New version 2 plants.pla")
     if (!response.ok) {
         alert("Problem loading plant file")
         return
     }
     const fileContents = await response.text()
-    plantManager.loadPlantsFromFile("test.pla", false,  fileContents)
+    plantManager.loadPlantsFromFile("UNUSED", false,  fileContents)
     const plantTemplate = plantManager.plantForIndex(0)
     if (!plantTemplate) {
         alert("Could not load plant from plant file")
@@ -39,19 +44,13 @@ async function createPlant() {
     // plant.defaultAllParameters()
     plant.basePoint_mm.x = 400
     plant.basePoint_mm.y = 450
+    plant.drawingScale_PixelsPerMm = zoom / 10
 
     amendment.partID = plant.firstPhytomer!.partID
     amendment.addRotations = true
     plant.addAmendment(amendment)
     m.redraw()
 }
-
-// Turn off posed color for now
-domain.options.selectedPosedColor = ColorDefs.clGreen
-domain.options.nonHiddenPosedColor = ColorDefs.clGreen
-
-let plantAge = 90
-let zoom = 10
 
 function growPlant() {
     if (!plant) return
