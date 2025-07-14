@@ -92,6 +92,7 @@ const MyComponent = {
                 amendment.xRotation = (amendment.xRotation + 4) % 360
             }
         }),
+        m("div.mb2.b", plant?.name || "loading..."),
         m("div", { style: "user-select: none" }, "Click canvas to rotate leaf"),
         m("br"),
         "Rotation",
