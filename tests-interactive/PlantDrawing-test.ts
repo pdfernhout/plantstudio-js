@@ -23,8 +23,11 @@ domain.options.nonHiddenPosedColor = ColorDefs.clGreen
 let plantAge = 90
 let zoom = 10
 
-async function createPlant() {
-    const plantManager = new PdPlantManager()
+let loadedPlants = false
+const plantManager = new PdPlantManager()
+let selectedPlantIndex = 0
+
+async function loadPlants() {
     // const response = await fetch("../plants/test.pla")
     const response = await fetch("../plants/New version 2 plants.pla")
     if (!response.ok) {
@@ -33,12 +36,18 @@ async function createPlant() {
     }
     const fileContents = await response.text()
     plantManager.loadPlantsFromFile("UNUSED", false,  fileContents)
-    const plantTemplate = plantManager.plantForIndex(0)
+    loadedPlants = true
+    createPlant(selectedPlantIndex)
+}
+
+async function createPlant(plantIndex: number) {
+    const plantTemplate = plantManager.plantForIndex(plantIndex)
     if (!plantTemplate) {
         alert("Could not load plant from plant file")
         throw new Error("Could not load plant from plant file");
     }
     plant = plantManager.copyFromPlant(plantTemplate)
+    plantManager.plants.pop()
 
     // const plant = new PdPlant()
     // plant.defaultAllParameters()
@@ -91,7 +100,23 @@ const MyComponent = {
                 amendment.xRotation = (amendment.xRotation + 4) % 360
             }
         }),
-        m("div.mb2.b", plant?.name || "loading..."),
+        m("div.mb2", "Plant: ",
+            !loadedPlants && "Loading..",
+            loadedPlants && m("select",
+                {
+                    onchange: (event: any) => {
+                        selectedPlantIndex = event.target.value
+                        createPlant(selectedPlantIndex)
+                    }
+                },
+                plantManager.plants.map((plant, index) =>
+                    m("option", {
+                        value: index,
+                        selected: (index === selectedPlantIndex ? "selected" : undefined),
+                    }, plant.name)
+                )
+            ),
+        ),
         m("div", { style: "user-select: none" }, "Click canvas to rotate leaf"),
         m("br"),
         "Rotation",
@@ -124,7 +149,7 @@ const MyComponent = {
     )
 }
 
-createPlant()
+loadPlants()
 
 m.mount(document.body, MyComponent)
 m.redraw()
