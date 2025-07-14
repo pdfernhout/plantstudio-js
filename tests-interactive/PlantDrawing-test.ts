@@ -56,9 +56,9 @@ let zoom = 10
 function growPlant() {
     if (!plant) return
     
-    plant.reset()
+    if (plant.age > plantAge) plant.reset()
     // Grow the plant a bit
-    for (let i = 0; i < plantAge; i++) {
+    for (let i = plant.age; i < plantAge; i++) {
         plant.nextDay()
     }
 }
