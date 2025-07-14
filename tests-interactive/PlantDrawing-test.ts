@@ -1,10 +1,6 @@
+// Test with: npm run test-interactive
+
 import * as m from "mithril"
-// import { KfDrawingSurface } from "../source/KfDrawingSurface"
-// import { TPoint } from "../source/TPoint"
-// import { KfPoint3D } from "../source/KfPoint3D"
-// import { KfTurtle } from "../source/KfTurtle"
-// import { TRect } from "../source/TRect"
-// import { KfObject3D } from "../source/KfObject3D"
 import { PdPlant } from "../source/PdPlant"
 import { PdDomain, domain } from "../source/PdDomain"
 import { PdPlantDrawingAmendment } from "../source/PdPlantDrawingAmendment";
@@ -23,13 +19,44 @@ domain.options.nonHiddenPosedColor = ColorDefs.clGreen
 let plantAge = 90
 let zoom = 10
 
-let loadedPlants = false
+const plantFileNames: string[] = [] 
+let selectedPlantFileIndex = 0
+
 const plantManager = new PdPlantManager()
+let loadedPlants = false
 let selectedPlantIndex = 0
 
-async function loadPlants() {
+const plantPath = "../plants/"
+
+async function fetchPlantFileNames() {
+    const response = await fetch(plantPath)
+    if (!response.ok) {
+        alert("Problem loading plants index")
+        return
+    }
+    // Kludgy way to get list of plant file names
+    // Assumes testing with: npm run test-interactive
+    const fileContents = await response.text()
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(fileContents, "text/html")
+    const links = doc.querySelectorAll("a")
+    for (let link of links) {
+        const parts = link.href.split("/")
+        const fileName = parts[parts.length - 1]
+        if (fileName.endsWith(".pla")) {
+            plantFileNames.push(decodeURIComponent(fileName))
+        }
+    }
+    loadPlants(plantFileNames[0])
+}
+
+async function selectPlantFile(plantFileIndex: number) {
+    loadPlants(plantFileNames[plantFileIndex])
+}
+
+async function loadPlants(fileName: string) {
     // const response = await fetch("../plants/test.pla")
-    const response = await fetch("../plants/New version 2 plants.pla")
+    const response = await fetch(plantPath + fileName)
     if (!response.ok) {
         alert("Problem loading plant file")
         return
@@ -37,6 +64,7 @@ async function loadPlants() {
     const fileContents = await response.text()
     plantManager.loadPlantsFromFile("UNUSED", false,  fileContents)
     loadedPlants = true
+    selectedPlantIndex = 0
     createPlant(selectedPlantIndex)
 }
 
@@ -58,6 +86,8 @@ async function createPlant(plantIndex: number) {
     amendment.partID = plant.firstPhytomer!.partID
     amendment.addRotations = true
     plant.addAmendment(amendment)
+    // plant.firstPhytomer!.amendment = amendment
+
     m.redraw()
 }
 
@@ -72,8 +102,6 @@ function growPlant() {
 }
 
 growPlant()
-
-// plant.firstPhytomer!.amendment = amendment
 
 function randomize() {
     if (plant) plant.randomize()
@@ -100,6 +128,23 @@ const MyComponent = {
                 amendment.xRotation = (amendment.xRotation + 4) % 360
             }
         }),
+        m("div.mb2", "Library: ",
+            !plantFileNames.length && "Loading..",
+            plantFileNames.length && m("select",
+                {
+                    onchange: (event: any) => {
+                        selectedPlantFileIndex = event.target.value
+                        selectPlantFile(selectedPlantFileIndex)
+                    }
+                },
+                plantFileNames.map((plantFileName, index) =>
+                    m("option", {
+                        value: index,
+                        selected: (index === selectedPlantFileIndex ? "selected" : undefined),
+                    }, plantFileName.split(".")[0])
+                )
+            ),
+        ),
         m("div.mb2", "Plant: ",
             !loadedPlants && "Loading..",
             loadedPlants && m("select",
@@ -149,7 +194,8 @@ const MyComponent = {
     )
 }
 
-loadPlants()
+fetchPlantFileNames()
+// loadPlants("../plants/New version 2 plants.pla")
 
 m.mount(document.body, MyComponent)
 m.redraw()
