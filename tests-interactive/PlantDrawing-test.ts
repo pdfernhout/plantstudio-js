@@ -9,16 +9,42 @@ import { PdPlant } from "../source/PdPlant"
 import { PdDomain, domain } from "../source/PdDomain"
 import { PdPlantDrawingAmendment } from "../source/PdPlantDrawingAmendment";
 import { ColorDefs } from "../source/common";
+import { PdPlantManager } from "../source/PdPlantManager";
+// import { PdFiler } from "../source/PdFiler";
 
 PdDomain.createDefault()
-const plant = new PdPlant()
-plant.defaultAllParameters()
-plant.basePoint_mm.x = 400
-plant.basePoint_mm.y = 450
+
+let plant: PdPlant | null = null
 const amendment = new PdPlantDrawingAmendment()
-amendment.partID = plant.firstPhytomer!.partID
-amendment.addRotations = true
-plant.addAmendment(amendment)
+
+async function createPlant() {
+    // PdFiler.load("test.pla", plant)
+    // plant.readLineAndTdoFromPlantFile()
+    const plantManager = new PdPlantManager()
+    const response = await fetch("data/test.pla")
+    if (!response.ok) {
+        alert("Problem loading plant file")
+        return
+    }
+    const fileContents = await response.text()
+    plantManager.loadPlantsFromFile("test.pla", false,  fileContents)
+    const plantTemplate = plantManager.plantForIndex(0)
+    if (!plantTemplate) {
+        alert("Could not load plant from plant file")
+        throw new Error("Could not load plant from plant file");
+    }
+    plant = plantManager.copyFromPlant(plantTemplate)
+
+    // const plant = new PdPlant()
+    // plant.defaultAllParameters()
+    plant.basePoint_mm.x = 400
+    plant.basePoint_mm.y = 450
+
+    amendment.partID = plant.firstPhytomer!.partID
+    amendment.addRotations = true
+    plant.addAmendment(amendment)
+    m.redraw()
+}
 
 // Turn off posed color for now
 domain.options.selectedPosedColor = ColorDefs.clGreen
@@ -28,6 +54,8 @@ let plantAge = 90
 let zoom = 10
 
 function growPlant() {
+    if (!plant) return
+    
     plant.reset()
     // Grow the plant a bit
     for (let i = 0; i < plantAge; i++) {
@@ -40,7 +68,7 @@ growPlant()
 // plant.firstPhytomer!.amendment = amendment
 
 function randomize() {
-    plant.randomize()
+    if (plant) plant.randomize()
 }
 
 const MyComponent = { 
@@ -57,7 +85,7 @@ const MyComponent = {
                 const context = canvas.getContext("2d")
                 if (!context) return
 
-                plant.drawOn(context)
+                if (plant) plant.drawOn(context)
             },
             onclick: () => {
                 console.log("onclick")
@@ -87,7 +115,7 @@ const MyComponent = {
         m("input[type=range].ml4", { min: 1, max: 100, value: zoom, oninput: (event: any) => {
             // console.log("slider", event, event.target.value)
             zoom = parseInt(event.target.value)
-            plant.drawingScale_PixelsPerMm = zoom / 10
+            if (plant) plant.drawingScale_PixelsPerMm = zoom / 10
         }}),
         m("span.ml2", zoom),
         m("br"),
@@ -95,6 +123,8 @@ const MyComponent = {
         m("button", { onclick: randomize } , "Randomize")
     )
 }
+
+createPlant()
 
 m.mount(document.body, MyComponent)
 m.redraw()

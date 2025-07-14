@@ -1,3 +1,5 @@
+import { max } from "./umath"
+
 export type float = number
 export type double = number
 export type long = number
@@ -173,8 +175,11 @@ export function odd(value: number) {
     return (value % 2) == 1
 }
 
+const dataPath = "data/"
 export class TFileStream {
-    contents: byte[] = []
+    contents: Uint8Array = new Uint8Array(new Array())
+    contentsLengthUsed = 0
+    loaded: Promise<void> | null = null
     position = 0
     // TODO: Maybe don't need fileName in TFileStream?
     fileName = ""
@@ -192,21 +197,56 @@ export class TFileStream {
     constructor(fileName: string, fileMode: number) {
         this.fileName = fileName
         this.fileMode = fileMode
+        if (fileMode === TFileStream.fmOpenRead) {
+            this.loadFile(fileName)
+        } else {
+            // TODO: Sloppy coding to have big array to avoid resizing
+            this.contents = new Uint8Array(new Array(1000000))
+        }
+    }
+
+    async loadFile(fileName: string) {
+        this.loaded = new Promise<void>(async (resolve, reject) => {
+            const response = await fetch(dataPath + fileName)
+            if (response.ok) {
+                this.contents = new Uint8Array(await response.arrayBuffer())
+                this.contentsLengthUsed = this.contents.length
+                resolve()
+            } else {
+                reject(new Error("Problem reading file: " + fileName + " : : " + response.statusText))
+            }
+        }).catch(e => {
+            alert("error loading file: " + fileName + " :: " + e)
+            console.log("error loading: " + fileName, e)
+            // toast("Something went wrong loading " + fileName + " from the server")
+            // m.redraw()
+        })
     }
 
     WriteBuffer(buffer: number | number[], length: number) {
-        if (Array.isArray(buffer)){
+        if (Array.isArray(buffer)) {
             for (let i = 0; i < Math.min(buffer.length, length); i++) {
+                if (this.position >= this.contents.length) {
+                    throw new Error("Writing past end of file: " + this.position + " >= " + this.contents.length)
+                }
                 this.contents[this.position++] = buffer[i] & 255
+                this.contentsLengthUsed = max(this.contentsLengthUsed, this.position)
             } 
         } else {
+            if (this.position >= this.contents.length) {
+                throw new Error("Writing past end of file: " + this.position + " >= " + this.contents.length)
+            }
             this.contents[this.position++] = buffer & 255
+            this.contentsLengthUsed = max(this.contentsLengthUsed, this.position)
         }
     }
 
     ReadBytes(length: number) {
         const result = []
         for (let i = 0; i < length; i++) {
+            if (this.position >= this.contentsLengthUsed) {
+                throw new Error("Reading past end of file: " + this.position + " >= " + this.contentsLengthUsed)
+            }
             result.push(this.contents[this.position++])
         }
         return result;

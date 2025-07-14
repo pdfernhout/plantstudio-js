@@ -2609,7 +2609,7 @@ export class PdPlant extends PdStreamableObject {
             traverser.filer = filer
             traverser.traverseWholePlant(Activity.kActivityStream)
         }
-        this.previewCache.streamUsingFiler(filer)
+        // TODO PDF -- this.previewCache.streamUsingFiler(filer)
         if (filer.isReading()) {
             calcSCurveCoeffs(this.pFruit.sCurveParams)
             calcSCurveCoeffs(this.pGeneral.growthSCurve)

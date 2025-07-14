@@ -162,7 +162,7 @@ export class PdFiler {
                 this.streamBytes(bytes, 1)
                 break
         }
-        return aBoolean
+        return result
     }
     
     streamSmallint(aSmallint: short): short {
@@ -182,7 +182,7 @@ export class PdFiler {
                 this.streamBytes(bytes, 2)
                 break
         }
-        return aSmallint
+        return result
     }
     
     streamLongint(aLongint: long): long {
@@ -202,7 +202,7 @@ export class PdFiler {
                 this.streamBytes(bytes, 4)
                 break
         }
-        return aLongint
+        return result
     }
     
     streamByte(aByte: byte): byte {
@@ -242,7 +242,7 @@ export class PdFiler {
                 this.streamBytes(bytes, 4)
                 break
         }
-        return aSingle
+        return result
     }
     
     streamSinglePoint(aPoint: SinglePoint): void {
@@ -274,11 +274,11 @@ export class PdFiler {
                 this.streamBytes(bytes, 4)
                 break
         }
-        return aColorRef
+        return result
     }
     
     // class level streaming
-    save(fileName: string, objectToSave: PdStreamableObject): void {
+    static save(fileName: string, objectToSave: PdStreamableObject): void {
         const fileStream = new TFileStream(fileName, TFileStream.fmOpenWrite | TFileStream.fmCreate)
         const filer = new PdFiler(fileStream)
         filer.setToWritingMode()
@@ -286,8 +286,9 @@ export class PdFiler {
     }
     
     // class save/load functions
-    load(fileName: string, objectToLoad: PdStreamableObject): void {
+    static async load(fileName: string, objectToLoad: PdStreamableObject): Promise<void> {
         const fileStream = new TFileStream(fileName, TFileStream.fmOpenRead)
+        await fileStream.loaded
         const filer = new PdFiler(fileStream)
         filer.setToReadingMode()
         objectToLoad.streamUsingFiler(filer)
