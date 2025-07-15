@@ -6,12 +6,18 @@ import { pointInTriangle } from "./U3dsupport"
 import { TPoint } from "./TPoint"
 import { KfTriangle } from "./KfTriangle"
 
-// TODO: Optimize convertColor to be more efficient; maybe add cache of common colors?
+let cachedColors: {[id: number]: string} = {}
+
 function convertColor(color: number) {
+    const cachedColorString = cachedColors[color]
+    if (cachedColorString !== undefined) {
+        return cachedColorString
+    }
     var r = (color >> 16) & 255;
     var g = (color >> 8) & 255
     var b = color & 255
     const result = "#" + hexForValue(r) + hexForValue(g) + hexForValue(b)
+    cachedColors[color] = result
     return result
 }
 
