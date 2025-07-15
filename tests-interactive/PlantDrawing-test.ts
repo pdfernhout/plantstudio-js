@@ -173,7 +173,7 @@ const MyComponent = {
         m("br"),
         m("br"),
         "Age",
-        m("input[type=range].ml4", { min: 0, max: 100, value: plantAge, oninput: (event: any) => {
+        m("input[type=range].ml4", { min: 0, max: 300, value: plantAge, oninput: (event: any) => {
             // console.log("slider", event, event.target.value)
             plantAge = parseInt(event.target.value)
             growPlant()
