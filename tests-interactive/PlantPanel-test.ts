@@ -6,6 +6,7 @@ import { PdDomain, domain } from "../source/PdDomain"
 import { PdPlantDrawingAmendment } from "../source/PdPlantDrawingAmendment";
 import { ColorDefs } from "../source/common";
 import { PdPlantManager } from "../source/PdPlantManager";
+import { PdSmallintParameterPanel } from "../source/PdSmallintParameterPanel";
 
 PdDomain.createDefault()
 
@@ -193,7 +194,10 @@ const MyComponent = {
             m("br"),
             m("button", { onclick: randomize } , "Randomize"),
         ),
-        m("div.ba.pa1.flex-grow.w-100", "PANELS")
+        m("div.ba.pa1.flex-grow.w-100",
+            "PANELS",
+            m(PdSmallintParameterPanel)
+        )
     )
 }
 

@@ -1,27 +1,31 @@
 // unit upp_int
 
-from conversion_common import *
-import udebug
-import udomain
-import usupport
-import uunits
-import umath
-import updcom
-import umain
-import usliders
-import uppanel
-import uparams
-import uplant
-import delphi_compatability
+import * as m from "mithril"
+import { int, intround, IntToStr, short } from "./common"
+import { PdParameterPanel } from "./PdParameterPanel"
+import { TRect } from "./TRect"
+import { intMax } from "./umath"
+
+// from conversion_common import *
+// import udebug
+// import udomain
+// import usupport
+// import uunits
+// import umath
+// import updcom
+// import umain
+// import usliders
+// import uppanel
+// import uparams
+// import uplant
+// import delphi_compatability
 
 // const
 const kItemValueText = 1
 const kItemSlider = 2
-
-
-
-//  kItemUnitText = 2;    
-export class PdSmallintParameterPanel {
+//  kItemUnitText = 2;  
+  
+export class PdSmallintParameterPanel extends PdParameterPanel {
     currentValue: short = 0
     currentValueWhileSliding: short = 0
     minValue: short = 0
@@ -33,8 +37,6 @@ export class PdSmallintParameterPanel {
     valueTextRect: TRect = new TRect()
     unitTextRect: TRect = new TRect()
     drawWithoutBounds: boolean = false
-    PdSmallintParameterPanel.prototype = new PdParameterPanel()
-    PdSmallintParameterPanel.prototype.constructor = PdSmallintParameterPanel
     
     initialize(): void {
         //assuming slider will be deleted automatically by owner - self - otherwise would have destructor
@@ -156,7 +158,7 @@ export class PdSmallintParameterPanel {
     }
     
     adjustValue(): void {
-        let newString: ansistring
+        let newString: string
         let oldValue: short
         let newValue: short
         let oldString: string
@@ -267,13 +269,13 @@ export class PdSmallintParameterPanel {
         }
     }
     
-    sliderKeyDown(sender: TOBject): void {
+    sliderKeyDown(sender: TObject): void {
         this.sliderMouseUp(sender)
     }
     
     maxWidth(): int {
         let result = 0
-        result = uppanel.kLeftRightGap * 2 + umath.intMax(this.labelWidth, this.minScaleWidthWithBounds())
+        result = uppanel.kLeftRightGap * 2 + intMax(this.labelWidth, this.minScaleWidthWithBounds())
         return result
     }
     
@@ -293,7 +295,7 @@ export class PdSmallintParameterPanel {
         if (requestedWidth < widthWithBounds) {
             this.drawWithoutBounds = true
             if (requestedWidth < widthWithoutBounds) {
-                result = umath.intMax(result, widthWithoutBounds)
+                result = intMax(result, widthWithoutBounds)
             }
         } else {
             this.drawWithoutBounds = false
@@ -337,7 +339,7 @@ export class PdSmallintParameterPanel {
         this.paint()
         this.slider.Left = this.minTextRect.Right + uppanel.kSliderSpaceGap
         this.slider.Top = this.collapsedHeight() + this.textHeight / 2 - this.slider.Height / 2
-        this.slider.Width = umath.intMax(0, this.maxTextRect.Left - this.minTextRect.Right - uppanel.kSliderSpaceGap * 2)
+        this.slider.Width = intMax(0, this.maxTextRect.Left - this.minTextRect.Right - uppanel.kSliderSpaceGap * 2)
     }
     
     maxSelectedItemIndex(): int {
@@ -398,6 +400,10 @@ export class PdSmallintParameterPanel {
         this.drawText(valueString, this.valueTextRect, !this.readOnly, (this.selectedItemIndex === kItemValueText), false)
         this.drawText(unitString, this.unitTextRect, false, false, false)
         this.drawText(maxString, this.maxTextRect, false, false, true)
+    }
+
+    view() {
+        return m("div", "PdSmallintParameterPanel UNFINISHED")
     }
     
 }

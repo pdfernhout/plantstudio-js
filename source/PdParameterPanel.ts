@@ -1,19 +1,27 @@
 // unit uppanel
 
-from conversion_common import *
-import upp_hed
-import udebug
-import udomain
-import usupport
-import uunits
-import umath
-import updcom
-import umain
-import uplant
-import ucollect
-import usection
-import uparams
-import delphi_compatability
+import * as m from "mithril"
+import { float, int, long, TColor } from "./common"
+import { PdParameter } from "./PdParameter"
+import { PdPlant, PdPlantUpdateEvent } from "./PdPlant"
+import { TRect } from "./TRect"
+import { intMax } from "./umath"
+import { digitValueString } from "./usupport"
+
+// from conversion_common import *
+// import upp_hed
+// import udebug
+// import udomain
+// import usupport
+// import uunits
+// import umath
+// import updcom
+// import umain
+// import uplant
+// import ucollect
+// import usection
+// import uparams
+// import delphi_compatability
 
 // const
 const kBetweenGap = 3
@@ -620,7 +628,7 @@ export class PdParameterPanel {
     collapsedHeight(): int {
         let result = 0
         result = this.wrappedLabelHeight + kTopBottomGap
-        result = umath.intMax(result, kArrowPictureSize + 5)
+        result = intMax(result, kArrowPictureSize + 5)
         return result
     }
     
@@ -645,8 +653,8 @@ export class PdParameterPanel {
         for (i = 1; i <= uunits.GetLastUnitEnumInUnitSet(unitSet) - 1; i++) {
             minValue = uunits.Convert(unitSet, unitPlant, i, softMin)
             maxValue = uunits.Convert(unitSet, unitPlant, i, softMax)
-            maxLengthSoftMin = umath.intMax(maxLengthSoftMin, len(usupport.digitValueString(minValue)))
-            maxLengthSoftMax = umath.intMax(maxLengthSoftMax, len(usupport.digitValueString(maxValue)))
+            maxLengthSoftMin = intMax(maxLengthSoftMin, len(digitValueString(minValue)))
+            maxLengthSoftMax = intMax(maxLengthSoftMax, len(digitValueString(maxValue)))
         }
         numeralChars = numeralChars + maxLengthSoftMin + maxLengthSoftMax
         // calc min scale width from number of chars 
@@ -667,6 +675,10 @@ export class PdParameterPanel {
         // calc min scale width from number of chars 
         result = this.formTextWidth("i") * letterChars + this.formTextWidth("1") * numeralChars + kBetweenGap + kLeftRightGap * 2
         return result
+    }
+
+    view() {
+        return m("div", "PdParameterPanel View NOT OVERRRIDEN")
     }
     
 }
