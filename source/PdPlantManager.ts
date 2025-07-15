@@ -413,7 +413,7 @@ export class PdPlantManager {
                     try {
                         plant.computeBounds = true
                         if ((domain.options.cachePlantBitmaps) && (!domain.drawingToMakeCopyBitmap)) {
-                            // TODO -- FIX ME
+                            // TODO -- FIX ME plant.previewCache
                             // destCanvas.Draw(plantRect.Left, plantRect.Top, plant.previewCache)
                             // const context = plant.previewCache.Context
                             // if (context) {
