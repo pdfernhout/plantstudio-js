@@ -9,6 +9,7 @@ import { PdPlantManager } from "../source/PdPlantManager";
 import { PdSmallintParameterPanel } from "../source/PdSmallintParameterPanel";
 import { PdBooleanParameterPanel } from "../source/PdBooleanParameterPanel";
 import { PdListParameterPanel } from "../source/PdListParameterPanel";
+import { PdRealParameterPanel } from "../source/PdRealParameterPanel";
 
 PdDomain.createDefault()
 
@@ -242,6 +243,27 @@ const MyComponent = {
                 key: plant.name,
                 plant: plant,
                 param: domain.parameterManager.parameterForName("How to draw bud")
+            }),
+
+            m(PdRealParameterPanel, {
+                key: plant.name,
+                plant: plant,
+                param: domain.parameterManager.parameterForName("Angle between stipule and main stem")
+            }),
+            m(PdRealParameterPanel, {
+                key: plant.name,
+                plant: plant,
+                param: domain.parameterManager.parameterForName("Flower petal scale at full size")
+            }),
+            m(PdRealParameterPanel, {
+                key: plant.name,
+                plant: plant,
+                param: domain.parameterManager.parameterForName("Pedicel (flower stalk) length")
+            }),
+            m(PdRealParameterPanel, {
+                key: plant.name,
+                plant: plant,
+                param: domain.parameterManager.parameterForName("Stem width")
             }),
         )
     )
