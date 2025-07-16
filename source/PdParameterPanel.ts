@@ -683,7 +683,7 @@ export class PdParameterPanel {
     }
 
     viewFrame(contents: any) {
-        return m("div.ba.pa1", this.Caption, contents)
+        return m("div.ba.pa1", {style: { borderStyle: "outset" } }, this.Caption, contents)
     }
     
 }

@@ -11,6 +11,7 @@ import { PdBooleanParameterPanel } from "../source/PdBooleanParameterPanel";
 import { PdListParameterPanel } from "../source/PdListParameterPanel";
 import { PdRealParameterPanel } from "../source/PdRealParameterPanel";
 import { PdColorParameterPanel } from "../source/PdColorParameterPanel";
+import { PdHeaderParameterPanel } from "../source/PdHeaderParameterPanel";
 
 PdDomain.createDefault()
 
@@ -198,8 +199,8 @@ const MyComponent = {
             m("br"),
             m("button", { onclick: randomize } , "Randomize"),
         ),
-        plant && m("div.ba.pa1.flex-grow.w-100.h-100.overflow-scroll",
-            m("div", { key: plant.name }, "PANELS"),
+        plant && m("div.flex-grow.h-100.overflow-scroll",
+            m("div.tc.ba", { key: plant.name }, "Plant Parameters"),
             m(PdSmallintParameterPanel, {
                 key: plant.name,
                 plant: plant,
@@ -245,7 +246,6 @@ const MyComponent = {
                 plant: plant,
                 param: domain.parameterManager.parameterForName("How to draw bud")
             }),
-
             m(PdRealParameterPanel, {
                 key: plant.name,
                 plant: plant,
@@ -265,6 +265,11 @@ const MyComponent = {
                 key: plant.name,
                 plant: plant,
                 param: domain.parameterManager.parameterForName("Stem width")
+            }),
+            m(PdHeaderParameterPanel, {
+                key: plant.name,
+                plant: plant,
+                param: domain.parameterManager.parameterForName("Drawing petiole")
             }),
             m(PdColorParameterPanel, {
                 key: plant.name,
