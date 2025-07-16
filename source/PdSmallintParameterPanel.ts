@@ -5,6 +5,9 @@ import { int, intround, IntToStr, short } from "./common"
 import { PdParameterPanel } from "./PdParameterPanel"
 import { TRect } from "./TRect"
 import { intMax } from "./umath"
+import { PdChangeSmallintValueCommand } from "./updcom"
+import { TransferDirection } from "./PdPlant"
+import { FieldType, kNotArray } from "./PdParameter"
 
 // from conversion_common import *
 // import udebug
@@ -48,23 +51,21 @@ export class PdSmallintParameterPanel extends PdParameterPanel {
     //     this.slider.FOnKeyDown = this.sliderKeyDown
     //     this.slider.readOnly = this.param.readOnly
     //     this.slider.useDefaultSizeAndDraggerSize()
-    //     this.minValue = intround(this.param.lowerBound())
-    //     this.maxValue = intround(this.param.upperBound())
     //     this.slider.minValue = this.minValue
     //     this.slider.maxValue = this.maxValue
     // }
     
-    // checkValueAgainstBounds(value: short): short {
-    //     let result = 0
-    //     result = value
-    //     if (result < this.minValue) {
-    //         result = this.minValue
-    //     }
-    //     if (result > this.maxValue) {
-    //         result = this.maxValue
-    //     }
-    //     return result
-    // }
+    checkValueAgainstBounds(value: short): short {
+        let result = 0
+        result = value
+        if (result < this.minValue) {
+            result = this.minValue
+        }
+        if (result > this.maxValue) {
+            result = this.maxValue
+        }
+        return result
+    }
     
     // doMouseUp(Sender: TObject, Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
     //     let thePoint: TPoint
@@ -211,21 +212,19 @@ export class PdSmallintParameterPanel extends PdParameterPanel {
     //     }
     // }
     
-    // updateCurrentValue(aFieldIndex: int): void {
-    //     if ((this.plant !== null) && (this.param.fieldType === uparams.kFieldSmallint)) {
-    //         this.currentValue = this.plant.transferField(umath.kGetField, this.currentValue, this.param.fieldNumber, uparams.kFieldSmallint, uparams.kNotArray, false, null)
-    //         if (this.currentValue < this.minValue) {
-    //             this.minValue = this.currentValue
-    //             this.slider.minValue = this.minValue
-    //         }
-    //         if (this.currentValue > this.maxValue) {
-    //             this.maxValue = this.currentValue
-    //             this.slider.maxValue = this.maxValue
-    //         }
-    //     } else {
-    //         this.currentValue = 0
-    //     }
-    // }
+    updateCurrentValue(aFieldIndex: int): void {
+        if ((this.plant !== null) && (this.param.fieldType === FieldType.kFieldSmallint)) {
+            this.currentValue = this.plant.transferField(TransferDirection.kGetField, this.currentValue, this.param.fieldNumber, FieldType.kFieldSmallint, kNotArray, false, null)
+            if (this.currentValue < this.minValue) {
+                this.minValue = this.currentValue
+            }
+            if (this.currentValue > this.maxValue) {
+                this.maxValue = this.currentValue
+            }
+        } else {
+            this.currentValue = 0
+        }
+    }
     
     // updateDisplay(): void {
     //     if ((this.plant !== null) && (this.param.fieldType === uparams.kFieldSmallint)) {
@@ -402,8 +401,35 @@ export class PdSmallintParameterPanel extends PdParameterPanel {
     //     this.drawText(maxString, this.maxTextRect, false, false, true)
     // }
 
+    oninit(vnode: any) {
+        super.oninit(vnode)
+        this.minValue = intround(this.param.lowerBound())
+        this.maxValue = intround(this.param.upperBound())
+        this.updateCurrentValue(-1)
+    }
+
     view() {
-        return m("div", "PdSmallintParameterPanel UNFINISHED")
+        return this.viewFrame(
+            m("div", 
+                m("input[type=range].ml2", {
+                    min: this.minValue,
+                    max: this.maxValue,
+                    value: this.currentValue, 
+                    onchange: (event: any) => {
+                        this.currentValue = parseInt(event.target.value)
+                        // TODO: PDF fix to use MainForm command list
+                        // umain.MainForm.doCommand(updcom.PdChangeSmallintValueCommand().createCommandWithListOfPlants(umain.MainForm.selectedPlants, this.currentValue, this.param.fieldNumber, uparams.kNotArray, this.param.regrow))
+                        const aList = [this.plant]
+                        const aNewValue = this.currentValue
+                        const aFieldNumber = this.param.fieldNumber
+                        const anArrayIndex = 0
+                        const aRegrow = true
+                        new PdChangeSmallintValueCommand(aList, aNewValue, aFieldNumber, anArrayIndex, aRegrow).doCommand()
+                    }
+                }),
+                m("span.ml2", this.currentValue)
+            )
+        )
     }
     
 }

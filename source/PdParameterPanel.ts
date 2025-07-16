@@ -51,6 +51,7 @@ const kItemLabel = 0
 //150;
 // 13
 export class PdParameterPanel {
+    Caption: string = "Unlabelled"
     plant: PdPlant = new PdPlant()
     param: PdParameter = new PdParameter()
     readOnly: boolean = false
@@ -675,9 +676,14 @@ export class PdParameterPanel {
     //     return result
     // }
 
-    view() {
-        return m("div", "PdParameterPanel View NOT OVERRRIDEN")
+    oninit(vnode: any) {
+        this.plant = vnode.attrs.plant
+        this.param = vnode.attrs.param
+        this.Caption = this.param.getName()
+    }
+
+    viewFrame(contents: any) {
+        return m("div.ba", this.Caption, contents)
     }
     
 }
-

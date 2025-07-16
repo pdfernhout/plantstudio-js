@@ -940,7 +940,8 @@ export class PdCommandWithListOfPlants extends PdCommand {
                 }
             }
         }
-        MainForm.invalidateDrawingRect(redrawRect)
+        // TODO: PDF Fix availability of MainForma
+        if (MainForm) MainForm.invalidateDrawingRect(redrawRect)
     }
     
 }

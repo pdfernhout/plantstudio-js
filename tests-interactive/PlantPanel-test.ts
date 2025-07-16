@@ -194,9 +194,12 @@ const MyComponent = {
             m("br"),
             m("button", { onclick: randomize } , "Randomize"),
         ),
-        m("div.ba.pa1.flex-grow.w-100",
+        plant && m("div.ba.pa1.flex-grow.w-100",
             "PANELS",
-            m(PdSmallintParameterPanel)
+            m(PdSmallintParameterPanel, {
+                plant: plant,
+                param: domain.parameterManager.parameterForName("Age at which flowering starts")
+            })
         )
     )
 }
