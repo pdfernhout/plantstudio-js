@@ -409,13 +409,14 @@ export class PdSmallintParameterPanel extends PdParameterPanel {
     }
 
     view() {
+        this.updateCurrentValue(-1)
         return this.viewFrame(
             m("div", 
                 m("input[type=range].ml2", {
                     min: this.minValue,
                     max: this.maxValue,
                     value: this.currentValue, 
-                    onchange: (event: any) => {
+                    oninput: (event: any) => {
                         this.currentValue = parseInt(event.target.value)
                         // TODO: PDF fix to use MainForm command list
                         // umain.MainForm.doCommand(updcom.PdChangeSmallintValueCommand().createCommandWithListOfPlants(umain.MainForm.selectedPlants, this.currentValue, this.param.fieldNumber, uparams.kNotArray, this.param.regrow))

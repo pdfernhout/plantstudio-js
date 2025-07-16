@@ -199,6 +199,18 @@ const MyComponent = {
             m(PdSmallintParameterPanel, {
                 plant: plant,
                 param: domain.parameterManager.parameterForName("Age at which flowering starts")
+            }),
+            m(PdSmallintParameterPanel, {
+                plant: plant,
+                param: domain.parameterManager.parameterForName("Age at which flowering starts")
+            }),
+            m(PdSmallintParameterPanel, {
+                plant: plant,
+                param: domain.parameterManager.parameterForName("Minimum days for meristem to create")
+            }),
+            m(PdSmallintParameterPanel, {
+                plant: plant,
+                param: domain.parameterManager.parameterForName("Maximum days for meristem to create")
             })
         )
     )
