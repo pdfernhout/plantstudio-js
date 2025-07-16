@@ -13,12 +13,33 @@ function convertColor(color: number) {
     if (cachedColorString !== undefined) {
         return cachedColorString
     }
+    const result = convertColorNoCache(color)
+    cachedColors[color] = result
+    return result
+}
+
+export type ColorMap = { [index: string]: number }
+
+export function convertColorNoCache(color: number): string {
     var r = (color >> 16) & 255;
     var g = (color >> 8) & 255
     var b = color & 255
     const result = "#" + hexForValue(r) + hexForValue(g) + hexForValue(b)
-    cachedColors[color] = result
     return result
+}
+
+export function rgbForColor(color: number): ColorMap {
+    var r = (color >> 16) & 255;
+    var g = (color >> 8) & 255
+    var b = color & 255
+    return {r, g, b}
+}
+
+export function colorForRGB(rgb: ColorMap) {
+    var r = (rgb.r & 255) << 16;
+    var g = (rgb.g & 255) << 8
+    var b = (rgb.b & 255)
+    return r + g + b
 }
 
 function hexForValue(c: number) {

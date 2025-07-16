@@ -10,6 +10,7 @@ import { PdSmallintParameterPanel } from "../source/PdSmallintParameterPanel";
 import { PdBooleanParameterPanel } from "../source/PdBooleanParameterPanel";
 import { PdListParameterPanel } from "../source/PdListParameterPanel";
 import { PdRealParameterPanel } from "../source/PdRealParameterPanel";
+import { PdColorParameterPanel } from "../source/PdColorParameterPanel";
 
 PdDomain.createDefault()
 
@@ -264,6 +265,21 @@ const MyComponent = {
                 key: plant.name,
                 plant: plant,
                 param: domain.parameterManager.parameterForName("Stem width")
+            }),
+            m(PdColorParameterPanel, {
+                key: plant.name,
+                plant: plant,
+                param: domain.parameterManager.parameterForName("Internode color")
+            }),
+            m(PdColorParameterPanel, {
+                key: plant.name,
+                plant: plant,
+                param: domain.parameterManager.parameterForName("Leaf front face color")
+            }),
+            m(PdColorParameterPanel, {
+                key: plant.name,
+                plant: plant,
+                param: domain.parameterManager.parameterForName("Leaf back face color")
             }),
         )
     )
