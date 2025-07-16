@@ -13,6 +13,7 @@ import { PdRealParameterPanel } from "../source/PdRealParameterPanel";
 import { PdColorParameterPanel } from "../source/PdColorParameterPanel";
 import { PdHeaderParameterPanel } from "../source/PdHeaderParameterPanel";
 import { PdSCurveParameterPanel } from "../source/PdSCurveParameterPanel";
+import { PdTdoParameterPanel } from "../source/PdTdoParameterPanel";
 
 PdDomain.createDefault()
 
@@ -291,6 +292,11 @@ const MyComponent = {
                 key: plant.name,
                 plant: plant,
                 param: domain.parameterManager.parameterForName("Growth curve")
+            }),
+            m(PdTdoParameterPanel, {
+                key: plant.name,
+                plant: plant,
+                param: domain.parameterManager.parameterForName("Seedling leaf 3D object")
             }),
         )
     )
