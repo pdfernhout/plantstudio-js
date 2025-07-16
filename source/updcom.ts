@@ -905,7 +905,7 @@ export class PdCommandWithListOfPlants extends PdCommand {
             }
         }
         if (atLeastOnePlantHadAmendments) {
-            MainForm.updatePosingForFirstSelectedPlant()
+            if (MainForm) MainForm.updatePosingForFirstSelectedPlant()
         }
     }
     
@@ -925,7 +925,7 @@ export class PdCommandWithListOfPlants extends PdCommand {
             }
         }
         if (atLeastOnePlantHadAmendments) {
-            MainForm.updatePosingForFirstSelectedPlant()
+            if (MainForm) MainForm.updatePosingForFirstSelectedPlant()
         }
     }
     

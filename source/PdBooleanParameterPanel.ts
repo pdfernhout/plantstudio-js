@@ -229,7 +229,7 @@ export class PdBooleanParameterPanel extends PdParameterPanel {
     //     this.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsClear
     // }
 
-        oninit(vnode: any) {
+    oninit(vnode: any) {
         super.oninit(vnode)
         this.updateCurrentValue(-1)
     }
@@ -243,7 +243,7 @@ export class PdBooleanParameterPanel extends PdParameterPanel {
                         m('input.mr1', {
                             type: "radio",
                             // id: label,
-                            name: label,
+                            name: "Field: " + this.param.fieldID + label,
                             checked: (label === "yes" && this.currentValue) || (label === "no" && !this.currentValue),
                             value: label,
                             onchange: () => {

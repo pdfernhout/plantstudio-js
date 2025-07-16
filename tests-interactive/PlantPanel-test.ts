@@ -8,6 +8,7 @@ import { ColorDefs } from "../source/common";
 import { PdPlantManager } from "../source/PdPlantManager";
 import { PdSmallintParameterPanel } from "../source/PdSmallintParameterPanel";
 import { PdBooleanParameterPanel } from "../source/PdBooleanParameterPanel";
+import { PdListParameterPanel } from "../source/PdListParameterPanel";
 
 PdDomain.createDefault()
 
@@ -110,7 +111,7 @@ function randomize() {
 }
 
 const MyComponent = { 
-    view: () => m("div.ma2.flex.flex-row",
+    view: () => m("div.ma2.flex.flex-row.h-100",
         m("div",
             m("canvas.ba", {
                 width: 800,
@@ -195,7 +196,7 @@ const MyComponent = {
             m("br"),
             m("button", { onclick: randomize } , "Randomize"),
         ),
-        plant && m("div.ba.pa1.flex-grow.w-100",
+        plant && m("div.ba.pa1.flex-grow.w-100.h-100.overflow-scroll",
             m("div", { key: plant.name }, "PANELS"),
             m(PdSmallintParameterPanel, {
                 key: plant.name,
@@ -226,7 +227,22 @@ const MyComponent = {
                 key: plant.name,
                 plant: plant,
                 param: domain.parameterManager.parameterForName("Secondary branching (branches off branches)")
-            })
+            }),
+            m(PdListParameterPanel, {
+                key: plant.name,
+                plant: plant,
+                param: domain.parameterManager.parameterForName("Axillary meristem and leaf arrangement")
+            }),
+            m(PdListParameterPanel, {
+                key: plant.name,
+                plant: plant,
+                param: domain.parameterManager.parameterForName("Compound leaf shape")
+            }),
+            m(PdListParameterPanel, {
+                key: plant.name,
+                plant: plant,
+                param: domain.parameterManager.parameterForName("How to draw bud")
+            }),
         )
     )
 }
