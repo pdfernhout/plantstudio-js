@@ -12,6 +12,7 @@ import { PdListParameterPanel } from "../source/PdListParameterPanel";
 import { PdRealParameterPanel } from "../source/PdRealParameterPanel";
 import { PdColorParameterPanel } from "../source/PdColorParameterPanel";
 import { PdHeaderParameterPanel } from "../source/PdHeaderParameterPanel";
+import { PdSCurveParameterPanel } from "../source/PdSCurveParameterPanel";
 
 PdDomain.createDefault()
 
@@ -114,8 +115,8 @@ function randomize() {
 }
 
 const MyComponent = { 
-    view: () => m("div.ma2.flex.flex-row.h-100",
-        m("div",
+    view: () => m("div.flex.flex-row.h-100",
+        m("div.pa2",
             m("canvas.ba", {
                 width: 800,
                 height: 500,
@@ -199,7 +200,7 @@ const MyComponent = {
             m("br"),
             m("button", { onclick: randomize } , "Randomize"),
         ),
-        plant && m("div.flex-grow.h-100.overflow-scroll",
+        plant && m("div.flex-grow.h-100.pa2.overflow-scroll",
             m("div.tc.ba", { key: plant.name }, "Plant Parameters"),
             m(PdSmallintParameterPanel, {
                 key: plant.name,
@@ -285,6 +286,11 @@ const MyComponent = {
                 key: plant.name,
                 plant: plant,
                 param: domain.parameterManager.parameterForName("Leaf back face color")
+            }),
+            m(PdSCurveParameterPanel, {
+                key: plant.name,
+                plant: plant,
+                param: domain.parameterManager.parameterForName("Growth curve")
             }),
         )
     )
