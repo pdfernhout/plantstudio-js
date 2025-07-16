@@ -7,6 +7,7 @@ import { PdPlantDrawingAmendment } from "../source/PdPlantDrawingAmendment";
 import { ColorDefs } from "../source/common";
 import { PdPlantManager } from "../source/PdPlantManager";
 import { PdSmallintParameterPanel } from "../source/PdSmallintParameterPanel";
+import { PdBooleanParameterPanel } from "../source/PdBooleanParameterPanel";
 
 PdDomain.createDefault()
 
@@ -215,6 +216,16 @@ const MyComponent = {
                 key: plant.name,
                 plant: plant,
                 param: domain.parameterManager.parameterForName("Maximum days for meristem to create")
+            }),
+            m(PdBooleanParameterPanel, {
+                key: plant.name,
+                plant: plant,
+                param: domain.parameterManager.parameterForName("Plant is dicotyledonous (has two seedling leaves)")
+            }),
+            m(PdBooleanParameterPanel, {
+                key: plant.name,
+                plant: plant,
+                param: domain.parameterManager.parameterForName("Secondary branching (branches off branches)")
             })
         )
     )

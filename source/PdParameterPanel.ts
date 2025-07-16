@@ -683,7 +683,7 @@ export class PdParameterPanel {
     }
 
     viewFrame(contents: any) {
-        return m("div.ba", this.Caption, contents)
+        return m("div.ba.pa1", this.Caption, contents)
     }
     
 }
