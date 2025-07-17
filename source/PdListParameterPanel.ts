@@ -309,7 +309,6 @@ export class PdListParameterPanel extends PdParameterPanel {
     view() {
         this.updateCurrentValue(-1)
         if (!this.hasRadioButtons) throw new Error("Unfinished support for checkboxes")
-        console.log("this.choiceStrings", this.choiceStrings)
         return this.viewFrame(
             m("div",
                 this.choiceStrings.map((label, index) =>

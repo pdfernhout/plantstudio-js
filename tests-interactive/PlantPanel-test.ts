@@ -14,6 +14,7 @@ import { PdColorParameterPanel } from "../source/PdColorParameterPanel";
 import { PdHeaderParameterPanel } from "../source/PdHeaderParameterPanel";
 import { PdSCurveParameterPanel } from "../source/PdSCurveParameterPanel";
 import { PdTdoParameterPanel } from "../source/PdTdoParameterPanel";
+import { FieldType, IndexType, PdParameter } from "../source/PdParameter";
 
 PdDomain.createDefault()
 
@@ -202,104 +203,45 @@ const MyComponent = {
             m("button", { onclick: randomize } , "Randomize"),
         ),
         plant && m("div.flex-grow.h-100.pa2.overflow-scroll",
-            m("div.tc.ba", { key: plant.name }, "Plant Parameters"),
-            m(PdSmallintParameterPanel, {
-                key: plant.name,
-                plant: plant,
-                param: domain.parameterManager.parameterForName("Age at which flowering starts")
-            }),
-            m(PdSmallintParameterPanel, {
-                key: plant.name,
-                plant: plant,
-                param: domain.parameterManager.parameterForName("Age at which flowering starts")
-            }),
-            m(PdSmallintParameterPanel, {
-                key: plant.name,
-                plant: plant,
-                param: domain.parameterManager.parameterForName("Minimum days for meristem to create")
-            }),
-            m(PdSmallintParameterPanel, {
-                key: plant.name,
-                plant: plant,
-                param: domain.parameterManager.parameterForName("Maximum days for meristem to create")
-            }),
-            m(PdBooleanParameterPanel, {
-                key: plant.name,
-                plant: plant,
-                param: domain.parameterManager.parameterForName("Plant is dicotyledonous (has two seedling leaves)")
-            }),
-            m(PdBooleanParameterPanel, {
-                key: plant.name,
-                plant: plant,
-                param: domain.parameterManager.parameterForName("Secondary branching (branches off branches)")
-            }),
-            m(PdListParameterPanel, {
-                key: plant.name,
-                plant: plant,
-                param: domain.parameterManager.parameterForName("Axillary meristem and leaf arrangement")
-            }),
-            m(PdListParameterPanel, {
-                key: plant.name,
-                plant: plant,
-                param: domain.parameterManager.parameterForName("Compound leaf shape")
-            }),
-            m(PdListParameterPanel, {
-                key: plant.name,
-                plant: plant,
-                param: domain.parameterManager.parameterForName("How to draw bud")
-            }),
-            m(PdRealParameterPanel, {
-                key: plant.name,
-                plant: plant,
-                param: domain.parameterManager.parameterForName("Angle between stipule and main stem")
-            }),
-            m(PdRealParameterPanel, {
-                key: plant.name,
-                plant: plant,
-                param: domain.parameterManager.parameterForName("Flower petal scale at full size")
-            }),
-            m(PdRealParameterPanel, {
-                key: plant.name,
-                plant: plant,
-                param: domain.parameterManager.parameterForName("Pedicel (flower stalk) length")
-            }),
-            m(PdRealParameterPanel, {
-                key: plant.name,
-                plant: plant,
-                param: domain.parameterManager.parameterForName("Stem width")
-            }),
-            m(PdHeaderParameterPanel, {
-                key: plant.name,
-                plant: plant,
-                param: domain.parameterManager.parameterForName("Drawing petiole")
-            }),
-            m(PdColorParameterPanel, {
-                key: plant.name,
-                plant: plant,
-                param: domain.parameterManager.parameterForName("Internode color")
-            }),
-            m(PdColorParameterPanel, {
-                key: plant.name,
-                plant: plant,
-                param: domain.parameterManager.parameterForName("Leaf front face color")
-            }),
-            m(PdColorParameterPanel, {
-                key: plant.name,
-                plant: plant,
-                param: domain.parameterManager.parameterForName("Leaf back face color")
-            }),
-            m(PdSCurveParameterPanel, {
-                key: plant.name,
-                plant: plant,
-                param: domain.parameterManager.parameterForName("Growth curve")
-            }),
-            m(PdTdoParameterPanel, {
-                key: plant.name,
-                plant: plant,
-                param: domain.parameterManager.parameterForName("Seedling leaf 3D object")
-            }),
+            m("div", { key: plant.name },
+                m("div.tc.ba", "Plant Parameters"),
+                domain.sectionManager.sections.map(section => {
+                    return section.sectionItems.map(fieldNumber => {
+                        const param = domain.parameterManager.parameterForFieldNumber(fieldNumber)
+                        return panelForParam(param)
+                    })
+                })
+            )
         )
     )
+}
+
+// derived from UMain
+function panelForParam(param: PdParameter): any {
+    switch (param.fieldType) {
+        case FieldType.kFieldHeader:
+            return m(PdHeaderParameterPanel, { plant: plant, param: param })
+        case FieldType.kFieldEnumeratedList:
+            return m(PdListParameterPanel, { plant: plant, param: param })
+        case FieldType.kFieldThreeDObject:
+            return m(PdTdoParameterPanel, { plant: plant, param: param })
+        case FieldType.kFieldColor:
+            return m(PdColorParameterPanel, { plant: plant, param: param })
+        case FieldType.kFieldSmallint:
+            return m(PdSmallintParameterPanel, { plant: plant, param: param })
+        case FieldType.kFieldFloat:
+            if (param.indexCount() <= 1) {
+                return m(PdRealParameterPanel, { plant: plant, param: param })
+            } else if (param.indexType === IndexType.kIndexTypeSCurve) {
+                return m(PdSCurveParameterPanel, { plant: plant, param: param })
+            } else {
+                throw new Error("problem with field float")
+            }
+        case FieldType.kFieldBoolean:
+            return m(PdBooleanParameterPanel, { plant: plant, param: param })
+        default:
+            throw new Error("Problem: Unsupported parameter type in method TMainForm.updateParameterPanelsForSectionChange.")
+    }
 }
 
 fetchPlantFileNames()

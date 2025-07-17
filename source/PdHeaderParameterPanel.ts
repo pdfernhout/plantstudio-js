@@ -214,9 +214,13 @@ export class PdHeaderParameterPanel extends  PdParameterPanel {
     //     }
     // }
 
+    oninit(vnode: any) {
+        super.oninit(vnode)
+        this.Caption = this.param.originalSectionName + " :: " + this.param.getName()
+    }
+
     view() {
-        console.log("header")
-        return m("div.ba.pa1.bw1.tc", this.Caption)
+        return m("div.ba.pa1.bw1.tc.mt3", this.Caption)
     }
 }
 
