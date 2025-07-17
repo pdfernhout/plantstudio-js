@@ -21,24 +21,22 @@ function convertColor(color: number) {
 export type ColorMap = { [index: string]: number }
 
 export function convertColorNoCache(color: number): string {
-    var r = (color >> 16) & 255;
-    var g = (color >> 8) & 255
-    var b = color & 255
-    const result = "#" + hexForValue(r) + hexForValue(g) + hexForValue(b)
+    var rgb = rgbForColor(color)
+    const result = "#" + hexForValue(rgb.r) + hexForValue(rgb.g) + hexForValue(rgb.b)
     return result
 }
 
 export function rgbForColor(color: number): ColorMap {
-    var r = (color >> 16) & 255;
+    var b = (color >> 16) & 255;
     var g = (color >> 8) & 255
-    var b = color & 255
+    var r = color & 255
     return {r, g, b}
 }
 
 export function colorForRGB(rgb: ColorMap) {
-    var r = (rgb.r & 255) << 16;
+    var b = (rgb.b & 255) << 16;
     var g = (rgb.g & 255) << 8
-    var b = (rgb.b & 255)
+    var r = (rgb.r & 255)
     return r + g + b
 }
 
