@@ -513,7 +513,6 @@ export class PdPlantPart extends PdStreamableObject {
     }
     
     setColorsWithAmendmentAndReturnTrueIfNoOverrides(drawingTdo: boolean): boolean {
-        let result = false
         let amendmentToUse: PdPlantDrawingAmendment
         let color: TColorRef
         let backfaceColor: TColorRef
@@ -525,8 +524,8 @@ export class PdPlantPart extends PdStreamableObject {
         let myParentsAmendmentSaysIAmHidden: boolean
         let iAmSelectedInTheMainWindow: boolean
         let showHighlights: boolean
+        let result = true
         
-        result = true
         if (!domain.options.showPosingAtAll) {
             return result
         }
@@ -536,9 +535,10 @@ export class PdPlantPart extends PdStreamableObject {
         color = 0
         backfaceColor = 0
         lineColor = 0
-        iHaveAnAmendment = this.amendment !== null
+        // TODO: PDF verify OK to check changeColors to see that it is a color ammedment (was messing up carrot color otherwise until first param change)
+        iHaveAnAmendment = this.amendment !== null && this.amendment.changeColors
         iDontHaveAnAmendment = this.amendment === null
-        myParentHasAnAmendment = this.parentAmendment !== null
+        myParentHasAnAmendment = this.parentAmendment !== null && this.parentAmendment.changeColors
         myAmendmentSaysIAmHidden = (this.amendment !== null) && (this.amendment.hide)
         myParentsAmendmentSaysIAmHidden = (this.parentAmendment !== null) && (this.parentAmendment.hide)
         iAmSelectedInTheMainWindow = (this.partID === MainForm.selectedPlantPartID) && (MainForm.focusedPlant() === this.plant)
