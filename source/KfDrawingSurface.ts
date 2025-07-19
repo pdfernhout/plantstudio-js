@@ -8,7 +8,7 @@ import { KfTriangle } from "./KfTriangle"
 
 let cachedColors: {[id: number]: string} = {}
 
-function convertColor(color: number) {
+export function convertColor(color: number) {
     const cachedColorString = cachedColors[color]
     if (cachedColorString !== undefined) {
         return cachedColorString

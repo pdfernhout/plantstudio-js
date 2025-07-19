@@ -1,12 +1,15 @@
 // unit upp_scv
 
 import * as m from "mithril"
-import { float, int, intround } from "./common"
+import { ColorDefs, float, int, intround } from "./common"
 import { FieldType, TransferType } from "./PdParameter"
 import { PdParameterPanel } from "./PdParameterPanel"
 import { TransferDirection } from "./PdPlant"
 import { TRect } from "./TRect"
 import { TPoint } from "./TPoint"
+import { calcSCurveCoeffsWithResult, SCurveStructure, scurveWithResult } from "./SCurveStructure"
+import { convertColor } from "./KfDrawingSurface"
+import { domain } from "./PdDomain"
 
 // from conversion_common import *
 // import usliders
@@ -37,41 +40,41 @@ let gRecursing: boolean
 export class PdSCurveParameterPanel extends PdParameterPanel {
     editEnabled: boolean = false
     draggingPoint: boolean = false
-    currentValues: float[] /* 3 + 1 */ = Array(3+ 1)
+    currentValues: float[] = Array(4)
     minXValue: float = 0.0
     maxXValue: float = 0.0
     belowZero: boolean = false
     currentUnitIndex: int = 0
     graphRect: TRect = new TRect()
-    pointRects: TRect[] /* 1 + 1 */ = Array(1+ 1)
-    valueRects: TRect[] /* 3 + 1 */ = Array(3+ 1)
+    pointRects: TRect[] = Array(2)
+    valueRects: TRect[] = Array(4)
     unitTextRect: TRect = new TRect()
     
-    // // ----------------------------------------------------------------------------- initialize 
-    // initialize(): void {
-    //     let temp: float
+    // ----------------------------------------------------------------------------- initialize 
+    initialize(): void {
+        let temp: float
         
-    //     this.OnMouseDown = this.doMouseDown
-    //     this.OnMouseMove = this.doMouseMove
-    //     this.OnMouseUp = this.doMouseUp
-    //     this.OnKeyDown = this.doKeyDown
-    //     this.draggingPoint = false
-    //     this.currentUnitIndex = 0
-    //     if (udomain.domain.options.useMetricUnits) {
-    //         this.currentUnitIndex = this.param.unitMetric
-    //     } else {
-    //         this.currentUnitIndex = this.param.unitEnglish
-    //     }
-    //     this.minXValue = this.param.lowerBound()
-    //     this.maxXValue = this.param.upperBound()
-    //     this.belowZero = false
-    //     if ((this.minXValue < 0.0)) {
-    //         temp = abs(this.maxXValue)
-    //         this.maxXValue = abs(this.minXValue)
-    //         this.minXValue = temp
-    //         this.belowZero = true
-    //     }
-    // }
+        // this.OnMouseDown = this.doMouseDown
+        // this.OnMouseMove = this.doMouseMove
+        // this.OnMouseUp = this.doMouseUp
+        // this.OnKeyDown = this.doKeyDown
+        this.draggingPoint = false
+        this.currentUnitIndex = 0
+        if (domain.options.useMetricUnits) {
+            this.currentUnitIndex = this.param.unitMetric
+        } else {
+            this.currentUnitIndex = this.param.unitEnglish
+        }
+        this.minXValue = this.param.lowerBound()
+        this.maxXValue = this.param.upperBound()
+        this.belowZero = false
+        if ((this.minXValue < 0.0)) {
+            temp = Math.abs(this.maxXValue)
+            this.maxXValue = Math.abs(this.minXValue)
+            this.minXValue = temp
+            this.belowZero = true
+        }
+    }
     
     // // ------------------------------------------------------------------------ mouse and key 
     // doMouseDown(sender: TObject, Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
@@ -673,60 +676,68 @@ export class PdSCurveParameterPanel extends PdParameterPanel {
     //     }
     // }
     
-    // drawSCurve(draw: boolean, failed: boolean): void {
-    //     let i: int
-    //     let x: float
-    //     let y: float
-    //     let thisPoint: TPoint
-    //     let curve: SCurveStructure
-    //     let numPoints: int
+    drawSCurve(context: CanvasRenderingContext2D, draw: boolean): boolean {
+        let thisPoint: TPoint
+        let curve: SCurveStructure = new SCurveStructure()
+        let numPoints: int
         
-    //     failed = true
-    //     if (this.plant === null) {
-    //         return failed
-    //     }
-    //     numPoints = 100
-    //     // assumes that zero does NOT fall between x1 and x2, though one of these could be zero 
-    //     curve.x1 = this.currentValues[0]
-    //     curve.y1 = this.currentValues[1]
-    //     curve.x2 = this.currentValues[2]
-    //     curve.y2 = this.currentValues[3]
-    //     if (draw) {
-    //         this.Canvas.Pen.Color = UNRESOLVED.clBtnShadow
-    //     }
-    //     try {
-    //         failed = umath.calcSCurveCoeffsWithResult(curve, failed)
-    //         if (failed) {
-    //             return failed
-    //         }
-    //         for (i = 0; i <= numPoints - 1; i++) {
-    //             // delphi 2.0 wants this 
-    //             x = 0.0
-    //             y = 0.0
-    //             try {
-    //                 x = this.minXValue + (1.0 * i / numPoints) * (this.maxXValue - this.minXValue)
-    //             } catch (e) {
-    //                 return failed
-    //             }
-    //             y = umath.scurveWithResult(x, curve.c1, curve.c2, failed)
-    //             if (failed) {
-    //                 return failed
-    //             }
-    //             if (draw) {
-    //                 thisPoint = this.pointFromXY(x, y)
-    //                 if (i === 0) {
-    //                     this.Canvas.MoveTo(thisPoint.X, thisPoint.Y)
-    //                 } else {
-    //                     this.Canvas.LineTo(thisPoint.X, thisPoint.Y)
-    //                 }
-    //             }
-    //         }
-    //     } catch (e) {
-    //         return failed
-    //     }
-    //     failed = false
-    //     return failed
-    // }
+        let failed = true
+        if (this.plant === null) {
+            return failed
+        }
+        numPoints = 100
+        // assumes that zero does NOT fall between x1 and x2, though one of these could be zero 
+        curve.x1 = this.currentValues[0]
+        curve.y1 = this.currentValues[1]
+        curve.x2 = this.currentValues[2]
+        curve.y2 = this.currentValues[3]
+        if (draw) {
+            // TEST
+            context.fillStyle = "rgb(200 0 0)"
+            context.fillRect(0, 0, 300, 300)
+            context.fillStyle = "rgb(0 0 200)"
+            context.fillRect(10, 10, 280, 280)
+
+            context.fillStyle = convertColor(ColorDefs.clBtnShadow)
+            context.beginPath()
+        }
+        try {
+            failed = calcSCurveCoeffsWithResult(curve, failed)
+            if (failed) {
+                return failed
+            }
+            for (let i = 0; i <= numPoints - 1; i++) {
+                // delphi 2.0 wants this 
+                let x = 0.0
+                let y = 0.0
+                try {
+                    x = this.minXValue + (1.0 * i / numPoints) * (this.maxXValue - this.minXValue)
+                } catch (e) {
+                    return failed
+                }
+                [y, failed] = scurveWithResult(x, curve.c1, curve.c2)
+                if (failed) {
+                    return failed
+                }
+                if (draw) {
+                    thisPoint = this.pointFromXY(x, y)
+                    if (i === 0) {
+                        context.moveTo(thisPoint.X, thisPoint.Y)
+                    } else {
+                        context.lineTo(thisPoint.X, thisPoint.Y)
+                    }
+                }
+            }
+        } catch (e) {
+            return failed
+        }
+        if (draw) {
+            context.strokeStyle = convertColor(ColorDefs.clBtnShadow)
+            context.stroke()
+        }
+        failed = false
+        return failed
+    }
     
     // maxWidth(): int {
     //     let result = 0
@@ -790,12 +801,12 @@ export class PdSCurveParameterPanel extends PdParameterPanel {
     //     return result
     // }
     
-    // pointFromXY(x: float, y: float): TPoint {
-    //     let result = new TPoint()
-    //     result.X = this.graphRect.Left + intround(((x - this.minXValue) / (this.maxXValue - this.minXValue)) * (this.graphRect.Right - this.graphRect.Left))
-    //     result.Y = this.graphRect.Top + intround((1.0 - y) * (this.graphRect.Bottom - this.graphRect.Top))
-    //     return result
-    // }
+    pointFromXY(x: float, y: float): TPoint {
+        let result = new TPoint()
+        result.X = this.graphRect.Left + intround(((x - this.minXValue) / (this.maxXValue - this.minXValue)) * (this.graphRect.Right - this.graphRect.Left))
+        result.Y = this.graphRect.Top + intround((1.0 - y) * (this.graphRect.Bottom - this.graphRect.Top))
+        return result
+    }
     
     // stringForIndex(index: int): string {
     //     let result = ""
@@ -890,11 +901,51 @@ export class PdSCurveParameterPanel extends PdParameterPanel {
     //     }
     //     return result
     // }
+
+    oninit(vnode: any) {
+        super.oninit(vnode)
+        this.initialize()
+        this.graphRect.Left = 0
+        this.graphRect.Right = 300
+        this.graphRect.Top = 0
+        this.graphRect.Bottom = 300
+    }
     
     view() {
         this.updateCurrentValue(-1)
+        const self = this
+        console.log(this.currentValues)
         return this.viewFrame(
-            m("div", "S-Curve Panel UNFINISHED")
+            m("div", 
+                m("div", "S-CURVE (Unfinished)"),
+                m("canvas", {
+                    style: { height: "300px", width: "300px" },
+                    oncreate(vnode: m.VnodeDOM) {
+                        console.log("oncreate for canvas")
+                        const canvas = <HTMLCanvasElement>vnode.dom
+
+                        // Clear the canvas
+                        canvas.width = canvas.width
+
+                        const context = canvas.getContext("2d")
+                        if (!context) return
+
+                        self.drawSCurve(context, true)
+                    },
+                    onupdate(vnode: m.VnodeDOM) {
+                        console.log("onupdate for canvas")
+                        const canvas = <HTMLCanvasElement>vnode.dom
+
+                        // Clear the canvas
+                        canvas.width = canvas.width
+
+                        const context = canvas.getContext("2d")
+                        if (!context) return
+
+                        self.drawSCurve(context, true)
+                    }
+                })
+            )
         )
     }
 }
