@@ -515,7 +515,7 @@ export class PdRealParameterPanel extends PdParameterPanel {
                         new PdChangeRealValueCommand(aList, aNewValue, aFieldNumber, anArrayIndex, aRegrow).doCommand()
                     }
                 }),
-                m("span.ml2", this.currentValue)
+                m("span.ml2", Math.round(this.currentValue * 100000) / 100000)
             )
         )
     }
