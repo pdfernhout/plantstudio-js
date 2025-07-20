@@ -10,6 +10,7 @@ import { TPoint } from "./TPoint"
 import { calcSCurveCoeffsWithResult, SCurveStructure, scurveWithResult } from "./SCurveStructure"
 import { convertColor } from "./KfDrawingSurface"
 import { domain } from "./PdDomain"
+import { PdChangeRealValueCommand } from "./updcom"
 
 // from conversion_common import *
 // import usliders
@@ -693,10 +694,16 @@ export class PdSCurveParameterPanel extends PdParameterPanel {
         curve.y2 = this.currentValues[3]
         if (draw) {
             // TEST
+            // context.fillStyle = "rgb(200 0 0)"
+            // context.fillRect(0, 0, 300, 300)
+            // context.fillStyle = "rgb(0 0 200)"
+            // context.fillRect(10, 10, 280, 280)
+
             context.fillStyle = "rgb(200 0 0)"
-            context.fillRect(0, 0, 300, 300)
-            context.fillStyle = "rgb(0 0 200)"
-            context.fillRect(10, 10, 280, 280)
+            const point1 = this.pointFromXY(curve.x1, curve.y1)
+            context.fillRect(point1.X - 5, point1.Y - 5, 10, 10)
+            const point2 = this.pointFromXY(curve.x2, curve.y2)
+            context.fillRect(point2.X - 5, point2.Y - 5, 10, 10)
 
             context.fillStyle = convertColor(ColorDefs.clBtnShadow)
             context.beginPath()
@@ -711,7 +718,7 @@ export class PdSCurveParameterPanel extends PdParameterPanel {
                 let x = 0.0
                 let y = 0.0
                 try {
-                    x = this.minXValue + (1.0 * i / numPoints) * (this.maxXValue - this.minXValue)
+                    x =  + (1.0 * i / numPoints) * (this.maxXValue - this.minXValue)
                 } catch (e) {
                     return failed
                 }
@@ -914,18 +921,15 @@ export class PdSCurveParameterPanel extends PdParameterPanel {
     view() {
         this.updateCurrentValue(-1)
         const self = this
-        console.log(this.currentValues)
         return this.viewFrame(
             m("div", 
-                m("div", "S-CURVE (Unfinished)"),
                 m("canvas", {
                     style: { height: "300px", width: "300px" },
                     oncreate(vnode: m.VnodeDOM) {
                         console.log("oncreate for canvas")
                         const canvas = <HTMLCanvasElement>vnode.dom
-
-                        // Clear the canvas
-                        canvas.width = canvas.width
+                        canvas.width = 300
+                        canvas.height = 300
 
                         const context = canvas.getContext("2d")
                         if (!context) return
@@ -944,6 +948,19 @@ export class PdSCurveParameterPanel extends PdParameterPanel {
 
                         self.drawSCurve(context, true)
                     }
+                }),
+                this.currentValues.map((value, index) => {
+                    return m("div",
+                        ["x1", "y1", "x2", "y2"][index] + "",
+                        m("input", {
+                            value: value.toFixed(2),
+                            onchange: (event: any) => {
+                                // TODO: PDF temp for testing
+                                this.currentValues[index] = parseFloat(event.target.value)
+                                new PdChangeRealValueCommand([this.plant], this.currentValues[index], this.param.fieldNumber, index, this.param.regrow).doCommand()
+                            }
+                        })
+                    )
                 })
             )
         )

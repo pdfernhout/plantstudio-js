@@ -49,7 +49,7 @@ export function IntToStr(value: int) {
     return "" + value
 }
 
-export function StrToFloat(value: string) {
+export function StrToFloat(value: string): float {
     return parseFloat(value)
 }
 

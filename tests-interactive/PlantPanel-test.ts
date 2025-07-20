@@ -208,6 +208,7 @@ const MyComponent = {
                 domain.sectionManager.sections.map(section => {
                     return section.sectionItems.map(fieldNumber => {
                         const param = domain.parameterManager.parameterForFieldNumber(fieldNumber)
+                        // if ( param.fieldType !== FieldType.kFieldFloat || param.indexCount() <= 1) return undefined
                         return panelForParam(param)
                     })
                 })
