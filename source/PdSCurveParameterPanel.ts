@@ -11,6 +11,7 @@ import { calcSCurveCoeffsWithResult, SCurveStructure, scurveWithResult } from ".
 import { convertColor } from "./KfDrawingSurface"
 import { domain } from "./PdDomain"
 import { PdChangeRealValueCommand } from "./updcom"
+import { intMax } from "./umath"
 
 // from conversion_common import *
 // import usliders
@@ -419,40 +420,40 @@ export class PdSCurveParameterPanel extends PdParameterPanel {
     //     umain.MainForm.doCommand(updcom.PdChangeSCurvePointValueCommand().createCommandWithListOfPlants(umain.MainForm.selectedPlants, this.currentValues[xIndex], this.currentValues[yIndex], this.param.fieldNumber, index, this.param.regrow))
     // }
     
-    // keepPointInGraphRect(point: TPoint): void {
-    //     if (point.x < this.graphRect.Left) {
-    //         point.x = this.graphRect.Left
-    //     }
-    //     if (point.x > this.graphRect.Right) {
-    //         point.x = this.graphRect.Right
-    //     }
-    //     if (point.y < this.graphRect.Top) {
-    //         point.y = this.graphRect.Top
-    //     }
-    //     if (point.y > this.graphRect.Bottom) {
-    //         point.y = this.graphRect.Bottom
-    //     }
-    // }
+    keepPointInGraphRect(point: TPoint): void {
+        if (point.X < this.graphRect.Left) {
+            point.X = this.graphRect.Left
+        }
+        if (point.X > this.graphRect.Right) {
+            point.X = this.graphRect.Right
+        }
+        if (point.Y < this.graphRect.Top) {
+            point.Y = this.graphRect.Top
+        }
+        if (point.Y > this.graphRect.Bottom) {
+            point.Y = this.graphRect.Bottom
+        }
+    }
     
-    // keepPointsFromCrossing(point0: TPoint, point1: TPoint, movingPoint: int): void {
-    //     let closestPoint: TPoint
-    //     let proportion: float
-    //     let minDifference: float
+    keepPointsFromCrossing(point0: TPoint, point1: TPoint, movingPoint: int): void {
+        let closestPoint: TPoint
+        let proportion: float
+        let minDifference: float
         
-    //     proportion = 0.01
-    //     minDifference = (this.maxXValue - this.minXValue) * proportion
-    //     closestPoint = this.pointFromXY(minDifference, 0)
-    //     closestPoint.X = umath.intMax(1, closestPoint.X - this.graphRect.Left)
-    //     if (movingPoint === 0) {
-    //         if (point0.X > point1.X - closestPoint.X) {
-    //             point0.X = point1.X - closestPoint.X
-    //         }
-    //     } else {
-    //         if (point1.X < point0.X + closestPoint.X) {
-    //             point1.X = point0.X + closestPoint.X
-    //         }
-    //     }
-    // }
+        proportion = 0.01
+        minDifference = (this.maxXValue - this.minXValue) * proportion
+        closestPoint = this.pointFromXY(minDifference, 0)
+        closestPoint.X = intMax(1, closestPoint.X - this.graphRect.Left)
+        if (movingPoint === 0) {
+            if (point0.X > point1.X - closestPoint.X) {
+                point0.X = point1.X - closestPoint.X
+            }
+        } else {
+            if (point1.X < point0.X + closestPoint.X) {
+                point1.X = point0.X + closestPoint.X
+            }
+        }
+    }
     
     // // ------------------------------------------------------------------------------- updating 
     // updateEnabling(): void {
@@ -957,6 +958,15 @@ export class PdSCurveParameterPanel extends PdParameterPanel {
                             onchange: (event: any) => {
                                 // TODO: PDF temp for testing
                                 this.currentValues[index] = parseFloat(event.target.value)
+
+                                // const points = Array(2)
+                                // points[0] = this.pointFromXY(this.currentValues[0], this.currentValues[1])
+                                // points[1] = this.pointFromXY(this.currentValues[2], this.currentValues[3])
+                                // for (let i = 0; i <= 1; i++) {
+                                //     this.keepPointInGraphRect(points[i])
+                                //     this.keepPointsFromCrossing(points[0], points[1], 1)
+                                // }
+
                                 new PdChangeRealValueCommand([this.plant], this.currentValues[index], this.param.fieldNumber, index, this.param.regrow).doCommand()
                             }
                         })
