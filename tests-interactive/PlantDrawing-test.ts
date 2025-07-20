@@ -162,7 +162,7 @@ const MyComponent = {
                 )
             ),
         ),
-        m("div", { style: "user-select: none" }, "Click canvas to rotate leaf"),
+        m("div", { style: "user-select: none" }, "Click canvas to rotate plant"),
         m("br"),
         "Rotation",
         m("input[type=range].ml2", { min: 0, max: 360, value: amendment.xRotation, oninput: (event: any) => {
