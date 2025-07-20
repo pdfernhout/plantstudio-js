@@ -391,7 +391,7 @@ export class PdTdoParameterPanel extends PdParameterPanel {
                             value = newValue
                         })
                 ),
-                m("div.pa2"),
+                m("div.pa2", this.viewTDOCanvas()),
                 m("div.ma2.flex.justify-end", 
                     m("button", { onclick: () => {
                         this.tdo = oldTDO
@@ -405,48 +405,52 @@ export class PdTdoParameterPanel extends PdParameterPanel {
             )
         })
     }
+
+    viewTDOCanvas() {
+        const self = this
+        return m("div.flex",
+            m("canvas.ba", {
+                style: { height: "64px", width: "64px" },
+                oncreate(vnode: m.VnodeDOM) {
+                    console.log("oncreate for canvas")
+                    const canvas = <HTMLCanvasElement>vnode.dom
+                    canvas.width = 64
+                    canvas.height = 64
+                    const context = canvas.getContext("2d")
+                    if (!context) return
+                    self.drawTdo(context)
+                },
+                onupdate(vnode: m.VnodeDOM) {
+                    console.log("onupdate for canvas")
+                    const canvas = <HTMLCanvasElement>vnode.dom
+                    // Clear the canvas
+                    canvas.width = canvas.width
+                    const context = canvas.getContext("2d")
+                    if (!context) return
+                    self.drawTdo(context)
+                }
+            }),
+            m("div.ml2.flex.flex.flex-column.f7.mt1",
+                m("div",
+                    m("button", {onclick: () => {this.rotateAngle = this.rotateAngle + 10}}, "<"),
+                    m("button.ml1", {onclick: () => { this.rotateAngle = this.rotateAngle - 10}}, ">"),
+                    m("button.ml2", {onclick: () => { this.initialize() }}, "reset"),
+                ),
+                m("div.mt1",
+                    m("button", {onclick: () => {this.scale = this.scale + 0.1; this.recenterTdo()}}, "+"),
+                    m("button.ml1", {onclick: () => {this.scale = this.scale - 0.1; this.recenterTdo()}}, "-"),
+                )
+            ),
+        )
+    }
     
     view() {
         this.updateCurrentValue(-1)
-        const self = this
         return this.viewFrame(
             m("div.flex.flex-column",
                 m("div", "TDO: ", this.tdo?.name),
-                m("div.flex",
-                    m("canvas.ba", {
-                        style: { height: "64px", width: "64px" },
-                        oncreate(vnode: m.VnodeDOM) {
-                            console.log("oncreate for canvas")
-                            const canvas = <HTMLCanvasElement>vnode.dom
-                            canvas.width = 64
-                            canvas.height = 64
-                            const context = canvas.getContext("2d")
-                            if (!context) return
-                            self.drawTdo(context)
-                        },
-                        onupdate(vnode: m.VnodeDOM) {
-                            console.log("onupdate for canvas")
-                            const canvas = <HTMLCanvasElement>vnode.dom
-                            // Clear the canvas
-                            canvas.width = canvas.width
-                            const context = canvas.getContext("2d")
-                            if (!context) return
-                            self.drawTdo(context)
-                        }
-                    }),
-                    m("div.ml2.flex.flex.flex-column.f7.mt1",
-                        m("div",
-                            m("button", {onclick: () => {this.rotateAngle = this.rotateAngle + 10}}, "<"),
-                            m("button.ml1", {onclick: () => { this.rotateAngle = this.rotateAngle - 10}}, ">"),
-                            m("button.ml2", {onclick: () => { this.initialize() }}, "reset"),
-                        ),
-                        m("div.mt1",
-                            m("button", {onclick: () => {this.scale = this.scale + 0.1; this.recenterTdo()}}, "+"),
-                            m("button.ml1", {onclick: () => {this.scale = this.scale - 0.1; this.recenterTdo()}}, "-"),
-                        )
-                    ),
-                ),
-                m("button.mt1", { onclick: () => {
+                this.viewTDOCanvas(),
+                m("button.mt1.w4", { onclick: () => {
                     this.modalTDOChoice().then(() => m.redraw())
                 }},
                     "Choose TDO..."
