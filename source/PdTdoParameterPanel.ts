@@ -12,6 +12,7 @@ import { KfTurtle } from "./KfTurtle"
 import { customModal, modalPrompt, setModalCallback } from "./ModalInputView"
 import { domain } from "./PdDomain"
 import { viewSelect } from "./menu"
+import { messageForExceptionType } from "./usupport"
 
 // from conversion_common import *
 // import ubmpsupport
@@ -69,12 +70,12 @@ export class PdTdoParameterPanel extends PdParameterPanel {
     //     this.tdo = null
     // }
     
-    // initialize(): void {
-    //     this.rotateAngle = 0
-    //     this.scale = 0.2
-    //     this.position = Point(0, 0)
-    //     this.movingTdo = false
-    // }
+    initialize(): void {
+        this.rotateAngle = 0
+        this.scale = 0.2
+        this.position = new TPoint(0, 0)
+        this.movingTdo = false
+    }
     
     // updateEnabling(): void {
     //     PdParameterPanel.prototype.updateEnabling.call(this)
@@ -329,48 +330,48 @@ export class PdTdoParameterPanel extends PdParameterPanel {
         }
     }
     
-    // drawTdo(): void {
-    //     let bitmap: TBitmap
+    drawTdo(context: CanvasRenderingContext2D): void {
+        // let bitmap: TBitmap
         
-    //     if (this.plant === null) {
-    //         return
-    //     }
-    //     if (this.tdo === null) {
-    //         return
-    //     }
-    //     // set up clipping bitmap 
-    //     bitmap = delphi_compatability.TBitmap().Create()
-    //     bitmap.Width = kTdoSize
-    //     bitmap.Height = kTdoSize
-    //     bitmap.Canvas.Brush.Color = delphi_compatability.clWhite
-    //     bitmap.Canvas.Rectangle(0, 0, bitmap.Width, bitmap.Height)
-    //     // set up turtle 
-    //     const turtle = KfTurtle.defaultStartUsing()
-    //     try {
-    //         turtle.drawingSurface.pane = bitmap.Canvas
-    //         turtle.setDrawOptionsForDrawingTdoOnly()
-    //         // must be after pane and draw options set 
-    //         turtle.reset()
-    //         turtle.xyz(this.position.X, this.position.Y, 0)
-    //         try {
-    //             turtle.push()
-    //             turtle.rotateY(this.rotateAngle)
-    //             turtle.drawingSurface.recordingStart()
-    //             this.tdo.draw(turtle, this.scale, "", "", 0, 0)
-    //             turtle.drawingSurface.recordingStop()
-    //             turtle.drawingSurface.recordingDraw()
-    //             turtle.drawingSurface.clearTriangles()
-    //             turtle.pop()
-    //         } catch (Exception e) {
-    //             messageForExceptionType(e, "PdTdoParameterPanel.drawTdo")
-    //             bitmap.free
-    //         }
-    //         ubmpsupport.copyBitmapToCanvasWithGlobalPalette(bitmap, this.Canvas, this.tdoRect)
-    //     } finally {
-    //         KfTurtle.defaultStopUsing()
-    //         bitmap.free
-    //     }
-    // }
+        if (this.plant === null) {
+            return
+        }
+        if (this.tdo === null) {
+            return
+        }
+        // // set up clipping bitmap 
+        // bitmap = delphi_compatability.TBitmap().Create()
+        // bitmap.Width = kTdoSize
+        // bitmap.Height = kTdoSize
+        // bitmap.Canvas.Brush.Color = delphi_compatability.clWhite
+        // bitmap.Canvas.Rectangle(0, 0, bitmap.Width, bitmap.Height)
+        // set up turtle 
+        const turtle = KfTurtle.defaultStartUsing()
+        try {
+            turtle.drawingSurface.pane = context
+            turtle.setDrawOptionsForDrawingTdoOnly()
+            // must be after pane and draw options set 
+            turtle.reset()
+            turtle.xyz(this.position.X, this.position.Y, 0)
+            try {
+                turtle.push()
+                turtle.rotateY(this.rotateAngle)
+                turtle.drawingSurface.recordingStart()
+                this.tdo.draw(turtle, this.scale, "", "", 0, 0)
+                turtle.drawingSurface.recordingStop()
+                turtle.drawingSurface.recordingDraw()
+                turtle.drawingSurface.clearTriangles()
+                turtle.pop()
+            } catch (e: any) {
+                messageForExceptionType(e, "PdTdoParameterPanel.drawTdo")
+                // bitmap.free
+            }
+            // ubmpsupport.copyBitmapToCanvasWithGlobalPalette(bitmap, this.Canvas, this.tdoRect)
+        } finally {
+            KfTurtle.defaultStopUsing()
+            // bitmap.free
+        }
+    }
 
     async modalTDOChoice() {
         const oldTDO  = this.tdo
@@ -407,10 +408,45 @@ export class PdTdoParameterPanel extends PdParameterPanel {
     
     view() {
         this.updateCurrentValue(-1)
+        const self = this
         return this.viewFrame(
-            m("div",
+            m("div.flex.flex-column",
                 m("div", "TDO: ", this.tdo?.name),
-                m("button", { onclick: () => {
+                m("div.flex",
+                    m("canvas.ba", {
+                        style: { height: "64px", width: "64px" },
+                        oncreate(vnode: m.VnodeDOM) {
+                            console.log("oncreate for canvas")
+                            const canvas = <HTMLCanvasElement>vnode.dom
+                            canvas.width = 64
+                            canvas.height = 64
+                            const context = canvas.getContext("2d")
+                            if (!context) return
+                            self.drawTdo(context)
+                        },
+                        onupdate(vnode: m.VnodeDOM) {
+                            console.log("onupdate for canvas")
+                            const canvas = <HTMLCanvasElement>vnode.dom
+                            // Clear the canvas
+                            canvas.width = canvas.width
+                            const context = canvas.getContext("2d")
+                            if (!context) return
+                            self.drawTdo(context)
+                        }
+                    }),
+                    m("div.ml2.flex.flex.flex-column.f7.mt1",
+                        m("div",
+                            m("button", {onclick: () => {this.rotateAngle = this.rotateAngle + 10}}, "<"),
+                            m("button.ml1", {onclick: () => { this.rotateAngle = this.rotateAngle - 10}}, ">"),
+                            m("button.ml2", {onclick: () => { this.initialize() }}, "reset"),
+                        ),
+                        m("div.mt1",
+                            m("button", {onclick: () => {this.scale = this.scale + 0.1; this.recenterTdo()}}, "+"),
+                            m("button.ml1", {onclick: () => {this.scale = this.scale - 0.1; this.recenterTdo()}}, "-"),
+                        )
+                    ),
+                ),
+                m("button.mt1", { onclick: () => {
                     this.modalTDOChoice().then(() => m.redraw())
                 }},
                     "Choose TDO..."
@@ -419,4 +455,3 @@ export class PdTdoParameterPanel extends PdParameterPanel {
         )
     }
 }
-
