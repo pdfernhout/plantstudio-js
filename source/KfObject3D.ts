@@ -1,6 +1,6 @@
 // KfObject3D was unit Utdo
 
-import { float, long, ColorDefs, int, IntToStr, short, StrToFloat, intround, arrayRemove, isInTextIgnoreCase, StrToIntDef, MessageDialog, TextFile, TMemo, writeln, eof, readln, write, TColorRef, getRValue, getGValue, getBValue, ExtractFileName } from "./common"
+import { float, long, ColorDefs, int, IntToStr, short, StrToFloat, intround, arrayRemove, isInTextIgnoreCase, StrToIntDef, MessageDialog, TextFile, TMemo, writeln, eof, readln, write, TColorRef, getRValue, getGValue, getBValue, ExtractFileName, AssignFile, CloseFile, Reset } from "./common"
 import { TListCollection_streamUsingFiler } from "./temporary"
 import { KfPoint3D, KfPoint3D_matchXYZ, KfPoint3D_setXYZ, KfPoint3D_addPointToBoundsRect, KfPoint3D_subtract } from "./KfPoint3D"
 import { KfIndexTriangle } from "./KfIndexTriangle"
@@ -1031,3 +1031,29 @@ export class KfObject3D extends PdStreamableObject {
 //    writeln(outputFile, String.fromCharCode(9) + 'angle 90');
 //    writeln(outputFile, '}');
 //    
+
+export async function readTDOsFile(fileNameWithPath: string): Promise<KfObject3D[]> {
+    let inputFile: TextFile = new  TextFile()
+
+    const response = await fetch(fileNameWithPath)
+    if (!response.ok) {
+        alert("Failed to read TDO library file")
+        throw new Error("Failed to read TOD library file")
+    }
+    const fileContents = await response.text()
+    const tdos: KfObject3D[] = []
+        
+    AssignFile(inputFile, fileNameWithPath, fileContents)
+    try {
+        Reset(inputFile)
+        while (!eof(inputFile)) {
+            const newTdo = new KfObject3D()
+            newTdo.readFromFileStream(inputFile, kInTdoLibrary)
+            tdos.push(newTdo)
+        }
+    } finally {
+        CloseFile(inputFile)
+    }
+
+    return tdos
+}

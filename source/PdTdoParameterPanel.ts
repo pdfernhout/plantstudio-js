@@ -9,7 +9,9 @@ import { TRect } from "./TRect"
 import { FieldType, kNotArray } from "./PdParameter"
 import { TransferDirection } from "./PdPlant"
 import { KfTurtle } from "./KfTurtle"
-import { messageForExceptionType } from "./usupport"
+import { customModal, modalPrompt, setModalCallback } from "./ModalInputView"
+import { domain } from "./PdDomain"
+import { viewSelect } from "./menu"
 
 // from conversion_common import *
 // import ubmpsupport
@@ -369,11 +371,51 @@ export class PdTdoParameterPanel extends PdParameterPanel {
     //         bitmap.free
     //     }
     // }
+
+    async modalTDOChoice() {
+        const oldTDO  = this.tdo
+        const selections = domain.defaultTdoLibrary.map((tdo, index) => { return { label: tdo.name, tdo: tdo, value: "" + index}})
+        let value = selections.find(selection => (selection.tdo === this.tdo || selection.tdo.name == this.tdo.name))?.value
+        return customModal((resolve: any) => {
+            return m("div",
+                m("h3", "Choose TDO from library"),
+                m("label",
+                    "Type: ",
+                    viewSelect(
+                        selections, 
+                        value, 
+                        (newValue: string) => {
+                            this.tdo = selections[parseInt(newValue)].tdo
+                            this.plant.transferField(TransferDirection.kSetField, this.tdo, this.param.fieldNumber, FieldType.kFieldThreeDObject, kNotArray, false, null)
+                            value = newValue
+                        })
+                ),
+                m("div.pa2"),
+                m("div.ma2.flex.justify-end", 
+                    m("button", { onclick: () => {
+                        this.tdo = oldTDO
+                        this.plant.transferField(TransferDirection.kSetField, this.tdo, this.param.fieldNumber, FieldType.kFieldThreeDObject, kNotArray, false, null)
+                        resolve(false)}
+                    }, "Cancel"),
+                    m("button.ml2", { onclick: () => {
+                        resolve(true)
+                    }}, "OK")
+                )
+            )
+        })
+    }
     
     view() {
         this.updateCurrentValue(-1)
         return this.viewFrame(
-            m("div", "TDO Panel UNFINISHED")
+            m("div",
+                m("div", "TDO: ", this.tdo?.name),
+                m("button", { onclick: () => {
+                    this.modalTDOChoice().then(() => m.redraw())
+                }},
+                    "Choose TDO..."
+                )
+            )
         )
     }
 }

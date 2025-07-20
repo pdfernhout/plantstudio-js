@@ -9,6 +9,7 @@ import { PdParameterManager } from "./PdParameterManager"
 import { ExportFormats, FileExport3DOptionsStructure, nameFor3DExportType, ExportPart, Axis } from "./U3dexport"
 import { BreedingAndTimeSeriesOptionsStructure, kMaxBreedingSections } from "./PdPlant"
 import { PdPlantManager } from "./PdPlantManager"
+import { KfObject3D } from "./KfObject3D"
 
 // const
 const kMaxWizardQuestions = 30
@@ -276,6 +277,7 @@ export class PdDomain {
     iniFileBackupName: string = ""
     useIniFile: boolean = false
     defaultTdoLibraryFileName: string = ""
+    defaultTdoLibrary: KfObject3D[] = []
     mainWindowRect: TRect = new TRect()
     horizontalSplitterPos: short = 0
     verticalSplitterPos: short = 0

@@ -15,8 +15,17 @@ import { PdHeaderParameterPanel } from "../source/PdHeaderParameterPanel";
 import { PdSCurveParameterPanel } from "../source/PdSCurveParameterPanel";
 import { PdTdoParameterPanel } from "../source/PdTdoParameterPanel";
 import { FieldType, IndexType, PdParameter } from "../source/PdParameter";
+import { readTDOsFile } from "../source/KfObject3D";
+import { ModalInputView } from "../source/ModalInputView";
 
 PdDomain.createDefault()
+domain.defaultTdoLibraryFileName = "../plants/3D object library.tdo"
+
+async function fetchDefaultTDOLibrary() {
+    domain.defaultTdoLibrary = await readTDOsFile(domain.defaultTdoLibraryFileName)
+}
+
+fetchDefaultTDOLibrary()
 
 let plant: PdPlant | null = null
 const amendment = new PdPlantDrawingAmendment()
@@ -118,6 +127,7 @@ function randomize() {
 
 const MyComponent = { 
     view: () => m("div.flex.flex-row.h-100",
+        m(ModalInputView),
         m("div.pa2",
             m("canvas.ba", {
                 width: 800,
@@ -209,6 +219,7 @@ const MyComponent = {
                     return section.sectionItems.map(fieldNumber => {
                         const param = domain.parameterManager.parameterForFieldNumber(fieldNumber)
                         // if ( param.fieldType !== FieldType.kFieldFloat || param.indexCount() <= 1) return undefined
+                        // if (param.fieldType !== FieldType.kFieldThreeDObject) return undefined
                         return panelForParam(param)
                     })
                 })
