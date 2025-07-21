@@ -19,6 +19,7 @@ import { PdTdoParameterPanel } from "../source/PdTdoParameterPanel";
 import { FieldType, IndexType, PdParameter } from "../source/PdParameter";
 import { readTDOsFile } from "../source/KfObject3D";
 import { ModalInputView } from "../source/ModalInputView";
+import { TBreederForm } from "../source/TBreederForm";
 
 PdDomain.createDefault()
 domain.defaultTdoLibraryFileName = "../plants/3D object library.tdo"
@@ -170,12 +171,12 @@ const MyComponent = {
         ),
         plant && m("div.flex-grow.h-100.pa2.overflow-scroll",
             m("div", { key: plant.name },
-                m("div.tc.ba", "Plant Plant Breeder"),
+                m("div.tc.ba", "Plant Breeder test"),
+                m(TBreederForm),
             )
         )
     )
 }
-
 
 loadPlants("../plants/New version 2 plants.pla")
 

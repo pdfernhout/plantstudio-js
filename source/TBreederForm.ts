@@ -1,5 +1,6 @@
 // TBreederForm was unit Ubreedr
 
+import * as m from "mithril"
 import { TRect } from "./TRect"
 import { TPoint } from "./TPoint"
 import { MainForm, TFPBrushStyle, ucursor } from "./temporary"
@@ -31,7 +32,7 @@ const kOptionTabBlending = 2
 const kOptionTabNonNumeric = 3
 const kOptionTabTdos = 4
 
-// export class TBreederForm {
+export class TBreederForm {
 //     plantsDrawGrid: TDrawGrid = new TDrawGrid()
 //     /*
 //     BreederMenu: TMainMenu = new TMainMenu()
@@ -1077,5 +1078,9 @@ const kOptionTabTdos = 4
 //     BreederMenuOptionsCustomDrawClick(event: any): void {
 //         MainForm.MenuOptionsCustomDrawClick(MainForm)
 //     }
+
+    view() {
+        return m("div", "TBreederForm unfinished")
+    }
     
-// }
+}
