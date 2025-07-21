@@ -39,40 +39,11 @@ domain.options.nonHiddenPosedColor = ColorDefs.clGreen
 let plantAge = 90
 let zoom = 10
 
-const plantFileNames: string[] = [] 
-let selectedPlantFileIndex = 0
-
 const plantManager = new PdPlantManager()
 let loadedPlants = false
 let selectedPlantIndex = 0
 
 const plantPath = "../plants/"
-
-async function fetchPlantFileNames() {
-    const response = await fetch(plantPath)
-    if (!response.ok) {
-        alert("Problem loading plants index")
-        return
-    }
-    // Kludgy way to get list of plant file names
-    // Assumes testing with: npm run test-interactive
-    const fileContents = await response.text()
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(fileContents, "text/html")
-    const links = doc.querySelectorAll("a")
-    for (let link of links) {
-        const parts = link.href.split("/")
-        const fileName = parts[parts.length - 1]
-        if (fileName.endsWith(".pla")) {
-            plantFileNames.push(decodeURIComponent(fileName))
-        }
-    }
-    loadPlants(plantFileNames[0])
-}
-
-async function selectPlantFile(plantFileIndex: number) {
-    loadPlants(plantFileNames[plantFileIndex])
-}
 
 async function loadPlants(fileName: string) {
     // const response = await fetch("../plants/test.pla")
@@ -150,23 +121,6 @@ const MyComponent = {
                     amendment.xRotation = (amendment.xRotation + 4) % 360
                 }
             }),
-            m("div.mb2", "Library: ",
-                !plantFileNames.length && "Loading..",
-                plantFileNames.length && m("select",
-                    {
-                        onchange: (event: any) => {
-                            selectedPlantFileIndex = event.target.value
-                            selectPlantFile(selectedPlantFileIndex)
-                        }
-                    },
-                    plantFileNames.map((plantFileName, index) =>
-                        m("option", {
-                            value: index,
-                            selected: (index === selectedPlantFileIndex ? "selected" : undefined),
-                        }, plantFileName.split(".")[0])
-                    )
-                ),
-            ),
             m("div.mb2", "Plant: ",
                 !loadedPlants && "Loading..",
                 loadedPlants && m("select",
@@ -216,50 +170,14 @@ const MyComponent = {
         ),
         plant && m("div.flex-grow.h-100.pa2.overflow-scroll",
             m("div", { key: plant.name },
-                m("div.tc.ba", "Plant Parameters"),
-                domain.sectionManager.sections.map(section => {
-                    return section.sectionItems.map(fieldNumber => {
-                        const param = domain.parameterManager.parameterForFieldNumber(fieldNumber)
-                        // if ( param.fieldType !== FieldType.kFieldFloat || param.indexCount() <= 1) return undefined
-                        // if (param.fieldType !== FieldType.kFieldThreeDObject) return undefined
-                        return panelForParam(param)
-                    })
-                })
+                m("div.tc.ba", "Plant Plant Breeder"),
             )
         )
     )
 }
 
-// derived from UMain
-function panelForParam(param: PdParameter): any {
-    switch (param.fieldType) {
-        case FieldType.kFieldHeader:
-            return m(PdHeaderParameterPanel, { plant: plant, param: param })
-        case FieldType.kFieldEnumeratedList:
-            return m(PdListParameterPanel, { plant: plant, param: param })
-        case FieldType.kFieldThreeDObject:
-            return m(PdTdoParameterPanel, { plant: plant, param: param })
-        case FieldType.kFieldColor:
-            return m(PdColorParameterPanel, { plant: plant, param: param })
-        case FieldType.kFieldSmallint:
-            return m(PdSmallintParameterPanel, { plant: plant, param: param })
-        case FieldType.kFieldFloat:
-            if (param.indexCount() <= 1) {
-                return m(PdRealParameterPanel, { plant: plant, param: param })
-            } else if (param.indexType === IndexType.kIndexTypeSCurve) {
-                return m(PdSCurveParameterPanel, { plant: plant, param: param })
-            } else {
-                throw new Error("problem with field float")
-            }
-        case FieldType.kFieldBoolean:
-            return m(PdBooleanParameterPanel, { plant: plant, param: param })
-        default:
-            throw new Error("Problem: Unsupported parameter type in method TMainForm.updateParameterPanelsForSectionChange.")
-    }
-}
 
-fetchPlantFileNames()
-// loadPlants("../plants/New version 2 plants.pla")
+loadPlants("../plants/New version 2 plants.pla")
 
 m.mount(document.body, MyComponent)
 m.redraw()
