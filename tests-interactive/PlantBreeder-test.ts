@@ -99,6 +99,17 @@ function randomize() {
     if (plant) plant.randomize()
 }
 
+function setPlant(aPlant: PdPlant) {
+    plant = aPlant
+    plant.basePoint_mm.x = 400
+    plant.basePoint_mm.y = 450
+    plant.drawingScale_PixelsPerMm = zoom / 10
+
+    amendment.partID = plant.firstPhytomer!.partID
+    amendment.addRotations = true
+    plant.addAmendment(amendment)
+}
+
 const MyComponent = { 
     view: () => m("div.flex.flex-row.h-100",
         m(ModalInputView),
@@ -169,10 +180,10 @@ const MyComponent = {
             m("br"),
             m("button", { onclick: randomize } , "Randomize"),
         ),
-        plant && m("div.flex-grow.h-100.pa2.overflow-scroll",
-            m("div", { key: plant.name },
-                m("div.tc.ba", "Plant Breeder test"),
-                m(TBreederForm, { testPlant: plant}),
+        m("div.flex-grow.h-100.pa2.overflow-scroll",
+            m("div",
+                m("div.tc.b", "Plant Breeder test (doubleclick to breed)"),
+                m(TBreederForm, { plant, setPlant }),
             )
         )
     )

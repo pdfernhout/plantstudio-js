@@ -1089,7 +1089,7 @@ export class TBreederForm {
             return m("div.ba.bw2.b--green", 
                 "The breeder is empty. Please add a plant to get started.",
                 m("button", { onclick: () => {
-                    this.generations.push(new PdGeneration(vnode.attrs.testPlant, null, 1.0))
+                    this.generations.push(new PdGeneration(vnode.attrs.plant, null, 1.0))
                 }}, "Add Plant")
             )
         } else {
@@ -1148,6 +1148,9 @@ export class TBreederForm {
                                 if (plant) context.drawImage(plant.previewCache.canvas, 0, 0)
                             },
                             onclick: () => {
+                                vnode.attrs.setPlant(plant)
+                            },
+                            ondblclick: () => {
                                 // Breed plant
                                 const newGeneration = new PdGeneration(null, null, 1.0)
                                 newGeneration.breedFromParents(plant, null, 1.0)
