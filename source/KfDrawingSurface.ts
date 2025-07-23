@@ -169,37 +169,11 @@ export class KfDrawingSurface {
                 }
             }
         }
-        this.sortTriangles(0, this.numTrianglesUsed - 1)
+        this.sortTriangles()
     }
     
-    sortTriangles(left: int, right: int): void {
-        function exchange(triangles: KfTriangle[], i: number, j: number) {
-            const a = triangles[i]
-            const b = triangles[j]
-            triangles[i] = b
-            triangles[j] = a
-        }
-        
-        if (right > left) {
-            const z = this.triangles[right].zForSorting
-            let i = left - 1
-            let j = right
-            while (true) {
-                do {
-                    i = i + 1
-                } while (!(!(this.triangles[i].zForSorting < z)))
-                do {
-                    j = j - 1
-                } while (!((j < i) || (!(this.triangles[j].zForSorting > z))))
-                if (i >= j) {
-                    break
-                }
-                exchange(this.triangles, i, j)
-            }
-            exchange(this.triangles, i, right)
-            this.sortTriangles(left, j)
-            this.sortTriangles(i + 1, right)
-        }
+    sortTriangles(): void {
+        this.triangles.sort((a, b) => a.zForSorting - b.zForSorting)
     }
     
     // ----------------------- KfDrawingSurface drawing
