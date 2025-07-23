@@ -106,7 +106,7 @@ export class KfDrawingSurface {
     plantPartIDForPoint(point: TPoint): long {
         let closestDistanceSoFar = 0
         let closestPartID = -1
-        for (let i = 0; i < this.triangles.length; i++) {
+        for (let i = 0; i < this.numTrianglesUsed; i++) {
             const triangle = this.triangles[i]
             if (triangle.isLine) {
                 const centerX = (triangle.points[0].x + triangle.points[1].x) / 2.0
