@@ -77,6 +77,7 @@ async function createPlant(plantIndex: number) {
 
     amendment.partID = plant.firstPhytomer!.partID
     amendment.addRotations = true
+    amendment.xRotation = 0
     plant.addAmendment(amendment)
     // plant.firstPhytomer!.amendment = amendment
 
@@ -153,8 +154,7 @@ const MyComponent = {
             m("div", { style: "user-select: none" }, "Click canvas to rotate plant"),
             m("br"),
             "Rotation",
-            m("input[type=range].ml2", { min: 0, max: 360, value: amendment.xRotation, oninput: (event: any) => {
-                // console.log("slider", event, event.target.value)
+            m("input[type=range].ml2", { min: -360, max: 360, value: amendment.xRotation, oninput: (event: any) => {
                 amendment.xRotation = parseInt(event.target.value)
             }}),
             m("span.ml2", amendment.xRotation),
@@ -171,7 +171,6 @@ const MyComponent = {
             m("br"),
             "Zoom",
             m("input[type=range].ml4", { min: 1, max: 100, value: zoom, oninput: (event: any) => {
-                // console.log("slider", event, event.target.value)
                 zoom = parseInt(event.target.value)
                 if (plant) plant.drawingScale_PixelsPerMm = zoom / 10
             }}),
