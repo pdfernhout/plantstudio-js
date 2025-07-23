@@ -6,7 +6,7 @@ import { TPoint } from "./TPoint"
 import { MainForm, TFPBrushStyle, ucursor } from "./temporary"
 import { BreederVariation, domain, DrawMode } from "./PdDomain"
 import { intround, short, long, ColorDefs, int, IntToStr, MessageDialog, arrayRemove } from "./common"
-import { PdPlant, BreedingAndTimeSeriesOptionsStructure } from "./PdPlant"
+import { PdPlant, BreedingAndTimeSeriesOptionsStructure, kDrawNow, kDontConsiderDomainScale } from "./PdPlant"
 import { PdGeneration } from "./PdGeneration"
 import { PdCommand } from "./PdCommand"
 import { PdBreedFromParentsCommand, PdMakeTimeSeriesCommand, PdDeleteBreederGenerationCommand, PdDeleteAllBreederGenerationsCommand, PdRandomizeCommand, PdChangeBreedingAndTimeSeriesOptionsCommand, PdPasteCommand, PdReplaceBreederPlant } from "./updcom"
@@ -98,6 +98,8 @@ export class TBreederForm {
 //     */
         selectedRow: short = 0
         generations: PdGeneration[] = []
+        DefaultColWidth = 200
+        DefaultRowHeight = 200
 //     dragPlantStartPoint: TPoint = new TPoint()
 //     lightUpCell: TPoint = new TPoint()
 //     numBreederPlantsCopiedThisSession: long = 0
@@ -236,82 +238,86 @@ export class TBreederForm {
 //         this.plantsDrawGrid.Update()
 //     }
     
-//     plantsDrawGridDrawCell(event: any, Col: long, Row: long, rect: TRect, State: TGridDrawState): void {        
-//         try {
-//             this.plantsDrawGrid.Canvas.Font = this.plantsDrawGrid.Font
-//             this.plantsDrawGrid.Canvas.Font.Color = ColorDefs.clBlack
-//             if (Col === 0) {
-//                 //if (row = selectedRow) and (generations.count > 0) then
-//                 //plantsDrawGrid.canvas.brush.color := clBlue
-//                 //else
-//                 this.plantsDrawGrid.Canvas.Brush.Color = ColorDefs.clWhite
-//                 this.plantsDrawGrid.Canvas.Pen.Color = this.plantsDrawGrid.Canvas.Brush.Color
-//                 this.plantsDrawGrid.Canvas.Rectangle(rect.Left, rect.Top, rect.Right, rect.Bottom)
-//                 if (Row > this.generations.length - 1) {
-//                     return
-//                 }
-//                 //if row = selectedRow then
-//                 //plantsDrawGrid.canvas.font.color := clWhite;
-//                 const textDrawRect: TRect = new TRect()
-//                 textDrawRect.Left = rect.Left + rect.width / 2 - this.plantsDrawGrid.Canvas.TextWidth(IntToStr(Row + 1)) / 2
-//                 textDrawRect.Top = rect.Top + rect.height / 2 - this.plantsDrawGrid.Canvas.TextHeight("0") / 2
-//                 this.plantsDrawGrid.Canvas.TextOut(textDrawRect.Left, textDrawRect.Top, IntToStr(Row + 1))
-//                 return
-//             } else {
-//                 this.plantsDrawGrid.Canvas.Brush.Color = ColorDefs.clWhite
-//                 this.plantsDrawGrid.Canvas.Pen.Width = 1
-//                 this.plantsDrawGrid.Canvas.Pen.Color = ColorDefs.clWhite
-//                 this.plantsDrawGrid.Canvas.Rectangle(rect.Left, rect.Top, rect.Right, rect.Bottom)
-//             }
-//             const generation = this.generationForIndex(Row)
-//             if (generation === null) {
-//                 return
-//             }
-//             const plant = generation.plantForIndex(Col - 1)
-//             if (plant === null) {
-//                 return
-//             }
-//             if (!plant.previewCacheUpToDate) {
-//                 // draw plant 
-//                 // draw gray solid box to show delay for drawing plant cache
-//                 this.plantsDrawGrid.Canvas.Brush.Style = TFPBrushStyle.bsSolid
-//                 this.plantsDrawGrid.Canvas.Brush.Color = ColorDefs.clSilver
-//                 this.plantsDrawGrid.Canvas.Pen.Color = ColorDefs.clSilver
-//                 this.plantsDrawGrid.Canvas.Rectangle(rect.Left + 1, rect.Top + 1, rect.Right, rect.Bottom)
-//                 // draw plant preview cache
-//                 plant.fixedPreviewScale = false
-//                 plant.fixedDrawPosition = false
-//                 plant.drawPreviewIntoCache(new TPoint(this.plantsDrawGrid.DefaultColWidth, this.plantsDrawGrid.DefaultRowHeight), uplant.kDontConsiderDomainScale, umain.kDrawNow)
-//             }
-//             plant.previewCache.Transparent = false
-//             ubmpsupport.copyBitmapToCanvasWithGlobalPalette(plant.previewCache, this.plantsDrawGrid.Canvas, rect)
-//             // draw selection rectangle 
-//             this.plantsDrawGrid.Canvas.Brush.Style = TFPBrushStyle.bsClear
-//             this.plantsDrawGrid.Canvas.Pen.Width = 2
-//             if ((Col === this.lightUpCell.X) && (Row === this.lightUpCell.Y)) {
-//                 this.plantsDrawGrid.Canvas.Pen.Color = ColorDefs.clAqua
-//             } else if (Row === this.selectedRow) {
-//                 if (plant === generation.firstSelectedPlant()) {
-//                     this.plantsDrawGrid.Canvas.Pen.Color = domain.options.firstSelectionRectangleColor
-//                 } else if (plant === generation.secondSelectedPlant()) {
-//                     this.plantsDrawGrid.Canvas.Pen.Color = domain.options.multiSelectionRectangleColor
-//                 } else {
-//                     this.plantsDrawGrid.Canvas.Pen.Color = ColorDefs.clSilver
-//                 }
-//             } else {
-//                 this.plantsDrawGrid.Canvas.Pen.Color = ColorDefs.clSilver
-//             }
-//             this.plantsDrawGrid.Canvas.Rectangle(rect.Left + 1, rect.Top + 1, rect.Right, rect.Bottom)
-//             if (plant === generation.firstParent) {
-//                 // draw parent indicator 
-//                 this.plantsDrawGrid.Canvas.TextOut(rect.Left + 4, rect.Top + 2, "p1")
-//             } else if (plant === generation.secondParent) {
-//                 this.plantsDrawGrid.Canvas.TextOut(rect.Left + 4, rect.Top + 2, "p2")
-//             }
-//         } finally {
-//             ucursor.cursor_stopWait()
-//         }
-//     }
+    plantsDrawGridDrawCell(context: CanvasRenderingContext2D, Col: long, Row: long /*, rect: TRect, State: TGridDrawState*/): void {        
+        try {
+            // this.plantsDrawGrid.Canvas.Font = this.plantsDrawGrid.Font
+            // this.plantsDrawGrid.Canvas.Font.Color = ColorDefs.clBlack
+            // if (Col === 0) {
+            //     //if (row = selectedRow) and (generations.count > 0) then
+            //     //plantsDrawGrid.canvas.brush.color := clBlue
+            //     //else
+            //     this.plantsDrawGrid.Canvas.Brush.Color = ColorDefs.clWhite
+            //     this.plantsDrawGrid.Canvas.Pen.Color = this.plantsDrawGrid.Canvas.Brush.Color
+            //     this.plantsDrawGrid.Canvas.Rectangle(rect.Left, rect.Top, rect.Right, rect.Bottom)
+            //     if (Row > this.generations.length - 1) {
+            //         return
+            //     }
+            //     //if row = selectedRow then
+            //     //plantsDrawGrid.canvas.font.color := clWhite;
+            //     const textDrawRect: TRect = new TRect()
+            //     textDrawRect.Left = rect.Left + rect.width / 2 - this.plantsDrawGrid.Canvas.TextWidth(IntToStr(Row + 1)) / 2
+            //     textDrawRect.Top = rect.Top + rect.height / 2 - this.plantsDrawGrid.Canvas.TextHeight("0") / 2
+            //     this.plantsDrawGrid.Canvas.TextOut(textDrawRect.Left, textDrawRect.Top, IntToStr(Row + 1))
+            //     return
+            // } else {
+            //     this.plantsDrawGrid.Canvas.Brush.Color = ColorDefs.clWhite
+            //     this.plantsDrawGrid.Canvas.Pen.Width = 1
+            //     this.plantsDrawGrid.Canvas.Pen.Color = ColorDefs.clWhite
+            //     this.plantsDrawGrid.Canvas.Rectangle(rect.Left, rect.Top, rect.Right, rect.Bottom)
+            // }
+            const generation = this.generationForIndex(Row)
+            if (generation === null) {
+                return
+            }
+            const plant = generation.plantForIndex(Col)
+            if (plant === null) {
+                return
+            }
+            if (!plant.previewCacheUpToDate) {
+                // draw plant 
+                // // draw gray solid box to show delay for drawing plant cache
+                // this.plantsDrawGrid.Canvas.Brush.Style = TFPBrushStyle.bsSolid
+                // this.plantsDrawGrid.Canvas.Brush.Color = ColorDefs.clSilver
+                // this.plantsDrawGrid.Canvas.Pen.Color = ColorDefs.clSilver
+                // this.plantsDrawGrid.Canvas.Rectangle(rect.Left + 1, rect.Top + 1, rect.Right, rect.Bottom)
+                // draw plant preview cache
+                plant.fixedPreviewScale = false
+                plant.fixedDrawPosition = false
+                // Clear cache
+                plant.previewCache.Width = plant.previewCache.Width
+                plant.drawPreviewIntoCache(new TPoint(this.DefaultColWidth, this.DefaultRowHeight), kDontConsiderDomainScale, kDrawNow)
+            }
+
+            plant.previewCache.Transparent = false
+            context.drawImage(plant.previewCache.canvas, 0, 0)
+
+            // draw selection rectangle 
+            // this.plantsDrawGrid.Canvas.Brush.Style = TFPBrushStyle.bsClear
+            // this.plantsDrawGrid.Canvas.Pen.Width = 2
+            // if ((Col === this.lightUpCell.X) && (Row === this.lightUpCell.Y)) {
+            //     this.plantsDrawGrid.Canvas.Pen.Color = ColorDefs.clAqua
+            // } else if (Row === this.selectedRow) {
+            //     if (plant === generation.firstSelectedPlant()) {
+            //         this.plantsDrawGrid.Canvas.Pen.Color = domain.options.firstSelectionRectangleColor
+            //     } else if (plant === generation.secondSelectedPlant()) {
+            //         this.plantsDrawGrid.Canvas.Pen.Color = domain.options.multiSelectionRectangleColor
+            //     } else {
+            //         this.plantsDrawGrid.Canvas.Pen.Color = ColorDefs.clSilver
+            //     }
+            // } else {
+            //     this.plantsDrawGrid.Canvas.Pen.Color = ColorDefs.clSilver
+            // }
+            // this.plantsDrawGrid.Canvas.Rectangle(rect.Left + 1, rect.Top + 1, rect.Right, rect.Bottom)
+            // if (plant === generation.firstParent) {
+            //     // draw parent indicator 
+            //     this.plantsDrawGrid.Canvas.TextOut(rect.Left + 4, rect.Top + 2, "p1")
+            // } else if (plant === generation.secondParent) {
+            //     this.plantsDrawGrid.Canvas.TextOut(rect.Left + 4, rect.Top + 2, "p2")
+            // }
+        } finally {
+            ucursor.cursor_stopWait()
+        }
+    }
     
 //     invalidateGridCell(column: long, row: long): void {
 //         let cellRectOver: TRect
@@ -1011,18 +1017,18 @@ export class TBreederForm {
 //         return result
 //     }
     
-//     generationForIndex(index: short): PdGeneration | null {
-//         if (index < 0) {
-//             return null
-//         }
-//         if (index > this.generations.length - 1) {
-//             return null
-//         }
-//         if (this.generations[index] === null) {
-//             return null
-//         }
-//         return this.generations[index]
-//     }
+    generationForIndex(index: short): PdGeneration | null {
+        if (index < 0) {
+            return null
+        }
+        if (index > this.generations.length - 1) {
+            return null
+        }
+        if (this.generations[index] === null) {
+            return null
+        }
+        return this.generations[index]
+    }
     
 //     plantForRowAndColumn(row: short, column: short): PdPlant | null {
 //         const generation = this.generationForIndex(row)
@@ -1092,6 +1098,7 @@ export class TBreederForm {
     }
 
     view(vnode: any) {
+        const self = this
         return m("div",
             m("TDrawGrid.plantsDrawGrid", {
                 // Top: "48",
@@ -1117,22 +1124,20 @@ export class TBreederForm {
             }, 
             this.viewEmptyIfNeeded(vnode),
             m("div",
-                this.generations.map((generation: PdGeneration) => m("div.flex.flex-row",
-                    generation.plants.map((plant: PdPlant) =>
+                this.generations.map((generation: PdGeneration, row: number) => m("div.flex.flex-row",
+                    generation.plants.map((plant: PdPlant, column: number) =>
                         m("canvas.ba", {
-                            width: 500,
-                            height: 400,
+                            key: plant.uuid,
+                            width: "" + self.DefaultColWidth + "px",
+                            height: "" + self.DefaultColWidth + "px",
                             oncreate(vnode: m.VnodeDOM) {
                                 const canvas = <HTMLCanvasElement>vnode.dom
-                                canvas.width = 500
-                                canvas.height = 400
+                                canvas.width = self.DefaultColWidth
+                                canvas.height = self.DefaultColWidth
                                 const context = canvas.getContext("2d")
                                 if (!context) return
-                                // TODO: PDF fix to draw breeder plant in bounds
-                                //plant.drawingScale_PixelsPerMm = plant.drawingScale_PixelsPerMm / 3
-                                //plant.basePoint_mm = new SinglePoint(50, 100)
-                                if (plant) plant.drawOn(context)
-                                console.log("plant.boundsRect_pixels()", plant.boundsRect_pixels())
+                                self.plantsDrawGridDrawCell(context, column, row)
+                                if (plant) context.drawImage(plant.previewCache.canvas, 0, 0)
                             },
                             onupdate(vnode: m.VnodeDOM) {
                                 const canvas = <HTMLCanvasElement>vnode.dom
@@ -1140,16 +1145,16 @@ export class TBreederForm {
                                 canvas.width = canvas.width
                                 const context = canvas.getContext("2d")
                                 if (!context) return
-                                if (plant) plant.drawOn(context)
+                                if (plant) context.drawImage(plant.previewCache.canvas, 0, 0)
                             },
                             onclick: () => {
                                 // Breed plant
                                 const newGeneration = new PdGeneration(null, null, 1.0)
                                 newGeneration.breedFromParents(plant, null, 1.0)
+                                this.generations.length = row + 1
                                 this.generations.push(newGeneration)
                             }
                         }),
-                        // m("div.ba", {style: {width: "100px", height: "100px"}}, plant.name)
                     )
                 )),
             ))

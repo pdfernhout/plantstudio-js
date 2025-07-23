@@ -77,7 +77,7 @@ export const kCheckForUnreadParams = true
 const kDontCheckForUnreadParams = false
 
 const kConsiderDomainScale = true
-const kDontConsiderDomainScale = false
+export const kDontConsiderDomainScale = false
 
 export const kDrawNow = true
 export const kDontDrawNow = false
@@ -597,6 +597,8 @@ function cancelOutOppositeAmounts(amountAdded: float, amountTakenAway: float): [
 
 // aspects->stop 
 export class PdPlant extends PdStreamableObject {
+    // Added uuid for mithril key
+    uuid: string = "" + Math.random()
     name: string = ""
     age: short = 0
     basePoint_mm: SinglePoint = new SinglePoint()
