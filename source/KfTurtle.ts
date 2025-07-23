@@ -519,9 +519,8 @@ export class KfTurtle {
     }
     
     drawTriangleFromIndexes(aPointIndex: long, bPointIndex: long, cPointIndex: long, partID: long): KfTriangle {
-        let result = new KfTriangle()
         // drawing surface takes over ownership of triangle
-        result = this.drawingSurface.allocateTriangle()
+        const result = this.drawingSurface.allocateTriangle()
         this.drawingSurface.lineWidth = 1.0
         result.points[0] = this.recordedPoints[aPointIndex - 1]
         result.points[1] = this.recordedPoints[bPointIndex - 1]
