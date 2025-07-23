@@ -97,9 +97,6 @@ export class KfDrawingSurface {
     // ----------------------- KfDrawingSurface managing triangles
 
     clearTriangles(): void {
-        for (let i = 0; i < this.numTrianglesUsed; i++) {
-            this.triangles[i].tdo = null
-        }
         this.numTrianglesUsed = 0
     }
     
@@ -138,6 +135,16 @@ export class KfDrawingSurface {
         let result: KfTriangle
         if (this.numTrianglesUsed < this.triangles.length) {
             result = this.triangles[this.numTrianglesUsed]
+            // result.foreColor = ColorDefs.clGreen
+            // result.backColor = ColorDefs.clLime
+            // result.lineColor = ColorDefs.clBlack
+            // result.zForSorting = 0.0
+            // result.backFacing = false
+            // result.lineWidth = 0.0
+            // result.isLine = false
+            result.tdo = null
+            // result.points = [new KfPoint3D(), new KfPoint3D(), new KfPoint3D()]
+            // result.plantPartID = 0            
         } else {
             result = new KfTriangle()
             this.triangles.push(result)
@@ -173,7 +180,11 @@ export class KfDrawingSurface {
     }
     
     sortTriangles(): void {
-        this.triangles.sort((a, b) => a.zForSorting - b.zForSorting)
+        if (this.numTrianglesUsed < 2) return
+        const usedTriangles = this.triangles.slice(0, this.numTrianglesUsed)
+        const unusedTriangles = this.triangles.slice(this.numTrianglesUsed)
+        usedTriangles.sort((a, b) => a.zForSorting - b.zForSorting)
+        this.triangles = usedTriangles.concat(unusedTriangles)
     }
     
     // ----------------------- KfDrawingSurface drawing
