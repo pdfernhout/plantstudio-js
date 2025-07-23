@@ -172,7 +172,7 @@ const MyComponent = {
         plant && m("div.flex-grow.h-100.pa2.overflow-scroll",
             m("div", { key: plant.name },
                 m("div.tc.ba", "Plant Breeder test"),
-                m(TBreederForm),
+                m(TBreederForm, { testPlant: plant}),
             )
         )
     )

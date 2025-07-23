@@ -9,7 +9,6 @@ import { intround, short, long, ColorDefs, int, IntToStr, MessageDialog, arrayRe
 import { PdPlant, BreedingAndTimeSeriesOptionsStructure } from "./PdPlant"
 import { PdGeneration } from "./PdGeneration"
 import { PdCommand } from "./PdCommand"
-import { TDrawGrid, TGridDrawState } from "./TDrawGrid"
 import { PdBreedFromParentsCommand, PdMakeTimeSeriesCommand, PdDeleteBreederGenerationCommand, PdDeleteAllBreederGenerationsCommand, PdRandomizeCommand, PdChangeBreedingAndTimeSeriesOptionsCommand, PdPasteCommand, PdReplaceBreederPlant } from "./updcom"
 
 // let BreederForm: TBreederForm
@@ -97,8 +96,8 @@ export class TBreederForm {
 //     breedButton: TSpeedButton = new TSpeedButton()
 //     BreederMenuUndoRedoList: TMenuItem = new TMenuItem()
 //     */
-//     selectedRow: short = 0
-//     generations: PdGeneration[] = []
+        selectedRow: short = 0
+        generations: PdGeneration[] = []
 //     dragPlantStartPoint: TPoint = new TPoint()
 //     lightUpCell: TPoint = new TPoint()
 //     numBreederPlantsCopiedThisSession: long = 0
@@ -1079,8 +1078,81 @@ export class TBreederForm {
 //         MainForm.MenuOptionsCustomDrawClick(MainForm)
 //     }
 
-    view() {
-        return m("div", "TBreederForm unfinished")
+    viewEmptyIfNeeded(vnode: any) {
+        if (this.generations.length <= 0) {
+            return m("div.ba.bw2.b--green", 
+                "The breeder is empty. Please add a plant to get started.",
+                m("button", { onclick: () => {
+                    this.generations.push(new PdGeneration(vnode.attrs.testPlant, null, 1.0))
+                }}, "Add Plant")
+            )
+        } else {
+            return []
+        }
     }
-    
+
+    view(vnode: any) {
+        return m("div",
+            m("TDrawGrid.plantsDrawGrid", {
+                // Top: "48",
+                // Left: "2",
+                // Height: "141",
+                // Width: "345",
+                // Ctl3D: "True",
+                // DefaultRowHeight: "64",
+                // DefaultDrawing: "False",
+                // FixedCols: "0",
+                // RowCount: "30",
+                // FixedRows: "0",
+                // Options: "[goFixedVertLine, goFixedHorzLine, goRangeSelect]",
+                // ParentCtl3D: "False",
+                // PopupMenu: "BreederPopupMenu",
+                // TabOrder: "0",
+                // OnDblClick: "plantsDrawGridDblClick",
+                // OnDragOver: "plantsDrawGridDragOver",
+                // OnDrawCell: "plantsDrawGridDrawCell",
+                // OnEndDrag: "plantsDrawGridEndDrag",
+                // OnMouseDown: "plantsDrawGridMouseDown",
+                // OnMouseUp: "plantsDrawGridMouseUp",
+            }, 
+            this.viewEmptyIfNeeded(vnode),
+            m("div",
+                this.generations.map((generation: PdGeneration) => m("div.flex.flex-row",
+                    generation.plants.map((plant: PdPlant) =>
+                        m("canvas.ba", {
+                            width: 500,
+                            height: 400,
+                            oncreate(vnode: m.VnodeDOM) {
+                                const canvas = <HTMLCanvasElement>vnode.dom
+                                canvas.width = 500
+                                canvas.height = 400
+                                const context = canvas.getContext("2d")
+                                if (!context) return
+                                // TODO: PDF fix to draw breeder plant in bounds
+                                //plant.drawingScale_PixelsPerMm = plant.drawingScale_PixelsPerMm / 3
+                                //plant.basePoint_mm = new SinglePoint(50, 100)
+                                if (plant) plant.drawOn(context)
+                                console.log("plant.boundsRect_pixels()", plant.boundsRect_pixels())
+                            },
+                            onupdate(vnode: m.VnodeDOM) {
+                                const canvas = <HTMLCanvasElement>vnode.dom
+                                // Clear the canvas
+                                canvas.width = canvas.width
+                                const context = canvas.getContext("2d")
+                                if (!context) return
+                                if (plant) plant.drawOn(context)
+                            },
+                            onclick: () => {
+                                // Breed plant
+                                const newGeneration = new PdGeneration(null, null, 1.0)
+                                newGeneration.breedFromParents(plant, null, 1.0)
+                                this.generations.push(newGeneration)
+                            }
+                        }),
+                        // m("div.ba", {style: {width: "100px", height: "100px"}}, plant.name)
+                    )
+                )),
+            ))
+        )
+    }
 }

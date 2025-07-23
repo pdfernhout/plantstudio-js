@@ -2,7 +2,7 @@
 // Exported from: ../../plantstudio-js/converted_source/ubreedr.lfm
 
 import * as m from "mithril"
-import { caption } from "common"
+import { caption } from "./common"
 
 export function viewBreederForm() {
     return m("BreederForm.TBreederForm",
@@ -479,30 +479,6 @@ export function viewBreederForm() {
                 },
                 "The breeder is empty. To make some breeder plants, select a plant (or two plants) in the main window and choose Breed from the Plant menu.",
             ),
-        ),
-        m("TDrawGrid.plantsDrawGrid.TDrawGrid",
-            {
-                // Top: "48",
-                // Left: "2",
-                // Height: "141",
-                // Width: "345",
-                // Ctl3D: "True",
-                // DefaultRowHeight: "64",
-                // DefaultDrawing: "False",
-                // FixedCols: "0",
-                // RowCount: "30",
-                // FixedRows: "0",
-                // Options: "[goFixedVertLine, goFixedHorzLine, goRangeSelect]",
-                // ParentCtl3D: "False",
-                // PopupMenu: "BreederPopupMenu",
-                // TabOrder: "0",
-                // OnDblClick: "plantsDrawGridDblClick",
-                // OnDragOver: "plantsDrawGridDragOver",
-                // OnDrawCell: "plantsDrawGridDrawCell",
-                // OnEndDrag: "plantsDrawGridEndDrag",
-                // OnMouseDown: "plantsDrawGridMouseDown",
-                // OnMouseUp: "plantsDrawGridMouseUp",
-            },
         ),
     )
 }
