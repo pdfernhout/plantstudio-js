@@ -110,6 +110,24 @@ export class TBreederForm {
 //     TBreederForm.prototype = new PdForm()
 //     TBreederForm.prototype.constructor = TBreederForm
 //     */
+
+        firstSelectedPlant: PdPlant | null = null
+        secondSelectedPlant: PdPlant | null = null
+
+        selectPlant(plant: PdPlant, isMulti: boolean) {
+            if (!isMulti) {
+                this.firstSelectedPlant = plant
+                this.secondSelectedPlant = null
+            } else if (!this.firstSelectedPlant) {
+                this.firstSelectedPlant = plant
+                this.secondSelectedPlant = null
+            } else if (!this.secondSelectedPlant) {
+                this.secondSelectedPlant = plant
+            } else {
+                this.firstSelectedPlant = this.secondSelectedPlant
+                this.secondSelectedPlant = plant
+            }
+        }
     
 //     //$R *.DFM
 //     // ---------------------------------------------------------------------------- creation/destruction 
@@ -1097,6 +1115,12 @@ export class TBreederForm {
         }
     }
 
+    borderIfSelected(plant: PdPlant) {
+        if (plant === this.firstSelectedPlant) return ".bw2.b--green"
+        if (plant === this.secondSelectedPlant) return ".bw2.b--blue"
+        return ".bw2.b--black"
+    }
+
     view(vnode: any) {
         const self = this
         return m("div",
@@ -1126,7 +1150,8 @@ export class TBreederForm {
             m("div",
                 this.generations.map((generation: PdGeneration, row: number) => m("div.flex.flex-row",
                     generation.plants.map((plant: PdPlant, column: number) =>
-                        m("canvas.ba", {
+                        m("div.ba"  + this.borderIfSelected(plant),
+                        m("canvas", {
                             key: plant.uuid,
                             width: "" + self.DefaultColWidth + "px",
                             height: "" + self.DefaultColWidth + "px",
@@ -1147,17 +1172,27 @@ export class TBreederForm {
                                 if (!context) return
                                 if (plant) context.drawImage(plant.previewCache.canvas, 0, 0)
                             },
-                            onclick: () => {
+                            onclick: (event: any) => {
+                                if ( event.ctrlKey && self.firstSelectedPlant == plant) {
+                                    self.firstSelectedPlant = self.secondSelectedPlant
+                                    self.secondSelectedPlant = null
+                                    return
+                                }
+                                if ( event.ctrlKey && self.secondSelectedPlant == plant) {
+                                    self.secondSelectedPlant = null
+                                    return
+                                }
+                                this.selectPlant(plant, event.shiftKey || event.ctrlKey)
                                 vnode.attrs.setPlant(plant)
                             },
                             ondblclick: () => {
                                 // Breed plant
                                 const newGeneration = new PdGeneration(null, null, 1.0)
-                                newGeneration.breedFromParents(plant, null, 1.0)
+                                newGeneration.breedFromParents(this.firstSelectedPlant, this.secondSelectedPlant, 1.0)
                                 this.generations.length = row + 1
                                 this.generations.push(newGeneration)
                             }
-                        }),
+                        })),
                     )
                 )),
             ))
