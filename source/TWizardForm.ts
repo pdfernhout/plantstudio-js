@@ -297,7 +297,7 @@ export class TWizardForm {
     // leafTdosDraw: TDrawGrid = new TDrawGrid()
     // petalTdosDraw: TDrawGrid = new TDrawGrid()
     // sectionTdosDraw: TDrawGrid = new TDrawGrid()
-    
+
     // defaultChoices: TButton = new TButton()
     // arrowInternodeWidth: TImage = new TImage()
     // internodeWidthLabel: TLabel = new TLabel()
@@ -1911,9 +1911,21 @@ WizardForm_turnLeft.png
 WizardForm_turnRight.png
 
 */
+// internodesLength: "veryShort" | "short" | "medium" | "long" | "veryLong" = "medium"
+    viewChoices(id: string, options: string[], defaultValue: string, label: string) {
+        return m("div", "CHOICES UNFINISHED")
+    }
 
     view() {
-        return m("div", "TWizardForm STUB")
+        return m("div",
+            "TWizardForm STUB",
+            this.viewChoices(
+                "internodesLength",
+                ["very short", "short", "medium", "long", "very long"],
+                "medium",
+                "Question???"
+            ),
+        )
     }
     
 }
