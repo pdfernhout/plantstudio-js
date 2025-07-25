@@ -359,13 +359,13 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
         id: "apicalStalk",
         options: ["very short", "short", "medium", "long", "very long"],
         initialValue: "medium",
-        label: "How long should their primary stems be?"
+        label: "How long should their apical (primary) stems be?"
     },
     {
         id: "axillaryStalk",
         options: ["very short", "short", "medium", "long", "very long"],
         initialValue: "medium",
-        label: "How long should their primary stems be?"
+        label: "How long should their axillary (lateral) stems be?"
     },
     {
         id: "fruitSections",
