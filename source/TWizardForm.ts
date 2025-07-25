@@ -291,7 +291,7 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     },
     {
         id: "secondaryBranching",
-        options: ["yes", "no"],
+        options: ["no", "yes"],
         initialValue: "no",
         label: "Should secondary branching (off branches) occur?"
     },
@@ -411,7 +411,7 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     },
     {
         id: "showFruits",
-        options: ["yes", "no"],
+        options: ["no", "yes"],
         initialValue: "yes",
         label: "Do you want to see fruits on your plant?"
     },
@@ -1984,6 +1984,7 @@ export class TWizardForm {
 }
 
 function fileForImage(id: string, option: string) {
+    if (option === "one (simple)") { option = "one"}
     return "../source/resources/WizardForm_" + id + option.split(" ").map(word => capitalize(word)).join("") + ".png"
 }
 
