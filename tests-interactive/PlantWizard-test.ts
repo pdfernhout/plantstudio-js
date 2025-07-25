@@ -171,7 +171,7 @@ const MyComponent = {
         ),
         m("div.flex-grow.h-100.pa2.overflow-scroll",
             m("div",
-                m("div.tc.b", "Plant Breeder test (doubleclick to breed)"),
+                m("div.tc.b", "Plant Wizard test"),
                 m(TWizardForm, { plant, setPlant }),
             )
         )

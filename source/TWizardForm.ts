@@ -20,52 +20,218 @@ import { AssignFile, CloseFile, Reset } from "./common"
 // import delphi_compatability
 
 // const
-const kMeristem_AlternateOrOpposite = 1
-const kMeristem_BranchIndex = 2
-const kMeristem_SecondaryBranching = 3
-const kMeristem_BranchAngle = 4
-const kInternode_Curviness = 5
-const kInternode_Length = 6
-const kLeaves_Scale = 7
-const kLeaves_PetioleLength = 8
-const kLeaves_Angle = 9
-const kLeaflets_Number = 10
-const kLeaflets_Shape = 11
-const kLeaflets_Spread = 12
-const kFlowers_NumPetals = 13
-const kFlowers_Scale = 14
-const kInflorDraw_NumFlowers = 15
-const kInflorDraw_Shape = 16
-const kInflorPlace_NumApical = 17
-const kInflorPlace_NumAxillary = 18
-const kInflorPlace_ApicalStalkLength = 19
-const kInflorPlace_AxillaryStalkLength = 20
-const kFruit_NumSections = 21
-const kFruit_Scale = 22
-const kInternode_Thickness = 23
-const kInflorDraw_Thickness = 24
+// const kMeristem_AlternateOrOpposite = 1
+// const kMeristem_BranchIndex = 2
+// const kMeristem_SecondaryBranching = 3
+// const kMeristem_BranchAngle = 4
+// const kInternode_Curviness = 5
+// const kInternode_Length = 6
+// const kLeaves_Scale = 7
+// const kLeaves_PetioleLength = 8
+// const kLeaves_Angle = 9
+// const kLeaflets_Number = 10
+// const kLeaflets_Shape = 11
+// const kLeaflets_Spread = 12
+// const kFlowers_NumPetals = 13
+// const kFlowers_Scale = 14
+// const kInflorDraw_NumFlowers = 15
+// const kInflorDraw_Shape = 16
+// const kInflorPlace_NumApical = 17
+// const kInflorPlace_NumAxillary = 18
+// const kInflorPlace_ApicalStalkLength = 19
+// const kInflorPlace_AxillaryStalkLength = 20
+// const kFruit_NumSections = 21
+// const kFruit_Scale = 22
+// const kInternode_Thickness = 23
+// const kInflorDraw_Thickness = 24
 
 
 // const
-const kStart = 0
-const kMeristems = 1
-const kInternodes = 2
-const kLeaves = 3
-const kCompoundLeaves = 4
-const kInflorescencesPlacement = 5
-const kInflorescences = 6
-const kFlowers = 7
-const kFruit = 8
-const kFinish = 9
-const kLastPanel = 9
-const kReloadVariables = true
-const kDontReloadVariables = false
+// const kStart = 0
+// const kMeristems = 1
+// const kInternodes = 2
+// const kLeaves = 3
+// const kCompoundLeaves = 4
+// const kInflorescencesPlacement = 5
+// const kInflorescences = 6
+// const kFlowers = 7
+// const kFruit = 8
+// const kFinish = 9
+// const kLastPanel = 9
+// const kReloadVariables = true
+// const kDontReloadVariables = false
 
 
 // const
 const kPreviewSize = 110
 
+type ChoiceSpec = {id: string, options: string[], initialValue: string, label: string}
 
+const templateSpec: ChoiceSpec = {
+    id: "",
+    options: [],
+    initialValue: "",
+    label: ""
+}
+
+const choiceSpecs: ChoiceSpec[] = [
+    {
+        id: "internodes",
+        options: ["very short", "short", "medium", "long", "very long"],
+        initialValue: "medium",
+        label: ""
+    },
+    {
+        id: "curviness",
+        options: ["none", "little", "some", "very"],
+        initialValue: "some",
+        label: ""
+    },
+    {
+        id: "leaves",
+        options: ["alternate", "opposite"],
+        initialValue: "alternate",
+        label: ""
+    },
+    {
+        id: "branch",
+        options: ["none", "little", "medium", "lot"],
+        initialValue: "medium",
+        label: ""
+    },
+    {
+        id: "secondaryBranching",
+        options: ["yes", "no"],
+        initialValue: "no",
+        label: ""
+    },
+    {
+        id: "branchAngle",
+        options: ["small", "medium", "large"],
+        initialValue: "medium",
+        label: ""
+    },
+    {
+        id: "leafScale",
+        options: ["tiny", "small", "medium", "large", "huge"],
+        initialValue: "medium",
+        label: ""
+    },
+    {
+        id: "leafAngle",
+        options: ["small", "medium", "large"],
+        initialValue: "medium",
+        label: ""
+    },
+    {
+        id: "petiole",
+        options: ["very short", "short", "medium", "long", "very long"],
+        initialValue: "medium",
+        label: ""
+    },
+    {
+        id: "petals",
+        options: ["one", "three", "four", "five", "ten"],
+        initialValue: "one",
+        label: ""
+    },
+    {
+        id: "petalScale",
+        options: ["tiny", "small", "medium", "large", "huge"],
+        initialValue: "medium",
+        label: ""
+    },
+    {
+        id: "inflorFlowers",
+        options: ["one", "two", "three", "five", "ten", "twenty"],
+        initialValue: "three",
+        label: ""
+    },
+    {
+        id: "inflorShape",
+        options: ["spike", "raceme", "panicle", "umbel", "head", "cluster"],
+        initialValue: "spike",
+        label: ""
+    },
+    {
+        id: "apicalInflors",
+        options: ["none", "one", "two", "three", "five"],
+        initialValue: "one",
+        label: ""
+    },
+    {
+        id: "axillaryInflors",
+        options: ["none", "three", "five", "ten", "twenty"],
+        initialValue: "none",
+        label: ""
+    },
+    {
+        id: "apicalStalk",
+        options: ["very short", "short", "medium", "long", "very long"],
+        initialValue: "medium",
+        label: ""
+    },
+    {
+        id: "axillaryStalk",
+        options: ["very short", "short", "medium", "long", "very long"],
+        initialValue: "medium",
+        label: ""
+    },
+    {
+        id: "fruitSections",
+        options: ["one", "three", "four", "five", "ten"],
+        initialValue: "one",
+        label: ""
+    },
+    {
+        id: "fruitScale",
+        options: ["tiny", "small", "medium", "large", "huge"],
+        initialValue: "medium",
+        label: ""
+    },
+    {
+        id: "leafletsNumber",
+        options: ["one", "three", "four", "five", "seven"],
+        initialValue: "one",
+        label: ""
+    },
+    {
+        id: "leafletsType",
+        options: ["pinnate", "palmate"],
+        initialValue: "pinnate",
+        label: ""
+    },
+    {
+        id: "leafletSpacing",
+        options: ["close", "medium", "far"],
+        initialValue: "medium",
+        label: ""
+    },
+    {
+        id: "internodeWidth",
+        options: ["very thin", "thin", "medium", "thick", "very thick"],
+        initialValue: "medium",
+        label: ""
+    },
+    {
+        id: "inflorWidth",
+        options: ["very thin", "thin", "medium", "thick", "very thick"],
+        initialValue: "medium",
+        label: ""
+    },
+    // {
+    //     id: "showFruits",
+    //     options: ["yes", "no"],
+    //     initialValue: "yes",
+    //     label: ""
+    // },
+    // {
+    //     id: "turn",
+    //     options: ["left", "right"],
+    //     initialValue: "left",
+    //     label: ""
+    // },
+]
 
 // group indexes 
 export class TWizardForm {
@@ -114,38 +280,6 @@ export class TWizardForm {
     // axillaryInflorExtraImage: TImage = new TImage()
     // previewPanel: TPanel = new TPanel()
 
-    internodesLength: "veryShort" | "short" | "medium" | "long" | "veryLong" = "medium"
-    // internodesVeryShort: TSpeedButton = new TSpeedButton()
-    // internodesShort: TSpeedButton = new TSpeedButton()
-    // internodesMedium: TSpeedButton = new TSpeedButton()
-    // internodesLong: TSpeedButton = new TSpeedButton()
-    // internodesVeryLong: TSpeedButton = new TSpeedButton()
-
-    curviness: "none" | "little" | "some" | "very" = "some"
-    // curvinessNone: TSpeedButton = new TSpeedButton()
-    // curvinessLittle: TSpeedButton = new TSpeedButton()
-    // curvinessSome: TSpeedButton = new TSpeedButton()
-    // curvinessVery: TSpeedButton = new TSpeedButton()
-
-    leaves: "alternate" | "opposite" = "alternate"
-    // leavesAlternate: TSpeedButton = new TSpeedButton()
-    // leavesOpposite: TSpeedButton = new TSpeedButton()
-
-    branch: "none" | "little" | "medium" | "lot" = "medium"
-    // branchNone: TSpeedButton = new TSpeedButton()
-    // branchLittle: TSpeedButton = new TSpeedButton()
-    // branchMedium: TSpeedButton = new TSpeedButton()
-    // branchLot: TSpeedButton = new TSpeedButton()
-
-    secondaryBranching: "yes" | "no" = "no"
-    // secondaryBranchingYes: TSpeedButton = new TSpeedButton()
-    // secondaryBranchingNo: TSpeedButton = new TSpeedButton()
-
-    branchAngle: "small" | "medium" | "large" = "medium"
-    // branchAngleSmall: TSpeedButton = new TSpeedButton()
-    // branchAngleMedium: TSpeedButton = new TSpeedButton()
-    // branchAngleLarge: TSpeedButton = new TSpeedButton()
-
     // arrowLeavesAlternateOpposite: TImage = new TImage()
     // arrowBranching: TImage = new TImage()
     // arrowSecondaryBranching: TImage = new TImage()
@@ -154,44 +288,11 @@ export class TWizardForm {
     // arrowInternodeLength: TImage = new TImage()
     // arrowLeafScale: TImage = new TImage()
 
-    leafScale: "tiny" | "small" | "medium" | "large" | "huge" = "medium"
-    // leafScaleTiny: TSpeedButton = new TSpeedButton()
-    // leafScaleSmall: TSpeedButton = new TSpeedButton()
-    // leafScaleMedium: TSpeedButton = new TSpeedButton()
-    // leafScaleLarge: TSpeedButton = new TSpeedButton()
-    // leafScaleHuge: TSpeedButton = new TSpeedButton()
-
     // arrowLeafAngle: TImage = new TImage()
-
-    leafAngle: "small" | "medium" | "large"  = "medium"
-    // leafAngleSmall: TSpeedButton = new TSpeedButton()
-    // leafAngleMedium: TSpeedButton = new TSpeedButton()
-    // leafAngleLarge: TSpeedButton = new TSpeedButton()
 
     // arrowPetioleLength: TImage = new TImage()
 
-    pertiole: "veryShort" | "short" | "medium" | "long" | "veryLong" = "medium"
-    // petioleVeryShort: TSpeedButton = new TSpeedButton()
-    // petioleShort: TSpeedButton = new TSpeedButton()
-    // petioleMedium: TSpeedButton = new TSpeedButton()
-    // petioleLong: TSpeedButton = new TSpeedButton()
-    // petioleVeryLong: TSpeedButton = new TSpeedButton()
-
     // arrowLeafTdos: TImage = new TImage()
-
-    petals: "one" | "three" | "four" | "five" | "ten" = "one"
-    // petalsOne: TSpeedButton = new TSpeedButton()
-    // petalsThree: TSpeedButton = new TSpeedButton()
-    // petalsFour: TSpeedButton = new TSpeedButton()
-    // petalsFive: TSpeedButton = new TSpeedButton()
-    // petalsTen: TSpeedButton = new TSpeedButton()
-
-    petalsScale: "tiny" | "small" | "medium" | "large" | "huge" = "medium"
-    // petalScaleTiny: TSpeedButton = new TSpeedButton()
-    // petalScaleSmall: TSpeedButton = new TSpeedButton()
-    // petalScaleMedium: TSpeedButton = new TSpeedButton()
-    // petalScaleLarge: TSpeedButton = new TSpeedButton()
-    // petalScaleHuge: TSpeedButton = new TSpeedButton()
 
     // arrowPetalTdos: TImage = new TImage()
     // arrowPetalsNumber: TImage = new TImage()
@@ -199,74 +300,16 @@ export class TWizardForm {
     // arrowInflorFlowers: TImage = new TImage()
     // arrowInflorShape: TImage = new TImage()
 
-    inflorFlowers: "one" | "two" | "three" | "five" | "ten" | "twenty" = "three"
-    // inflorFlowersOne: TSpeedButton = new TSpeedButton()
-    // inflorFlowersTwo: TSpeedButton = new TSpeedButton()
-    // inflorFlowersThree: TSpeedButton = new TSpeedButton()
-    // inflorFlowersFive: TSpeedButton = new TSpeedButton()
-    // inflorFlowersTen: TSpeedButton = new TSpeedButton()
-    // inflorFlowersTwenty: TSpeedButton = new TSpeedButton()
-
-    inflorShape: "spike" | "raceme" | "panicle" | "umbel" | "head" | "cluster" = "umbel"
-    // inflorShapeSpike: TSpeedButton = new TSpeedButton()
-    // inflorShapeRaceme: TSpeedButton = new TSpeedButton()
-    // inflorShapePanicle: TSpeedButton = new TSpeedButton()
-    // inflorShapeUmbel: TSpeedButton = new TSpeedButton()
-    // inflorShapeHead: TSpeedButton = new TSpeedButton()
-    // inflorShapeCluster: TSpeedButton = new TSpeedButton()
-
-    apicalInflors: "none" | "one" | "two" | "three" | "five" = "one"
-    // apicalInflorsNone: TSpeedButton = new TSpeedButton()
-    // apicalInflorsOne: TSpeedButton = new TSpeedButton()
-    // apicalInflorsTwo: TSpeedButton = new TSpeedButton()
-    // apicalInflorsThree: TSpeedButton = new TSpeedButton()
-    // apicalInflorsFive: TSpeedButton = new TSpeedButton()
-
     // arrowApicalInflorsNumber: TImage = new TImage()
 
-    axillaryInflors:  "none" | "three" | "five" | "ten" | "twenty" = "none"
-    // axillaryInflorsNone: TSpeedButton = new TSpeedButton()
-    // axillaryInflorsThree: TSpeedButton = new TSpeedButton()
-    // axillaryInflorsFive: TSpeedButton = new TSpeedButton()
-    // axillaryInflorsTen: TSpeedButton = new TSpeedButton()
-    // axillaryInflorsTwenty: TSpeedButton = new TSpeedButton()
-
     // arrowAxillaryInflorsNumber: TImage = new TImage()
-
-    apicalStalk: "veryShort" | "short" | "medium" | "long" | "veryLong" = "medium"
-    // apicalStalkVeryShort: TSpeedButton = new TSpeedButton()
-    // apicalStalkShort: TSpeedButton = new TSpeedButton()
-    // apicalStalkMedium: TSpeedButton = new TSpeedButton()
-    // apicalStalkLong: TSpeedButton = new TSpeedButton()
-    // apicalStalkVeryLong: TSpeedButton = new TSpeedButton()
 
     // arrowApicalStalk: TImage = new TImage()
     // arrowAxillaryStalk: TImage = new TImage()
 
-    axillaryStalk: "veryShort" | "short" | "medium" | "long" | "veryLong" = "medium" 
-    // axillaryStalkVeryShort: TSpeedButton = new TSpeedButton()
-    // axillaryStalkShort: TSpeedButton = new TSpeedButton()
-    // axillaryStalkMedium: TSpeedButton = new TSpeedButton()
-    // axillaryStalkLong: TSpeedButton = new TSpeedButton()
-    // axillaryStalkVeryLong: TSpeedButton = new TSpeedButton()
-
     // arrowFruitTdo: TImage = new TImage()
     // arrowFruitSectionsNumber: TImage = new TImage()
     // arrowFruitScale: TImage = new TImage()
-
-    fruitSections: "one" | "three" | "four" | "five" | "ten" = "one"
-    // fruitSectionsOne: TSpeedButton = new TSpeedButton()
-    // fruitSectionsThree: TSpeedButton = new TSpeedButton()
-    // fruitSectionsFour: TSpeedButton = new TSpeedButton()
-    // fruitSectionsFive: TSpeedButton = new TSpeedButton()
-    // fruitSectionsTen: TSpeedButton = new TSpeedButton()
-
-    fruitScale: "tiny" | "small" | "medium" | "large" | "huge" = "medium"
-    // fruitScaleTiny: TSpeedButton = new TSpeedButton()
-    // fruitScaleSmall: TSpeedButton = new TSpeedButton()
-    // fruitScaleMedium: TSpeedButton = new TSpeedButton()
-    // fruitScaleLarge: TSpeedButton = new TSpeedButton()
-    // fruitScaleHuge: TSpeedButton = new TSpeedButton()
 
     // introLabelSecond: TLabel = new TLabel()
     // panelCompoundLeavesLabel: TLabel = new TLabel()
@@ -275,24 +318,8 @@ export class TWizardForm {
     // leafletsShapeLabel: TLabel = new TLabel()
     // arrowLeafletsShape: TImage = new TImage()
 
-    leafletsNumber: "one" | "three" | "four" | "five" | "seven" = "one"
-    // leafletsOne: TSpeedButton = new TSpeedButton()
-    // leafletsThree: TSpeedButton = new TSpeedButton()
-    // leafletsFour: TSpeedButton = new TSpeedButton()
-    // leafletsFive: TSpeedButton = new TSpeedButton()
-    // leafletsSeven: TSpeedButton = new TSpeedButton()
-
-    leafletsType: "pinnate" | "palmate" = "pinnate"
-    // leafletsPinnate: TSpeedButton = new TSpeedButton()
-    // leafletsPalmate: TSpeedButton = new TSpeedButton()
-
     // arrowLeafletsSpacing: TImage = new TImage()
     // leafletSpacingLabel: TLabel = new TLabel()
-
-    leafletSpacing: "close" | "medium" | "far" = "medium"
-    // leafletSpacingClose: TSpeedButton = new TSpeedButton()
-    // leafletSpacingMedium: TSpeedButton = new TSpeedButton()
-    // leafletSpacingFar: TSpeedButton = new TSpeedButton()
 
     // leafTdosDraw: TDrawGrid = new TDrawGrid()
     // petalTdosDraw: TDrawGrid = new TDrawGrid()
@@ -302,22 +329,8 @@ export class TWizardForm {
     // arrowInternodeWidth: TImage = new TImage()
     // internodeWidthLabel: TLabel = new TLabel()
 
-    internodeWidth: "veryThin" | "thin" | "medium" | "thick" | "veryThick" = "medium"
-    // internodeWidthVeryThin: TSpeedButton = new TSpeedButton()
-    // internodeWidthThin: TSpeedButton = new TSpeedButton()
-    // internodeWidthMedium: TSpeedButton = new TSpeedButton()
-    // internodeWidthThick: TSpeedButton = new TSpeedButton()
-    // internodeWidthVeryThick: TSpeedButton = new TSpeedButton()
-
     // arrowInflorThickness: TImage = new TImage()
     // inflorThicknessLabel: TLabel = new TLabel()
-
-    inflorWidth: "veryThin" | "thin" | "medium" | "thick" | "veryThick" = "medium"
-    // inflorWidthVeryThin: TSpeedButton = new TSpeedButton()
-    // inflorWidthThin: TSpeedButton = new TSpeedButton()
-    // inflorWidthMedium: TSpeedButton = new TSpeedButton()
-    // inflorWidthThick: TSpeedButton = new TSpeedButton()
-    // inflorWidthVeryThick: TSpeedButton = new TSpeedButton()
 
     // arrowPetalColor: TImage = new TImage()
     // petalColorLabel: TLabel = new TLabel()
@@ -343,10 +356,6 @@ export class TWizardForm {
     // arrowShowFruits: TImage = new TImage()
     // showFruitsLabel: TLabel = new TLabel()
 
-    showFruits: "yes" | "no" = "yes"
-    // showFruitsYes: TRadioButton = new TRadioButton()
-    // showFruitsNo: TRadioButton = new TRadioButton()
-
     // previewLabel: TLabel = new TLabel()
 
     // randomizePlant: TButton = new TButton()
@@ -354,10 +363,6 @@ export class TWizardForm {
     // inflorDrawPageImageDisabled: TImage = new TImage()
     // flowersPageImageDisabled: TImage = new TImage()
     // fruitsPageImageDisabled: TImage = new TImage()
-
-    turn: "left" | "right" = "left"
-    // turnLeft: TSpeedButton = new TSpeedButton()
-    // turnRight: TSpeedButton = new TSpeedButton()
 
     // bottomBevel: TBevel = new TBevel()
     // longHintsSuggestionLabel: TLabel = new TLabel()
@@ -386,9 +391,11 @@ export class TWizardForm {
 
     // plant: PdPlant = new PdPlant()
     // tdos: TListCollection = new TListCollection()
-    plantHasInflorescences: boolean = false
-    tdoSelectionChanged: boolean = false
-    askedToSaveOptions: boolean = false
+    // plantHasInflorescences: boolean = false
+    // tdoSelectionChanged: boolean = false
+    // askedToSaveOptions: boolean = false
+
+    wizardChoices: { [id: string] : string } = {}
 
     // previewPaintBox: PdPaintBoxWithPalette = new PdPaintBoxWithPalette()
     // TWizardForm.prototype = new PdForm()
@@ -1911,22 +1918,33 @@ WizardForm_turnLeft.png
 WizardForm_turnRight.png
 
 */
-// internodesLength: "veryShort" | "short" | "medium" | "long" | "veryLong" = "medium"
-    viewChoices(id: string, options: string[], defaultValue: string, label: string) {
-        return m("div", "CHOICES UNFINISHED")
+
+    viewChoice(choiceSpec: ChoiceSpec) {
+        return m("div.ba",
+            m("div", choiceSpec.label),
+            m("div", choiceSpec.id),
+            m("div", choiceSpec.initialValue),
+            m("div.flex.f7", choiceSpec.options.map(option => m("div.ba.ma1",
+                { style: { backgroundColor: "#c0c0c0" }},
+                m("img", { src: fileForImage(choiceSpec.id, option), alt: option }),
+                m("br"),
+                option
+            )))
+        )
     }
 
     view() {
         return m("div",
-            "TWizardForm STUB",
-            this.viewChoices(
-                "internodesLength",
-                ["very short", "short", "medium", "long", "very long"],
-                "medium",
-                "Question???"
-            ),
+            choiceSpecs.map(choiceSpec => this.viewChoice(choiceSpec))
         )
     }
     
 }
 
+function fileForImage(id: string, option: string) {
+    return "../source/resources/WizardForm_" + id + option.split(" ").map(word => capitalize(word)).join("") + ".png"
+}
+
+function capitalize(word: string) {
+    return word.charAt(0).toUpperCase() + word.slice(1)
+}
