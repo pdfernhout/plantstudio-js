@@ -65,7 +65,26 @@ import { AssignFile, CloseFile, Reset } from "./common"
 // const
 const kPreviewSize = 110
 
-type ChoiceSpec = {id: string, options: string[], initialValue: string, label: string}
+type PageSpec = {
+    id: string
+    title: string
+    image: string
+    icon: string
+    iconDisabled?: string
+    topText: string
+    bottomText?: string
+    type: "page"
+}
+
+type ChoiceSpec = {
+    id: string
+    options: string[]
+    initialValue: string
+    label: string
+    explain?: string
+    type?: "tdo" | "color"
+}
+
 
 const templateSpec: ChoiceSpec = {
     id: "",
@@ -74,7 +93,178 @@ const templateSpec: ChoiceSpec = {
     label: ""
 }
 
-const choiceSpecs: ChoiceSpec[] = [
+const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
+    {
+        id: "page1",
+        title: "Start",
+        image: "WizardForm_startPicture.png",
+        icon: "WizardForm_startPageImage.png",
+        topText: "Welcome to the Plant Wizard! " +
+            "This wizard will help you create a new plant by asking you some simple questions. " +
+            "These 10 panels contain about 25 questions based on the most important of the 400 or so parameters that define a plant. " +
+            "Click the Next button to start, or click Cancel to stop. Once you start, you can click the Back button to go back and change your choices, or you can click Cancel at any time. ",
+        bottomText: "Note: If you are using the wizard for the first time, we recommend turning on the 'Long Button Hints'. Each wizard question has a hint.",
+        type: "page"
+    },
+
+    {
+        id: "page2",
+        title: "Meristems",
+        image: "",
+        icon: "WizardForm_meristemsPageImage.png",
+        topText: "Meristems are buds from which leaves and branches grow. Where they develop and what they produce has a big effect on plant shape. Meristems form at the growing ends of plant stems (apexes) and in the angles between leaf and stem (axils).",
+        bottomText: "For each question, click on one of the big buttons under the question to make your choice.",
+        type: "page"
+    },
+
+    {
+        id: "page3",
+        title: "Internodes",
+        image: "",
+        icon: "WizardForm_internodesPageImage.png",
+        topText: "Internodes are portions of plant stem between leaves. They determine how tall or short, straight or viney, and stiff or flexible a plant will be.",
+        bottomText: "",
+        type: "page"
+    },
+
+    {
+        id: "page4",
+        title: "Leaves",
+        image: "",
+        icon: "WizardForm_leavesPageImage.png",
+        topText: "PlantStudio draws leaves using a \"3D object\" that represents a 3D leaf shape. The 3D object is drawn bigger as the leaf grows. Leaves are connected to the plant by a stalk called a petiole.",
+        bottomText: "",
+        type: "page"
+    },
+
+    {
+        id: "leafTdos",
+        options: [],
+        initialValue: "",
+        label: "What 3D object should be used to draw leaves?",
+        type: "tdo"
+    },
+
+    {
+        id: "page5",
+        title: "Compound leaves",
+        image: "",
+        icon: "WizardForm_compoundLeavesPageImage.png",
+        topText: "A compound leaf is a leaf made up of two or more small parts called leaflets. The leaflets look like small whole leaves, but they always fit together in the same pattern for all the leaves on the plant (usually). A leaf without leaflets is a simple leaf.",
+        bottomText: "",
+        type: "page"
+    },
+
+    {
+        id: "page6",
+        title: "Inflorescence placement",
+        image: "",
+        icon: "WizardForm_inflorPlacePageImage.png",
+        topText: "An inflorescence holds flowers and fruits on a plant. Since most plants have hermaphroditic flowers (with both male and female parts), the wizard creates only primary (female or hermaphroditic) flowers. " +
+            "IMAGE:source/resources/WizardForm_apicalInflorExtraImage.png " + 
+            "Apical inflorescences are at the ends (apexes) of plant stems. " +
+            "IMAGE:source/resources/WizardForm_axillaryInflorExtraImage.png " + 
+            "Axillary inflorescences are in the angles between leaf and stem (axils).",
+        bottomText: "",
+        type: "page"
+    },
+
+    {
+        id: "page7",
+        title: "Inflorescences",
+        image: "",
+        icon: "WizardForm_inflorDrawPageImage.png",
+        iconDisabled: "WizardForm_inflorDrawPageImageDisabled.png",
+        topText: "Inflorescence drawing: " +
+            "Inflorescences can have a large variety of shapes, a few of which are shown here. We extend the true meaning of \"inflorescence\" a bit to use an inflorescence when there is only one flower. ",
+        bottomText: "",
+        type: "page"
+    },
+
+    {
+        id: "page8",
+        title: "Flowers",
+        image: "",
+        icon: "WizardForm_flowersPageImage.png",
+        iconDisabled: "WizardForm_flowersPageImageDisabled.png",
+        topText: "Like leaves, flowers are drawn using a 3D object. But here the 3D object represents only one petal of the flower. A number of petals is drawn rotated around a center to produce what looks like a flower.",
+        bottomText: "",
+        type: "page"
+    },
+
+    {
+        id: "petalTdos",
+        options: [],
+        initialValue: "",
+        label: "What 3D object should be used for a flower petal?",
+        explain: "Click in the square to change the color.",
+        type: "tdo"
+    },
+
+    {
+        id: "petalColor",
+        options: [],
+        initialValue: "",
+        label: "What color should flowers be drawn?",
+        type: "color"
+    },
+
+    {
+        id: "page9",
+        title: "Fruits",
+        image: "",
+        icon: "WizardForm_fruitsPageImage.png",
+        iconDisabled: "WizardForm_fruitsPageImageDisabled.png",
+        topText: "Fruits are drawn like flowers, but with a portion of the fruit (a \"fruit section\") rotated around instead of a petal. For many plants you will not be interested in the fruit, so you can turn fruits off entirely.",
+        bottomText: "",
+        type: "page"
+    },
+
+    {
+        id: "fruitTdo",
+        options: [],
+        initialValue: "",
+        label: "What 3D object should be used to draw each fruit section?",
+        type: "tdo"
+    },
+
+    {
+        id: "fruitColor",
+        options: [],
+        initialValue: "",
+        label: "What color should fruits be drawn?",
+        explain: "Click in the square to change the color.",
+        type: "color"
+    },
+
+    {
+        id: "page10",
+        title: "Finish / Preview",
+        image: "",
+        icon: "WizardForm_finishPageImage.png",
+        topText: "Congratulations! " +
+            "You have finished designing your new plant. You can name your new plant here, or just keep this name. " +
+            "Now click Finish to place your plant in the main window, or click Cancel to stop without creating a plant, or click Back to change your choices. " +
+            "You can also click on the pictures below to return to any of the wizard panels. " +
+            "Once your plant is made, you can fine-tune the parameters that define your plant in the Parameters panel in the main window. ",
+        bottomText: "",
+        type: "page"
+    },
+
+    // TODO: wizardNotebook / wizardNotebookPageChanged
+
+    // TODO: Plant name edit field / newPlantName
+
+    // TODO: Plant preview pane / previewPanel / 213 x 251
+
+    // TODO: Randomize button / caption("&Randomize") / randomizePlantClick
+
+    // TODO: Rotate left and right buttons / turnLeftClick / turnRightClick
+
+
+
+
+    
     {
         id: "internodes",
         options: ["very short", "short", "medium", "long", "very long"],
@@ -149,9 +339,9 @@ const choiceSpecs: ChoiceSpec[] = [
     },
     {
         id: "inflorShape",
-        options: ["spike", "raceme", "panicle", "umbel", "head", "cluster"],
+        options: ["spike", "raceme", "panicle", "umbel", "cluster", "head"],
         initialValue: "spike",
-        label: "What shape should each inflorescence have"
+        label: "What shape should each inflorescence have?"
     },
     {
         id: "apicalInflors",
@@ -191,8 +381,8 @@ const choiceSpecs: ChoiceSpec[] = [
     },
     {
         id: "leafletsNumber",
-        options: ["one", "three", "four", "five", "seven"],
-        initialValue: "one",
+        options: ["one (simple)", "three", "four", "five", "seven"],
+        initialValue: "one (simple)",
         label: "How many leaflets should make up each leaf?"
     },
     {
@@ -219,12 +409,12 @@ const choiceSpecs: ChoiceSpec[] = [
         initialValue: "medium",
         label: "How thick should each inflorescence stem be?"
     },
-    // {
-    //     id: "showFruits",
-    //     options: ["yes", "no"],
-    //     initialValue: "yes",
-    //     label: ""
-    // },
+    {
+        id: "showFruits",
+        options: ["yes", "no"],
+        initialValue: "yes",
+        label: "Do you want to see fruits on your plant?"
+    },
     // {
     //     id: "turn",
     //     options: ["left", "right"],
@@ -1760,164 +1950,13 @@ export class TWizardForm {
     //     return Key
     // }
 
-/* Available Wizard images
-
-WizardForm_apicalInflorExtraImage.png
-WizardForm_apicalInflorsFive.png
-WizardForm_apicalInflorsNone.png
-WizardForm_apicalInflorsOne.png
-WizardForm_apicalInflorsThree.png
-WizardForm_apicalInflorsTwo.png
-WizardForm_apicalStalkLong.png
-WizardForm_apicalStalkMedium.png
-WizardForm_apicalStalkShort.png
-WizardForm_apicalStalkVeryLong.png
-WizardForm_apicalStalkVeryShort.png
-WizardForm_arrowApicalInflorsNumber.png
-WizardForm_arrowApicalStalk.png
-WizardForm_arrowAxillaryInflorsNumber.png
-WizardForm_arrowAxillaryStalk.png
-WizardForm_arrowBranchAngle.png
-WizardForm_arrowBranching.png
-WizardForm_arrowCurviness.png
-WizardForm_arrowFruitColor.png
-WizardForm_arrowFruitScale.png
-WizardForm_arrowFruitSectionsNumber.png
-WizardForm_arrowFruitTdo.png
-WizardForm_arrowInflorFlowers.png
-WizardForm_arrowInflorShape.png
-WizardForm_arrowInflorThickness.png
-WizardForm_arrowInternodeLength.png
-WizardForm_arrowInternodeWidth.png
-WizardForm_arrowLeafAngle.png
-WizardForm_arrowLeaflets.png
-WizardForm_arrowLeafletsShape.png
-WizardForm_arrowLeafletsSpacing.png
-WizardForm_arrowLeafScale.png
-WizardForm_arrowLeafTdos.png
-WizardForm_arrowLeavesAlternateOpposite.png
-WizardForm_arrowPetalColor.png
-WizardForm_arrowPetalScale.png
-WizardForm_arrowPetalsNumber.png
-WizardForm_arrowPetalTdos.png
-WizardForm_arrowPetioleLength.png
-WizardForm_arrowSecondaryBranching.png
-WizardForm_arrowShowFruits.png
-WizardForm_axillaryInflorExtraImage.png
-WizardForm_axillaryInflorsFive.png
-WizardForm_axillaryInflorsNone.png
-WizardForm_axillaryInflorsTen.png
-WizardForm_axillaryInflorsThree.png
-WizardForm_axillaryInflorsTwenty.png
-WizardForm_axillaryStalkLong.png
-WizardForm_axillaryStalkMedium.png
-WizardForm_axillaryStalkShort.png
-WizardForm_axillaryStalkVeryLong.png
-WizardForm_axillaryStalkVeryShort.png
-WizardForm_branchAngleLarge.png
-WizardForm_branchAngleMedium.png
-WizardForm_branchAngleSmall.png
-WizardForm_branchLittle.png
-WizardForm_branchLot.png
-WizardForm_branchMedium.png
-WizardForm_branchNone.png
-WizardForm_compoundLeavesPageImage.png
-WizardForm_curvinessLittle.png
-WizardForm_curvinessNone.png
-WizardForm_curvinessSome.png
-WizardForm_curvinessVery.png
-WizardForm_finishPageImage.png
-WizardForm_flowersPageImageDisabled.png
-WizardForm_flowersPageImage.png
-WizardForm_fruitScaleHuge.png
-WizardForm_fruitScaleLarge.png
-WizardForm_fruitScaleMedium.png
-WizardForm_fruitScaleSmall.png
-WizardForm_fruitScaleTiny.png
-WizardForm_fruitSectionsFive.png
-WizardForm_fruitSectionsFour.png
-WizardForm_fruitSectionsOne.png
-WizardForm_fruitSectionsTen.png
-WizardForm_fruitSectionsThree.png
-WizardForm_fruitsPageImageDisabled.png
-WizardForm_fruitsPageImage.png
-WizardForm_helpButton.png
-WizardForm_inflorDrawPageImageDisabled.png
-WizardForm_inflorDrawPageImage.png
-WizardForm_inflorFlowersFive.png
-WizardForm_inflorFlowersOne.png
-WizardForm_inflorFlowersTen.png
-WizardForm_inflorFlowersThree.png
-WizardForm_inflorFlowersTwenty.png
-WizardForm_inflorFlowersTwo.png
-WizardForm_inflorPlacePageImage.png
-WizardForm_inflorShapeCluster.png
-WizardForm_inflorShapeHead.png
-WizardForm_inflorShapePanicle.png
-WizardForm_inflorShapeRaceme.png
-WizardForm_inflorShapeSpike.png
-WizardForm_inflorShapeUmbel.png
-WizardForm_inflorWidthMedium.png
-WizardForm_inflorWidthThick.png
-WizardForm_inflorWidthThin.png
-WizardForm_inflorWidthVeryThick.png
-WizardForm_inflorWidthVeryThin.png
-WizardForm_internodesLong.png
-WizardForm_internodesMedium.png
-WizardForm_internodesPageImage.png
-WizardForm_internodesShort.png
-WizardForm_internodesVeryLong.png
-WizardForm_internodesVeryShort.png
-WizardForm_internodeWidthMedium.png
-WizardForm_internodeWidthThick.png
-WizardForm_internodeWidthThin.png
-WizardForm_internodeWidthVeryThick.png
-WizardForm_internodeWidthVeryThin.png
-WizardForm_leafAngleLarge.png
-WizardForm_leafAngleMedium.png
-WizardForm_leafAngleSmall.png
-WizardForm_leafletsFive.png
-WizardForm_leafletsFour.png
-WizardForm_leafletsOne.png
-WizardForm_leafletSpacingClose.png
-WizardForm_leafletSpacingFar.png
-WizardForm_leafletSpacingMedium.png
-WizardForm_leafletsPalmate.png
-WizardForm_leafletsPinnate.png
-WizardForm_leafletsSeven.png
-WizardForm_leafletsThree.png
-WizardForm_leafScaleHuge.png
-WizardForm_leafScaleLarge.png
-WizardForm_leafScaleMedium.png
-WizardForm_leafScaleSmall.png
-WizardForm_leafScaleTiny.png
-WizardForm_leavesAlternate.png
-WizardForm_leavesOpposite.png
-WizardForm_leavesPageImage.png
-WizardForm_meristemsPageImage.png
-WizardForm_petalScaleHuge.png
-WizardForm_petalScaleLarge.png
-WizardForm_petalScaleMedium.png
-WizardForm_petalScaleSmall.png
-WizardForm_petalScaleTiny.png
-WizardForm_petalsFive.png
-WizardForm_petalsFour.png
-WizardForm_petalsOne.png
-WizardForm_petalsTen.png
-WizardForm_petalsThree.png
-WizardForm_petioleLong.png
-WizardForm_petioleMedium.png
-WizardForm_petioleShort.png
-WizardForm_petioleVeryLong.png
-WizardForm_petioleVeryShort.png
-WizardForm_secondaryBranchingNo.png
-WizardForm_secondaryBranchingYes.png
-WizardForm_startPageImage.png
-WizardForm_startPicture.png
-WizardForm_turnLeft.png
-WizardForm_turnRight.png
-
-*/
+    viewPage(pageSpec: PageSpec) {
+        return m("div.ba.b5",
+            m("div.b", pageSpec.title || "FIXME: " + pageSpec.id),
+            m("div", pageSpec.topText),
+            m("div", pageSpec.bottomText),
+        )
+    }
 
     viewChoice(choiceSpec: ChoiceSpec) {
         return m("div.ba",
@@ -1934,7 +1973,11 @@ WizardForm_turnRight.png
 
     view() {
         return m("div",
-            choiceSpecs.map(choiceSpec => this.viewChoice(choiceSpec))
+            "Plant Wizard",
+            choiceSpecs.map(spec => spec.type === "page"
+                ? this.viewPage(spec)
+                : this.viewChoice(spec)
+            )
         )
     }
     
