@@ -79,145 +79,145 @@ const choiceSpecs: ChoiceSpec[] = [
         id: "internodes",
         options: ["very short", "short", "medium", "long", "very long"],
         initialValue: "medium",
-        label: ""
+        label: "How long should internodes be?"
     },
     {
         id: "curviness",
         options: ["none", "little", "some", "very"],
         initialValue: "some",
-        label: ""
+        label: "How curvy should the plant stem be?"
     },
     {
         id: "leaves",
         options: ["alternate", "opposite"],
         initialValue: "alternate",
-        label: ""
+        label: "How should leaves and branches be arranged?"
     },
     {
         id: "branch",
         options: ["none", "little", "medium", "lot"],
         initialValue: "medium",
-        label: ""
+        label: "How much should the plant branch?"
     },
     {
         id: "secondaryBranching",
         options: ["yes", "no"],
         initialValue: "no",
-        label: ""
+        label: "Should secondary branching (off branches) occur?"
     },
     {
         id: "branchAngle",
         options: ["small", "medium", "large"],
         initialValue: "medium",
-        label: ""
+        label: "What angle should branches make with the stem?"
     },
     {
         id: "leafScale",
         options: ["tiny", "small", "medium", "large", "huge"],
         initialValue: "medium",
-        label: ""
+        label: "How big should a full-sized leaf be drawn?"
     },
     {
         id: "leafAngle",
         options: ["small", "medium", "large"],
         initialValue: "medium",
-        label: ""
+        label: "What angle should each leaf make with the stem?"
     },
     {
         id: "petiole",
         options: ["very short", "short", "medium", "long", "very long"],
         initialValue: "medium",
-        label: ""
+        label: "How long should the petiole (leaf stalk) be?"
     },
     {
         id: "petals",
         options: ["one", "three", "four", "five", "ten"],
         initialValue: "one",
-        label: ""
+        label: "How many flower petals should a flower have?"
     },
     {
         id: "petalScale",
         options: ["tiny", "small", "medium", "large", "huge"],
         initialValue: "medium",
-        label: ""
+        label: "How big should a flower petal be drawn?"
     },
     {
         id: "inflorFlowers",
         options: ["one", "two", "three", "five", "ten", "twenty"],
         initialValue: "three",
-        label: ""
+        label: "How many flowers should each inflorescence have?"
     },
     {
         id: "inflorShape",
         options: ["spike", "raceme", "panicle", "umbel", "head", "cluster"],
         initialValue: "spike",
-        label: ""
+        label: "What shape should each inflorescence have"
     },
     {
         id: "apicalInflors",
         options: ["none", "one", "two", "three", "five"],
         initialValue: "one",
-        label: ""
+        label: "How many apical inflorescences should there be?"
     },
     {
         id: "axillaryInflors",
         options: ["none", "three", "five", "ten", "twenty"],
         initialValue: "none",
-        label: ""
+        label: "How many axillary inflorescences should there be?"
     },
     {
         id: "apicalStalk",
         options: ["very short", "short", "medium", "long", "very long"],
         initialValue: "medium",
-        label: ""
+        label: "How long should their primary stems be?"
     },
     {
         id: "axillaryStalk",
         options: ["very short", "short", "medium", "long", "very long"],
         initialValue: "medium",
-        label: ""
+        label: "How long should their primary stems be?"
     },
     {
         id: "fruitSections",
         options: ["one", "three", "four", "five", "ten"],
         initialValue: "one",
-        label: ""
+        label: "How many fruit sections should be used to draw the fruit?"
     },
     {
         id: "fruitScale",
         options: ["tiny", "small", "medium", "large", "huge"],
         initialValue: "medium",
-        label: ""
+        label: "How big should fruit sections be drawn?"
     },
     {
         id: "leafletsNumber",
         options: ["one", "three", "four", "five", "seven"],
         initialValue: "one",
-        label: ""
+        label: "How many leaflets should make up each leaf?"
     },
     {
-        id: "leafletsType",
+        id: "leafletsShape",
         options: ["pinnate", "palmate"],
         initialValue: "pinnate",
-        label: ""
+        label: "What shape should the compound leaves take?"
     },
     {
         id: "leafletSpacing",
         options: ["close", "medium", "far"],
         initialValue: "medium",
-        label: ""
+        label: "How spread out should the leaflets be?"
     },
     {
         id: "internodeWidth",
         options: ["very thin", "thin", "medium", "thick", "very thick"],
         initialValue: "medium",
-        label: ""
+        label: "How thick should internodes be?"
     },
     {
         id: "inflorWidth",
         options: ["very thin", "thin", "medium", "thick", "very thick"],
         initialValue: "medium",
-        label: ""
+        label: "How thick should each inflorescence stem be?"
     },
     // {
     //     id: "showFruits",
@@ -1921,9 +1921,8 @@ WizardForm_turnRight.png
 
     viewChoice(choiceSpec: ChoiceSpec) {
         return m("div.ba",
-            m("div", choiceSpec.label),
-            m("div", choiceSpec.id),
-            m("div", choiceSpec.initialValue),
+            m("div", choiceSpec.label || "FIXME: " + choiceSpec.id),
+            // m("div", choiceSpec.initialValue),
             m("div.flex.f7", choiceSpec.options.map(option => m("div.ba.ma1",
                 { style: { backgroundColor: "#c0c0c0" }},
                 m("img", { src: fileForImage(choiceSpec.id, option), alt: option }),
