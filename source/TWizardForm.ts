@@ -2,6 +2,7 @@
 
 import * as m from "mithril"
 import { AssignFile, CloseFile, Reset } from "./common"
+import { PdPlant } from "./PdPlant"
 
 // from conversion_common import *
 // import ubmpsupport
@@ -103,7 +104,8 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
             "This wizard will help you create a new plant by asking you some simple questions. " +
             "These 10 panels contain about 25 questions based on the most important of the 400 or so parameters that define a plant. " +
             "Click the Next button to start, or click Cancel to stop. Once you start, you can click the Back button to go back and change your choices, or you can click Cancel at any time. ",
-        bottomText: "Note: If you are using the wizard for the first time, we recommend turning on the 'Long Button Hints'. Each wizard question has a hint.",
+        bottomText: "For each question, click on one of the big buttons under the question to make your choice.",
+        // bottomText: "Note: If you are using the wizard for the first time, we recommend turning on the 'Long Button Hints'. Each wizard question has a hint.",
         type: "page"
     },
 
@@ -115,7 +117,6 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
         image: "",
         icon: "WizardForm_meristemsPageImage.png",
         topText: "Meristems are buds from which leaves and branches grow. Where they develop and what they produce has a big effect on plant shape. Meristems form at the growing ends of plant stems (apexes) and in the angles between leaf and stem (axils).",
-        bottomText: "For each question, click on one of the big buttons under the question to make your choice.",
         type: "page"
     },
 
@@ -599,13 +600,17 @@ export class TWizardForm {
     // leafTdoSelectedLabel: TLabel = new TLabel()
     // startPicture: TImage = new TImage()
 
-    // plant: PdPlant = new PdPlant()
+    plant: PdPlant = new PdPlant()
     // tdos: TListCollection = new TListCollection()
     // plantHasInflorescences: boolean = false
     // tdoSelectionChanged: boolean = false
     // askedToSaveOptions: boolean = false
 
     wizardChoices: { [id: string] : string } = {}
+
+    constructor() {
+        this.defaultAllChoices()
+    }
 
     // previewPaintBox: PdPaintBoxWithPalette = new PdPaintBoxWithPalette()
     // TWizardForm.prototype = new PdForm()
@@ -1970,34 +1975,78 @@ export class TWizardForm {
     //     return Key
     // }
 
+    defaultAllChoices() {
+        choiceSpecs.forEach(spec => {
+            if (spec.type !== "page") {
+                this.wizardChoices[spec.id] = spec.initialValue
+            }
+        }
+    }
+
     viewPage(pageSpec: PageSpec) {
-        return m("div.ba.b5",
+        return m("div.bt.b5.mt2.mb2",
             m("div.b", pageSpec.title || "FIXME: " + pageSpec.id),
             m("div", pageSpec.topText),
-            m("div", pageSpec.bottomText),
+            m("div.pt2", pageSpec.bottomText),
         )
     }
 
     viewChoice(choiceSpec: ChoiceSpec) {
-        return m("div.ba",
+        return m("div",
             m("div", choiceSpec.label || "FIXME: " + choiceSpec.id),
-            // m("div", choiceSpec.initialValue),
-            m("div.flex.f7", choiceSpec.options.map(option => m("div.ba.ma1",
-                { style: { backgroundColor: "#c0c0c0" }},
-                m("img", { src: fileForImage(choiceSpec.id, option), alt: option }),
-                m("br"),
-                option
-            )))
+            // TODO: Should rethink as buttons or in some other way to make keyboard accessible
+            m("div.flex.f7", choiceSpec.options.map(option => 
+                m("div.ba.bw2" + (this.wizardChoices[choiceSpec.id] === option ? ".b--black" : ".b--white"),
+                    {
+                        style: { backgroundColor: "#c0c0c0" },
+                        onclick: () => this.wizardChoices[choiceSpec.id] = option
+                    },
+                    m("img", { src: fileForImage(choiceSpec.id, option), alt: option }),
+                    m("br"),
+                    option
+                )
+            )),
+            choiceSpec.type == "tdo" ? m("div.ba.ma1", "UNFINISHED TDO CHOOSER") : undefined,
+            choiceSpec.type == "color" ? m("div.ba.ma1", "UNFINISHED COLOR CHOOSER") : undefined,
         )
     }
 
+    previewSize = 400
+
     view() {
+        const plant = this.plant
+        plant.defaultAllParameters()
+        plant.basePoint_mm.x = 200
+        plant.basePoint_mm.y = 300
+        plant.age = 90
+        plant.regrow()
+        const self = this
         return m("div",
             "Plant Wizard",
             choiceSpecs.map(spec => spec.type === "page"
                 ? this.viewPage(spec)
                 : this.viewChoice(spec)
-            )
+            ),
+            m("canvas.ba", {
+                width: "" + self.previewSize + "px",
+                height: "" + self.previewSize + "px",
+                oncreate(vnode: m.VnodeDOM) {
+                    const canvas = <HTMLCanvasElement>vnode.dom
+                    canvas.width = self.previewSize
+                    canvas.height = self.previewSize
+                    const context = canvas.getContext("2d")
+                    if (!context) return
+                    plant.drawOn(context)
+                },
+                onupdate(vnode: m.VnodeDOM) {
+                    const canvas = <HTMLCanvasElement>vnode.dom
+                    // Clear the canvas
+                    canvas.width = canvas.width
+                    const context = canvas.getContext("2d")
+                    if (!context) return
+                    plant.drawOn(context)
+                },
+            }),
         )
     }
     
