@@ -107,6 +107,8 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
         type: "page"
     },
 
+    ///////////////////////////////////
+
     {
         id: "page2",
         title: "Meristems",
@@ -117,166 +119,6 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
         type: "page"
     },
 
-    {
-        id: "page3",
-        title: "Internodes",
-        image: "",
-        icon: "WizardForm_internodesPageImage.png",
-        topText: "Internodes are portions of plant stem between leaves. They determine how tall or short, straight or viney, and stiff or flexible a plant will be.",
-        bottomText: "",
-        type: "page"
-    },
-
-    {
-        id: "page4",
-        title: "Leaves",
-        image: "",
-        icon: "WizardForm_leavesPageImage.png",
-        topText: "PlantStudio draws leaves using a \"3D object\" that represents a 3D leaf shape. The 3D object is drawn bigger as the leaf grows. Leaves are connected to the plant by a stalk called a petiole.",
-        bottomText: "",
-        type: "page"
-    },
-
-    {
-        id: "leafTdos",
-        options: [],
-        initialValue: "",
-        label: "What 3D object should be used to draw leaves?",
-        type: "tdo"
-    },
-
-    {
-        id: "page5",
-        title: "Compound leaves",
-        image: "",
-        icon: "WizardForm_compoundLeavesPageImage.png",
-        topText: "A compound leaf is a leaf made up of two or more small parts called leaflets. The leaflets look like small whole leaves, but they always fit together in the same pattern for all the leaves on the plant (usually). A leaf without leaflets is a simple leaf.",
-        bottomText: "",
-        type: "page"
-    },
-
-    {
-        id: "page6",
-        title: "Inflorescence placement",
-        image: "",
-        icon: "WizardForm_inflorPlacePageImage.png",
-        topText: "An inflorescence holds flowers and fruits on a plant. Since most plants have hermaphroditic flowers (with both male and female parts), the wizard creates only primary (female or hermaphroditic) flowers. " +
-            "IMAGE:source/resources/WizardForm_apicalInflorExtraImage.png " + 
-            "Apical inflorescences are at the ends (apexes) of plant stems. " +
-            "IMAGE:source/resources/WizardForm_axillaryInflorExtraImage.png " + 
-            "Axillary inflorescences are in the angles between leaf and stem (axils).",
-        bottomText: "",
-        type: "page"
-    },
-
-    {
-        id: "page7",
-        title: "Inflorescences",
-        image: "",
-        icon: "WizardForm_inflorDrawPageImage.png",
-        iconDisabled: "WizardForm_inflorDrawPageImageDisabled.png",
-        topText: "Inflorescence drawing: " +
-            "Inflorescences can have a large variety of shapes, a few of which are shown here. We extend the true meaning of \"inflorescence\" a bit to use an inflorescence when there is only one flower. ",
-        bottomText: "",
-        type: "page"
-    },
-
-    {
-        id: "page8",
-        title: "Flowers",
-        image: "",
-        icon: "WizardForm_flowersPageImage.png",
-        iconDisabled: "WizardForm_flowersPageImageDisabled.png",
-        topText: "Like leaves, flowers are drawn using a 3D object. But here the 3D object represents only one petal of the flower. A number of petals is drawn rotated around a center to produce what looks like a flower.",
-        bottomText: "",
-        type: "page"
-    },
-
-    {
-        id: "petalTdos",
-        options: [],
-        initialValue: "",
-        label: "What 3D object should be used for a flower petal?",
-        explain: "Click in the square to change the color.",
-        type: "tdo"
-    },
-
-    {
-        id: "petalColor",
-        options: [],
-        initialValue: "",
-        label: "What color should flowers be drawn?",
-        type: "color"
-    },
-
-    {
-        id: "page9",
-        title: "Fruits",
-        image: "",
-        icon: "WizardForm_fruitsPageImage.png",
-        iconDisabled: "WizardForm_fruitsPageImageDisabled.png",
-        topText: "Fruits are drawn like flowers, but with a portion of the fruit (a \"fruit section\") rotated around instead of a petal. For many plants you will not be interested in the fruit, so you can turn fruits off entirely.",
-        bottomText: "",
-        type: "page"
-    },
-
-    {
-        id: "fruitTdo",
-        options: [],
-        initialValue: "",
-        label: "What 3D object should be used to draw each fruit section?",
-        type: "tdo"
-    },
-
-    {
-        id: "fruitColor",
-        options: [],
-        initialValue: "",
-        label: "What color should fruits be drawn?",
-        explain: "Click in the square to change the color.",
-        type: "color"
-    },
-
-    {
-        id: "page10",
-        title: "Finish / Preview",
-        image: "",
-        icon: "WizardForm_finishPageImage.png",
-        topText: "Congratulations! " +
-            "You have finished designing your new plant. You can name your new plant here, or just keep this name. " +
-            "Now click Finish to place your plant in the main window, or click Cancel to stop without creating a plant, or click Back to change your choices. " +
-            "You can also click on the pictures below to return to any of the wizard panels. " +
-            "Once your plant is made, you can fine-tune the parameters that define your plant in the Parameters panel in the main window. ",
-        bottomText: "",
-        type: "page"
-    },
-
-    // TODO: wizardNotebook / wizardNotebookPageChanged
-
-    // TODO: Plant name edit field / newPlantName
-
-    // TODO: Plant preview pane / previewPanel / 213 x 251
-
-    // TODO: Randomize button / caption("&Randomize") / randomizePlantClick
-
-    // TODO: Rotate left and right buttons / turnLeftClick / turnRightClick
-
-
-
-
-    
-    {
-        id: "internodes",
-        options: ["very short", "short", "medium", "long", "very long"],
-        initialValue: "medium",
-        label: "How long should internodes be?"
-    },
-    {
-        id: "curviness",
-        options: ["none", "little", "some", "very"],
-        initialValue: "some",
-        label: "How curvy should the plant stem be?"
-    },
     {
         id: "leaves",
         options: ["alternate", "opposite"],
@@ -301,17 +143,62 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
         initialValue: "medium",
         label: "What angle should branches make with the stem?"
     },
+
+    ///////////////////////////////////
+
+    {
+        id: "page3",
+        title: "Internodes",
+        image: "",
+        icon: "WizardForm_internodesPageImage.png",
+        topText: "Internodes are portions of plant stem between leaves. They determine how tall or short, straight or viney, and stiff or flexible a plant will be.",
+        bottomText: "",
+        type: "page"
+    },
+
+    {
+        id: "curviness",
+        options: ["none", "little", "some", "very"],
+        initialValue: "some",
+        label: "How curvy should the plant stem be?"
+    },
+    {
+        id: "internodeWidth",
+        options: ["very thin", "thin", "medium", "thick", "very thick"],
+        initialValue: "medium",
+        label: "How thick should internodes be?"
+    },
+    {
+        id: "internodes",
+        options: ["very short", "short", "medium", "long", "very long"],
+        initialValue: "medium",
+        label: "How long should internodes be?"
+    },
+
+    ///////////////////////////////////
+
+    {
+        id: "page4",
+        title: "Leaves",
+        image: "",
+        icon: "WizardForm_leavesPageImage.png",
+        topText: "PlantStudio draws leaves using a \"3D object\" that represents a 3D leaf shape. The 3D object is drawn bigger as the leaf grows. Leaves are connected to the plant by a stalk called a petiole.",
+        bottomText: "",
+        type: "page"
+    },
+
+    {
+        id: "leafTdos",
+        options: [],
+        initialValue: "",
+        label: "What 3D object should be used to draw leaves?",
+        type: "tdo"
+    },
     {
         id: "leafScale",
         options: ["tiny", "small", "medium", "large", "huge"],
         initialValue: "medium",
         label: "How big should a full-sized leaf be drawn?"
-    },
-    {
-        id: "leafAngle",
-        options: ["small", "medium", "large"],
-        initialValue: "medium",
-        label: "What angle should each leaf make with the stem?"
     },
     {
         id: "petiole",
@@ -320,65 +207,24 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
         label: "How long should the petiole (leaf stalk) be?"
     },
     {
-        id: "petals",
-        options: ["one", "three", "four", "five", "ten"],
-        initialValue: "one",
-        label: "How many flower petals should a flower have?"
-    },
-    {
-        id: "petalScale",
-        options: ["tiny", "small", "medium", "large", "huge"],
+        id: "leafAngle",
+        options: ["small", "medium", "large"],
         initialValue: "medium",
-        label: "How big should a flower petal be drawn?"
+        label: "What angle should each leaf make with the stem?"
     },
+
+    ///////////////////////////////////
+
     {
-        id: "inflorFlowers",
-        options: ["one", "two", "three", "five", "ten", "twenty"],
-        initialValue: "three",
-        label: "How many flowers should each inflorescence have?"
+        id: "page5",
+        title: "Compound leaves",
+        image: "",
+        icon: "WizardForm_compoundLeavesPageImage.png",
+        topText: "A compound leaf is a leaf made up of two or more small parts called leaflets. The leaflets look like small whole leaves, but they always fit together in the same pattern for all the leaves on the plant (usually). A leaf without leaflets is a simple leaf.",
+        bottomText: "",
+        type: "page"
     },
-    {
-        id: "inflorShape",
-        options: ["spike", "raceme", "panicle", "umbel", "cluster", "head"],
-        initialValue: "spike",
-        label: "What shape should each inflorescence have?"
-    },
-    {
-        id: "apicalInflors",
-        options: ["none", "one", "two", "three", "five"],
-        initialValue: "one",
-        label: "How many apical inflorescences should there be?"
-    },
-    {
-        id: "axillaryInflors",
-        options: ["none", "three", "five", "ten", "twenty"],
-        initialValue: "none",
-        label: "How many axillary inflorescences should there be?"
-    },
-    {
-        id: "apicalStalk",
-        options: ["very short", "short", "medium", "long", "very long"],
-        initialValue: "medium",
-        label: "How long should their apical (primary) stems be?"
-    },
-    {
-        id: "axillaryStalk",
-        options: ["very short", "short", "medium", "long", "very long"],
-        initialValue: "medium",
-        label: "How long should their axillary (lateral) stems be?"
-    },
-    {
-        id: "fruitSections",
-        options: ["one", "three", "four", "five", "ten"],
-        initialValue: "one",
-        label: "How many fruit sections should be used to draw the fruit?"
-    },
-    {
-        id: "fruitScale",
-        options: ["tiny", "small", "medium", "large", "huge"],
-        initialValue: "medium",
-        label: "How big should fruit sections be drawn?"
-    },
+
     {
         id: "leafletsNumber",
         options: ["one (simple)", "three", "four", "five", "seven"],
@@ -397,11 +243,72 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
         initialValue: "medium",
         label: "How spread out should the leaflets be?"
     },
+
+    ///////////////////////////////////
+
     {
-        id: "internodeWidth",
-        options: ["very thin", "thin", "medium", "thick", "very thick"],
+        id: "page6",
+        title: "Inflorescence placement",
+        image: "",
+        icon: "WizardForm_inflorPlacePageImage.png",
+        topText: "An inflorescence holds flowers and fruits on a plant. Since most plants have hermaphroditic flowers (with both male and female parts), the wizard creates only primary (female or hermaphroditic) flowers. " +
+            "IMAGE:source/resources/WizardForm_apicalInflorExtraImage.png " + 
+            "Apical inflorescences are at the ends (apexes) of plant stems. " +
+            "IMAGE:source/resources/WizardForm_axillaryInflorExtraImage.png " + 
+            "Axillary inflorescences are in the angles between leaf and stem (axils).",
+        bottomText: "",
+        type: "page"
+    },
+
+    {
+        id: "apicalInflors",
+        options: ["none", "one", "two", "three", "five"],
+        initialValue: "one",
+        label: "How many apical inflorescences should there be?"
+    },
+    {
+        id: "apicalStalk",
+        options: ["very short", "short", "medium", "long", "very long"],
         initialValue: "medium",
-        label: "How thick should internodes be?"
+        label: "How long should their apical (primary) stems be?"
+    },
+    {
+        id: "axillaryStalk",
+        options: ["very short", "short", "medium", "long", "very long"],
+        initialValue: "medium",
+        label: "How long should their axillary (lateral) stems be?"
+    },
+    {
+        id: "axillaryInflors",
+        options: ["none", "three", "five", "ten", "twenty"],
+        initialValue: "none",
+        label: "How many axillary inflorescences should there be?"
+    },
+
+    ///////////////////////////////////
+
+    {
+        id: "page7",
+        title: "Inflorescences", // "Inflorescence drawing"
+        image: "",
+        icon: "WizardForm_inflorDrawPageImage.png",
+        iconDisabled: "WizardForm_inflorDrawPageImageDisabled.png",
+        topText: "Inflorescences can have a large variety of shapes, a few of which are shown here. We extend the true meaning of \"inflorescence\" a bit to use an inflorescence when there is only one flower. ",
+        bottomText: "",
+        type: "page"
+    },
+
+    {
+        id: "inflorFlowers",
+        options: ["one", "two", "three", "five", "ten", "twenty"],
+        initialValue: "three",
+        label: "How many flowers should each inflorescence have?"
+    },
+    {
+        id: "inflorShape",
+        options: ["spike", "raceme", "panicle", "umbel", "cluster", "head"],
+        initialValue: "spike",
+        label: "What shape should each inflorescence have?"
     },
     {
         id: "inflorWidth",
@@ -409,19 +316,132 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
         initialValue: "medium",
         label: "How thick should each inflorescence stem be?"
     },
+
+    ///////////////////////////////////
+
+    {
+        id: "page8",
+        title: "Flowers",
+        image: "",
+        icon: "WizardForm_flowersPageImage.png",
+        iconDisabled: "WizardForm_flowersPageImageDisabled.png",
+        topText: "Like leaves, flowers are drawn using a 3D object. But here the 3D object represents only one petal of the flower. A number of petals is drawn rotated around a center to produce what looks like a flower.",
+        bottomText: "",
+        type: "page"
+    },
+
+    {
+        id: "petalTdos",
+        options: [],
+        initialValue: "",
+        label: "What 3D object should be used for a flower petal?",
+        explain: "Click in the square to change the color.",
+        type: "tdo"
+    },
+    {
+        id: "petals",
+        options: ["one", "three", "four", "five", "ten"],
+        initialValue: "one",
+        label: "How many flower petals should a flower have?"
+    },
+    {
+        id: "petalScale",
+        options: ["tiny", "small", "medium", "large", "huge"],
+        initialValue: "medium",
+        label: "How big should a flower petal be drawn?"
+    },
+    {
+        id: "petalColor",
+        options: [],
+        initialValue: "",
+        label: "What color should flowers be drawn?",
+        explain: "Click in the square to change the color.",
+        type: "color"
+    },
+
+    ///////////////////////////////////
+
+    {
+        id: "page9",
+        title: "Fruits",
+        image: "",
+        icon: "WizardForm_fruitsPageImage.png",
+        iconDisabled: "WizardForm_fruitsPageImageDisabled.png",
+        topText: "Fruits are drawn like flowers, but with a portion of the fruit (a \"fruit section\") rotated around instead of a petal. For many plants you will not be interested in the fruit, so you can turn fruits off entirely.",
+        bottomText: "",
+        type: "page"
+    },
+
     {
         id: "showFruits",
         options: ["no", "yes"],
         initialValue: "yes",
         label: "Do you want to see fruits on your plant?"
     },
-    // {
-    //     id: "turn",
-    //     options: ["left", "right"],
-    //     initialValue: "left",
-    //     label: ""
-    // },
+    {
+        id: "fruitTdo",
+        options: [],
+        initialValue: "",
+        label: "What 3D object should be used to draw each fruit section?",
+        type: "tdo"
+    },
+    {
+        id: "fruitSections",
+        options: ["one", "three", "four", "five", "ten"],
+        initialValue: "one",
+        label: "How many fruit sections should be used to draw the fruit?"
+    },
+    {
+        id: "fruitScale",
+        options: ["tiny", "small", "medium", "large", "huge"],
+        initialValue: "medium",
+        label: "How big should fruit sections be drawn?"
+    },
+    {
+        id: "fruitColor",
+        options: [],
+        initialValue: "",
+        label: "What color should fruits be drawn?",
+        explain: "Click in the square to change the color.",
+        type: "color"
+    },
+
+    ///////////////////////////////////
+
+    {
+        id: "page10",
+        title: "Finish / Preview",
+        image: "",
+        icon: "WizardForm_finishPageImage.png",
+        topText: "Congratulations! " +
+            "You have finished designing your new plant. You can name your new plant here, or just keep this name. " +
+            "Now click Finish to place your plant in the main window, or click Cancel to stop without creating a plant, or click Back to change your choices. " +
+            "You can also click on the pictures below to return to any of the wizard panels. " +
+            "Once your plant is made, you can fine-tune the parameters that define your plant in the Parameters panel in the main window. ",
+        bottomText: "",
+        type: "page"
+    },
+
+    // TODO: Plant preview pane / previewPanel / 213 x 251
+
+    // TODO: Plant name edit field / newPlantName
+
+    // TODO: Randomize button / caption("&Randomize") / randomizePlantClick
+
+    // TODO: Rotate left and right buttons / turnLeftClick / turnRightClick
+
+    // TODO: wizardNotebook / wizardNotebookPageChanged
 ]
+
+/* Other buttons:
+caption("&Help") helpButtonClick
+caption("&Defaults") defaultChoicesClick
+caption("&3D Objects...") changeTdoLibraryClick
+progressDrawGrid  ColCount: "10", progressDrawGridDrawCell progressDrawGridSelectCell
+caption("< &Back") backClick
+caption("&Next >") nextClick
+caption("&Cancel") cancelClick
+*/
 
 // group indexes 
 export class TWizardForm {
