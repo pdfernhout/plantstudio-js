@@ -2,7 +2,8 @@
 
 import * as m from "mithril"
 import { AssignFile, CloseFile, Reset } from "./common"
-import { PdPlant } from "./PdPlant"
+import { CompoundLeafStyle, FloralPart, Gender, LeafArrangement, PdPlant } from "./PdPlant"
+import { darkerColor } from "./usupport"
 
 // from conversion_common import *
 // import ubmpsupport
@@ -80,18 +81,130 @@ type PageSpec = {
 type ChoiceSpec = {
     id: string
     options: string[]
+    values: any[]
+    setValue: (plant: PdPlant, value: any, form: TWizardForm) => void
     initialValue: string
     label: string
     explain?: string
     type?: "tdo" | "color"
 }
 
-
 const templateSpec: ChoiceSpec = {
     id: "",
     options: [],
+    values: [],
+    setValue: (plant: PdPlant, value: any) => plant.age = value,
     initialValue: "",
     label: ""
+}
+
+function hasNoInflorescences(plant: PdPlant) {
+    return plant.pGeneral.numApicalInflors === 0 && plant.pGeneral.numAxillaryInflors === 0
+}
+
+function adjustAgeAtWhichFloweringStarts(plant: PdPlant) {
+    if (hasNoInflorescences(plant)) {
+        // if no flowers, set age to allocate at max
+        plant.pGeneral.ageAtWhichFloweringStarts = plant.pGeneral.ageAtMaturity + 1
+    } else {
+        plant.pGeneral.ageAtWhichFloweringStarts = Math.round(plant.pGeneral.ageAtMaturity * 0.6)
+    }
+}
+
+function adjustFlowersForChanges(plant: PdPlant, numFlowers: number, inflorShape: string): void {
+    // TODO: Maybe needs to handle the case of no flowers better?
+    // Originally just exited, presumably leaving all defaults as-is:
+    // if (hasNoInflorescences(plant)) {
+    //     return
+    // }
+    plant.pInflor[Gender.kGenderFemale].numFlowersOnMainBranch = numFlowers
+    plant.pInflor[Gender.kGenderFemale].numFlowersPerBranch = 0
+    plant.pInflor[Gender.kGenderFemale].numBranches = 0
+
+    if (inflorShape === "spike") {
+        // shape 
+        plant.pInflor[Gender.kGenderFemale].numFlowersOnMainBranch = numFlowers
+        plant.pInflor[Gender.kGenderFemale].numFlowersPerBranch = 0
+        plant.pInflor[Gender.kGenderFemale].numBranches = 0
+        plant.pInflor[Gender.kGenderFemale].pedicelLength_mm = 1
+        plant.pInflor[Gender.kGenderFemale].pedicelAngle = 30
+        plant.pInflor[Gender.kGenderFemale].internodeLength_mm = 10
+        plant.pInflor[Gender.kGenderFemale].flowersSpiralOnStem = true
+    } else if (inflorShape === "raceme") {
+        plant.pInflor[Gender.kGenderFemale].numFlowersOnMainBranch = numFlowers
+        plant.pInflor[Gender.kGenderFemale].numFlowersPerBranch = 0
+        plant.pInflor[Gender.kGenderFemale].numBranches = 0
+        plant.pInflor[Gender.kGenderFemale].pedicelLength_mm = 20
+        plant.pInflor[Gender.kGenderFemale].pedicelAngle = 45
+        plant.pInflor[Gender.kGenderFemale].internodeLength_mm = 10
+        plant.pInflor[Gender.kGenderFemale].flowersSpiralOnStem = true
+    } else if (inflorShape === "panicle") {
+        switch (numFlowers) {
+            case 1:
+                plant.pInflor[Gender.kGenderFemale].numFlowersOnMainBranch = 1
+                plant.pInflor[Gender.kGenderFemale].numFlowersPerBranch = 0
+                plant.pInflor[Gender.kGenderFemale].numBranches = 0
+                break
+            case 2:
+                plant.pInflor[Gender.kGenderFemale].numFlowersOnMainBranch = 0
+                plant.pInflor[Gender.kGenderFemale].numFlowersPerBranch = 1
+                plant.pInflor[Gender.kGenderFemale].numBranches = 2
+                break
+            case 3:
+                plant.pInflor[Gender.kGenderFemale].numFlowersOnMainBranch = 1
+                plant.pInflor[Gender.kGenderFemale].numFlowersPerBranch = 1
+                plant.pInflor[Gender.kGenderFemale].numBranches = 2
+                break
+            case 5:
+                plant.pInflor[Gender.kGenderFemale].numFlowersOnMainBranch = 1
+                plant.pInflor[Gender.kGenderFemale].numFlowersPerBranch = 2
+                plant.pInflor[Gender.kGenderFemale].numBranches = 2
+                break
+            case 10:
+                plant.pInflor[Gender.kGenderFemale].numFlowersOnMainBranch = 1
+                plant.pInflor[Gender.kGenderFemale].numFlowersPerBranch = 3
+                plant.pInflor[Gender.kGenderFemale].numBranches = 3
+                break
+            case 20:
+                plant.pInflor[Gender.kGenderFemale].numFlowersOnMainBranch = 4
+                plant.pInflor[Gender.kGenderFemale].numFlowersPerBranch = 4
+                plant.pInflor[Gender.kGenderFemale].numBranches = 4
+                break
+        }
+        plant.pInflor[Gender.kGenderFemale].pedicelLength_mm = 15
+        plant.pInflor[Gender.kGenderFemale].pedicelAngle = 30
+        plant.pInflor[Gender.kGenderFemale].branchAngle = 35
+        plant.pInflor[Gender.kGenderFemale].branchesAreAlternate = true
+        plant.pInflor[Gender.kGenderFemale].internodeLength_mm = 7
+        plant.pInflor[Gender.kGenderFemale].flowersSpiralOnStem = true
+    } else if (inflorShape === "umbel") {
+        plant.pInflor[Gender.kGenderFemale].numFlowersOnMainBranch = 0
+        plant.pInflor[Gender.kGenderFemale].numFlowersPerBranch = 1
+        plant.pInflor[Gender.kGenderFemale].numBranches = numFlowers
+        plant.pInflor[Gender.kGenderFemale].pedicelLength_mm = 20
+        plant.pInflor[Gender.kGenderFemale].pedicelAngle = 20
+        plant.pInflor[Gender.kGenderFemale].internodeLength_mm = 0.0
+        plant.pInflor[Gender.kGenderFemale].flowersSpiralOnStem = true
+    } else if (inflorShape === "cluster") {
+        plant.pInflor[Gender.kGenderFemale].numFlowersOnMainBranch = 0
+        plant.pInflor[Gender.kGenderFemale].numFlowersPerBranch = 1
+        plant.pInflor[Gender.kGenderFemale].numBranches = numFlowers
+        plant.pInflor[Gender.kGenderFemale].flowersSpiralOnStem = true
+        plant.pInflor[Gender.kGenderFemale].internodeLength_mm = 3
+        plant.pInflor[Gender.kGenderFemale].pedicelLength_mm = 1
+        plant.pInflor[Gender.kGenderFemale].pedicelAngle = 25
+    } else if (inflorShape === "head") {
+        plant.pInflor[Gender.kGenderFemale].numFlowersOnMainBranch = numFlowers
+        plant.pInflor[Gender.kGenderFemale].numFlowersPerBranch = 0
+        plant.pInflor[Gender.kGenderFemale].numBranches = 0
+        plant.pInflor[Gender.kGenderFemale].pedicelLength_mm = 10
+        plant.pInflor[Gender.kGenderFemale].pedicelAngle = 0
+        plant.pInflor[Gender.kGenderFemale].internodeLength_mm = 10
+        plant.pInflor[Gender.kGenderFemale].isHead = true
+        plant.pInflor[Gender.kGenderFemale].flowersSpiralOnStem = false
+    } else {
+        throw new Error("Unexpected inflorShape: " + inflorShape)
+    }
 }
 
 const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
@@ -123,24 +236,32 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     {
         id: "leaves",
         options: ["alternate", "opposite"],
+        values: [LeafArrangement.kArrangementAlternate, LeafArrangement.kArrangementOpposite],
+        setValue: (plant: PdPlant, value: any) =>  plant.pMeristem.branchingAndLeafArrangement = value,
         initialValue: "alternate",
         label: "How should leaves and branches be arranged?"
     },
     {
         id: "branch",
         options: ["none", "little", "medium", "lot"],
+        values: [0, 10, 30, 80],
+        setValue: (plant: PdPlant, value: any) => plant.pMeristem.branchingIndex = value,
         initialValue: "medium",
         label: "How much should the plant branch?"
     },
     {
         id: "secondaryBranching",
         options: ["no", "yes"],
+        values: [false, true],
+        setValue: (plant: PdPlant, value: any) => plant.pMeristem.secondaryBranchingIsAllowed = value,
         initialValue: "no",
         label: "Should secondary branching (off branches) occur?"
     },
     {
         id: "branchAngle",
         options: ["small", "medium", "large"],
+        values: [20, 40, 60],
+        setValue: (plant: PdPlant, value: any) => plant.pMeristem.branchingAngle = value,
         initialValue: "medium",
         label: "What angle should branches make with the stem?"
     },
@@ -160,18 +281,27 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     {
         id: "curviness",
         options: ["none", "little", "some", "very"],
+        values: [[0, 0], [10, 5], [30, 10], [50, 20]],
+        setValue: (plant: PdPlant, value: any) => {
+            plant.pInternode.curvingIndex = value[0]
+            plant.pInternode.firstInternodeCurvingIndex = value[1]
+        },
         initialValue: "some",
         label: "How curvy should the plant stem be?"
     },
     {
         id: "internodeWidth",
         options: ["very thin", "thin", "medium", "thick", "very thick"],
+        values: [0.5, 1, 2, 3, 10],
+        setValue: (plant: PdPlant, value: any) => plant.pInternode.widthAtOptimalFinalBiomassAndExpansion_mm = value,
         initialValue: "medium",
         label: "How thick should internodes be?"
     },
     {
         id: "internodes",
         options: ["very short", "short", "medium", "long", "very long"],
+        values: [1, 10, 15, 25, 50],
+        setValue: (plant: PdPlant, value: any) => plant.pInternode.lengthAtOptimalFinalBiomassAndExpansion_mm = value,
         initialValue: "medium",
         label: "How long should internodes be?"
     },
@@ -191,6 +321,11 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     {
         id: "leafTdos",
         options: [],
+        values: [],
+        setValue: (plant: PdPlant, value: any) => {
+            // TODO: FIXME for TDOs
+            // plant.pLeaf.leafTdoParams.object3D.copyFrom(value),
+        },
         initialValue: "",
         label: "What 3D object should be used to draw leaves?",
         type: "tdo"
@@ -198,18 +333,24 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     {
         id: "leafScale",
         options: ["tiny", "small", "medium", "large", "huge"],
+        values: [5, 20, 40, 60, 100],
+        setValue: (plant: PdPlant, value: any) => plant.pLeaf.leafTdoParams.scaleAtFullSize = value,
         initialValue: "medium",
         label: "How big should a full-sized leaf be drawn?"
     },
     {
         id: "petiole",
         options: ["very short", "short", "medium", "long", "very long"],
+        values: [1, 10, 20, 30, 60],
+        setValue: (plant: PdPlant, value: any) => plant.pLeaf.petioleLengthAtOptimalBiomass_mm = value,
         initialValue: "medium",
         label: "How long should the petiole (leaf stalk) be?"
     },
     {
         id: "leafAngle",
         options: ["small", "medium", "large"],
+        values: [20, 40, 60],
+        setValue: (plant: PdPlant, value: any) => plant.pLeaf.petioleAngle = value,
         initialValue: "medium",
         label: "What angle should each leaf make with the stem?"
     },
@@ -229,18 +370,24 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     {
         id: "leafletsNumber",
         options: ["one (simple)", "three", "four", "five", "seven"],
+        values: [1, 3, 4, 5, 7],
+        setValue: (plant: PdPlant, value: any) => plant.pLeaf.compoundNumLeaflets = value,
         initialValue: "one (simple)",
         label: "How many leaflets should make up each leaf?"
     },
     {
         id: "leafletsShape",
         options: ["pinnate", "palmate"],
+        values: [CompoundLeafStyle.kCompoundLeafPinnate, CompoundLeafStyle.kCompoundLeafPalmate],
+        setValue: (plant: PdPlant, value: any) => plant.pLeaf.compoundPinnateOrPalmate = value,
         initialValue: "pinnate",
         label: "What shape should the compound leaves take?"
     },
     {
         id: "leafletSpacing",
         options: ["close", "medium", "far"],
+        values: [10.0, 30.0, 50.0],
+        setValue: (plant: PdPlant, value: any) => plant.pLeaf.compoundRachisToPetioleRatio = value,
         initialValue: "medium",
         label: "How spread out should the leaflets be?"
     },
@@ -264,26 +411,40 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     {
         id: "apicalInflors",
         options: ["none", "one", "two", "three", "five"],
+        values: [0, 1, 2, 3, 5],
+        setValue: (plant: PdPlant, value: any) => {
+            plant.pGeneral.numApicalInflors = value
+            adjustAgeAtWhichFloweringStarts(plant)
+        },
         initialValue: "one",
         label: "How many apical inflorescences should there be?"
     },
     {
         id: "apicalStalk",
         options: ["very short", "short", "medium", "long", "very long"],
+        values: [1, 10, 30, 50, 100],
+        setValue: (plant: PdPlant, value: any) => plant.pInflor[Gender.kGenderFemale].terminalStalkLength_mm = value,
         initialValue: "medium",
         label: "How long should their apical (primary) stems be?"
     },
     {
-        id: "axillaryStalk",
-        options: ["very short", "short", "medium", "long", "very long"],
-        initialValue: "medium",
-        label: "How long should their axillary (lateral) stems be?"
-    },
-    {
         id: "axillaryInflors",
         options: ["none", "three", "five", "ten", "twenty"],
+        values: [0, 3, 5, 10, 20],
+        setValue: (plant: PdPlant, value: any) => {
+            plant.pGeneral.numAxillaryInflors = value
+            adjustAgeAtWhichFloweringStarts(plant)
+        },
         initialValue: "none",
         label: "How many axillary inflorescences should there be?"
+    },
+    {
+        id: "axillaryStalk",
+        options: ["very short", "short", "medium", "long", "very long"],
+        values: [1, 5, 10, 15, 40],
+        setValue: (plant: PdPlant, value: any) => plant.pInflor[Gender.kGenderFemale].peduncleLength_mm = value,
+        initialValue: "medium",
+        label: "How long should their axillary (lateral) stems be?"
     },
 
     ///////////////////////////////////
@@ -301,19 +462,31 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
 
     {
         id: "inflorFlowers",
-        options: ["one", "two", "three", "five", "ten", "twenty"],
-        initialValue: "three",
+        options: ["none", "one", "two", "three", "five", "ten", "twenty"],
+        values: [0, 1, 2, 3, 5, 10, 20],
+        setValue: (plant: PdPlant, value: any, form: TWizardForm) => {
+            form.inflorFlowers = value
+            adjustFlowersForChanges(plant, form.inflorFlowers, form.inflorShape)
+        },
+        initialValue: "three", // If you change this, you mist also change form.inflorFlowers initializer
         label: "How many flowers should each inflorescence have?"
     },
     {
         id: "inflorShape",
         options: ["spike", "raceme", "panicle", "umbel", "cluster", "head"],
-        initialValue: "spike",
+        values: ["spike", "raceme", "panicle", "umbel", "cluster", "head"],
+        setValue: (plant: PdPlant, value: any, form: TWizardForm) => {
+            form.inflorShape = value
+            adjustFlowersForChanges(plant, form.inflorFlowers, form.inflorShape)
+        },
+        initialValue: "spike", // If you change this, you mist also change form.inflorShape initializer
         label: "What shape should each inflorescence have?"
     },
     {
         id: "inflorWidth",
         options: ["very thin", "thin", "medium", "thick", "very thick"],
+        values: [0.5, 1, 2, 3, 10],
+        setValue: (plant: PdPlant, value: any) => plant.pInflor[Gender.kGenderFemale].internodeWidth_mm = value,
         initialValue: "medium",
         label: "How thick should each inflorescence stem be?"
     },
@@ -334,6 +507,15 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     {
         id: "petalTdos",
         options: [],
+        values: [],
+        setValue: (plant: PdPlant, value: any) => {
+            // TODO: FIXME for setting TDO
+            // tdo = this.tdoForIndex(this.petalTdosDraw.Selection.left)
+            // if ((tdo !== null) && (this.plant.pFlower[Gender.kGenderFemale].tdoParams[uplant.kFirstPetals].object3D !== null)) {
+            //     // cfk first petals again
+            //     this.plant.pFlower[Gender.kGenderFemale].tdoParams[uplant.kFirstPetals].object3D.copyFrom(tdo)
+            // }
+        },
         initialValue: "",
         label: "What 3D object should be used for a flower petal?",
         explain: "Click in the square to change the color.",
@@ -342,18 +524,29 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     {
         id: "petals",
         options: ["one", "three", "four", "five", "ten"],
-        initialValue: "one",
+        values: [1, 3, 4, 5, 10],
+        setValue: (plant: PdPlant, value: any) => plant.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kFirstPetals].repetitions = value,
+        initialValue: "five",
         label: "How many flower petals should a flower have?"
     },
     {
         id: "petalScale",
         options: ["tiny", "small", "medium", "large", "huge"],
+        values: [4, 10, 20, 30, 60],
+        setValue: (plant: PdPlant, value: any) => plant.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kFirstPetals].scaleAtFullSize = value,
         initialValue: "medium",
         label: "How big should a flower petal be drawn?"
     },
     {
         id: "petalColor",
         options: [],
+        values: [],
+        setValue: (plant: PdPlant, value: any) => {
+            plant.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kFirstPetals].faceColor = value
+            plant.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kFirstPetals].backfaceColor = darkerColor(plant.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kFirstPetals].faceColor)
+            plant.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kBud].faceColor = plant.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kFirstPetals].faceColor
+            plant.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kBud].backfaceColor = plant.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kFirstPetals].backfaceColor
+        },
         initialValue: "",
         label: "What color should flowers be drawn?",
         explain: "Click in the square to change the color.",
@@ -376,12 +569,22 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     {
         id: "showFruits",
         options: ["no", "yes"],
+        values: [200, 3],
+        setValue: (plant: PdPlant, value: any) => plant.pFlower[Gender.kGenderFemale].minDaysBeforeSettingFruit = value,
         initialValue: "yes",
         label: "Do you want to see fruits on your plant?"
     },
     {
         id: "fruitTdo",
         options: [],
+        values: [],
+        setValue: (plant: PdPlant, value: any) => {
+            // TODO: FIXME for TDOs
+            // tdo = this.tdoForIndex(this.sectionTdosDraw.Selection.left)
+            // if ((tdo !== null) && (this.plant.pFruit.tdoParams.object3D !== null)) {
+            //     this.plant.pFruit.tdoParams.object3D.copyFrom(tdo)
+            // }
+        },
         initialValue: "",
         label: "What 3D object should be used to draw each fruit section?",
         type: "tdo"
@@ -389,23 +592,36 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     {
         id: "fruitSections",
         options: ["one", "three", "four", "five", "ten"],
+        values: [1, 3, 4, 5, 10],
+        setValue: (plant: PdPlant, value: any) => plant.pFruit.tdoParams.repetitions = value,
         initialValue: "one",
         label: "How many fruit sections should be used to draw the fruit?"
     },
     {
         id: "fruitScale",
         options: ["tiny", "small", "medium", "large", "huge"],
+        values: [4, 10, 20, 30, 60],
+        setValue: (plant: PdPlant, value: any) => plant.pFruit.tdoParams.scaleAtFullSize = value,
         initialValue: "medium",
         label: "How big should fruit sections be drawn?"
     },
     {
         id: "fruitColor",
         options: [],
+        values: [],
+        setValue: (plant: PdPlant, value: any) => {
+            plant.pFruit.tdoParams.faceColor = value
+            plant.pFruit.tdoParams.backfaceColor = darkerColor(plant.pFruit.tdoParams.faceColor)
+            plant.pFruit.tdoParams.alternateFaceColor = plant.pFruit.tdoParams.faceColor
+            plant.pFruit.tdoParams.alternateBackfaceColor = plant.pFruit.tdoParams.backfaceColor
+        },
         initialValue: "",
         label: "What color should fruits be drawn?",
         explain: "Click in the square to change the color.",
         type: "color"
     },
+
+    // TODO: Maybe need extra conditional where if not flowers should turn off fruit
 
     ///////////////////////////////////
 
@@ -608,8 +824,18 @@ export class TWizardForm {
 
     wizardChoices: { [id: string] : string } = {}
 
+    // Need to store some flower choices in form as they are used to calculate ingterdependent things in plant 
+    inflorFlowers: number = 3
+    inflorShape: string = "spike"
+
     constructor() {
         this.defaultAllChoices()
+        const plant = this.plant
+        plant.defaultAllParameters()
+        plant.basePoint_mm.x = 200
+        plant.basePoint_mm.y = 300
+        plant.age = 90
+        plant.regrow()
     }
 
     // previewPaintBox: PdPaintBoxWithPalette = new PdPaintBoxWithPalette()
@@ -1139,9 +1365,9 @@ export class TWizardForm {
     //     if (this.plant.pLeaf.leafTdoParams.object3D !== null) {
     //         udomain.domain.options.wizardTdoNames[1] = this.plant.pLeaf.leafTdoParams.object3D.getName()
     //     }
-    //     if (this.plant.pFlower[uplant.kGenderFemale].tdoParams[uplant.kFirstPetals].object3D !== null) {
+    //     if (this.plant.pFlower[Gender.kGenderFemale].tdoParams[uplant.kFirstPetals].object3D !== null) {
     //         // cfk do first petal only in wizard, right?
-    //         udomain.domain.options.wizardTdoNames[2] = this.plant.pFlower[uplant.kGenderFemale].tdoParams[uplant.kFirstPetals].object3D.getName()
+    //         udomain.domain.options.wizardTdoNames[2] = this.plant.pFlower[Gender.kGenderFemale].tdoParams[uplant.kFirstPetals].object3D.getName()
     //     }
     //     if (this.plant.pFruit.tdoParams.object3D !== null) {
     //         udomain.domain.options.wizardTdoNames[3] = this.plant.pFruit.tdoParams.object3D.getName()
@@ -1214,469 +1440,6 @@ export class TWizardForm {
     //         }
     //     }
     //     return result
-    // }
-    
-    // finishForMeristems(): void {
-    //     if (this.leavesAlternate.Enabled) {
-    //         if (this.leavesAlternate.Down) {
-    //             // alternate/opposite 
-    //             this.plant.pMeristem.branchingAndLeafArrangement = uplant.kArrangementAlternate
-    //         } else {
-    //             this.plant.pMeristem.branchingAndLeafArrangement = uplant.kArrangementOpposite
-    //         }
-    //     }
-    //     if (this.branchNone.Enabled) {
-    //         if (this.branchNone.Down) {
-    //             // branching index 
-    //             this.plant.pMeristem.branchingIndex = 0
-    //         } else if (this.branchLittle.Down) {
-    //             this.plant.pMeristem.branchingIndex = 10
-    //         } else if (this.branchMedium.Down) {
-    //             this.plant.pMeristem.branchingIndex = 30
-    //         } else if (this.branchLot.Down) {
-    //             this.plant.pMeristem.branchingIndex = 80
-    //         }
-    //     }
-    //     if (this.secondaryBranchingYes.Enabled) {
-    //         // secondary branching 
-    //         this.plant.pMeristem.secondaryBranchingIsAllowed = this.secondaryBranchingYes.Down
-    //     }
-    //     if (this.branchAngleSmall.Enabled) {
-    //         if (this.branchAngleSmall.Down) {
-    //             // branch angle 
-    //             this.plant.pMeristem.branchingAngle = 20
-    //         } else if (this.branchAngleMedium.Down) {
-    //             this.plant.pMeristem.branchingAngle = 40
-    //         } else if (this.branchAngleLarge.Down) {
-    //             this.plant.pMeristem.branchingAngle = 60
-    //         }
-    //     }
-    // }
-    
-    // finishForInternodes(): void {
-    //     if (this.curvinessNone.Enabled) {
-    //         if (this.curvinessNone.Down) {
-    //             // curviness 
-    //             this.plant.pInternode.curvingIndex = 0
-    //             this.plant.pInternode.firstInternodeCurvingIndex = 0
-    //         } else if (this.curvinessLittle.Down) {
-    //             this.plant.pInternode.curvingIndex = 10
-    //             this.plant.pInternode.firstInternodeCurvingIndex = 5
-    //         } else if (this.curvinessSome.Down) {
-    //             this.plant.pInternode.curvingIndex = 30
-    //             this.plant.pInternode.firstInternodeCurvingIndex = 10
-    //         } else if (this.curvinessVery.Down) {
-    //             this.plant.pInternode.curvingIndex = 50
-    //             this.plant.pInternode.firstInternodeCurvingIndex = 20
-    //         }
-    //     }
-    //     if (this.internodesVeryShort.Enabled) {
-    //         if (this.internodesVeryShort.Down) {
-    //             // length 
-    //             this.plant.pInternode.lengthAtOptimalFinalBiomassAndExpansion_mm = 1
-    //         } else if (this.internodesShort.Down) {
-    //             this.plant.pInternode.lengthAtOptimalFinalBiomassAndExpansion_mm = 10
-    //         } else if (this.internodesMedium.Down) {
-    //             this.plant.pInternode.lengthAtOptimalFinalBiomassAndExpansion_mm = 15
-    //         } else if (this.internodesLong.Down) {
-    //             this.plant.pInternode.lengthAtOptimalFinalBiomassAndExpansion_mm = 25
-    //         } else if (this.internodesVeryLong.Down) {
-    //             this.plant.pInternode.lengthAtOptimalFinalBiomassAndExpansion_mm = 50
-    //         }
-    //     }
-    //     if (this.internodeWidthVeryThin.Enabled) {
-    //         if (this.internodeWidthVeryThin.Down) {
-    //             // width 
-    //             this.plant.pInternode.widthAtOptimalFinalBiomassAndExpansion_mm = 0.5
-    //         } else if (this.internodeWidthThin.Down) {
-    //             this.plant.pInternode.widthAtOptimalFinalBiomassAndExpansion_mm = 1
-    //         } else if (this.internodeWidthMedium.Down) {
-    //             this.plant.pInternode.widthAtOptimalFinalBiomassAndExpansion_mm = 2
-    //         } else if (this.internodeWidthThick.Down) {
-    //             this.plant.pInternode.widthAtOptimalFinalBiomassAndExpansion_mm = 3
-    //         } else if (this.internodeWidthVeryThick.Down) {
-    //             this.plant.pInternode.widthAtOptimalFinalBiomassAndExpansion_mm = 10
-    //         }
-    //     }
-    // }
-    
-    // finishForLeaves(): void {
-    //     let tdo: KfObject3D
-        
-    //     if (this.leafScaleTiny.Enabled) {
-    //         if (this.leafScaleTiny.Down) {
-    //             // scale 
-    //             this.plant.pLeaf.leafTdoParams.scaleAtFullSize = 5
-    //         } else if (this.leafScaleSmall.Down) {
-    //             this.plant.pLeaf.leafTdoParams.scaleAtFullSize = 20
-    //         } else if (this.leafScaleMedium.Down) {
-    //             this.plant.pLeaf.leafTdoParams.scaleAtFullSize = 40
-    //         } else if (this.leafScaleLarge.Down) {
-    //             this.plant.pLeaf.leafTdoParams.scaleAtFullSize = 60
-    //         } else if (this.leafScaleHuge.Down) {
-    //             this.plant.pLeaf.leafTdoParams.scaleAtFullSize = 100
-    //         }
-    //     }
-    //     if (this.petioleVeryShort.Enabled) {
-    //         if (this.petioleVeryShort.Down) {
-    //             // petiole length 
-    //             this.plant.pLeaf.petioleLengthAtOptimalBiomass_mm = 1
-    //         } else if (this.petioleShort.Down) {
-    //             this.plant.pLeaf.petioleLengthAtOptimalBiomass_mm = 10
-    //         } else if (this.petioleMedium.Down) {
-    //             this.plant.pLeaf.petioleLengthAtOptimalBiomass_mm = 20
-    //         } else if (this.petioleLong.Down) {
-    //             this.plant.pLeaf.petioleLengthAtOptimalBiomass_mm = 30
-    //         } else if (this.petioleVeryLong.Down) {
-    //             this.plant.pLeaf.petioleLengthAtOptimalBiomass_mm = 60
-    //         }
-    //     }
-    //     if (this.leafAngleSmall.Enabled) {
-    //         if (this.leafAngleSmall.Down) {
-    //             // petiole angle 
-    //             this.plant.pLeaf.petioleAngle = 20
-    //         } else if (this.leafAngleMedium.Down) {
-    //             this.plant.pLeaf.petioleAngle = 40
-    //         } else if (this.leafAngleLarge.Down) {
-    //             this.plant.pLeaf.petioleAngle = 60
-    //         }
-    //     }
-    //     if (this.leafTdosDraw.Visible) {
-    //         // tdo 
-    //         tdo = this.tdoForIndex(this.leafTdosDraw.Selection.left)
-    //         if ((tdo !== null) && (this.plant.pLeaf.leafTdoParams.object3D !== null)) {
-    //             this.plant.pLeaf.leafTdoParams.object3D.copyFrom(tdo)
-    //         }
-    //     }
-    // }
-    
-    // finishForCompoundLeaves(): void {
-    //     if (this.leafletsOne.Enabled) {
-    //         if (this.leafletsOne.Down) {
-    //             // num leaflets 
-    //             this.plant.pLeaf.compoundNumLeaflets = 1
-    //         } else if (this.leafletsThree.Down) {
-    //             this.plant.pLeaf.compoundNumLeaflets = 3
-    //         } else if (this.leafletsFour.Down) {
-    //             this.plant.pLeaf.compoundNumLeaflets = 4
-    //         } else if (this.leafletsFive.Down) {
-    //             this.plant.pLeaf.compoundNumLeaflets = 5
-    //         } else if (this.leafletsSeven.Down) {
-    //             this.plant.pLeaf.compoundNumLeaflets = 7
-    //         }
-    //     }
-    //     if (this.leafletsPinnate.Enabled) {
-    //         if (this.leafletsPinnate.Down) {
-    //             // shape 
-    //             this.plant.pLeaf.compoundPinnateOrPalmate = uplant.kCompoundLeafPinnate
-    //         } else if (this.leafletsPalmate.Down) {
-    //             this.plant.pLeaf.compoundPinnateOrPalmate = uplant.kCompoundLeafPalmate
-    //         }
-    //     }
-    //     if (this.leafletSpacingClose.Enabled) {
-    //         if (this.leafletSpacingClose.Down) {
-    //             // spread 
-    //             this.plant.pLeaf.compoundRachisToPetioleRatio = 10.0
-    //         } else if (this.leafletSpacingMedium.Down) {
-    //             this.plant.pLeaf.compoundRachisToPetioleRatio = 30.0
-    //         } else if (this.leafletSpacingFar.Down) {
-    //             this.plant.pLeaf.compoundRachisToPetioleRatio = 50.0
-    //         }
-    //     }
-    // }
-    
-    // finishForInflorescencePlacement(): void {
-    //     if (this.apicalInflorsNone.Enabled) {
-    //         if (this.apicalInflorsNone.Down) {
-    //             // num apical inflors 
-    //             this.plant.pGeneral.numApicalInflors = 0
-    //         } else if (this.apicalInflorsOne.Down) {
-    //             this.plant.pGeneral.numApicalInflors = 1
-    //         } else if (this.apicalInflorsTwo.Down) {
-    //             this.plant.pGeneral.numApicalInflors = 2
-    //         } else if (this.apicalInflorsThree.Down) {
-    //             this.plant.pGeneral.numApicalInflors = 3
-    //         } else if (this.apicalInflorsFive.Down) {
-    //             this.plant.pGeneral.numApicalInflors = 5
-    //         }
-    //     }
-    //     if (this.axillaryInflorsNone.Enabled) {
-    //         if (this.axillaryInflorsNone.Down) {
-    //             // num axillary inflors 
-    //             this.plant.pGeneral.numAxillaryInflors = 0
-    //         } else if (this.axillaryInflorsThree.Down) {
-    //             this.plant.pGeneral.numAxillaryInflors = 3
-    //         } else if (this.axillaryInflorsFive.Down) {
-    //             this.plant.pGeneral.numAxillaryInflors = 5
-    //         } else if (this.axillaryInflorsTen.Down) {
-    //             this.plant.pGeneral.numAxillaryInflors = 10
-    //         } else if (this.axillaryInflorsTwenty.Down) {
-    //             this.plant.pGeneral.numAxillaryInflors = 20
-    //         }
-    //     }
-    //     if (this.apicalInflorsNone.Enabled && this.apicalInflorsNone.Down && this.axillaryInflorsNone.Enabled && this.axillaryInflorsNone.Down) {
-    //         // if no flowers, set age to allocate at max
-    //         this.plant.pGeneral.ageAtWhichFloweringStarts = this.plant.pGeneral.ageAtMaturity + 1
-    //     } else {
-    //         this.plant.pGeneral.ageAtWhichFloweringStarts = intround(this.plant.pGeneral.ageAtMaturity * 0.6)
-    //     }
-    //     if (this.apicalStalkVeryShort.Enabled) {
-    //         if (this.apicalStalkVeryShort.Down) {
-    //             // apical stalk 
-    //             this.plant.pInflor[uplant.kGenderFemale].terminalStalkLength_mm = 1
-    //         } else if (this.apicalStalkShort.Down) {
-    //             this.plant.pInflor[uplant.kGenderFemale].terminalStalkLength_mm = 10
-    //         } else if (this.apicalStalkMedium.Down) {
-    //             this.plant.pInflor[uplant.kGenderFemale].terminalStalkLength_mm = 30
-    //         } else if (this.apicalStalkLong.Down) {
-    //             this.plant.pInflor[uplant.kGenderFemale].terminalStalkLength_mm = 50
-    //         } else if (this.apicalStalkVeryLong.Down) {
-    //             this.plant.pInflor[uplant.kGenderFemale].terminalStalkLength_mm = 100
-    //         }
-    //     }
-    //     if (this.axillaryStalkVeryShort.Enabled) {
-    //         if (this.axillaryStalkVeryShort.Down) {
-    //             // axillary stalk (peduncle) 
-    //             this.plant.pInflor[uplant.kGenderFemale].peduncleLength_mm = 1
-    //         } else if (this.axillaryStalkShort.Down) {
-    //             this.plant.pInflor[uplant.kGenderFemale].peduncleLength_mm = 5
-    //         } else if (this.axillaryStalkMedium.Down) {
-    //             this.plant.pInflor[uplant.kGenderFemale].peduncleLength_mm = 10
-    //         } else if (this.axillaryStalkLong.Down) {
-    //             this.plant.pInflor[uplant.kGenderFemale].peduncleLength_mm = 15
-    //         } else if (this.axillaryStalkVeryLong.Down) {
-    //             this.plant.pInflor[uplant.kGenderFemale].peduncleLength_mm = 40
-    //         }
-    //     }
-    // }
-    
-    // finishForInflorescences(): void {
-    //     let numFlowers: short
-        
-    //     if (!this.plantHasInflorescences) {
-    //         return
-    //     }
-    //     // num flowers 
-    //     numFlowers = 0
-    //     if (this.inflorFlowersOne.Enabled) {
-    //         if (this.inflorFlowersOne.Down) {
-    //             numFlowers = 1
-    //         } else if (this.inflorFlowersTwo.Down) {
-    //             numFlowers = 2
-    //         } else if (this.inflorFlowersThree.Down) {
-    //             numFlowers = 3
-    //         } else if (this.inflorFlowersFive.Down) {
-    //             numFlowers = 5
-    //         } else if (this.inflorFlowersTen.Down) {
-    //             numFlowers = 10
-    //         } else if (this.inflorFlowersTwenty.Down) {
-    //             numFlowers = 20
-    //         }
-    //     }
-    //     this.plant.pInflor[uplant.kGenderFemale].numFlowersOnMainBranch = numFlowers
-    //     this.plant.pInflor[uplant.kGenderFemale].numFlowersPerBranch = 0
-    //     this.plant.pInflor[uplant.kGenderFemale].numBranches = 0
-    //     if (this.inflorShapeSpike.Enabled) {
-    //         if (this.inflorShapeSpike.Down) {
-    //             // shape 
-    //             this.plant.pInflor[uplant.kGenderFemale].numFlowersOnMainBranch = numFlowers
-    //             this.plant.pInflor[uplant.kGenderFemale].numFlowersPerBranch = 0
-    //             this.plant.pInflor[uplant.kGenderFemale].numBranches = 0
-    //             this.plant.pInflor[uplant.kGenderFemale].pedicelLength_mm = 1
-    //             this.plant.pInflor[uplant.kGenderFemale].pedicelAngle = 30
-    //             this.plant.pInflor[uplant.kGenderFemale].internodeLength_mm = 10
-    //             this.plant.pInflor[uplant.kGenderFemale].flowersSpiralOnStem = true
-    //         } else if (this.inflorShapeRaceme.Down) {
-    //             this.plant.pInflor[uplant.kGenderFemale].numFlowersOnMainBranch = numFlowers
-    //             this.plant.pInflor[uplant.kGenderFemale].numFlowersPerBranch = 0
-    //             this.plant.pInflor[uplant.kGenderFemale].numBranches = 0
-    //             this.plant.pInflor[uplant.kGenderFemale].pedicelLength_mm = 20
-    //             this.plant.pInflor[uplant.kGenderFemale].pedicelAngle = 45
-    //             this.plant.pInflor[uplant.kGenderFemale].internodeLength_mm = 10
-    //             this.plant.pInflor[uplant.kGenderFemale].flowersSpiralOnStem = true
-    //         } else if (this.inflorShapePanicle.Down) {
-    //             switch (numFlowers) {
-    //                 case 1:
-    //                     this.plant.pInflor[uplant.kGenderFemale].numFlowersOnMainBranch = 1
-    //                     this.plant.pInflor[uplant.kGenderFemale].numFlowersPerBranch = 0
-    //                     this.plant.pInflor[uplant.kGenderFemale].numBranches = 0
-    //                     break
-    //                 case 2:
-    //                     this.plant.pInflor[uplant.kGenderFemale].numFlowersOnMainBranch = 0
-    //                     this.plant.pInflor[uplant.kGenderFemale].numFlowersPerBranch = 1
-    //                     this.plant.pInflor[uplant.kGenderFemale].numBranches = 2
-    //                     break
-    //                 case 3:
-    //                     this.plant.pInflor[uplant.kGenderFemale].numFlowersOnMainBranch = 1
-    //                     this.plant.pInflor[uplant.kGenderFemale].numFlowersPerBranch = 1
-    //                     this.plant.pInflor[uplant.kGenderFemale].numBranches = 2
-    //                     break
-    //                 case 5:
-    //                     this.plant.pInflor[uplant.kGenderFemale].numFlowersOnMainBranch = 1
-    //                     this.plant.pInflor[uplant.kGenderFemale].numFlowersPerBranch = 2
-    //                     this.plant.pInflor[uplant.kGenderFemale].numBranches = 2
-    //                     break
-    //                 case 10:
-    //                     this.plant.pInflor[uplant.kGenderFemale].numFlowersOnMainBranch = 1
-    //                     this.plant.pInflor[uplant.kGenderFemale].numFlowersPerBranch = 3
-    //                     this.plant.pInflor[uplant.kGenderFemale].numBranches = 3
-    //                     break
-    //                 case 20:
-    //                     this.plant.pInflor[uplant.kGenderFemale].numFlowersOnMainBranch = 4
-    //                     this.plant.pInflor[uplant.kGenderFemale].numFlowersPerBranch = 4
-    //                     this.plant.pInflor[uplant.kGenderFemale].numBranches = 4
-    //                     break
-    //             }
-    //             this.plant.pInflor[uplant.kGenderFemale].pedicelLength_mm = 15
-    //             this.plant.pInflor[uplant.kGenderFemale].pedicelAngle = 30
-    //             this.plant.pInflor[uplant.kGenderFemale].branchAngle = 35
-    //             this.plant.pInflor[uplant.kGenderFemale].branchesAreAlternate = true
-    //             this.plant.pInflor[uplant.kGenderFemale].internodeLength_mm = 7
-    //             this.plant.pInflor[uplant.kGenderFemale].flowersSpiralOnStem = true
-    //         } else if (this.inflorShapeUmbel.Down) {
-    //             this.plant.pInflor[uplant.kGenderFemale].numFlowersOnMainBranch = 0
-    //             this.plant.pInflor[uplant.kGenderFemale].numFlowersPerBranch = 1
-    //             this.plant.pInflor[uplant.kGenderFemale].numBranches = numFlowers
-    //             this.plant.pInflor[uplant.kGenderFemale].pedicelLength_mm = 20
-    //             this.plant.pInflor[uplant.kGenderFemale].pedicelAngle = 20
-    //             this.plant.pInflor[uplant.kGenderFemale].internodeLength_mm = 0.0
-    //             this.plant.pInflor[uplant.kGenderFemale].flowersSpiralOnStem = true
-    //         } else if (this.inflorShapeCluster.Down) {
-    //             this.plant.pInflor[uplant.kGenderFemale].numFlowersOnMainBranch = 0
-    //             this.plant.pInflor[uplant.kGenderFemale].numFlowersPerBranch = 1
-    //             this.plant.pInflor[uplant.kGenderFemale].numBranches = numFlowers
-    //             this.plant.pInflor[uplant.kGenderFemale].flowersSpiralOnStem = true
-    //             this.plant.pInflor[uplant.kGenderFemale].internodeLength_mm = 3
-    //             this.plant.pInflor[uplant.kGenderFemale].pedicelLength_mm = 1
-    //             this.plant.pInflor[uplant.kGenderFemale].pedicelAngle = 25
-    //         } else if (this.inflorShapeHead.Down) {
-    //             this.plant.pInflor[uplant.kGenderFemale].numFlowersOnMainBranch = numFlowers
-    //             this.plant.pInflor[uplant.kGenderFemale].numFlowersPerBranch = 0
-    //             this.plant.pInflor[uplant.kGenderFemale].numBranches = 0
-    //             this.plant.pInflor[uplant.kGenderFemale].pedicelLength_mm = 10
-    //             this.plant.pInflor[uplant.kGenderFemale].pedicelAngle = 0
-    //             this.plant.pInflor[uplant.kGenderFemale].internodeLength_mm = 10
-    //             this.plant.pInflor[uplant.kGenderFemale].isHead = true
-    //             this.plant.pInflor[uplant.kGenderFemale].flowersSpiralOnStem = false
-    //         }
-    //     }
-    //     if (this.inflorWidthVeryThin.Enabled) {
-    //         if (this.inflorWidthVeryThin.Down) {
-    //             // width 
-    //             this.plant.pInflor[uplant.kGenderFemale].internodeWidth_mm = 0.5
-    //         } else if (this.inflorWidthThin.Down) {
-    //             this.plant.pInflor[uplant.kGenderFemale].internodeWidth_mm = 1
-    //         } else if (this.inflorWidthMedium.Down) {
-    //             this.plant.pInflor[uplant.kGenderFemale].internodeWidth_mm = 2
-    //         } else if (this.inflorWidthThick.Down) {
-    //             this.plant.pInflor[uplant.kGenderFemale].internodeWidth_mm = 3
-    //         } else if (this.inflorWidthVeryThick.Down) {
-    //             this.plant.pInflor[uplant.kGenderFemale].internodeWidth_mm = 10
-    //         }
-    //     }
-    // }
-    
-    // finishForFlowers(): void {
-    //     let tdo: KfObject3D
-        
-    //     if (!this.plantHasInflorescences) {
-    //         return
-    //     }
-    //     if (this.petalsOne.Enabled) {
-    //         if (this.petalsOne.Down) {
-    //             // cfk only first petals for wizard?
-    //             this.plant.pFlower[uplant.kGenderFemale].tdoParams[uplant.kFirstPetals].repetitions = 1
-    //         } else if (this.petalsThree.Down) {
-    //             this.plant.pFlower[uplant.kGenderFemale].tdoParams[uplant.kFirstPetals].repetitions = 3
-    //         } else if (this.petalsFour.Down) {
-    //             this.plant.pFlower[uplant.kGenderFemale].tdoParams[uplant.kFirstPetals].repetitions = 4
-    //         } else if (this.petalsFive.Down) {
-    //             this.plant.pFlower[uplant.kGenderFemale].tdoParams[uplant.kFirstPetals].repetitions = 5
-    //         } else if (this.petalsTen.Down) {
-    //             this.plant.pFlower[uplant.kGenderFemale].tdoParams[uplant.kFirstPetals].repetitions = 10
-    //         }
-    //     }
-    //     if (this.petalScaleTiny.Enabled) {
-    //         if (this.petalScaleTiny.Down) {
-    //             this.plant.pFlower[uplant.kGenderFemale].tdoParams[uplant.kFirstPetals].scaleAtFullSize = 4
-    //         } else if (this.petalScaleSmall.Down) {
-    //             this.plant.pFlower[uplant.kGenderFemale].tdoParams[uplant.kFirstPetals].scaleAtFullSize = 10
-    //         } else if (this.petalScaleMedium.Down) {
-    //             this.plant.pFlower[uplant.kGenderFemale].tdoParams[uplant.kFirstPetals].scaleAtFullSize = 20
-    //         } else if (this.petalScaleLarge.Down) {
-    //             this.plant.pFlower[uplant.kGenderFemale].tdoParams[uplant.kFirstPetals].scaleAtFullSize = 30
-    //         } else if (this.petalScaleHuge.Down) {
-    //             this.plant.pFlower[uplant.kGenderFemale].tdoParams[uplant.kFirstPetals].scaleAtFullSize = 60
-    //         }
-    //     }
-    //     if (this.petalColor.Visible) {
-    //         this.plant.pFlower[uplant.kGenderFemale].tdoParams[uplant.kFirstPetals].faceColor = this.petalColor.Color
-    //         this.plant.pFlower[uplant.kGenderFemale].tdoParams[uplant.kFirstPetals].backfaceColor = usupport.darkerColor(this.plant.pFlower[uplant.kGenderFemale].tdoParams[uplant.kFirstPetals].faceColor)
-    //         this.plant.pFlower[uplant.kGenderFemale].tdoParams[uplant.kBud].faceColor = this.plant.pFlower[uplant.kGenderFemale].tdoParams[uplant.kFirstPetals].faceColor
-    //         this.plant.pFlower[uplant.kGenderFemale].tdoParams[uplant.kBud].backfaceColor = this.plant.pFlower[uplant.kGenderFemale].tdoParams[uplant.kFirstPetals].backfaceColor
-    //     }
-    //     if (this.petalTdosDraw.Visible) {
-    //         tdo = this.tdoForIndex(this.petalTdosDraw.Selection.left)
-    //         if ((tdo !== null) && (this.plant.pFlower[uplant.kGenderFemale].tdoParams[uplant.kFirstPetals].object3D !== null)) {
-    //             // cfk first petals again
-    //             this.plant.pFlower[uplant.kGenderFemale].tdoParams[uplant.kFirstPetals].object3D.copyFrom(tdo)
-    //         }
-    //     }
-    // }
-    
-    // finishForFruit(): void {
-    //     let tdo: KfObject3D
-        
-    //     if (!this.plantHasInflorescences) {
-    //         return
-    //     }
-    //     if (this.showFruitsNo.Enabled) {
-    //         if (this.showFruitsNo.Checked) {
-    //             this.plant.pFlower[uplant.kGenderFemale].minDaysBeforeSettingFruit = 200
-    //         } else {
-    //             this.plant.pFlower[uplant.kGenderFemale].minDaysBeforeSettingFruit = 3
-    //         }
-    //     }
-    //     if (this.fruitSectionsOne.Enabled) {
-    //         if (this.fruitSectionsOne.Down) {
-    //             // num sections 
-    //             this.plant.pFruit.tdoParams.repetitions = 1
-    //         } else if (this.fruitSectionsThree.Down) {
-    //             this.plant.pFruit.tdoParams.repetitions = 3
-    //         } else if (this.fruitSectionsFour.Down) {
-    //             this.plant.pFruit.tdoParams.repetitions = 4
-    //         } else if (this.fruitSectionsFive.Down) {
-    //             this.plant.pFruit.tdoParams.repetitions = 5
-    //         } else if (this.fruitSectionsTen.Down) {
-    //             this.plant.pFruit.tdoParams.repetitions = 10
-    //         }
-    //     }
-    //     if (this.fruitScaleTiny.Enabled) {
-    //         if (this.fruitScaleTiny.Down) {
-    //             // scale 
-    //             this.plant.pFruit.tdoParams.scaleAtFullSize = 4
-    //         } else if (this.fruitScaleSmall.Down) {
-    //             this.plant.pFruit.tdoParams.scaleAtFullSize = 10
-    //         } else if (this.fruitScaleMedium.Down) {
-    //             this.plant.pFruit.tdoParams.scaleAtFullSize = 20
-    //         } else if (this.fruitScaleLarge.Down) {
-    //             this.plant.pFruit.tdoParams.scaleAtFullSize = 30
-    //         } else if (this.fruitScaleHuge.Down) {
-    //             this.plant.pFruit.tdoParams.scaleAtFullSize = 60
-    //         }
-    //     }
-    //     if (this.fruitColor.Visible) {
-    //         this.plant.pFruit.tdoParams.faceColor = this.fruitColor.Color
-    //         this.plant.pFruit.tdoParams.backfaceColor = usupport.darkerColor(this.plant.pFruit.tdoParams.faceColor)
-    //         this.plant.pFruit.tdoParams.alternateFaceColor = this.plant.pFruit.tdoParams.faceColor
-    //         this.plant.pFruit.tdoParams.alternateBackfaceColor = this.plant.pFruit.tdoParams.backfaceColor
-    //     }
-    //     if (this.sectionTdosDraw.Visible) {
-    //         tdo = this.tdoForIndex(this.sectionTdosDraw.Selection.left)
-    //         if ((tdo !== null) && (this.plant.pFruit.tdoParams.object3D !== null)) {
-    //             this.plant.pFruit.tdoParams.object3D.copyFrom(tdo)
-    //         }
-    //     }
     // }
     
     // // ------------------------------------------------------------------------------------------- *preview 
@@ -1979,8 +1742,9 @@ export class TWizardForm {
         choiceSpecs.forEach(spec => {
             if (spec.type !== "page") {
                 this.wizardChoices[spec.id] = spec.initialValue
+                spec.setValue(this.plant, spec.values[spec.options.indexOf(spec.initialValue)], this)
             }
-        }
+        })
     }
 
     viewPage(pageSpec: PageSpec) {
@@ -1995,11 +1759,14 @@ export class TWizardForm {
         return m("div",
             m("div", choiceSpec.label || "FIXME: " + choiceSpec.id),
             // TODO: Should rethink as buttons or in some other way to make keyboard accessible
-            m("div.flex.f7", choiceSpec.options.map(option => 
+            m("div.flex.f7", choiceSpec.options.map((option, optionIndex) => 
                 m("div.ba.bw2" + (this.wizardChoices[choiceSpec.id] === option ? ".b--black" : ".b--white"),
                     {
                         style: { backgroundColor: "#c0c0c0" },
-                        onclick: () => this.wizardChoices[choiceSpec.id] = option
+                        onclick: () => {
+                            this.wizardChoices[choiceSpec.id] = option
+                            choiceSpec.setValue(this.plant, choiceSpec.values[optionIndex], this)
+                        }
                     },
                     m("img", { src: fileForImage(choiceSpec.id, option), alt: option }),
                     m("br"),
@@ -2013,13 +1780,9 @@ export class TWizardForm {
 
     previewSize = 400
 
-    view() {
+    view(vnode: any) {
         const plant = this.plant
-        plant.defaultAllParameters()
-        plant.basePoint_mm.x = 200
-        plant.basePoint_mm.y = 300
-        plant.age = 90
-        plant.regrow()
+        vnode.attrs.setPlant(plant)
         const self = this
         return m("div",
             "Plant Wizard",
@@ -2027,26 +1790,26 @@ export class TWizardForm {
                 ? this.viewPage(spec)
                 : this.viewChoice(spec)
             ),
-            m("canvas.ba", {
-                width: "" + self.previewSize + "px",
-                height: "" + self.previewSize + "px",
-                oncreate(vnode: m.VnodeDOM) {
-                    const canvas = <HTMLCanvasElement>vnode.dom
-                    canvas.width = self.previewSize
-                    canvas.height = self.previewSize
-                    const context = canvas.getContext("2d")
-                    if (!context) return
-                    plant.drawOn(context)
-                },
-                onupdate(vnode: m.VnodeDOM) {
-                    const canvas = <HTMLCanvasElement>vnode.dom
-                    // Clear the canvas
-                    canvas.width = canvas.width
-                    const context = canvas.getContext("2d")
-                    if (!context) return
-                    plant.drawOn(context)
-                },
-            }),
+            // m("canvas.ba", {
+            //     width: "" + self.previewSize + "px",
+            //     height: "" + self.previewSize + "px",
+            //     oncreate(vnode: m.VnodeDOM) {
+            //         const canvas = <HTMLCanvasElement>vnode.dom
+            //         canvas.width = self.previewSize
+            //         canvas.height = self.previewSize
+            //         const context = canvas.getContext("2d")
+            //         if (!context) return
+            //         plant.drawOn(context)
+            //     },
+            //     onupdate(vnode: m.VnodeDOM) {
+            //         const canvas = <HTMLCanvasElement>vnode.dom
+            //         // Clear the canvas
+            //         canvas.width = canvas.width
+            //         const context = canvas.getContext("2d")
+            //         if (!context) return
+            //         plant.drawOn(context)
+            //     },
+            // }),
         )
     }
     
