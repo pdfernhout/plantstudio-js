@@ -99,6 +99,7 @@ function setPlant(aPlant: PdPlant) {
     amendment.partID = plant.firstPhytomer!.partID
     amendment.addRotations = true
     plant.addAmendment(amendment)
+    plant.regrow()
 }
 
 const MyComponent = { 

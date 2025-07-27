@@ -1743,6 +1743,11 @@ export class TWizardForm {
             if (spec.type !== "page") {
                 this.wizardChoices[spec.id] = spec.initialValue
                 spec.setValue(this.plant, spec.values[spec.options.indexOf(spec.initialValue)], this)
+                // TODO Development: Used to verify a mistake was not made in options not matching values
+                if (spec.options.length !== spec.values.length) {
+                    alert("options and values configuration error")
+                    throw new Error("options and values configuration error")
+                }
             }
         })
     }
