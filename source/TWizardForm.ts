@@ -1785,7 +1785,7 @@ export class TWizardForm {
             m("div.mb1", m("span.green", "🞂 "), choiceSpec.label || "FIXME: " + choiceSpec.id),
             // TODO: Should rethink as buttons or in some other way to make keyboard accessible
             m("div.flex.f7.ml3", choiceSpec.options.map((option, optionIndex) => 
-                m("div.ba.bw2" + (this.wizardChoices[choiceSpec.id] === option ? ".b--black" : ".b--white"),
+                m("div.ba.bw2.flex.flex-column.pt1" + (this.wizardChoices[choiceSpec.id] === option ? ".b--black" : ".b--white"),
                     {
                         style: { backgroundColor: 
                             choiceSpec.type === "color" 
@@ -1797,8 +1797,8 @@ export class TWizardForm {
                             choiceSpec.setValue(this.plant, choiceSpec.values[optionIndex], this)
                         }
                     },
-                    choiceSpec.type !== "color" && m("img", { src: fileForImage(choiceSpec.id, option), alt: option }),
-                    m("br"),
+                    choiceSpec.type !== "color" && m("img.center", { src: fileForImage(choiceSpec.id, option), alt: option }),
+                    choiceSpec.type === "color" && m("div.h1"),
                     m("span", { style: choiceSpec.type === "color" ? "background-color: white": undefined }, option)
                 )
             )),
