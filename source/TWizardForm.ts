@@ -1773,18 +1773,18 @@ export class TWizardForm {
     }
 
     viewPage(pageSpec: PageSpec) {
-        return m("div.bt.b5.mt2.mb2",
-            m("div.b", pageSpec.title || "FIXME: " + pageSpec.id),
+        return m("div.bt.b5.mt2",
+            m("div.b.mt1.mb1", pageSpec.title || "FIXME: " + pageSpec.id),
             m("div", pageSpec.topText),
-            m("div.pt2", pageSpec.bottomText),
+            pageSpec.bottomText && m("div.pt2", pageSpec.bottomText),
         )
     }
 
     viewChoice(choiceSpec: ChoiceSpec) {
-        return m("div",
-            m("div", choiceSpec.label || "FIXME: " + choiceSpec.id),
+        return m("div.mt2",
+            m("div.mb1", m("span.green", "🞂 "), choiceSpec.label || "FIXME: " + choiceSpec.id),
             // TODO: Should rethink as buttons or in some other way to make keyboard accessible
-            m("div.flex.f7", choiceSpec.options.map((option, optionIndex) => 
+            m("div.flex.f7.ml3", choiceSpec.options.map((option, optionIndex) => 
                 m("div.ba.bw2" + (this.wizardChoices[choiceSpec.id] === option ? ".b--black" : ".b--white"),
                     {
                         style: { backgroundColor: 
