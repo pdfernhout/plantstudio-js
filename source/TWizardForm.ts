@@ -82,10 +82,10 @@ type ChoiceSpec = {
     id: string
     options: string[]
     values: any[]
+    getValue?: (plant: PdPlant) => any
     setValue: (plant: PdPlant, value: any, form: TWizardForm) => void
     initialValue: string
     label: string
-    explain?: string
     type?: "tdo" | "color"
 }
 
@@ -205,6 +205,29 @@ function adjustFlowersForChanges(plant: PdPlant, numFlowers: number, inflorShape
     } else {
         throw new Error("Unexpected inflorShape: " + inflorShape)
     }
+}
+
+const commonColors = {
+    aqua: "#00FFFF",
+    black: "#000000",
+    blue: "#0000FF",
+    fuchsia: "#FF00FF",
+    gray: "#808080",
+    green: "#008000",
+    lime: "#00FF00",
+    maroon: "#800000",
+    navy: "#000080",
+    olive: "#808000",
+    purple: "#800080",
+    red: "#FF0000",
+    silver: "#C0C0C0",
+    teal: "#008080",
+    white: "#FFFFFF",
+    yellow: "#FFFF00",
+}
+
+function CssHexColorToNumber(cssColor: string) {
+    return parseInt(cssColor.substring(5,7) + cssColor.substring(3,5) + cssColor.substring(1,3), 16);
 }
 
 const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
@@ -518,7 +541,6 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
         },
         initialValue: "",
         label: "What 3D object should be used for a flower petal?",
-        explain: "Click in the square to change the color.",
         type: "tdo"
     },
     {
@@ -539,17 +561,16 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     },
     {
         id: "petalColor",
-        options: [],
-        values: [],
+        options: Object.keys(commonColors),
+        values: Object.values(commonColors),
         setValue: (plant: PdPlant, value: any) => {
-            plant.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kFirstPetals].faceColor = value
+            plant.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kFirstPetals].faceColor = CssHexColorToNumber(value)
             plant.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kFirstPetals].backfaceColor = darkerColor(plant.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kFirstPetals].faceColor)
             plant.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kBud].faceColor = plant.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kFirstPetals].faceColor
             plant.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kBud].backfaceColor = plant.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kFirstPetals].backfaceColor
         },
-        initialValue: "",
+        initialValue: "blue",
         label: "What color should flowers be drawn?",
-        explain: "Click in the square to change the color.",
         type: "color"
     },
 
@@ -607,17 +628,16 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     },
     {
         id: "fruitColor",
-        options: [],
-        values: [],
+        options: Object.keys(commonColors),
+        values: Object.values(commonColors),
         setValue: (plant: PdPlant, value: any) => {
-            plant.pFruit.tdoParams.faceColor = value
+            plant.pFruit.tdoParams.faceColor = CssHexColorToNumber(value)
             plant.pFruit.tdoParams.backfaceColor = darkerColor(plant.pFruit.tdoParams.faceColor)
             plant.pFruit.tdoParams.alternateFaceColor = plant.pFruit.tdoParams.faceColor
             plant.pFruit.tdoParams.alternateBackfaceColor = plant.pFruit.tdoParams.backfaceColor
         },
-        initialValue: "",
+        initialValue: "red",
         label: "What color should fruits be drawn?",
-        explain: "Click in the square to change the color.",
         type: "color"
     },
 
@@ -829,12 +849,12 @@ export class TWizardForm {
     inflorShape: string = "spike"
 
     constructor() {
-        this.defaultAllChoices()
         const plant = this.plant
         plant.defaultAllParameters()
         plant.basePoint_mm.x = 200
         plant.basePoint_mm.y = 300
         plant.age = 90
+        this.defaultAllChoices()
         plant.regrow()
     }
 
@@ -1767,19 +1787,22 @@ export class TWizardForm {
             m("div.flex.f7", choiceSpec.options.map((option, optionIndex) => 
                 m("div.ba.bw2" + (this.wizardChoices[choiceSpec.id] === option ? ".b--black" : ".b--white"),
                     {
-                        style: { backgroundColor: "#c0c0c0" },
+                        style: { backgroundColor: 
+                            choiceSpec.type === "color" 
+                                ? choiceSpec.values[optionIndex]
+                                : "#c0c0c0" 
+                        },
                         onclick: () => {
                             this.wizardChoices[choiceSpec.id] = option
                             choiceSpec.setValue(this.plant, choiceSpec.values[optionIndex], this)
                         }
                     },
-                    m("img", { src: fileForImage(choiceSpec.id, option), alt: option }),
+                    choiceSpec.type !== "color" && m("img", { src: fileForImage(choiceSpec.id, option), alt: option }),
                     m("br"),
-                    option
+                    m("span", { style: choiceSpec.type === "color" ? "background-color: white": undefined }, option)
                 )
             )),
-            choiceSpec.type == "tdo" ? m("div.ba.ma1", "UNFINISHED TDO CHOOSER") : undefined,
-            choiceSpec.type == "color" ? m("div.ba.ma1", "UNFINISHED COLOR CHOOSER") : undefined,
+            choiceSpec.type === "tdo" ? m("div.ba.ma1", "UNFINISHED TDO CHOOSER") : undefined,
         )
     }
 
