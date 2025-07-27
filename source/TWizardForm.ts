@@ -83,6 +83,7 @@ type PageSpec = {
 
 type ChoiceSpec = {
     id: string
+    disabled?: (id: string, plant: PdPlant, form: TWizardForm) => boolean
     options: string[]
     values: any[]
     getValue?: (plant: PdPlant) => any
@@ -277,6 +278,7 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     },
     {
         id: "secondaryBranching",
+        disabled: (id: string, plant: PdPlant, form: TWizardForm) => form.wizardChoices["branch"] === "none",
         options: ["no", "yes"],
         values: [false, true],
         setValue: (plant: PdPlant, value: any) => plant.pMeristem.secondaryBranchingIsAllowed = value,
@@ -285,6 +287,7 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     },
     {
         id: "branchAngle",
+        disabled: (id: string, plant: PdPlant, form: TWizardForm) => form.wizardChoices["branch"] === "none",
         options: ["small", "medium", "large"],
         values: [20, 40, 60],
         setValue: (plant: PdPlant, value: any) => plant.pMeristem.branchingAngle = value,
@@ -404,6 +407,7 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     },
     {
         id: "leafletsShape",
+        disabled: (id: string, plant: PdPlant, form: TWizardForm) => form.wizardChoices["leafletsNumber"] === "one (simple)",
         options: ["pinnate", "palmate"],
         values: [CompoundLeafStyle.kCompoundLeafPinnate, CompoundLeafStyle.kCompoundLeafPalmate],
         setValue: (plant: PdPlant, value: any) => plant.pLeaf.compoundPinnateOrPalmate = value,
@@ -412,6 +416,7 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     },
     {
         id: "leafletSpacing",
+        disabled: (id: string, plant: PdPlant, form: TWizardForm) => form.wizardChoices["leafletsNumber"] === "one (simple)",
         options: ["close", "medium", "far"],
         values: [10.0, 30.0, 50.0],
         setValue: (plant: PdPlant, value: any) => plant.pLeaf.compoundRachisToPetioleRatio = value,
@@ -448,6 +453,7 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     },
     {
         id: "apicalStalk",
+        disabled: (id: string, plant: PdPlant, form: TWizardForm) => form.wizardChoices["apicalInflors"] === "none",
         options: ["very short", "short", "medium", "long", "very long"],
         values: [1, 10, 30, 50, 100],
         setValue: (plant: PdPlant, value: any) => plant.pInflor[Gender.kGenderFemale].terminalStalkLength_mm = value,
@@ -467,6 +473,7 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     },
     {
         id: "axillaryStalk",
+        disabled: (id: string, plant: PdPlant, form: TWizardForm) => form.wizardChoices["axillaryInflors"] === "none",
         options: ["very short", "short", "medium", "long", "very long"],
         values: [1, 5, 10, 15, 40],
         setValue: (plant: PdPlant, value: any) => plant.pInflor[Gender.kGenderFemale].peduncleLength_mm = value,
@@ -489,17 +496,19 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
 
     {
         id: "inflorFlowers",
-        options: ["none", "one", "two", "three", "five", "ten", "twenty"],
-        values: [0, 1, 2, 3, 5, 10, 20],
+        disabled: (id: string, plant: PdPlant, form: TWizardForm) => hasNoInflorescences(plant),
+        options: ["one", "two", "three", "five", "ten", "twenty"],
+        values: [1, 2, 3, 5, 10, 20],
         setValue: (plant: PdPlant, value: any, form: TWizardForm) => {
             form.inflorFlowers = value
             adjustFlowersForChanges(plant, form.inflorFlowers, form.inflorShape)
         },
-        initialValue: "three", // If you change this, you mist also change form.inflorFlowers initializer
+        initialValue: "one", // If you change this, you mist also change form.inflorFlowers initializer
         label: "How many flowers should each inflorescence have?"
     },
     {
         id: "inflorShape",
+        disabled: (id: string, plant: PdPlant, form: TWizardForm) =>  hasNoInflorescences(plant) || form.wizardChoices["inflorFlowers"] === "one",
         options: ["spike", "raceme", "panicle", "umbel", "cluster", "head"],
         values: ["spike", "raceme", "panicle", "umbel", "cluster", "head"],
         setValue: (plant: PdPlant, value: any, form: TWizardForm) => {
@@ -511,6 +520,7 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     },
     {
         id: "inflorWidth",
+        disabled: (id: string, plant: PdPlant, form: TWizardForm) => hasNoInflorescences(plant),
         options: ["very thin", "thin", "medium", "thick", "very thick"],
         values: [0.5, 1, 2, 3, 10],
         setValue: (plant: PdPlant, value: any) => plant.pInflor[Gender.kGenderFemale].internodeWidth_mm = value,
@@ -533,6 +543,7 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
 
     {
         id: "petalTdos",
+        disabled: (id: string, plant: PdPlant, form: TWizardForm) => hasNoInflorescences(plant),
         options: [],
         values: [],
         setValue: (plant: PdPlant, value: any) => {
@@ -552,6 +563,7 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     },
     {
         id: "petals",
+        disabled: (id: string, plant: PdPlant, form: TWizardForm) => hasNoInflorescences(plant),
         options: ["one", "three", "four", "five", "ten"],
         values: [1, 3, 4, 5, 10],
         setValue: (plant: PdPlant, value: any) => plant.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kFirstPetals].repetitions = value,
@@ -560,6 +572,7 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     },
     {
         id: "petalScale",
+        disabled: (id: string, plant: PdPlant, form: TWizardForm) => hasNoInflorescences(plant),
         options: ["tiny", "small", "medium", "large", "huge"],
         values: [4, 10, 20, 30, 60],
         setValue: (plant: PdPlant, value: any) => plant.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kFirstPetals].scaleAtFullSize = value,
@@ -568,6 +581,7 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     },
     {
         id: "petalColor",
+        disabled: (id: string, plant: PdPlant, form: TWizardForm) => hasNoInflorescences(plant),
         options: Object.keys(commonColors),
         values: Object.values(commonColors),
         setValue: (plant: PdPlant, value: any) => {
@@ -604,6 +618,7 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     },
     {
         id: "fruitTdo",
+        disabled: (id: string, plant: PdPlant, form: TWizardForm) => form.wizardChoices["showFruits"] === "no",
         options: [],
         values: [],
         setValue: (plant: PdPlant, value: any) => {
@@ -622,6 +637,7 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     },
     {
         id: "fruitSections",
+        disabled: (id: string, plant: PdPlant, form: TWizardForm) => form.wizardChoices["showFruits"] === "no",
         options: ["one", "three", "four", "five", "ten"],
         values: [1, 3, 4, 5, 10],
         setValue: (plant: PdPlant, value: any) => plant.pFruit.tdoParams.repetitions = value,
@@ -630,6 +646,7 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     },
     {
         id: "fruitScale",
+        disabled: (id: string, plant: PdPlant, form: TWizardForm) => form.wizardChoices["showFruits"] === "no",
         options: ["tiny", "small", "medium", "large", "huge"],
         values: [4, 10, 20, 30, 60],
         setValue: (plant: PdPlant, value: any) => plant.pFruit.tdoParams.scaleAtFullSize = value,
@@ -638,6 +655,7 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     },
     {
         id: "fruitColor",
+        disabled: (id: string, plant: PdPlant, form: TWizardForm) => form.wizardChoices["showFruits"] === "no",
         options: Object.keys(commonColors),
         values: Object.values(commonColors),
         setValue: (plant: PdPlant, value: any) => {
@@ -855,7 +873,7 @@ export class TWizardForm {
     wizardChoices: { [id: string] : string } = {}
 
     // Need to store some flower choices in form as they are used to calculate ingterdependent things in plant 
-    inflorFlowers: number = 3
+    inflorFlowers: number = 1
     inflorShape: string = "spike"
     setPlantCallback: ((plant: PdPlant) => void) | undefined = undefined
 
@@ -1781,6 +1799,7 @@ export class TWizardForm {
                 }
             }
         })
+        this.plant.setAge(this.plant.pGeneral.ageAtMaturity)
     }
 
     viewPage(pageSpec: PageSpec) {
@@ -1799,11 +1818,12 @@ export class TWizardForm {
             choiceSpec.options = domain.defaultTdoLibrary.map(tdo => tdo.name)
             choiceSpec.values = domain.defaultTdoLibrary.map(tdo => tdo)
         }
-        return m("div.mt2",
-            m("div.mb1", m("span.green", "🞂 "), choiceSpec.label || "FIXME: " + choiceSpec.id),
+        const disabled = choiceSpec.disabled && choiceSpec.disabled(choiceSpec.id, this.plant, this)
+        return m("div.mt2" + (disabled ? ".disabled" : ""),
+            m("div.mb1", m("span.green" + (disabled ? ".hidden" : ""), "🞂 "), choiceSpec.label || "FIXME: " + choiceSpec.id),
             // TODO: Should rethink as buttons or in some other way to make keyboard accessible
             m("div.flex.f7.ml3.mw-100.overflow-auto", choiceSpec.options.map((option, optionIndex) => 
-                m("div.ba.bw2.flex.flex-column.pt1" + (this.wizardChoices[choiceSpec.id] === option ? ".b--black" : ".b--white"),
+                m("div.ba.bw2.flex.flex-column.pt1" + ((!disabled && this.wizardChoices[choiceSpec.id] === option) ? ".b--black" : ".b--white"),
                     {
                         style: { backgroundColor: 
                             choiceSpec.type === "color" 
