@@ -592,7 +592,7 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
         options: ["no", "yes"],
         values: [200, 3],
         setValue: (plant: PdPlant, value: any) => plant.pFlower[Gender.kGenderFemale].minDaysBeforeSettingFruit = value,
-        initialValue: "yes",
+        initialValue: "no",
         label: "Do you want to see fruits on your plant?"
     },
     {
