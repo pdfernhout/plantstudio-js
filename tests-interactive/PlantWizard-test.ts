@@ -32,47 +32,6 @@ let plantAge = 90
 let zoom = 10
 
 const plantManager = new PdPlantManager()
-let loadedPlants = false
-let selectedPlantIndex = 0
-
-const plantPath = "../plants/"
-
-async function loadPlants(fileName: string) {
-    const response = await fetch(plantPath + fileName)
-    if (!response.ok) {
-        alert("Problem loading plant file")
-        return
-    }
-    const fileContents = await response.text()
-    plantManager.loadPlantsFromFile("UNUSED", false,  fileContents)
-    loadedPlants = true
-    selectedPlantIndex = 0
-    createPlant(selectedPlantIndex)
-}
-
-async function createPlant(plantIndex: number) {
-    const plantTemplate = plantManager.plantForIndex(plantIndex)
-    if (!plantTemplate) {
-        alert("Could not load plant from plant file")
-        throw new Error("Could not load plant from plant file");
-    }
-    plant = plantManager.copyFromPlant(plantTemplate)
-    plantManager.plants.pop()
-
-    // const plant = new PdPlant()
-    // plant.defaultAllParameters()
-    plant.basePoint_mm.x = 400
-    plant.basePoint_mm.y = 450
-    plant.drawingScale_PixelsPerMm = zoom / 10
-
-    amendment.partID = plant.firstPhytomer!.partID
-    amendment.addRotations = true
-    amendment.xRotation = 0
-    plant.addAmendment(amendment)
-    // plant.firstPhytomer!.amendment = amendment
-
-    m.redraw()
-}
 
 function growPlant() {
     if (!plant) return
@@ -125,23 +84,6 @@ const MyComponent = {
                     amendment.xRotation = (amendment.xRotation + 4) % 360
                 }
             }),
-            m("div.mb2", "Plant: ",
-                !loadedPlants && "Loading..",
-                loadedPlants && m("select",
-                    {
-                        onchange: (event: any) => {
-                            selectedPlantIndex = event.target.value
-                            createPlant(selectedPlantIndex)
-                        }
-                    },
-                    plantManager.plants.map((plant, index) =>
-                        m("option", {
-                            value: index,
-                            selected: (index === selectedPlantIndex ? "selected" : undefined),
-                        }, plant.name)
-                    )
-                ),
-            ),
             m("div", { style: "user-select: none" }, "Click canvas to rotate plant"),
             m("br"),
             "Rotation",
@@ -178,8 +120,6 @@ const MyComponent = {
         )
     )
 }
-
-loadPlants("../plants/New version 2 plants.pla")
 
 m.mount(document.body, MyComponent)
 m.redraw()
