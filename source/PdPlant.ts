@@ -980,7 +980,7 @@ export class PdPlant extends PdStreamableObject {
                 turtle.drawOptions.drawStems = true
                 turtle.drawOptions.wireFrame = false
                 turtle.drawOptions.sortPolygons = true
-                turtle.drawOptions.sortTdosAsOneItem = true
+                turtle.drawOptions.sortTdosAsOneItem = false
                 turtle.drawOptions.drawLines = true
                 turtle.drawOptions.lineContrastIndex = 3
                 break
