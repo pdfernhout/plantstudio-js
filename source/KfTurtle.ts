@@ -26,7 +26,7 @@ export class PlantDrawOptionsStructure {
     lineContrastIndex: short = 1
     wireFrame: boolean = false
     straightLinesOnly: boolean = false
-    simpleLeavesOnly: boolean = true
+    simpleLeavesOnly: boolean = false
     drawStems: boolean = true
     draw3DObjects: boolean = true
     draw3DObjectsAsRects: boolean = true

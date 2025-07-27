@@ -1,2 +1,1 @@
-PlantWizard: Issue where pick "very thin" (0.5) in "How thick should each inflorescence stem  and way too thick.
-PlantWizard: Compound leaves not working.
+PlantWizard: Issue where pick "very thin" (0.5) in "How thick should each inflorescence stem be?" and is way too thick.
