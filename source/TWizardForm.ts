@@ -3,7 +3,10 @@
 import * as m from "mithril"
 import { AssignFile, CloseFile, Reset } from "./common"
 import { CompoundLeafStyle, FloralPart, Gender, LeafArrangement, PdPlant } from "./PdPlant"
-import { darkerColor } from "./usupport"
+import { darkerColor, messageForExceptionType } from "./usupport"
+import { domain } from "./PdDomain"
+import { KfObject3D } from "./KfObject3D"
+import { KfTurtle } from "./KfTurtle"
 
 // from conversion_common import *
 // import ubmpsupport
@@ -346,8 +349,9 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
         options: [],
         values: [],
         setValue: (plant: PdPlant, value: any) => {
-            // TODO: FIXME for TDOs
-            // plant.pLeaf.leafTdoParams.object3D.copyFrom(value),
+            if (value) {
+                plant.pLeaf.leafTdoParams.object3D.copyFrom(value)
+            }
         },
         initialValue: "",
         label: "What 3D object should be used to draw leaves?",
@@ -538,6 +542,9 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
             //     // cfk first petals again
             //     this.plant.pFlower[Gender.kGenderFemale].tdoParams[uplant.kFirstPetals].object3D.copyFrom(tdo)
             // }
+            if (value) {
+                plant.pFlower[Gender.kGenderFemale].tdoParams[FloralPart.kFirstPetals].object3D.copyFrom(value)
+            }
         },
         initialValue: "",
         label: "What 3D object should be used for a flower petal?",
@@ -605,6 +612,9 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
             // if ((tdo !== null) && (this.plant.pFruit.tdoParams.object3D !== null)) {
             //     this.plant.pFruit.tdoParams.object3D.copyFrom(tdo)
             // }
+            if (value) {
+                plant.pFruit.tdoParams.object3D.copyFrom(value)
+            }
         },
         initialValue: "",
         label: "What 3D object should be used to draw each fruit section?",
@@ -847,6 +857,7 @@ export class TWizardForm {
     // Need to store some flower choices in form as they are used to calculate ingterdependent things in plant 
     inflorFlowers: number = 3
     inflorShape: string = "spike"
+    setPlantCallback: ((plant: PdPlant) => void) | undefined = undefined
 
     constructor() {
         const plant = this.plant
@@ -1781,63 +1792,111 @@ export class TWizardForm {
     }
 
     viewChoice(choiceSpec: ChoiceSpec) {
+        if (choiceSpec.type === "tdo") {
+            choiceSpec.options = domain.defaultTdoLibrary.map(tdo => tdo.name)
+            choiceSpec.values = domain.defaultTdoLibrary.map(tdo => tdo)
+        }
         return m("div.mt2",
             m("div.mb1", m("span.green", "🞂 "), choiceSpec.label || "FIXME: " + choiceSpec.id),
             // TODO: Should rethink as buttons or in some other way to make keyboard accessible
-            m("div.flex.f7.ml3", choiceSpec.options.map((option, optionIndex) => 
+            m("div.flex.f7.ml3.mw-100.overflow-auto", choiceSpec.options.map((option, optionIndex) => 
                 m("div.ba.bw2.flex.flex-column.pt1" + (this.wizardChoices[choiceSpec.id] === option ? ".b--black" : ".b--white"),
                     {
                         style: { backgroundColor: 
                             choiceSpec.type === "color" 
                                 ? choiceSpec.values[optionIndex]
-                                : "#c0c0c0" 
+                                :  choiceSpec.type === "tdo"
+                                    ? "white"
+                                    : "#c0c0c0" 
                         },
                         onclick: () => {
                             this.wizardChoices[choiceSpec.id] = option
                             choiceSpec.setValue(this.plant, choiceSpec.values[optionIndex], this)
+                            this.setPlantCallback!(this.plant)
                         }
                     },
-                    choiceSpec.type !== "color" && m("img.center", { src: fileForImage(choiceSpec.id, option), alt: option }),
-                    choiceSpec.type === "color" && m("div.h1"),
+                    !choiceSpec.type && m("img.center", { src: fileForImage(choiceSpec.id, option), alt: option }),
+                    choiceSpec.type === "color" && m("div.mt1.h1"),
+                    choiceSpec.type === "tdo" && m("div.mt1", this.viewTdo(choiceSpec.values[optionIndex] as KfObject3D)),
                     m("span", { style: choiceSpec.type === "color" ? "background-color: white": undefined }, option)
                 )
             )),
-            choiceSpec.type === "tdo" ? m("div.ba.ma1", "UNFINISHED TDO CHOOSER") : undefined,
         )
     }
 
-    previewSize = 400
+    updatePlant() {
+        this.setPlantCallback && this.setPlantCallback(this.plant)
+    }
+    
+    viewTdo(tdo: KfObject3D) {
+        const self = this
+        return m("canvas.ba", {
+            style: { 
+                height: "64px",
+                width: "64px",
+                minHeight: "64px",
+                minWidth: "64px"
+            },
+            oncreate(vnode: m.VnodeDOM) {
+                const canvas = <HTMLCanvasElement>vnode.dom
+                canvas.width = 64
+                canvas.height = 64
+                const context = canvas.getContext("2d")
+                if (!context) return
+                self.drawTdo(tdo, context)
+            },
+            onupdate(vnode: m.VnodeDOM) {
+                const canvas = <HTMLCanvasElement>vnode.dom
+                // Clear the canvas
+                canvas.width = canvas.width
+                const context = canvas.getContext("2d")
+                if (!context) return
+                self.drawTdo(tdo, context)
+            }
+        })
+    }
+
+    drawTdo(tdo: KfObject3D, context: CanvasRenderingContext2D): void {
+        const turtle = KfTurtle.defaultStartUsing()
+        try {
+            turtle.drawingSurface.pane = context
+            turtle.setDrawOptionsForDrawingTdoOnly()
+            // must be after pane and draw options set 
+            turtle.reset()
+            turtle.xyz(32, 54, 0)
+            try {
+                turtle.push()
+                turtle.rotateY(0)
+                turtle.drawingSurface.recordingStart()
+                tdo.draw(turtle, 0.20, "", "", 0, 0)
+                turtle.drawingSurface.recordingStop()
+                turtle.drawingSurface.recordingDraw()
+                turtle.drawingSurface.clearTriangles()
+                turtle.pop()
+            } catch (e: any) {
+                messageForExceptionType(e, "TWizardForm.drawTdo")
+            }
+        } finally {
+            KfTurtle.defaultStopUsing()
+        }
+    }
+
+    oninit(vnode: any) {
+        const plant = this.plant
+        this.setPlantCallback = vnode.attrs.setPlant
+        this.setPlantCallback!(plant)
+    }
 
     view(vnode: any) {
-        const plant = this.plant
-        vnode.attrs.setPlant(plant)
+        // const plant = this.plant
+        // vnode.attrs.setPlant(plant)
         const self = this
         return m("div",
             "Plant Wizard",
             choiceSpecs.map(spec => spec.type === "page"
                 ? this.viewPage(spec)
                 : this.viewChoice(spec)
-            ),
-            // m("canvas.ba", {
-            //     width: "" + self.previewSize + "px",
-            //     height: "" + self.previewSize + "px",
-            //     oncreate(vnode: m.VnodeDOM) {
-            //         const canvas = <HTMLCanvasElement>vnode.dom
-            //         canvas.width = self.previewSize
-            //         canvas.height = self.previewSize
-            //         const context = canvas.getContext("2d")
-            //         if (!context) return
-            //         plant.drawOn(context)
-            //     },
-            //     onupdate(vnode: m.VnodeDOM) {
-            //         const canvas = <HTMLCanvasElement>vnode.dom
-            //         // Clear the canvas
-            //         canvas.width = canvas.width
-            //         const context = canvas.getContext("2d")
-            //         if (!context) return
-            //         plant.drawOn(context)
-            //     },
-            // }),
+            )
         )
     }
     

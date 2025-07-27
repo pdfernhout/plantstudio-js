@@ -15,8 +15,12 @@ import { TWizardForm } from "../source/TWizardForm";
 PdDomain.createDefault()
 domain.defaultTdoLibraryFileName = "../plants/3D object library.tdo"
 
+let loading = true
+
 async function fetchDefaultTDOLibrary() {
     domain.defaultTdoLibrary = await readTDOsFile(domain.defaultTdoLibraryFileName)
+    loading = false
+    m.redraw()
 }
 
 fetchDefaultTDOLibrary()
@@ -34,6 +38,7 @@ let zoom = 10
 const plantManager = new PdPlantManager()
 
 function growPlant() {
+    console.log("growPlant", plant)
     if (!plant) return
     
     if (plant.age > plantAge) plant.reset()
@@ -42,8 +47,6 @@ function growPlant() {
         plant.nextDay()
     }
 }
-
-growPlant()
 
 function randomize() {
     if (plant) plant.randomize()
@@ -59,10 +62,11 @@ function setPlant(aPlant: PdPlant) {
     amendment.addRotations = true
     plant.addAmendment(amendment)
     plant.regrow()
+    m.redraw()
 }
 
 const MyComponent = { 
-    view: () => m("div.flex.flex-row.h-100",
+    view: () => !loading && m("div.flex.flex-row.h-100",
         m(ModalInputView),
         m("div.pa2",
             m("canvas.ba", {
