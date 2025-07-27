@@ -1785,7 +1785,10 @@ export class TWizardForm {
 
     viewPage(pageSpec: PageSpec) {
         return m("div.bt.b5.mt2",
-            m("div.b.mt1.mb1", pageSpec.title || "FIXME: " + pageSpec.id),
+            m("div.b.mt1.mb1.flex", m("img.mr1", { 
+                src: imageDir + pageSpec.icon,
+                width: "32px",
+            }), pageSpec.title || "FIXME: " + pageSpec.id),
             m("div", pageSpec.topText),
             pageSpec.bottomText && m("div.pt2", pageSpec.bottomText),
         )
@@ -1902,9 +1905,11 @@ export class TWizardForm {
     
 }
 
+const imageDir = "../source/resources/"
+
 function fileForImage(id: string, option: string) {
     if (option === "one (simple)") { option = "one"}
-    return "../source/resources/WizardForm_" + id + option.split(" ").map(word => capitalize(word)).join("") + ".png"
+    return imageDir + "WizardForm_" + id + option.split(" ").map(word => capitalize(word)).join("") + ".png"
 }
 
 function capitalize(word: string) {
