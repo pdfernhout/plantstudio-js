@@ -54,8 +54,11 @@ const kChangeWidth = true
 const kChangeHeight = false
 
 
-// var
-let numPlantsCreatedThisSession: long = 0
+export let numPlantsCreatedThisSession: long = 0
+export function incrementNumPlantsCreatedThisSession(): number {
+    numPlantsCreatedThisSession++
+    return numPlantsCreatedThisSession
+}
 
 
 // ================ local functions

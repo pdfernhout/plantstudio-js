@@ -90,6 +90,8 @@ const MyComponent = {
             }),
             m("div", { style: "user-select: none" }, "Click canvas to rotate plant"),
             m("br"),
+            m("div", "Plant name: ", plant && plant.name),
+            m("br"),
             "Rotation",
             m("input[type=range].ml2", { min: -360, max: 360, value: amendment.xRotation, oninput: (event: any) => {
                 amendment.xRotation = parseInt(event.target.value)

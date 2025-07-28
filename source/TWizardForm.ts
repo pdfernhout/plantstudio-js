@@ -7,68 +7,7 @@ import { darkerColor, messageForExceptionType } from "./usupport"
 import { domain } from "./PdDomain"
 import { KfObject3D } from "./KfObject3D"
 import { KfTurtle } from "./KfTurtle"
-
-// from conversion_common import *
-// import ubmpsupport
-// import umain
-// import ucursor
-// import updcom
-// import utravers
-// import usupport
-// import uturtle
-// import udomain
-// import ubitmap
-// import utdo
-// import ucollect
-// import updform
-// import uplant
-// import delphi_compatability
-
-// const
-// const kMeristem_AlternateOrOpposite = 1
-// const kMeristem_BranchIndex = 2
-// const kMeristem_SecondaryBranching = 3
-// const kMeristem_BranchAngle = 4
-// const kInternode_Curviness = 5
-// const kInternode_Length = 6
-// const kLeaves_Scale = 7
-// const kLeaves_PetioleLength = 8
-// const kLeaves_Angle = 9
-// const kLeaflets_Number = 10
-// const kLeaflets_Shape = 11
-// const kLeaflets_Spread = 12
-// const kFlowers_NumPetals = 13
-// const kFlowers_Scale = 14
-// const kInflorDraw_NumFlowers = 15
-// const kInflorDraw_Shape = 16
-// const kInflorPlace_NumApical = 17
-// const kInflorPlace_NumAxillary = 18
-// const kInflorPlace_ApicalStalkLength = 19
-// const kInflorPlace_AxillaryStalkLength = 20
-// const kFruit_NumSections = 21
-// const kFruit_Scale = 22
-// const kInternode_Thickness = 23
-// const kInflorDraw_Thickness = 24
-
-
-// const
-// const kStart = 0
-// const kMeristems = 1
-// const kInternodes = 2
-// const kLeaves = 3
-// const kCompoundLeaves = 4
-// const kInflorescencesPlacement = 5
-// const kInflorescences = 6
-// const kFlowers = 7
-// const kFruit = 8
-// const kFinish = 9
-// const kLastPanel = 9
-// const kReloadVariables = true
-// const kDontReloadVariables = false
-
-
-// const
-const kPreviewSize = 110
+import { incrementNumPlantsCreatedThisSession } from "./updcom"
 
 type PageSpec = {
     id: string
@@ -77,7 +16,7 @@ type PageSpec = {
     icon: string
     iconDisabled?: string
     topText: string
-    bottomText?: string
+    bottomView?: (plant: PdPlant, form: TWizardForm) => any
     type: "page"
 }
 
@@ -242,10 +181,9 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
         icon: "WizardForm_startPageImage.png",
         topText: "Welcome to the Plant Wizard! " +
             "This wizard will help you create a new plant by asking you some simple questions. " +
-            "These 10 panels contain about 25 questions based on the most important of the 400 or so parameters that define a plant. " +
-            "Click the Next button to start, or click Cancel to stop. Once you start, you can click the Back button to go back and change your choices, or you can click Cancel at any time. ",
-        bottomText: "For each question, click on one of the big buttons under the question to make your choice.",
-        // bottomText: "Note: If you are using the wizard for the first time, we recommend turning on the 'Long Button Hints'. Each wizard question has a hint.",
+            "Here are about 25 questions based on the most important of the 400 or so parameters that define a plant. " +
+            "For each question, click on one of the big buttons under the question to make your choice.",
+        // "Note: If you are using the wizard for the first time, we recommend turning on the 'Long Button Hints'. Each wizard question has a hint.",
         type: "page"
     },
 
@@ -303,7 +241,6 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
         image: "",
         icon: "WizardForm_internodesPageImage.png",
         topText: "Internodes are portions of plant stem between leaves. They determine how tall or short, straight or viney, and stiff or flexible a plant will be.",
-        bottomText: "",
         type: "page"
     },
 
@@ -343,7 +280,6 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
         image: "",
         icon: "WizardForm_leavesPageImage.png",
         topText: "PlantStudio draws leaves using a \"3D object\" that represents a 3D leaf shape. The 3D object is drawn bigger as the leaf grows. Leaves are connected to the plant by a stalk called a petiole.",
-        bottomText: "",
         type: "page"
     },
 
@@ -393,7 +329,6 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
         image: "",
         icon: "WizardForm_compoundLeavesPageImage.png",
         topText: "A compound leaf is a leaf made up of two or more small parts called leaflets. The leaflets look like small whole leaves, but they always fit together in the same pattern for all the leaves on the plant (usually). A leaf without leaflets is a simple leaf.",
-        bottomText: "",
         type: "page"
     },
 
@@ -436,7 +371,6 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
             "Apical inflorescences are at the ends (apexes) of plant stems. " +
             "IMAGE:source/resources/WizardForm_axillaryInflorExtraImage.png " + 
             "Axillary inflorescences are in the angles between leaf and stem (axils).",
-        bottomText: "",
         type: "page"
     },
 
@@ -490,7 +424,6 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
         icon: "WizardForm_inflorDrawPageImage.png",
         iconDisabled: "WizardForm_inflorDrawPageImageDisabled.png",
         topText: "Inflorescences can have a large variety of shapes, a few of which are shown here. We extend the true meaning of \"inflorescence\" a bit to use an inflorescence when there is only one flower. ",
-        bottomText: "",
         type: "page"
     },
 
@@ -537,7 +470,6 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
         icon: "WizardForm_flowersPageImage.png",
         iconDisabled: "WizardForm_flowersPageImageDisabled.png",
         topText: "Like leaves, flowers are drawn using a 3D object. But here the 3D object represents only one petal of the flower. A number of petals is drawn rotated around a center to produce what looks like a flower.",
-        bottomText: "",
         type: "page"
     },
 
@@ -604,7 +536,6 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
         icon: "WizardForm_fruitsPageImage.png",
         iconDisabled: "WizardForm_fruitsPageImageDisabled.png",
         topText: "Fruits are drawn like flowers, but with a portion of the fruit (a \"fruit section\") rotated around instead of a petal. For many plants you will not be interested in the fruit, so you can turn fruits off entirely.",
-        bottomText: "",
         type: "page"
     },
 
@@ -681,10 +612,15 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
         icon: "WizardForm_finishPageImage.png",
         topText: "Congratulations! " +
             "You have finished designing your new plant. You can name your new plant here, or just keep this name. " +
-            "Now click Finish to place your plant in the main window, or click Cancel to stop without creating a plant, or click Back to change your choices. " +
-            "You can also click on the pictures below to return to any of the wizard panels. " +
+            "Now click Finish to place your plant in the main window, or click Cancel to stop without creating a plant. " +
             "Once your plant is made, you can fine-tune the parameters that define your plant in the Parameters panel in the main window. ",
-        bottomText: "",
+        bottomView: (plant: PdPlant, form: TWizardForm) => m("div",
+            "Plant name: ",
+            m("input", { 
+                value: plant.name, 
+                oninput: (event: any) => plant.name = event.target.value 
+            })
+        ),
         type: "page"
     },
 
@@ -695,8 +631,6 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     // TODO: Randomize button / caption("&Randomize") / randomizePlantClick
 
     // TODO: Rotate left and right buttons / turnLeftClick / turnRightClick
-
-    // TODO: wizardNotebook / wizardNotebookPageChanged
 ]
 
 /* Other buttons:
@@ -708,6 +642,8 @@ caption("< &Back") backClick
 caption("&Next >") nextClick
 caption("&Cancel") cancelClick
 */
+
+// TODO: Need to add hints
 
 // group indexes 
 export class TWizardForm {
@@ -739,14 +675,11 @@ export class TWizardForm {
         plant.basePoint_mm.x = 200
         plant.basePoint_mm.y = 300
         plant.age = 90
+        plant.setName("New plant " + (incrementNumPlantsCreatedThisSession()))
         this.defaultAllChoices()
         plant.regrow()
     }
 
-    // previewPaintBox: PdPaintBoxWithPalette = new PdPaintBoxWithPalette()
-    // TWizardForm.prototype = new PdForm()
-    // TWizardForm.prototype.constructor = TWizardForm
-    
     // //$R *.DFM
     // // panels 
     // // -------------------------------------------------------------------------------------------- creation/destruction 
@@ -1447,7 +1380,7 @@ export class TWizardForm {
                 width: "32px",
             }), pageSpec.title || "FIXME: " + pageSpec.id),
             m("div", pageSpec.topText),
-            pageSpec.bottomText && m("div.pt2", pageSpec.bottomText),
+            pageSpec.bottomView && m("div.pt2", pageSpec.bottomView(this.plant, this)),
         )
     }
 
