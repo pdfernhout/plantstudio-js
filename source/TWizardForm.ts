@@ -1109,12 +1109,18 @@ export class TWizardForm {
 
     viewPage(pageSpec: PageSpec) {
         const disabled = pageSpec.disabled && pageSpec.disabled(pageSpec.id, this.plant, this)
+        const imageFileName = pageSpec.image ? imageDir + pageSpec.image : ""
         return m("div.bt.b5.mt2" + (disabled ? ".disabled" : ""),
             m("div.b.mt1.mb1.flex", m("img.mr1", { 
                 src: imageDir + (disabled ? (pageSpec.iconDisabled || pageSpec.icon) : pageSpec.icon),
                 width: "32px",
             }), pageSpec.title || "FIXME: " + pageSpec.id),
-            m("div", pageSpec.topText),
+            imageFileName
+                ? m("div.flex", 
+                    m("img", { src: imageFileName, alt: "Picture of bouquet of plants"}), 
+                    m("div.ml2", pageSpec.topText)
+                )
+                : m("div", pageSpec.topText),
             pageSpec.bottomView && m("div.pt2", pageSpec.bottomView(this.plant, this)),
         )
     }
