@@ -608,7 +608,7 @@ const pageAndChoiceSpecs: (PageSpec | ChoiceSpec)[] = [
 
     {
         id: "page10",
-        title: "Finish / Preview",
+        title: "Finish",
         image: "",
         icon: "WizardForm_finishPageImage.png",
         topText: "Congratulations! " +
