@@ -9,39 +9,6 @@ import { KfObject3D } from "./KfObject3D"
 import { KfTurtle } from "./KfTurtle"
 import { incrementNumPlantsCreatedThisSession } from "./updcom"
 
-type PageSpec = {
-    id: string
-    disabled?: (id: string, plant: PdPlant, form: TWizardForm) => boolean
-    title: string
-    image: string
-    icon: string
-    iconDisabled?: string
-    topText: string
-    bottomView?: (plant: PdPlant, form: TWizardForm) => any
-    type: "page"
-}
-
-type ChoiceSpec = {
-    id: string
-    disabled?: (id: string, plant: PdPlant, form: TWizardForm) => boolean
-    options: string[]
-    values: any[]
-    getValue?: (plant: PdPlant) => any
-    setValue: (plant: PdPlant, value: any, form: TWizardForm) => void
-    initialValue: string
-    label: string
-    type?: "tdo" | "color"
-}
-
-const templateSpec: ChoiceSpec = {
-    id: "",
-    options: [],
-    values: [],
-    setValue: (plant: PdPlant, value: any) => plant.age = value,
-    initialValue: "",
-    label: ""
-}
-
 function hasNoInflorescences(plant: PdPlant) {
     return plant.pGeneral.numApicalInflors === 0 && plant.pGeneral.numAxillaryInflors === 0
 }
@@ -174,7 +141,31 @@ function CssHexColorToNumber(cssColor: string) {
     return parseInt(cssColor.substring(5,7) + cssColor.substring(3,5) + cssColor.substring(1,3), 16);
 }
 
-const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
+type PageSpec = {
+    id: string
+    disabled?: (id: string, plant: PdPlant, form: TWizardForm) => boolean
+    title: string
+    image: string
+    icon: string
+    iconDisabled?: string
+    topText: string
+    bottomView?: (plant: PdPlant, form: TWizardForm) => any
+    type: "page"
+}
+
+type ChoiceSpec = {
+    id: string
+    disabled?: (id: string, plant: PdPlant, form: TWizardForm) => boolean
+    options: string[]
+    values: any[]
+    getValue?: (plant: PdPlant) => any
+    setValue: (plant: PdPlant, value: any, form: TWizardForm) => void
+    initialValue: string
+    label: string
+    type?: "tdo" | "color"
+}
+
+const pageAndChoiceSpecs: (PageSpec | ChoiceSpec)[] = [
     {
         id: "page1",
         title: "Start",
@@ -1093,7 +1084,7 @@ export class TWizardForm {
     // }
     
     defaultAllChoices() {
-        choiceSpecs.forEach(spec => {
+        pageAndChoiceSpecs.forEach(spec => {
             if (spec.type !== "page") {
                 this.wizardChoices[spec.id] = spec.initialValue
                 spec.setValue(this.plant, spec.values[spec.options.indexOf(spec.initialValue)], this)
@@ -1242,7 +1233,7 @@ export class TWizardForm {
         const self = this
         return m("div",
             "Plant Wizard",
-            choiceSpecs.map(spec => spec.type === "page"
+            pageAndChoiceSpecs.map(spec => spec.type === "page"
                 ? this.viewPage(spec)
                 : this.viewChoice(spec)
             )
