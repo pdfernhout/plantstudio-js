@@ -358,11 +358,17 @@ const pageAndChoiceSpecs: (PageSpec | ChoiceSpec)[] = [
         title: "Inflorescence placement",
         image: "",
         icon: "WizardForm_inflorPlacePageImage.png",
-        topText: "An inflorescence holds flowers and fruits on a plant. Since most plants have hermaphroditic flowers (with both male and female parts), the wizard creates only primary (female or hermaphroditic) flowers. " +
-            "IMAGE:source/resources/WizardForm_apicalInflorExtraImage.png " + 
-            "Apical inflorescences are at the ends (apexes) of plant stems. " +
-            "IMAGE:source/resources/WizardForm_axillaryInflorExtraImage.png " + 
-            "Axillary inflorescences are in the angles between leaf and stem (axils).",
+        topText: "An inflorescence holds flowers and fruits on a plant. Since most plants have hermaphroditic flowers (with both male and female parts), the wizard creates only primary (female or hermaphroditic) flowers. ",
+        bottomView: () => m("div",
+            m("div",
+                m("img", {src: imageDir + "WizardForm_apicalInflorExtraImage.png", alt: "Apical infloresences example" }), 
+                "Apical inflorescences are at the ends (apexes) of plant stems."
+            ),
+            m("div",
+                m("img", {src: imageDir + "WizardForm_axillaryInflorExtraImage.png", alt: "Axillary infloresences example" }),
+                "Axillary inflorescences are in the angles between leaf and stem (axils)."
+            )
+        ),
         type: "page"
     },
 
