@@ -1821,10 +1821,10 @@ export class TWizardForm {
         const disabled = choiceSpec.disabled && choiceSpec.disabled(choiceSpec.id, this.plant, this)
         return m("div.mt2" + (disabled ? ".disabled" : ""),
             m("div.mb1", m("span.green" + (disabled ? ".hidden" : ""), "🞂 "), choiceSpec.label || "FIXME: " + choiceSpec.id),
-            // TODO: Should rethink as buttons or in some other way to make keyboard accessible
             m("div.flex.f7.ml3.mw-100.overflow-auto", choiceSpec.options.map((option, optionIndex) => 
-                m("div.ba.bw2.flex.flex-column.pt1" + ((!disabled && this.wizardChoices[choiceSpec.id] === option) ? ".b--black" : ".b--white"),
+                m("div.ba.bw2.flex.flex-column.pt1" + ((!disabled && this.wizardChoices[choiceSpec.id] === option) ? ".b--green" : ".b--white"),
                     {
+                        tabindex: !disabled ? "0" : "-1",
                         style: { backgroundColor: 
                             choiceSpec.type === "color" 
                                 ? choiceSpec.values[optionIndex]
@@ -1836,6 +1836,20 @@ export class TWizardForm {
                             this.wizardChoices[choiceSpec.id] = option
                             choiceSpec.setValue(this.plant, choiceSpec.values[optionIndex], this)
                             this.setPlantCallback!(this.plant)
+                        },
+                        onkeyup: (event: any) => {
+                            if (event.keyCode === 13) {
+                                this.wizardChoices[choiceSpec.id] = option
+                                choiceSpec.setValue(this.plant, choiceSpec.values[optionIndex], this)
+                                this.setPlantCallback!(this.plant) 
+                            }
+                            // TODO: Trying to use arrow keys to navigate within a row
+                            // tabindex: (!disabled && this.wizardChoices[choiceSpec.id] === option) ? "0" : "-1",
+                            // else if (event.keyCode === 37 || event.key === "ArrowLeft") {
+                            //     this.wizardChoices[choiceSpec.id] = choiceSpec.options[(optionIndex - 1 + choiceSpec.options.length) % choiceSpec.options.length]
+                            // } else if (event.keyCode === 39 || event.key === "ArrowRight") {
+                            //     this.wizardChoices[choiceSpec.id] = choiceSpec.options[(optionIndex + 1) % choiceSpec.options.length]
+                            // }
                         }
                     },
                     !choiceSpec.type && m("img.center", { src: fileForImage(choiceSpec.id, option), alt: option }),
