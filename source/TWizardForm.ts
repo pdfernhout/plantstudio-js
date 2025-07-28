@@ -735,17 +735,6 @@ export class TWizardForm {
     //     this.updateForButtonInteractions()
     // }
     
-    // FormCreate(Sender: TObject): void {
-    //     this.startPicture.Picture.Bitmap.Palette = UNRESOLVED.CopyPalette(umain.MainForm.paletteImage.Picture.Bitmap.Palette)
-    //     this.wizardNotebook.Invalidate()
-    //     // assumes there is no border
-    //     this.progressDrawGrid.DefaultColWidth = this.progressDrawGrid.Width / this.progressDrawGrid.ColCount
-    //     this.progressDrawGrid.Width = this.progressDrawGrid.DefaultColWidth * this.progressDrawGrid.ColCount
-    //     this.progressDrawGrid.DefaultRowHeight = this.progressDrawGrid.Height
-    //     this.setPageIndex(0)
-    //     this.updateProgress()
-    // }
-    
     // // -------------------------------------------------------------------------------------------- *tdos 
     // hintForTdosDrawGridAtPoint(aComponent: TComponent, aPoint: TPoint, cursorRect: TRect): string {
     //     raise "method hintForTdosDrawGridAtPoint had assigned to var parameter cursorRect not added to return -- fixup manually"
@@ -854,27 +843,6 @@ export class TWizardForm {
     //     }
     // }
     
-    // tdoForIndex(index: short): KfObject3D {
-    //     let result = new KfObject3D()
-    //     result = null
-    //     if ((index >= 0) && (index <= this.tdos.Count - 1)) {
-    //         result = utdo.KfObject3D(this.tdos.Items[index])
-    //     }
-    //     return result
-    // }
-    
-    // leafTdosDrawDrawCell(Sender: TObject, Col: int, Row: int, Rect: TRect, State: TGridDrawState): void {
-    //     this.drawCellInTdoDrawGrid(this.leafTdosDraw, Col, UNRESOLVED.gdSelected in State, Rect)
-    // }
-    
-    // petalTdosDrawDrawCell(Sender: TObject, Col: int, Row: int, Rect: TRect, State: TGridDrawState): void {
-    //     this.drawCellInTdoDrawGrid(this.petalTdosDraw, Col, UNRESOLVED.gdSelected in State, Rect)
-    // }
-    
-    // sectionTdosDrawDrawCell(Sender: TObject, Col: int, Row: int, Rect: TRect, State: TGridDrawState): void {
-    //     this.drawCellInTdoDrawGrid(this.sectionTdosDraw, Col, UNRESOLVED.gdSelected in State, Rect)
-    // }
-    
     // drawCellInTdoDrawGrid(grid: TDrawGrid, column: short, selected: boolean, rect: TRect): void {
     //     let tdo: KfObject3d
     //     let turtle: KfTurtle
@@ -977,24 +945,6 @@ export class TWizardForm {
     //     return result
     // }
     
-    // setPlantVariables(): void {
-    //     if (this.plant === null) {
-    //         return
-    //     }
-    //     this.plant.defaultAllParameters()
-    //     // set variables in plant based on options 
-    //     this.finishForMeristems()
-    //     this.finishForInternodes()
-    //     this.finishForLeaves()
-    //     this.finishForCompoundLeaves()
-    //     this.finishForInflorescencePlacement()
-    //     this.finishForInflorescences()
-    //     this.finishForFlowers()
-    //     this.finishForFruit()
-    //     this.plant.setName(this.newPlantName.Text)
-    //     this.plant.setAge(this.plant.pGeneral.ageAtMaturity)
-    // }
-    
     // saveOptionsToDomain(): void {
     //     let i: short
         
@@ -1033,55 +983,6 @@ export class TWizardForm {
     //     result = result || (udomain.domain.options.wizardColors[1] !== this.petalColor.Color)
     //     result = result || (udomain.domain.options.wizardColors[2] !== this.fruitColor.Color)
     //     result = result || this.tdoSelectionChanged
-    //     return result
-    // }
-    
-    // setDownButtonForGroupIndexFromName(aGroupIndex: short, aName: string): void {
-    //     let i: short
-    //     let button: TSpeedButton
-        
-    //     if (aName === "") {
-    //         return
-    //     }
-    //     if (this.ComponentCount > 0) {
-    //         for (i = 0; i <= this.ComponentCount - 1; i++) {
-    //             if (!(this.Components[i] instanceof delphi_compatability.TSpeedButton)) {
-    //                 continue
-    //             }
-    //             button = this.Components[i]
-    //             if (button.GroupIndex === aGroupIndex) {
-    //                 if (button.Name === aName) {
-    //                     // only one can be down, so can exit when one is down 
-    //                     button.Down = true
-    //                     return
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-    
-    // downButtonNameForGroupIndex(aGroupIndex: short): string {
-    //     let result = ""
-    //     let i: short
-    //     let button: TSpeedButton
-        
-    //     result = ""
-    //     if (this.ComponentCount > 0) {
-    //         for (i = 0; i <= this.ComponentCount - 1; i++) {
-    //             if (!(this.Components[i] instanceof delphi_compatability.TSpeedButton)) {
-    //                 continue
-    //             }
-    //             button = this.Components[i]
-    //             if ((button.GroupIndex === aGroupIndex) && (button.Enabled)) {
-    //                 if (button.Down) {
-    //                     // if not enabled, don't want to match
-    //                     // only one can be down, so can exit when one is down 
-    //                     result = button.Name
-    //                     return result
-    //                 }
-    //             }
-    //         }
-    //     }
     //     return result
     // }
     
@@ -1140,49 +1041,7 @@ export class TWizardForm {
     // }
     
     // // -------------------------------------------------------------------------------------------- buttons/notebook 
-    // setPageIndex(newIndex: short): void {
-    //     this.wizardNotebook.PageIndex = newIndex
-    // }
-    
-    // backClick(Sender: TObject): void {
-    //     if (this.wizardNotebook.PageIndex > 0) {
-    //         if (this.wizardNotebook.PageIndex === kFinish) {
-    //             if (this.plantHasInflorescences) {
-    //                 this.setPageIndex(kFruit)
-    //             } else {
-    //                 this.setPageIndex(kInflorescencesPlacement)
-    //             }
-    //         } else {
-    //             this.setPageIndex(this.wizardNotebook.PageIndex - 1)
-    //         }
-    //     }
-    //     this.updateProgress()
-    // }
-    
-    // nextClick(Sender: TObject): void {
-    //     if (this.wizardNotebook.PageIndex < kLastPanel) {
-    //         if (this.wizardNotebook.PageIndex === kInflorescencesPlacement) {
-    //             if (this.plantHasInflorescences) {
-    //                 this.setPageIndex(kInflorescences)
-    //             } else {
-    //                 this.setPageIndex(kFinish)
-    //             }
-    //         } else {
-    //             this.setPageIndex(this.wizardNotebook.PageIndex + 1)
-    //         }
-    //         this.updateProgress()
-    //     } else {
-    //         this.setPlantVariables()
-    //         this.saveOptionsToDomain()
-    //         this.plant.shrinkPreviewCache()
-    //         this.ModalResult = mrOK
-    //     }
-    // }
-    
-    // cancelClick(Sender: TObject): void {
-    //     this.ModalResult = mrCancel
-    // }
-    
+       
     // FormClose(Sender: TObject, Action: TCloseAction): void {
     //     let response: int
         
@@ -1201,17 +1060,6 @@ export class TWizardForm {
     //                 Action = delphi_compatability.TCloseAction.caNone
     //                 break
     //         }
-    //     }
-    // }
-    
-    // updateProgress(): void {
-    //     this.progressDrawGrid.Invalidate()
-    //     this.progressDrawGrid.Refresh()
-    //     if (this.wizardNotebook.PageIndex === kLastPanel) {
-    //         this.previewPaintBox.Visible = false
-    //         delphi_compatability.Application.ProcessMessages()
-    //         this.drawPreview(kReloadVariables)
-    //         this.previewPaintBox.Visible = true
     //     }
     // }
     
@@ -1240,128 +1088,10 @@ export class TWizardForm {
     //     }
     // }
     
-    // bitmapForProgressPage(page: short): TBitmap {
-    //     let result = new TBitmap()
-    //     result = null
-    //     switch (page) {
-    //         case kStart:
-    //             result = this.startPageImage.Picture.Bitmap
-    //             break
-    //         case kMeristems:
-    //             result = this.meristemsPageImage.Picture.Bitmap
-    //             break
-    //         case kInternodes:
-    //             result = this.internodesPageImage.Picture.Bitmap
-    //             break
-    //         case kLeaves:
-    //             result = this.leavesPageImage.Picture.Bitmap
-    //             break
-    //         case kCompoundLeaves:
-    //             result = this.compoundLeavesPageImage.Picture.Bitmap
-    //             break
-    //         case kInflorescencesPlacement:
-    //             result = this.inflorPlacePageImage.Picture.Bitmap
-    //             break
-    //         case kInflorescences:
-    //             if (this.plantHasInflorescences) {
-    //                 result = this.inflorDrawPageImage.Picture.Bitmap
-    //             } else {
-    //                 result = this.inflorDrawPageImageDisabled.Picture.Bitmap
-    //             }
-    //             break
-    //         case kFlowers:
-    //             if (this.plantHasInflorescences) {
-    //                 result = this.flowersPageImage.Picture.Bitmap
-    //             } else {
-    //                 result = this.flowersPageImageDisabled.Picture.Bitmap
-    //             }
-    //             break
-    //         case kFruit:
-    //             if (this.plantHasInflorescences) {
-    //                 result = this.fruitsPageImage.Picture.Bitmap
-    //             } else {
-    //                 result = this.fruitsPageImageDisabled.Picture.Bitmap
-    //             }
-    //             break
-    //         case kFinish:
-    //             result = this.finishPageImage.Picture.Bitmap
-    //             break
-    //     }
-    //     return result
-    // }
-    
-    // progressDrawGridSelectCell(Sender: TObject, Col: long, Row: long, CanSelect: boolean): void {
-    //     if (((Col === kInflorescences) || (Col === kFlowers) || (Col === kFruit)) && (!this.plantHasInflorescences)) {
-    //         CanSelect = false
-    //     } else {
-    //         this.setPageIndex(Col)
-    //         this.updateProgress()
-    //     }
-    //     return CanSelect
-    // }
-    
-    // petalColorMouseUp(Sender: TObject, Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
-    //     this.petalColor.Color = udomain.domain.getColorUsingCustomColors(this.petalColor.Color)
-    // }
-    
-    // fruitColorMouseUp(Sender: TObject, Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
-    //     this.fruitColor.Color = udomain.domain.getColorUsingCustomColors(this.fruitColor.Color)
-    // }
-    
-    // leafTdosDrawSelectCell(Sender: TObject, Col: int, Row: int, CanSelect: boolean): void {
-    //     if ((Col !== this.leafTdosDraw.Selection.left)) {
-    //         this.tdoSelectionChanged = true
-    //         this.showTdoNameInLabel(Col, this.leafTdoSelectedLabel)
-    //     }
-    //     return CanSelect
-    // }
-    
-    // petalTdosDrawSelectCell(Sender: TObject, Col: int, Row: int, CanSelect: boolean): void {
-    //     if ((Col !== this.petalTdosDraw.Selection.left)) {
-    //         this.tdoSelectionChanged = true
-    //         this.showTdoNameInLabel(Col, this.petalTdoSelectedLabel)
-    //     }
-    //     return CanSelect
-    // }
-    
-    // sectionTdosDrawSelectCell(Sender: TObject, Col: int, Row: int, CanSelect: boolean): void {
-    //     if ((Col !== this.sectionTdosDraw.Selection.left)) {
-    //         this.tdoSelectionChanged = true
-    //         this.showTdoNameInLabel(Col, this.sectionTdoSelectedLabel)
-    //     }
-    //     return CanSelect
-    // }
-    
-    // sectionTdosDrawMouseMove(Sender: TObject, Shift: TShiftState, X: int, Y: int): void {
-    //     //var col, row: integer;
-    //     //sectionTdosDraw.mouseToCell(x, y, col, row);
-    //     //if (col <> sectionTdosDraw.selection.left) then
-    //     //  self.showTdoNameInLabel(col, sectionTdoSelectedLabel);
-    // }
-    
-    // showTdoNameInLabel(index: short, aLabel: TLabel): void {
-    //     let tdo: KfObject3D
-        
-    //     tdo = null
-    //     if ((index >= 0) && (index <= this.tdos.Count - 1)) {
-    //         tdo = utdo.KfObject3D(this.tdos.Items[index])
-    //     }
-    //     if (tdo !== null) {
-    //         aLabel.Caption = tdo.getName()
-    //     } else {
-    //         aLabel.Caption = ""
-    //     }
-    // }
-    
     // helpButtonClick(Sender: TObject): void {
     //     delphi_compatability.Application.HelpJump("Making_a_new_plant_with_the_wizard")
     // }
     
-    // FormKeyPress(Sender: TObject, Key: char): void {
-    //     Key = usupport.makeEnterWorkAsTab(this, this.ActiveControl, Key)
-    //     return Key
-    // }
-
     defaultAllChoices() {
         choiceSpecs.forEach(spec => {
             if (spec.type !== "page") {
