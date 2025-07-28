@@ -610,6 +610,7 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
 
     {
         id: "showFruits",
+        disabled: (id: string, plant: PdPlant, form: TWizardForm) => hasNoInflorescences(plant),
         options: ["no", "yes"],
         values: [200, 3],
         setValue: (plant: PdPlant, value: any) => plant.pFlower[Gender.kGenderFemale].minDaysBeforeSettingFruit = value,
@@ -618,7 +619,7 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     },
     {
         id: "fruitTdo",
-        disabled: (id: string, plant: PdPlant, form: TWizardForm) => form.wizardChoices["showFruits"] === "no",
+        disabled: (id: string, plant: PdPlant, form: TWizardForm) => form.wizardChoices["showFruits"] === "no" || hasNoInflorescences(plant),
         options: [],
         values: [],
         setValue: (plant: PdPlant, value: any) => {
@@ -637,7 +638,7 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     },
     {
         id: "fruitSections",
-        disabled: (id: string, plant: PdPlant, form: TWizardForm) => form.wizardChoices["showFruits"] === "no",
+        disabled: (id: string, plant: PdPlant, form: TWizardForm) => form.wizardChoices["showFruits"] === "no" || hasNoInflorescences(plant),
         options: ["one", "three", "four", "five", "ten"],
         values: [1, 3, 4, 5, 10],
         setValue: (plant: PdPlant, value: any) => plant.pFruit.tdoParams.repetitions = value,
@@ -646,7 +647,7 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     },
     {
         id: "fruitScale",
-        disabled: (id: string, plant: PdPlant, form: TWizardForm) => form.wizardChoices["showFruits"] === "no",
+        disabled: (id: string, plant: PdPlant, form: TWizardForm) => form.wizardChoices["showFruits"] === "no" || hasNoInflorescences(plant),
         options: ["tiny", "small", "medium", "large", "huge"],
         values: [4, 10, 20, 30, 60],
         setValue: (plant: PdPlant, value: any) => plant.pFruit.tdoParams.scaleAtFullSize = value,
@@ -655,7 +656,7 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
     },
     {
         id: "fruitColor",
-        disabled: (id: string, plant: PdPlant, form: TWizardForm) => form.wizardChoices["showFruits"] === "no",
+        disabled: (id: string, plant: PdPlant, form: TWizardForm) => form.wizardChoices["showFruits"] === "no" || hasNoInflorescences(plant),
         options: Object.keys(commonColors),
         values: Object.values(commonColors),
         setValue: (plant: PdPlant, value: any) => {
