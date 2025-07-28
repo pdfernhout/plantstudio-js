@@ -11,6 +11,7 @@ import { incrementNumPlantsCreatedThisSession } from "./updcom"
 
 type PageSpec = {
     id: string
+    disabled?: (id: string, plant: PdPlant, form: TWizardForm) => boolean
     title: string
     image: string
     icon: string
@@ -419,6 +420,7 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
 
     {
         id: "page7",
+        disabled: (id: string, plant: PdPlant, form: TWizardForm) => hasNoInflorescences(plant),
         title: "Inflorescences", // "Inflorescence drawing"
         image: "",
         icon: "WizardForm_inflorDrawPageImage.png",
@@ -465,6 +467,7 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
 
     {
         id: "page8",
+        disabled: (id: string, plant: PdPlant, form: TWizardForm) => hasNoInflorescences(plant),
         title: "Flowers",
         image: "",
         icon: "WizardForm_flowersPageImage.png",
@@ -531,6 +534,7 @@ const choiceSpecs: (PageSpec | ChoiceSpec)[] = [
 
     {
         id: "page9",
+        disabled: (id: string, plant: PdPlant, form: TWizardForm) => hasNoInflorescences(plant),
         title: "Fruits",
         image: "",
         icon: "WizardForm_fruitsPageImage.png",
@@ -1374,9 +1378,10 @@ export class TWizardForm {
     }
 
     viewPage(pageSpec: PageSpec) {
-        return m("div.bt.b5.mt2",
+        const disabled = pageSpec.disabled && pageSpec.disabled(pageSpec.id, this.plant, this)
+        return m("div.bt.b5.mt2" + (disabled ? ".disabled" : ""),
             m("div.b.mt1.mb1.flex", m("img.mr1", { 
-                src: imageDir + pageSpec.icon,
+                src: imageDir + (disabled ? (pageSpec.iconDisabled || pageSpec.icon) : pageSpec.icon),
                 width: "32px",
             }), pageSpec.title || "FIXME: " + pageSpec.id),
             m("div", pageSpec.topText),
