@@ -3,6 +3,7 @@ import { KfStringStream } from "./KfStringStream"
 import { intMax, max, min, intMin } from "./umath"
 import { TRect } from "./TRect"
 import { DebugPrint } from "./udebug"
+import { TPoint } from "./TPoint"
 
 // unit Usupport
 
@@ -1052,8 +1053,6 @@ export function nameStringForFileType(fileType: short): string {
     return result
 }
 
-/*
-
 export function extensionForFileType(fileType: short): string {
     let result = ""
     result = ""
@@ -1112,6 +1111,8 @@ export function extensionForFileType(fileType: short): string {
     }
     return result
 }
+
+/*
 
 export function filterStringForFileType(fileType: short, includeAllFiles: boolean): string {
     let result = ""
@@ -1419,4 +1420,25 @@ export function setDecimalSeparator() {
 export function pos(aString: string, aLine: string): number {
     // One-based result for Delphi compatibility
     return aLine.indexOf(aString) + 1
+}
+
+export function ExpandFileName(fileName: string) {
+    // TODO: Need to return fully qualified path name (unless other things change)
+    return fileName
+}
+
+export function Point(width: number, height: number): import("./TPoint").TPoint {
+    throw new TPoint(width, height)
+}
+
+export function Rect(x: number, y: number, width: number, height: number) {
+    return new TRect(x, y, x + width, y + height)
+}
+
+export function uppercase(aString: string) {
+    return aString.toUpperCase()
+}
+
+export function lowercase(aString: string) {
+    return aString.toLowerCase()
 }

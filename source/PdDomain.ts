@@ -1,29 +1,30 @@
 // unit Udomain
 
-import { short, float, TColorRef, long, StrToInt, IntToStr, ColorDefs } from "./common"
+import { short, float, TColorRef, long, StrToInt, IntToStr, ColorDefs, ShowMessage, ExtractFileName } from "./common"
 import { TPoint } from "./TPoint"
 import { TRect } from "./TRect"
-import { SinglePoint, strToBool, strToFloatWithCommaCheck } from "./usupport"
+import { ExpandFileName, extensionForFileType, FileType, SinglePoint, stringBeyond, strToBool, strToFloatWithCommaCheck } from "./usupport"
 import { PdSectionManager } from "./PdSectionManager"
 import { PdParameterManager } from "./PdParameterManager"
 import { ExportFormats, FileExport3DOptionsStructure, nameFor3DExportType, ExportPart, Axis } from "./U3dexport"
 import { BreedingAndTimeSeriesOptionsStructure, kMaxBreedingSections } from "./PdPlant"
 import { PdPlantManager } from "./PdPlantManager"
 import { KfObject3D } from "./KfObject3D"
+import { MainForm } from "./temporary"
 
 // const
 const kMaxWizardQuestions = 30
 const kMaxWizardColors = 2
 const kMaxWizardTdos = 3
 
-const kMainWindowOrientationHorizontal = 0
-const kMainWindowOrientationVertical = 1
+export const kMainWindowOrientationHorizontal = 0
+export const kMainWindowOrientationVertical = 1
 const kMaxMainWindowOrientations = 1
 
-const kIncludeSelectedPlants = 0
-const kIncludeVisiblePlants = 1
-const kIncludeAllPlants = 2
-const kIncludeDrawingAreaContents = 3
+export const kIncludeSelectedPlants = 0
+export const kIncludeVisiblePlants = 1
+export const kIncludeAllPlants = 2
+export const kIncludeDrawingAreaContents = 3
 const kMaxIncludeOption = 3
 
 export enum BreederVariation {
@@ -54,8 +55,8 @@ const kIncludeInvisiblePlants = false
 const kExcludeNonSelectedPlants = true
 const kIncludeNonSelectedPlants = false
 const kMaxCustomColors = 16
-const kAnimateByXRotation = 0
-const kAnimateByAge = 1
+export const kAnimateByXRotation = 0
+export const kAnimateByAge = 1
 
 export enum DrawMode {
     kDrawFast = 0,
@@ -1263,6 +1264,8 @@ export class PdDomain {
         }
     }
     
+    */
+
     // --------------------------------------------------------------------------- plant file i/o 
     load(fileName: string): void {
         let extension: string
@@ -1272,31 +1275,37 @@ export class PdDomain {
             this.plantFileName = fileName
             this.plantFileName = ExpandFileName(this.plantFileName)
             // v2.1 check for file extension - when opening file on startup or send to
-            extension = lowercase(usupport.stringBeyond(ExtractFileName(this.plantFileName), "."))
+            extension = stringBeyond(ExtractFileName(this.plantFileName), ".").toLowerCase()
             if (extension !== "pla") {
                 ShowMessage("The file (" + this.plantFileName + ") does not have the correct extension (pla).")
             } else {
-                this.plantManager.loadPlantsFromFile(fileName, kNotInPlantMover)
+                // TODO: PDF Need to get contents for plants file somehow from web
+                throw new Error("Unfinished")
+                this.plantManager.loadPlantsFromFile(fileName, kNotInPlantMover, "")
                 this.plantFileLoaded = true
-                if (umain.MainForm !== null) {
-                    umain.MainForm.setPlantFileChanged(false)
+                if (MainForm !== null) {
+                    MainForm.setPlantFileChanged(false)
                 }
                 this.lastOpenedPlantFileName = this.plantFileName
-                this.lastOpenedPlantFileName = trim(this.lastOpenedPlantFileName)
+                this.lastOpenedPlantFileName = this.lastOpenedPlantFileName.trim()
                 // v1.60
                 this.updateRecentFileNames(this.lastOpenedPlantFileName)
             }
         } catch (e) {
             this.plantFileLoaded = false
-            //callers need exception
-            throw new Exception()
+            // callers need exception
+            throw new Error("Problem loading plant file")
         }
     }
     
+    /*
+
     save(fileName: string): void {
         this.plantManager.savePlantsToFile(fileName, kNotInPlantMover)
     }
     
+    */
+
     // v1.60
     updateRecentFileNames(aFileName: string): void {
         let i: short
@@ -1327,33 +1336,32 @@ export class PdDomain {
                 }
             }
         }
-        if (umain.MainForm !== null) {
-            // PDF PORTING -- maybe syntax error in original -- had empty parens -- unless intended as procedure or fucntion call from pointer? Probably nt
-            umain.MainForm.updateFileMenuForOtherRecentFiles()
+        if (MainForm !== null) {
+            // PDF PORTING -- maybe syntax error in original -- had empty parens -- unless intended as procedure or function call from pointer? Probably not
+            MainForm.updateFileMenuForOtherRecentFiles()
         }
     }
-    
+
     resetForEmptyPlantFile(): void {
-        this.plantManager.plants.clear()
+        this.plantManager.plants = []
         this.plantFileLoaded = true
-        this.plantFileName = kUnsavedFileName + "." + usupport.extensionForFileType(usupport.kFileTypePlant)
+        this.plantFileName = kUnsavedFileName + "." + extensionForFileType(FileType.kFileTypePlant)
         this.lastOpenedPlantFileName = ""
-        if (umain.MainForm !== null) {
-            umain.MainForm.setPlantFileChanged(false)
+        if (MainForm !== null) {
+            MainForm.setPlantFileChanged(false)
         }
     }
     
     resetForNoPlantFile(): void {
-        this.plantManager.plants.clear()
+        this.plantManager.plants = []
         this.plantFileLoaded = false
         this.plantFileName = ""
         this.lastOpenedPlantFileName = ""
-        if (umain.MainForm !== null) {
-            umain.MainForm.setPlantFileChanged(false)
+        if (MainForm !== null) {
+            MainForm.setPlantFileChanged(false)
         }
     }
     
-    */
     checkForExistingDefaultTdoLibrary(): boolean {
         return false
         /* TODO: implement checkForExistingDefaultTdoLibrary
@@ -1493,7 +1501,7 @@ export class PdDomain {
         }
         return result
     }
-    
+
     */
 
     sectionNumberFor3DExportType(anOutputType: short): short {

@@ -35,8 +35,8 @@ const kNewPlantPosition = 100
 const kHide = true
 const kShow = false
 
-const kSendBackward = true
-const kBringForward = false
+export const kSendBackward = true
+export const kBringForward = false
 
 export const kPasteMoveDistance = 40
 
