@@ -249,8 +249,6 @@ udomain.domain.plantManager.plants  [1]
 000001 PhysicalOffsetY
 000001 Randomize
 000001 ReallocMem
-000001 RegistrationForm
-000001 RegistrationMatch
 000001 SReadError
 000001 SWriteError
 000001 SetClipboardData

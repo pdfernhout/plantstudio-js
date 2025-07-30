@@ -226,7 +226,7 @@ const kCustomColors = 7
 const kSectionBreeding = 8
 const kSectionNozzle = 9
 const kSectionAnimation = 10
-const kSectionRegistration = 11
+// const kObsolete = 11
 const kSectionOverrides = 12
 const kSectionPOV = 13
 const kSection3DS = 14
@@ -235,12 +235,8 @@ const kSectionVRML = 16
 const kSectionLWO = 17
 const kSectionOtherRecentFiles = 18
 const kLastSectionNumber = 18
-const iniSections = ["Files", "Preferences", "Settings", "DXF", "Wizard", "Picture export", "Printing", "Custom colors", "Breeding", "Nozzles", "Animation", "Registration", "Overrides", "POV", "3DS", "OBJ", "VRML", "LWO", "Other recent files", ]
+const iniSections = ["Files", "Preferences", "Settings", "DXF", "Wizard", "Picture export", "Printing", "Custom colors", "Breeding", "Nozzles", "Animation", "Overrides", "POV", "3DS", "OBJ", "VRML", "LWO", "Other recent files", ]
 const kStandardTdoLibraryFileName = "3D object library.tdo"
-const kEncryptingMultiplierForAccumulatedUnregisteredTime = 20
-const kEncryptingMultiplierForUnregisteredExportCount = 149
-const kKeyForAccumulatedUnregisteredTime = "Time scale fraction"
-const kKeyForUnregisteredExportCount = "Frame count"
 const kGetKeys = true
 const kGetValues = false
 
@@ -262,14 +258,6 @@ export class PdDomain {
     exportOptionsFor3D: FileExport3DOptionsStructure[] = Array(ExportFormats.k3DExportTypeLast + 1)
     nozzleOptions: NozzleOptionsStructure = new NozzleOptionsStructure()
     animationOptions: NumberedAnimationOptionsStructure = new NumberedAnimationOptionsStructure()
-    registered: boolean = false
-    justRegistered: boolean = false
-    // TODO: FIX startTimeThisSession: TDateTime = new TDateTime()
-    // TODO: FIX accumulatedUnregisteredTime: TDateTime = new TDateTime()
-    registrationName: string = ""
-    registrationCode: string = ""
-    unregisteredExportCountBeforeThisSession: short = 0
-    unregisteredExportCountThisSession: short = 0
     plantManager: PdPlantManager = new PdPlantManager()
     parameterManager: PdParameterManager = new PdParameterManager()
     sectionManager: PdSectionManager = new PdSectionManager()
@@ -294,7 +282,6 @@ export class PdDomain {
     // TODO: FIX iniLines: TStringList = new TStringList()
     gotInfoFromV1IniFile: boolean = false
     
-    // registration
     // managers 
     // support files 
     // for remembering settings 
@@ -461,11 +448,6 @@ export class PdDomain {
                     ShowMessage("Could not load most recently saved plant file " + this.plantFileName)
                 }
             }
-        }
-        // show obsolete warning if unregistered
-        UNRESOLVED.DecodeDate(UNRESOLVED.Now, year, month, day)
-        if ((!this.registered) && (year >= 2003)) {
-            MessageDialog("This version of PlantStudio was released some time ago." + chr(13) + chr(13) + "Please check for an newer version at:" + chr(13) + "  http://www.kurtz-fernhout.com" + chr(13) + chr(13) + "The web site may also have updated pricing information." + chr(13) + chr(13) + "You can still register this copy of the software if you want to, though;" + chr(13) + "this message will disappear when this copy is registered.", mtInformation, {mbOK, }, 0)
         }
         return result
     }
@@ -884,24 +866,6 @@ export class PdDomain {
         // 24 bit
         this.animationOptions.colorType = UNRESOLVED.TPixelFormat(StrToInt(this.stringForSectionAndKey(section, "Animation colors (screen/2/16/256/15-bit/16-bit/24-bit/32-bit)", "6")))
         
-        // -------------------------------------------  registration
-        section = iniSections[kSectionRegistration]
-        this.registrationName = this.stringForSectionAndKey(section, "R4", "")
-        this.registrationName = usupport.hexUnencode(this.registrationName)
-        this.registrationCode = this.stringForSectionAndKey(section, "R2", "")
-        this.registrationCode = usupport.hexUnencode(this.registrationCode)
-        this.registered = uregistersupport.RegistrationMatch(this.registrationName, this.registrationCode)
-        if (!this.registered) {
-            section = iniSections[kSectionPrefs]
-            timeString = this.stringForSectionAndKey(section, kKeyForAccumulatedUnregisteredTime, "0")
-            readNumber = umath.max(usupport.strToFloatWithCommaCheck(timeString), 0)
-            this.accumulatedUnregisteredTime = readNumber / kEncryptingMultiplierForAccumulatedUnregisteredTime
-            section = iniSections[kSectionBreeding]
-            readInt = StrToInt(this.stringForSectionAndKey(section, kKeyForUnregisteredExportCount, "0"))
-            this.unregisteredExportCountBeforeThisSession = readInt / kEncryptingMultiplierForUnregisteredExportCount
-            this.unregisteredExportCountThisSession = 0
-        }
-        
         // -------------------------------------------  parameter overrides
         section = iniSections[kSectionOverrides]
         overrideKeys = delphi_compatability.TStringList.create
@@ -1014,23 +978,8 @@ export class PdDomain {
             this.setStringForSectionAndKey(section, "Pause before hint", IntToStr(this.options.pauseBeforeHint))
             this.setStringForSectionAndKey(section, "Pause during hint", IntToStr(this.options.pauseDuringHint))
             this.setStringForSectionAndKey(section, "Wrap lines in note editor", usupport.boolToStr(this.options.noteEditorWrapLines))
-            if (this.justRegistered) {
-                // registration, embedded here to hide time scale fraction
-                section = iniSections[kSectionRegistration]
-                this.setStringForSectionAndKey(section, "R1", "RQBBBOYUMMBIHYMBB")
-                this.setStringForSectionAndKey(section, "R2", usupport.hexEncode(this.registrationCode))
-                this.setStringForSectionAndKey(section, "R3", "YWEHZBBIUWOPBCDVXBQB")
-                this.setStringForSectionAndKey(section, "R4", usupport.hexEncode(this.registrationName))
-            } else if (!this.registered) {
-                section = iniSections[kSectionPrefs]
-                this.accumulatedUnregisteredTime = this.accumulatedUnregisteredTime + umath.max((UNRESOLVED.now - this.startTimeThisSession), 0)
-                saveNumber = this.accumulatedUnregisteredTime * kEncryptingMultiplierForAccumulatedUnregisteredTime
-                this.setStringForSectionAndKey(section, kKeyForAccumulatedUnregisteredTime, FloatToStr(saveNumber))
-                // hide this elsewhere
-                section = iniSections[kSectionBreeding]
-                saveInt = (this.unregisteredExportCountBeforeThisSession + this.unregisteredExportCountThisSession) * kEncryptingMultiplierForUnregisteredExportCount
-                this.setStringForSectionAndKey(section, kKeyForUnregisteredExportCount, IntToStr(saveInt))
-            }
+            
+            // prefs
             section = iniSections[kSectionPrefs]
             this.setStringForSectionAndKey(section, "Update time series plants on parameter change", usupport.boolToStr(this.options.updateTimeSeriesPlantsOnParameterChange))
             this.setStringForSectionAndKey(section, "Main window view option (all/one)", IntToStr(this.options.mainWindowViewMode))
@@ -1052,6 +1001,7 @@ export class PdDomain {
             this.setStringForSectionAndKey(section, "Ghosting color", IntToStr(this.options.ghostingColor))
             this.setStringForSectionAndKey(section, "Posed color", IntToStr(this.options.nonHiddenPosedColor))
             this.setStringForSectionAndKey(section, "Posed selected color", IntToStr(this.options.selectedPosedColor))
+            
             // settings 
             section = iniSections[kSectionSettings]
             this.setStringForSectionAndKey(section, "Window position", usupport.rectToString(this.mainWindowRect))
@@ -1378,12 +1328,6 @@ export class PdDomain {
     }
 
     /*
-    
-    totalUnregisteredExportsAtThisMoment(): short {
-        let result = 0
-        result = this.unregisteredExportCountBeforeThisSession + this.unregisteredExportCountThisSession
-        return result
-    }
     
     // ------------------------------------------------------------------- file/directory utilities 
     nameIsAbsolute(fileName: string): boolean {

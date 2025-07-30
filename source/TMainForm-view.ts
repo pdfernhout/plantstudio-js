@@ -2575,17 +2575,6 @@ export function viewMainForm() {
                         },
                         "-",
                     ),
-                    m("li.MenuHelpRegister.TMenuItem",
-                        {
-                            onclick: MenuHelpRegisterClick,
-                        },
-                        caption("&Register..."),
-                    ),
-                    m("li.AfterRegisterMenuSeparator.TMenuItem",
-                        {
-                        },
-                        "-",
-                    ),
                     m("li.MenuHelpAbout.TMenuItem",
                         {
                             onclick: MenuHelpAboutClick,
@@ -2759,17 +2748,6 @@ export function viewMainForm() {
                     // Width: "16",
                     // AutoSize: "True",
                     // Picture.Data: "07544269746D6170F6000000424DF600000000000000760000002800000010000000100000000100040000000000800000000000000000000000100000001000000000000000000080000080000000808000800000008000800080800000C0C0C000808080000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF2FFFFFFFFFFFFFFF2FFFFFFFFFFFFFFF2FFFFFFFFFFFFFFF2FFFFFFFFFFFFFFF2FFFFFFFFF22FFFF2FFFF22FFF22222F2F22222FFFF22222222222FFFFFFF222F222FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
-                    // Visible: "False",
-                },
-            ),
-            m("img.unregisteredExportReminder.TImage",
-                {
-                    // Top: "220",
-                    // Left: "66",
-                    // Height: "16",
-                    // Width: "17",
-                    // AutoSize: "True",
-                    // Picture.Data: "07544269746D617036010000424D3601000000000000760000002800000011000000100000000100040000000000C0000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF000000000000000000000000000FFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFF000000000FFFFFFF2FFFFFFF000000000FFFFFFF2FFFFFFF000000000FFFFFFF2FFFFFFF000000000FFFFFFF2FFFFFFF000000000FFFFFFF2FFFFFFF000000000F22FFFF2FFFF22F000000000F22222F2F22222F000000000FF22222222222FF000000000FFFF222F222FFFF000000000FFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFF00000000000000000000000000000000",
                     // Visible: "False",
                 },
             ),
@@ -3201,8 +3179,6 @@ function MenuFileSaveJPEGClick() { console.log("MenuFileSaveJPEGClick") }
 function MenuFileTdoMoverClick() { console.log("MenuFileTdoMoverClick") }
 
 function MenuHelpAboutClick() { console.log("MenuHelpAboutClick") }
-
-function MenuHelpRegisterClick() { console.log("MenuHelpRegisterClick") }
 
 function MenuHelpSuperSpeedTourClick() { console.log("MenuHelpSuperSpeedTourClick") }
 

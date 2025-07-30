@@ -20,7 +20,6 @@ import { FileType, kDontAskForFileName, Point, pos, Rect, rHeight, rWidth, setSi
 // import uoptions3dexport
 // import unoted
 // import ucustdrw
-// import uregister
 // import uabout
 // import uanimate
 // import unozzle
@@ -302,15 +301,12 @@ export class TMainForm {
     // N15: TMenuItem = new TMenuItem()
     // paramPopupMenuExpand: TMenuItem = new TMenuItem()
     // paramPopupMenuCollapse: TMenuItem = new TMenuItem()
-    // AfterRegisterMenuSeparator: TMenuItem = new TMenuItem()
     // MenuFileTdoMover: TMenuItem = new TMenuItem()
     // animateGrowth: TSpeedButton = new TSpeedButton()
     // MenuFileMakePainterNozzle: TMenuItem = new TMenuItem()
-    // unregisteredExportReminder: TImage = new TImage()
     // MenuFileMakePainterAnimation: TMenuItem = new TMenuItem()
     // N17: TMenuItem = new TMenuItem()
     // N13: TMenuItem = new TMenuItem()
-    // MenuHelpRegister: TMenuItem = new TMenuItem()
     // MenuHelpSuperSpeedTour: TMenuItem = new TMenuItem()
     // MenuHelpTutorial: TMenuItem = new TMenuItem()
     // MenuEditCopyAsText: TMenuItem = new TMenuItem()
@@ -547,7 +543,6 @@ export class TMainForm {
     //         }
     //         // domain must exist when this is created; use this pointer to shorten code
     //         this.plants = domain.plantManager.plants
-    //         this.updateForRegistrationChange()
     //         // turn off panel bevels 
     //         this.plantListPanel.BevelOuter = UNRESOLVED.bvNone
     //         this.plantFocusPanel.BevelOuter = UNRESOLVED.bvNone
@@ -1015,24 +1010,7 @@ export class TMainForm {
                 return result
             }
         }
-        // start putting up reminder after one hour
-        lowerLimit = 1.0 / 24.0
-        if ((!domain.registered) && (domain.accumulatedUnregisteredTime > lowerLimit)) {
-            UNRESOLVED.Randomize
-            randomNumber = UNRESOLVED.random
-            // v2 changed this - used to get to saturation after 24 hrs, changed to 12 - more reminding
-            // almost always after 12 hrs
-            upperLimit = umath.min(domain.accumulatedUnregisteredTime / (12.0 / 24.0), 0.9)
-            if ((randomNumber < upperLimit)) {
-                uabout.AboutForm.initializeWithWhetherClosingProgram(true)
-                response = uabout.AboutForm.ShowModal()
-                this.updateForRegistrationChange()
-                if (response === mrCancel) {
-                    result = false
-                    return result
-                }
-            }
-        }
+
         // have to clear out parameter panels before leaving, for some reason was making program crash
         //    but only if tdo components existed at the time of leaving the program. this works for now,
         //    but it would be better to understand why it was happening. 
@@ -1324,9 +1302,6 @@ export class TMainForm {
     MenuEditCopyDrawingClick(): void {
         let bitmapForExport: TBitmap
         
-        if (this.checkForUnregisteredExportCountOverMaxReturnTrueIfAbort()) {
-            return
-        }
         if ((domain === null) || (domain.plantManager === null) || (this.plants.length <= 0)) {
             return
         }
@@ -1337,9 +1312,6 @@ export class TMainForm {
                 ubitmap.CopyBitmapToClipboard(bitmapForExport)
             } finally {
                 bitmapForExport.free
-                if ((!domain.registered)) {
-                    this.incrementUnregisteredExportCount()
-                }
             }
         }
     }
@@ -1349,9 +1321,6 @@ export class TMainForm {
         let bitmapForExport: TBitmap
         let suggestedFileName: string
         
-        if (this.checkForUnregisteredExportCountOverMaxReturnTrueIfAbort()) {
-            return
-        }
         if ((domain === null) || (domain.plantManager === null) || (this.plants.length <= 0)) {
             return
         }
@@ -1387,9 +1356,6 @@ export class TMainForm {
         let jpegForExport: TJPEGImage
         let suggestedFileName: string
         
-        if (this.checkForUnregisteredExportCountOverMaxReturnTrueIfAbort()) {
-            return
-        }
         if ((domain === null) || (domain.plantManager === null) || (this.plants.length <= 0)) {
             return
         }
@@ -1434,9 +1400,6 @@ export class TMainForm {
         let printOffsetX_px: int
         let printOffsetY_px: int
         
-        if (this.checkForUnregisteredExportCountOverMaxReturnTrueIfAbort()) {
-            return
-        }
         if ((domain === null) || (domain.plantManager === null) || (this.plants.length <= 0)) {
             return
         }
@@ -1474,9 +1437,6 @@ export class TMainForm {
             UNRESOLVED.Printer.endDoc
         } finally {
             bitmapForExport.free
-            if ((!domain.registered)) {
-                this.incrementUnregisteredExportCount()
-            }
         }
     }
     
@@ -1571,11 +1531,6 @@ export class TMainForm {
                 if (domain.options.showPlantDrawingProgress) {
                     this.finishDrawProgress()
                 }
-            }
-            if (!domain.registered) {
-                scaleMultiplier = max(1.0, scaleMultiplier)
-                unregRect = Rect(1, 1, intround(this.unregisteredExportReminder.Width * scaleMultiplier) + 1, intround(this.unregisteredExportReminder.Height * scaleMultiplier) + 1)
-                bitmapForExport.Canvas.StretchDraw(unregRect, this.unregisteredExportReminder.Picture.Bitmap)
             }
         } finally {
             ucursor.cursor_stopWait()
@@ -1786,26 +1741,6 @@ export class TMainForm {
         this.doCommand(newCommand)
     }
     
-    checkForUnregisteredExportCountOverMaxReturnTrueIfAbort(): boolean {
-        let result = false
-        result = false
-        if ((domain.totalUnregisteredExportsAtThisMoment() >= udomain.kMaxUnregExportsAllowed) && (domain.unregisteredExportCountThisSession >= udomain.kMaxUnregExportsPerSessionAfterMaxReached)) {
-            MessageDialog("Thank you for evaluating PlantStudio!" + chr(13) + chr(13) + "You have exported PlantStudio output at least " + IntToStr(udomain.kMaxUnregExportsAllowed) + " times" + chr(13) + "since installing it for evaluation," + " and " + IntToStr(udomain.kMaxUnregExportsPerSessionAfterMaxReached) + " times this session." + chr(13) + chr(13) + "To export more output without registering," + chr(13) + "simply close and restart the program." + chr(13) + chr(13) + "To remove this restriction, purchase a registration code," + chr(13) + "then enter it into the Help-Register window" + chr(13) + "to register your copy of PlantStudio.", mtInformation, {mbOK, }, 0)
-            result = true
-            this.MenuHelpRegisterClick(this)
-        }
-        return result
-    }
-    
-    incrementUnregisteredExportCount(): void {
-        domain.unregisteredExportCountThisSession += 1
-        if (domain.totalUnregisteredExportsAtThisMoment() === udomain.kMaxUnregExportsAllowed) {
-            domain.unregisteredExportCountBeforeThisSession = domain.unregisteredExportCountBeforeThisSession + domain.unregisteredExportCountThisSession
-            domain.unregisteredExportCountThisSession = 0
-        }
-        this.updateForChangedExportCount()
-    }
-    
     //v2.1
     // v2.1 separated this out and added call in animation saving
     // it is the same otherwise except for the padding
@@ -1843,9 +1778,6 @@ export class TMainForm {
         let excludeNonSelectedPlants: boolean
         let newCommand: PdCommand
         
-        if (this.checkForUnregisteredExportCountOverMaxReturnTrueIfAbort()) {
-            return
-        }
         response = mrCancel
         optionsChanged = false
         optionsForm = uoptions3dexport.TGeneric3DOptionsForm().create(this)
@@ -1952,9 +1884,6 @@ export class TMainForm {
         let bitmapForExport: TBitmap
         let suggestedFileName: string
         
-        if (this.checkForUnregisteredExportCountOverMaxReturnTrueIfAbort()) {
-            return
-        }
         if ((domain === null) || (domain.plantManager === null) || (this.plants.length <= 0)) {
             return
         }
@@ -2060,9 +1989,6 @@ export class TMainForm {
         let saveDialog: TSaveDialog
         let sizeNeeded_MB: float
         
-        if (this.checkForUnregisteredExportCountOverMaxReturnTrueIfAbort()) {
-            return
-        }
         if ((domain === null) || (domain.plantManager === null) || (this.plants.length <= 0)) {
             return
         }
@@ -2167,12 +2093,6 @@ export class TMainForm {
                 startWaitMessage("Saving " + ExtractFileName(saveFileName) + "...")
                 setPlantCharacteristicsForAnimationFrame(plant, i)
                 plant.drawPreviewIntoCache(domain.animationOptions.scaledSize, kDontConsiderDomainScale, kDrawNow)
-                if (!domain.registered) {
-                    scaleMultiplier = safedivExcept(1.0 * domain.animationOptions.resolution_pixelsPerInch, 1.0 * delphi_compatability.Screen.PixelsPerInch, 1.0)
-                    scaleMultiplier = max(1.0, scaleMultiplier)
-                    unregRect = Rect(1, 1, intround(this.unregisteredExportReminder.Width * scaleMultiplier) + 1, intround(this.unregisteredExportReminder.Height * scaleMultiplier) + 1)
-                    plant.previewCache.Canvas.StretchDraw(unregRect, this.unregisteredExportReminder.Picture.Bitmap)
-                }
                 plant.previewCache.SaveToFile(saveFileName)
             }
             // clean up for next time
@@ -2591,36 +2511,12 @@ export class TMainForm {
     }
     
     MenuHelpAboutClick(): void {
-        if (domain.registered) {
-            if (usplash.splashForm === null) {
-                return
-            }
-            //domain.registrationName);
-            usplash.splashForm.showLoadingString("Registered to:")
-            //domain.registrationCode);
-            usplash.splashForm.showCodeString(domain.registrationName)
-            usplash.splashForm.close.Visible = true
-            usplash.splashForm.supportButton.Visible = true
-            usplash.splashForm.ShowModal()
-        } else {
-            if (uabout.AboutForm === null) {
-                return
-            }
-            uabout.AboutForm.initializeWithWhetherClosingProgram(false)
-            uabout.AboutForm.ShowModal()
-            this.updateForRegistrationChange()
+        if (usplash.splashForm === null) {
+            return
         }
-    }
-    
-    MenuHelpRegisterClick(): void {
-        uregister.RegistrationForm.ShowModal()
-        this.updateForRegistrationChange()
-    }
-    
-    updateForRegistrationChange(): void {
-        this.MenuHelpRegister.visible = !domain.registered
-        this.AfterRegisterMenuSeparator.visible = !domain.registered
-        this.Caption = this.captionForFile()
+        usplash.splashForm.close.Visible = true
+        usplash.splashForm.supportButton.Visible = true
+        usplash.splashForm.ShowModal()
     }
     
     MenuHelpSuperSpeedTourClick(): void {
@@ -2701,27 +2597,7 @@ export class TMainForm {
             result = delphi_compatability.Application.Title + " - no file"
         } else {
             result = delphi_compatability.Application.Title + " - " + usupport.stringUpTo(ExtractFileName(domain.plantFileName), ".")
-            if (!domain.registered) {
-                if (domain.totalUnregisteredExportsAtThisMoment() < udomain.kMaxUnregExportsAllowed) {
-                    // before pool runs out
-                    numLeft = umath.intMax(0, udomain.kMaxUnregExportsAllowed - domain.totalUnregisteredExportsAtThisMoment())
-                    if (numLeft === 1) {
-                        result = result + " [unregistered - " + IntToStr(numLeft) + " export left in evaluation]"
-                    } else {
-                        result = result + " [unregistered - " + IntToStr(numLeft) + " exports left in evaluation]"
-                    }
-                    // after pool runs out, fixed number per session
-                } else {
-                    numLeft = umath.intMax(0, udomain.kMaxUnregExportsPerSessionAfterMaxReached - domain.unregisteredExportCountThisSession)
-                    if (numLeft <= 0) {
-                        result = result + " [unregistered - NO exports left this session]"
-                    } else if (numLeft === 1) {
-                        result = result + " [unregistered - " + IntToStr(numLeft) + " export left this session]"
-                    } else {
-                        result = result + " [unregistered - " + IntToStr(numLeft) + " exports left this session]"
-                    }
-                }
-            } else if (this.plants.length <= 0) {
+            if (this.plants.length <= 0) {
                 result = result + " (no plants)"
             } else if (this.plants.length === 1) {
                 result = result + " (1 plant)"

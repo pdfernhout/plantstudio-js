@@ -1576,9 +1576,6 @@ export class PdPlant extends PdStreamableObject {
                 // for 3DS need to write out all colors in front especially; must be done before reminder
                 (<KfDrawingSurfaceFor3DS>fileExportSurface).writeMaterialDescription(i, this.colorForDXFPartType(i))
             }
-            if (!domain.registered) {
-                (<KfDrawingSurfaceFor3DS>fileExportSurface).writeMaterialDescription(-1, support_rgb(100, 100, 100))
-            }
         }
         let fixRotation: short
         switch (outputType) {
@@ -1613,26 +1610,6 @@ export class PdPlant extends PdStreamableObject {
         this.turtle.rotateX(fixRotation)
         // this is a user-specified turn on top of the default
         this.turtle.rotateX(domain.exportOptionsFor3D[outputType].xRotationBeforeDraw * 256.0 / 360.0)
-        if (!domain.registered) {
-            const remWidth = this.realDrawingScale_pixelsPerMm() * 5.0
-            this.turtle.push()
-            this.turtle.moveInMillimeters(remWidth / 2)
-            this.turtle.rotateY(64)
-            this.turtle.moveInMillimeters(remWidth / 2)
-            const remPoints: KfPoint3D[] = Array(4)
-            remPoints[0] = this.turtle.positionCopy()
-            this.turtle.rotateY(64)
-            this.turtle.moveInMillimeters(remWidth)
-            remPoints[1] = this.turtle.positionCopy()
-            this.turtle.rotateY(64)
-            this.turtle.moveInMillimeters(remWidth)
-            remPoints[2] = this.turtle.positionCopy()
-            this.turtle.rotateY(64)
-            this.turtle.moveInMillimeters(remWidth)
-            remPoints[3] = this.turtle.positionCopy()
-            this.turtle.pop()
-            fileExportSurface.writeRegistrationReminder(remPoints[0], remPoints[1], remPoints[2], remPoints[3])
-        }
         this.draw()
         fileExportSurface.endPlant()
     }

@@ -197,16 +197,6 @@ TBreedingOptionsForm	TSpinEdit	maxPartsPerPlant_thousands	(none)	How many plant 
 TBreedingOptionsForm	TGroupBox	GroupBox3	(none)	(none)
 TBreedingOptionsForm	TSpinEdit	numTimeSeriesStages	(none)	The number of stages shown in a time series of different ages in a plant's life cycle.
 TBreedingOptionsForm	TCheckBox	updateTimeSeriesPlantsOnParameterChange	(none)	"Check this box to regrow and redraw all plants in the time series window whenever you change a parameter for the corresponding plant in the main window (the plant the time series was made from). If your computer draws slowly you might want to turn this option off, but remember that time series plants won't track your changes."
-TRegistrationForm	TPanel	Panel1	(none)	(none)
-TRegistrationForm	TEdit	registrationNameEdit	(none)	Type your registration name here exactly as you received it.
-TRegistrationForm	TEdit	registrationCodeEdit	(none)	Type your registration code here exactly as you received it.
-TRegistrationForm	TEdit	orderPageEdit	(none)	This is the web page where you can register PlantStudio.
-TRegistrationForm	TButton	openBrowser	(none)	"Click here to open your internet browser to the registration web page shown here. If this doesn't work and your browser doesn't open, copy the web page and paste it into the address box of your internet browser by hand."
-TRegistrationForm	TButton	close	(none)	Close this window.
-TRegistrationForm	TButton	readLicense	(none)	Read the PlantStudio license.
-TRegistrationForm	TButton	moreInfo	(none)	Read some information about registering PlantStudio.
-TRegistrationForm	TButton	registerMe	(none)	"After you have entered your registration name and code, click this button to register your copy of PlantStudio."
-TRegistrationForm	TButton	PrintButton	(none)	We highly recommend that you print the registration information that appears after you enter your registration name and code and click Register Me. Click here to print the information.
 TBitmapOptionsForm	TButton	Close	(none)	(none)
 TBitmapOptionsForm	TButton	cancel	(none)	(none)
 TBitmapOptionsForm	TGroupBox	printBox	(none)	(none)

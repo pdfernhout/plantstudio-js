@@ -595,16 +595,6 @@ TAnimationFilesOptionsForm	TRadioButton	animateByXRotation	(none)	"Use different
 TAnimationFilesOptionsForm	TSpinEdit	incrementEdit	(none)	"In each frame the plant will be this many days older, or this many degrees rotated more, than in the previous frame. In the case of age animation, we always add an extra frame at the end with the mature plant, in case the number of days doesn't divide evenly. In the case of rotation, the entire 360 degrees will be covered (give or take a degree)."
 TAnimationFilesOptionsForm	TSpinEdit	resolution	(none)	"The resolution of the output picture, in pixels per inch. Since you are creating multiple files here, don't set the resolution too high. PlantStudio will check your hard disk space before starting to make sure the files will fit."
 TAnimationFilesOptionsForm	TComboBox	colorType	(none)	Choose a color depth (number of colors in the image) to use to draw the animation pictures. For animation files you should usually use 24-bit color.
-TRegistrationForm	TPanel	Panel1	(none)	(none)
-TRegistrationForm	TEdit	registrationNameEdit	(none)	Type your registration name here exactly as you received it.
-TRegistrationForm	TEdit	registrationCodeEdit	(none)	Type your registration code here exactly as you received it.
-TRegistrationForm	TEdit	orderPageEdit	(none)	This is the web page where you can register PlantStudio.
-TRegistrationForm	TButton	openBrowser	(none)	"Click here to open your internet browser to the registration web page shown here. If this doesn't work and your browser doesn't open, copy the web page and paste it into the address box of your internet browser by hand."
-TRegistrationForm	TButton	close	(none)	Close this window.
-TRegistrationForm	TButton	readLicense	(none)	Read the PlantStudio license.
-TRegistrationForm	TButton	moreInfo	(none)	Read some information about registering PlantStudio.
-TRegistrationForm	TButton	registerMe	(none)	"After you have entered your registration name and code, click this button to register your copy of PlantStudio."
-TRegistrationForm	TButton	PrintButton	(none)	We highly recommend that you print the registration information that appears after you enter your registration name and code and click Register Me. Click here to print the information.
 TUndoRedoListForm	TButton	OK	(none)	Close this window and undo or redo all of the selected actions.
 TUndoRedoListForm	TButton	cancel	(none)	Close this window without undoing or redoing anything.
 TUndoRedoListForm	TSpeedButton	helpButton	(none)	Get help on using the undo/redo window.

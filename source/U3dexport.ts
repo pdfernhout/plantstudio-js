@@ -431,10 +431,6 @@ export class KfFileExportSurface extends KfDrawingSurface {
         // subclasses can override
     }
     
-    writeRegistrationReminder(p1: KfPoint3D, p2: KfPoint3D, p3: KfPoint3D, p4: KfPoint3D): void {
-        throw new Error("subclasses must override")
-    }
-    
     startNestedGroupOfPlantParts(groupName: string, shortName: string, nestingType: short): void {
         // subclasses can override
     }
@@ -710,15 +706,7 @@ export class KfDrawingSurfaceForDXF extends KfTextFileExportSurface {
     basicDrawTriangle(triangle: KfTriangle): void {
         this.draw3DFace(triangle.points[0], triangle.points[1], triangle.points[2], triangle.points[2])
     }
-    
-    writeRegistrationReminder(p1: KfPoint3D, p2: KfPoint3D, p3: KfPoint3D, p4: KfPoint3D): void {
-        this.currentGroupingString = this.currentPlantNameShort + "_rem"
-        // adds one; kLastDxfColorIndex is gray
-        this.currentColorIndex = kLastDxfColorIndex - 1
-        this.draw3DFace(p1, p2, p3, p3)
-        this.draw3DFace(p1, p3, p4, p4)
-    }
-    
+
 }
 
 export class KfDrawingSurfaceForPOV extends KfTextFileExportSurface {
@@ -943,22 +931,7 @@ export class KfDrawingSurfaceForPOV extends KfTextFileExportSurface {
         write(this.outputFile, valueString(this.pressedOrNot(this.scale * p2.x, Axis.kX)) + ", " + valueString(this.pressedOrNot(this.scale * -p2.y, Axis.kY)) + ", " + valueString(this.pressedOrNot(this.scale * p2.z, Axis.kZ)) + ">, <")
         writeln(this.outputFile, valueString(this.pressedOrNot(this.scale * p3.x, Axis.kX)) + ", " + valueString(this.pressedOrNot(this.scale * -p3.y, Axis.kY)) + ", " + valueString(this.pressedOrNot(this.scale * p3.z, Axis.kZ)) + "> }")
     }
-    
-    writeRegistrationReminder(p1: KfPoint3D, p2: KfPoint3D, p3: KfPoint3D, p4: KfPoint3D): void {
-        this.startMesh(support_rgb(100, 100, 100), this.currentPlantNameShort + "_reminder")
-        const triangle1 = new KfTriangle()
-        const triangle2 = new KfTriangle()
-        triangle1.points[0] = p1
-        triangle1.points[1] = p2
-        triangle1.points[2] = p3
-        this.basicDrawTriangle(triangle1)
-        triangle2.points[0] = p1
-        triangle2.points[1] = p3
-        triangle2.points[2] = p4
-        this.basicDrawTriangle(triangle2)
-        this.endBrace(kWriteColor)
-    }
-    
+ 
 }
 
 export class KfDrawingSurfaceForVRML extends KfTextFileExportSurface {
@@ -1332,21 +1305,6 @@ export class KfDrawingSurfaceForVRML extends KfTextFileExportSurface {
         this.indent()
     }
     
-    writeRegistrationReminder(p1: KfPoint3D, p2: KfPoint3D, p3: KfPoint3D, p4: KfPoint3D): void { 
-        this.setColor(support_rgb(100, 100, 100))
-        this.currentGroupingString = this.currentPlantNameShort + "_reminder"
-        this.startMesh()
-        const numPointsAtStart = this.numPoints
-        this.addPoint(p1)
-        this.addPoint(p2)
-        this.addPoint(p3)
-        this.addPoint(p4)
-        this.addTriangle(numPointsAtStart, numPointsAtStart + 1, numPointsAtStart + 3)
-        this.addTriangle(numPointsAtStart + 1, numPointsAtStart + 2, numPointsAtStart + 3)
-        this.writePointsAndTriangles()
-        this.endMesh()
-    }
-    
 }
 
 export class KfDrawingSurfaceForOBJ extends KfTextFileExportSurface {
@@ -1379,7 +1337,7 @@ export class KfDrawingSurfaceForOBJ extends KfTextFileExportSurface {
         writeln(this.outputFile)
         writeln(this.outputFile, "# plant \"" + this.currentPlantNameLong + "\"")
         writeln(this.outputFile, "o " + this.currentPlantNameShort)
-        if ((domain.registered) && (this.options.layeringOption === kLayerOutputAllTogether)) {
+        if (this.options.layeringOption === kLayerOutputAllTogether) {
             this.startGroup(this.currentPlantNameShort)
         }
     }
@@ -1502,24 +1460,7 @@ export class KfDrawingSurfaceForOBJ extends KfTextFileExportSurface {
         this.numPoints = 0
         this.numFaces = 0
     }
-    
-    writeRegistrationReminder(p1: KfPoint3D, p2: KfPoint3D, p3: KfPoint3D, p4: KfPoint3D): void {
-        this.startGroup(this.currentPlantNameShort + "_reminder")
-        this.startColor(support_rgb(100, 100, 100), "reminder_gray")
-        const numPointsAtStart = this.numPoints
-        this.startVerticesAndTriangles()
-        this.addPoint(p1)
-        this.addPoint(p2)
-        this.addPoint(p3)
-        this.addPoint(p4)
-        this.addTriangle(numPointsAtStart, numPointsAtStart + 1, numPointsAtStart + 3)
-        this.addTriangle(numPointsAtStart + 1, numPointsAtStart + 2, numPointsAtStart + 3)
-        this.endVerticesAndTriangles()
-        if (this.options.layeringOption === kLayerOutputAllTogether) {
-            this.startGroup(this.currentPlantNameShort)
-        }
-    }
-    
+
 }
 
 export class KfBinaryFileExportSurface extends KfFileExportSurface {
@@ -1762,21 +1703,7 @@ export class KfDrawingSurfaceFor3DS extends KfBinaryFileExportSurface {
         this.finishChunk(0xA020)
         this.finishChunk(0xAFFF)
     }
-    
-    writeRegistrationReminder(p1: KfPoint3D, p2: KfPoint3D, p3: KfPoint3D, p4: KfPoint3D): void {  
-        this.currentGroupingString = this.currentPlantNameShort + "_rem"
-        this.currentMaterialName = this.currentPlantNameShort + "_rem"
-        const numPointsAtStart = this.numPoints
-        this.startVerticesAndTriangles()
-        this.addPoint(p1)
-        this.addPoint(p2)
-        this.addPoint(p3)
-        this.addPoint(p4)
-        this.addTriangle(numPointsAtStart, numPointsAtStart + 1, numPointsAtStart + 3)
-        this.addTriangle(numPointsAtStart + 1, numPointsAtStart + 2, numPointsAtStart + 3)
-        this.endVerticesAndTriangles()
-    }
-    
+
 }
 
 export class KfDrawingSurfaceForLWO extends KfBinaryFileExportSurface {
@@ -1971,18 +1898,7 @@ export class KfDrawingSurfaceForLWO extends KfBinaryFileExportSurface {
         this.writeByte(aString[2].charCodeAt(0))
         this.writeByte(aString[3].charCodeAt(0))
     }
-    
-    writeRegistrationReminder(p1: KfPoint3D, p2: KfPoint3D, p3: KfPoint3D, p4: KfPoint3D): void {   
-        this.currentSurfaceID = this.lookUpSurfaceIDForName(this.currentPlantNameShort + "_rem", support_rgb(100, 100, 100))
-        const numPointsAtStart = this.numPoints
-        this.addPoint(p1)
-        this.addPoint(p2)
-        this.addPoint(p3)
-        this.addPoint(p4)
-        this.addTriangle(numPointsAtStart, numPointsAtStart + 1, numPointsAtStart + 3)
-        this.addTriangle(numPointsAtStart + 1, numPointsAtStart + 2, numPointsAtStart + 3)
-    }
-    
+
 }
 
 // VRML 1.0 spec

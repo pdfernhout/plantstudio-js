@@ -64,7 +64,6 @@ uses
   unozzle in 'unozzle.pas' {NozzleOptionsForm},
   uanimate in 'uanimate.pas' {AnimationFilesOptionsForm},
   uabout in 'uabout.pas' {AboutForm},
-  uregister in 'uregister.pas' {RegistrationForm},
   ucustdrw in 'ucustdrw.pas' {CustomDrawOptionsForm},
   URegisterSupport in 'Register\PlantStudio Register\URegisterSupport.pas',
   umakepm in 'umakepm.pas',
@@ -111,7 +110,6 @@ var
   Application.CreateForm(TWaitForm, WaitForm);
   Application.CreateForm(TTimeSeriesForm, TimeSeriesForm);
   Application.CreateForm(TAboutForm, AboutForm);
-  Application.CreateForm(TRegistrationForm, RegistrationForm);
   SplashForm.hide;
     MainForm.loadPlantFileAtStartup;
     MainForm.showWelcomeForm;

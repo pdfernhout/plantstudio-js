@@ -32,10 +32,6 @@ export class TSplashForm {
     }
     
     showLoadingString(aString: string): void {
-        if ((len(aString) > 1) && (aString[len(aString)] === ",")) {
-            // remove possible comma at end from registration program
-            aString = UNRESOLVED.copy(aString, 1, len(aString) - 1)
-        }
         this.loadingLabel.Caption = aString
         this.Update()
     }

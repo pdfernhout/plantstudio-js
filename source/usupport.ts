@@ -1406,9 +1406,6 @@ export function cleanUpAfterFileSave(fileInfo: SaveFileNamesStructure): void {
         DeleteFile(fileInfo.tempFile)
         return
     }
-    if ((!udomain.domain.registered) && (fileInfo.writingWasSuccessful) && (fileIsExportFile(fileInfo.fileType))) {
-        umain.MainForm.incrementUnregisteredExportCount()
-    }
 }
 
 */
