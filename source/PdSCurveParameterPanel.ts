@@ -543,10 +543,6 @@ export class PdSCurveParameterPanel extends PdParameterPanel {
     //     let thePoint: TPoint
     //     let failed: boolean
         
-    //     try {
-    //         if (delphi_compatability.Application.terminated) {
-    //             return
-    //         }
     //         PdParameterPanel.prototype.paint.call(this)
     //         if (this.param.collapsed) {
     //             return

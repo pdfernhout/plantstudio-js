@@ -109,10 +109,6 @@ export class PdTdoParameterPanel extends PdParameterPanel {
     
     // doMouseDown(Sender: TObject, Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
     //     let thePoint: TPoint
-        
-    //     if (delphi_compatability.Application.terminated) {
-    //         return
-    //     }
     //     // must always call this first because it sets the focus 
     //     PdParameterPanel.prototype.doMouseDown.call(this, Sender, Button, Shift, X, Y)
     //     if ((this.editEnabled)) {
@@ -136,10 +132,6 @@ export class PdTdoParameterPanel extends PdParameterPanel {
     
     // doMouseUp(Sender: TObject, Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
     //     let thePoint: TPoint
-        
-    //     if (delphi_compatability.Application.terminated) {
-    //         return
-    //     }
     //     PdParameterPanel.prototype.doMouseUp.call(this, Sender, Button, Shift, X, Y)
     //     if ((this.editEnabled)) {
     //         thePoint = Point(X, Y)
@@ -177,9 +169,6 @@ export class PdTdoParameterPanel extends PdParameterPanel {
     // }
     
     // doKeyDown(sender: TObject, key: byte, shift: TShiftState): void {
-    //     if (delphi_compatability.Application.terminated) {
-    //         return key
-    //     }
     //     PdParameterPanel.prototype.doKeyDown.call(this, sender, key, shift)
     //     if ((key === delphi_compatability.VK_RETURN) && (this.editEnabled)) {
     //         switch (this.selectedItemIndex) {
@@ -258,10 +247,6 @@ export class PdTdoParameterPanel extends PdParameterPanel {
     
     // paint(): void {
     //     let rect: TRect
-        
-    //     if (delphi_compatability.Application.terminated) {
-    //         return
-    //     }
     //     PdParameterPanel.prototype.paint.call(this)
     //     if ((this.param.collapsed)) {
     //         this.drawExtraValueCaptionWithString(this.tdo.getName(), "")

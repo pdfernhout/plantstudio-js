@@ -117,10 +117,7 @@ export class PdHeaderParameterPanel extends  PdParameterPanel {
     
     // paint(): void {
     //     let fullRect: TRect
-        
-    //     if (delphi_compatability.Application.terminated) {
-    //         return
-    //     }
+
     //     // copied from TCustomPanel.paint and location of caption text changed 
     //     // can't call inherited paint because it wants to put the caption in the middle 
     //     this.fillWithBevels()

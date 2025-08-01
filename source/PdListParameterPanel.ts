@@ -227,10 +227,7 @@ export class PdListParameterPanel extends PdParameterPanel {
     //     let rect: TRect
     //     let circleRects: TRect[] /* kMaxNumChoices + 1 */
     //     let textRects: TRect[] /* kMaxNumChoices + 1 */
-        
-    //     if (delphi_compatability.Application.terminated) {
-    //         return
-    //     }
+
     //     PdParameterPanel.prototype.paint.call(this)
     //     if ((this.param.collapsed)) {
     //         this.drawExtraValueCaptionWithString(this.firstCheckedString(), "")

@@ -596,9 +596,6 @@ export class TMainForm {
     }
     
     // FormActivate(): void {
-    //     if (delphi_compatability.Application.terminated) {
-    //         return
-    //     }
     //     this.MenuEditPasteAsText.enabled = (UNRESOLVED.Clipboard.hasFormat(UNRESOLVED.CF_TEXT)) && (domain.plantFileLoaded)
     // }
     
@@ -1288,7 +1285,7 @@ export class TMainForm {
     }
     
     fillBitmapForExport(bitmapForExport: TBitmap, options: BitmapOptionsStructure): void {
-        if ((bitmapForExport === null) || (domain === null) || (delphi_compatability.Application.terminated)) {
+        if ((bitmapForExport === null) || (domain === null)) {
             return
         }
         // set up according to domain options
@@ -1695,7 +1692,7 @@ export class TMainForm {
     }
     
     fillBitmapForPainterNozzle(bitmapForExport: TBitmap): void {
-        if ((bitmapForExport === null) || (domain === null) || (delphi_compatability.Application.terminated)) {
+        if ((bitmapForExport === null) || (domain === null)) {
             return
         }
         const oldBackgroundColor = domain.options.backgroundColor
@@ -2499,9 +2496,6 @@ export class TMainForm {
     }
     
     updateForChangeToPlantList(): void {
-        if (delphi_compatability.Application.terminated) {
-            return
-        }
         if ((domain === null) || (domain.plantManager === null)) {
             return
         }
@@ -2835,15 +2829,9 @@ export class TMainForm {
         this.invalidDrawingRect = Rect(0, 0, this.drawingBitmap.Width, this.drawingBitmap.Height)
     }
     
-    paintDrawing(immediate: boolean): void {
-        let plantPartsToDraw: long
-        let showProgress: boolean
-        
-        if (delphi_compatability.Application.terminated) {
-            return
-        }
-        plantPartsToDraw = 0
-        showProgress = domain.options.showPlantDrawingProgress && (!domain.options.cachePlantBitmaps)
+    paintDrawing(immediate: boolean): void { 
+        let plantPartsToDraw = 0
+        const showProgress = domain.options.showPlantDrawingProgress && (!domain.options.cachePlantBitmaps)
         if ((this.invalidDrawingRect.Top !== 0) || (this.invalidDrawingRect.Left !== 0) || (this.invalidDrawingRect.Bottom !== 0) || (this.invalidDrawingRect.Right !== 0)) {
             try {
                 if (!this.mouseMoveActionInProgress) {
@@ -2883,9 +2871,6 @@ export class TMainForm {
     }
     
     copyDrawingBitmapToPaintBox(): void {
-        if (delphi_compatability.Application.terminated) {
-            return
-        }
         if ((domain === null) || (this.plants === null)) {
             return
         }
@@ -3147,9 +3132,6 @@ export class TMainForm {
     }
     
     selectPlantAtIndex(Shift: TShiftState, index: int): void {
-        if (delphi_compatability.Application.terminated) {
-            return
-        }
         if (this.plants.length <= 0) {
             return
         }
@@ -3383,9 +3365,6 @@ export class TMainForm {
     
     // ------------------------------------------------------------------------------------- *list of plants 
     plantListDrawGridDrawCell(Col: int, Row: int, Rect: TRect, State: TGridDrawState): void {
-        if (delphi_compatability.Application.terminated) {
-            return
-        }
         this.plantListDrawGrid.Canvas.Brush.Color = this.plantListDrawGrid.Color
         this.plantListDrawGrid.Canvas.FillRect(Rect)
         if ((this.plants.length <= 0) || (Row < 0) || (Row > this.plants.length - 1)) {
@@ -3476,9 +3455,6 @@ export class TMainForm {
     }
     
     plantListDrawGridEndDrag(Target: TObject, X: int, Y: int): void {
-        if (delphi_compatability.Application.terminated) {
-            return
-        }
         if ((Target !== null) && (Target instanceof delphi_compatability.TDrawGrid)) {
             if (this.focusedPlant() !== null) {
                 if (((Target).owner instanceof ubreedr.TBreederForm)) {
@@ -3584,9 +3560,6 @@ export class TMainForm {
     // mouse handling in drawing 
     // -------------------------------------------------------------------------- *mouse handling in drawing 
     PaintBoxMouseDown(Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
-        if (delphi_compatability.Application.terminated) {
-            return
-        }
         if (this.plants.length <= 0) {
             return
         }
@@ -3669,9 +3642,6 @@ export class TMainForm {
     }
     
     PaintBoxMouseMove(Shift: TShiftState, X: int, Y: int): void {
-        if (delphi_compatability.Application.terminated) {
-            return
-        }
         if (this.plants.length <= 0) {
             return
         }
@@ -3719,9 +3689,6 @@ export class TMainForm {
     }
     
     PaintBoxMouseUp(Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
-        if (delphi_compatability.Application.terminated) {
-            return
-        }
         if (this.plants.length <= 0) {
             return
         }
@@ -3763,9 +3730,6 @@ export class TMainForm {
     }
     
     PaintBoxEndDrag(Target: TObject, X: int, Y: int): void {
-        if (delphi_compatability.Application.terminated) {
-            return
-        }
         if ((Target !== null) && (Target instanceof delphi_compatability.TDrawGrid)) {
             const plantClickedOn = domain.plantManager.findPlantAtPoint(this.commandList.anchorPoint)
             if (plantClickedOn !== null) {
@@ -5025,9 +4989,6 @@ export class TMainForm {
     
     // ----------------------------------------------------------------------------- *parameters panel 
     sectionsComboBoxDrawItem(Control: TWinControl, index: int, Rect: TRect, State: TOwnerDrawState): void {
-        if (delphi_compatability.Application.terminated) {
-            return
-        }
         if ((this.sectionsComboBox.Items.Count <= 0) || (index < 0) || (index > this.sectionsComboBox.Items.Count - 1)) {
             return
         }
@@ -5060,9 +5021,6 @@ export class TMainForm {
     }
     
     sectionsComboBoxChange(): void {
-        if (delphi_compatability.Application.terminated) {
-            return
-        }
         this.updateParameterPanelsForSectionChange()
         this.updateSectionPopupMenuForSectionChange()
     }
@@ -5316,9 +5274,6 @@ export class TMainForm {
     }
     
     repositionParameterPanels(): void {
-        if (delphi_compatability.Application.terminated) {
-            return
-        }
         if (this.parametersScrollBox.ControlCount > 0) {
             let totalMaxWidth = 0
             let lastPos = 0
@@ -5465,9 +5420,6 @@ export class TMainForm {
     
     // stats panel
     updateStatisticsPanelForFirstSelectedPlant(): void {
-        if (delphi_compatability.Application.terminated) {
-            return
-        }
         if (this.statsPanel === null) {
             return
         }
@@ -5477,9 +5429,6 @@ export class TMainForm {
     
     // note panel
     updateNoteForFirstSelectedPlant(): void { 
-        if (delphi_compatability.Application.terminated) {
-            return
-        }
         if (this.notePanel === null) {
             return
         }
@@ -5962,9 +5911,6 @@ export class TMainForm {
         let splitterWidthOrHeight: short
         let windowLock: boolean
         
-        if (delphi_compatability.Application.terminated) {
-            return
-        }
         if (this.WindowState === delphi_compatability.TWindowState.wsMinimized) {
             return
         }
@@ -6330,7 +6276,7 @@ export class TMainForm {
         if (palette !== 0) {
             DC = this.GetDeviceContext(windowHandle)
             oldPalette = UNRESOLVED.selectPalette(DC, palette, !Foreground)
-            if ((UNRESOLVED.realizePalette(DC) !== 0) && (!delphi_compatability.Application.terminated) && (this.drawingPaintBox !== null)) {
+            if ((UNRESOLVED.realizePalette(DC) !== 0) && (this.drawingPaintBox !== null)) {
                 // if palette changed, repaint drawing 
                 ubmpsupport.setPixelFormatBasedOnScreenForBitmap(this.drawingBitmap)
                 this.drawingPaintBox.Invalidate()

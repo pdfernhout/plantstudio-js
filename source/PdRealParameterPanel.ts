@@ -444,10 +444,7 @@ export class PdRealParameterPanel extends PdParameterPanel {
     //     let valueString: string
     //     let maxString: string
     //     let unitString: string
-        
-    //     if (delphi_compatability.Application.terminated) {
-    //         return
-    //     }
+
     //     if ((this.selectedItemIndex === kItemSlider)) {
     //         // ask slider to update itself based on whether it is selected 
     //         this.slider.hasUnofficialFocus = true

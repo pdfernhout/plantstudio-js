@@ -432,10 +432,7 @@ export class PdColorParameterPanel extends PdParameterPanel {
     //     let gTextRect: TRect
     //     let bTextRect: TRect
     //     let collapsedColorRect: TRect
-        
-    //     if (delphi_compatability.Application.terminated) {
-    //         return
-    //     }
+
     //     // ask sliders to update themselves based on whether they are selected 
     //     this.redSlider.hasUnofficialFocus = (this.selectedItemIndex === kItemRedSlider)
     //     this.greenSlider.hasUnofficialFocus = (this.selectedItemIndex === kItemGreenSlider)
