@@ -99,8 +99,8 @@ export enum FromPlant {
 const kPlantAsTextStartString = "start PlantStudio plant"
 export const kPlantAsTextEndString = "end PlantStudio plant"
 
-const kStartNoteString = "=== start note"
-const kEndNoteString = "=== end note"
+export const kStartNoteString = "=== start note"
+export const kEndNoteString = "=== end note"
 
 const kInMainWindow = true
 const kNotInMainWindow = false

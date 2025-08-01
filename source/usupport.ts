@@ -1465,6 +1465,10 @@ export function chr(charCode: number): string {
     return String.fromCharCode(charCode)
 }
 
+export function len(aString: string): number {
+    return aString.length
+}
+
 export function removeItem<T>(arr: Array<T>, value: T): Array<T> {
   const index = arr.indexOf(value);
   if (index > -1) {

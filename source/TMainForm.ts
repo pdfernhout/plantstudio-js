@@ -1,18 +1,23 @@
 // unit Umain
 
-import { ColorDefs, double, ExtractFileName, float, int, intround, IntToStr, long, mbYesNoCancel, MessageDialog, mtConfirmation, short, ShowMessage, TColorRef } from "./common"
+import { ColorDefs, double, ExtractFileName, float, int, intround, IntToStr, long, mbYesNoCancel, MessageDialog, mtConfirmation, short, ShowMessage, StrToFloat, StrToIntDef, TColorRef } from "./common"
 import { PdCommand } from "./PdCommand"
 import { PdCommandList } from "./PdCommandList"
-import { domain, DrawMode, kAnimateByAge, kAnimateByXRotation, kIncludeAllPlants, kIncludeDrawingAreaContents, kIncludeSelectedPlants, kIncludeVisiblePlants, kMainWindowOrientationHorizontal, kMainWindowOrientationVertical, kUnsavedFileName } from "./PdDomain"
-import { kDontConsiderDomainScale, PdPlant } from "./PdPlant"
+import { domain, DrawMode, kAnimateByAge, kAnimateByXRotation, kIncludeAllPlants, kIncludeDrawingAreaContents, kIncludeSelectedPlants, kIncludeVisiblePlants, kMainWindowOrientationHorizontal, kMainWindowOrientationVertical, kUnsavedFileName, ViewPlants } from "./PdDomain"
+import { FieldType } from "./PdParameter"
+import { PdParameterPanel } from "./PdParameterPanel"
+import { kDontConsiderDomainScale, kDontDrawNow, kEndNoteString, kPlantAsTextEndString, kStartNoteString, PdPlant, PdPlantUpdateEvent } from "./PdPlant"
+import { PdPlantDrawingAmendment } from "./PdPlantDrawingAmendment"
 import { checkVersionNumberInPlantNameLine } from "./PdPlantManager"
+import { PdSection } from "./PdSection"
+import { calcSCurveCoeffsWithResult, SCurveStructure, scurveWithResult } from "./SCurveStructure"
 import { ucursor } from "./temporary"
 import { TPoint } from "./TPoint"
 import { TRect } from "./TRect"
 import { ExportFormats } from "./U3dexport"
-import { max, safedivExcept } from "./umath"
-import { kBringForward, kDontCopyToClipboard, kHide, kSendBackward, kShow, PdAlignPlantsCommand, PdAnimatePlantCommand, PdBooleanValue, PdBreedFromParentsCommand, PdCenterDrawingCommand, PdChangeDomain3DOptionsCommand, PdChangeDomainOptionsCommand, PdChangeMagnificationCommand, PdChangeMainWindowOrientationCommand, PdChangeMainWindowViewingOptionCommand, PdChangePlantAgeCommand, PdChangeSelectedPlantsCommand, PdCreateAmendmentCommand, PdDeleteAmendmentCommand, PdDragCommand, PdDuplicateCommand, PdEditAmendmentCommand, PdEditNoteCommand, PdHideOrShowCommand, PdMakeTimeSeriesCommand, PdNewCommand, PdPackPlantsCommand, PdPasteCommand, PdRandomizeCommand, PdRemoveCommand, PdRenameCommand, PdResetRotationsCommand, PdResizePlantsCommand, PdResizePlantsToSameWidthOrHeightCommand, PdRotateCommand, PdScrollCommand, PdSelectOrDeselectAllCommand, PdSelectPosingPartCommand, PdSendBackwardOrForwardCommand } from "./updcom"
-import { chr, cleanUpAfterFileSave, createSaveFileNamesStructure, FileType, getFileSaveInfo, IDCANCEL, IDNO, IDYES, kAskForFileName, kDontAskForFileName, mrCancel, mrOK, Point, pos, Rect, removeItem, rHeight, rWidth, SaveFileNamesStructure, setSinglePoint, startFileSave, stringBeyond, stringUpTo, trim, uppercase } from "./usupport"
+import { intMax, intMin, max, safedivExcept } from "./umath"
+import { kBringForward, kDontCopyToClipboard, kDown, kHide, kLeft, kRight, kSendBackward, kShow, kUp, PdAlignPlantsCommand, PdAnimatePlantCommand, PdBooleanValue, PdBreedFromParentsCommand, PdCenterDrawingCommand, PdChangeDomain3DOptionsCommand, PdChangeDomainOptionsCommand, PdChangeMagnificationCommand, PdChangeMainWindowOrientationCommand, PdChangeMainWindowViewingOptionCommand, PdChangePlantAgeCommand, PdChangeSelectedPlantsCommand, PdCreateAmendmentCommand, PdDeleteAmendmentCommand, PdDragCommand, PdDuplicateCommand, PdEditAmendmentCommand, PdEditNoteCommand, PdHideOrShowCommand, PdMakeTimeSeriesCommand, PdNewCommand, PdPackPlantsCommand, PdPasteCommand, PdRandomizeCommand, PdRemoveCommand, PdRenameCommand, PdResetRotationsCommand, PdResizePlantsCommand, PdResizePlantsToSameWidthOrHeightCommand, PdRotateCommand, PdScrollCommand, PdSelectOrDeselectAllCommand, PdSelectPosingPartCommand, PdSendBackwardOrForwardCommand } from "./updcom"
+import { chr, cleanUpAfterFileSave, createSaveFileNamesStructure, FileType, getFileSaveInfo, IDCANCEL, IDNO, IDYES, kAskForFileName, kDontAskForFileName, len, lowercase, mrCancel, mrOK, Point, pos, Rect, removeItem, rHeight, rWidth, SaveFileNamesStructure, setSinglePoint, startFileSave, stringBeyond, stringUpTo, trim, uppercase } from "./usupport"
 
 // from conversion_common import *
 // import ubmpsupport
@@ -481,7 +486,7 @@ export class TMainForm {
     commandList: PdCommandList = new PdCommandList()
     // drawingPaintBox: PdPaintBoxWithPalette = new PdPaintBoxWithPalette()
     // statsPanel: PdStatsPanel = new PdStatsPanel()
-    // invalidDrawingRect: TRect = new TRect()
+    invalidDrawingRect: TRect = new TRect()
     internalChange: boolean = false
     inFormCreation: boolean = false
     inFileOpen: boolean = false
@@ -490,7 +495,7 @@ export class TMainForm {
     plants: PdPlant[] = []
     selectedPlants: PdPlant[] = []
     // numPlantsInClipboard: short = 0
-    // lastSingleClickPlantIndex: int = 0
+    lastSingleClickPlantIndex: int = 0
     // justDoubleClickedOnDrawGrid: boolean = false
     // rubberBanding: boolean = false
     // rubberBandNeedToRedraw: boolean = false
@@ -499,7 +504,7 @@ export class TMainForm {
     drawing: boolean = false
     // animateCommand: PdCommand = new PdCommand()
     // drawProgressMax: long = 0
-    // cursorModeForDrawing: short = 0
+    cursorModeForDrawing: short = 0
     // actionInProgress: boolean = false
     // mouseMoveActionInProgress: boolean = false
     // lifeCycleDragging: boolean = false
@@ -560,7 +565,7 @@ export class TMainForm {
     //         delphi_compatability.Application.ShowHint = true
     //         // creation of dependent objects and setting them up 
     //         this.selectedPlants = []
-    //         this.commandList = ucommand.PdCommandList().create()
+    //         this.commandList =  new PdCommandList()
     //         this.commandList.setNewUndoLimit(domain.options.undoLimit)
     //         this.commandList.setNewObjectUndoLimit(domain.options.undoLimitOfPlants)
     //         this.drawingPaintBox = ubitmap.PdPaintBoxWithPalette().Create(this)
@@ -716,7 +721,7 @@ export class TMainForm {
     }
     
     // WMDropFiles(Msg: TWMDropFiles): void {
-    //     let CFileName: char[] /* MAX_PATH + 1 */
+    //     let CFileName: char[] = Array(MAX_PATH + 1)
         
     //     try {
     //         if (UNRESOLVED.DragQueryFile(Msg.Drop, 0, CFileName, UNRESOLVED.MAX_PATH) > 0) {
@@ -735,12 +740,10 @@ export class TMainForm {
     // }
     
     MenuFileOpenClick(): void {
-        let fileNameWithPath: string
-        
         if (!this.askForSaveAndProceed()) {
             return
         }
-        fileNameWithPath = getFileOpenInfo(FileType.kFileTypePlant, domain.plantFileName, "Choose a plant file")
+        const fileNameWithPath = getFileOpenInfo(FileType.kFileTypePlant, domain.plantFileName, "Choose a plant file")
         if (fileNameWithPath === "") {
             return
         }
@@ -789,15 +792,12 @@ export class TMainForm {
     
     // returns false if user canceled leaving
     askForSaveAndProceed(): boolean {
-        let result = false
-        let messageBoxResult: int
-        
-        result = true
+        let result = true
         if (!plantFileChanged) {
             return result
         }
         //cfk fix - put help context in - for all messageDlgs 
-        messageBoxResult = MessageDialog("Save changes to " + ExtractFileName(domain.plantFileName) + "?", mtConfirmation, mbYesNoCancel, 0)
+        const messageBoxResult = MessageDialog("Save changes to " + ExtractFileName(domain.plantFileName) + "?", mtConfirmation, mbYesNoCancel, 0)
         switch (messageBoxResult) {
             case IDCANCEL:
                 result = false
@@ -818,7 +818,7 @@ export class TMainForm {
     }
     
     MenuFileSaveClick(): void {
-        let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
+        const fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
         
         if (pos(uppercase(kUnsavedFileName), uppercase(ExtractFileName(domain.plantFileName))) > 0) {
             this.MenuFileSaveAsClick()
@@ -856,7 +856,7 @@ export class TMainForm {
     }
     
     MenuFileSaveAsClick(): void {
-        let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
+        const fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
         
         this.lastSaveProceeded = getFileSaveInfo(FileType.kFileTypePlant, kAskForFileName, domain.plantFileName, fileInfo)
         if (!this.lastSaveProceeded) {
@@ -881,10 +881,9 @@ export class TMainForm {
     
     MenuFilePlantMoverClick(): void {
         let mover: TMoverForm
-        let response: int
         
         if (plantFileChanged) {
-            response = MessageDialog("Do you want to save your changes to " + ExtractFileName(domain.plantFileName) + chr(13) + "before you use the plant mover?", mtConfirmation, mbYesNoCancel, 0)
+            const response = MessageDialog("Do you want to save your changes to " + ExtractFileName(domain.plantFileName) + chr(13) + "before you use the plant mover?", mtConfirmation, mbYesNoCancel, 0)
             switch (response) {
                 case IDCANCEL:
                     return
@@ -909,13 +908,13 @@ export class TMainForm {
                 domain.plantFileName = mover.untitledDomainFileSavedAs
             }
             // cfk fix put help context in 
-            response = MessageDialog("The current plant file has changed." + chr(13) + "Do you want to reload the changed file?", mtConfirmation, {mbYes, mbNo, }, 0)
+            const response = MessageDialog("The current plant file has changed." + chr(13) + "Do you want to reload the changed file?", mtConfirmation, {mbYes, mbNo, }, 0)
             if (response === IDYES) {
                 try {
                     startWaitMessage("Opening " + ExtractFileName(domain.plantFileName))
                     this.updateForNoPlantFile()
                     domain.load(domain.plantFileName)
-                } catch (Exception E) {
+                } catch (E: any) {
                     stopWaitMessage()
                     ShowMessage(E.message)
                     ShowMessage("Could not load file " + domain.plantFileName + ".")
@@ -968,14 +967,6 @@ export class TMainForm {
     
     // returns false if user cancels quit
     cleanUpBeforeExit(): boolean {
-        let result = false
-        let response: int
-        let okayToQuit: boolean
-        let randomNumber: double
-        let lowerLimit: double
-        let upperLimit: double
-        
-        result = true
         domain.mainWindowRect = Rect(this.Left, this.Top, this.Width, this.Height)
         domain.horizontalSplitterPos = this.horizontalSplitter.Top
         domain.verticalSplitterPos = this.verticalSplitter.Left
@@ -983,10 +974,9 @@ export class TMainForm {
         domain.timeSeriesWindowRect = Rect(utimeser.TimeSeriesForm.Left, utimeser.TimeSeriesForm.Top, utimeser.TimeSeriesForm.Width, utimeser.TimeSeriesForm.Height)
         domain.debugWindowRect = Rect(udebug.DebugForm.Left, udebug.DebugForm.Top, udebug.DebugForm.Width, udebug.DebugForm.Height)
         if (domain.useIniFile) {
-            okayToQuit = this.storeIniFile()
+            const okayToQuit = this.storeIniFile()
             if (!okayToQuit) {
-                result = false
-                return result
+                return false
             }
         }
 
@@ -996,19 +986,13 @@ export class TMainForm {
         this.sectionsComboBox.ItemIndex = -1
         this.updateParameterPanelsForSectionChange()
         delphi_compatability.Application.HelpCommand(UNRESOLVED.HELP_QUIT, 0)
-        return result
+        return true
     }
     
     storeIniFile(): boolean {
-        let result = false
-        let fileSavedOK: boolean
-        let choseAnotherFileName: boolean
-        let buttonPressed: byte
-        let saveDialog: TSaveDialog
-        
-        result = true
-        fileSavedOK = false
-        choseAnotherFileName = false
+        let result = true
+        let fileSavedOK = false
+        let choseAnotherFileName = false
         while (!fileSavedOK) {
             try {
                 storeProfileInformation()
@@ -1017,10 +1001,10 @@ export class TMainForm {
                 fileSavedOK = false
             }
             if (!fileSavedOK) {
-                buttonPressed = MessageDialog("Could not save settings to " + chr(13) + chr(13) + "  " + domain.iniFileName + chr(13) + chr(13) + "Would you like to save them to another file?", delphi_compatability.TMsgDlgType.mtError, mbYesNoCancel, 0)
+                const buttonPressed = MessageDialog("Could not save settings to " + chr(13) + chr(13) + "  " + domain.iniFileName + chr(13) + chr(13) + "Would you like to save them to another file?", delphi_compatability.TMsgDlgType.mtError, mbYesNoCancel, 0)
                 switch (buttonPressed) {
                     case IDYES:
-                        saveDialog = delphi_compatability.TSaveDialog().Create(delphi_compatability.Application)
+                        const saveDialog: TSaveDialog = delphi_compatability.TSaveDialog().Create(delphi_compatability.Application)
                         saveDialog.FileName = domain.iniFileName
                         saveDialog.Filter = "Ini files (*.ini)|*.ini|All files (*.*)|*.*"
                         saveDialog.DefaultExt = "ini"
@@ -1058,27 +1042,22 @@ export class TMainForm {
     }
     
     UndoMenuEditUndoRedoListClick(): void {
-        let undoRedoListForm: TUndoRedoListForm
-        let response: int
-        let newCommand: PdCommand
-        let i: int
-        
-        undoRedoListForm = uundo.TUndoRedoListForm().create(this)
+        const undoRedoListForm: TUndoRedoListForm = uundo.TUndoRedoListForm().create(this)
         if (undoRedoListForm === null) {
             throw new Error("Problem: Could not create undo/redo list window.")
         }
         undoRedoListForm.initializeWithCommandList(this.commandList)
-        response = undoRedoListForm.ShowModal()
+        const response = undoRedoListForm.ShowModal()
         if (response === mrOK) {
             try {
                 this.enableOrDisableAllForms(kDisableAllForms)
                 startWaitMessage("Multiple undo/redo in progress; please wait...")
                 if (undoRedoListForm.undoToIndex() >= 0) {
-                    for (i = 0; i <= undoRedoListForm.undoToIndex(); i++) {
+                    for (let i = 0; i <= undoRedoListForm.undoToIndex(); i++) {
                         this.commandList.undoLast()
                     }
                 } else if (undoRedoListForm.redoToIndex() >= 0) {
-                    for (i = 0; i <= undoRedoListForm.redoToIndex(); i++) {
+                    for (let i = 0; i <= undoRedoListForm.redoToIndex(); i++) {
                         this.commandList.redoLast()
                     }
                 }
@@ -1096,12 +1075,10 @@ export class TMainForm {
     }
     
     MenuEditCutClick(): void {
-        let newCommand: PdCommand
-        
         if (this.selectedPlants.length <= 0) {
             return
         }
-        newCommand = new PdRemoveCommand(this.selectedPlants, kCopyToClipboard)
+        const newCommand = new PdRemoveCommand(this.selectedPlants, kCopyToClipboard)
         //command calls copy, which enables paste menu item
         this.doCommand(newCommand)
     }
@@ -1111,14 +1088,11 @@ export class TMainForm {
     }
     
     MenuEditCopyAsTextClick(): void {
-        let i: int
-        let plant: PdPlant
-        
         if (this.selectedPlants.length > 0) {
             UNRESOLVED.Clipboard.clear
             this.plantsAsTextMemo.Clear()
-            for (i = 0; i <= this.selectedPlants.length - 1; i++) {
-                plant = this.selectedPlants[i]
+            for (let i = 0; i <= this.selectedPlants.length - 1; i++) {
+                const plant = this.selectedPlants[i]
                 if (plant === null) {
                     continue
                 }
@@ -1131,15 +1105,7 @@ export class TMainForm {
     
     MenuEditPasteAsTextClick(): void {
         let fakeTextFile: TextFile
-        let plant: PdPlant
-        let newPlants: PdPlant[] = []
-        let newCommand: PdCommand
-        let aLine: string
-        let secondLine: string
-        let plantName: string
-        let i: short
-        let startLine: short
-        let endLine: short
+        const newPlants: PdPlant[] = []
         
         if (!UNRESOLVED.Clipboard.hasFormat(UNRESOLVED.CF_TEXT)) {
             MessageDialog("The clipboard has no text in it.", delphi_compatability.TMsgDlgType.mtError, {mbOK, }, 0)
@@ -1151,16 +1117,16 @@ export class TMainForm {
             MessageDialog("The clipboard has no text in it.", delphi_compatability.TMsgDlgType.mtError, {mbOK, }, 0)
             return
         }
-        startLine = -1
-        endLine = -1
-        for (i = 0; i <= this.plantsAsTextMemo.Lines.Count - 1; i++) {
+        let startLine = -1
+        let endLine = -1
+        for (let i = 0; i <= this.plantsAsTextMemo.Lines.Count - 1; i++) {
             if (pos(uplant.kPlantAsTextStartString, this.plantsAsTextMemo.Lines.Strings[i]) > 0) {
                 startLine = i
                 break
             }
         }
         for (i = this.plantsAsTextMemo.Lines.Count - 1; i >= 0; i--) {
-            if (pos(uplant.kPlantAsTextEndString, this.plantsAsTextMemo.Lines.Strings[i]) > 0) {
+            if (pos(kPlantAsTextEndString, this.plantsAsTextMemo.Lines.Strings[i]) > 0) {
                 endLine = i
                 break
             }
@@ -1176,9 +1142,9 @@ export class TMainForm {
             return
         }
         // since startLine and endLine are comments, we can read them
-        i = startLine
+        let i = startLine
         while (i <= endLine) {
-            aLine = this.plantsAsTextMemo.Lines.Strings[i]
+            const aLine: string = this.plantsAsTextMemo.Lines.Strings[i]
             i += 1
             if (trim(aLine) === "") {
                 // v1.60final ignore blank lines
@@ -1189,17 +1155,17 @@ export class TMainForm {
             }
             if (pos("[", aLine) === 1) {
                 checkVersionNumberInPlantNameLine(aLine)
-                plant = new PdPlant()
-                plantName = stringBeyond(aLine, "[")
+                const plant = new PdPlant()
+                let plantName = stringBeyond(aLine, "[")
                 plantName = stringUpTo(plantName, "]")
                 plant.setName(plantName + " from text")
                 domain.parameterManager.setAllReadFlagsToFalse()
                 plant.readingFromMemo = true
                 try {
-                    while ((pos(uplant.kPlantAsTextEndString, aLine) <= 0) && (i <= endLine)) {
+                    while ((pos(kPlantAsTextEndString, aLine) <= 0) && (i <= endLine)) {
                         // v1.60final fixed cutting off plant at blank line (was changed in file read in v1.3)
                         // aLine <> '' do
-                        aLine = this.plantsAsTextMemo.Lines.Strings[i]
+                        let aLine = this.plantsAsTextMemo.Lines.Strings[i]
                         i += 1
                         if (pos(";", aLine) === 1) {
                             continue
@@ -1207,13 +1173,13 @@ export class TMainForm {
                         if (trim(aLine) === "") {
                             continue
                         }
-                        if (pos(uppercase(uplant.kStartNoteString), uppercase(aLine)) > 0) {
+                        if (pos(uppercase(kStartNoteString), uppercase(aLine)) > 0) {
                             // added v1.6b1 to accommodate paste from text with note
                             plant.noteLines.Clear()
                             while (i <= this.plantsAsTextMemo.Lines.Count - 1) {
                                 aLine = this.plantsAsTextMemo.Lines.Strings[i]
                                 i += 1
-                                if ((pos(uppercase(uplant.kEndNoteString), uppercase(aLine)) > 0) && (plant.noteLines.Count < 5000)) {
+                                if ((pos(uppercase(kEndNoteString), uppercase(aLine)) > 0) && (plant.noteLines.Count < 5000)) {
                                     break
                                 } else if (pos(";", aLine) === 1) {
                                     continue
@@ -1241,16 +1207,15 @@ export class TMainForm {
                 newPlants.push(plant)
             }
         }
-        newCommand = new PdPasteCommand(newPlants, this.selectedPlants)
+        const newCommand = new PdPasteCommand(newPlants, this.selectedPlants)
         this.doCommand(newCommand)
     }
     
     // export 
     getBitmapCopySavePrintOptions(copySavePrintType: short): int {
-        let result = 0
         let bitmapOptionsForm: TBitmapOptionsForm
         
-        result = mrCancel
+        let result = mrCancel
         bitmapOptionsForm = ubmpopt.TBitmapOptionsForm().create(this)
         if (bitmapOptionsForm === null) {
             throw new Error("Problem: Could not create copy/save/print options window.")
@@ -1277,7 +1242,6 @@ export class TMainForm {
     MenuFileSaveDrawingAsClick(): void {
         let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
         let bitmapForExport: TBitmap
-        let suggestedFileName: string
         
         if ((domain === null) || (domain.plantManager === null) || (this.plants.length <= 0)) {
             return
@@ -1286,7 +1250,7 @@ export class TMainForm {
             return
         }
         pictureFileSaveAttemptsThisSession += 1
-        suggestedFileName = "picture" + IntToStr(pictureFileSaveAttemptsThisSession) + ".bmp"
+        const suggestedFileName = "picture" + IntToStr(pictureFileSaveAttemptsThisSession) + ".bmp"
         if (!getFileSaveInfo(FileType.kFileTypeBitmap, kAskForFileName, suggestedFileName, fileInfo)) {
             return
         }
@@ -1311,7 +1275,6 @@ export class TMainForm {
         let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
         let bitmapForExport: TBitmap
         let jpegForExport: TJPEGImage
-        let suggestedFileName: string
         
         if ((domain === null) || (domain.plantManager === null) || (this.plants.length <= 0)) {
             return
@@ -1320,7 +1283,7 @@ export class TMainForm {
             return
         }
         pictureFileSaveAttemptsThisSession += 1
-        suggestedFileName = "picture" + IntToStr(pictureFileSaveAttemptsThisSession) + ".jpg"
+        const suggestedFileName = "picture" + IntToStr(pictureFileSaveAttemptsThisSession) + ".jpg"
         if (!getFileSaveInfo(FileType.kFileTypeJPEG, kAskForFileName, suggestedFileName, fileInfo)) {
             return
         }
@@ -1348,12 +1311,8 @@ export class TMainForm {
     }
     
     MenuFilePrintDrawingClick(): void {
-        let printRect_pixels: TRect
+        const printRect_pixels: TRect = new TRect()
         let bitmapForExport: TBitmap
-        let xResolution_pixelsPerInch: float
-        let yResolution_pixelsPerInch: float
-        let printOffsetX_px: int
-        let printOffsetY_px: int
         
         if ((domain === null) || (domain.plantManager === null) || (this.plants.length <= 0)) {
             return
@@ -1365,10 +1324,10 @@ export class TMainForm {
         this.fillBitmapForExport(bitmapForExport, domain.bitmapOptions)
         UNRESOLVED.Printer.Title = "PlantStudio Picture"
         UNRESOLVED.Printer.beginDoc
-        xResolution_pixelsPerInch = UNRESOLVED.GetDeviceCaps(UNRESOLVED.Printer.Handle, delphi_compatability.LOGPIXELSX)
-        yResolution_pixelsPerInch = UNRESOLVED.GetDeviceCaps(UNRESOLVED.Printer.Handle, delphi_compatability.LOGPIXELSY)
-        printOffsetX_px = UNRESOLVED.GetDeviceCaps(UNRESOLVED.Printer.Handle, UNRESOLVED.PhysicalOffsetX)
-        printOffsetY_px = UNRESOLVED.GetDeviceCaps(UNRESOLVED.Printer.Handle, UNRESOLVED.PhysicalOffsetY)
+        const xResolution_pixelsPerInch: float = UNRESOLVED.GetDeviceCaps(UNRESOLVED.Printer.Handle, delphi_compatability.LOGPIXELSX)
+        const yResolution_pixelsPerInch: float = UNRESOLVED.GetDeviceCaps(UNRESOLVED.Printer.Handle, delphi_compatability.LOGPIXELSY)
+        const printOffsetX_px: int = UNRESOLVED.GetDeviceCaps(UNRESOLVED.Printer.Handle, UNRESOLVED.PhysicalOffsetX)
+        const printOffsetY_px: int = UNRESOLVED.GetDeviceCaps(UNRESOLVED.Printer.Handle, UNRESOLVED.PhysicalOffsetY)
         printRect_pixels.Left = intround(domain.bitmapOptions.printLeftMargin_in * xResolution_pixelsPerInch) - printOffsetX_px
         printRect_pixels.Top = intround(domain.bitmapOptions.printTopMargin_in * yResolution_pixelsPerInch) - printOffsetY_px
         printRect_pixels.Right = printRect_pixels.Left + intround(domain.bitmapOptions.printWidth_in * xResolution_pixelsPerInch)
@@ -1402,24 +1361,15 @@ export class TMainForm {
     }
     
     fillBitmapForExport(bitmapForExport: TBitmap, options: BitmapOptionsStructure): void {
-        let combinedBoundsRect: TRect
-        let rectToDrawIn: TRect
-        let unregRect: TRect
-        let xMultiplier: float
-        let yMultiplier: float
-        let scaleMultiplier: float
-        let plantPartsToDraw: long
-        let plantsToDraw: PdPlant[] = []
-        let excludeInvisiblePlants: boolean
-        let excludeNonSelectedPlants: boolean
-        
         if ((bitmapForExport === null) || (domain === null) || (delphi_compatability.Application.terminated)) {
             return
         }
         // set up according to domain options
         bitmapForExport.PixelFormat = options.colorType
-        excludeInvisiblePlants = true
-        excludeNonSelectedPlants = false
+        let combinedBoundsRect: TRect = new TRect()
+        let plantsToDraw: PdPlant[] = []
+        let excludeInvisiblePlants = true
+        let excludeNonSelectedPlants = false
         switch (options.exportType) {
             case kIncludeSelectedPlants:
                 plantsToDraw = this.selectedPlants
@@ -1446,14 +1396,14 @@ export class TMainForm {
                 combinedBoundsRect = Rect(0, 0, this.drawingBitmap.Width, this.drawingBitmap.Height)
                 break
         }
-        rectToDrawIn = Rect(0, 0, options.width_pixels, options.height_pixels)
+        const rectToDrawIn = Rect(0, 0, options.width_pixels, options.height_pixels)
         if ((plantsToDraw === null) || (plantsToDraw.length <= 0)) {
             return
         }
         bitmapForExport.Palette = UNRESOLVED.CopyPalette(this.paletteImage.Picture.Bitmap.Palette)
-        xMultiplier = safedivExcept(1.0 * rWidth(rectToDrawIn), 1.0 * rWidth(combinedBoundsRect), 1.0)
-        yMultiplier = safedivExcept(1.0 * rHeight(rectToDrawIn), 1.0 * rHeight(combinedBoundsRect), 1.0)
-        scaleMultiplier = umath.min(xMultiplier, yMultiplier)
+        const xMultiplier = safedivExcept(1.0 * rWidth(rectToDrawIn), 1.0 * rWidth(combinedBoundsRect), 1.0)
+        const yMultiplier = safedivExcept(1.0 * rHeight(rectToDrawIn), 1.0 * rHeight(combinedBoundsRect), 1.0)
+        const scaleMultiplier = Math.min(xMultiplier, yMultiplier)
         try {
             ucursor.cursor_startWait()
             ubmpsupport.resizeBitmap(bitmapForExport, Point(intround(rWidth(combinedBoundsRect) * scaleMultiplier), intround(rHeight(combinedBoundsRect) * scaleMultiplier)))
@@ -1466,7 +1416,7 @@ export class TMainForm {
                 domain.plantDrawOffsetWhenDrawingCopy_mm.y = domain.plantDrawOffsetWhenDrawingCopy_mm.y - safedivExcept(1.0 * combinedBoundsRect.Top, domain.plantDrawScale_PixelsPerMm(), 0)
             }
             ubmpsupport.fillBitmap(bitmapForExport, domain.options.backgroundColor)
-            plantPartsToDraw = 0
+            let plantPartsToDraw = 0
             if (domain.options.showPlantDrawingProgress) {
                 plantPartsToDraw = domain.plantManager.totalPlantPartCountInInvalidRect(plantsToDraw, combinedBoundsRect, excludeInvisiblePlants, excludeNonSelectedPlants)
             }
@@ -1497,67 +1447,53 @@ export class TMainForm {
     }
     
     pastePlantsFromClipboard(): void {
-        let newPlants: PdPlant[] = []
-        let newCommand: PdCommand
-        
         if (domain.plantManager.privatePlantClipboard.Count <= 0) {
             return
         }
+        const newPlants: PdPlant[] = []
         domain.plantManager.pastePlantsFromPrivatePlantClipboardToList(newPlants)
-        newCommand = new PdPasteCommand(newPlants, this.selectedPlants)
+        const newCommand = new PdPasteCommand(newPlants, this.selectedPlants)
         this.doCommand(newCommand)
     }
-    
+
     standardPastePosition(): TPoint {
-        let result = new TPoint()
-        result = Point(this.drawingPaintBox.Width / 2, 3 * this.drawingPaintBox.Height / 4)
+        const result = Point(this.drawingPaintBox.Width / 2, 3 * this.drawingPaintBox.Height / 4)
         return result
     }
     
     MenuEditDeleteClick(): void {
-        let newCommand: PdCommand
-        
         if (this.selectedPlants.length <= 0) {
             return
         }
-        newCommand = new PdRemoveCommand(this.selectedPlants, kDontCopyToClipboard)
+        const newCommand = new PdRemoveCommand(this.selectedPlants, kDontCopyToClipboard)
         this.doCommand(newCommand)
     }
     
     MenuEditDuplicateClick(): void {
-        let newCommand: PdCommand
-        
         if (this.selectedPlants.length <= 0) {
             return
         }
-        newCommand = new PdDuplicateCommand(this.selectedPlants)
+        const newCommand = new PdDuplicateCommand(this.selectedPlants)
         this.doCommand(newCommand)
     }
     
     MenuEditPreferencesClick(): void {
-        let optionsForm: TOptionsForm
-        let response: int
-        let newCommand: PdCommand
-        
-        optionsForm = uoptions.TOptionsForm().create(this)
+        const optionsForm: TOptionsForm = uoptions.TOptionsForm().create(this)
         if (optionsForm === null) {
             throw new Error("Problem: Could not create preferences window.")
         }
         optionsForm.options = domain.options
-        response = optionsForm.ShowModal()
+        const response = optionsForm.ShowModal()
         if ((response === mrOK) && (optionsForm.optionsChanged)) {
-            newCommand = new PdChangeDomainOptionsCommand(optionsForm.options)
+            const newCommand = new PdChangeDomainOptionsCommand(optionsForm.options)
             this.doCommand(newCommand)
         }
     }
     
     // ---------------------------------------------------------------------------- *plant menu 
     MenuPlantNewClick(): void {
-        let newCommand: PdCommand
         let wizardForm: TWizardForm
-        let response: int
-        let newPlantFromWizard: PdPlant
-        
+
         try {
             ucursor.cursor_startWait()
             // on slower computer wizard takes a long time to come up
@@ -1570,21 +1506,20 @@ export class TMainForm {
         if (wizardForm === null) {
             throw new Error("Problem: Could not create wizard window.")
         }
-        response = wizardForm.ShowModal()
+        const response = wizardForm.ShowModal()
         if (response === mrOK) {
             if (wizardForm.plant === null) {
                 throw new Error("Problem: New wizard plant is nil.")
             }
-            newPlantFromWizard = new PdPlant()
+            const newPlantFromWizard = new PdPlant()
             wizardForm.plant.copyTo(newPlantFromWizard)
-            newCommand = new PdNewCommand(newPlantFromWizard, this.selectedPlants)
+            const newCommand = new PdNewCommand(newPlantFromWizard, this.selectedPlants)
             this.doCommand(newCommand)
             // command will free newPlantFromWizard 
         }
     }
     
     MenuPlantNewUsingLastWizardSettingsClick(): void {
-        let newCommand: PdCommand
         let wizardForm: TWizardForm
         let newPlantFromWizard: PdPlant
         
@@ -1608,7 +1543,7 @@ export class TMainForm {
             wizardForm.setPlantVariables()
             wizardForm.plant.copyTo(newPlantFromWizard)
             newPlantFromWizard.setAge(newPlantFromWizard.pGeneral.ageAtMaturity)
-            newCommand = new PdNewCommand(newPlantFromWizard, this.selectedPlants)
+            const newCommand = new PdNewCommand(newPlantFromWizard, this.selectedPlants)
             this.doCommand(newCommand)
         } finally {
             stopWaitMessage()
@@ -1616,30 +1551,23 @@ export class TMainForm {
     }
     
     MenuPlantRenameClick(): void {
-        let newName: ansistring
-        let response: boolean
-        let newCommand: PdCommand
-        let plant: PdPlant
-        
-        plant = this.focusedPlant()
+        const plant = this.focusedPlant()
         if (plant === null) {
             return
         }
-        newName = plant.getName()
-        response = InputQuery("Rename plant", "Enter a new name for " + plant.getName(), newName)
+        const newName = plant.getName()
+        const response = InputQuery("Rename plant", "Enter a new name for " + plant.getName(), newName)
         if (response) {
-            newCommand = new PdRenameCommand(plant, newName)
+            const newCommand = new PdRenameCommand(plant, newName)
             this.doCommand(newCommand)
         }
     }
     
     MenuPlantRandomizeClick(): void {
-        let newCommand: PdCommand
-        
         if (this.selectedPlants.length <= 0) {
             return
         }
-        newCommand = new PdRandomizeCommand(this.selectedPlants)
+        const newCommand = new PdRandomizeCommand(this.selectedPlants)
         this.doCommand(newCommand)
     }
     
@@ -1648,8 +1576,6 @@ export class TMainForm {
     }
     
     MenuPlantBreedClick(): void {
-        let newCommand: PdCommand
-        
         if (this.selectedPlants.length <= 0) {
             return
         }
@@ -1657,18 +1583,16 @@ export class TMainForm {
             // check if there is room in the breeder - this command will make two new generations 
             ubreedr.BreederForm.fullWarning()
         } else {
-            newCommand = new PdBreedFromParentsCommand(ubreedr.BreederForm.generations, this.focusedPlant(), this.firstUnfocusedPlant(), -1, domain.breedingAndTimeSeriesOptions.percentMaxAge / 100.0, kCreateFirstGeneration)
+            const newCommand = new PdBreedFromParentsCommand(ubreedr.BreederForm.generations, this.focusedPlant(), this.firstUnfocusedPlant(), -1, domain.breedingAndTimeSeriesOptions.percentMaxAge / 100.0, kCreateFirstGeneration)
             this.doCommand(newCommand)
         }
     }
     
     MenuPlantMakeTimeSeriesClick(): void {
-        let newCommand: PdCommand
-        
         if (this.selectedPlants.length <= 0) {
             return
         }
-        newCommand = new PdMakeTimeSeriesCommand(this.focusedPlant())
+        const newCommand = new PdMakeTimeSeriesCommand(this.focusedPlant())
         this.doCommand(newCommand)
     }
     
@@ -1676,15 +1600,10 @@ export class TMainForm {
     // v2.1 separated this out and added call in animation saving
     // it is the same otherwise except for the padding
     enoughRoomToSaveFile(tempFileName: string, fileDescriptor: string, fileSizeNeeded_MB: float): boolean {
-        let result = false
-        let driveLetter: string
-        let driveNumber: short
-        let fileMegaBytesAvailable: float
-        
-        result = true
-        driveLetter = uppercase(UNRESOLVED.copy(UNRESOLVED.ExtractFileDrive(tempFileName), 1, 1))
-        driveNumber = ord(driveLetter[1]) - ord("A") + 1
-        fileMegaBytesAvailable = 1.0 * UNRESOLVED.diskFree(driveNumber) / (1024 * 1024)
+        let result = true
+        const driveLetter: string = uppercase(UNRESOLVED.copy(UNRESOLVED.ExtractFileDrive(tempFileName), 1, 1))
+        const driveNumber: short = ord(driveLetter[1]) - ord("A") + 1
+        const fileMegaBytesAvailable: float = 1.0 * UNRESOLVED.diskFree(driveNumber) / (1024 * 1024)
         if (fileMegaBytesAvailable >= 0) {
             if (fileMegaBytesAvailable < fileSizeNeeded_MB * 1.1) {
                 // if there are too many bytes available, the integer wraps around and goes negative, so ignore this case
@@ -1700,16 +1619,12 @@ export class TMainForm {
         let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
         let optionsForm: TGeneric3DOptionsForm
         let tempOptions: FileExport3DOptionsStructure
-        let response: short
         let fileType: short
-        let suggestedFileName: string
         let fileDescriptor: string
         let optionsChanged: boolean
         let excludeInvisiblePlants: boolean
         let excludeNonSelectedPlants: boolean
-        let newCommand: PdCommand
         
-        response = mrCancel
         optionsChanged = false
         optionsForm = uoptions3dexport.TGeneric3DOptionsForm().create(this)
         if (optionsForm === null) {
@@ -1718,7 +1633,7 @@ export class TMainForm {
         optionsForm.outputType = outputType
         optionsForm.rearrangeItemsForOutputType()
         optionsForm.options = domain.exportOptionsFor3D[outputType]
-        response = optionsForm.ShowModal()
+        const response = optionsForm.ShowModal()
         tempOptions = optionsForm.options
         optionsChanged = optionsForm.optionsChanged
         if (response !== mrOK) {
@@ -1727,11 +1642,11 @@ export class TMainForm {
         fileType = u3dexport.fileTypeFor3DExportType(outputType)
         fileDescriptor = usupport.nameStringForFileType(fileType)
         exportTo3DFileSaveAttemptsThisSession[outputType] += 1
-        suggestedFileName = "plants" + IntToStr(exportTo3DFileSaveAttemptsThisSession[outputType]) + "." + usupport.extensionForFileType(fileType)
+        const suggestedFileName = "plants" + IntToStr(exportTo3DFileSaveAttemptsThisSession[outputType]) + "." + usupport.extensionForFileType(fileType)
         if (!getFileSaveInfo(fileType, kAskForFileName, suggestedFileName, fileInfo)) {
             if (optionsChanged) {
                 if (MessageDialog(fileDescriptor + " export stopped." + chr(13) + chr(13) + "Do you want to save the changes you made" + chr(13) + "to the " + fileDescriptor + " export options?", mtConfirmation, {mbYes, mbNo, }, 0) === IDYES) {
-                    newCommand = new PdChangeDomain3DOptionsCommand(tempOptions, outputType)
+                    const newCommand = new PdChangeDomain3DOptionsCommand(tempOptions, outputType)
                     this.doCommand(newCommand)
                 }
             }
@@ -1741,7 +1656,7 @@ export class TMainForm {
             return
         }
         if (optionsChanged) {
-            newCommand = new PdChangeDomain3DOptionsCommand(tempOptions, outputType)
+            const newCommand = new PdChangeDomain3DOptionsCommand(tempOptions, outputType)
             this.doCommand(newCommand)
         }
         try {
@@ -1808,7 +1723,6 @@ export class TMainForm {
     MenuFileMakePainterNozzleClick(): void {
         let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
         let bitmapForExport: TBitmap
-        let suggestedFileName: string
         
         if ((domain === null) || (domain.plantManager === null) || (this.plants.length <= 0)) {
             return
@@ -1820,7 +1734,7 @@ export class TMainForm {
             return
         }
         nozzleFileSaveAttemptsThisSession += 1
-        suggestedFileName = "nozzle" + IntToStr(nozzleFileSaveAttemptsThisSession) + " " + IntToStr(domain.nozzleOptions.cellSize.X) + "x" + IntToStr(domain.nozzleOptions.cellSize.Y) + "x" + IntToStr(domain.nozzleOptions.cellCount) + ".bmp"
+        const suggestedFileName = "nozzle" + IntToStr(nozzleFileSaveAttemptsThisSession) + " " + IntToStr(domain.nozzleOptions.cellSize.X) + "x" + IntToStr(domain.nozzleOptions.cellSize.Y) + "x" + IntToStr(domain.nozzleOptions.cellCount) + ".bmp"
         if (!getFileSaveInfo(FileType.kFileTypeBitmap, kAskForFileName, suggestedFileName, fileInfo)) {
             return
         }
@@ -1853,19 +1767,12 @@ export class TMainForm {
     }
     
     fillBitmapForPainterNozzle(bitmapForExport: TBitmap): void {
-        let plantsToDraw: PdPlant[] = []
-        let oldBackgroundColor: TColorRef
-        let i: short
-        let plant: PdPlant
-        let oldPlantScale: float
-        let scaleMultiplier: float
-        let scaledPlantSize: TPoint
-        
         if ((bitmapForExport === null) || (domain === null) || (delphi_compatability.Application.terminated)) {
             return
         }
-        oldBackgroundColor = domain.options.backgroundColor
+        const oldBackgroundColor = domain.options.backgroundColor
         bitmapForExport.PixelFormat = domain.nozzleOptions.colorType
+        let plantsToDraw: PdPlant[]
         if (domain.nozzleOptions.exportType === kIncludeSelectedPlants) {
             plantsToDraw = this.selectedPlants
         } else {
@@ -1877,16 +1784,16 @@ export class TMainForm {
         try {
             ucursor.cursor_startWait()
             ubmpsupport.resizeBitmap(bitmapForExport, Point(intround(domain.nozzleOptions.cellSize.X * plantsToDraw.length), domain.nozzleOptions.cellSize.Y))
-            scaleMultiplier = safedivExcept(1.0 * domain.nozzleOptions.resolution_pixelsPerInch, 1.0 * delphi_compatability.Screen.PixelsPerInch, 1.0)
+            let scaleMultiplier = safedivExcept(1.0 * domain.nozzleOptions.resolution_pixelsPerInch, 1.0 * delphi_compatability.Screen.PixelsPerInch, 1.0)
             // v1.4 changed 0.8 to 0.9 because fitting algorithm works better now
             // extra margin to make sure plants fit
             scaleMultiplier = scaleMultiplier * 0.9
             domain.options.backgroundColor = domain.nozzleOptions.backgroundColor
             ubmpsupport.fillBitmap(bitmapForExport, domain.nozzleOptions.backgroundColor)
-            for (i = 0; i <= plantsToDraw.length - 1; i++) {
-                plant = plantsToDraw[i]
-                scaledPlantSize = Point(intround(rWidth(plant.boundsRect_pixels()) * scaleMultiplier), intround(rHeight(plant.boundsRect_pixels()) * scaleMultiplier))
-                oldPlantScale = plant.drawingScale_PixelsPerMm
+            for (let i = 0; i <= plantsToDraw.length - 1; i++) {
+                const plant = plantsToDraw[i]
+                const scaledPlantSize = Point(intround(rWidth(plant.boundsRect_pixels()) * scaleMultiplier), intround(rHeight(plant.boundsRect_pixels()) * scaleMultiplier))
+                const oldPlantScale = plant.drawingScale_PixelsPerMm
                 try {
                     // v1.4
                     plant.fixedPreviewScale = false
@@ -1908,7 +1815,6 @@ export class TMainForm {
     
     MenuFileMakePainterAnimationClick(): void {
         let saveDialog: TSaveDialog
-        let sizeNeeded_MB: float
         
         if ((domain === null) || (domain.plantManager === null) || (this.plants.length <= 0)) {
             return
@@ -1929,7 +1835,7 @@ export class TMainForm {
         saveDialog.DefaultExt = "bmp"
         saveDialog.Options = saveDialog.Options + {delphi_compatability.TOpenOption.ofPathMustExist, delphi_compatability.TOpenOption.ofOverwritePrompt, delphi_compatability.TOpenOption.ofHideReadOnly, delphi_compatability.TOpenOption.ofNoReadOnlyReturn, }
         if (saveDialog.Execute()) {
-            sizeNeeded_MB = 1.0 * domain.animationOptions.fileSize / (1024 * 1024)
+            const sizeNeeded_MB = 1.0 * domain.animationOptions.fileSize / (1024 * 1024)
             if (!this.enoughRoomToSaveFile(saveDialog.FileName, "animation", sizeNeeded_MB)) {
                 return
             }
@@ -1945,33 +1851,20 @@ export class TMainForm {
     }
     
     writeAnimationFilesWithFileSpec(startFileName: string): void {
-        let plant: PdPlant
-        let oldXRotation: float
-        let scaleMultiplier: float
-        let minScale: float
-        let oldScale: float
-        let oldAge: short
-        let i: short
-        let saveFileName: string
-        let unregRect: TRect
-        let bestPosition: TPoint = new TPoint()
-        let widestWidth: long
-        let tallestHeight: long
-        
         if (this.focusedPlant() === null) {
             return
         }
-        plant = this.focusedPlant()
-        oldXRotation = plant.xRotation
-        oldAge = plant.age
-        oldScale = plant.drawingScale_PixelsPerMm
+        const plant = this.focusedPlant()
+        const oldXRotation = plant.xRotation
+        const oldAge = plant.age
+        const oldScale = plant.drawingScale_PixelsPerMm
         try {
             plant.previewCache.PixelFormat = domain.animationOptions.colorType
             // draw plant for all frames, get min drawing scale
             plant.fixedPreviewScale = false
             plant.fixedDrawPosition = false
-            minScale = 0
-            for (i = 0; i <= domain.animationOptions.frameCount - 1; i++) {
+            let minScale = 0
+            for (let i = 0; i <= domain.animationOptions.frameCount - 1; i++) {
                 setPlantCharacteristicsForAnimationFrame(plant, i)
                 plant.drawPreviewIntoCache(domain.animationOptions.scaledSize, kDontConsiderDomainScale, uplant.kDontDrawNow)
                 if ((i === 1) || (plant.drawingScale_PixelsPerMm < minScale)) {
@@ -1981,11 +1874,12 @@ export class TMainForm {
             // draw plant for all frames, get common draw position
             plant.drawingScale_PixelsPerMm = minScale
             plant.fixedPreviewScale = true
-            widestWidth = 0
-            tallestHeight = 0
-            for (i = 0; i <= domain.animationOptions.frameCount - 1; i++) {
+            const bestPosition: TPoint = new TPoint()
+            let widestWidth = 0
+            let tallestHeight = 0
+            for (let i = 0; i <= domain.animationOptions.frameCount - 1; i++) {
                 setPlantCharacteristicsForAnimationFrame(plant, i)
-                plant.drawPreviewIntoCache(domain.animationOptions.scaledSize, kDontConsiderDomainScale, uplant.kDontDrawNow)
+                plant.drawPreviewIntoCache(domain.animationOptions.scaledSize, kDontConsiderDomainScale, kDontDrawNow)
                 if ((i === 0) || (rWidth(plant.boundsRect_pixels()) > widestWidth)) {
                     widestWidth = rWidth(plant.boundsRect_pixels())
                     bestPosition.X = plant.drawPositionIfFixed.X
@@ -1998,8 +1892,8 @@ export class TMainForm {
             // now really draw
             plant.drawPositionIfFixed = bestPosition
             plant.fixedDrawPosition = true
-            for (i = 0; i <= domain.animationOptions.frameCount - 1; i++) {
-                saveFileName = startFileName
+            for (let i = 0; i <= domain.animationOptions.frameCount - 1; i++) {
+                let saveFileName = startFileName
                 if (i + 1 < 100) {
                     saveFileName = saveFileName + "0"
                 }
@@ -2026,10 +1920,9 @@ export class TMainForm {
     }
     
     getAnimationOptions(): int {
-        let result = 0
         let animationOptionsForm: TAnimationFilesOptionsForm
         
-        result = mrCancel
+        let result = mrCancel
         if (this.focusedPlant() === null) {
             return result
         }
@@ -2044,16 +1937,12 @@ export class TMainForm {
     }
     
     MenuLayoutShowClick(): void {
-        let newCommand: PdCommand
-        let atLeastOnePlantIsHidden: boolean
-        let i: short
-        
         if (this.selectedPlants.length <= 0) {
             return
         }
         // make sure at least one plant is hidden 
-        atLeastOnePlantIsHidden = false
-        for (i = 0; i <= this.selectedPlants.length - 1; i++) {
+        let atLeastOnePlantIsHidden = false
+        for (let i = 0; i <= this.selectedPlants.length - 1; i++) {
             if (this.selectedPlants[i].hidden) {
                 atLeastOnePlantIsHidden = true
                 break
@@ -2062,21 +1951,17 @@ export class TMainForm {
         if (!atLeastOnePlantIsHidden) {
             return
         }
-        newCommand = new PdHideOrShowCommand(this.selectedPlants, kShow)
+        const newCommand = new PdHideOrShowCommand(this.selectedPlants, kShow)
         this.doCommand(newCommand)
     }
     
     MenuLayoutHideClick(): void {
-        let newCommand: PdCommand
-        let atLeastOnePlantIsShowing: boolean
-        let i: short
-        
         if (this.selectedPlants.length <= 0) {
             return
         }
         // make sure at least one plant is showing 
-        atLeastOnePlantIsShowing = false
-        for (i = 0; i <= this.selectedPlants.length - 1; i++) {
+        let atLeastOnePlantIsShowing = false
+        for (let i = 0; i <= this.selectedPlants.length - 1; i++) {
             if (!this.selectedPlants[i].hidden) {
                 atLeastOnePlantIsShowing = true
                 break
@@ -2085,33 +1970,28 @@ export class TMainForm {
         if (!atLeastOnePlantIsShowing) {
             return
         }
-        newCommand = new PdHideOrShowCommand(this.selectedPlants, kHide)
+        const newCommand = new PdHideOrShowCommand(this.selectedPlants, kHide)
         this.doCommand(newCommand)
     }
     
     MenuLayoutHideOthersClick(): void {
-        let booleansList: PdBooleanValue[] = []
-        
         if (this.selectedPlants.length <= 0) {
             return
         }
+        const booleansList: PdBooleanValue[] = []
         for (let i = 0; i <= this.plants.length - 1; i++) {
             const plant = this.plants[i]
             booleansList.push(new PdBooleanValue(!this.isSelected(plant)))
         }
-        
         const newCommand = new PdHideOrShowCommand(this.plants, kHide, booleansList)
         this.doCommand(newCommand)
-
     }
     
     MenuLayoutMakeBouquetClick(): void {
-        let newCommand: PdCommand
-        
         if (this.selectedPlants.length <= 1) {
             return
         }
-        newCommand = new PdDragCommand(this.selectedPlants, this.focusedPlant().basePoint_pixels())
+        const newCommand = new PdDragCommand(this.selectedPlants, this.focusedPlant().basePoint_pixels())
         this.doCommand(newCommand)
     }
     
@@ -2121,23 +2001,21 @@ export class TMainForm {
     
     // drawing 
     changeViewingOptionTo(aNewOption: short): void {
-        let newCommand: PdCommand
-        
-        if ((aNewOption === udomain.kViewPlantsInMainWindowOneAtATime) && (this.selectedPlants.length <= 0)) {
+        if ((aNewOption === ViewPlants.kViewPlantsInMainWindowOneAtATime) && (this.selectedPlants.length <= 0)) {
             if (this.plants.length < 0) {
                 return
             }
             this.selectedPlants.push(this.plants[0])
             this.updateForChangeToPlantSelections()
         }
-        newCommand = new PdChangeMainWindowViewingOptionCommand(this.plants, this.selectedPlants, aNewOption)
+        const newCommand = new PdChangeMainWindowViewingOptionCommand(this.plants, this.selectedPlants, aNewOption)
         this.doCommand(newCommand)
         this.MenuLayoutMakeBouquet.enabled = (this.selectedPlants.length > 1) && (!domain.viewPlantsInMainWindowOnePlantAtATime())
     }
     
     MenuLayoutViewOnePlantAtATimeClick(): void {
-        if (domain.options.mainWindowViewMode !== udomain.kViewPlantsInMainWindowOneAtATime) {
-            this.changeViewingOptionTo(udomain.kViewPlantsInMainWindowOneAtATime)
+        if (domain.options.mainWindowViewMode !== ViewPlants.kViewPlantsInMainWindowOneAtATime) {
+            this.changeViewingOptionTo(ViewPlants.kViewPlantsInMainWindowOneAtATime)
         }
     }
     
@@ -2146,8 +2024,8 @@ export class TMainForm {
     }
     
     MenuLayoutViewFreeFloatingClick(): void {
-        if (domain.options.mainWindowViewMode !== udomain.kViewPlantsInMainWindowFreeFloating) {
-            this.changeViewingOptionTo(udomain.kViewPlantsInMainWindowFreeFloating)
+        if (domain.options.mainWindowViewMode !== ViewPlants.kViewPlantsInMainWindowFreeFloating) {
+            this.changeViewingOptionTo(ViewPlants.kViewPlantsInMainWindowFreeFloating)
         }
     }
     
@@ -2156,8 +2034,6 @@ export class TMainForm {
     }
     
     MenuLayoutBringForwardClick(): void {
-        let newCommand: PdCommand
-        
         if (this.selectedPlants.length <= 0) {
             return
         }
@@ -2165,13 +2041,11 @@ export class TMainForm {
             // don't do if you can't go forward any more 
             return
         }
-        newCommand = new PdSendBackwardOrForwardCommand(kBringForward)
+        const newCommand = new PdSendBackwardOrForwardCommand(kBringForward)
         this.doCommand(newCommand)
     }
     
     MenuLayoutSendBackClick(): void {
-        let newCommand: PdCommand
-        
         if (this.selectedPlants.length <= 0) {
             return
         }
@@ -2179,24 +2053,20 @@ export class TMainForm {
             // don't do if you can't go backward any more 
             return
         }
-        newCommand = new PdSendBackwardOrForwardCommand(kSendBackward)
+        const newCommand = new PdSendBackwardOrForwardCommand(kSendBackward)
         this.doCommand(newCommand)
     }
     
     MenuLayoutHorizontalOrientationClick(): void {
-        let newCommand: PdCommand
-        
         if (domain.options.mainWindowOrientation !== kMainWindowOrientationHorizontal) {
-            newCommand = new PdChangeMainWindowOrientationCommand(kMainWindowOrientationHorizontal)
+            const newCommand = new PdChangeMainWindowOrientationCommand(kMainWindowOrientationHorizontal)
             this.doCommand(newCommand)
         }
     }
     
     MenuLayoutVerticalOrientationClick(): void {
-        let newCommand: PdCommand
-        
         if (domain.options.mainWindowOrientation !== kMainWindowOrientationVertical) {
-            newCommand = new PdChangeMainWindowOrientationCommand(kMainWindowOrientationVertical)
+            const newCommand = new PdChangeMainWindowOrientationCommand(kMainWindowOrientationVertical)
             this.doCommand(newCommand)
         }
     }
@@ -2251,7 +2121,6 @@ export class TMainForm {
     
     MenuOptionsCustomDrawClick(): void {
         let customDrawForm: TCustomDrawOptionsForm
-        let newCommand: PdCommand
         let response: int
         let lastDrawSpeed: short
         
@@ -2267,7 +2136,7 @@ export class TMainForm {
         customDrawForm.options = domain.options
         response = customDrawForm.ShowModal()
         if ((response === mrOK) && (customDrawForm.optionsChanged)) {
-            newCommand = new PdChangeDomainOptionsCommand(customDrawForm.options)
+            const newCommand = new PdChangeDomainOptionsCommand(customDrawForm.options)
             this.doCommand(newCommand)
         } else {
             if (lastDrawSpeed !== DrawMode.kDrawCustom) {
@@ -2442,8 +2311,6 @@ export class TMainForm {
     }
     
     showDrawProgress(amount: long): void {
-        let progress: long
-        
         if (!this.drawing) {
             return
         }
@@ -2453,6 +2320,7 @@ export class TMainForm {
         if (this.animateTimer.enabled) {
             return
         }
+        let progress: long
         if (this.drawProgressMax !== 0) {
             progress = intround((1.0 * this.progressPaintBox.Width * amount) / (this.drawProgressMax * 1.0))
         } else {
@@ -2510,9 +2378,6 @@ export class TMainForm {
     }
     
     updateForPlantFile(): void {
-        let plant: PdPlant
-        let i: int
-        
         this.internalChange = true
         if (!domain.plantFileLoaded) {
             this.updateForNoPlantFile()
@@ -2528,9 +2393,9 @@ export class TMainForm {
                 this.updateForChangeToOrientation()
             }
             if (this.plants.length > 0) {
-                for (i = 0; i <= this.plants.length - 1; i++) {
+                for (let i = 0; i <= this.plants.length - 1; i++) {
                     // v2.0 load and save plant hidden and selected flags
-                    plant = this.plants[i]
+                    const plant = this.plants[i]
                     if (plant.selectedWhenLastSaved) {
                         this.selectedPlants.push(plant)
                     }
@@ -2598,10 +2463,10 @@ export class TMainForm {
         this.MenuOptionsHidePosing.checked = !domain.options.showPosingAtAll
         this.posingNotShown.Down = !domain.options.showPosingAtAll
         // vertical/horizontal
-        this.MenuLayoutHorizontalOrientation.checked = domain.options.mainWindowOrientation === udomain.kMainWindowOrientationHorizontal
-        this.MenuLayoutVerticalOrientation.checked = domain.options.mainWindowOrientation === udomain.kMainWindowOrientationVertical
-        this.drawingAreaOnTop.Down = domain.options.mainWindowOrientation === udomain.kMainWindowOrientationHorizontal
-        this.drawingAreaOnSide.Down = domain.options.mainWindowOrientation === udomain.kMainWindowOrientationVertical
+        this.MenuLayoutHorizontalOrientation.checked = domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal
+        this.MenuLayoutVerticalOrientation.checked = domain.options.mainWindowOrientation === kMainWindowOrientationVertical
+        this.drawingAreaOnTop.Down = domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal
+        this.drawingAreaOnSide.Down = domain.options.mainWindowOrientation === kMainWindowOrientationVertical
         this.internalChange = false
         // hint, undo
         this.updateHintPauseForOptions()
@@ -2650,17 +2515,14 @@ export class TMainForm {
     }
     
     updateForChangeToOrientation(): void {
-        this.MenuLayoutHorizontalOrientation.checked = domain.options.mainWindowOrientation === udomain.kMainWindowOrientationHorizontal
-        this.MenuLayoutVerticalOrientation.checked = domain.options.mainWindowOrientation === udomain.kMainWindowOrientationVertical
-        this.drawingAreaOnTop.Down = domain.options.mainWindowOrientation === udomain.kMainWindowOrientationHorizontal
-        this.drawingAreaOnSide.Down = domain.options.mainWindowOrientation === udomain.kMainWindowOrientationVertical
+        this.MenuLayoutHorizontalOrientation.checked = domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal
+        this.MenuLayoutVerticalOrientation.checked = domain.options.mainWindowOrientation === kMainWindowOrientationVertical
+        this.drawingAreaOnTop.Down = domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal
+        this.drawingAreaOnSide.Down = domain.options.mainWindowOrientation === kMainWindowOrientationVertical
         this.Resize()
     }
     
     moveUpOrDownWithKeyInPlantList(indexAfterMove: short): void {
-        let newList: PdPlant[] = []
-        let newCommand: PdCommand
-        
         if (indexAfterMove > this.plants.length - 1) {
             // loop around 
             indexAfterMove = 0
@@ -2669,8 +2531,9 @@ export class TMainForm {
             indexAfterMove = this.plants.length - 1
         }
         if ((indexAfterMove >= 0) && (indexAfterMove <= this.plants.length - 1)) {
+            const newList: PdPlant[] = []
             newList.push(this.plants[indexAfterMove])
-            newCommand = new PdChangeSelectedPlantsCommand(this.selectedPlants, newList)
+            const newCommand = new PdChangeSelectedPlantsCommand(this.selectedPlants, newList)
             this.doCommand(newCommand)
         }
     }
@@ -2693,12 +2556,9 @@ export class TMainForm {
     }
     
     invalidateSelectedPlantRectangles(): void {
-        let i: short
-        let plant: PdPlant
-        
         if (this.selectedPlants.length > 0) {
-            for (i = 0; i <= this.selectedPlants.length - 1; i++) {
-                plant = this.selectedPlants[i]
+            for (let i = 0; i <= this.selectedPlants.length - 1; i++) {
+                const plant = this.selectedPlants[i]
                 if (plant !== null) {
                     this.invalidateDrawingRect(plant.boundsRect_pixels())
                 }
@@ -2707,10 +2567,6 @@ export class TMainForm {
     }
     
     updateForChangeToPlantList(): void {
-        let plant: PdPlant
-        let i: short
-        let plantsToRemove: PdPlant[] = []
-        
         if (delphi_compatability.Application.terminated) {
             return
         }
@@ -2721,17 +2577,18 @@ export class TMainForm {
         this.plantListDrawGrid.RowCount = this.plants.length
         this.plantListDrawGrid.Invalidate()
         // selected plants list - make sure no pointers are invalid 
+        const plantsToRemove: PdPlant[] = [] 
         if (this.selectedPlants.length > 0) {
-            for (i = 0; i <= this.selectedPlants.length - 1; i++) {
-                plant = this.selectedPlants[i]
+            for (let i = 0; i <= this.selectedPlants.length - 1; i++) {
+                const plant = this.selectedPlants[i]
                 if (this.plants.indexOf(plant) < 0) {
                     plantsToRemove.push(plant)
                 }
             }
         }
         if (plantsToRemove.length > 0) {
-            for (i = 0; i <= plantsToRemove.length - 1; i++) {
-                plant = plantsToRemove[i]
+            for (let i = 0; i <= plantsToRemove.length - 1; i++) {
+                const plant = plantsToRemove[i]
                 this.selectedPlants = removeItem(this.selectedPlants, plant)
             }
         }
@@ -2751,29 +2608,23 @@ export class TMainForm {
     }
     
     recalculateAllPlantBoundsRects(drawNow: boolean): void {
-        let i: short
-        let plant: PdPlant
-        let showProgress: boolean
-        let plantPartsToDraw: long
-        let partsDrawn: long
-        
         if (this.plants.length <= 0) {
             return
         }
-        plantPartsToDraw = 0
-        showProgress = drawNow && domain.options.cachePlantBitmaps && domain.options.showPlantDrawingProgress
+        let plantPartsToDraw = 0
+        let showProgress = drawNow && domain.options.cachePlantBitmaps && domain.options.showPlantDrawingProgress
         if (showProgress) {
             plantPartsToDraw = domain.plantManager.totalPlantPartCountInInvalidRect(this.plants, Rect(0, 0, this.drawingBitmap.Width, this.drawingBitmap.Height), udomain.kExcludeInvisiblePlants, udomain.kIncludeNonSelectedPlants)
         }
-        partsDrawn = 0
+        let partsDrawn = 0
         try {
             ucursor.cursor_startWait()
             this.drawing = true
             if (showProgress) {
                 this.startDrawProgress(plantPartsToDraw)
             }
-            for (i = 0; i <= this.plants.length - 1; i++) {
-                plant = this.plants[i]
+            for (let i = 0; i <= this.plants.length - 1; i++) {
+                const plant = this.plants[i]
                 plant.plantPartsDrawnAtStart = partsDrawn
                 plant.recalculateBounds(drawNow)
                 partsDrawn = partsDrawn + plant.totalPlantParts
@@ -2787,30 +2638,24 @@ export class TMainForm {
         }
     }
     
-    recalculateSelectedPlantsBoundsRects(drawNow: boolean): void {
-        let i: short
-        let plant: PdPlant
-        let showProgress: boolean
-        let plantPartsToDraw: long
-        let partsDrawn: long
-        
+    recalculateSelectedPlantsBoundsRects(drawNow: boolean): void {        
         if (this.selectedPlants.length <= 0) {
             return
         }
-        plantPartsToDraw = 0
-        showProgress = drawNow && domain.options.cachePlantBitmaps && domain.options.showPlantDrawingProgress
+        let plantPartsToDraw = 0
+        let showProgress = drawNow && domain.options.cachePlantBitmaps && domain.options.showPlantDrawingProgress
         if (showProgress) {
             plantPartsToDraw = domain.plantManager.totalPlantPartCountInInvalidRect(this.selectedPlants, Rect(0, 0, this.drawingBitmap.Width, this.drawingBitmap.Height), udomain.kExcludeInvisiblePlants, udomain.kIncludeNonSelectedPlants)
         }
-        partsDrawn = 0
+        let partsDrawn = 0
         try {
             ucursor.cursor_startWait()
             this.drawing = true
             if (showProgress) {
                 this.startDrawProgress(plantPartsToDraw)
             }
-            for (i = 0; i <= this.selectedPlants.length - 1; i++) {
-                plant = this.selectedPlants[i]
+            for (let i = 0; i <= this.selectedPlants.length - 1; i++) {
+                const plant = this.selectedPlants[i]
                 plant.plantPartsDrawnAtStart = partsDrawn
                 plant.recalculateBounds(drawNow)
                 partsDrawn = partsDrawn + plant.totalPlantParts
@@ -2825,10 +2670,8 @@ export class TMainForm {
     }
     
     shrinkAllPlantBitmaps(): void {
-        let i: short
-        
         if (this.plants.length > 0) {
-            for (i = 0; i <= this.plants.length - 1; i++) {
+            for (let i = 0; i <= this.plants.length - 1; i++) {
                 this.plants[i].shrinkPreviewCache()
             }
         }
@@ -2836,28 +2679,21 @@ export class TMainForm {
     }
     
     recalculateAllPlantBoundsRectsForOffsetChange(): void {
-        let i: short
-        let plant: PdPlant
-        
-        for (i = 0; i <= this.plants.length - 1; i++) {
-            plant = this.plants[i]
+        for (let i = 0; i <= this.plants.length - 1; i++) {
+            const plant = this.plants[i]
             plant.recalculateBoundsForOffsetChange()
         }
     }
     
     updateForRenamingPlant(aPlant: PdPlant): void {
-        let i: short
-        
         this.plantListDrawGrid.Invalidate()
-        for (i = 0; i <= kTabHighest; i++) {
+        for (let i = 0; i <= kTabHighest; i++) {
             this.updatePlantNameLabel(i)
         }
     }
     
     updateForChangeToPlantNote(aPlant: PdPlant): void {
-        let start: int
-        
-        start = this.noteMemo.SelStart
+        let start: int = this.noteMemo.SelStart
         this.noteMemo.Clear()
         if (aPlant === null) {
             return
@@ -3042,31 +2878,24 @@ export class TMainForm {
     }
     
     updateSectionPopupMenuForSectionChange(): void {
-        let haveSection: boolean
-        
-        haveSection = this.currentSection() !== null
+        const haveSection = this.currentSection() !== null
         this.sectionPopupMenuHelp.enabled = haveSection
     }
     
     updateParamPopupMenuForParamSelectionChange(): void {
-        let haveSection: boolean
-        let haveParam: boolean
-        
-        haveSection = this.currentSection() !== null
+        const haveSection = this.currentSection() !== null
         this.paramPopupMenuExpandAllInSection.enabled = haveSection
         this.paramPopupMenuCollapseAllInSection.enabled = haveSection
-        haveParam = this.selectedParameterPanel !== null
+        const haveParam = this.selectedParameterPanel !== null
         this.paramPopupMenuHelp.enabled = haveParam
         this.paramPopupMenuExpand.enabled = haveParam
         this.paramPopupMenuCollapse.enabled = haveParam
     }
-    
+
     // ---------------------------------------------------------------------------- *drawing 
     invalidateDrawingRect(aRect: TRect): void {
-        let newRect: TRect
-        
-        newRect = this.invalidDrawingRect
-        delphi_compatability.UnionRect(newRect, newRect, aRect)
+        const newRect = this.invalidDrawingRect
+        UnionRect(newRect, newRect, aRect)
         this.invalidDrawingRect = newRect
     }
     
@@ -3122,48 +2951,37 @@ export class TMainForm {
     }
     
     copyDrawingBitmapToPaintBox(): void {
-        let drawSelectionRects: boolean
-        let drawBoundingRects: boolean
-        let includePlant: boolean
-        let i: short
-        let plant: PdPlant
-        let aRect: TRect
-        let insetOneRect: TRect
-        let intersection: TRect
-        let intersectResult: longbool
-        let oldPalette: HPALETTE
-        
         if (delphi_compatability.Application.terminated) {
             return
         }
         if ((domain === null) || (this.plants === null)) {
             return
         }
-        aRect = Rect(0, 0, this.drawingBitmap.Width, this.drawingBitmap.Height)
+        const aRect = Rect(0, 0, this.drawingBitmap.Width, this.drawingBitmap.Height)
         // use an inset rect to avoid flicker in the boundary rectangle
-        insetOneRect = Rect(1, 1, this.drawingBitmap.Width - 1, this.drawingBitmap.Height - 1)
-        oldPalette = 0
-        oldPalette = UNRESOLVED.selectPalette(this.drawingPaintBox.Canvas.Handle, MainForm.paletteImage.Picture.Bitmap.Palette, false)
+        const insetOneRect = Rect(1, 1, this.drawingBitmap.Width - 1, this.drawingBitmap.Height - 1)
+        const oldPalette: HPALETTE = UNRESOLVED.selectPalette(this.drawingPaintBox.Canvas.Handle, MainForm.paletteImage.Picture.Bitmap.Palette, false)
         UNRESOLVED.realizePalette(this.drawingPaintBox.Canvas.Handle)
         this.drawingPaintBox.Canvas.CopyRect(insetOneRect, this.drawingBitmap.Canvas, insetOneRect)
         this.drawingPaintBox.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsClear
         this.drawingPaintBox.Canvas.Pen.Width = 1
-        drawBoundingRects = (domain.options.showBoundsRectangle) && (!domain.viewPlantsInMainWindowOnePlantAtATime()) && (!domain.temporarilyHideSelectionRectangles)
+        const drawBoundingRects = (domain.options.showBoundsRectangle) && (!domain.viewPlantsInMainWindowOnePlantAtATime()) && (!domain.temporarilyHideSelectionRectangles)
         if ((drawBoundingRects) && (this.plants.length > 0)) {
-            this.drawingPaintBox.Canvas.Pen.Color = delphi_compatability.clSilver
-            for (i = 0; i <= this.plants.length - 1; i++) {
-                plant = this.plants[i]
+            this.drawingPaintBox.Canvas.Pen.Color = ColorDefs.clSilver
+            for (let i = 0; i <= this.plants.length - 1; i++) {
+                const plant = this.plants[i]
                 if (!plant.hidden) {
                     this.drawingPaintBox.Canvas.Rectangle(plant.boundsRect_pixels().Left, plant.boundsRect_pixels().Top, plant.boundsRect_pixels().Right, plant.boundsRect_pixels().Bottom)
                 }
             }
         }
-        drawSelectionRects = (domain.options.showSelectionRectangle) && (!domain.viewPlantsInMainWindowOnePlantAtATime()) && (!domain.temporarilyHideSelectionRectangles)
+        const intersection: TRect = new TRect()
+        const drawSelectionRects = (domain.options.showSelectionRectangle) && (!domain.viewPlantsInMainWindowOnePlantAtATime()) && (!domain.temporarilyHideSelectionRectangles)
         if ((drawSelectionRects) && (this.plants.length > 0)) {
-            for (i = 0; i <= this.plants.length - 1; i++) {
-                plant = this.plants[i]
-                includePlant = false
-                intersectResult = delphi_compatability.IntersectRect(intersection, plant.boundsRect_pixels(), aRect)
+            for (let i = 0; i <= this.plants.length - 1; i++) {
+                const plant = this.plants[i]
+                let includePlant = false
+                const intersectResult = IntersectRect(intersection, plant.boundsRect_pixels(), aRect)
                 includePlant = includePlant || intersectResult
                 includePlant = includePlant && !plant.hidden
                 if (!includePlant) {
@@ -3193,9 +3011,7 @@ export class TMainForm {
     // ---------------------------------------------------------------------------- *bitmaps for plants 
     screenBytesPerPixel(): float {
         let result = 0.0
-        let screenDC: HDC
-        
-        screenDC = UNRESOLVED.GetDC(0)
+        const screenDC: HDC = UNRESOLVED.GetDC(0)
         try {
             result = (UNRESOLVED.GetDeviceCaps(screenDC, delphi_compatability.BITSPIXEL) * UNRESOLVED.GetDeviceCaps(screenDC, delphi_compatability.PLANES))
             result = result / 8.0
@@ -3207,16 +3023,10 @@ export class TMainForm {
     
     bytesInPlantBitmaps(plantToExclude: PdPlant): long {
         let result = 0
-        let bytesInBitmap: long
-        let bytesPerPixel: float
-        let i: short
-        let plant: PdPlant
-        
-        result = 0
-        bytesPerPixel = this.screenBytesPerPixel()
+        const bytesPerPixel = this.screenBytesPerPixel()
         if (this.plants.length > 0) {
-            for (i = 0; i <= this.plants.length - 1; i++) {
-                plant = this.plants[i]
+            for (let i = 0; i <= this.plants.length - 1; i++) {
+                const plant = this.plants[i]
                 if (plant.hidden) {
                     continue
                 }
@@ -3224,7 +3034,7 @@ export class TMainForm {
                     // plant that is asking should not be counted, since it is looking to resize and lose the old size
                     continue
                 }
-                bytesInBitmap = intround(plant.previewCache.Width * plant.previewCache.Height * bytesPerPixel)
+                const bytesInBitmap = intround(plant.previewCache.Width * plant.previewCache.Height * bytesPerPixel)
                 result = result + bytesInBitmap
             }
         }
@@ -3232,16 +3042,11 @@ export class TMainForm {
     }
     
     roomForPlantBitmap(plant: PdPlant, bytesForThisPlant: long): boolean {
-        let result = false
-        let bytesAlreadyNotIncludingThisPlant: long
-        let bytesLimit: long
-        let megabytesTried: float
-        
-        bytesAlreadyNotIncludingThisPlant = this.bytesInPlantBitmaps(plant)
-        bytesLimit = domain.options.memoryLimitForPlantBitmaps_MB * 1024 * 1024
-        result = bytesAlreadyNotIncludingThisPlant + bytesForThisPlant < bytesLimit
+        const bytesAlreadyNotIncludingThisPlant = this.bytesInPlantBitmaps(plant)
+        const bytesLimit = domain.options.memoryLimitForPlantBitmaps_MB * 1024 * 1024
+        const result = bytesAlreadyNotIncludingThisPlant + bytesForThisPlant < bytesLimit
         if (!result) {
-            megabytesTried = (bytesAlreadyNotIncludingThisPlant + bytesForThisPlant) / (1024 * 1024)
+            const megabytesTried = (bytesAlreadyNotIncludingThisPlant + bytesForThisPlant) / (1024 * 1024)
             ShowMessage("The total size of plant bitmaps (" + FloatToStrF(megabytesTried, UNRESOLVED.ffFixed, 7, 1) + ") has exceeded " + "the memory limit of " + IntToStr(domain.options.memoryLimitForPlantBitmaps_MB) + " megabytes." + chr(13) + "All plant bitmaps have been dropped and plants will be drawn directly on the window." + chr(13) + "To use plant bitmaps again, choose Use Plant Bitmaps from the Options menu." + chr(13) + chr(13) + "If you have more free memory, your memory limit is set too low." + chr(13) + "To increase the memory limit, choose Preferences from the Edit menu." + chr(13) + "Click Help in the Preferences window for details.")
             this.stopUsingPlantBitmaps()
         }
@@ -3255,16 +3060,13 @@ export class TMainForm {
     
     updateForChangeToPlantBitmaps(): void {
         let aString: string
-        let bytesInUse: long
-        let megabytesInUse: float
-        
         if (domain.options.showLongHintsForButtons) {
             aString = "Plant bitmaps are used to speed up drawing by caching each plant into a separate " + "bitmap in memory. Plant bitmaps are turned "
         } else {
             aString = "Plant bitmaps are turned "
         }
-        bytesInUse = 0
-        megabytesInUse = 0
+        let bytesInUse = 0
+        let megabytesInUse = 0
         if (domain.options.cachePlantBitmaps) {
             bytesInUse = this.bytesInPlantBitmaps(null)
             megabytesInUse = bytesInUse / (1024 * 1024)
@@ -3323,25 +3125,21 @@ export class TMainForm {
     
     // called by commands 
     // ------------------------------------------------------------------------------- *called by commands 
-    hideOrShowSomePlants(plantList: PdPlant[], hideList: PdPlant[], hide: boolean, drawNow: boolean): void {
-        let redrawRect: TRect
-        let i: short
-        let plant: PdPlant
-        
+    hideOrShowSomePlants(plantList: PdPlant[], hideList: PdBooleanValue[], hide: boolean, drawNow: boolean): void {
         if ((plantList === null) || (plantList.length <= 0)) {
             return
         }
-        redrawRect = delphi_compatability.Bounds(0, 0, 0, 0)
-        for (i = 0; i <= plantList.length - 1; i++) {
-            plant = plantList[i]
-            if ((hideList !== null) && (hideList.Count > 0)) {
-                plant.hidden = new PdBooleanValue(hideList[i]).saveBoolean
+        const redrawRect = new TRect(0, 0, 0, 0)
+        for (let i = 0; i <= plantList.length - 1; i++) {
+            const plant = plantList[i]
+            if ((hideList !== null) && (hideList.length > 0)) {
+                plant.hidden = hideList[i].saveBoolean
             } else {
                 plant.hidden = hide
             }
             // magnification might have changed
             plant.recalculateBounds(kDrawNow)
-            delphi_compatability.UnionRect(redrawRect, redrawRect, plant.boundsRect_pixels())
+            UnionRect(redrawRect, redrawRect, plant.boundsRect_pixels())
         }
         this.invalidateDrawingRect(redrawRect)
         this.plantListDrawGrid.Invalidate()
@@ -3351,52 +3149,43 @@ export class TMainForm {
     }
     
     fitVisiblePlantsInDrawingArea(drawNow: boolean, scaleAsWellAsMove: boolean, alwaysMove: boolean): void {
-        let upperLeft_mm: TPoint
-        let lowerRight_mm: TPoint
-        let size_mm: TPoint
-        let offScreenUpperLeft_mm: TPoint
-        let offScreenLowerRight_mm: TPoint
-        let xScale_pixelsPerMm: float
-        let yScale_pixelsPerMm: float
-        let newScale_pixelsPerMm: float
-        let marginOffset_mm: float
-        let i: short
-        let plant: PdPlant
-        let allPlantsAreOffscreen: boolean
-        
         if (this.plants.length <= 0) {
             return
         }
-        for (i = 0; i <= this.plants.length - 1; i++) {
-            plant = this.plants[i]
+        for (let i = 0; i <= this.plants.length - 1; i++) {
+            const plant = this.plants[i]
             if (!plant.hidden) {
                 plant.recalculateBounds(kDontDrawYet)
             }
         }
-        upperLeft_mm = this.upperLeftMostPlantBoundsRectPoint_mm()
-        lowerRight_mm = this.lowerRightMostPlantBoundsRectPoint_mm()
-        size_mm = Point(lowerRight_mm.X - upperLeft_mm.X, lowerRight_mm.Y - upperLeft_mm.Y)
+        const upperLeft_mm = this.upperLeftMostPlantBoundsRectPoint_mm()
+        const lowerRight_mm = this.lowerRightMostPlantBoundsRectPoint_mm()
+        const size_mm = Point(lowerRight_mm.X - upperLeft_mm.X, lowerRight_mm.Y - upperLeft_mm.Y)
+        let allPlantsAreOffscreen: boolean
         if (alwaysMove) {
             // move domain offset so all plants begin within drawing area
             allPlantsAreOffscreen = false
         } else {
             // determine if all plants are out of the drawing area and so must be moved
+            const offScreenUpperLeft_mm: TPoint = new TPoint()
+            const offScreenLowerRight_mm: TPoint = new TPoint()
             offScreenUpperLeft_mm.X = intround(kOffscreenMargin / domain.plantManager.plantDrawScale_PixelsPerMm)
             offScreenUpperLeft_mm.Y = intround(kOffscreenMargin / domain.plantManager.plantDrawScale_PixelsPerMm)
             offScreenLowerRight_mm.X = intround((this.drawingPaintBox.Width - kOffscreenMargin) / domain.plantManager.plantDrawScale_PixelsPerMm)
             offScreenLowerRight_mm.Y = intround((this.drawingPaintBox.Height - kOffscreenMargin) / domain.plantManager.plantDrawScale_PixelsPerMm)
             allPlantsAreOffscreen = (lowerRight_mm.X <= offScreenUpperLeft_mm.X) || (lowerRight_mm.Y <= offScreenUpperLeft_mm.Y) || (upperLeft_mm.X >= offScreenLowerRight_mm.X) || (upperLeft_mm.Y >= offScreenLowerRight_mm.Y)
         }
+        let newScale_pixelsPerMm: float
         if (scaleAsWellAsMove) {
-            xScale_pixelsPerMm = safedivExcept(1.0 * this.drawingPaintBox.Width - 1.0 * kScaleToFitMargin * 2, size_mm.X, 0)
-            yScale_pixelsPerMm = safedivExcept(1.0 * this.drawingPaintBox.Height - 1.0 * kScaleToFitMargin * 2, size_mm.Y, 0)
-            newScale_pixelsPerMm = umath.min(xScale_pixelsPerMm, yScale_pixelsPerMm)
+            const xScale_pixelsPerMm = safedivExcept(1.0 * this.drawingPaintBox.Width - 1.0 * kScaleToFitMargin * 2, size_mm.X, 0)
+            const yScale_pixelsPerMm = safedivExcept(1.0 * this.drawingPaintBox.Height - 1.0 * kScaleToFitMargin * 2, size_mm.Y, 0)
+            newScale_pixelsPerMm = Math.min(xScale_pixelsPerMm, yScale_pixelsPerMm)
         } else {
             newScale_pixelsPerMm = 0
         }
         if (alwaysMove || allPlantsAreOffscreen) {
-            marginOffset_mm = safedivExcept(1.0 * kScaleToFitMargin, newScale_pixelsPerMm, 0)
-            domain.plantManager.plantDrawOffset_mm = usupport.setSinglePoint(-upperLeft_mm.X + marginOffset_mm, -upperLeft_mm.Y + marginOffset_mm)
+            const marginOffset_mm = safedivExcept(1.0 * kScaleToFitMargin, newScale_pixelsPerMm, 0)
+            domain.plantManager.plantDrawOffset_mm = setSinglePoint(-upperLeft_mm.X + marginOffset_mm, -upperLeft_mm.Y + marginOffset_mm)
         }
         if ((scaleAsWellAsMove) && (newScale_pixelsPerMm !== 0.0)) {
             // calculate new scale to fit all plants in drawing area and apply
@@ -3406,14 +3195,11 @@ export class TMainForm {
     
     // ------------------------------------------------------------------------------- *selected plants list 
     selectPlantAtPoint(aPoint: TPoint, shift: boolean): void {
-        let newCommand: PdCommand
         let newList: PdPlant[] = []
-        let plant: PdPlant
-        let i: short
-        
-        plant = domain.plantManager.findPlantAtPoint(aPoint)
+        const plant = domain.plantManager.findPlantAtPoint(aPoint)
+        if (!plant) return
         if ((shift) && (this.selectedPlants.length > 0)) {
-            for (i = 0; i <= this.selectedPlants.length - 1; i++) {
+            for (let i = 0; i <= this.selectedPlants.length - 1; i++) {
                 newList.push(this.selectedPlants[i])
             }
         }
@@ -3423,17 +3209,12 @@ export class TMainForm {
             newList.push(plant)
         }
         if (!this.twoListsAreIdentical(this.selectedPlants, newList)) {
-            newCommand = new PdChangeSelectedPlantsCommand(this.selectedPlants, newList)
+            const newCommand = new PdChangeSelectedPlantsCommand(this.selectedPlants, newList)
             this.doCommand(newCommand)
         }
     }
     
     selectPlantAtIndex(Shift: TShiftState, index: int): void {
-        let newCommand: PdCommand
-        let newList: PdPlant[] = []
-        let i: short
-        let plant: PdPlant
-        
         if (delphi_compatability.Application.terminated) {
             return
         }
@@ -3444,17 +3225,18 @@ export class TMainForm {
             if (this.selectedPlants.length <= 0) {
                 return
             }
-            newCommand = new PdChangeSelectedPlantsCommand(this.selectedPlants, newList)
+            const newCommand = new PdChangeSelectedPlantsCommand(this.selectedPlants, newList)
             this.doCommand(newCommand)
             return
         }
-        plant = this.plants[index]
+        const plant = this.plants[index]
         if (plant === null) {
             return
         }
+        let newList: PdPlant[] = []
         if ((delphi_compatability.TShiftStateEnum.ssCtrl in Shift)) {
             if (this.selectedPlants.length > 0) {
-                for (i = 0; i <= this.selectedPlants.length - 1; i++) {
+                for (let i = 0; i <= this.selectedPlants.length - 1; i++) {
                     newList.push(this.selectedPlants[i])
                 }
             }
@@ -3465,19 +3247,19 @@ export class TMainForm {
             }
         } else if ((delphi_compatability.TShiftStateEnum.ssShift in Shift)) {
             if (this.selectedPlants.length > 0) {
-                for (i = 0; i <= this.selectedPlants.length - 1; i++) {
+                for (let i = 0; i <= this.selectedPlants.length - 1; i++) {
                     newList.push(this.selectedPlants[i])
                 }
             }
             if ((this.lastSingleClickPlantIndex >= 0) && (this.lastSingleClickPlantIndex <= this.plants.length - 1) && (this.lastSingleClickPlantIndex !== index)) {
                 if (this.lastSingleClickPlantIndex < index) {
-                    for (i = this.lastSingleClickPlantIndex; i <= index; i++) {
+                    for (let i = this.lastSingleClickPlantIndex; i <= index; i++) {
                         if (newList.indexOf(this.plants[i]) < 0) {
                             newList.push(this.plants[i])
                         }
                     }
                 } else if (this.lastSingleClickPlantIndex > index) {
-                    for (i = this.lastSingleClickPlantIndex; i >= index; i--) {
+                    for (let i = this.lastSingleClickPlantIndex; i >= index; i--) {
                         if (newList.indexOf(this.plants[i]) < 0) {
                             newList.push(this.plants[i])
                         }
@@ -3487,7 +3269,7 @@ export class TMainForm {
         } else {
             if (this.isSelected(plant)) {
                 if (this.selectedPlants.length > 0) {
-                    for (i = 0; i <= this.selectedPlants.length - 1; i++) {
+                    for (let i = 0; i <= this.selectedPlants.length - 1; i++) {
                         newList.push(this.selectedPlants[i])
                     }
                 }
@@ -3497,16 +3279,13 @@ export class TMainForm {
             }
         }
         if (!this.twoListsAreIdentical(this.selectedPlants, newList)) {
-            newCommand = new PdChangeSelectedPlantsCommand(this.selectedPlants, newList)
+            const newCommand = new PdChangeSelectedPlantsCommand(this.selectedPlants, newList)
             this.doCommand(newCommand)
         }
     }
     
     twoListsAreIdentical(firstList: PdPlant[], secondList: PdPlant[]): boolean {
         let result = false
-        let i: long
-        
-        result = false
         if ((firstList === null) || (secondList === null)) {
             return result
         }
@@ -3516,7 +3295,7 @@ export class TMainForm {
         if (firstList.length <= 0) {
             return result
         }
-        for (i = 0; i <= firstList.length - 1; i++) {
+        for (let i = 0; i <= firstList.length - 1; i++) {
             if (firstList[i] !== secondList[i]) {
                 return result
             }
@@ -3531,12 +3310,10 @@ export class TMainForm {
     }
     
     deselectAllPlantsButFirst(): void {
-        let firstPlant: PdPlant
-        
         if (this.selectedPlants.length <= 0) {
             return
         }
-        firstPlant = this.focusedPlant()
+        const firstPlant = this.focusedPlant()
         this.selectedPlants= []
         this.selectedPlants.push(firstPlant)
         this.updateForChangeToPlantSelections()
@@ -3552,19 +3329,14 @@ export class TMainForm {
     }
     
     showOnePlantExclusively(drawNow: boolean): void {
-        let booleansList: PdBooleanValue[] = []
-        let i: short
-        let plant: PdPlant
-        let firstPlant: PdPlant
-        
-        firstPlant = this.focusedPlant()
+        const firstPlant = this.focusedPlant()
         try {
             ucursor.cursor_startWait()
-            booleansList = ucollect.TListCollection().Create()
-            for (i = 0; i <= this.plants.length - 1; i++) {
-                plant = this.plants[i]
+            const booleansList: PdBooleanValue[] = []
+            for (let i = 0; i <= this.plants.length - 1; i++) {
+                const plant = this.plants[i]
                 if (plant !== null) {
-                    booleansList.push(new PdBooleanValue().createWithBoolean(!(plant === firstPlant)))
+                    booleansList.push(new PdBooleanValue(!(plant === firstPlant)))
                 }
             }
             this.hideOrShowSomePlants(this.plants, booleansList, false, kDontDrawYet)
@@ -3583,9 +3355,7 @@ export class TMainForm {
     }
     
     redrawFocusedPlantOnly(drawNow: boolean): void {
-        let firstPlant: PdPlant
-        
-        firstPlant = this.focusedPlant()
+        const firstPlant = this.focusedPlant()
         if (firstPlant !== null) {
             firstPlant.recalculateBounds(kDrawNow)
             this.invalidateDrawingRect(firstPlant.boundsRect_pixels())
@@ -3611,7 +3381,6 @@ export class TMainForm {
     
     isSelected(plant: PdPlant): boolean {
         let result = false
-        result = false
         if ((this.selectedPlants === null) || (this.selectedPlants.length <= 0)) {
             return result
         }
@@ -3621,7 +3390,6 @@ export class TMainForm {
     
     isFocused(plant: PdPlant): boolean {
         let result = false
-        result = false
         if (plant === null) {
             return result
         }
@@ -3633,9 +3401,8 @@ export class TMainForm {
     }
     
     // selected plants list 
-    focusedPlant(): PdPlant {
-        let result = new PdPlant()
-        result = null
+    focusedPlant(): PdPlant | null {
+        let result: PdPlant | null = null
         if (this.selectedPlants.length > 0) {
             result = this.selectedPlants[0]
         }
@@ -3643,67 +3410,47 @@ export class TMainForm {
     }
     
     focusedPlantIndex(): short {
-        let result = 0
-        result = -1
+        let result = -1
         if (this.selectedPlants.length > 0) {
-            result = this.plants.indexOf(this.selectedPlants[0]
+            result = this.plants.indexOf(this.selectedPlants[0])
         }
         return result
     }
     
-    firstUnfocusedPlant(): PdPlant {
-        let result = new PdPlant()
-        result = null
+    firstUnfocusedPlant(): PdPlant | null {
+        let result: PdPlant | null = null
         if (this.selectedPlants.length > 1) {
             result = this.selectedPlants[1]
         }
         return result
     }
     
-    firstSelectedPlantInList(): PdPlant {
-        let result = new PdPlant()
-        let i: short
-        let plant: PdPlant
-        
-        result = null
+    firstSelectedPlantInList(): PdPlant | null {
         if (this.plants.length > 0) {
-            for (i = 0; i <= this.plants.length - 1; i++) {
-                plant = this.plants[i]
+            for (let i = 0; i <= this.plants.length - 1; i++) {
+                const plant = this.plants[i]
                 if (this.isSelected(plant)) {
-                    result = plant
-                    return result
+                    return plant
                 }
             }
         }
-        return result
+        return null
     }
     
-    lastSelectedPlantInList(): PdPlant {
-        let result = new PdPlant()
-        let i: short
-        let plant: PdPlant
-        
-        result = null
+    lastSelectedPlantInList(): PdPlant | null{
         if (this.plants.length > 0) {
-            for (i = this.plants.length - 1; i >= 0; i--) {
-                plant = this.plants[i]
+            for (let i = this.plants.length - 1; i >= 0; i--) {
+                const plant = this.plants[i]
                 if (this.isSelected(plant)) {
-                    result = plant
-                    return result
+                    return plant
                 }
             }
         }
-        return result
+        return null
     }
     
     // ------------------------------------------------------------------------------------- *list of plants 
     plantListDrawGridDrawCell(Col: int, Row: int, Rect: TRect, State: TGridDrawState): void {
-        let plant: PdPlant
-        let selected: boolean
-        let visibleRect: TRect
-        let remainderRect: TRect
-        let cText: char[] /* 255 + 1 */
-        
         if (delphi_compatability.Application.terminated) {
             return
         }
@@ -3713,15 +3460,15 @@ export class TMainForm {
             return
         }
         // set up plant pointer 
-        plant = this.plants[Row]
+        const plant = this.plants[Row]
         if (plant === null) {
             return
         }
-        selected = this.isSelected(plant)
+        const selected = this.isSelected(plant)
         // set up rectangles 
-        visibleRect = Rect
+        const visibleRect = new TRect()
         visibleRect.Right = visibleRect.Left + this.plantListDrawGrid.DefaultRowHeight
-        remainderRect = Rect
+        const remainderRect = new TRect()
         remainderRect.Left = remainderRect.Left + rWidth(visibleRect)
         // fill first box with white, rest with clHighlight if selected 
         this.plantListDrawGrid.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsSolid
@@ -3739,7 +3486,7 @@ export class TMainForm {
             this.plantListDrawGrid.Canvas.Font.Color = UNRESOLVED.clBtnText
         }
         this.plantListDrawGrid.Canvas.FillRect(remainderRect)
-        UNRESOLVED.strPCopy(cText, plant.getName())
+        const cText = plant.getName()
         // margin for text 
         remainderRect.Left = remainderRect.Left + 5
         UNRESOLVED.winprocs.drawText(this.plantListDrawGrid.Canvas.Handle, cText, len(cText), remainderRect, delphi_compatability.DT_LEFT)
@@ -3751,8 +3498,6 @@ export class TMainForm {
     plantListDrawGridMouseDown(Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
         let col: int
         let row: int
-        let hideList: PdPlant[] = []
-        let newCommand: PdCommand
         
         if (this.plants.length <= 0) {
             return
@@ -3767,6 +3512,7 @@ export class TMainForm {
             this.justDoubleClickedOnDrawGrid = false
         }
         col, row = this.plantListDrawGrid.MouseToCell(X, Y, col, row)
+        const hideList: PdPlant[] = []
         // does updating in command
         this.selectPlantAtIndex(Shift, row)
         if ((X <= 16) && (row >= 0) && (row <= this.plants.length - 1)) {
@@ -3775,7 +3521,7 @@ export class TMainForm {
                 return
             }
             hideList.push(plant)
-            newCommand = new PdHideOrShowCommand(hideList, !plant.hidden)
+            const newCommand = new PdHideOrShowCommand(hideList, !plant.hidden)
             this.doCommand(newCommand)
         }
         if (X > 16) {
@@ -3820,14 +3566,11 @@ export class TMainForm {
     
     // list box 
     moveSelectedPlantsUp(): void {
-        let i: short
-        let plant: PdPlant
-        
         if (this.plants.length > 1) {
             // start at 1 because you can't move first one up any more 
-            i = 1
+            let i = 1
             while (i <= this.plants.length - 1) {
-                plant = this.plants[i]
+                const plant = this.plants[i]
                 if (this.isSelected(plant)) {
                     this.plants.Move(i, i - 1)
                 }
@@ -3840,14 +3583,11 @@ export class TMainForm {
     }
     
     moveSelectedPlantsDown(): void {
-        let i: short
-        let plant: PdPlant
-        
         if (this.plants.length > 1) {
             // start at next to last one because you can't move last one down any more 
-            i = this.plants.length - 2
+            let i = this.plants.length - 2
             while (i >= 0) {
-                plant = this.plants[i]
+                const plant = this.plants[i]
                 if (this.isSelected(plant)) {
                     this.plants.Move(i, i + 1)
                 }
@@ -3912,10 +3652,6 @@ export class TMainForm {
     // mouse handling in drawing 
     // -------------------------------------------------------------------------- *mouse handling in drawing 
     PaintBoxMouseDown(Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
-        let newCommand: PdCommand
-        let anchorPoint: TPoint
-        let plantClickedOn: PdPlant
-        
         if (delphi_compatability.Application.terminated) {
             return
         }
@@ -3930,12 +3666,12 @@ export class TMainForm {
                 this.actionInProgress = false
             }
         }
+        let plantClickedOn: PdPlant
         switch (this.cursorModeForDrawing) {
             case kCursorModeSelectDrag:
                 if (Button === delphi_compatability.TMouseButton.mbRight) {
                     return
                 }
-                plantClickedOn = null
                 plantClickedOn = domain.plantManager.findPlantAtPoint(Point(X, Y))
                 if (plantClickedOn === null) {
                     if (domain.viewPlantsInMainWindowOnePlantAtATime()) {
@@ -3975,7 +3711,6 @@ export class TMainForm {
                 if (this.tabSet.tabIndex !== kTabPosing) {
                     this.tabSet.tabIndex = kTabPosing
                 }
-                plantClickedOn = null
                 plantClickedOn = domain.plantManager.findPlantAtPoint(Point(X, Y))
                 if (this.isFocused(plantClickedOn)) {
                     this.mouseDownSelectedPlantPartID, this.mouseDownSelectedPlantPartType = plantClickedOn.getInfoForPlantPartAtPoint(Point(X, Y), this.mouseDownSelectedPlantPartID, this.mouseDownSelectedPlantPartType)
@@ -3987,10 +3722,10 @@ export class TMainForm {
                 }
                 break
         }
-        anchorPoint = Point(X, Y)
+        const anchorPoint = Point(X, Y)
         // makes shift-click work as right-click
         this.commandList.rightButtonDown = (Button === delphi_compatability.TMouseButton.mbRight) || (delphi_compatability.TShiftStateEnum.ssShift in Shift)
-        newCommand = this.makeMouseCommand(anchorPoint, Shift)
+        const newCommand = this.makeMouseCommand(anchorPoint, Shift)
         if (newCommand !== null) {
             this.actionInProgress = this.commandList.mouseDown(newCommand, anchorPoint)
         } else {
@@ -4002,10 +3737,6 @@ export class TMainForm {
     }
     
     PaintBoxMouseMove(Shift: TShiftState, X: int, Y: int): void {
-        let shouldCancelHint: boolean
-        let plantClickedOn: PdPlant
-        let aRect: TRect
-        
         if (delphi_compatability.Application.terminated) {
             return
         }
@@ -4015,14 +3746,14 @@ export class TMainForm {
         if (this.cursorModeForDrawing === kCursorModeSelectDrag) {
             // show cursor that tells you you can resize plant when mouse is in resize rect, but only in select mode
             delphi_compatability.Screen.Cursor = delphi_compatability.crDefault
-            plantClickedOn = domain.plantManager.findPlantAtPoint(Point(X, Y))
+            const plantClickedOn = domain.plantManager.findPlantAtPoint(Point(X, Y))
             if ((domain.options.showSelectionRectangle) && (plantClickedOn !== null) && (plantClickedOn === this.focusedPlant()) && (plantClickedOn.pointIsInResizingRect(Point(X, Y)))) {
                 delphi_compatability.Screen.Cursor = delphi_compatability.crSizeNS
             }
         }
         if (!this.actionInProgress) {
             // show hint for plant mouse is over
-            shouldCancelHint = false
+            let shouldCancelHint = false
             if (this.hintActive && ((X < this.hintX - kHintRange) || (X > this.hintX + kHintRange) || (Y < this.hintY - kHintRange) || (Y > this.hintY + kHintRange))) {
                 if (this.hintForPlantAtPoint(Point(X, Y)) !== this.lastHintString) {
                     shouldCancelHint = true
@@ -4056,8 +3787,6 @@ export class TMainForm {
     }
     
     PaintBoxMouseUp(Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
-        let popupPositionInScreenCoords: TPoint
-        
         if (delphi_compatability.Application.terminated) {
             return
         }
@@ -4066,7 +3795,7 @@ export class TMainForm {
         }
         if ((Button === delphi_compatability.TMouseButton.mbRight) && (this.cursorModeForDrawing === kCursorModeSelectDrag)) {
             // show popup menu but only if in select/drag mode
-            popupPositionInScreenCoords = this.ClientToScreen(Point(X, Y))
+            const popupPositionInScreenCoords: TPoint = this.ClientToScreen(Point(X, Y))
             this.PlantPopupMenu.popup(popupPositionInScreenCoords.X, popupPositionInScreenCoords.Y)
             return
         }
@@ -4102,14 +3831,11 @@ export class TMainForm {
     }
     
     PaintBoxEndDrag(Target: TObject, X: int, Y: int): void {
-        let plantClickedOn: PdPlant
-        
         if (delphi_compatability.Application.terminated) {
             return
         }
         if ((Target !== null) && (Target instanceof delphi_compatability.TDrawGrid)) {
-            plantClickedOn = null
-            plantClickedOn = domain.plantManager.findPlantAtPoint(this.commandList.anchorPoint)
+            const plantClickedOn = domain.plantManager.findPlantAtPoint(this.commandList.anchorPoint)
             if (plantClickedOn !== null) {
                 if (((Target).owner instanceof ubreedr.TBreederForm)) {
                     ubreedr.BreederForm.copyPlantToPoint(plantClickedOn, X, Y)
@@ -4121,9 +3847,8 @@ export class TMainForm {
         }
     }
     
-    makeMouseCommand(point: TPoint, shift: TShiftState): PdCommand {
-        let result = new PdCommand()
-        result = null
+    makeMouseCommand(point: TPoint, shift: TShiftState): PdCommand | null {
+        let result: PdCommand | null
         switch (this.cursorModeForDrawing) {
             case kCursorModeSelectDrag:
                 if ((delphi_compatability.TShiftStateEnum.ssShift in shift) && (delphi_compatability.TShiftStateEnum.ssCtrl in shift)) {
@@ -4150,7 +3875,7 @@ export class TMainForm {
                     (result).shift = true
                 } else {
                     result = new PdChangeMagnificationCommand()
-                    (result).shift = (delphi_compatability.TShiftStateEnum.ssShift in shift)
+                    result.shift = (delphi_compatability.TShiftStateEnum.ssShift in shift)
                 }
                 break
             case kCursorModeRotate:
@@ -4171,7 +3896,7 @@ export class TMainForm {
     selectPlantsInRubberBandBox(): void {
         const newList: PdPlant[] = []
         
-        const rubberBandRect = Rect(umath.intMin(this.rubberBandStartDragPoint.X, this.rubberBandLastDrawPoint.X), umath.intMin(this.rubberBandStartDragPoint.Y, this.rubberBandLastDrawPoint.Y), umath.intMax(this.rubberBandStartDragPoint.X, this.rubberBandLastDrawPoint.X), umath.intMax(this.rubberBandStartDragPoint.Y, this.rubberBandLastDrawPoint.Y))
+        const rubberBandRect = Rect(intMin(this.rubberBandStartDragPoint.X, this.rubberBandLastDrawPoint.X), intMin(this.rubberBandStartDragPoint.Y, this.rubberBandLastDrawPoint.Y), intMax(this.rubberBandStartDragPoint.X, this.rubberBandLastDrawPoint.X), intMax(this.rubberBandStartDragPoint.Y, this.rubberBandLastDrawPoint.Y))
         domain.plantManager.fillListWithPlantsInRectangle(rubberBandRect, newList)
         if (!this.twoListsAreIdentical(this.selectedPlants, newList)) {
             const newCommand = new PdChangeSelectedPlantsCommand(this.selectedPlants, newList)
@@ -4194,11 +3919,8 @@ export class TMainForm {
     }
     
     drawOrUndrawRubberBandBox(): void {
-        let theDC: HDC
-        let drawRect: TRect
-        
-        theDC = UNRESOLVED.getDC(0)
-        drawRect = Rect(this.ClientOrigin.X + this.drawingPaintBox.Left + this.rubberBandStartDragPoint.X, this.ClientOrigin.Y + this.drawingPaintBox.Top + this.rubberBandStartDragPoint.Y, this.ClientOrigin.X + this.drawingPaintBox.Left + this.rubberBandLastDrawPoint.X, this.ClientOrigin.Y + this.drawingPaintBox.Top + this.rubberBandLastDrawPoint.Y)
+        const theDC: HDC = UNRESOLVED.getDC(0)
+        const drawRect = Rect(this.ClientOrigin.X + this.drawingPaintBox.Left + this.rubberBandStartDragPoint.X, this.ClientOrigin.Y + this.drawingPaintBox.Top + this.rubberBandStartDragPoint.Y, this.ClientOrigin.X + this.drawingPaintBox.Left + this.rubberBandLastDrawPoint.X, this.ClientOrigin.Y + this.drawingPaintBox.Top + this.rubberBandLastDrawPoint.Y)
         UNRESOLVED.patBlt(theDC, drawRect.Left, drawRect.Top, drawRect.Right - drawRect.Left, 1, delphi_compatability.DSTINVERT)
         UNRESOLVED.patBlt(theDC, drawRect.Right, drawRect.Top, 1, drawRect.Bottom - drawRect.Top, delphi_compatability.DSTINVERT)
         UNRESOLVED.patBlt(theDC, drawRect.Left, drawRect.Bottom, drawRect.Right - drawRect.Left, 1, delphi_compatability.DSTINVERT)
@@ -4232,11 +3954,7 @@ export class TMainForm {
     
     hintForPlantAtPoint(aPoint: TPoint): string {
         let result = ""
-        let plant: PdPlant
-        
-        result = ""
-        plant = null
-        plant = domain.plantManager.findPlantAtPoint(aPoint)
+        const plant = domain.plantManager.findPlantAtPoint(aPoint)
         if (plant !== null) {
             // v1.60 final
             result = plant.getHint(aPoint)
@@ -4310,14 +4028,11 @@ export class TMainForm {
     }
     
     sectionPopupMenuHelpClick(): void {
-        let section: PdSection
-        let helpID: string
-        
-        section = this.currentSection()
+        const section = this.currentSection()
         if (section === null) {
             return
         }
-        helpID = this.sectionHelpIDForSectionName(section.getName())
+        const helpID = this.sectionHelpIDForSectionName(section.getName())
         if (helpID !== "") {
             delphi_compatability.Application.HelpJump(helpID)
         }
@@ -4325,12 +4040,10 @@ export class TMainForm {
     
     // new v1.4
     paramPopupMenuCopyNameClick(): void {
-        let textToCopy: string
-        let newText: string
-        
         if (this.selectedParameterPanel === null) {
             return
         }
+        let textToCopy: string
         if (this.currentSection() !== null) {
             textToCopy = this.currentSection().getName() + ": "
         } else {
@@ -4339,7 +4052,7 @@ export class TMainForm {
         textToCopy = textToCopy + this.selectedParameterPanel.Caption
         if (usupport.found("[", textToCopy)) {
             // v2.1 deal with orthogonal sections
-            newText = stringUpTo(stringBeyond(textToCopy, "["), "]")
+            let newText = stringUpTo(stringBeyond(textToCopy, "["), "]")
             newText = newText + ": " + trim(stringUpTo(stringBeyond(textToCopy, ":"), "["))
             textToCopy = newText
         }
@@ -4412,62 +4125,46 @@ export class TMainForm {
     }
     
     centerDrawingClick(): void {
-        let newCommand: PdCommand
-        
-        newCommand = new PdCenterDrawingCommand()
+        const newCommand = new PdCenterDrawingCommand()
         this.doCommand(newCommand)
     }
     
     magnificationPercentClick(): void {
-        let newScale: float
-        
-        newScale = this.magnifyScaleForText(this.magnificationPercent.Text)
+        const newScale = this.magnifyScaleForText(this.magnificationPercent.Text)
         if ((newScale !== domain.plantDrawScale_PixelsPerMm())) {
             this.changeMagnificationWithoutClick()
         }
     }
     
     magnificationPercentExit(): void {
-        let newScale: float
-        
-        newScale = this.magnifyScaleForText(this.magnificationPercent.Text)
+        const newScale = this.magnifyScaleForText(this.magnificationPercent.Text)
         if ((newScale !== domain.plantDrawScale_PixelsPerMm())) {
             this.changeMagnificationWithoutClick()
         }
     }
     
     magnifyPlusClick(): void {
-        let newCommand: PdCommand
-        
-        newCommand = new PdChangeMagnificationCommand(domain.plantDrawScale_PixelsPerMm() * 1.5, Point(this.drawingPaintBox.Width / 2, this.drawingPaintBox.Height / 2))
+        const newCommand = new PdChangeMagnificationCommand(domain.plantDrawScale_PixelsPerMm() * 1.5, Point(this.drawingPaintBox.Width / 2, this.drawingPaintBox.Height / 2))
         this.doCommand(newCommand)
     }
     
     magnifyMinusClick(): void {
-        let newCommand: PdCommand
-        
-        newCommand = new PdChangeMagnificationCommand(domain.plantDrawScale_PixelsPerMm() * 0.75, Point(this.drawingPaintBox.Width / 2, this.drawingPaintBox.Height / 2))
+        const newCommand = new PdChangeMagnificationCommand(domain.plantDrawScale_PixelsPerMm() * 0.75, Point(this.drawingPaintBox.Width / 2, this.drawingPaintBox.Height / 2))
         this.doCommand(newCommand)
     }
     
     // popup menu commands 
     // toolbar 
     changeMagnificationWithoutClick(): void {
-        let newCommand: PdCommand
-        
-        newCommand = new PdChangeMagnificationCommand(this.magnifyScaleForText(this.magnificationPercent.Text), Point(this.drawingPaintBox.Width / 2, this.drawingPaintBox.Height / 2))
+        const newCommand = new PdChangeMagnificationCommand(this.magnifyScaleForText(this.magnificationPercent.Text), Point(this.drawingPaintBox.Width / 2, this.drawingPaintBox.Height / 2))
         this.doCommand(newCommand)
     }
     
     magnifyScaleForText(aText: string): float {
-        let result = 0.0
-        let intResult: int
-        let oldIntResult: int
-        
-        result = 1.0
+        let result = 1.0
         try {
-            oldIntResult = intround(domain.plantDrawScale_PixelsPerMm() * 100.0)
-            intResult = StrToIntDef(stringUpTo(aText, "%"), -1)
+            const oldIntResult = intround(domain.plantDrawScale_PixelsPerMm() * 100.0)
+            let intResult: int = StrToIntDef(stringUpTo(aText, "%"), -1)
             if ((intResult <= 0)) {
                 intResult = oldIntResult
                 this.magnificationPercent.Text = IntToStr(intResult) + "%"
@@ -4483,44 +4180,31 @@ export class TMainForm {
         return result
     }
     
-    magnifyOrReduce(newScale_PixelsPerMm: float, point_pixels: TPoint, drawNow: boolean): TPoint {
-        let result = new TPoint()
-        let oldOffset_mm: SinglePoint
-        let pointInOldScale_mm: SinglePoint
-        let pointInNewScale_mm: SinglePoint
-        let newOffset_mm: SinglePoint
-        let oldScale_PixelsPerMm: float
-        
+    magnifyOrReduce(newScale_PixelsPerMm: float, point_pixels: TPoint, drawNow: boolean) {
         this.recalculateAllPlantBoundsRects(kDontDrawYet)
-        oldScale_PixelsPerMm = domain.plantDrawScale_PixelsPerMm()
-        oldOffset_mm = domain.plantDrawOffset_mm()
-        pointInOldScale_mm = usupport.setSinglePoint(intround(point_pixels.X / oldScale_PixelsPerMm), intround(point_pixels.Y / oldScale_PixelsPerMm))
-        pointInNewScale_mm = usupport.setSinglePoint(intround(point_pixels.X / newScale_PixelsPerMm), intround(point_pixels.Y / newScale_PixelsPerMm))
-        newOffset_mm = usupport.setSinglePoint(oldOffset_mm.x + pointInNewScale_mm.x - pointInOldScale_mm.x, oldOffset_mm.y + pointInNewScale_mm.y - pointInOldScale_mm.y)
+        const oldScale_PixelsPerMm = domain.plantDrawScale_PixelsPerMm()
+        const oldOffset_mm = domain.plantDrawOffset_mm()
+        const pointInOldScale_mm = setSinglePoint(intround(point_pixels.X / oldScale_PixelsPerMm), intround(point_pixels.Y / oldScale_PixelsPerMm))
+        const pointInNewScale_mm = setSinglePoint(intround(point_pixels.X / newScale_PixelsPerMm), intround(point_pixels.Y / newScale_PixelsPerMm))
+        const newOffset_mm = setSinglePoint(oldOffset_mm.x + pointInNewScale_mm.x - pointInOldScale_mm.x, oldOffset_mm.y + pointInNewScale_mm.y - pointInOldScale_mm.y)
         domain.plantManager.plantDrawScale_PixelsPerMm = intround(newScale_PixelsPerMm * 100.0) / 100.0
         domain.plantManager.plantDrawOffset_mm = newOffset_mm
         if (drawNow) {
             this.redrawEverything()
         }
         this.magnificationPercent.Text = IntToStr(intround(domain.plantDrawScale_PixelsPerMm() * 100.0)) + "%"
-        return result
     }
     
     upperLeftMostPlantBoundsRectPoint_mm(): TPoint {
-        let result = new TPoint()
-        let plant: PdPlant
-        let i: short
-        let topLeft_mm: TPoint
-        let initialized: boolean
-        
-        result = Point(0, 0)
-        initialized = false
+        let result = Point(0, 0)
+        let initialized = false
         if (this.plants.length > 0) {
-            for (i = 0; i <= this.plants.length - 1; i++) {
-                plant = this.plants[i]
+            for (let i = 0; i <= this.plants.length - 1; i++) {
+                const plant = this.plants[i]
                 if (plant.hidden) {
                     continue
                 }
+                const topLeft_mm = new TPoint()
                 topLeft_mm.X = intround(plant.boundsRect_pixels().Left / domain.plantDrawScale_PixelsPerMm() - domain.plantDrawOffset_mm().x)
                 topLeft_mm.Y = intround(plant.boundsRect_pixels().Top / domain.plantDrawScale_PixelsPerMm() - domain.plantDrawOffset_mm().y)
                 if (!initialized) {
@@ -4540,20 +4224,15 @@ export class TMainForm {
     }
     
     lowerRightMostPlantBoundsRectPoint_mm(): TPoint {
-        let result = new TPoint()
-        let plant: PdPlant
-        let i: short
-        let bottomRight_mm: TPoint
-        let initialized: boolean
-        
-        result = Point(0, 0)
-        initialized = false
+        let result = Point(0, 0)
+        let initialized = false
         if (this.plants.length > 0) {
-            for (i = 0; i <= this.plants.length - 1; i++) {
-                plant = this.plants[i]
+            for (let i = 0; i <= this.plants.length - 1; i++) {
+                const plant = this.plants[i]
                 if (plant.hidden) {
                     continue
                 }
+                const bottomRight_mm = new TPoint()
                 bottomRight_mm.X = intround(plant.boundsRect_pixels().Right / domain.plantDrawScale_PixelsPerMm() - domain.plantDrawOffset_mm().x)
                 bottomRight_mm.Y = intround(plant.boundsRect_pixels().Bottom / domain.plantDrawScale_PixelsPerMm() - domain.plantDrawOffset_mm().y)
                 if (!initialized) {
@@ -4573,40 +4252,32 @@ export class TMainForm {
     }
     
     xLocationEditExit(): void {
-        let increment: int
-        let oldXLocation: int
-        let newXLocation: int
-        let direction: short
-        
         if (this.focusedPlant() === null) {
             return
         }
-        oldXLocation = this.focusedPlant().basePoint_pixels().X
-        newXLocation = StrToIntDef(this.xLocationEdit.Text, oldXLocation)
+        const oldXLocation: int = this.focusedPlant().basePoint_pixels().X
+        const newXLocation: int = StrToIntDef(this.xLocationEdit.Text, oldXLocation)
         if (newXLocation !== oldXLocation) {
-            increment = newXLocation - oldXLocation
+            const increment = newXLocation - oldXLocation
+            let direction: short
             if (increment > 0) {
-                direction = utdomove.kRight
+                direction = kRight
             } else {
-                direction = utdomove.kLeft
+                direction = kLeft
             }
             this.nudgeSelectedPlantsByPixelsAndDirection(increment, direction)
         }
     }
     
     yLocationEditExit(): void {
-        let increment: int
-        let oldYLocation: int
-        let newYLocation: int
-        let direction: short
-        
         if (this.focusedPlant() === null) {
             return
         }
-        oldYLocation = this.focusedPlant().basePoint_pixels().Y
-        newYLocation = StrToIntDef(this.yLocationEdit.Text, oldYLocation)
+        const oldYLocation = this.focusedPlant().basePoint_pixels().Y
+        const newYLocation = StrToIntDef(this.yLocationEdit.Text, oldYLocation)
         if (newYLocation !== oldYLocation) {
-            increment = newYLocation - oldYLocation
+            const increment = newYLocation - oldYLocation
+            let direction: short
             if (increment > 0) {
                 direction = kDown
             } else {
@@ -4645,16 +4316,13 @@ export class TMainForm {
     }
     
     checkRotationEditAgainstBounds(edit: TEdit): void {
-        let newRotation: short
-        let oldRotation: short
-        
         if (this.internalChange) {
             return
         }
-        newRotation = StrToIntDef(edit.Text, 0)
-        oldRotation = newRotation
+        let newRotation = StrToIntDef(edit.Text, 0)
+        const oldRotation = newRotation
         if (newRotation < -360) {
-            newRotation = 360 - (abs(newRotation) - 360)
+            newRotation = 360 - (Math.abs(newRotation) - 360)
         }
         if (newRotation > 360) {
             newRotation = -360 + (newRotation - 360)
@@ -4703,13 +4371,10 @@ export class TMainForm {
     }
     
     changeSelectedPlantRotations(edit: TEdit, rotateDirection: short, changeInRotation: short): void {
-        let newRotation: short
-        let newCommand: PdCommand
-        
         if (this.internalChange) {
             return
         }
-        newRotation = StrToIntDef(edit.Text, 0) + changeInRotation
+        let newRotation = StrToIntDef(edit.Text, 0) + changeInRotation
         edit.Text = IntToStr(newRotation)
         // need this? 
         this.checkRotationEditAgainstBounds(edit)
@@ -4719,23 +4384,18 @@ export class TMainForm {
             //should be disabled, but
             return
         }
-        newCommand = new PdRotateCommand(this.selectedPlants, rotateDirection, newRotation)
+        const newCommand = new PdRotateCommand(this.selectedPlants, rotateDirection, newRotation)
         this.doCommand(newCommand)
     }
     
     resetRotationsClick(): void {
-        let newCommand: PdCommand
-        let i: short
-        let plant: PdPlant
-        let allRotationsAreZero: boolean
-        
         if (this.selectedPlants.length <= 0) {
             return
         }
         // don't do if none of the selected plants have rotations other than zero 
-        allRotationsAreZero = true
-        for (i = 0; i <= this.selectedPlants.length - 1; i++) {
-            plant = this.selectedPlants[i]
+        let allRotationsAreZero = true
+        for (let i = 0; i <= this.selectedPlants.length - 1; i++) {
+            const plant = this.selectedPlants[i]
             if ((plant.xRotation !== 0) || (plant.yRotation !== 0) || (plant.zRotation !== 0)) {
                 allRotationsAreZero = false
                 break
@@ -4744,18 +4404,16 @@ export class TMainForm {
         if (allRotationsAreZero) {
             return
         }
-        newCommand = new PdResetRotationsCommand(this.selectedPlants)
+        const newCommand = new PdResetRotationsCommand(this.selectedPlants)
         this.doCommand(newCommand)
     }
     
     drawingScaleEditExit(): void {
-        let oldValue: float
-        let newValue: float
-        
         if (this.focusedPlant() === null) {
             return
         }
-        oldValue = this.focusedPlant().drawingScale_PixelsPerMm
+        const oldValue = this.focusedPlant().drawingScale_PixelsPerMm
+        let newValue: float
         try {
             newValue = StrToFloat(this.drawingScaleEdit.Text)
         } catch (e) {
@@ -4767,42 +4425,34 @@ export class TMainForm {
     }
     
     drawingScaleSpinUpClick(): void {
-        let resizeMultiplier: float
-        
         if (this.focusedPlant() === null) {
             return
         }
-        resizeMultiplier = domain.options.resizeKeyUpMultiplierPercent / 100.0
+        const resizeMultiplier = domain.options.resizeKeyUpMultiplierPercent / 100.0
         this.resizeSelectedPlantsWithMultiplierOrNewAmount(resizeMultiplier, 0)
     }
     
     drawingScaleSpinDownClick(): void {
-        let resizeMultiplier: float
-        
         if (this.focusedPlant() === null) {
             return
         }
-        resizeMultiplier = safedivExcept(1.0, domain.options.resizeKeyUpMultiplierPercent / 100.0, 0.9)
+        const resizeMultiplier = safedivExcept(1.0, domain.options.resizeKeyUpMultiplierPercent / 100.0, 0.9)
         this.resizeSelectedPlantsWithMultiplierOrNewAmount(resizeMultiplier, 0)
     }
     
     makeEqualWidthClick(): void {
-        let newCommand: PdCommand
-        
         if (this.selectedPlants.length <= 0) {
             return
         }
-        newCommand = new PdResizePlantsToSameWidthOrHeightCommand(this.selectedPlants, rWidth(this.focusedPlant().boundsRect_pixels()), 0, kChangeWidth)
+        const newCommand = new PdResizePlantsToSameWidthOrHeightCommand(this.selectedPlants, rWidth(this.focusedPlant().boundsRect_pixels()), 0, kChangeWidth)
         this.doCommand(newCommand)
     }
     
     makeEqualHeightClick(): void {
-        let newCommand: PdCommand
-        
         if (this.selectedPlants.length <= 0) {
             return
         }
-        newCommand = new PdResizePlantsToSameWidthOrHeightCommand(this.selectedPlants, 0, rHeight(this.focusedPlant().boundsRect_pixels()), kChangeHeight)
+        const newCommand = new PdResizePlantsToSameWidthOrHeightCommand(this.selectedPlants, 0, rHeight(this.focusedPlant().boundsRect_pixels()), kChangeHeight)
         this.doCommand(newCommand)
     }
     
@@ -4831,12 +4481,10 @@ export class TMainForm {
     }
     
     alignSelectedPlants(alignDirection: short): void {
-        let newCommand: PdCommand
-        
         if (this.selectedPlants.length <= 1) {
             return
         }
-        newCommand = new PdAlignPlantsCommand(this.selectedPlants, this.focusedPlant().boundsRect_pixels(), alignDirection)
+        const newCommand = new PdAlignPlantsCommand(this.selectedPlants, this.focusedPlant().boundsRect_pixels(), alignDirection)
         this.doCommand(newCommand)
     }
     
@@ -4857,12 +4505,10 @@ export class TMainForm {
     }
     
     packPlantsClick(): void {
-        let newCommand: PdCommand
-        
         if (this.selectedPlants.length <= 1) {
             return
         }
-        newCommand = new PdPackPlantsCommand(this.selectedPlants, this.focusedPlant().boundsRect_pixels())
+        const newCommand = new PdPackPlantsCommand(this.selectedPlants, this.focusedPlant().boundsRect_pixels())
         this.doCommand(newCommand)
     }
     
@@ -4898,11 +4544,10 @@ export class TMainForm {
     }
     
     nudgeSelectedPlantsByKey(key: byte): void {
-        let direction: short
-        
         if (this.selectedPlants.length <= 0) {
             return
         }
+        let direction: short
         switch (key) {
             case delphi_compatability.VK_LEFT:
                 direction = utdomove.kLeft
@@ -4924,13 +4569,10 @@ export class TMainForm {
     }
     
     nudgeSelectedPlantsByPixelsAndDirection(pixels: int, direction: short): void {
-        let newCommand: PdCommand
-        let movePoint: TPoint
-        
         if (this.selectedPlants.length <= 0) {
             return
         }
-        movePoint = Point(0, 0)
+        const movePoint = Point(0, 0)
         switch (direction) {
             case kUp:
                 movePoint.Y = -pixels
@@ -4938,23 +4580,22 @@ export class TMainForm {
             case kDown:
                 movePoint.Y = pixels
                 break
-            case utdomove.kLeft:
+            case kLeft:
                 movePoint.X = -pixels
                 break
-            case utdomove.kRight:
+            case kRight:
                 movePoint.X = pixels
                 break
         }
-        newCommand = new PdDragCommand(this.selectedPlants, movePoint)
+        const newCommand = new PdDragCommand(this.selectedPlants, movePoint)
         this.doCommand(newCommand)
     }
     
     resizeSelectedPlantsByKey(key: byte): void {
-        let resizeMultiplier: float
-        
         if (this.selectedPlants.length <= 0) {
             return
         }
+        let resizeMultiplier: float
         if ((key === delphi_compatability.VK_LEFT) || (key === delphi_compatability.VK_UP)) {
             resizeMultiplier = domain.options.resizeKeyUpMultiplierPercent / 100.0
         } else if ((key === delphi_compatability.VK_RIGHT) || (key === delphi_compatability.VK_DOWN)) {
@@ -4966,11 +4607,10 @@ export class TMainForm {
     }
     
     resizeSelectedPlantsWithMultiplierOrNewAmount(multiplier: float, newAmount_pixelsPerMm: float): void {
-        let newCommand: PdCommand
-        
         if (this.selectedPlants.length <= 0) {
             return
         }
+        let newCommand: PdCommand
         if (multiplier !== 0) {
             newCommand = new PdResizePlantsCommand(this.selectedPlants, multiplier)
         } else {
@@ -5007,38 +4647,32 @@ export class TMainForm {
     // tab set 
     // ------------------------------------------------------------------------------------ *tab set 
     lifeCycleShowing(): boolean {
-        let result = false
-        result = (this.tabSet.tabIndex === kTabLifeCycle)
+        const result = (this.tabSet.tabIndex === kTabLifeCycle)
         return result
     }
     
     rotationsShowing(): boolean {
-        let result = false
-        result = (this.tabSet.tabIndex === kTabRotations)
+        const result = (this.tabSet.tabIndex === kTabRotations)
         return result
     }
     
     parametersShowing(): boolean {
-        let result = false
-        result = (this.tabSet.tabIndex === kTabParameters)
+        const result = (this.tabSet.tabIndex === kTabParameters)
         return result
     }
     
     statsShowing(): boolean {
-        let result = false
-        result = (this.tabSet.tabIndex === kTabStatistics)
+        const result = (this.tabSet.tabIndex === kTabStatistics)
         return result
     }
     
     noteShowing(): boolean {
-        let result = false
-        result = (this.tabSet.tabIndex === kTabNote)
+        const result = (this.tabSet.tabIndex === kTabNote)
         return result
     }
     
     posingShowing(): boolean {
-        let result = false
-        result = (this.tabSet.tabIndex === kTabPosing)
+        const result = (this.tabSet.tabIndex === kTabPosing)
         return result
     }
     
@@ -5104,9 +4738,7 @@ export class TMainForm {
     }
     
     updateForChangeToPlantRotations(): void {
-        let firstPlant: PdPlant
-        
-        firstPlant = this.focusedPlant()
+        const firstPlant = this.focusedPlant()
         if (firstPlant !== null) {
             this.xRotationEdit.Text = IntToStr(intround(firstPlant.xRotation))
             this.yRotationEdit.Text = IntToStr(intround(firstPlant.yRotation))
@@ -5122,9 +4754,7 @@ export class TMainForm {
     }
     
     updateForChangeToSelectedPlantsDrawingScale(): void {
-        let firstPlant: PdPlant
-        
-        firstPlant = this.focusedPlant()
+        const firstPlant = this.focusedPlant()
         if (firstPlant !== null) {
             this.drawingScaleEdit.Text = usupport.digitValueString(firstPlant.drawingScale_PixelsPerMm)
         } else {
@@ -5134,9 +4764,7 @@ export class TMainForm {
     }
     
     updateForChangeToSelectedPlantsLocation(): void {
-        let firstPlant: PdPlant
-        
-        firstPlant = this.focusedPlant()
+        const firstPlant = this.focusedPlant()
         if (firstPlant !== null) {
             this.xLocationEdit.Text = usupport.digitValueString(firstPlant.basePoint_pixels().X)
             this.yLocationEdit.Text = usupport.digitValueString(firstPlant.basePoint_pixels().Y)
@@ -5150,10 +4778,8 @@ export class TMainForm {
     
     // ------------------------------------------------------- *life cycle panel drawing and mouse handling 
     updateLifeCyclePanelForFirstSelectedPlant(): void {
-        let firstPlant: PdPlant
-        
         this.updatePlantNameLabel(kTabLifeCycle)
-        firstPlant = this.focusedPlant()
+        const firstPlant = this.focusedPlant()
         this.lifeCycleDaysEdit.Enabled = firstPlant !== null
         this.lifeCycleDaysSpin.Enabled = firstPlant !== null
         this.lifeCycleDragger.Enabled = firstPlant !== null
@@ -5187,17 +4813,17 @@ export class TMainForm {
     }
     
     updatePlantNameLabel(tabIndex: short): void {
-        let firstPlant: PdPlant
-        let labelToChange: TLabel
-        let payAttentionToOtherPlants: boolean
-        let prefix: string
-        let handlingDifferently: boolean
+        // let firstPlant: PdPlant
+        // let labelToChange: TLabel
+        // let payAttentionToOtherPlants: boolean
+        // let prefix: string
+        // let handlingDifferently: boolean
         
-        firstPlant = this.focusedPlant()
-        payAttentionToOtherPlants = true
-        handlingDifferently = false
-        prefix = ""
-        labelToChange = null
+        const firstPlant = this.focusedPlant()
+        let payAttentionToOtherPlants = true
+        let handlingDifferently = false
+        let prefix = ""
+        let labelToChange: string | null = null
         switch (tabIndex) {
             case kTabRotations:
                 labelToChange = this.arrangementPlantName
@@ -5241,12 +4867,10 @@ export class TMainForm {
     }
     
     animateGrowthClick(): void {
-        let newCommand: PdCommand
-        
         if (this.selectedPlants.length <= 0) {
             return
         }
-        newCommand = new PdAnimatePlantCommand(this.selectedPlants)
+        const newCommand = new PdAnimatePlantCommand(this.selectedPlants)
         this.doCommand(newCommand)
     }
     
@@ -5300,14 +4924,11 @@ export class TMainForm {
     }
     
     lifeCycleDaysEditExit(): void {
-        let newAge: short
-        let plant: PdPlant
-        
-        plant = this.focusedPlant()
+        const plant = this.focusedPlant()
         if (plant === null) {
             return
         }
-        newAge = StrToIntDef(this.lifeCycleDaysEdit.Text, 0)
+        let newAge = StrToIntDef(this.lifeCycleDaysEdit.Text, 0)
         if (newAge === plant.age) {
             return
         }
@@ -5319,25 +4940,21 @@ export class TMainForm {
     }
     
     lifeCycleDaysSpinUpClick(): void {
-        let newAge: short
-        
         if (this.focusedPlant() === null) {
             return
         }
-        newAge = umath.intMin(StrToIntDef(this.lifeCycleDaysEdit.Text, 0) + 1, this.focusedPlant().pGeneral.ageAtMaturity)
-        newAge = umath.intMax(0, newAge)
+        let newAge = intMin(StrToIntDef(this.lifeCycleDaysEdit.Text, 0) + 1, this.focusedPlant().pGeneral.ageAtMaturity)
+        newAge = intMax(0, newAge)
         this.lifeCycleDaysEdit.Text = IntToStr(newAge)
         this.changeSelectedPlantAges(newAge)
     }
     
     lifeCycleDaysSpinDownClick(): void {
-        let newAge: short
-        
         if (this.focusedPlant() === null) {
             return
         }
-        newAge = umath.intMin(StrToIntDef(this.lifeCycleDaysEdit.Text, 0) - 1, this.focusedPlant().pGeneral.ageAtMaturity)
-        newAge = umath.intMax(0, newAge)
+        let newAge = intMin(StrToIntDef(this.lifeCycleDaysEdit.Text, 0) - 1, this.focusedPlant().pGeneral.ageAtMaturity)
+        newAge = intMax(0, newAge)
         this.lifeCycleDaysEdit.Text = IntToStr(newAge)
         this.changeSelectedPlantAges(newAge)
     }
@@ -5359,9 +4976,6 @@ export class TMainForm {
     }
     
     lifeCycleDraggerMouseUp(Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
-        let firstPlant: PdPlant
-        let newAge: short
-        
         if (this.lifeCycleDragging) {
             this.undrawLifeCycleDraggerLine()
             this.lifeCycleDragger.Left = this.lifeCycleDragger.Left - (this.lifeCycleDraggingStartPos - X)
@@ -5371,10 +4985,11 @@ export class TMainForm {
             if (this.lifeCycleDragger.Left + this.lifeCycleDragger.Width > this.lifeCycleGraphImage.Left + this.lifeCycleGraphImage.Width) {
                 this.lifeCycleDragger.Left = this.lifeCycleGraphImage.Left + this.lifeCycleGraphImage.Width - this.lifeCycleDragger.Width
             }
-            firstPlant = this.focusedPlant()
+            const firstPlant = this.focusedPlant()
             if (firstPlant === null) {
                 throw new Error("Problem: First plant is nil during drag in method TMainForm.lifeCycleDraggerMouseUp.")
             }
+            let newAge: int
             if ((this.lifeCycleGraphImage.Width - this.lifeCycleDragger.Width) !== 0) {
                 newAge = intround(firstPlant.pGeneral.ageAtMaturity * (this.lifeCycleDragger.Left - this.lifeCycleGraphImage.Left) / (this.lifeCycleGraphImage.Width - this.lifeCycleDragger.Width))
             } else {
@@ -5387,11 +5002,8 @@ export class TMainForm {
     }
     
     drawLifeCycleDraggerLine(pos: int): int {
-        let result = 0
-        let theDC: HDC
-        
-        theDC = UNRESOLVED.getDC(0)
-        result = this.ClientOrigin.X + this.plantFocusPanel.Left + this.lifeCyclePanel.Left + this.lifeCycleDragger.Left + pos + 2
+        const theDC: HDC = UNRESOLVED.getDC(0)
+        const result = this.ClientOrigin.X + this.plantFocusPanel.Left + this.lifeCyclePanel.Left + this.lifeCycleDragger.Left + pos + 2
         UNRESOLVED.patBlt(theDC, result, this.ClientOrigin.Y + this.plantFocusPanel.Top + this.lifeCyclePanel.Top + this.lifeCycleDragger.Top, 1, this.lifeCycleDragger.Height, delphi_compatability.DSTINVERT)
         UNRESOLVED.releaseDC(0, theDC)
         this.lifeCycleDraggingNeedToRedraw = true
@@ -5399,34 +5011,28 @@ export class TMainForm {
     }
     
     undrawLifeCycleDraggerLine(): void {
-        let theDC: HDC
-        
         if (!this.lifeCycleDraggingNeedToRedraw) {
             return
         }
-        theDC = UNRESOLVED.getDC(0)
+        const theDC: HDC = UNRESOLVED.getDC(0)
         UNRESOLVED.patBlt(theDC, this.lifeCycleDraggingLastDrawPos, this.ClientOrigin.Y + this.plantFocusPanel.Top + this.lifeCyclePanel.Top + this.lifeCycleDragger.Top, 1, this.lifeCycleDragger.Height, delphi_compatability.DSTINVERT)
         UNRESOLVED.releaseDC(0, theDC)
         this.lifeCycleDraggingNeedToRedraw = false
     }
     
     changeSelectedPlantAges(newAge: short): void {
-        let newCommand: PdCommand
-        
         if (this.selectedPlants.length <= 0) {
             return
         }
-        newCommand = new PdChangePlantAgeCommand(this.selectedPlants, newAge)
+        const newCommand = new PdChangePlantAgeCommand(this.selectedPlants, newAge)
         this.doCommand(newCommand)
     }
     
     // life cycle panel drawing and mouse handling 
     redrawLifeCycleGraph(): void {
-        let sCurveError: boolean
-        
         this.lifeCycleGraphImage.Picture.Bitmap.Canvas.Brush.Color = UNRESOLVED.clBtnFace
         this.lifeCycleGraphImage.Picture.Bitmap.Canvas.Rectangle(0, 0, this.lifeCycleGraphImage.ClientWidth, this.lifeCycleGraphImage.ClientHeight)
-        sCurveError = this.drawSCurveOrCheckForError(this.lifeCycleGraphImage.Picture.Bitmap.Canvas, delphi_compatability.Bounds(0, 0, this.lifeCycleGraphImage.ClientWidth, this.lifeCycleGraphImage.ClientHeight), true, sCurveError)
+        const sCurveError = this.drawSCurveOrCheckForError(this.lifeCycleGraphImage.Picture.Bitmap.Canvas, delphi_compatability.Bounds(0, 0, this.lifeCycleGraphImage.ClientWidth, this.lifeCycleGraphImage.ClientHeight), true, false)
         if (sCurveError && (this.focusedPlant() !== null)) {
             // error - do something, should be caught by parameter panel 
             // PDF PORT -- put in NIL
@@ -5434,45 +5040,39 @@ export class TMainForm {
         }
     }
     
-    drawSCurveOrCheckForError(aCanvas: TCanvas, aRect: TRect, draw: boolean, failed: boolean): void {
-        let firstPlant: PdPlant
-        let i: int
-        let x: float
-        let y: float
-        let thisPoint: TPoint
-        let curve: SCurveStructure
-        let numPoints: int
-        
-        firstPlant = this.focusedPlant()
+    drawSCurveOrCheckForError(aCanvas: TCanvas, aRect: TRect, draw: boolean, failed: boolean): boolean {
+        const firstPlant = this.focusedPlant()
         if (firstPlant === null) {
             return failed
         }
         failed = true
-        numPoints = 100
+        const numPoints = 100
+        const curve: SCurveStructure = new SCurveStructure()
         // assumes that zero does NOT fall between x1 and x2, though one of these could be zero 
         curve.x1 = firstPlant.pGeneral.growthSCurve.x1
         curve.y1 = firstPlant.pGeneral.growthSCurve.y1
         curve.x2 = firstPlant.pGeneral.growthSCurve.x2
         curve.y2 = firstPlant.pGeneral.growthSCurve.y2
         try {
-            failed = umath.calcSCurveCoeffsWithResult(curve, failed)
+            failed = calcSCurveCoeffsWithResult(curve)
             if (failed) {
                 return failed
             }
-            for (i = 0; i <= numPoints - 1; i++) {
+            for (let i = 0; i <= numPoints - 1; i++) {
                 // delphi 2.0 wants this 
-                x = 0.0
-                y = 0.0
+                let x = 0.0
+                let y = 0.0
                 try {
                     x = 1.0 * i / numPoints
                 } catch (e) {
                     return failed
                 }
-                y = umath.scurveWithResult(x, curve.c1, curve.c2, failed)
+                y = scurveWithResult(x, curve.c1, curve.c2)
                 if (failed) {
                     return failed
                 }
                 if (draw) {
+                    const thisPoint: TPoint = new TPoint()
                     thisPoint.X = aRect.Left + intround(x * (aRect.Right - aRect.Left))
                     thisPoint.Y = aRect.Top + intround((1.0 - y) * (aRect.Bottom - aRect.Top))
                     if (i === 0) {
@@ -5491,21 +5091,15 @@ export class TMainForm {
     
     // ----------------------------------------------------------------------------- *parameters panel 
     sectionsComboBoxDrawItem(Control: TWinControl, index: int, Rect: TRect, State: TOwnerDrawState): void {
-        let section: PdSection
-        let sectionPicture: TPicture
-        let selected: boolean
-        let textDrawRect: TRect
-        let cText: char[] /* 255 + 1 */
-        
         if (delphi_compatability.Application.terminated) {
             return
         }
         if ((this.sectionsComboBox.Items.Count <= 0) || (index < 0) || (index > this.sectionsComboBox.Items.Count - 1)) {
             return
         }
-        selected = (delphi_compatability.TOwnerDrawStateType.odSelected in State)
+        const selected: boolean = (delphi_compatability.TOwnerDrawStateType.odSelected in State)
         // set up section pointer 
-        section = this.sectionsComboBox.Items.Objects[index]
+        const section: PdSection = this.sectionsComboBox.Items.Objects[index]
         if (section === null) {
             return
         }
@@ -5519,15 +5113,15 @@ export class TMainForm {
             this.sectionsComboBox.Canvas.Font.Color = UNRESOLVED.clBtnText
         }
         this.sectionsComboBox.Canvas.FillRect(Rect)
-        textDrawRect = Rect
+        const textDrawRect = new TRect()
         textDrawRect.Left = textDrawRect.Left + 4
         textDrawRect.Top = textDrawRect.Top + (textDrawRect.Bottom - textDrawRect.Top) / 2 - (this.sectionsComboBox.Canvas.TextHeight("W") / 2)
-        sectionPicture = this.sectionPictureForSectionName(section.getName())
+        const sectionPicture: TPicture = this.sectionPictureForSectionName(section.getName())
         if (sectionPicture !== null) {
             this.sectionsComboBox.Canvas.Draw(Rect.left + 4, Rect.top, sectionPicture.Graphic)
         }
         textDrawRect.Left = textDrawRect.Left + 32 + 4
-        UNRESOLVED.strPCopy(cText, this.sectionsComboBox.Items[index])
+        const cText = this.sectionsComboBox.Items[index]
         UNRESOLVED.winprocs.drawText(this.sectionsComboBox.Canvas.Handle, cText, len(cText), textDrawRect, delphi_compatability.DT_LEFT)
     }
     
@@ -5541,24 +5135,20 @@ export class TMainForm {
     
     // parameters panel 
     loadSectionsIntoListBox(): void {
-        let section: PdSection
-        let i: short
-        let indexOfPrimaryInflors: short
-        
         if ((domain === null) || (domain.sectionManager === null)) {
             return
         }
         this.sectionsComboBox.Clear()
         if (domain.sectionManager.sections.Count > 0) {
-            for (i = 0; i <= domain.sectionManager.sections.Count - 1; i++) {
-                section = usection.PdSection(domain.sectionManager.sections.Items[i])
+            for (let i = 0; i <= domain.sectionManager.sections.Count - 1; i++) {
+                const section: PdSection = usection.PdSection(domain.sectionManager.sections.Items[i])
                 if (section.showInParametersWindow) {
                     if (section.name === "Primary flowers, advanced") {
                         // kludge to get around necessary ordering of new advanced floral section
                         // advanced floral params are at end of file, but want to show them
                         // in the list before inflorescences
                         // WATCH OUT: change this code if you change the names of the sections
-                        indexOfPrimaryInflors = this.sectionsComboBox.Items.indexOf("Primary inflorescences")
+                        const indexOfPrimaryInflors = this.sectionsComboBox.Items.indexOf("Primary inflorescences")
                         this.sectionsComboBox.Items.InsertObject(indexOfPrimaryInflors, section.name, section)
                     } else {
                         this.sectionsComboBox.Items.AddObject(section.name, section)
@@ -5567,9 +5157,9 @@ export class TMainForm {
             }
         }
         if (domain.sectionManager.orthogonalSections.Count > 0) {
-            for (i = 0; i <= domain.sectionManager.orthogonalSections.Count - 1; i++) {
+            for (let i = 0; i <= domain.sectionManager.orthogonalSections.Count - 1; i++) {
                 // v2.1 add orthogonal sections
-                section = usection.PdSection(domain.sectionManager.orthogonalSections.Items[i])
+                const section: PdSection = new PdSection(domain.sectionManager.orthogonalSections[i])
                 if (section.showInParametersWindow) {
                     this.sectionsComboBox.Items.AddObject(section.name, section)
                 }
@@ -5578,24 +5168,21 @@ export class TMainForm {
     }
     
     currentSection(): PdSection {
-        let result = new PdSection()
-        result = null
+        let result: PdSection | null = null
         if ((this.sectionsComboBox.Items.Count <= 0) || (this.sectionsComboBox.ItemIndex < 0) || (this.sectionsComboBox.ItemIndex > this.sectionsComboBox.Items.Count - 1)) {
             return result
         }
-        result = usection.PdSection(this.sectionsComboBox.Items.Objects[this.sectionsComboBox.ItemIndex])
+        result = new PdSection(this.sectionsComboBox.Items.Objects[this.sectionsComboBox.ItemIndex])
         return result
     }
     
     sectionPictureForSectionName(aName: string): TPicture {
-        let result = new TPicture()
-        let image: TImage
+        let result: TPicture | null = null
+        let image: TImage | null = null
         
-        result = null
         if (aName === "(no section)") {
             return result
         }
-        image = null
         aName = lowercase(aName)
         if (usupport.found("general", aName)) {
             image = this.Sections_General
@@ -5634,7 +5221,6 @@ export class TMainForm {
     
     sectionHelpIDForSectionName(aName: string): string {
         let result = ""
-        result = ""
         if (aName === "(no section)") {
             return result
         }
@@ -5671,12 +5257,6 @@ export class TMainForm {
     }
     
     updateParameterPanelsForSectionChange(): void {
-        let paramPanel: PdParameterPanel
-        let oldParamPanel: PdParameterPanel
-        let section: PdSection
-        let parameter: PdParameter
-        let i: short
-        
         try {
             ucursor.cursor_startWait()
             // clear out any earlier panels 
@@ -5685,7 +5265,7 @@ export class TMainForm {
                 while (this.parametersScrollBox.ControlCount > 0) {
                     // this is the only valid time to free a component owned by something - after it has
                     //        been removed from the component list (owned objects) of the owner 
-                    oldParamPanel = uppanel.PdParameterPanel(this.parametersScrollBox.Controls[0])
+                    const oldParamPanel: PdParameterPanel = uppanel.PdParameterPanel(this.parametersScrollBox.Controls[0])
                     this.RemoveComponent(oldParamPanel)
                     oldParamPanel.Parent = null
                 }
@@ -5694,33 +5274,33 @@ export class TMainForm {
                 // make new panels for the current section 
                 return
             }
-            section = this.sectionsComboBox.Items.Objects[this.sectionsComboBox.ItemIndex]
+            const section: PdSection = this.sectionsComboBox.Items.Objects[this.sectionsComboBox.ItemIndex]
             if (section.numSectionItems > 0) {
-                for (i = 0; i <= section.numSectionItems - 1; i++) {
-                    parameter = domain.parameterManager.parameterForFieldNumber(section.sectionItems[i])
+                for (let i = 0; i <= section.numSectionItems - 1; i++) {
+                    const parameter = domain.parameterManager.parameterForFieldNumber(section.sectionItems[i])
                     if (parameter === null) {
                         continue
                     }
-                    paramPanel = null
+                    let paramPanel: PdParameterPanel | null = null
                     // note that the longint type is used to store plant positions, but should not be used
                     //          for parameter panels 
                     switch (parameter.fieldType) {
-                        case uparams.kFieldHeader:
+                        case FieldType.kFieldHeader:
                             paramPanel = upp_hed.PdHeaderParameterPanel().createForParameter(this, parameter)
                             break
-                        case uparams.kFieldEnumeratedList:
+                        case FieldType.kFieldEnumeratedList:
                             paramPanel = upp_lis.PdListParameterPanel().createForParameter(this, parameter)
                             break
-                        case uparams.kFieldThreeDObject:
+                        case FieldType.kFieldThreeDObject:
                             paramPanel = upp_tdo.PdTdoParameterPanel().createForParameter(this, parameter)
                             break
-                        case uparams.kFieldColor:
+                        case FieldType.kFieldColor:
                             paramPanel = upp_col.PdColorParameterPanel().createForParameter(this, parameter)
                             break
-                        case uparams.kFieldSmallint:
+                        case FieldType.kFieldSmallint:
                             paramPanel = upp_int.PdSmallintParameterPanel().createForParameter(this, parameter)
                             break
-                        case uparams.kFieldFloat:
+                        case FieldType.kFieldFloat:
                             if (parameter.indexCount() <= 1) {
                                 paramPanel = upp_rea.PdRealParameterPanel().createForParameter(this, parameter)
                             } else if (parameter.indexType === uparams.kIndexTypeSCurve) {
@@ -5756,7 +5336,6 @@ export class TMainForm {
     
     paramHelpIDForParamPanel(panel: PdParameterPanel): string {
         let result = ""
-        result = ""
         if (panel === null) {
             return result
         }
@@ -5779,14 +5358,11 @@ export class TMainForm {
     }
     
     updateParametersPanelForFirstSelectedPlant(): void {
-        let i: int
-        let paramPanel: PdParameterPanel
-        
         this.updatePlantNameLabel(kTabParameters)
         if (this.parametersScrollBox.ControlCount > 0) {
-            for (i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
+            for (let i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
                 if (this.parametersScrollBox.Controls[i] instanceof uppanel.PdParameterPanel) {
-                    paramPanel = this.parametersScrollBox.Controls[i]
+                    const paramPanel: PdParameterPanel = this.parametersScrollBox.Controls[i]
                     //panels check if the new plant is different from current one
                     paramPanel.updatePlant(this.focusedPlant())
                 }
@@ -5806,33 +5382,23 @@ export class TMainForm {
     }
     
     repositionParameterPanels(): void {
-        let i: int
-        let lastPos: int
-        let totalMaxWidth: int
-        let panelMaxWidth: int
-        let panelMinWidth: int
-        let requestedWidth: int
-        let windowLock: boolean
-        let paramPanel: PdParameterPanel
-        let oldPosition: int
-        
         if (delphi_compatability.Application.terminated) {
             return
         }
         if (this.parametersScrollBox.ControlCount > 0) {
-            totalMaxWidth = 0
-            lastPos = 0
-            oldPosition = this.parametersScrollBox.VertScrollBar.Position
+            let totalMaxWidth = 0
+            let lastPos = 0
+            const oldPosition: int = this.parametersScrollBox.VertScrollBar.Position
             this.parametersScrollBox.VertScrollBar.Position = 0
-            windowLock = UNRESOLVED.lockWindowUpdate(this.Handle)
-            requestedWidth = this.parametersScrollBox.ClientWidth
-            for (i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
-                paramPanel = uppanel.PdParameterPanel(this.parametersScrollBox.Controls[i])
+            const windowLock: boolean = UNRESOLVED.lockWindowUpdate(this.Handle)
+            const requestedWidth: int = this.parametersScrollBox.ClientWidth
+            for (let i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
+                const paramPanel: PdParameterPanel = this.parametersScrollBox.Controls[i]
                 paramPanel.Left = 0
                 paramPanel.Top = lastPos
                 paramPanel.calculateTextDimensions()
-                panelMaxWidth = paramPanel.maxWidth()
-                panelMinWidth = paramPanel.minWidth(requestedWidth)
+                const panelMaxWidth = paramPanel.maxWidth()
+                const panelMinWidth = paramPanel.minWidth(requestedWidth)
                 if (panelMaxWidth <= requestedWidth) {
                     paramPanel.Width = panelMaxWidth
                 } else {
@@ -5849,8 +5415,8 @@ export class TMainForm {
                 }
             }
             lastPos = 0
-            for (i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
-                paramPanel = uppanel.PdParameterPanel(this.parametersScrollBox.Controls[i])
+            for (let i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
+                const paramPanel: PdParameterPanel = this.parametersScrollBox.Controls[i]
                 paramPanel.Top = lastPos
                 // cfk change v2.0 final - can't remember why we had a max width - looks better this way
                 // paramPanel.width := totalMaxWidth;   // was this
@@ -5868,15 +5434,11 @@ export class TMainForm {
     }
     
     collapseOrExpandParameterPanelsUntilNextHeader(headerPanel: PdParameterPanel): void {
-        let collapsing: boolean
-        let paramPanel: PdParameterPanel
-        let i: short
-        
-        collapsing = false
+        let collapsing = false
         this.internalChange = true
         if (this.parametersScrollBox.ControlCount > 0) {
-            for (i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
-                paramPanel = uppanel.PdParameterPanel(this.parametersScrollBox.Controls[i])
+            for (let i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
+                const paramPanel: PdParameterPanel = this.parametersScrollBox.Controls[i]
                 if (paramPanel === headerPanel) {
                     collapsing = true
                 } else if (collapsing && (paramPanel instanceof upp_hed.PdHeaderParameterPanel)) {
@@ -5895,15 +5457,11 @@ export class TMainForm {
     }
     
     collapseOrExpandAllParameterPanelsInCurrentSection(doWhat: short): void {
-        let section: PdSection
-        let paramPanel: PdParameterPanel
-        let i: short
-        
         this.internalChange = true
         if (this.sectionsComboBox.ItemIndex < 0) {
             return
         }
-        section = this.sectionsComboBox.Items.Objects[this.sectionsComboBox.ItemIndex]
+        const section: PdSection = this.sectionsComboBox.Items.Objects[this.sectionsComboBox.ItemIndex]
         if (section === null) {
             return
         }
@@ -5919,8 +5477,8 @@ export class TMainForm {
                 break
         }
         if (this.parametersScrollBox.ControlCount > 0) {
-            for (i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
-                paramPanel = uppanel.PdParameterPanel(this.parametersScrollBox.Controls[i])
+            for (let i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
+                const paramPanel: PdParameterPanel = this.parametersScrollBox.Controls[i]
                 if (section.expanded) {
                     paramPanel.expand()
                 } else {
@@ -5932,11 +5490,11 @@ export class TMainForm {
         this.repositionParameterPanels()
     }
     
-    updateParameterValuesWithUpdateListForPlant(aPlant: PdPlant, updateList: TListCollection): void {
-        let i: long
-        let paramPanel: PdParameterPanel
-        let updateEvent: PdPlantUpdateEvent
-        let needToUpdateWholePlant: boolean
+    updateParameterValuesWithUpdateListForPlant(aPlant: PdPlant, updateList: PdPlantUpdateEvent[]): void {
+        // let i: long
+        // let paramPanel: PdParameterPanel
+        // let updateEvent: PdPlantUpdateEvent
+        // let needToUpdateWholePlant: boolean
         
         if (aPlant !== this.focusedPlant()) {
             return
@@ -5946,9 +5504,9 @@ export class TMainForm {
         }
         // first look to see if the whole plant needs updated - if any do, update it 
         // this is for side effects in GWI - left in just in case we need it later 
-        needToUpdateWholePlant = false
-        for (i = 0; i <= updateList.Count - 1; i++) {
-            updateEvent = uplant.PdPlantUpdateEvent(updateList[i])
+        let needToUpdateWholePlant = false
+        for (let i = 0; i <= updateList.length - 1; i++) {
+            const updateEvent: PdPlantUpdateEvent = updateList[i]
             if ((updateEvent.plant !== null) && (updateEvent.plant.wholePlantUpdateNeeded)) {
                 needToUpdateWholePlant = true
                 updateEvent.plant.wholePlantUpdateNeeded = false
@@ -5963,7 +5521,7 @@ export class TMainForm {
                 if (this.parametersScrollBox.Controls[i] instanceof uppanel.PdParameterPanel) {
                     // if not updating everything, update based on list 
                     // tell all components to look at list to see if they need updating 
-                    paramPanel = this.parametersScrollBox.Controls[i]
+                    const paramPanel: PdParameterPanel = this.parametersScrollBox.Controls[i]
                     // components check if use models and fields in list 
                     paramPanel.updateFromUpdateEventList(updateList)
                 }
@@ -5984,9 +5542,7 @@ export class TMainForm {
     }
     
     // note panel
-    updateNoteForFirstSelectedPlant(): void {
-        let selStart: int
-        
+    updateNoteForFirstSelectedPlant(): void { 
         if (delphi_compatability.Application.terminated) {
             return
         }
@@ -6001,14 +5557,10 @@ export class TMainForm {
     }
     
     noteEditClick(): void {
-        let newCommand: PdCommand
-        let noteForm: TNoteEditForm
-        let commandLines: TStringList
-        
         if (this.focusedPlant() === null) {
             return
         }
-        noteForm = unoted.TNoteEditForm().create(this)
+        const noteForm: TNoteEditForm = unoted.TNoteEditForm().create(this)
         if (noteForm === null) {
             throw new Error("Problem: Could not create note edit window.")
         }
@@ -6016,9 +5568,9 @@ export class TMainForm {
         noteForm.Caption = "Edit note for " + this.focusedPlant().getName()
         if (noteForm.ShowModal() !== mrCancel) {
             // command will take ownership of this and free it if necessary
-            commandLines = delphi_compatability.TStringList.create
+            const commandLines: TStringList = delphi_compatability.TStringList.create
             commandLines.AddStrings(noteForm.noteEditMemo.Lines)
-            newCommand = new PdEditNoteCommand(this.focusedPlant(), commandLines)
+            const newCommand = new PdEditNoteCommand(this.focusedPlant(), commandLines)
             this.doCommand(newCommand)
         }
     }
@@ -6045,10 +5597,8 @@ export class TMainForm {
     
     // rotations panel
     updateRotationsPanelForFirstSelectedPlant(): void {
-        let color: TColorRef
-        
         this.updatePlantNameLabel(kTabRotations)
-        color = this.textColorToRepresentPlantSelection(false)
+        const color: TColorRef = this.textColorToRepresentPlantSelection(false)
         // location
         this.locationLabel.Font.Color = color
         this.xLocationLabel.Font.Color = color
@@ -6071,17 +5621,13 @@ export class TMainForm {
     // posing panel
     // ------------------------------------------------------------------------------------- *posing - updating 
     updatePosingForFirstSelectedPlant(): void {
-        let i: int
-        let amendment: PdPlantDrawingAmendment
-        let partString: string
-        
         this.internalChange = true
         this.posedPartsLabel.Font.Color = this.textColorToRepresentPlantSelection(false)
         this.selectedPartLabel.Font.Color = this.textColorToRepresentPlantSelection(false)
         this.posingPosePart.Enabled = false
         this.posingUnposePart.Enabled = false
         // called when plant changes
-        this.posedPlantParts= []
+        this.posedPlantParts = []
         this.updatePlantNameLabel(kTabPosing)
         if (this.focusedPlant() === null) {
             this.posedPlantParts.Text = ""
@@ -6092,9 +5638,9 @@ export class TMainForm {
                 // load list of parts with amendments
                 this.selectedPlantPartID = -1
             } else {
-                for (i = 0; i <= this.focusedPlant().amendments.length - 1; i++) {
-                    amendment = uamendmt.PdPlantDrawingAmendment(this.focusedPlant().amendments[i])
-                    partString = this.partDescriptionForIDAndType(amendment.partID, amendment.typeOfPart)
+                for (let i = 0; i <= this.focusedPlant().amendments.length - 1; i++) {
+                    const amendment: PdPlantDrawingAmendment = this.focusedPlant().amendments[i]
+                    const partString = this.partDescriptionForIDAndType(amendment.partID, amendment.typeOfPart)
                     if (this.posedPlantParts.Items.indexOf(partString) < 0) {
                         this.posedPlantParts.Items.Add(partString)
                     }
@@ -6107,9 +5653,6 @@ export class TMainForm {
     }
     
     updatePosingForSelectedPlantPart(): void {
-        let partString: string
-        let index: short
-        
         // PDF PORT -- removed semicolon from after begin
         this.internalChange = true
         if (this.focusedPlant() === null) {
@@ -6119,9 +5662,9 @@ export class TMainForm {
             this.selectedPartLabel.Caption = kNoPartSelected
         }
         if (this.selectedPlantPartID >= 0) {
-            partString = this.partDescriptionForIDAndType(this.selectedPlantPartID, this.selectedPlantPartType)
+            const partString = this.partDescriptionForIDAndType(this.selectedPlantPartID, this.selectedPlantPartType)
             this.selectedPartLabel.Caption = "Selected part: " + partString
-            index = this.posedPlantParts.Items.indexOf(partString)
+            const index = this.posedPlantParts.Items.indexOf(partString)
             if (index >= 0) {
                 this.posedPlantParts.ItemIndex = index
             } else {
@@ -6138,19 +5681,16 @@ export class TMainForm {
     }
     
     updatePoseInfo(): void {
-        let amendment: PdPlantDrawingAmendment
-        let partID: long
-        
         this.internalChange = true
-        amendment = null
-        partID = this.selectedPartIDInAmendedPartsList()
+        let amendment: PdPlantDrawingAmendment | null = null
+        const partID = this.selectedPartIDInAmendedPartsList()
         if (partID >= 0) {
             amendment = this.focusedPlant().amendmentForPartID(partID)
         }
         this.posingPosePart.Enabled = (!(this.selectedPartLabel.Caption === kNoPartSelected)) && (amendment === null)
         this.posingUnposePart.Enabled = (!(this.selectedPartLabel.Caption === kNoPartSelected)) && (!(amendment === null))
         this.posingDetailsPanel.Visible = amendment !== null
-        if ((amendment !== null)) {
+        if (amendment !== null) {
             this.posingHidePart.Checked = amendment.hide
             //
             //    posingChangeColors.checked := changeColors;
@@ -6197,12 +5737,9 @@ export class TMainForm {
     }
     
     redrawAllPlantsInViewWithAmendments(): void {
-        let i: short
-        let plant: PdPlant
-        
         if (this.plants.length > 0) {
-            for (i = 0; i <= this.plants.length - 1; i++) {
-                plant = this.plants[i]
+            for (let i = 0; i <= this.plants.length - 1; i++) {
+                const plant = this.plants[i]
                 if ((plant !== null) && (plant.amendments !== null) && (plant.amendments.length > 0)) {
                     plant.recalculateBounds(kDrawNow)
                     this.invalidateDrawingRect(plant.boundsRect_pixels())
@@ -6213,12 +5750,11 @@ export class TMainForm {
     }
     
     // ------------------------------------------------------------------------------------- *posing - interface 
-    posedPlantPartsChange(): void {
-        let newCommand: PdCommand
-        
+    posedPlantPartsChange(): void { 
         if (this.internalChange) {
             return
         }
+        let newCommand: PdCommand
         if (this.posedPlantParts.ItemIndex === this.posedPlantParts.Items.Count - 1) {
             newCommand = new PdSelectPosingPartCommand(this.focusedPlant(), -1, this.selectedPlantPartID, "", this.selectedPlantPartType)
         } else {
@@ -6255,12 +5791,10 @@ export class TMainForm {
     }
     
     spinPoseRotationBy(amount: int): void {
-        let newRotation: short
-        let oldRotation: short
-        
+        // TODO sender was event or component sending event
         if ((sender !== null) && (sender instanceof delphi_compatability.TEdit)) {
-            newRotation = StrToIntDef((sender).text, 0)
-            oldRotation = newRotation
+            let newRotation = StrToIntDef((sender).text, 0)
+            const oldRotation = newRotation
             newRotation = newRotation + amount
             if (newRotation < -360) {
                 newRotation = 360 - (abs(newRotation) - 360)
@@ -6275,24 +5809,24 @@ export class TMainForm {
     }
     
     posingScaleMultiplierSpinUpClick(): void {
+        // TODO Sender was event or component sending event
         if ((Sender !== null) && (Sender instanceof delphi_compatability.TSpinButton)) {
             this.spinScaleMultiplierBy((Sender).focusControl, domain.options.resizeKeyUpMultiplierPercent - 100)
         }
     }
     
     posingScaleMultiplierSpinDownClick(): void {
+        // TODO Sender was event or component sending event
         if ((Sender !== null) && (Sender instanceof delphi_compatability.TSpinButton)) {
             this.spinScaleMultiplierBy((Sender).focusControl, -(domain.options.resizeKeyUpMultiplierPercent - 100))
         }
     }
     
     spinScaleMultiplierBy(amount: int): void {
-        let newValue: short
-        let oldValue: short
-        
+        // TODO sender was event or component sending event
         if ((sender !== null) && (sender instanceof delphi_compatability.TEdit)) {
-            newValue = StrToIntDef((sender).text, 0)
-            oldValue = newValue
+            let newValue = StrToIntDef((sender).text, 0)
+            const oldValue = newValue
             newValue = newValue + amount
             if (newValue < 0) {
                 newValue = 0
@@ -6308,12 +5842,7 @@ export class TMainForm {
     
     // ------------------------------------------------------------------------------------- *posing - commands 
     changeSelectedPose(): void {
-        let newCommand: PdCommand
-        let newAmendment: PdPlantDrawingAmendment
-        let partID: long
-        let currentAmendment: PdPlantDrawingAmendment
-        let field: string
-        
+        // TODO sender was event or component sending event
         if (this.internalChange) {
             return
         }
@@ -6322,12 +5851,13 @@ export class TMainForm {
             return
         }
         // command will take ownership of this and free it if necessary
-        newAmendment = uamendmt.PdPlantDrawingAmendment().create()
-        partID = this.selectedPartIDInAmendedPartsList()
-        currentAmendment = this.focusedPlant().amendmentForPartID(partID)
+        const newAmendment = new PdPlantDrawingAmendment()
+        const partID = this.selectedPartIDInAmendedPartsList()
+        const currentAmendment: PdPlantDrawingAmendment | null = this.focusedPlant().amendmentForPartID(partID)
         if (currentAmendment === null) {
             return
         }
+        let field: string
         if ((Sender === this.posingHidePart)) {
             field = "hide"
         } else if ((Sender === this.posingAddExtraRotation)) {
@@ -6372,22 +5902,19 @@ export class TMainForm {
         //    propagateColors := posingChangeAllColorsAfter.checked;
         //    
         newAmendment.addRotations = this.posingAddExtraRotation.Checked
-        newAmendment.xRotation = umath.intMax(-360, umath.intMin(360, StrToIntDef(this.posingXRotationEdit.Text, intround(currentAmendment.xRotation))))
-        newAmendment.yRotation = umath.intMax(-360, umath.intMin(360, StrToIntDef(this.posingYRotationEdit.Text, intround(currentAmendment.yRotation))))
-        newAmendment.zRotation = umath.intMax(-360, umath.intMin(360, StrToIntDef(this.posingZRotationEdit.Text, intround(currentAmendment.zRotation))))
+        newAmendment.xRotation = intMax(-360, intMin(360, StrToIntDef(this.posingXRotationEdit.Text, intround(currentAmendment.xRotation))))
+        newAmendment.yRotation = intMax(-360, intMin(360, StrToIntDef(this.posingYRotationEdit.Text, intround(currentAmendment.yRotation))))
+        newAmendment.zRotation = intMax(-360, intMin(360, StrToIntDef(this.posingZRotationEdit.Text, intround(currentAmendment.zRotation))))
         newAmendment.multiplyScale = this.posingMultiplyScale.Checked
         newAmendment.propagateScale = this.posingMultiplyScaleAllPartsAfter.Checked
-        newAmendment.scaleMultiplier_pct = umath.intMax(0, umath.intMin(1000, StrToIntDef(this.posingScaleMultiplierEdit.Text, currentAmendment.scaleMultiplier_pct)))
-        newAmendment.lengthMultiplier_pct = umath.intMax(0, umath.intMin(1000, StrToIntDef(this.posingLengthMultiplierEdit.Text, currentAmendment.lengthMultiplier_pct)))
-        newAmendment.widthMultiplier_pct = umath.intMax(0, umath.intMin(1000, StrToIntDef(this.posingWidthMultiplierEdit.Text, currentAmendment.widthMultiplier_pct)))
-        newCommand = new PdEditAmendmentCommand(this.focusedPlant(), newAmendment, field)
+        newAmendment.scaleMultiplier_pct = intMax(0, intMin(1000, StrToIntDef(this.posingScaleMultiplierEdit.Text, currentAmendment.scaleMultiplier_pct)))
+        newAmendment.lengthMultiplier_pct = intMax(0, intMin(1000, StrToIntDef(this.posingLengthMultiplierEdit.Text, currentAmendment.lengthMultiplier_pct)))
+        newAmendment.widthMultiplier_pct = intMax(0, intMin(1000, StrToIntDef(this.posingWidthMultiplierEdit.Text, currentAmendment.widthMultiplier_pct)))
+        const newCommand = new PdEditAmendmentCommand(this.focusedPlant(), newAmendment, field)
         this.doCommand(newCommand)
     }
     
     posingPosePartClick(): void {
-        let newCommand: PdCommand
-        let newAmendment: PdPlantDrawingAmendment
-        
         if (this.focusedPlant() === null) {
             return
         }
@@ -6399,38 +5926,31 @@ export class TMainForm {
             return
         }
         // command will take ownership of this and free it if necessary
-        newAmendment = uamendmt.PdPlantDrawingAmendment().create()
+        const newAmendment = new PdPlantDrawingAmendment()
         newAmendment.partID = this.selectedPlantPartID
         newAmendment.typeOfPart = this.selectedPlantPartType
-        newCommand = new PdCreateAmendmentCommand(this.focusedPlant(), newAmendment)
+        const newCommand = new PdCreateAmendmentCommand(this.focusedPlant(), newAmendment)
         this.doCommand(newCommand)
     }
     
     posingUnposePartClick(): void {
-        let newCommand: PdCommand
-        let amendment: PdPlantDrawingAmendment
-        
         if (this.focusedPlant() === null) {
             return
         }
-        amendment = this.focusedPlant().amendmentForPartID(this.selectedPartIDInAmendedPartsList())
+        const amendment = this.focusedPlant().amendmentForPartID(this.selectedPartIDInAmendedPartsList())
         if (amendment === null) {
             return
         }
-        newCommand = new PdDeleteAmendmentCommand(this.focusedPlant(), amendment)
+        const newCommand = new PdDeleteAmendmentCommand(this.focusedPlant(), amendment)
         this.doCommand(newCommand)
     }
     
     addAmendedPartToList(partID: long, partType: string): void {
-        let newString: string
-        let selectNoneIndex: short
-        let indexToSave: short
-        
-        newString = MainForm.partDescriptionForIDAndType(partID, partType)
+        const newString: string = MainForm.partDescriptionForIDAndType(partID, partType)
         this.posedPlantParts.Items.Add(newString)
-        indexToSave = this.posedPlantParts.Items.Count - 1
+        const indexToSave: int = this.posedPlantParts.Items.Count - 1
         // add "select none" to end - move down if already there
-        selectNoneIndex = this.posedPlantParts.Items.indexOf(kSelectNoPosedPartString)
+        const selectNoneIndex: int = this.posedPlantParts.Items.indexOf(kSelectNoPosedPartString)
         if (selectNoneIndex >= 0) {
             this.posedPlantParts.Items.Delete(selectNoneIndex)
         }
@@ -6440,13 +5960,9 @@ export class TMainForm {
     }
     
     removeAmendedPartFromList(partID: long, partType: string): void {
-        let oldString: string
-        let index: int
-        let oldItemIndex: int
-        
-        oldItemIndex = this.posedPlantParts.ItemIndex
-        oldString = this.partDescriptionForIDAndType(partID, partType)
-        index = this.posedPlantParts.Items.indexOf(oldString)
+        const oldItemIndex: int = this.posedPlantParts.ItemIndex
+        const oldString = this.partDescriptionForIDAndType(partID, partType)
+        const index: int = this.posedPlantParts.Items.indexOf(oldString)
         if (index >= 0) {
             this.posedPlantParts.Items.Delete(index)
         }
@@ -6459,19 +5975,16 @@ export class TMainForm {
     // ------------------------------------------------------------------------------------- *posing - supporting 
     partDescriptionForIDAndType(id: long, typeName: string): string {
         let result = ""
-        result = IntToStr(id) + " (" + typeName + ")"
         return result
     }
     
     partIDForFullDescription(aString: string): long {
-        let result = 0
-        result = StrToIntDef(stringUpTo(aString, " ("), -1)
+        let result = StrToIntDef(stringUpTo(aString, " ("), -1)
         return result
     }
     
     partTypeForFullDescription(aString: string): string {
-        let result = ""
-        result = ""
+        let  result = ""
         if (len(aString) <= 0) {
             return result
         }
@@ -6481,8 +5994,7 @@ export class TMainForm {
     }
     
     selectedPartIDInAmendedPartsList(): long {
-        let result = 0
-        result = -1
+        let result = -1
         if ((this.focusedPlant() === null) || (this.posedPlantParts.Items.Count <= 0) || (this.posedPlantParts.ItemIndex < 0)) {
             return result
         }
@@ -6492,7 +6004,6 @@ export class TMainForm {
     
     selectedPartTypeInAmendedPartsList(): string {
         let result = ""
-        result = ""
         if ((this.focusedPlant() === null) || (this.posedPlantParts.Items.Count <= 0) || (this.posedPlantParts.ItemIndex < 0)) {
             return result
         }
@@ -6537,20 +6048,20 @@ export class TMainForm {
         } else {
             newTop = this.ClientHeight / 2
         }
-        newTop = umath.intMax(0, umath.intMin(this.ClientHeight - 1, newTop))
-        newHeight = umath.intMax(0, this.ClientHeight - newTop - splitterWidthOrHeight)
+        newTop = intMax(0, intMin(this.ClientHeight - 1, newTop))
+        newHeight = intMax(0, this.ClientHeight - newTop - splitterWidthOrHeight)
         if (this.lastWidth !== 0) {
             newLeft = intround(1.0 * this.verticalSplitter.Left * this.ClientWidth / this.lastWidth)
         } else {
             newLeft = this.ClientWidth / 2
         }
-        newLeft = umath.intMax(0, umath.intMin(this.ClientWidth - 1, newLeft))
-        newWidth = umath.intMax(0, this.ClientWidth - newLeft - splitterWidthOrHeight)
-        if (domain.options.mainWindowOrientation === udomain.kMainWindowOrientationHorizontal) {
+        newLeft = intMax(0, intMin(this.ClientWidth - 1, newLeft))
+        newWidth = intMax(0, this.ClientWidth - newLeft - splitterWidthOrHeight)
+        if (domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal) {
             this.horizontalSplitter.SetBounds(0, newTop, this.ClientWidth, this.horizontalSplitter.Height)
             this.verticalSplitter.SetBounds(newLeft, newTop + this.horizontalSplitter.Height, this.verticalSplitter.Width, newHeight)
-        } else if (domain.options.mainWindowOrientation === udomain.kMainWindowOrientationVertical) {
-            this.verticalSplitter.SetBounds(newLeft, this.toolbarPanel.Height, this.verticalSplitter.Width, umath.intMax(0, this.ClientHeight - this.toolbarPanel.Height))
+        } else if (domain.options.mainWindowOrientation === kMainWindowOrientationVertical) {
+            this.verticalSplitter.SetBounds(newLeft, this.toolbarPanel.Height, this.verticalSplitter.Width, intMax(0, this.ClientHeight - this.toolbarPanel.Height))
             this.horizontalSplitter.SetBounds(newLeft + this.verticalSplitter.Width, newTop, newWidth, this.horizontalSplitter.Height)
         }
         // resize images and panels 
@@ -6575,18 +6086,18 @@ export class TMainForm {
         let newHeight: short
         
         newLeft = this.verticalSplitter.Left + this.verticalSplitter.Width
-        newWidth = umath.intMax(0, this.ClientWidth - newLeft)
+        newWidth = intMax(0, this.ClientWidth - newLeft)
         newTop = this.horizontalSplitter.Top + this.horizontalSplitter.Height
-        newHeight = umath.intMax(0, this.ClientHeight - newTop)
-        if (domain.options.mainWindowOrientation === udomain.kMainWindowOrientationHorizontal) {
+        newHeight = intMax(0, this.ClientHeight - newTop)
+        if (domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal) {
             this.plantListPanel.SetBounds(0, newTop, this.verticalSplitter.Left, newHeight)
             this.plantFocusPanel.SetBounds(newLeft, newTop, newWidth, newHeight)
-        } else if (domain.options.mainWindowOrientation === udomain.kMainWindowOrientationVertical) {
+        } else if (domain.options.mainWindowOrientation === kMainWindowOrientationVertical) {
             this.plantListPanel.SetBounds(newLeft, this.toolbarPanel.Height, newWidth, this.horizontalSplitter.Top - this.toolbarPanel.Height)
             this.plantFocusPanel.SetBounds(newLeft, newTop, newWidth, newHeight)
             //don't change top here
             this.horizontalSplitter.SetBounds(newLeft, this.horizontalSplitter.Top, newWidth, this.horizontalSplitter.Height)
-            this.drawingPaintBox.SetBounds(0, this.toolbarPanel.Height, newLeft, umath.intMax(0, this.ClientHeight - this.toolbarPanel.Height))
+            this.drawingPaintBox.SetBounds(0, this.toolbarPanel.Height, newLeft, intMax(0, this.ClientHeight - this.toolbarPanel.Height))
             this.resizeDrawingBitmapIfNecessary()
         }
         this.resizePlantListPanel()
@@ -6600,17 +6111,17 @@ export class TMainForm {
         let newHeight: short
         
         newLeft = this.verticalSplitter.Left + this.verticalSplitter.Width
-        newWidth = umath.intMax(0, this.ClientWidth - newLeft)
+        newWidth = intMax(0, this.ClientWidth - newLeft)
         newTop = this.horizontalSplitter.Top + this.horizontalSplitter.Height
-        newHeight = umath.intMax(0, this.ClientHeight - newTop)
-        if (domain.options.mainWindowOrientation === udomain.kMainWindowOrientationHorizontal) {
+        newHeight = intMax(0, this.ClientHeight - newTop)
+        if (domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal) {
             this.plantListPanel.SetBounds(0, newTop, this.verticalSplitter.Left, newHeight)
             //don't change left here
             this.verticalSplitter.SetBounds(this.verticalSplitter.Left, newTop, this.verticalSplitter.Width, newHeight)
             this.plantFocusPanel.SetBounds(newLeft, newTop, newWidth, newHeight)
-            this.drawingPaintBox.SetBounds(0, this.toolbarPanel.Height, this.ClientWidth, umath.intMax(0, this.horizontalSplitter.Top - this.toolbarPanel.Height))
+            this.drawingPaintBox.SetBounds(0, this.toolbarPanel.Height, this.ClientWidth, intMax(0, this.horizontalSplitter.Top - this.toolbarPanel.Height))
             this.resizeDrawingBitmapIfNecessary()
-        } else if (domain.options.mainWindowOrientation === udomain.kMainWindowOrientationVertical) {
+        } else if (domain.options.mainWindowOrientation === kMainWindowOrientationVertical) {
             this.plantListPanel.SetBounds(newLeft, this.toolbarPanel.Height, newWidth, this.horizontalSplitter.Top - this.toolbarPanel.Height)
             this.plantFocusPanel.SetBounds(newLeft, newTop, newWidth, newHeight)
         }
@@ -6651,13 +6162,13 @@ export class TMainForm {
         // tab set 
         this.SetBounds(0, this.plantFocusPanel.Height - this.Height, this.plantFocusPanel.Width, this.Height)
         // v1.4 change
-        this.animatingLabel.SetBounds(umath.intMax(0, this.plantFocusPanel.Width - this.animatingLabel.Width - kBetweenGap), this.plantFocusPanel.Height - this.animatingLabel.Height - kBetweenGap, this.animatingLabel.Width, this.animatingLabel.Height)
+        this.animatingLabel.SetBounds(intMax(0, this.plantFocusPanel.Width - this.animatingLabel.Width - kBetweenGap), this.plantFocusPanel.Height - this.animatingLabel.Height - kBetweenGap, this.animatingLabel.Width, this.animatingLabel.Height)
         // life cycle panel 
-        this.lifeCyclePanel.SetBounds(0, 0, this.plantFocusPanel.Width, umath.intMax(0, this.plantFocusPanel.Height - this.tabSet.height))
+        this.lifeCyclePanel.SetBounds(0, 0, this.plantFocusPanel.Width, intMax(0, this.plantFocusPanel.Height - this.tabSet.height))
         // v1.4 change - 2
         this.lifeCycleEditPanel.Height = this.animateGrowth.Height + kBetweenGap * 2 - 2
         // v1.4 change +1, -1, -2
-        this.lifeCycleEditPanel.SetBounds(1, umath.intMax(0, this.lifeCyclePanel.Height - this.lifeCycleEditPanel.Height - 1), this.lifeCyclePanel.Width - 2, this.lifeCycleEditPanel.Height)
+        this.lifeCycleEditPanel.SetBounds(1, intMax(0, this.lifeCyclePanel.Height - this.lifeCycleEditPanel.Height - 1), this.lifeCyclePanel.Width - 2, this.lifeCycleEditPanel.Height)
         // rotations panel
         this.rotationsPanel.SetBounds(0, 0, this.lifeCyclePanel.Width, this.lifeCyclePanel.Height)
         // posing panel
@@ -6668,7 +6179,7 @@ export class TMainForm {
         this.posingHighlight.SetBounds(this.posingGhost.Left - this.posingHighlight.Width - kBetweenGap, newTop, this.posingHighlight.Width, this.posingHighlight.Height)
         newTop = this.posingNotShown.Top + this.posingNotShown.Height + kBetweenGap
         this.posedPartsLabel.SetBounds(kBetweenGap, newTop + (this.posedPlantParts.Height / 2 - this.posedPartsLabel.Height / 2), this.posedPartsLabel.Width, this.posedPartsLabel.Height)
-        this.posedPlantParts.SetBounds(this.posedPartsLabel.Left + this.posedPartsLabel.Width + kBetweenGap, newTop, umath.intMax(10, this.posingPanel.Width - this.posedPartsLabel.Width - kBetweenGap * 3), this.posedPlantParts.Height)
+        this.posedPlantParts.SetBounds(this.posedPartsLabel.Left + this.posedPartsLabel.Width + kBetweenGap, newTop, intMax(10, this.posingPanel.Width - this.posedPartsLabel.Width - kBetweenGap * 3), this.posedPlantParts.Height)
         newTop = this.posedPlantParts.Top + this.posedPlantParts.Height + kBetweenGap
         // fix later
         this.selectedPartLabel.SetBounds(kBetweenGap, newTop + (this.posingUnposePart.Height / 2 - this.selectedPartLabel.Height / 2), this.selectedPartLabel.Width, this.selectedPartLabel.Height)
@@ -6676,17 +6187,17 @@ export class TMainForm {
         this.posingPosePart.SetBounds(kBetweenGap, newTop, this.posingPosePart.Width, this.posingPosePart.Height)
         this.posingUnposePart.SetBounds(this.posingPosePart.Left + this.posingPosePart.Width + kBetweenGap, newTop, this.posingUnposePart.Width, this.posingUnposePart.Height)
         newTop = this.posingUnposePart.Top + this.posingUnposePart.Height + kBetweenGap
-        this.posingDetailsPanel.SetBounds(0, newTop, this.lifeCyclePanel.Width, umath.intMax(230, this.lifeCyclePanel.Height - newTop))
+        this.posingDetailsPanel.SetBounds(0, newTop, this.lifeCyclePanel.Width, intMax(230, this.lifeCyclePanel.Height - newTop))
         // lifeCycleEditPanel 
         this.lifeCycleDaysEdit.SetBounds(this.ageAndSizeLabel.Width + kBetweenGap * 2, kBetweenGap, this.lifeCycleDaysEdit.Width, this.lifeCycleDaysEdit.Height)
         this.lifeCycleDaysSpin.SetBounds(this.lifeCycleDaysEdit.Left + this.lifeCycleDaysEdit.Width, kBetweenGap + this.lifeCycleDaysEdit.Height / 2 - this.lifeCycleDaysSpin.Height / 2, this.lifeCycleDaysSpin.Width, this.lifeCycleDaysSpin.Height)
-        this.ageAndSizeLabel.SetBounds(kBetweenGap, umath.intMax(0, this.lifeCycleDaysEdit.Top + this.lifeCycleDaysEdit.Height / 2 - this.ageAndSizeLabel.Height / 2), this.ageAndSizeLabel.Width, this.ageAndSizeLabel.Height)
-        this.daysAndSizeLabel.SetBounds(this.lifeCycleDaysSpin.Left + this.lifeCycleDaysSpin.Width + kBetweenGap, umath.intMax(0, this.lifeCycleDaysEdit.Top + this.lifeCycleDaysEdit.Height / 2 - this.daysAndSizeLabel.Height / 2), this.daysAndSizeLabel.Width, this.daysAndSizeLabel.Height)
+        this.ageAndSizeLabel.SetBounds(kBetweenGap, intMax(0, this.lifeCycleDaysEdit.Top + this.lifeCycleDaysEdit.Height / 2 - this.ageAndSizeLabel.Height / 2), this.ageAndSizeLabel.Width, this.ageAndSizeLabel.Height)
+        this.daysAndSizeLabel.SetBounds(this.lifeCycleDaysSpin.Left + this.lifeCycleDaysSpin.Width + kBetweenGap, intMax(0, this.lifeCycleDaysEdit.Top + this.lifeCycleDaysEdit.Height / 2 - this.daysAndSizeLabel.Height / 2), this.daysAndSizeLabel.Width, this.daysAndSizeLabel.Height)
         this.animateGrowth.SetBounds(this.lifeCycleEditPanel.Width - this.animateGrowth.Width - kBetweenGap, this.lifeCycleDaysEdit.Top, this.animateGrowth.Width, this.animateGrowth.Height)
         // above lifeCycleEditPanel 
-        this.timeLabel.SetBounds(umath.intMax(0, this.lifeCyclePanel.Width / 2 - this.timeLabel.Width / 2), umath.intMax(0, this.lifeCycleEditPanel.Top - this.timeLabel.Height - kBetweenGap), this.timeLabel.Width, this.timeLabel.Height)
-        this.lifeCycleGraphImage.SetBounds(kBetweenGap + this.maxSizeAxisLabel.Width + kBetweenGap, umath.intMax(1, this.selectedPlantNameLabel.Top + this.selectedPlantNameLabel.Height + kBetweenGap), umath.intMax(1, this.lifeCyclePanel.Width - this.maxSizeAxisLabel.Width - kBetweenGap * 3), umath.intMax(1, this.timeLabel.Top - this.selectedPlantNameLabel.Height - kBetweenGap * 2))
-        this.maxSizeAxisLabel.SetBounds(kBetweenGap, umath.intMax(0, this.lifeCycleGraphImage.Top + this.lifeCycleGraphImage.Height / 2 - this.maxSizeAxisLabel.Height / 2), this.maxSizeAxisLabel.Width, this.maxSizeAxisLabel.Height)
+        this.timeLabel.SetBounds(intMax(0, this.lifeCyclePanel.Width / 2 - this.timeLabel.Width / 2), intMax(0, this.lifeCycleEditPanel.Top - this.timeLabel.Height - kBetweenGap), this.timeLabel.Width, this.timeLabel.Height)
+        this.lifeCycleGraphImage.SetBounds(kBetweenGap + this.maxSizeAxisLabel.Width + kBetweenGap, intMax(1, this.selectedPlantNameLabel.Top + this.selectedPlantNameLabel.Height + kBetweenGap), intMax(1, this.lifeCyclePanel.Width - this.maxSizeAxisLabel.Width - kBetweenGap * 3), intMax(1, this.timeLabel.Top - this.selectedPlantNameLabel.Height - kBetweenGap * 2))
+        this.maxSizeAxisLabel.SetBounds(kBetweenGap, intMax(0, this.lifeCycleGraphImage.Top + this.lifeCycleGraphImage.Height / 2 - this.maxSizeAxisLabel.Height / 2), this.maxSizeAxisLabel.Width, this.maxSizeAxisLabel.Height)
         this.selectedPlantNameLabel.SetBounds(kBetweenGap, kBetweenGap, this.selectedPlantNameLabel.Width, this.selectedPlantNameLabel.Height)
         if ((this.lifeCycleGraphImage.Picture.Bitmap.Width !== this.lifeCycleGraphImage.Width) || (this.lifeCycleGraphImage.Picture.Bitmap.Height !== this.lifeCycleGraphImage.Height)) {
             // with selectedPlantNameLabel do setBounds(lifeCycleGraphImage.left, kBetweenGap, width, height);
@@ -6696,32 +6207,29 @@ export class TMainForm {
         this.redrawLifeCycleGraph()
         this.resizeParametersPanel()
         // stats scroll box 
-        this.statsScrollBox.SetBounds(0, 0, this.plantFocusPanel.Width, umath.intMax(0, this.plantFocusPanel.Height - this.tabSet.height))
+        this.statsScrollBox.SetBounds(0, 0, this.plantFocusPanel.Width, intMax(0, this.plantFocusPanel.Height - this.tabSet.height))
         this.statsPanel.resizeElements()
-        this.notePanel.SetBounds(0, 0, this.plantFocusPanel.Width, umath.intMax(0, this.plantFocusPanel.Height - this.tabSet.height))
+        this.notePanel.SetBounds(0, 0, this.plantFocusPanel.Width, intMax(0, this.plantFocusPanel.Height - this.tabSet.height))
         this.noteLabel.SetBounds(kBetweenGap, kBetweenGap, this.noteLabel.Width, this.noteLabel.Height)
         //kBetweenGap + noteEdit.height div 2 - height div 2, width, height);
-        this.noteEdit.SetBounds(umath.intMax(0, this.notePanel.Width - this.noteEdit.Width - kBetweenGap), kBetweenGap, this.noteEdit.Width, this.noteEdit.Height)
-        this.noteMemo.SetBounds(0, this.noteEdit.Height + kBetweenGap * 2, this.notePanel.Width, umath.intMax(0, this.notePanel.Height - this.noteEdit.Height - kBetweenGap * 2))
+        this.noteEdit.SetBounds(intMax(0, this.notePanel.Width - this.noteEdit.Width - kBetweenGap), kBetweenGap, this.noteEdit.Width, this.noteEdit.Height)
+        this.noteMemo.SetBounds(0, this.noteEdit.Height + kBetweenGap * 2, this.notePanel.Width, intMax(0, this.notePanel.Height - this.noteEdit.Height - kBetweenGap * 2))
     }
     
     resizeParametersPanel(): void {
         let newTop: short
         
-        this.parametersPanel.SetBounds(0, 0, this.plantFocusPanel.Width, umath.intMax(0, this.plantFocusPanel.Height - this.tabSet.height))
+        this.parametersPanel.SetBounds(0, 0, this.plantFocusPanel.Width, intMax(0, this.plantFocusPanel.Height - this.tabSet.height))
         this.parametersPlantName.SetBounds(kBetweenGap, kBetweenGap, this.parametersPlantName.Width, this.parametersPlantName.Height)
         this.sectionsComboBox.SetBounds(kBetweenGap, this.parametersPlantName.Top + this.parametersPlantName.Height + kBetweenGap, this.parametersPanel.Width - kBetweenGap * 2, this.sectionsComboBox.Height)
-        newTop = this.sectionsComboBox.Top + this.sectionsComboBox.Height + kBetweenGap
+        const newTop = this.sectionsComboBox.Top + this.sectionsComboBox.Height + kBetweenGap
         this.parametersScrollBox.SetBounds(0, this.sectionsComboBox.Top + this.sectionsComboBox.Height + kBetweenGap, this.parametersPanel.Width, this.parametersPanel.Height - newTop)
         this.repositionParameterPanels()
     }
     
     placeLifeCycleDragger(): void {
-        let firstPlant: PdPlant
-        let fractionOfMaxAge: float
-        
-        firstPlant = this.focusedPlant()
-        fractionOfMaxAge = 0.0
+        const firstPlant = this.focusedPlant()
+        let fractionOfMaxAge = 0.0
         if (firstPlant !== null) {
             try {
                 fractionOfMaxAge = firstPlant.age / firstPlant.pGeneral.ageAtMaturity
@@ -6748,14 +6256,13 @@ export class TMainForm {
     }
     
     horizontalSplitterMouseMove(Shift: TShiftState, X: int, Y: int): void {
-        let bottomLimit: int
-        
         if (domain === null) {
             return
         }
-        if (domain.options.mainWindowOrientation === udomain.kMainWindowOrientationHorizontal) {
+        let bottomLimit: int
+        if (domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal) {
             bottomLimit = kSplitterDragToBottomMinPixelsInHorizMode
-        } else if (domain.options.mainWindowOrientation === udomain.kMainWindowOrientationVertical) {
+        } else if (domain.options.mainWindowOrientation === kMainWindowOrientationVertical) {
             bottomLimit = kSplitterDragToBottomMinPixelsInVertMode
         } else {
             bottomLimit = kSplitterDragToBottomMinPixelsInHorizMode
@@ -6767,14 +6274,13 @@ export class TMainForm {
     }
     
     horizontalSplitterMouseUp(Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
-        let bottomLimit: int
-        
         if (domain === null) {
             return
         }
-        if (domain.options.mainWindowOrientation === udomain.kMainWindowOrientationHorizontal) {
+        let bottomLimit: int
+        if (domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal) {
             bottomLimit = kSplitterDragToBottomMinPixelsInHorizMode
-        } else if (domain.options.mainWindowOrientation === udomain.kMainWindowOrientationVertical) {
+        } else if (domain.options.mainWindowOrientation === kMainWindowOrientationVertical) {
             bottomLimit = kSplitterDragToBottomMinPixelsInVertMode
         } else {
             bottomLimit = kSplitterDragToBottomMinPixelsInHorizMode
@@ -6795,11 +6301,8 @@ export class TMainForm {
     
     // splitting 
     drawHorizontalSplitterLine(pos: int): int {
-        let result = 0
-        let theDC: HDC
-        
-        theDC = UNRESOLVED.getDC(0)
-        result = this.ClientOrigin.Y + this.horizontalSplitter.Top + pos + 2
+        const theDC: HDC = UNRESOLVED.getDC(0)
+        const result = this.ClientOrigin.Y + this.horizontalSplitter.Top + pos + 2
         UNRESOLVED.patBlt(theDC, this.ClientOrigin.X + this.horizontalSplitter.Left, result, this.horizontalSplitter.Width, 1, delphi_compatability.DSTINVERT)
         UNRESOLVED.releaseDC(0, theDC)
         this.horizontalSplitterNeedToRedraw = true
@@ -6807,12 +6310,10 @@ export class TMainForm {
     }
     
     undrawHorizontalSplitterLine(): void {
-        let theDC: HDC
-        
         if (!this.horizontalSplitterNeedToRedraw) {
             return
         }
-        theDC = UNRESOLVED.getDC(0)
+        const theDC: HDC = UNRESOLVED.getDC(0)
         UNRESOLVED.patBlt(theDC, this.ClientOrigin.X + this.horizontalSplitter.Left, this.horizontalSplitterLastDrawPos, this.horizontalSplitter.Width, 1, delphi_compatability.DSTINVERT)
         UNRESOLVED.releaseDC(0, theDC)
         this.horizontalSplitterNeedToRedraw = false
@@ -6848,24 +6349,19 @@ export class TMainForm {
     }
     
     drawVerticalSplitterLine(pos: int): int {
-        let result = 0
-        let theDC: HDC
-        
-        theDC = UNRESOLVED.getDC(0)
-        result = this.ClientOrigin.X + this.verticalSplitter.Left + pos + 2
+        const theDC: HDC = UNRESOLVED.getDC(0)
+        let result = this.ClientOrigin.X + this.verticalSplitter.Left + pos + 2
         UNRESOLVED.patBlt(theDC, result, this.ClientOrigin.Y + this.verticalSplitter.Top, 1, this.verticalSplitter.Height, delphi_compatability.DSTINVERT)
         UNRESOLVED.releaseDC(0, theDC)
         this.verticalSplitterNeedToRedraw = true
         return result
     }
     
-    undrawVerticalSplitterLine(): void {
-        let theDC: HDC
-        
+    undrawVerticalSplitterLine(): void { 
         if (!this.verticalSplitterNeedToRedraw) {
             return
         }
-        theDC = UNRESOLVED.getDC(0)
+        const theDC: HDC = UNRESOLVED.getDC(0)
         UNRESOLVED.patBlt(theDC, this.verticalSplitterLastDrawPos, this.ClientOrigin.Y + this.verticalSplitter.Top, 1, this.verticalSplitter.Height, delphi_compatability.DSTINVERT)
         UNRESOLVED.releaseDC(0, theDC)
         this.verticalSplitterNeedToRedraw = false
@@ -6914,13 +6410,9 @@ export class TMainForm {
     
     // v1.11
     Reconcile3DObjects1Click(): void {
-        let response: int
-        let numTdosAdded: int
-        
-        numTdosAdded = 0
         if (plantFileChanged) {
             // ask if want to save file first
-            response = MessageDialog("Do you want to save your changes to " + ExtractFileName(domain.plantFileName) + chr(13) + "before you reconcile its 3D objects" + chr(13) + "with those in the current 3D object file?", mtConfirmation, mbYesNoCancel, 0)
+            const response = MessageDialog("Do you want to save your changes to " + ExtractFileName(domain.plantFileName) + chr(13) + "before you reconcile its 3D objects" + chr(13) + "with those in the current 3D object file?", mtConfirmation, mbYesNoCancel, 0)
             switch (response) {
                 case IDCANCEL:
                     return
@@ -6936,7 +6428,7 @@ export class TMainForm {
             return
         }
         if (MessageDialog("You are about to add any 3D objects in the current plant file" + chr(13) + chr(13) + "    (" + domain.plantFileName + ")" + chr(13) + chr(13) + "that are not already in the current 3D object library" + chr(13) + chr(13) + "    (" + domain.defaultTdoLibraryFileName + ")" + chr(13) + chr(13) + "into that library. Do you want to go ahead?", mtConfirmation, {mbYes, mbNo, }, 0) === IDYES) {
-            numTdosAdded = domain.plantManager.reconcileFileWithTdoLibrary(domain.plantFileName, domain.defaultTdoLibraryFileName)
+            const numTdosAdded = domain.plantManager.reconcileFileWithTdoLibrary(domain.plantFileName, domain.defaultTdoLibraryFileName)
             if (numTdosAdded <= 0) {
                 MessageDialog("All the 3D objects in the current plant file" + chr(13) + chr(13) + "    (" + domain.plantFileName + ")" + chr(13) + chr(13) + "were already in the current 3D object library" + chr(13) + chr(13) + "    (" + domain.defaultTdoLibraryFileName + ").", mtInformation, {mbOK, }, 0)
             } else {
@@ -6950,22 +6442,17 @@ export class TMainForm {
     // v1.60 recent files menu
     // PDF PORT removed empty parens
     updateFileMenuForOtherRecentFiles(): void {
-        let i: short
-        let numSet: short
-        let shortcutString: string
-        let atLeastOneFileNameExists: boolean
-        let showThis: boolean
-        
-        atLeastOneFileNameExists = false
-        numSet = 0
-        for (i = 0; i <= udomain.kMaxRecentFiles - 1; i++) {
+        let atLeastOneFileNameExists = false
+        let numSet = 0
+        for (let i = 0; i <= udomain.kMaxRecentFiles - 1; i++) {
+            let shortcutString: string
             if (numSet + 1 === 10) {
                 shortcutString = "1&0"
             } else {
                 shortcutString = "&" + IntToStr(numSet + 1)
             }
             this.MenuFileReopen.items[i].caption = shortcutString + " " + domain.options.recentFiles[udomain.kMaxRecentFiles - 1 - i]
-            showThis = (domain.options.recentFiles[udomain.kMaxRecentFiles - 1 - i] !== "") && (FileExists(domain.options.recentFiles[udomain.kMaxRecentFiles - 1 - i]))
+            const showThis = (domain.options.recentFiles[udomain.kMaxRecentFiles - 1 - i] !== "") && (FileExists(domain.options.recentFiles[udomain.kMaxRecentFiles - 1 - i]))
             this.MenuFileReopen.items[i].visible = showThis
             if (showThis) {
                 numSet += 1
@@ -6979,9 +6466,7 @@ export class TMainForm {
     
     // v1.60 recent files menu
     Recent0Click(): void {
-        let index: short
-        
-        index = udomain.kMaxRecentFiles - 1 - this.MenuFileReopen.indexOf(Sender)
+        const index = udomain.kMaxRecentFiles - 1 - this.MenuFileReopen.indexOf(Sender)
         if (!FileExists(domain.options.recentFiles[index])) {
             MessageDialog("Cannot find the file" + chr(13) + domain.options.recentFiles[index] + ".", delphi_compatability.TMsgDlgType.mtError, {mbOK, }, 0)
             return
@@ -7014,6 +6499,14 @@ function InputQuery(arg0: string, arg1: string, newName: ansistring): boolean {
 
 const kSavingDrawingToBmp = 1
 function storeProfileInformation() {
+    throw new Error("Function not implemented.")
+}
+
+function UnionRect(newRect: TRect, newRect1: TRect, aRect: TRect) {
+    throw new Error("Function not implemented.")
+}
+
+function IntersectRect(intersection: any, arg1: TRect, aRect: TRect): boolean {
     throw new Error("Function not implemented.")
 }
 

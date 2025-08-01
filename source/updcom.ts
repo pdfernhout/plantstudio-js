@@ -45,10 +45,10 @@ export const kDontCreateFirstGeneration = false
 
 const kAddAtEnd = -1
 
-const kUp = 0
-const kDown = 1
-const kLeft = 2
-const kRight = 3
+export const kUp = 0
+export const kDown = 1
+export const kLeft = 2
+export const kRight = 3
 
 const kChangeWidth = true
 const kChangeHeight = false
