@@ -677,43 +677,28 @@ export class TMainForm {
     //         return
     //     }
     //     welcomeForm = uwelcome.TWelcomeForm().create(delphi_compatability.Application)
-    //     try {
-    //         if (welcomeForm.ShowModal() !== mrCancel) {
-    //             switch (welcomeForm.whatToDo) {
-    //                 case uwelcome.kReadSuperSpeedTour:
-    //                     delphi_compatability.Application.HelpJump("Super-Speed_Tour")
-    //                     break
-    //                 case uwelcome.kReadTutorial:
-    //                     delphi_compatability.Application.HelpJump("Tutorial")
-    //                     break
-    //                 case uwelcome.kMakeNewPlant:
-    //                     this.MenuPlantNewClick()
-    //                     break
-    //                 case uwelcome.kOpenPlantLibrary:
-    //                     if (domain.plantFileName === "") {
-    //                         domain.plantFileName = ExtractFilePath(delphi_compatability.Application.exeName)
-    //                     }
-    //                     this.MenuFileOpenClick()
-    //                     break
-    //                 case uwelcome.kStartUsingProgram:
-    //                     break
-    //             }
+    //     if (welcomeForm.ShowModal() !== mrCancel) {
+    //         switch (welcomeForm.whatToDo) {
+    //             case uwelcome.kReadSuperSpeedTour:
+    //                 delphi_compatability.Application.HelpJump("Super-Speed_Tour")
+    //                 break
+    //             case uwelcome.kReadTutorial:
+    //                 delphi_compatability.Application.HelpJump("Tutorial")
+    //                 break
+    //             case uwelcome.kMakeNewPlant:
+    //                 this.MenuPlantNewClick()
+    //                 break
+    //             case uwelcome.kOpenPlantLibrary:
+    //                 if (domain.plantFileName === "") {
+    //                     domain.plantFileName = ExtractFilePath(delphi_compatability.Application.exeName)
+    //                 }
+    //                 this.MenuFileOpenClick()
+    //                 break
+    //             case uwelcome.kStartUsingProgram:
+    //                 break
     //         }
-    //         domain.options.hideWelcomeForm = welcomeForm.hideWelcomeForm.Checked
-    //     } finally {
-    //         welcomeForm.free
-    //         welcomeForm = null
     //     }
-    // }
-    
-    // FormDestroy(): void {
-    //     this.commandList.free
-    //     this.commandList = null
-    //     this.drawingBitmap.free
-    //     this.drawingBitmap = null
-    //     this.selectedPlants.free
-    //     this.selectedPlants = null
-    //     // don't free statsPanel because we are the owner 
+    //     domain.options.hideWelcomeForm = welcomeForm.hideWelcomeForm.Checked
     // }
     
     // ------------------------------------------------------------------------- *file menu 
@@ -915,35 +900,32 @@ export class TMainForm {
         if (mover === null) {
             throw new Error("Problem: Could not create plant mover window.")
         }
-        try {
-            mover.ShowModal()
-            //in case mover copied something
-            this.updatePasteMenuForClipboardContents()
-            if (mover.changedCurrentPlantFile) {
-                if (mover.untitledDomainFileSavedAs !== "") {
-                    domain.plantFileName = mover.untitledDomainFileSavedAs
-                }
-                // cfk fix put help context in 
-                response = MessageDialog("The current plant file has changed." + chr(13) + "Do you want to reload the changed file?", mtConfirmation, {mbYes, mbNo, }, 0)
-                if (response === IDYES) {
-                    try {
-                        startWaitMessage("Opening " + ExtractFileName(domain.plantFileName))
-                        this.updateForNoPlantFile()
-                        domain.load(domain.plantFileName)
-                    } catch (Exception E) {
-                        stopWaitMessage()
-                        ShowMessage(E.message)
-                        ShowMessage("Could not load file " + domain.plantFileName + ".")
-                        return
-                    }
-                    this.updateForPlantFile()
-                    stopWaitMessage()
-                }
+
+        mover.ShowModal()
+        //in case mover copied something
+        this.updatePasteMenuForClipboardContents()
+        if (mover.changedCurrentPlantFile) {
+            if (mover.untitledDomainFileSavedAs !== "") {
+                domain.plantFileName = mover.untitledDomainFileSavedAs
             }
-        } finally {
-            mover.free
-            mover = null
+            // cfk fix put help context in 
+            response = MessageDialog("The current plant file has changed." + chr(13) + "Do you want to reload the changed file?", mtConfirmation, {mbYes, mbNo, }, 0)
+            if (response === IDYES) {
+                try {
+                    startWaitMessage("Opening " + ExtractFileName(domain.plantFileName))
+                    this.updateForNoPlantFile()
+                    domain.load(domain.plantFileName)
+                } catch (Exception E) {
+                    stopWaitMessage()
+                    ShowMessage(E.message)
+                    ShowMessage("Could not load file " + domain.plantFileName + ".")
+                    return
+                }
+                this.updateForPlantFile()
+                stopWaitMessage()
+            }
         }
+
     }
     
     MenuFileTdoMoverClick(): void {
@@ -953,12 +935,7 @@ export class TMainForm {
         if (mover === null) {
             throw new Error("Problem: Could not create 3D object mover window.")
         }
-        try {
-            mover.ShowModal()
-        } finally {
-            mover.free
-            mover = null
-        }
+        mover.ShowModal()
     }
     
     WMQueryEndSession(message: TWMQueryEndSession): void {
@@ -1044,18 +1021,14 @@ export class TMainForm {
                 switch (buttonPressed) {
                     case IDYES:
                         saveDialog = delphi_compatability.TSaveDialog().Create(delphi_compatability.Application)
-                        try {
-                            saveDialog.FileName = domain.iniFileName
-                            saveDialog.Filter = "Ini files (*.ini)|*.ini|All files (*.*)|*.*"
-                            saveDialog.DefaultExt = "ini"
-                            saveDialog.Options = saveDialog.Options + {delphi_compatability.TOpenOption.ofPathMustExist, delphi_compatability.TOpenOption.ofOverwritePrompt, delphi_compatability.TOpenOption.ofHideReadOnly, delphi_compatability.TOpenOption.ofNoReadOnlyReturn, }
-                            result = saveDialog.Execute()
-                            if (result) {
-                                domain.iniFileName = saveDialog.FileName
-                                choseAnotherFileName = true
-                            }
-                        } finally {
-                            saveDialog.free
+                        saveDialog.FileName = domain.iniFileName
+                        saveDialog.Filter = "Ini files (*.ini)|*.ini|All files (*.*)|*.*"
+                        saveDialog.DefaultExt = "ini"
+                        saveDialog.Options = saveDialog.Options + {delphi_compatability.TOpenOption.ofPathMustExist, delphi_compatability.TOpenOption.ofOverwritePrompt, delphi_compatability.TOpenOption.ofHideReadOnly, delphi_compatability.TOpenOption.ofNoReadOnlyReturn, }
+                        result = saveDialog.Execute()
+                        if (result) {
+                            domain.iniFileName = saveDialog.FileName
+                            choseAnotherFileName = true
                         }
                         if (!result) {
                             return result
@@ -1094,30 +1067,26 @@ export class TMainForm {
         if (undoRedoListForm === null) {
             throw new Error("Problem: Could not create undo/redo list window.")
         }
-        try {
-            undoRedoListForm.initializeWithCommandList(this.commandList)
-            response = undoRedoListForm.ShowModal()
-            if (response === mrOK) {
-                try {
-                    this.enableOrDisableAllForms(kDisableAllForms)
-                    startWaitMessage("Multiple undo/redo in progress; please wait...")
-                    if (undoRedoListForm.undoToIndex() >= 0) {
-                        for (i = 0; i <= undoRedoListForm.undoToIndex(); i++) {
-                            this.commandList.undoLast()
-                        }
-                    } else if (undoRedoListForm.redoToIndex() >= 0) {
-                        for (i = 0; i <= undoRedoListForm.redoToIndex(); i++) {
-                            this.commandList.redoLast()
-                        }
+        undoRedoListForm.initializeWithCommandList(this.commandList)
+        response = undoRedoListForm.ShowModal()
+        if (response === mrOK) {
+            try {
+                this.enableOrDisableAllForms(kDisableAllForms)
+                startWaitMessage("Multiple undo/redo in progress; please wait...")
+                if (undoRedoListForm.undoToIndex() >= 0) {
+                    for (i = 0; i <= undoRedoListForm.undoToIndex(); i++) {
+                        this.commandList.undoLast()
                     }
-                } finally {
-                    this.updateForPossibleChangeToDrawing()
-                    stopWaitMessage()
-                    this.enableOrDisableAllForms(kEnableAllForms)
+                } else if (undoRedoListForm.redoToIndex() >= 0) {
+                    for (i = 0; i <= undoRedoListForm.redoToIndex(); i++) {
+                        this.commandList.redoLast()
+                    }
                 }
+            } finally {
+                this.updateForPossibleChangeToDrawing()
+                stopWaitMessage()
+                this.enableOrDisableAllForms(kEnableAllForms)
             }
-        } finally {
-            undoRedoListForm.free
         }
     }
     
@@ -1206,79 +1175,74 @@ export class TMainForm {
             MessageDialog("The clipboard has text in it, but no plants." + chr(13) + chr(13) + "I can't find an ending line for a plant text description." + chr(13) + "It should have \"" + uplant.kPlantAsTextEndString + "\" in it." + chr(13) + chr(13) + "If you copied the text for a plant," + chr(13) + "make sure the whole plant is selected and copy it again.", delphi_compatability.TMsgDlgType.mtError, {mbOK, }, 0)
             return
         }
-        try {
-            // since startLine and endLine are comments, we can read them
-            i = startLine
-            while (i <= endLine) {
-                aLine = this.plantsAsTextMemo.Lines.Strings[i]
-                i += 1
-                if (trim(aLine) === "") {
-                    // v1.60final ignore blank lines
-                    continue
-                }
-                if (pos(";", aLine) === 1) {
-                    continue
-                }
-                if (pos("[", aLine) === 1) {
-                    checkVersionNumberInPlantNameLine(aLine)
-                    plant = new PdPlant()
-                    plantName = stringBeyond(aLine, "[")
-                    plantName = stringUpTo(plantName, "]")
-                    plant.setName(plantName + " from text")
-                    domain.parameterManager.setAllReadFlagsToFalse()
-                    plant.readingFromMemo = true
-                    try {
-                        while ((pos(uplant.kPlantAsTextEndString, aLine) <= 0) && (i <= endLine)) {
-                            // v1.60final fixed cutting off plant at blank line (was changed in file read in v1.3)
-                            // aLine <> '' do
-                            aLine = this.plantsAsTextMemo.Lines.Strings[i]
-                            i += 1
-                            if (pos(";", aLine) === 1) {
-                                continue
-                            }
-                            if (trim(aLine) === "") {
-                                continue
-                            }
-                            if (pos(uppercase(uplant.kStartNoteString), uppercase(aLine)) > 0) {
-                                // added v1.6b1 to accommodate paste from text with note
-                                plant.noteLines.Clear()
-                                while (i <= this.plantsAsTextMemo.Lines.Count - 1) {
-                                    aLine = this.plantsAsTextMemo.Lines.Strings[i]
-                                    i += 1
-                                    if ((pos(uppercase(uplant.kEndNoteString), uppercase(aLine)) > 0) && (plant.noteLines.Count < 5000)) {
-                                        break
-                                    } else if (pos(";", aLine) === 1) {
-                                        continue
-                                    } else {
-                                        plant.noteLines.Add(aLine)
-                                    }
+        // since startLine and endLine are comments, we can read them
+        i = startLine
+        while (i <= endLine) {
+            aLine = this.plantsAsTextMemo.Lines.Strings[i]
+            i += 1
+            if (trim(aLine) === "") {
+                // v1.60final ignore blank lines
+                continue
+            }
+            if (pos(";", aLine) === 1) {
+                continue
+            }
+            if (pos("[", aLine) === 1) {
+                checkVersionNumberInPlantNameLine(aLine)
+                plant = new PdPlant()
+                plantName = stringBeyond(aLine, "[")
+                plantName = stringUpTo(plantName, "]")
+                plant.setName(plantName + " from text")
+                domain.parameterManager.setAllReadFlagsToFalse()
+                plant.readingFromMemo = true
+                try {
+                    while ((pos(uplant.kPlantAsTextEndString, aLine) <= 0) && (i <= endLine)) {
+                        // v1.60final fixed cutting off plant at blank line (was changed in file read in v1.3)
+                        // aLine <> '' do
+                        aLine = this.plantsAsTextMemo.Lines.Strings[i]
+                        i += 1
+                        if (pos(";", aLine) === 1) {
+                            continue
+                        }
+                        if (trim(aLine) === "") {
+                            continue
+                        }
+                        if (pos(uppercase(uplant.kStartNoteString), uppercase(aLine)) > 0) {
+                            // added v1.6b1 to accommodate paste from text with note
+                            plant.noteLines.Clear()
+                            while (i <= this.plantsAsTextMemo.Lines.Count - 1) {
+                                aLine = this.plantsAsTextMemo.Lines.Strings[i]
+                                i += 1
+                                if ((pos(uppercase(uplant.kEndNoteString), uppercase(aLine)) > 0) && (plant.noteLines.Count < 5000)) {
+                                    break
+                                } else if (pos(";", aLine) === 1) {
+                                    continue
+                                } else {
+                                    plant.noteLines.Add(aLine)
                                 }
                             }
-                            // end added v1.6b1
-                            plant.readingMemoLine = i
-                            plant.readLineAndTdoFromPlantFile(aLine, fakeTextFile)
-                            if (i !== plant.readingMemoLine) {
-                                i = plant.readingMemoLine
-                            }
                         }
-                    } finally {
-                        plant.readingFromMemo = false
-                        plant.readingMemoLine = -1
+                        // end added v1.6b1
+                        plant.readingMemoLine = i
+                        plant.readLineAndTdoFromPlantFile(aLine, fakeTextFile)
+                        if (i !== plant.readingMemoLine) {
+                            i = plant.readingMemoLine
+                        }
                     }
-                    plant.finishLoadingOrDefaulting(uplant.kCheckForUnreadParams)
-                    // cfk change v1.3 make plant fit into 100x100 box with paste from text, because
-                    // the scale always seems to be way off from what is being used; this way it always
-                    // looks okay when it pastes
-                    plant.drawPreviewIntoCache(Point(domain.options.pasteRectSize, domain.options.pasteRectSize), kDontConsiderDomainScale, uplant.kDontDrawNow)
-                    newPlants.push(plant)
+                } finally {
+                    plant.readingFromMemo = false
+                    plant.readingMemoLine = -1
                 }
+                plant.finishLoadingOrDefaulting(uplant.kCheckForUnreadParams)
+                // cfk change v1.3 make plant fit into 100x100 box with paste from text, because
+                // the scale always seems to be way off from what is being used; this way it always
+                // looks okay when it pastes
+                plant.drawPreviewIntoCache(Point(domain.options.pasteRectSize, domain.options.pasteRectSize), kDontConsiderDomainScale, uplant.kDontDrawNow)
+                newPlants.push(plant)
             }
-            newCommand = new PdPasteCommand(newPlants, this.selectedPlants)
-            this.doCommand(newCommand)
-        } finally {
-            //command has another list, so we need to free this one; command will free plants if paste is undone
-            newPlants.free
         }
+        newCommand = new PdPasteCommand(newPlants, this.selectedPlants)
+        this.doCommand(newCommand)
     }
     
     // export 
@@ -1291,13 +1255,9 @@ export class TMainForm {
         if (bitmapOptionsForm === null) {
             throw new Error("Problem: Could not create copy/save/print options window.")
         }
-        try {
-            bitmapOptionsForm.initializeWithTypeAndOptions(copySavePrintType, domain.bitmapOptions)
-            result = bitmapOptionsForm.ShowModal()
-            domain.bitmapOptions = bitmapOptionsForm.options
-        } finally {
-            bitmapOptionsForm.free
-        }
+        bitmapOptionsForm.initializeWithTypeAndOptions(copySavePrintType, domain.bitmapOptions)
+        result = bitmapOptionsForm.ShowModal()
+        domain.bitmapOptions = bitmapOptionsForm.options
         return result
     }
     
@@ -1309,12 +1269,8 @@ export class TMainForm {
         }
         if (this.getBitmapCopySavePrintOptions(ubmpopt.kCopyingDrawing) === mrOK) {
             bitmapForExport = delphi_compatability.TBitmap().Create()
-            try {
-                this.fillBitmapForExport(bitmapForExport, domain.bitmapOptions)
-                ubitmap.CopyBitmapToClipboard(bitmapForExport)
-            } finally {
-                bitmapForExport.free
-            }
+            this.fillBitmapForExport(bitmapForExport, domain.bitmapOptions)
+            ubitmap.CopyBitmapToClipboard(bitmapForExport)
         }
     }
     
@@ -1346,7 +1302,6 @@ export class TMainForm {
             bitmapForExport.SaveToFile(fileInfo.tempFile)
             fileInfo.writingWasSuccessful = true
         } finally {
-            bitmapForExport.free
             stopWaitMessage()
             cleanUpAfterFileSave(fileInfo)
         }
@@ -1387,8 +1342,6 @@ export class TMainForm {
             jpegForExport.saveToFile(fileInfo.tempFile)
             fileInfo.writingWasSuccessful = true
         } finally {
-            bitmapForExport.free
-            jpegForExport.free
             stopWaitMessage()
             cleanUpAfterFileSave(fileInfo)
         }
@@ -1409,37 +1362,33 @@ export class TMainForm {
             return
         }
         bitmapForExport = delphi_compatability.TBitmap().Create()
-        try {
-            this.fillBitmapForExport(bitmapForExport, domain.bitmapOptions)
-            UNRESOLVED.Printer.Title = "PlantStudio Picture"
-            UNRESOLVED.Printer.beginDoc
-            xResolution_pixelsPerInch = UNRESOLVED.GetDeviceCaps(UNRESOLVED.Printer.Handle, delphi_compatability.LOGPIXELSX)
-            yResolution_pixelsPerInch = UNRESOLVED.GetDeviceCaps(UNRESOLVED.Printer.Handle, delphi_compatability.LOGPIXELSY)
-            printOffsetX_px = UNRESOLVED.GetDeviceCaps(UNRESOLVED.Printer.Handle, UNRESOLVED.PhysicalOffsetX)
-            printOffsetY_px = UNRESOLVED.GetDeviceCaps(UNRESOLVED.Printer.Handle, UNRESOLVED.PhysicalOffsetY)
-            printRect_pixels.Left = intround(domain.bitmapOptions.printLeftMargin_in * xResolution_pixelsPerInch) - printOffsetX_px
-            printRect_pixels.Top = intround(domain.bitmapOptions.printTopMargin_in * yResolution_pixelsPerInch) - printOffsetY_px
-            printRect_pixels.Right = printRect_pixels.Left + intround(domain.bitmapOptions.printWidth_in * xResolution_pixelsPerInch)
-            printRect_pixels.Bottom = printRect_pixels.Top + intround(domain.bitmapOptions.printHeight_in * yResolution_pixelsPerInch)
-            UNRESOLVED.inflateRect(printRect_pixels, -domain.bitmapOptions.borderThickness, -domain.bitmapOptions.borderThickness)
-            ubitmap.PrintBitmap(bitmapForExport, printRect_pixels)
-            //FIX unresolved WITH expression: UNRESOLVED.Printer.Canvas
-            // border
-            this.Brush.Style = delphi_compatability.TFPBrushStyle.bsClear
-            if (domain.bitmapOptions.printBorderInner) {
-                UNRESOLVED.pen.color = domain.bitmapOptions.printBorderColorInner
-                UNRESOLVED.pen.width = domain.bitmapOptions.printBorderWidthInner
-                UNRESOLVED.rectangle(printRect_pixels.Left, printRect_pixels.Top, printRect_pixels.Right, printRect_pixels.Bottom)
-            }
-            if (domain.bitmapOptions.printBorderOuter) {
-                UNRESOLVED.pen.color = domain.bitmapOptions.printBorderColorOuter
-                UNRESOLVED.pen.width = domain.bitmapOptions.printBorderWidthOuter
-                UNRESOLVED.rectangle(printRect_pixels.Left - domain.bitmapOptions.borderGap, printRect_pixels.Top - domain.bitmapOptions.borderGap, printRect_pixels.Right + domain.bitmapOptions.borderGap, printRect_pixels.Bottom + domain.bitmapOptions.borderGap)
-            }
-            UNRESOLVED.Printer.endDoc
-        } finally {
-            bitmapForExport.free
+        this.fillBitmapForExport(bitmapForExport, domain.bitmapOptions)
+        UNRESOLVED.Printer.Title = "PlantStudio Picture"
+        UNRESOLVED.Printer.beginDoc
+        xResolution_pixelsPerInch = UNRESOLVED.GetDeviceCaps(UNRESOLVED.Printer.Handle, delphi_compatability.LOGPIXELSX)
+        yResolution_pixelsPerInch = UNRESOLVED.GetDeviceCaps(UNRESOLVED.Printer.Handle, delphi_compatability.LOGPIXELSY)
+        printOffsetX_px = UNRESOLVED.GetDeviceCaps(UNRESOLVED.Printer.Handle, UNRESOLVED.PhysicalOffsetX)
+        printOffsetY_px = UNRESOLVED.GetDeviceCaps(UNRESOLVED.Printer.Handle, UNRESOLVED.PhysicalOffsetY)
+        printRect_pixels.Left = intround(domain.bitmapOptions.printLeftMargin_in * xResolution_pixelsPerInch) - printOffsetX_px
+        printRect_pixels.Top = intround(domain.bitmapOptions.printTopMargin_in * yResolution_pixelsPerInch) - printOffsetY_px
+        printRect_pixels.Right = printRect_pixels.Left + intround(domain.bitmapOptions.printWidth_in * xResolution_pixelsPerInch)
+        printRect_pixels.Bottom = printRect_pixels.Top + intround(domain.bitmapOptions.printHeight_in * yResolution_pixelsPerInch)
+        UNRESOLVED.inflateRect(printRect_pixels, -domain.bitmapOptions.borderThickness, -domain.bitmapOptions.borderThickness)
+        ubitmap.PrintBitmap(bitmapForExport, printRect_pixels)
+        //FIX unresolved WITH expression: UNRESOLVED.Printer.Canvas
+        // border
+        this.Brush.Style = delphi_compatability.TFPBrushStyle.bsClear
+        if (domain.bitmapOptions.printBorderInner) {
+            UNRESOLVED.pen.color = domain.bitmapOptions.printBorderColorInner
+            UNRESOLVED.pen.width = domain.bitmapOptions.printBorderWidthInner
+            UNRESOLVED.rectangle(printRect_pixels.Left, printRect_pixels.Top, printRect_pixels.Right, printRect_pixels.Bottom)
         }
+        if (domain.bitmapOptions.printBorderOuter) {
+            UNRESOLVED.pen.color = domain.bitmapOptions.printBorderColorOuter
+            UNRESOLVED.pen.width = domain.bitmapOptions.printBorderWidthOuter
+            UNRESOLVED.rectangle(printRect_pixels.Left - domain.bitmapOptions.borderGap, printRect_pixels.Top - domain.bitmapOptions.borderGap, printRect_pixels.Right + domain.bitmapOptions.borderGap, printRect_pixels.Bottom + domain.bitmapOptions.borderGap)
+        }
+        UNRESOLVED.Printer.endDoc
     }
     
     // edit menu 
@@ -1554,14 +1503,9 @@ export class TMainForm {
         if (domain.plantManager.privatePlantClipboard.Count <= 0) {
             return
         }
-        try {
-            domain.plantManager.pastePlantsFromPrivatePlantClipboardToList(newPlants)
-            newCommand = new PdPasteCommand(newPlants, this.selectedPlants)
-            this.doCommand(newCommand)
-        } finally {
-            //command has another list, so we need to free this one; command will free plants if paste is undone
-            newPlants.free
-        }
+        domain.plantManager.pastePlantsFromPrivatePlantClipboardToList(newPlants)
+        newCommand = new PdPasteCommand(newPlants, this.selectedPlants)
+        this.doCommand(newCommand)
     }
     
     standardPastePosition(): TPoint {
@@ -1599,16 +1543,11 @@ export class TMainForm {
         if (optionsForm === null) {
             throw new Error("Problem: Could not create preferences window.")
         }
-        try {
-            optionsForm.options = domain.options
-            response = optionsForm.ShowModal()
-            if ((response === mrOK) && (optionsForm.optionsChanged)) {
-                newCommand = new PdChangeDomainOptionsCommand(optionsForm.options)
-                this.doCommand(newCommand)
-            }
-        } finally {
-            optionsForm.free
-            optionsForm = null
+        optionsForm.options = domain.options
+        response = optionsForm.ShowModal()
+        if ((response === mrOK) && (optionsForm.optionsChanged)) {
+            newCommand = new PdChangeDomainOptionsCommand(optionsForm.options)
+            this.doCommand(newCommand)
         }
     }
     
@@ -1631,21 +1570,16 @@ export class TMainForm {
         if (wizardForm === null) {
             throw new Error("Problem: Could not create wizard window.")
         }
-        try {
-            response = wizardForm.ShowModal()
-            if (response === mrOK) {
-                if (wizardForm.plant === null) {
-                    throw new Error("Problem: New wizard plant is nil.")
-                }
-                newPlantFromWizard = new PdPlant()
-                wizardForm.plant.copyTo(newPlantFromWizard)
-                newCommand = new PdNewCommand(newPlantFromWizard, this.selectedPlants)
-                this.doCommand(newCommand)
-                // command will free newPlantFromWizard 
+        response = wizardForm.ShowModal()
+        if (response === mrOK) {
+            if (wizardForm.plant === null) {
+                throw new Error("Problem: New wizard plant is nil.")
             }
-        } finally {
-            wizardForm.free
-            wizardForm = null
+            newPlantFromWizard = new PdPlant()
+            wizardForm.plant.copyTo(newPlantFromWizard)
+            newCommand = new PdNewCommand(newPlantFromWizard, this.selectedPlants)
+            this.doCommand(newCommand)
+            // command will free newPlantFromWizard 
         }
     }
     
@@ -1677,9 +1611,6 @@ export class TMainForm {
             newCommand = new PdNewCommand(newPlantFromWizard, this.selectedPlants)
             this.doCommand(newCommand)
         } finally {
-            // command will free newPlantFromWizard 
-            wizardForm.free
-            wizardForm = null
             stopWaitMessage()
         }
     }
@@ -1784,17 +1715,12 @@ export class TMainForm {
         if (optionsForm === null) {
             throw new Error("Problem: Could not create 3D export options window.")
         }
-        try {
-            optionsForm.outputType = outputType
-            optionsForm.rearrangeItemsForOutputType()
-            optionsForm.options = domain.exportOptionsFor3D[outputType]
-            response = optionsForm.ShowModal()
-            tempOptions = optionsForm.options
-            optionsChanged = optionsForm.optionsChanged
-        } finally {
-            optionsForm.free
-            optionsForm = null
-        }
+        optionsForm.outputType = outputType
+        optionsForm.rearrangeItemsForOutputType()
+        optionsForm.options = domain.exportOptionsFor3D[outputType]
+        response = optionsForm.ShowModal()
+        tempOptions = optionsForm.options
+        optionsChanged = optionsForm.optionsChanged
         if (response !== mrOK) {
             return
         }
@@ -1906,7 +1832,6 @@ export class TMainForm {
             bitmapForExport.SaveToFile(fileInfo.tempFile)
             fileInfo.writingWasSuccessful = true
         } finally {
-            bitmapForExport.free
             stopWaitMessage()
             cleanUpAfterFileSave(fileInfo)
         }
@@ -1921,13 +1846,9 @@ export class TMainForm {
         if (nozzleOptionsForm === null) {
             throw new Error("Problem: Could not create nozzle options window.")
         }
-        try {
-            nozzleOptionsForm.initializeWithOptions(domain.nozzleOptions)
-            result = nozzleOptionsForm.ShowModal()
-            domain.nozzleOptions = nozzleOptionsForm.options
-        } finally {
-            nozzleOptionsForm.free
-        }
+        nozzleOptionsForm.initializeWithOptions(domain.nozzleOptions)
+        result = nozzleOptionsForm.ShowModal()
+        domain.nozzleOptions = nozzleOptionsForm.options
         return result
     }
     
@@ -2002,28 +1923,24 @@ export class TMainForm {
             return
         }
         saveDialog = delphi_compatability.TSaveDialog().Create(delphi_compatability.Application)
-        try {
-            saveDialog.Title = "Choose a file name (numbers will be added)"
-            saveDialog.FileName = this.focusedPlant().getName() + ".bmp"
-            saveDialog.Filter = "Bitmap files (*.bmp)|*.bmp"
-            saveDialog.DefaultExt = "bmp"
-            saveDialog.Options = saveDialog.Options + {delphi_compatability.TOpenOption.ofPathMustExist, delphi_compatability.TOpenOption.ofOverwritePrompt, delphi_compatability.TOpenOption.ofHideReadOnly, delphi_compatability.TOpenOption.ofNoReadOnlyReturn, }
-            if (saveDialog.Execute()) {
-                sizeNeeded_MB = 1.0 * domain.animationOptions.fileSize / (1024 * 1024)
-                if (!this.enoughRoomToSaveFile(saveDialog.FileName, "animation", sizeNeeded_MB)) {
-                    return
-                }
-                ucursor.cursor_startWait()
-                startWaitMessage("Starting...")
-                try {
-                    this.writeAnimationFilesWithFileSpec(stringUpTo(saveDialog.FileName, ".") + " ")
-                } finally {
-                    ucursor.cursor_stopWait()
-                    stopWaitMessage()
-                }
+        saveDialog.Title = "Choose a file name (numbers will be added)"
+        saveDialog.FileName = this.focusedPlant().getName() + ".bmp"
+        saveDialog.Filter = "Bitmap files (*.bmp)|*.bmp"
+        saveDialog.DefaultExt = "bmp"
+        saveDialog.Options = saveDialog.Options + {delphi_compatability.TOpenOption.ofPathMustExist, delphi_compatability.TOpenOption.ofOverwritePrompt, delphi_compatability.TOpenOption.ofHideReadOnly, delphi_compatability.TOpenOption.ofNoReadOnlyReturn, }
+        if (saveDialog.Execute()) {
+            sizeNeeded_MB = 1.0 * domain.animationOptions.fileSize / (1024 * 1024)
+            if (!this.enoughRoomToSaveFile(saveDialog.FileName, "animation", sizeNeeded_MB)) {
+                return
             }
-        } finally {
-            saveDialog.free
+            ucursor.cursor_startWait()
+            startWaitMessage("Starting...")
+            try {
+                this.writeAnimationFilesWithFileSpec(stringUpTo(saveDialog.FileName, ".") + " ")
+            } finally {
+                ucursor.cursor_stopWait()
+                stopWaitMessage()
+            }
         }
     }
     
@@ -2120,13 +2037,9 @@ export class TMainForm {
         if (animationOptionsForm === null) {
             throw new Error("Problem: Could not create animation options window.")
         }
-        try {
-            animationOptionsForm.initializeWithOptionsAndPlant(domain.animationOptions, this.focusedPlant())
-            result = animationOptionsForm.ShowModal()
-            domain.animationOptions = animationOptionsForm.options
-        } finally {
-            animationOptionsForm.free
-        }
+        animationOptionsForm.initializeWithOptionsAndPlant(domain.animationOptions, this.focusedPlant())
+        result = animationOptionsForm.ShowModal()
+        domain.animationOptions = animationOptionsForm.options
         return result
     }
     
@@ -2351,22 +2264,17 @@ export class TMainForm {
         if (customDrawForm === null) {
             throw new Error("Problem: Could not create 3D object mover window.")
         }
-        try {
-            customDrawForm.options = domain.options
-            response = customDrawForm.ShowModal()
-            if ((response === mrOK) && (customDrawForm.optionsChanged)) {
-                newCommand = new PdChangeDomainOptionsCommand(customDrawForm.options)
-                this.doCommand(newCommand)
-            } else {
-                if (lastDrawSpeed !== DrawMode.kDrawCustom) {
-                    // escape just escapes changing options in dialog, not setting to custom, should still redraw
-                    // v1.4 change UNLESS it was custom before.
-                    this.updateForChangeToDrawOptions()
-                }
+        customDrawForm.options = domain.options
+        response = customDrawForm.ShowModal()
+        if ((response === mrOK) && (customDrawForm.optionsChanged)) {
+            newCommand = new PdChangeDomainOptionsCommand(customDrawForm.options)
+            this.doCommand(newCommand)
+        } else {
+            if (lastDrawSpeed !== DrawMode.kDrawCustom) {
+                // escape just escapes changing options in dialog, not setting to custom, should still redraw
+                // v1.4 change UNLESS it was custom before.
+                this.updateForChangeToDrawOptions()
             }
-        } finally {
-            customDrawForm.free
-            customDrawForm = null
         }
     }
     
@@ -2762,13 +2670,9 @@ export class TMainForm {
         }
         if ((indexAfterMove >= 0) && (indexAfterMove <= this.plants.length - 1)) {
             newList = delphi_compatability.TList().Create()
-            try {
-                newList.push(this.plants[indexAfterMove])
-                newCommand = new PdChangeSelectedPlantsCommand(this.selectedPlants, newList)
-                this.doCommand(newCommand)
-            } finally {
-                newList.free
-            }
+            newList.push(this.plants[indexAfterMove])
+            newCommand = new PdChangeSelectedPlantsCommand(this.selectedPlants, newList)
+            this.doCommand(newCommand)
         }
     }
     
@@ -2819,23 +2723,19 @@ export class TMainForm {
         this.plantListDrawGrid.Invalidate()
         // selected plants list - make sure no pointers are invalid 
         plantsToRemove = delphi_compatability.TList().Create()
-        try {
-            if (this.selectedPlants.length > 0) {
-                for (i = 0; i <= this.selectedPlants.length - 1; i++) {
-                    plant = this.selectedPlants[i]
-                    if (this.plants.indexOf(plant) < 0) {
-                        plantsToRemove.push(plant)
-                    }
+        if (this.selectedPlants.length > 0) {
+            for (i = 0; i <= this.selectedPlants.length - 1; i++) {
+                plant = this.selectedPlants[i]
+                if (this.plants.indexOf(plant) < 0) {
+                    plantsToRemove.push(plant)
                 }
             }
-            if (plantsToRemove.length > 0) {
-                for (i = 0; i <= plantsToRemove.length - 1; i++) {
-                    plant = plantsToRemove[i]
-                    this.selectedPlants = removeItem(this.selectedPlants, plant)
-                }
+        }
+        if (plantsToRemove.length > 0) {
+            for (i = 0; i <= plantsToRemove.length - 1; i++) {
+                plant = plantsToRemove[i]
+                this.selectedPlants = removeItem(this.selectedPlants, plant)
             }
-        } finally {
-            plantsToRemove.free
         }
         if (domain.viewPlantsInMainWindowOnePlantAtATime()) {
             this.showOnePlantExclusively(kDrawNow)
@@ -3414,9 +3314,7 @@ export class TMainForm {
     // command list management 
     // ---------------------------------------------------------------------------- *command list management 
     clearCommandList(): void {
-        this.commandList.free
-        this.commandList = null
-        this.commandList = ucommand.PdCommandList().create()
+        this.commandList = new PdCommandList()
         this.updateMenusForUndoRedo()
     }
     
@@ -3517,23 +3415,19 @@ export class TMainForm {
         
         plant = domain.plantManager.findPlantAtPoint(aPoint)
         newList = delphi_compatability.TList().Create()
-        try {
-            if ((shift) && (this.selectedPlants.length > 0)) {
-                for (i = 0; i <= this.selectedPlants.length - 1; i++) {
-                    newList.push(this.selectedPlants[i])
-                }
+        if ((shift) && (this.selectedPlants.length > 0)) {
+            for (i = 0; i <= this.selectedPlants.length - 1; i++) {
+                newList.push(this.selectedPlants[i])
             }
-            if (newList.indexOf(plant) >= 0) {
-                newList = removeItem(newList, plant)
-            } else if (plant !== null) {
-                newList.push(plant)
-            }
-            if (!this.twoListsAreIdentical(this.selectedPlants, newList)) {
-                newCommand = new PdChangeSelectedPlantsCommand(this.selectedPlants, newList)
-                this.doCommand(newCommand)
-            }
-        } finally {
-            newList.free
+        }
+        if (newList.indexOf(plant) >= 0) {
+            newList = removeItem(newList, plant)
+        } else if (plant !== null) {
+            newList.push(plant)
+        }
+        if (!this.twoListsAreIdentical(this.selectedPlants, newList)) {
+            newCommand = new PdChangeSelectedPlantsCommand(this.selectedPlants, newList)
+            this.doCommand(newCommand)
         }
     }
     
@@ -3553,71 +3447,61 @@ export class TMainForm {
             if (this.selectedPlants.length <= 0) {
                 return
             }
-            newList = delphi_compatability.TList().Create()
-            try {
-                newCommand = new PdChangeSelectedPlantsCommand(this.selectedPlants, newList)
-                this.doCommand(newCommand)
-            } finally {
-                newList.free
-            }
+            newCommand = new PdChangeSelectedPlantsCommand(this.selectedPlants, newList)
+            this.doCommand(newCommand)
             return
         }
         plant = this.plants[index]
         if (plant === null) {
             return
         }
-        newList = delphi_compatability.TList().Create()
-        try {
-            if ((delphi_compatability.TShiftStateEnum.ssCtrl in Shift)) {
+        if ((delphi_compatability.TShiftStateEnum.ssCtrl in Shift)) {
+            if (this.selectedPlants.length > 0) {
+                for (i = 0; i <= this.selectedPlants.length - 1; i++) {
+                    newList.push(this.selectedPlants[i])
+                }
+            }
+            if (newList.indexOf(plant) >= 0) {
+                newList = removeItem(newList, plant)
+            } else {
+                newList.push(plant)
+            }
+        } else if ((delphi_compatability.TShiftStateEnum.ssShift in Shift)) {
+            if (this.selectedPlants.length > 0) {
+                for (i = 0; i <= this.selectedPlants.length - 1; i++) {
+                    newList.push(this.selectedPlants[i])
+                }
+            }
+            if ((this.lastSingleClickPlantIndex >= 0) && (this.lastSingleClickPlantIndex <= this.plants.length - 1) && (this.lastSingleClickPlantIndex !== index)) {
+                if (this.lastSingleClickPlantIndex < index) {
+                    for (i = this.lastSingleClickPlantIndex; i <= index; i++) {
+                        if (newList.indexOf(this.plants[i]) < 0) {
+                            newList.push(this.plants[i])
+                        }
+                    }
+                } else if (this.lastSingleClickPlantIndex > index) {
+                    for (i = this.lastSingleClickPlantIndex; i >= index; i--) {
+                        if (newList.indexOf(this.plants[i]) < 0) {
+                            newList.push(this.plants[i])
+                        }
+                    }
+                }
+            }
+        } else {
+            if (this.isSelected(plant)) {
                 if (this.selectedPlants.length > 0) {
                     for (i = 0; i <= this.selectedPlants.length - 1; i++) {
                         newList.push(this.selectedPlants[i])
-                    }
-                }
-                if (newList.indexOf(plant) >= 0) {
-                    newList = removeItem(newList, plant)
-                } else {
-                    newList.push(plant)
-                }
-            } else if ((delphi_compatability.TShiftStateEnum.ssShift in Shift)) {
-                if (this.selectedPlants.length > 0) {
-                    for (i = 0; i <= this.selectedPlants.length - 1; i++) {
-                        newList.push(this.selectedPlants[i])
-                    }
-                }
-                if ((this.lastSingleClickPlantIndex >= 0) && (this.lastSingleClickPlantIndex <= this.plants.length - 1) && (this.lastSingleClickPlantIndex !== index)) {
-                    if (this.lastSingleClickPlantIndex < index) {
-                        for (i = this.lastSingleClickPlantIndex; i <= index; i++) {
-                            if (newList.indexOf(this.plants[i]) < 0) {
-                                newList.push(this.plants[i])
-                            }
-                        }
-                    } else if (this.lastSingleClickPlantIndex > index) {
-                        for (i = this.lastSingleClickPlantIndex; i >= index; i--) {
-                            if (newList.indexOf(this.plants[i]) < 0) {
-                                newList.push(this.plants[i])
-                            }
-                        }
                     }
                 }
             } else {
-                if (this.isSelected(plant)) {
-                    if (this.selectedPlants.length > 0) {
-                        for (i = 0; i <= this.selectedPlants.length - 1; i++) {
-                            newList.push(this.selectedPlants[i])
-                        }
-                    }
-                } else {
-                    newList.push(plant)
-                    this.lastSingleClickPlantIndex = index
-                }
+                newList.push(plant)
+                this.lastSingleClickPlantIndex = index
             }
-            if (!this.twoListsAreIdentical(this.selectedPlants, newList)) {
-                newCommand = new PdChangeSelectedPlantsCommand(this.selectedPlants, newList)
-                this.doCommand(newCommand)
-            }
-        } finally {
-            newList.free
+        }
+        if (!this.twoListsAreIdentical(this.selectedPlants, newList)) {
+            newCommand = new PdChangeSelectedPlantsCommand(this.selectedPlants, newList)
+            this.doCommand(newCommand)
         }
     }
     
@@ -3671,12 +3555,11 @@ export class TMainForm {
     }
     
     showOnePlantExclusively(drawNow: boolean): void {
-        let booleansList: TListCollection
+        let booleansList: PdBooleanValue[] = []
         let i: short
         let plant: PdPlant
         let firstPlant: PdPlant
         
-        booleansList = null
         firstPlant = this.focusedPlant()
         try {
             ucursor.cursor_startWait()
@@ -3698,7 +3581,6 @@ export class TMainForm {
                 this.updateForPossibleChangeToDrawing()
             }
         } finally {
-            booleansList.free
             ucursor.cursor_stopWait()
         }
     }
@@ -3897,13 +3779,9 @@ export class TMainForm {
                 return
             }
             hideList = delphi_compatability.TList().Create()
-            try {
-                hideList.push(plant)
-                newCommand = new PdHideOrShowCommand(hideList, !plant.hidden)
-                this.doCommand(newCommand)
-            } finally {
-                hideList.free
-            }
+            hideList.push(plant)
+            newCommand = new PdHideOrShowCommand(hideList, !plant.hidden)
+            this.doCommand(newCommand)
         }
         if (X > 16) {
             this.plantListDrawGrid.BeginDrag(false)
@@ -4301,15 +4179,11 @@ export class TMainForm {
         let newCommand: PdCommand
         
         newList = delphi_compatability.TList().Create()
-        try {
-            rubberBandRect = Rect(umath.intMin(this.rubberBandStartDragPoint.X, this.rubberBandLastDrawPoint.X), umath.intMin(this.rubberBandStartDragPoint.Y, this.rubberBandLastDrawPoint.Y), umath.intMax(this.rubberBandStartDragPoint.X, this.rubberBandLastDrawPoint.X), umath.intMax(this.rubberBandStartDragPoint.Y, this.rubberBandLastDrawPoint.Y))
-            domain.plantManager.fillListWithPlantsInRectangle(rubberBandRect, newList)
-            if (!this.twoListsAreIdentical(this.selectedPlants, newList)) {
-                newCommand = new PdChangeSelectedPlantsCommand(this.selectedPlants, newList)
-                this.doCommand(newCommand)
-            }
-        } finally {
-            newList.free
+        rubberBandRect = Rect(umath.intMin(this.rubberBandStartDragPoint.X, this.rubberBandLastDrawPoint.X), umath.intMin(this.rubberBandStartDragPoint.Y, this.rubberBandLastDrawPoint.Y), umath.intMax(this.rubberBandStartDragPoint.X, this.rubberBandLastDrawPoint.X), umath.intMax(this.rubberBandStartDragPoint.Y, this.rubberBandLastDrawPoint.Y))
+        domain.plantManager.fillListWithPlantsInRectangle(rubberBandRect, newList)
+        if (!this.twoListsAreIdentical(this.selectedPlants, newList)) {
+            newCommand = new PdChangeSelectedPlantsCommand(this.selectedPlants, newList)
+            this.doCommand(newCommand)
         }
     }
     
@@ -5822,7 +5696,6 @@ export class TMainForm {
                     oldParamPanel = uppanel.PdParameterPanel(this.parametersScrollBox.Controls[0])
                     this.RemoveComponent(oldParamPanel)
                     oldParamPanel.Parent = null
-                    oldParamPanel.free
                 }
             }
             if (this.sectionsComboBox.ItemIndex < 0) {
@@ -6147,19 +6020,14 @@ export class TMainForm {
         if (noteForm === null) {
             throw new Error("Problem: Could not create note edit window.")
         }
-        try {
-            noteForm.noteEditMemo.Lines.AddStrings(this.focusedPlant().noteLines)
-            noteForm.Caption = "Edit note for " + this.focusedPlant().getName()
-            if (noteForm.ShowModal() !== mrCancel) {
-                // command will take ownership of this and free it if necessary
-                commandLines = delphi_compatability.TStringList.create
-                commandLines.AddStrings(noteForm.noteEditMemo.Lines)
-                newCommand = new PdEditNoteCommand(this.focusedPlant(), commandLines)
-                this.doCommand(newCommand)
-            }
-        } finally {
-            noteForm.free
-            noteForm = null
+        noteForm.noteEditMemo.Lines.AddStrings(this.focusedPlant().noteLines)
+        noteForm.Caption = "Edit note for " + this.focusedPlant().getName()
+        if (noteForm.ShowModal() !== mrCancel) {
+            // command will take ownership of this and free it if necessary
+            commandLines = delphi_compatability.TStringList.create
+            commandLines.AddStrings(noteForm.noteEditMemo.Lines)
+            newCommand = new PdEditNoteCommand(this.focusedPlant(), commandLines)
+            this.doCommand(newCommand)
         }
     }
     
