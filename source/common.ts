@@ -89,6 +89,7 @@ export function StrToInt(value: string) {
 
 export const mtConfirmation = 1
 export const mbYesNoCancel = 2
+export const mbYesNo = 3
 export function MessageDialog(text: string, type: any, buttons: any, ignore3: any): number {
     alert(text)
     return 0

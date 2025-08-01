@@ -1,6 +1,6 @@
 // unit Umain
 
-import { ColorDefs, double, ExtractFileName, float, int, intround, IntToStr, long, mbYesNoCancel, MessageDialog, mtConfirmation, short, ShowMessage, StrToFloat, StrToIntDef, TColorRef } from "./common"
+import { ColorDefs, double, ExtractFileName, float, int, intround, IntToStr, long, mbYesNo, mbYesNoCancel, MessageDialog, mtConfirmation, short, ShowMessage, StrToFloat, StrToIntDef, TColorRef } from "./common"
 import { PdCommand } from "./PdCommand"
 import { PdCommandList } from "./PdCommandList"
 import { domain, DrawMode, kAnimateByAge, kAnimateByXRotation, kIncludeAllPlants, kIncludeDrawingAreaContents, kIncludeSelectedPlants, kIncludeVisiblePlants, kMainWindowOrientationHorizontal, kMainWindowOrientationVertical, kUnsavedFileName, ViewPlants } from "./PdDomain"
@@ -14,10 +14,10 @@ import { calcSCurveCoeffsWithResult, SCurveStructure, scurveWithResult } from ".
 import { ucursor } from "./temporary"
 import { TPoint } from "./TPoint"
 import { TRect } from "./TRect"
-import { ExportFormats } from "./U3dexport"
+import { ExportFormats, fileTypeFor3DExportType } from "./U3dexport"
 import { intMax, intMin, max, safedivExcept } from "./umath"
 import { kBringForward, kCopyToClipboard, kDontCopyToClipboard, kDown, kHide, kLeft, kRight, kSendBackward, kShow, kUp, PdAlignPlantsCommand, PdAnimatePlantCommand, PdBooleanValue, PdBreedFromParentsCommand, PdCenterDrawingCommand, PdChangeDomain3DOptionsCommand, PdChangeDomainOptionsCommand, PdChangeMagnificationCommand, PdChangeMainWindowOrientationCommand, PdChangeMainWindowViewingOptionCommand, PdChangePlantAgeCommand, PdChangeSelectedPlantsCommand, PdCreateAmendmentCommand, PdDeleteAmendmentCommand, PdDragCommand, PdDuplicateCommand, PdEditAmendmentCommand, PdEditNoteCommand, PdHideOrShowCommand, PdMakeTimeSeriesCommand, PdNewCommand, PdPackPlantsCommand, PdPasteCommand, PdRandomizeCommand, PdRemoveCommand, PdRenameCommand, PdResetRotationsCommand, PdResizePlantsCommand, PdResizePlantsToSameWidthOrHeightCommand, PdRotateCommand, PdScrollCommand, PdSelectOrDeselectAllCommand, PdSelectPosingPartCommand, PdSendBackwardOrForwardCommand } from "./updcom"
-import { chr, cleanUpAfterFileSave, createSaveFileNamesStructure, FileType, getFileSaveInfo, IDCANCEL, IDNO, IDYES, kAskForFileName, kDontAskForFileName, len, lowercase, mrCancel, mrOK, Point, pos, Rect, removeItem, rHeight, rWidth, SaveFileNamesStructure, setSinglePoint, startFileSave, stringBeyond, stringUpTo, trim, uppercase } from "./usupport"
+import { chr, cleanUpAfterFileSave, createSaveFileNamesStructure, FileType, getFileSaveInfo, IDCANCEL, IDNO, IDYES, kAskForFileName, kDontAskForFileName, len, lowercase, mrCancel, mrOK, nameStringForFileType, Point, pos, Rect, removeItem, rHeight, rWidth, SaveFileNamesStructure, setSinglePoint, startFileSave, stringBeyond, stringUpTo, trim, uppercase } from "./usupport"
 
 const kCursorModeSelectDrag = 0
 const kCursorModeMagnify = 1
@@ -693,7 +693,7 @@ export class TMainForm {
             try {
                 startWaitMessage("Opening " + ExtractFileName(fileNameWithPath))
                 domain.load(fileNameWithPath)
-            } catch (E) {
+            } catch (E: any) {
                 stopWaitMessage()
                 ShowMessage(E.message)
                 ShowMessage("Could not load file " + fileNameWithPath)
@@ -768,15 +768,6 @@ export class TMainForm {
     
     setPlantFileChanged(fileChanged: boolean): void {
         plantFileChanged = fileChanged
-        if (this.plantFileChangedImage !== null) {
-            if (plantFileChanged) {
-                this.plantFileChangedImage.Picture = this.fileChangedImage.Picture
-            } else {
-                this.plantFileChangedImage.Picture = this.fileNotChangedImage.Picture
-            }
-            this.plantFileChangedImage.Invalidate()
-            this.plantFileChangedImage.Refresh()
-        }
     }
     
     MenuFileSaveAsClick(): void {
@@ -819,7 +810,7 @@ export class TMainForm {
                     break
             }
         }
-        mover = umover.TMoverForm().create(this)
+        mover = TMoverForm().create(this)
         if (mover === null) {
             throw new Error("Problem: Could not create plant mover window.")
         }
@@ -832,7 +823,7 @@ export class TMainForm {
                 domain.plantFileName = mover.untitledDomainFileSavedAs
             }
             // cfk fix put help context in 
-            const response = MessageDialog("The current plant file has changed." + chr(13) + "Do you want to reload the changed file?", mtConfirmation, {mbYes, mbNo, }, 0)
+            const response = MessageDialog("The current plant file has changed." + chr(13) + "Do you want to reload the changed file?", mtConfirmation, mbYesNo, 0)
             if (response === IDYES) {
                 try {
                     startWaitMessage("Opening " + ExtractFileName(domain.plantFileName))
@@ -848,13 +839,12 @@ export class TMainForm {
                 stopWaitMessage()
             }
         }
-
     }
     
     MenuFileTdoMoverClick(): void {
         let mover: TTdoMoverForm
         
-        mover = utdomove.TTdoMoverForm().create(this)
+        mover = TTdoMoverForm().create(this)
         if (mover === null) {
             throw new Error("Problem: Could not create 3D object mover window.")
         }
@@ -862,7 +852,6 @@ export class TMainForm {
     }
     
     WMQueryEndSession(message: TWMQueryEndSession): void {
-        PdForm.prototype.WMQueryEndSession.call(this)
         if (!this.askForSaveAndProceed()) {
             // prevents windows from shutting down
             message.result = 0
@@ -928,11 +917,11 @@ export class TMainForm {
                 const buttonPressed = MessageDialog("Could not save settings to " + chr(13) + chr(13) + "  " + domain.iniFileName + chr(13) + chr(13) + "Would you like to save them to another file?", delphi_compatability.TMsgDlgType.mtError, mbYesNoCancel, 0)
                 switch (buttonPressed) {
                     case IDYES:
-                        const saveDialog: TSaveDialog = delphi_compatability.TSaveDialog().Create(delphi_compatability.Application)
+                        const saveDialog: TSaveDialog = TSaveDialog(delphi_compatability.Application)
                         saveDialog.FileName = domain.iniFileName
                         saveDialog.Filter = "Ini files (*.ini)|*.ini|All files (*.*)|*.*"
                         saveDialog.DefaultExt = "ini"
-                        saveDialog.Options = saveDialog.Options + {delphi_compatability.TOpenOption.ofPathMustExist, delphi_compatability.TOpenOption.ofOverwritePrompt, delphi_compatability.TOpenOption.ofHideReadOnly, delphi_compatability.TOpenOption.ofNoReadOnlyReturn, }
+                        saveDialog.Options = saveDialog.Options + {TOpenOption.ofPathMustExist, TOpenOption.ofOverwritePrompt, TOpenOption.ofHideReadOnly, TOpenOption.ofNoReadOnlyReturn, }
                         result = saveDialog.Execute()
                         if (result) {
                             domain.iniFileName = saveDialog.FileName
@@ -1541,72 +1530,73 @@ export class TMainForm {
     }
     
     ExportToGeneric3DType(outputType: short): void {
-        let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
-        let optionsForm: TGeneric3DOptionsForm
-        let tempOptions: FileExport3DOptionsStructure
-        let fileType: short
-        let fileDescriptor: string
-        let optionsChanged: boolean
-        let excludeInvisiblePlants: boolean
-        let excludeNonSelectedPlants: boolean
+        throw new Error("TODO unfinished")
+        // let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
+        // let optionsForm: TGeneric3DOptionsForm
+        // let tempOptions: FileExport3DOptionsStructure
+        // let fileType: short
+        // let fileDescriptor: string
+        // let optionsChanged: boolean
+        // let excludeInvisiblePlants: boolean
+        // let excludeNonSelectedPlants: boolean
         
-        optionsChanged = false
-        optionsForm = uoptions3dexport.TGeneric3DOptionsForm().create(this)
-        if (optionsForm === null) {
-            throw new Error("Problem: Could not create 3D export options window.")
-        }
-        optionsForm.outputType = outputType
-        optionsForm.rearrangeItemsForOutputType()
-        optionsForm.options = domain.exportOptionsFor3D[outputType]
-        const response = optionsForm.ShowModal()
-        tempOptions = optionsForm.options
-        optionsChanged = optionsForm.optionsChanged
-        if (response !== mrOK) {
-            return
-        }
-        fileType = u3dexport.fileTypeFor3DExportType(outputType)
-        fileDescriptor = usupport.nameStringForFileType(fileType)
-        exportTo3DFileSaveAttemptsThisSession[outputType] += 1
-        const suggestedFileName = "plants" + IntToStr(exportTo3DFileSaveAttemptsThisSession[outputType]) + "." + usupport.extensionForFileType(fileType)
-        if (!getFileSaveInfo(fileType, kAskForFileName, suggestedFileName, fileInfo)) {
-            if (optionsChanged) {
-                if (MessageDialog(fileDescriptor + " export stopped." + chr(13) + chr(13) + "Do you want to save the changes you made" + chr(13) + "to the " + fileDescriptor + " export options?", mtConfirmation, {mbYes, mbNo, }, 0) === IDYES) {
-                    const newCommand = new PdChangeDomain3DOptionsCommand(tempOptions, outputType)
-                    this.doCommand(newCommand)
-                }
-            }
-            return
-        }
-        if (!this.enoughRoomToSaveFile(fileInfo.tempFile, fileDescriptor, tempOptions.fileSize)) {
-            return
-        }
-        if (optionsChanged) {
-            const newCommand = new PdChangeDomain3DOptionsCommand(tempOptions, outputType)
-            this.doCommand(newCommand)
-        }
-        try {
-            startFileSave(fileInfo)
-            if (outputType === u3dexport.kPOV) {
-                fileInfo.newFile = usupport.replacePunctuationWithUnderscores(stringUpTo(ExtractFileName(fileInfo.newFile), ".")) + ".inc"
-            }
-            startWaitMessage("Saving " + ExtractFileName(fileInfo.newFile) + "...")
-            excludeInvisiblePlants = false
-            excludeNonSelectedPlants = false
-            switch (tempOptions.exportType) {
-                case kIncludeSelectedPlants:
-                    excludeInvisiblePlants = true
-                    excludeNonSelectedPlants = true
-                    break
-                case kIncludeVisiblePlants:
-                    excludeInvisiblePlants = true
-                    break
-            }
-            domain.plantManager.write3DOutputFileToFileName(this.selectedPlants, excludeInvisiblePlants, excludeNonSelectedPlants, fileInfo.tempFile, outputType)
-            fileInfo.writingWasSuccessful = true
-        } finally {
-            stopWaitMessage()
-            cleanUpAfterFileSave(fileInfo)
-        }
+        // optionsChanged = false
+        // optionsForm = uoptions3dexport.TGeneric3DOptionsForm().create(this)
+        // if (optionsForm === null) {
+        //     throw new Error("Problem: Could not create 3D export options window.")
+        // }
+        // optionsForm.outputType = outputType
+        // optionsForm.rearrangeItemsForOutputType()
+        // optionsForm.options = domain.exportOptionsFor3D[outputType]
+        // const response = optionsForm.ShowModal()
+        // tempOptions = optionsForm.options
+        // optionsChanged = optionsForm.optionsChanged
+        // if (response !== mrOK) {
+        //     return
+        // }
+        // fileType = fileTypeFor3DExportType(outputType)
+        // fileDescriptor = nameStringForFileType(fileType)
+        // exportTo3DFileSaveAttemptsThisSession[outputType] += 1
+        // const suggestedFileName = "plants" + IntToStr(exportTo3DFileSaveAttemptsThisSession[outputType]) + "." + usupport.extensionForFileType(fileType)
+        // if (!getFileSaveInfo(fileType, kAskForFileName, suggestedFileName, fileInfo)) {
+        //     if (optionsChanged) {
+        //         if (MessageDialog(fileDescriptor + " export stopped." + chr(13) + chr(13) + "Do you want to save the changes you made" + chr(13) + "to the " + fileDescriptor + " export options?", mtConfirmation, mbYesNo, 0) === IDYES) {
+        //             const newCommand = new PdChangeDomain3DOptionsCommand(tempOptions, outputType)
+        //             this.doCommand(newCommand)
+        //         }
+        //     }
+        //     return
+        // }
+        // if (!this.enoughRoomToSaveFile(fileInfo.tempFile, fileDescriptor, tempOptions.fileSize)) {
+        //     return
+        // }
+        // if (optionsChanged) {
+        //     const newCommand = new PdChangeDomain3DOptionsCommand(tempOptions, outputType)
+        //     this.doCommand(newCommand)
+        // }
+        // try {
+        //     startFileSave(fileInfo)
+        //     if (outputType === FileType.kPOV) {
+        //         fileInfo.newFile = usupport.replacePunctuationWithUnderscores(stringUpTo(ExtractFileName(fileInfo.newFile), ".")) + ".inc"
+        //     }
+        //     startWaitMessage("Saving " + ExtractFileName(fileInfo.newFile) + "...")
+        //     excludeInvisiblePlants = false
+        //     excludeNonSelectedPlants = false
+        //     switch (tempOptions.exportType) {
+        //         case kIncludeSelectedPlants:
+        //             excludeInvisiblePlants = true
+        //             excludeNonSelectedPlants = true
+        //             break
+        //         case kIncludeVisiblePlants:
+        //             excludeInvisiblePlants = true
+        //             break
+        //     }
+        //     domain.plantManager.write3DOutputFileToFileName(this.selectedPlants, excludeInvisiblePlants, excludeNonSelectedPlants, fileInfo.tempFile, outputType)
+        //     fileInfo.writingWasSuccessful = true
+        // } finally {
+        //     stopWaitMessage()
+        //     cleanUpAfterFileSave(fileInfo)
+        // }
     }
     
     MenuPlantExportToDXFClick(): void {
@@ -3608,7 +3598,7 @@ export class TMainForm {
                 break
             case kCursorModePosingSelect:
                 if (domain.options.drawSpeed !== DrawMode.kDrawBest) {
-                    if (MessageDialog("To pose a plant, you need the \"Draw Using\" option set to \"Solids.\"" + chr(13) + chr(13) + "Do you want to change it?", mtConfirmation, {mbYes, mbNo, }, 0) === IDYES) {
+                    if (MessageDialog("To pose a plant, you need the \"Draw Using\" option set to \"Solids.\"" + chr(13) + chr(13) + "Do you want to change it?", mtConfirmation, mbYesNo, 0) === IDYES) {
                         this.MenuOptionsBestDrawClick()
                     }
                     return
@@ -6315,7 +6305,7 @@ export class TMainForm {
         if (!domain.checkForExistingDefaultTdoLibrary()) {
             return
         }
-        if (MessageDialog("You are about to add any 3D objects in the current plant file" + chr(13) + chr(13) + "    (" + domain.plantFileName + ")" + chr(13) + chr(13) + "that are not already in the current 3D object library" + chr(13) + chr(13) + "    (" + domain.defaultTdoLibraryFileName + ")" + chr(13) + chr(13) + "into that library. Do you want to go ahead?", mtConfirmation, {mbYes, mbNo, }, 0) === IDYES) {
+        if (MessageDialog("You are about to add any 3D objects in the current plant file" + chr(13) + chr(13) + "    (" + domain.plantFileName + ")" + chr(13) + chr(13) + "that are not already in the current 3D object library" + chr(13) + chr(13) + "    (" + domain.defaultTdoLibraryFileName + ")" + chr(13) + chr(13) + "into that library. Do you want to go ahead?", mtConfirmation, mbYesNo, 0) === IDYES) {
             const numTdosAdded = domain.plantManager.reconcileFileWithTdoLibrary(domain.plantFileName, domain.defaultTdoLibraryFileName)
             if (numTdosAdded <= 0) {
                 MessageDialog("All the 3D objects in the current plant file" + chr(13) + chr(13) + "    (" + domain.plantFileName + ")" + chr(13) + chr(13) + "were already in the current 3D object library" + chr(13) + chr(13) + "    (" + domain.defaultTdoLibraryFileName + ").", mtInformation, {mbOK, }, 0)
