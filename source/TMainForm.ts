@@ -559,7 +559,7 @@ export class TMainForm {
     //         // Application.OnHint := DoMenuHint;    
     //         delphi_compatability.Application.ShowHint = true
     //         // creation of dependent objects and setting them up 
-    //         this.selectedPlants = delphi_compatability.TList().Create()
+    //         this.selectedPlants = []
     //         this.commandList = ucommand.PdCommandList().create()
     //         this.commandList.setNewUndoLimit(domain.options.undoLimit)
     //         this.commandList.setNewObjectUndoLimit(domain.options.undoLimitOfPlants)
@@ -2669,7 +2669,6 @@ export class TMainForm {
             indexAfterMove = this.plants.length - 1
         }
         if ((indexAfterMove >= 0) && (indexAfterMove <= this.plants.length - 1)) {
-            newList = delphi_compatability.TList().Create()
             newList.push(this.plants[indexAfterMove])
             newCommand = new PdChangeSelectedPlantsCommand(this.selectedPlants, newList)
             this.doCommand(newCommand)
@@ -2722,7 +2721,6 @@ export class TMainForm {
         this.plantListDrawGrid.RowCount = this.plants.length
         this.plantListDrawGrid.Invalidate()
         // selected plants list - make sure no pointers are invalid 
-        plantsToRemove = delphi_compatability.TList().Create()
         if (this.selectedPlants.length > 0) {
             for (i = 0; i <= this.selectedPlants.length - 1; i++) {
                 plant = this.selectedPlants[i]
@@ -3414,7 +3412,6 @@ export class TMainForm {
         let i: short
         
         plant = domain.plantManager.findPlantAtPoint(aPoint)
-        newList = delphi_compatability.TList().Create()
         if ((shift) && (this.selectedPlants.length > 0)) {
             for (i = 0; i <= this.selectedPlants.length - 1; i++) {
                 newList.push(this.selectedPlants[i])
@@ -3754,8 +3751,7 @@ export class TMainForm {
     plantListDrawGridMouseDown(Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
         let col: int
         let row: int
-        let plant: PdPlant
-        let hideList: TList
+        let hideList: PdPlant[] = []
         let newCommand: PdCommand
         
         if (this.plants.length <= 0) {
@@ -3774,11 +3770,10 @@ export class TMainForm {
         // does updating in command
         this.selectPlantAtIndex(Shift, row)
         if ((X <= 16) && (row >= 0) && (row <= this.plants.length - 1)) {
-            plant = this.plants[row]
+            const plant = this.plants[row]
             if (plant === null) {
                 return
             }
-            hideList = delphi_compatability.TList().Create()
             hideList.push(plant)
             newCommand = new PdHideOrShowCommand(hideList, !plant.hidden)
             this.doCommand(newCommand)
@@ -4174,15 +4169,12 @@ export class TMainForm {
     // rubber banding 
     // ----------------------------------------------------------------------- *rubber banding 
     selectPlantsInRubberBandBox(): void {
-        let rubberBandRect: TRect
-        let newList: TList
-        let newCommand: PdCommand
+        const newList: PdPlant[] = []
         
-        newList = delphi_compatability.TList().Create()
-        rubberBandRect = Rect(umath.intMin(this.rubberBandStartDragPoint.X, this.rubberBandLastDrawPoint.X), umath.intMin(this.rubberBandStartDragPoint.Y, this.rubberBandLastDrawPoint.Y), umath.intMax(this.rubberBandStartDragPoint.X, this.rubberBandLastDrawPoint.X), umath.intMax(this.rubberBandStartDragPoint.Y, this.rubberBandLastDrawPoint.Y))
+        const rubberBandRect = Rect(umath.intMin(this.rubberBandStartDragPoint.X, this.rubberBandLastDrawPoint.X), umath.intMin(this.rubberBandStartDragPoint.Y, this.rubberBandLastDrawPoint.Y), umath.intMax(this.rubberBandStartDragPoint.X, this.rubberBandLastDrawPoint.X), umath.intMax(this.rubberBandStartDragPoint.Y, this.rubberBandLastDrawPoint.Y))
         domain.plantManager.fillListWithPlantsInRectangle(rubberBandRect, newList)
         if (!this.twoListsAreIdentical(this.selectedPlants, newList)) {
-            newCommand = new PdChangeSelectedPlantsCommand(this.selectedPlants, newList)
+            const newCommand = new PdChangeSelectedPlantsCommand(this.selectedPlants, newList)
             this.doCommand(newCommand)
         }
     }
