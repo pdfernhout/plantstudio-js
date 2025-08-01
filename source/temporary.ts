@@ -10,6 +10,7 @@ import { PdCommand } from "./PdCommand";
 import { TPoint } from "./TPoint";
 import { PdFiler } from "./PdFiler";
 import { PdStreamableObject } from "./PdStreamableObject";
+import { TMainForm } from "./TMainForm"
 
 // TODO: Fix copied code from utdo
 export const kMaximumRecordedPoints = 10000
@@ -21,42 +22,6 @@ export const kTdoBackColor = ColorDefs.clGray
 export const ucursor = {
     cursor_startWait: () => {},
     cursor_stopWait: () => {},
-}
-
-// TODO: Fix MainForm stub from umain
-export const MainForm = {
-    updateForChangeToPlantBitmaps: () => {},
-    cursorModeForDrawing: null,
-    exceptionResizingPlantBitmap: () => { throw new Error("exceptionResizingPlantBitmap") },
-    screenBytesPerPixel: () => 4,
-    drawingPaintBox: new TRect(),
-    inFileOpen: false,
-    inFormCreation: false,
-    drawing: false,
-    roomForPlantBitmap: (something: any, bytesThisBitmapWillBe: number) => true,
-    startDrawProgress: (totalPlantParts: number) => {},
-    finishDrawProgress: () => {},
-    isSelected: (something: any) => false,
-    focusedPlant: (): PdPlant | null => null,
-    plantsAsTextMemo: <string[]>[],
-    updateParameterValuesWithUpdateListForPlant: (something: any, updateList: any[]) => {},
-    showDrawProgress: (value: number) => {},
-    selectedPlantPartID: null,
-    plantFileChanged: false,
-    setPlantFileChanged: (changed: boolean) => {},
-    doCommand: (command: PdCommand) => {},
-    updateMenusForUndoRedo: () => {},
-    MenuEditUndoClick: (Sender: any) => {},
-    MenuEditRedoClick: (Sender: any) => {},
-    updatePasteMenuForClipboardContents: () => {},
-    standardPastePosition: () => new TPoint(),
-    invalidateDrawingRect(rect: TRect) {},
-    updatePoseInfo() {},
-    updateForChangeToPlantSelections() {},
-    invalidateEntireDrawing() {},
-    recalculateAllPlantBoundsRectsForOffsetChange() {},
-    updateForChangeToSelectedPlantsDrawingScale() {},
-    selectedPlants: <PdPlant[]>[],
 }
 
 // TODO: Fix PdBitmap stub

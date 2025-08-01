@@ -1,5 +1,6 @@
 // unit Umain
 
+import * as m from "mithril"
 import { ColorDefs, double, ExtractFileName, float, int, intround, IntToStr, long, mbYesNo, mbYesNoCancel, MessageDialog, mtConfirmation, short, ShowMessage, StrToFloat, StrToIntDef, TColorRef } from "./common"
 import { PdCommand } from "./PdCommand"
 import { PdCommandList } from "./PdCommandList"
@@ -66,7 +67,7 @@ const kSelectNoPosedPartString = "< Select None >"
 const kNoPartSelected = "Selected part: (none)"
 
 let plantFileChanged: boolean  = false
-let MainForm: TMainForm
+export let MainForm: TMainForm
 let pictureFileSaveAttemptsThisSession: short = 0
 let nozzleFileSaveAttemptsThisSession: short = 0
 let exportTo3DFileSaveAttemptsThisSession: short[] = Array(ExportFormats.k3DExportTypeLast + 1)
@@ -462,6 +463,8 @@ export class TMainForm {
     // TMainForm.prototype = new PdForm()
     // TMainForm.prototype.constructor = TMainForm
     Caption: string = "PlantStudio"
+
+    /*
     
     //$R *.DFM
     //in each direction, so box is 100 x 100
@@ -6355,6 +6358,48 @@ export class TMainForm {
         this.openFile(domain.options.recentFiles[index])
     }
     
+    */
+
+    // TODO: Temp definitions to get to compile
+    updateForChangeToPlantBitmaps = () => {}
+    exceptionResizingPlantBitmap = () => { throw new Error("exceptionResizingPlantBitmap") }
+    screenBytesPerPixel = () => 4
+    drawingPaintBox = new TRect()
+    roomForPlantBitmap = (something: any, bytesThisBitmapWillBe: number) => true
+    startDrawProgress = (totalPlantParts: number) => {}
+    finishDrawProgress = () => {}
+    isSelected = (something: any) => false
+    focusedPlant = (): PdPlant | null => null
+    plantsAsTextMemo = <string[]>[]
+    updateParameterValuesWithUpdateListForPlant = (something: any, updateList: any[]) => {}
+    showDrawProgress = (value: number) => {}
+    plantFileChanged = false
+    setPlantFileChanged = (changed: boolean) => {}
+    doCommand = (command: PdCommand) => {}
+    updateMenusForUndoRedo = () => {}
+    MenuEditUndoClick = (Sender: any) => {}
+    MenuEditRedoClick = (Sender: any) => {}
+    updatePasteMenuForClipboardContents = () => {}
+    standardPastePosition = () => new TPoint()
+    invalidateDrawingRect(rect: TRect) {}
+    updatePoseInfo() {}
+    updateForChangeToPlantSelections() {}
+    invalidateEntireDrawing() {}
+    recalculateAllPlantBoundsRectsForOffsetChange() {}
+    updateForChangeToSelectedPlantsDrawingScale() {}
+
+    updateFileMenuForOtherRecentFiles(): void {
+        throw new Error("TODO Unfinished duplicate function")
+    }
+
+    oninit() {
+        MainForm = this
+    }
+
+    view() {
+        return m("div", "PlantStudio Main Form")
+    }
+    
 }
 
 /// Unfinished Stub Function
@@ -6371,7 +6416,7 @@ function getFileOpenInfo(kFileTypePlant: FileType, plantFileName: string, arg2: 
     throw new Error("Function not implemented.")
 }
 
-function InputQuery(arg0: string, arg1: string, newName: ansistring): boolean {
+function InputQuery(arg0: string, arg1: string, newName: string): boolean {
     throw new Error("Function not implemented.")
 }
 

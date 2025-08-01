@@ -1,6 +1,6 @@
 // PdPlant was unit Uplant
 
-import { ucursor, MainForm, PdBitmap, TListCollection_streamUsingFiler, CursorMode, TimeSeriesForm, TTransparentMode, setPixelFormatBasedOnScreenForBitmap, TFPPenStyle, TFPBrushStyle, fillBitmap } from "./temporary"
+import { ucursor, PdBitmap, TListCollection_streamUsingFiler, CursorMode, TimeSeriesForm, TTransparentMode, setPixelFormatBasedOnScreenForBitmap, TFPPenStyle, TFPBrushStyle, fillBitmap } from "./temporary"
 import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor, ColorDefs, StrToIntDef, IntToStr, compareTextIgnoreCase, arrayRemove, TextFile, writeln, eof } from "./common"
 import { KfObject3D, kEmbeddedInPlant, kAdjustForOrigin } from "./KfObject3D"
 import { TPoint } from "./TPoint"
@@ -25,6 +25,7 @@ import { PdInternode } from "./PdInternode"
 import { PdStreamableObject } from "./PdStreamableObject"
 import { PdClassAndVersionInformationRecord, PdFiler } from "./PdFiler"
 import { DebugPrint } from "./udebug"
+import { MainForm } from "./TMainForm"
 
 // const
 export enum Gender {

@@ -109,7 +109,7 @@ export function calcSCurveCoeffs(sCurve: SCurveStructure): void {
 
 // same as Utils_CalcSCurveCoeffs but does not show an errorMessage or re-raise the exception;
 //  just returns whether it failed; used inside paint methods where you don't want error dialogs popping up 
-export function calcSCurveCoeffsWithResult(sCurve: SCurveStructure): boolean {
+export function calcSCurveCoeffsWithResult(sCurve: SCurveStructure, failed: boolean): boolean {
     let quotientX1Y1: double
     let lnQuotientX1Y1MinusX1: double
     let quotientX2Y2: double
@@ -117,7 +117,6 @@ export function calcSCurveCoeffsWithResult(sCurve: SCurveStructure): boolean {
     let c1temp: double
     let c2temp: double
     
-    let failed = true
     try {
         [quotientX1Y1, failed] = safedivWithResult(sCurve.x1, sCurve.y1)
         if (failed) {

@@ -2,7 +2,6 @@
 
 import { float, int, TColorRef, short, long } from "./common"
 import { max, safedivExcept, min } from "./umath"
-import { MainForm } from "./temporary"
 import { PdPlant } from "./PdPlant"
 import { TPoint } from "./TPoint"
 import { messageForExceptionType } from "./usupport"
@@ -10,6 +9,7 @@ import { PdPlantPart } from "./PdPlantPart"
 import { PdInternode } from "./PdInternode"
 import { ExportPart } from "./U3dexport"
 import { PdFiler } from "./PdFiler"
+import { MainForm } from "./TMainForm"
 
 export enum TraverseDirection {
     kTraverseNone = 0,

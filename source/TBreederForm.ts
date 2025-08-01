@@ -3,7 +3,7 @@
 import * as m from "mithril"
 import { TRect } from "./TRect"
 import { TPoint } from "./TPoint"
-import { MainForm, TFPBrushStyle, ucursor } from "./temporary"
+import { TFPBrushStyle, ucursor } from "./temporary"
 import { BreederVariation, domain, DrawMode } from "./PdDomain"
 import { intround, short, long, ColorDefs, int, IntToStr, MessageDialog, arrayRemove } from "./common"
 import { PdPlant, BreedingAndTimeSeriesOptionsStructure, kDrawNow, kDontConsiderDomainScale } from "./PdPlant"

@@ -4,7 +4,6 @@ import { PdPlant, Gender, PartType } from "./PdPlant"
 import { float, short, long, IntToStr, int, TColorRef } from "./common"
 import { TRect } from "./TRect"
 import { PdPlantDrawingAmendment } from "./PdPlantDrawingAmendment"
-import { MainForm } from "./temporary"
 import { PdTraverser, Activity, PdPlantStatistics } from "./PdTraverser"
 import { safedivExcept } from "./umath"
 import { KfObject3D } from "./KfObject3D"
@@ -19,6 +18,7 @@ import { ExportFormats, ExportPart, longNameForDXFPartType, shortNameForDXFPartT
 import { PdStreamableObject } from "./PdStreamableObject"
 import { PdClassAndVersionInformationRecord, PdFiler } from "./PdFiler"
 import { DebugPrint } from "./udebug"
+import { MainForm } from "./TMainForm"
 
 // const
 const kAddingBiomassToPlant = true
