@@ -26,7 +26,7 @@ const kRotateX = 1
 const kRotateY = 2
 const kRotateZ = 3
 
-const kCopyToClipboard = true
+export const kCopyToClipboard = true
 export const kDontCopyToClipboard = false
 
 const kNewPlantAge = 5

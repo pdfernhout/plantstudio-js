@@ -16,60 +16,9 @@ import { TPoint } from "./TPoint"
 import { TRect } from "./TRect"
 import { ExportFormats } from "./U3dexport"
 import { intMax, intMin, max, safedivExcept } from "./umath"
-import { kBringForward, kDontCopyToClipboard, kDown, kHide, kLeft, kRight, kSendBackward, kShow, kUp, PdAlignPlantsCommand, PdAnimatePlantCommand, PdBooleanValue, PdBreedFromParentsCommand, PdCenterDrawingCommand, PdChangeDomain3DOptionsCommand, PdChangeDomainOptionsCommand, PdChangeMagnificationCommand, PdChangeMainWindowOrientationCommand, PdChangeMainWindowViewingOptionCommand, PdChangePlantAgeCommand, PdChangeSelectedPlantsCommand, PdCreateAmendmentCommand, PdDeleteAmendmentCommand, PdDragCommand, PdDuplicateCommand, PdEditAmendmentCommand, PdEditNoteCommand, PdHideOrShowCommand, PdMakeTimeSeriesCommand, PdNewCommand, PdPackPlantsCommand, PdPasteCommand, PdRandomizeCommand, PdRemoveCommand, PdRenameCommand, PdResetRotationsCommand, PdResizePlantsCommand, PdResizePlantsToSameWidthOrHeightCommand, PdRotateCommand, PdScrollCommand, PdSelectOrDeselectAllCommand, PdSelectPosingPartCommand, PdSendBackwardOrForwardCommand } from "./updcom"
+import { kBringForward, kCopyToClipboard, kDontCopyToClipboard, kDown, kHide, kLeft, kRight, kSendBackward, kShow, kUp, PdAlignPlantsCommand, PdAnimatePlantCommand, PdBooleanValue, PdBreedFromParentsCommand, PdCenterDrawingCommand, PdChangeDomain3DOptionsCommand, PdChangeDomainOptionsCommand, PdChangeMagnificationCommand, PdChangeMainWindowOrientationCommand, PdChangeMainWindowViewingOptionCommand, PdChangePlantAgeCommand, PdChangeSelectedPlantsCommand, PdCreateAmendmentCommand, PdDeleteAmendmentCommand, PdDragCommand, PdDuplicateCommand, PdEditAmendmentCommand, PdEditNoteCommand, PdHideOrShowCommand, PdMakeTimeSeriesCommand, PdNewCommand, PdPackPlantsCommand, PdPasteCommand, PdRandomizeCommand, PdRemoveCommand, PdRenameCommand, PdResetRotationsCommand, PdResizePlantsCommand, PdResizePlantsToSameWidthOrHeightCommand, PdRotateCommand, PdScrollCommand, PdSelectOrDeselectAllCommand, PdSelectPosingPartCommand, PdSendBackwardOrForwardCommand } from "./updcom"
 import { chr, cleanUpAfterFileSave, createSaveFileNamesStructure, FileType, getFileSaveInfo, IDCANCEL, IDNO, IDYES, kAskForFileName, kDontAskForFileName, len, lowercase, mrCancel, mrOK, Point, pos, Rect, removeItem, rHeight, rWidth, SaveFileNamesStructure, setSinglePoint, startFileSave, stringBeyond, stringUpTo, trim, uppercase } from "./usupport"
 
-// from conversion_common import *
-// import ubmpsupport
-// import uundo
-// import uamendmt
-// import uoptions3dexport
-// import unoted
-// import ucustdrw
-// import uabout
-// import uanimate
-// import unozzle
-// import uwelcome
-// import utdomove
-// import ubmpopt
-// import udebug
-// import uwizard
-// import utimeser
-// import uturtle
-// import umover
-// import uwait
-// import ubreedr
-// import upp_hed
-// import upp_tdo
-// import upp_scv
-// import upp_rea
-// import upp_lis
-// import upp_int
-// import upp_col
-// import upp_boo
-// import uplantmn
-// import uparams
-// import usplash
-// import umath
-// import updcom
-// import uoptions
-// import ucursor
-// import ubitmap
-// import u3dexport
-// import usupport
-// import udomain
-// import uwinsliders
-// import usection
-// import ustats
-// import uppanel
-// import ucollect
-// import usliders
-// import uplant
-// import ucommand
-// import updform
-// import delphi_compatability
-
-// const
 const kCursorModeSelectDrag = 0
 const kCursorModeMagnify = 1
 const kCursorModeScroll = 2
@@ -84,16 +33,6 @@ const kJustMove = false
 const kAlwaysMove = true
 const kOnlyMoveIfOffTheScreen = false
 
-
-// var
-let plantFileChanged: boolean
-
-
-// var
-let MainForm: TMainForm
-
-
-// const
 const kBetweenGap = 4
 const kSplitterDragToTopMinPixels = 100
 const kSplitterDragToBottomMinPixelsInHorizMode = 160
@@ -120,12 +59,17 @@ const kExpand = 0
 const kCollapse = 1
 const kExpandOrCollapse = 2
 
+const kProgressBarColor = ColorDefs.clBlue
+const kScaleToFitMargin = 10
+const kOffscreenMargin = 20
+const kSelectNoPosedPartString = "< Select None >"
+const kNoPartSelected = "Selected part: (none)"
 
-// var
+let plantFileChanged: boolean  = false
+let MainForm: TMainForm
 let pictureFileSaveAttemptsThisSession: short = 0
 let nozzleFileSaveAttemptsThisSession: short = 0
 let exportTo3DFileSaveAttemptsThisSession: short[] = Array(ExportFormats.k3DExportTypeLast + 1)
-
 
 function setPlantCharacteristicsForAnimationFrame(plant: PdPlant, frame: short): void {
     if (plant === null) {
@@ -145,23 +89,6 @@ function setPlantCharacteristicsForAnimationFrame(plant: PdPlant, frame: short):
         }
     }
 }
-
-// const
-const kProgressBarColor = ColorDefs.clBlue
-
-
-// const
-const kScaleToFitMargin = 10
-const kOffscreenMargin = 20
-
-
-// const
-const kSelectNoPosedPartString = "< Select None >"
-
-
-// const
-const kNoPartSelected = "Selected part: (none)"
-
 
 // function enableOrDisableSet(aLabel: TLabel, anEdit: TEdit, aSpin: TSpinButton, anExtraLabel: TLabel, enable: boolean): void {
 //     if (aLabel !== null) {
@@ -1589,10 +1516,11 @@ export class TMainForm {
     }
     
     MenuPlantMakeTimeSeriesClick(): void {
-        if (this.selectedPlants.length <= 0) {
+        const plant = this.focusedPlant()
+        if (plant === null) {
             return
         }
-        const newCommand = new PdMakeTimeSeriesCommand(this.focusedPlant())
+        const newCommand = new PdMakeTimeSeriesCommand(plant)
         this.doCommand(newCommand)
     }
     
@@ -1851,10 +1779,10 @@ export class TMainForm {
     }
     
     writeAnimationFilesWithFileSpec(startFileName: string): void {
-        if (this.focusedPlant() === null) {
+        const plant = this.focusedPlant()
+        if (plant === null) {
             return
         }
-        const plant = this.focusedPlant()
         const oldXRotation = plant.xRotation
         const oldAge = plant.age
         const oldScale = plant.drawingScale_PixelsPerMm
@@ -1923,14 +1851,15 @@ export class TMainForm {
         let animationOptionsForm: TAnimationFilesOptionsForm
         
         let result = mrCancel
-        if (this.focusedPlant() === null) {
+        const plant = this.focusedPlant()
+        if (plant === null) {
             return result
         }
         animationOptionsForm = uanimate.TAnimationFilesOptionsForm().create(this)
         if (animationOptionsForm === null) {
             throw new Error("Problem: Could not create animation options window.")
         }
-        animationOptionsForm.initializeWithOptionsAndPlant(domain.animationOptions, this.focusedPlant())
+        animationOptionsForm.initializeWithOptionsAndPlant(domain.animationOptions, plant)
         result = animationOptionsForm.ShowModal()
         domain.animationOptions = animationOptionsForm.options
         return result
@@ -1988,10 +1917,11 @@ export class TMainForm {
     }
     
     MenuLayoutMakeBouquetClick(): void {
-        if (this.selectedPlants.length <= 1) {
+        const plant = this.focusedPlant()
+        if (!plant || this.selectedPlants.length <= 1) {
             return
         }
-        const newCommand = new PdDragCommand(this.selectedPlants, this.focusedPlant().basePoint_pixels())
+        const newCommand = new PdDragCommand(this.selectedPlants) // TODO: resolve: had another arg plant.basePoint_pixels()
         this.doCommand(newCommand)
     }
     
@@ -2034,10 +1964,11 @@ export class TMainForm {
     }
     
     MenuLayoutBringForwardClick(): void {
-        if (this.selectedPlants.length <= 0) {
+        const plant = this.firstSelectedPlantInList()
+        if (plant === null) {
             return
         }
-        if (this.plants.indexOf(this.firstSelectedPlantInList()) <= 0) {
+        if (this.plants.indexOf(plant) <= 0) {
             // don't do if you can't go forward any more 
             return
         }
@@ -2046,10 +1977,11 @@ export class TMainForm {
     }
     
     MenuLayoutSendBackClick(): void {
-        if (this.selectedPlants.length <= 0) {
+        const plant = this.lastSelectedPlantInList()
+        if (plant === null) {
             return
         }
-        if (this.plants.indexOf(this.lastSelectedPlantInList()) >= this.plants.length - 1) {
+        if (this.plants.indexOf(plant) >= this.plants.length - 1) {
             // don't do if you can't go backward any more 
             return
         }
@@ -4481,10 +4413,11 @@ export class TMainForm {
     }
     
     alignSelectedPlants(alignDirection: short): void {
-        if (this.selectedPlants.length <= 1) {
+        const plant = this.focusedPlant()
+        if (!plant || this.selectedPlants.length <= 1) {
             return
         }
-        const newCommand = new PdAlignPlantsCommand(this.selectedPlants, this.focusedPlant().boundsRect_pixels(), alignDirection)
+        const newCommand = new PdAlignPlantsCommand(this.selectedPlants, plant.boundsRect_pixels(), alignDirection)
         this.doCommand(newCommand)
     }
     
@@ -4505,10 +4438,11 @@ export class TMainForm {
     }
     
     packPlantsClick(): void {
-        if (this.selectedPlants.length <= 1) {
+        const plant = this.focusedPlant()
+        if (!plant || this.selectedPlants.length <= 1) {
             return
         }
-        const newCommand = new PdPackPlantsCommand(this.selectedPlants, this.focusedPlant().boundsRect_pixels())
+        const newCommand = new PdPackPlantsCommand(this.selectedPlants, plant.boundsRect_pixels())
         this.doCommand(newCommand)
     }
     
@@ -5557,20 +5491,21 @@ export class TMainForm {
     }
     
     noteEditClick(): void {
-        if (this.focusedPlant() === null) {
+        const plant = this.focusedPlant()
+        if (plant === null) {
             return
         }
         const noteForm: TNoteEditForm = unoted.TNoteEditForm().create(this)
         if (noteForm === null) {
             throw new Error("Problem: Could not create note edit window.")
         }
-        noteForm.noteEditMemo.Lines.AddStrings(this.focusedPlant().noteLines)
-        noteForm.Caption = "Edit note for " + this.focusedPlant().getName()
+        noteForm.noteEditMemo.Lines.AddStrings(plant.noteLines)
+        noteForm.Caption = "Edit note for " + plant.getName()
         if (noteForm.ShowModal() !== mrCancel) {
             // command will take ownership of this and free it if necessary
             const commandLines: TStringList = delphi_compatability.TStringList.create
             commandLines.AddStrings(noteForm.noteEditMemo.Lines)
-            const newCommand = new PdEditNoteCommand(this.focusedPlant(), commandLines)
+            const newCommand = new PdEditNoteCommand(plant, commandLines)
             this.doCommand(newCommand)
         }
     }
@@ -5754,11 +5689,15 @@ export class TMainForm {
         if (this.internalChange) {
             return
         }
+        const plant = this.focusedPlant()
+        if (plant === null) {
+            return
+        }
         let newCommand: PdCommand
         if (this.posedPlantParts.ItemIndex === this.posedPlantParts.Items.Count - 1) {
-            newCommand = new PdSelectPosingPartCommand(this.focusedPlant(), -1, this.selectedPlantPartID, "", this.selectedPlantPartType)
+            newCommand = new PdSelectPosingPartCommand(plant, -1, this.selectedPlantPartID, "", this.selectedPlantPartType)
         } else {
-            newCommand = new PdSelectPosingPartCommand(this.focusedPlant(), this.selectedPartIDInAmendedPartsList(), this.selectedPlantPartID, this.selectedPartTypeInAmendedPartsList(), this.selectedPlantPartType)
+            newCommand = new PdSelectPosingPartCommand(plant, this.selectedPartIDInAmendedPartsList(), this.selectedPlantPartID, this.selectedPartTypeInAmendedPartsList(), this.selectedPlantPartType)
         }
         this.doCommand(newCommand)
     }
@@ -5847,7 +5786,8 @@ export class TMainForm {
             return
         }
         this.updateForDependenciesWithinPoseInfo()
-        if (this.focusedPlant() === null) {
+        const plant = this.focusedPlant()
+        if (plant === null) {
             return
         }
         // command will take ownership of this and free it if necessary
@@ -5910,18 +5850,19 @@ export class TMainForm {
         newAmendment.scaleMultiplier_pct = intMax(0, intMin(1000, StrToIntDef(this.posingScaleMultiplierEdit.Text, currentAmendment.scaleMultiplier_pct)))
         newAmendment.lengthMultiplier_pct = intMax(0, intMin(1000, StrToIntDef(this.posingLengthMultiplierEdit.Text, currentAmendment.lengthMultiplier_pct)))
         newAmendment.widthMultiplier_pct = intMax(0, intMin(1000, StrToIntDef(this.posingWidthMultiplierEdit.Text, currentAmendment.widthMultiplier_pct)))
-        const newCommand = new PdEditAmendmentCommand(this.focusedPlant(), newAmendment, field)
+        const newCommand = new PdEditAmendmentCommand(plant, newAmendment, field)
         this.doCommand(newCommand)
     }
     
     posingPosePartClick(): void {
-        if (this.focusedPlant() === null) {
+        const plant = this.focusedPlant()
+        if (plant === null) {
             return
         }
         if (this.selectedPlantPartID < 0) {
             return
         }
-        if (this.focusedPlant().amendmentForPartID(this.selectedPlantPartID) !== null) {
+        if (plant.amendmentForPartID(this.selectedPlantPartID) !== null) {
             // only one amendment per part id
             return
         }
@@ -5929,19 +5870,20 @@ export class TMainForm {
         const newAmendment = new PdPlantDrawingAmendment()
         newAmendment.partID = this.selectedPlantPartID
         newAmendment.typeOfPart = this.selectedPlantPartType
-        const newCommand = new PdCreateAmendmentCommand(this.focusedPlant(), newAmendment)
+        const newCommand = new PdCreateAmendmentCommand(plant, newAmendment)
         this.doCommand(newCommand)
     }
     
     posingUnposePartClick(): void {
-        if (this.focusedPlant() === null) {
+        const plant = this.focusedPlant()
+        if (plant === null) {
             return
         }
-        const amendment = this.focusedPlant().amendmentForPartID(this.selectedPartIDInAmendedPartsList())
+        const amendment = plant.amendmentForPartID(this.selectedPartIDInAmendedPartsList())
         if (amendment === null) {
             return
         }
-        const newCommand = new PdDeleteAmendmentCommand(this.focusedPlant(), amendment)
+        const newCommand = new PdDeleteAmendmentCommand(plant, amendment)
         this.doCommand(newCommand)
     }
     
