@@ -4,6 +4,7 @@ import { intMax, max, min, intMin } from "./umath"
 import { TRect } from "./TRect"
 import { DebugPrint } from "./udebug"
 import { TPoint } from "./TPoint"
+import { ucursor } from "./temporary"
 
 // unit Usupport
 
@@ -52,6 +53,16 @@ export interface SaveFileNamesStructure {
     writingWasSuccessful: boolean
 }
 
+export function createSaveFileNamesStructure(): SaveFileNamesStructure {
+    return {
+        fileType: 0,
+        tempFile: "",
+        newFile: "",
+        backupFile: "",
+        writingWasSuccessful: false,
+    }
+}
+
 // const
 export enum FileType {
     kFileTypeAny = 0,
@@ -77,7 +88,7 @@ const kWritingWasSuccessful = true
 const kWritingFailed = false
 
 const kNoSuggestedFile = ""
-const kAskForFileName = true
+export const kAskForFileName = true
 export const kDontAskForFileName = false
 
 
@@ -1197,115 +1208,120 @@ export function fileNameIsOkayForSaving(suggestedFile: string): boolean {
     return result
 }
 
+*/
+
 export function getFileSaveInfo(fileType: short, askForFileName: boolean, suggestedFile: string, fileInfo: SaveFileNamesStructure): boolean {
-    let result = false
-    let saveDialog: TSaveDialog
-    let tryBackupName: string
-    let tryTempName: string
-    let fullSuggestedFileName: string
-    let prompt: string
-    let extension: string
-    let index: short
-    let tempFileHandle: long
-    let userAbortedSave: boolean
+    throw new Error("TODO Unfinished")
+    // let result = false
+    // let saveDialog: TSaveDialog
+    // let tryBackupName: string
+    // let tryTempName: string
+    // let fullSuggestedFileName: string
+    // let prompt: string
+    // let extension: string
+    // let index: short
+    // let tempFileHandle: long
+    // let userAbortedSave: boolean
     
-    fileInfo.fileType = fileType
-    result = false
-    userAbortedSave = false
-    // default info 
-    fileInfo.tempFile = ""
-    fileInfo.newFile = ""
-    fileInfo.backupFile = ""
-    fileInfo.writingWasSuccessful = false
-    if (!askForFileName) {
-        // if this is a Save, try to set the file name from the suggestedFile given; if file name
-        //    is invalid, set flag to move into Save As instead 
-        askForFileName = !fileNameIsOkayForSaving(suggestedFile)
-        if (!askForFileName) {
-            fileInfo.newFile = ExpandFileName(suggestedFile)
-        }
-    }
-    if (askForFileName) {
-        // if this is a Save As, or if this is a Save and the file in suggestedFile is invalid,
-        //    ask user for a file name 
-        saveDialog = delphi_compatability.TSaveDialog().Create(delphi_compatability.Application)
-        try {
-            if (len(suggestedFile) > 0) {
-                fullSuggestedFileName = ExpandFileName(suggestedFile)
-                // if directory does not exist, will leave as it was 
-                saveDialog.InitialDir = ExtractFilePath(fullSuggestedFileName)
-                if (UNRESOLVED.directoryExists(ExtractFilePath(fullSuggestedFileName))) {
-                    // don't check if file exists (because saving); check if dir exists 
-                    saveDialog.FileName = ExtractFileName(fullSuggestedFileName)
-                }
-            }
-            saveDialog.Filter = filterStringForFileType(fileType, kDontIncludeAllFiles)
-            saveDialog.DefaultExt = extensionForFileType(fileType)
-            saveDialog.Options = saveDialog.Options + {delphi_compatability.TOpenOption.ofPathMustExist, delphi_compatability.TOpenOption.ofOverwritePrompt, delphi_compatability.TOpenOption.ofHideReadOnly, delphi_compatability.TOpenOption.ofNoReadOnlyReturn, }
-            userAbortedSave = !saveDialog.Execute()
-            if (!userAbortedSave) {
-                fileInfo.newFile = saveDialog.FileName
-            }
-        } finally {
-            saveDialog.free
-            saveDialog = null
-        }
-    }
-    if (userAbortedSave) {
-        return result
-    }
-    try {
-        // set backup file name, check if read-only 
-        // changed backup file extension to put tilde first because it is better to have all backup files sort together 
-        // includes dot 
-        extension = ExtractFileExt(fileInfo.newFile)
-        extension = ".~" + UNRESOLVED.copy(extension, 2, 2)
-    } catch (e) {
-        extension = ".bak"
-    }
-    tryBackupName = ChangeFileExt(fileInfo.newFile, extension)
-    if (FileExists(tryBackupName)) {
-        if ((UNRESOLVED.fileGetAttr(tryBackupName) && UNRESOLVED.faReadOnly)) {
-            prompt = "The backup file " + tryBackupName + " is read-only. Continue?"
-            if (MessageDialog(prompt, mtConfirmation, {mbYes, mbNo, }, 0) !== mrYes) {
-                return result
-            }
-        }
-    } else {
-        fileInfo.backupFile = tryBackupName
-    }
-    for (index = 100; index <= 999; index++) {
-        // set temp file name 
-        tryTempName = ChangeFileExt(fileInfo.newFile, "." + IntToStr(index))
-        if (!FileExists(tryTempName)) {
-            fileInfo.tempFile = tryTempName
-            break
-        }
-    }
-    if (fileInfo.tempFile === "") {
-        // if can't find unused temp file, quit 
-        ShowMessage("Could not create temporary file " + tryTempName + ".")
-        return result
-    }
-    // test whether temp file can be created 
-    tempFileHandle = UNRESOLVED.fileCreate(fileInfo.tempFile)
-    if (tempFileHandle > 0) {
-        UNRESOLVED.fileClose(tempFileHandle)
-        if (!DeleteFile(fileInfo.tempFile)) {
-            ShowMessage("Problem with temporary file " + fileInfo.tempFile + ".")
-            return result
-        }
-    } else {
-        ShowMessage("Could not write to temporary file " + fileInfo.tempFile + ".")
-        return result
-    }
-    result = true
-    return result
+    // fileInfo.fileType = fileType
+    // result = false
+    // userAbortedSave = false
+    // // default info 
+    // fileInfo.tempFile = ""
+    // fileInfo.newFile = ""
+    // fileInfo.backupFile = ""
+    // fileInfo.writingWasSuccessful = false
+    // if (!askForFileName) {
+    //     // if this is a Save, try to set the file name from the suggestedFile given; if file name
+    //     //    is invalid, set flag to move into Save As instead 
+    //     askForFileName = !fileNameIsOkayForSaving(suggestedFile)
+    //     if (!askForFileName) {
+    //         fileInfo.newFile = ExpandFileName(suggestedFile)
+    //     }
+    // }
+    // if (askForFileName) {
+    //     // if this is a Save As, or if this is a Save and the file in suggestedFile is invalid,
+    //     //    ask user for a file name 
+    //     saveDialog = delphi_compatability.TSaveDialog().Create(delphi_compatability.Application)
+    //     try {
+    //         if (len(suggestedFile) > 0) {
+    //             fullSuggestedFileName = ExpandFileName(suggestedFile)
+    //             // if directory does not exist, will leave as it was 
+    //             saveDialog.InitialDir = ExtractFilePath(fullSuggestedFileName)
+    //             if (UNRESOLVED.directoryExists(ExtractFilePath(fullSuggestedFileName))) {
+    //                 // don't check if file exists (because saving); check if dir exists 
+    //                 saveDialog.FileName = ExtractFileName(fullSuggestedFileName)
+    //             }
+    //         }
+    //         saveDialog.Filter = filterStringForFileType(fileType, kDontIncludeAllFiles)
+    //         saveDialog.DefaultExt = extensionForFileType(fileType)
+    //         saveDialog.Options = saveDialog.Options + {delphi_compatability.TOpenOption.ofPathMustExist, delphi_compatability.TOpenOption.ofOverwritePrompt, delphi_compatability.TOpenOption.ofHideReadOnly, delphi_compatability.TOpenOption.ofNoReadOnlyReturn, }
+    //         userAbortedSave = !saveDialog.Execute()
+    //         if (!userAbortedSave) {
+    //             fileInfo.newFile = saveDialog.FileName
+    //         }
+    //     } finally {
+    //         saveDialog.free
+    //         saveDialog = null
+    //     }
+    // }
+    // if (userAbortedSave) {
+    //     return result
+    // }
+    // try {
+    //     // set backup file name, check if read-only 
+    //     // changed backup file extension to put tilde first because it is better to have all backup files sort together 
+    //     // includes dot 
+    //     extension = ExtractFileExt(fileInfo.newFile)
+    //     extension = ".~" + UNRESOLVED.copy(extension, 2, 2)
+    // } catch (e) {
+    //     extension = ".bak"
+    // }
+    // tryBackupName = ChangeFileExt(fileInfo.newFile, extension)
+    // if (FileExists(tryBackupName)) {
+    //     if ((UNRESOLVED.fileGetAttr(tryBackupName) && UNRESOLVED.faReadOnly)) {
+    //         prompt = "The backup file " + tryBackupName + " is read-only. Continue?"
+    //         if (MessageDialog(prompt, mtConfirmation, {mbYes, mbNo, }, 0) !== mrYes) {
+    //             return result
+    //         }
+    //     }
+    // } else {
+    //     fileInfo.backupFile = tryBackupName
+    // }
+    // for (index = 100; index <= 999; index++) {
+    //     // set temp file name 
+    //     tryTempName = ChangeFileExt(fileInfo.newFile, "." + IntToStr(index))
+    //     if (!FileExists(tryTempName)) {
+    //         fileInfo.tempFile = tryTempName
+    //         break
+    //     }
+    // }
+    // if (fileInfo.tempFile === "") {
+    //     // if can't find unused temp file, quit 
+    //     ShowMessage("Could not create temporary file " + tryTempName + ".")
+    //     return result
+    // }
+    // // test whether temp file can be created 
+    // tempFileHandle = UNRESOLVED.fileCreate(fileInfo.tempFile)
+    // if (tempFileHandle > 0) {
+    //     UNRESOLVED.fileClose(tempFileHandle)
+    //     if (!DeleteFile(fileInfo.tempFile)) {
+    //         ShowMessage("Problem with temporary file " + fileInfo.tempFile + ".")
+    //         return result
+    //     }
+    // } else {
+    //     ShowMessage("Could not write to temporary file " + fileInfo.tempFile + ".")
+    //     return result
+    // }
+    // result = true
+    // return result
 }
 
 export function startFileSave(fileInfo: SaveFileNamesStructure): void {
     ucursor.cursor_startWait()
 }
+
+/*
 
 export function fileIsExportFile(fileType: short): boolean {
     let result = false
@@ -1339,76 +1355,77 @@ export function fileIsExportFile(fileType: short): boolean {
     return result
 }
 
-export function cleanUpAfterFileSave(fileInfo: SaveFileNamesStructure): void {
-    let useBackup: boolean
-    let renamingFailed: boolean
-    let deletingFailed: boolean
-    let prompt: string
-    
-    ucursor.cursor_stopWait()
-    uwait.stopWaitMessage()
-    useBackup = true
-    if (!fileInfo.writingWasSuccessful) {
-        //if couldn't write, then remove temp file and exit without warning
-        DeleteFile(fileInfo.tempFile)
-        return
-    }
-    if (fileInfo.backupFile !== "") {
-        if (FileExists(fileInfo.backupFile)) {
-            //remove backup file if exists from prior backup
-            //try to delete backup file
-            deletingFailed = !DeleteFile(fileInfo.backupFile)
-            if (deletingFailed) {
-                //couldn't delete backup file
-                prompt = "Could not write backup file " + fileInfo.backupFile + ". Continue?"
-                if (MessageDialog(prompt, mtConfirmation, {mbYes, mbNo, }, 0) !== mrYes) {
-                    //user doesn't want to proceed - so cleanup temp file
-                    DeleteFile(fileInfo.tempFile)
-                    return
-                } else {
-                    useBackup = false
-                }
-            }
-        }
-    } else {
-        useBackup = false
-    }
-    if (FileExists(fileInfo.newFile)) {
-        if (useBackup) {
-            //if original file exists make backup if requested...
-            //rename old copy of new file to make backup
-            renamingFailed = !RenameFile(fileInfo.newFile, fileInfo.backupFile)
-            if (renamingFailed) {
-                prompt = "Could not rename old file to backup file " + fileInfo.backupFile + ". Continue?"
-                if (MessageDialog(prompt, mtConfirmation, {mbYes, mbNo, }, 0) !== mrYes) {
-                    //user doesn't want to proceed - so cleanup temp file
-                    DeleteFile(fileInfo.tempFile)
-                    return
-                } else {
-                    useBackup = false
-                }
-            }
-        }
-        if (!useBackup) {
-            //could not create backup file - so just delete old file instead of renaming
-            deletingFailed = !DeleteFile(fileInfo.newFile)
-            if (deletingFailed) {
-                ShowMessage("Could not write file " + fileInfo.newFile)
-                return
-            }
-        }
-    }
-    //rename temp file to newFile name
-    renamingFailed = !RenameFile(fileInfo.tempFile, fileInfo.newFile)
-    if (renamingFailed) {
-        //clean up by removing temp file
-        ShowMessage("Could not write file " + fileInfo.newFile + " from " + fileInfo.tempFile)
-        DeleteFile(fileInfo.tempFile)
-        return
-    }
-}
-
 */
+
+export function cleanUpAfterFileSave(fileInfo: SaveFileNamesStructure): void {
+    throw new Error("Unfinished")
+    // let useBackup: boolean
+    // let renamingFailed: boolean
+    // let deletingFailed: boolean
+    // let prompt: string
+    
+    // ucursor.cursor_stopWait()
+    // uwait.stopWaitMessage()
+    // useBackup = true
+    // if (!fileInfo.writingWasSuccessful) {
+    //     //if couldn't write, then remove temp file and exit without warning
+    //     DeleteFile(fileInfo.tempFile)
+    //     return
+    // }
+    // if (fileInfo.backupFile !== "") {
+    //     if (FileExists(fileInfo.backupFile)) {
+    //         //remove backup file if exists from prior backup
+    //         //try to delete backup file
+    //         deletingFailed = !DeleteFile(fileInfo.backupFile)
+    //         if (deletingFailed) {
+    //             //couldn't delete backup file
+    //             prompt = "Could not write backup file " + fileInfo.backupFile + ". Continue?"
+    //             if (MessageDialog(prompt, mtConfirmation, {mbYes, mbNo, }, 0) !== mrYes) {
+    //                 //user doesn't want to proceed - so cleanup temp file
+    //                 DeleteFile(fileInfo.tempFile)
+    //                 return
+    //             } else {
+    //                 useBackup = false
+    //             }
+    //         }
+    //     }
+    // } else {
+    //     useBackup = false
+    // }
+    // if (FileExists(fileInfo.newFile)) {
+    //     if (useBackup) {
+    //         //if original file exists make backup if requested...
+    //         //rename old copy of new file to make backup
+    //         renamingFailed = !RenameFile(fileInfo.newFile, fileInfo.backupFile)
+    //         if (renamingFailed) {
+    //             prompt = "Could not rename old file to backup file " + fileInfo.backupFile + ". Continue?"
+    //             if (MessageDialog(prompt, mtConfirmation, {mbYes, mbNo, }, 0) !== mrYes) {
+    //                 //user doesn't want to proceed - so cleanup temp file
+    //                 DeleteFile(fileInfo.tempFile)
+    //                 return
+    //             } else {
+    //                 useBackup = false
+    //             }
+    //         }
+    //     }
+    //     if (!useBackup) {
+    //         //could not create backup file - so just delete old file instead of renaming
+    //         deletingFailed = !DeleteFile(fileInfo.newFile)
+    //         if (deletingFailed) {
+    //             ShowMessage("Could not write file " + fileInfo.newFile)
+    //             return
+    //         }
+    //     }
+    // }
+    // //rename temp file to newFile name
+    // renamingFailed = !RenameFile(fileInfo.tempFile, fileInfo.newFile)
+    // if (renamingFailed) {
+    //     //clean up by removing temp file
+    //     ShowMessage("Could not write file " + fileInfo.newFile + " from " + fileInfo.tempFile)
+    //     DeleteFile(fileInfo.tempFile)
+    //     return
+    // }
+}
 
 export function setDecimalSeparator() {
     // TODO: not sure yet what this should do
@@ -1439,3 +1456,26 @@ export function uppercase(aString: string) {
 export function lowercase(aString: string) {
     return aString.toLowerCase()
 }
+
+export function trim(aLine: string) {
+    return aLine.trim()
+}
+
+export function chr(charCode: number): string {
+    return String.fromCharCode(charCode)
+}
+
+export function removeItem<T>(arr: Array<T>, value: T): Array<T> {
+  const index = arr.indexOf(value);
+  if (index > -1) {
+    arr.splice(index, 1);
+  }
+  return arr;
+}
+
+export const IDCANCEL = 0
+export const IDYES = 1
+export const IDNO = 2
+
+export const mrOK = 1
+export const mrCancel = 2

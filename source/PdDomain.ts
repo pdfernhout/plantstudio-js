@@ -214,7 +214,7 @@ export let domain: PdDomain
 
 
 // const
-const kUnsavedFileName = "untitled"
+export const kUnsavedFileName = "untitled"
 const kSectionFiles = 0
 const kSectionPrefs = 1
 const kSectionSettings = 2
@@ -1248,13 +1248,10 @@ export class PdDomain {
         }
     }
     
-    /*
 
     save(fileName: string): void {
         this.plantManager.savePlantsToFile(fileName, kNotInPlantMover)
     }
-    
-    */
 
     // v1.60
     updateRecentFileNames(aFileName: string): void {

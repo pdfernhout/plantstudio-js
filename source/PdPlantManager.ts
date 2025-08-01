@@ -11,7 +11,7 @@ import { SinglePoint, SaveFileNamesStructure, rWidth, rHeight, stringBetween, se
 import { KfObject3D, kInTdoLibrary, kStartTdoString } from "./KfObject3D"
 import { ucursor } from "./temporary"
 
-function checkVersionNumberInPlantNameLine(aLine: string): void {
+export function checkVersionNumberInPlantNameLine(aLine: string): void {
     let versionNumberString: string
     let plantName: string
     let versionNumber: int

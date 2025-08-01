@@ -87,8 +87,11 @@ export function StrToInt(value: string) {
     return parseInt(value, 10)
 }
 
-export function MessageDialog(text: string, ignore1: any, ignore2: any, ignore3: any) {
+export const mtConfirmation = 1
+export const mbYesNoCancel = 2
+export function MessageDialog(text: string, type: any, buttons: any, ignore3: any): number {
     alert(text)
+    return 0
 }
 
 export function ShowMessage(text: string) {

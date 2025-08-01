@@ -1,17 +1,18 @@
 // unit Umain
 
-import { ColorDefs, double, ExtractFileName, float, int, intround, IntToStr, long, MessageDialog, short, ShowMessage, TColorRef } from "./common"
+import { ColorDefs, double, ExtractFileName, float, int, intround, IntToStr, long, mbYesNoCancel, MessageDialog, mtConfirmation, short, ShowMessage, TColorRef } from "./common"
 import { PdCommand } from "./PdCommand"
 import { PdCommandList } from "./PdCommandList"
-import { domain, DrawMode, kAnimateByAge, kAnimateByXRotation, kIncludeAllPlants, kIncludeDrawingAreaContents, kIncludeSelectedPlants, kIncludeVisiblePlants, kMainWindowOrientationHorizontal, kMainWindowOrientationVertical } from "./PdDomain"
+import { domain, DrawMode, kAnimateByAge, kAnimateByXRotation, kIncludeAllPlants, kIncludeDrawingAreaContents, kIncludeSelectedPlants, kIncludeVisiblePlants, kMainWindowOrientationHorizontal, kMainWindowOrientationVertical, kUnsavedFileName } from "./PdDomain"
 import { kDontConsiderDomainScale, PdPlant } from "./PdPlant"
+import { checkVersionNumberInPlantNameLine } from "./PdPlantManager"
 import { ucursor } from "./temporary"
 import { TPoint } from "./TPoint"
 import { TRect } from "./TRect"
 import { ExportFormats } from "./U3dexport"
 import { max, safedivExcept } from "./umath"
-import { kBringForward, kSendBackward, PdAlignPlantsCommand, PdAnimatePlantCommand, PdBreedFromParentsCommand, PdCenterDrawingCommand, PdChangeDomain3DOptionsCommand, PdChangeDomainOptionsCommand, PdChangeMagnificationCommand, PdChangeMainWindowOrientationCommand, PdChangeMainWindowViewingOptionCommand, PdChangePlantAgeCommand, PdChangeSelectedPlantsCommand, PdCreateAmendmentCommand, PdDeleteAmendmentCommand, PdDragCommand, PdDuplicateCommand, PdEditAmendmentCommand, PdEditNoteCommand, PdHideOrShowCommand, PdMakeTimeSeriesCommand, PdNewCommand, PdPackPlantsCommand, PdPasteCommand, PdRandomizeCommand, PdRemoveCommand, PdRenameCommand, PdResetRotationsCommand, PdResizePlantsCommand, PdResizePlantsToSameWidthOrHeightCommand, PdRotateCommand, PdScrollCommand, PdSelectOrDeselectAllCommand, PdSelectPosingPartCommand, PdSendBackwardOrForwardCommand } from "./updcom"
-import { FileType, kDontAskForFileName, Point, pos, Rect, rHeight, rWidth, setSinglePoint, uppercase } from "./usupport"
+import { kBringForward, kDontCopyToClipboard, kHide, kSendBackward, kShow, PdAlignPlantsCommand, PdAnimatePlantCommand, PdBooleanValue, PdBreedFromParentsCommand, PdCenterDrawingCommand, PdChangeDomain3DOptionsCommand, PdChangeDomainOptionsCommand, PdChangeMagnificationCommand, PdChangeMainWindowOrientationCommand, PdChangeMainWindowViewingOptionCommand, PdChangePlantAgeCommand, PdChangeSelectedPlantsCommand, PdCreateAmendmentCommand, PdDeleteAmendmentCommand, PdDragCommand, PdDuplicateCommand, PdEditAmendmentCommand, PdEditNoteCommand, PdHideOrShowCommand, PdMakeTimeSeriesCommand, PdNewCommand, PdPackPlantsCommand, PdPasteCommand, PdRandomizeCommand, PdRemoveCommand, PdRenameCommand, PdResetRotationsCommand, PdResizePlantsCommand, PdResizePlantsToSameWidthOrHeightCommand, PdRotateCommand, PdScrollCommand, PdSelectOrDeselectAllCommand, PdSelectPosingPartCommand, PdSendBackwardOrForwardCommand } from "./updcom"
+import { chr, cleanUpAfterFileSave, createSaveFileNamesStructure, FileType, getFileSaveInfo, IDCANCEL, IDNO, IDYES, kAskForFileName, kDontAskForFileName, mrCancel, mrOK, Point, pos, Rect, removeItem, rHeight, rWidth, SaveFileNamesStructure, setSinglePoint, startFileSave, stringBeyond, stringUpTo, trim, uppercase } from "./usupport"
 
 // from conversion_common import *
 // import ubmpsupport
@@ -116,9 +117,9 @@ const kExpandOrCollapse = 2
 
 
 // var
-let pictureFileSaveAttemptsThisSession: short
-let nozzleFileSaveAttemptsThisSession: short
-let exportTo3DFileSaveAttemptsThisSession: short[] /* k3DExportTypeLast + 1 */
+let pictureFileSaveAttemptsThisSession: short = 0
+let nozzleFileSaveAttemptsThisSession: short = 0
+let exportTo3DFileSaveAttemptsThisSession: short[] = Array(ExportFormats.k3DExportTypeLast + 1)
 
 
 function setPlantCharacteristicsForAnimationFrame(plant: PdPlant, frame: short): void {
@@ -481,7 +482,7 @@ export class TMainForm {
     // drawingPaintBox: PdPaintBoxWithPalette = new PdPaintBoxWithPalette()
     // statsPanel: PdStatsPanel = new PdStatsPanel()
     // invalidDrawingRect: TRect = new TRect()
-    // internalChange: boolean = false
+    internalChange: boolean = false
     inFormCreation: boolean = false
     inFileOpen: boolean = false
     lastSaveProceeded: boolean = false
@@ -528,6 +529,7 @@ export class TMainForm {
     // mouseDownSelectedPlantPartType: string = ""
     // TMainForm.prototype = new PdForm()
     // TMainForm.prototype.constructor = TMainForm
+    Caption: string = "PlantStudio"
     
     //$R *.DFM
     //in each direction, so box is 100 x 100
@@ -646,7 +648,7 @@ export class TMainForm {
                     stopWaitMessage()
                 }
             } else {
-                this.MenuFileNewClick(this)
+                this.MenuFileNewClick()
             }
             // TODO: FIXME for splashForm
             // if (usplash.splashForm !== null) {
@@ -685,13 +687,13 @@ export class TMainForm {
     //                     delphi_compatability.Application.HelpJump("Tutorial")
     //                     break
     //                 case uwelcome.kMakeNewPlant:
-    //                     this.MenuPlantNewClick(this)
+    //                     this.MenuPlantNewClick()
     //                     break
     //                 case uwelcome.kOpenPlantLibrary:
     //                     if (domain.plantFileName === "") {
     //                         domain.plantFileName = ExtractFilePath(delphi_compatability.Application.exeName)
     //                     }
-    //                     this.MenuFileOpenClick(this)
+    //                     this.MenuFileOpenClick()
     //                     break
     //                 case uwelcome.kStartUsingProgram:
     //                     break
@@ -812,14 +814,14 @@ export class TMainForm {
         //cfk fix - put help context in - for all messageDlgs 
         messageBoxResult = MessageDialog("Save changes to " + ExtractFileName(domain.plantFileName) + "?", mtConfirmation, mbYesNoCancel, 0)
         switch (messageBoxResult) {
-            case delphi_compatability.IDCANCEL:
+            case IDCANCEL:
                 result = false
                 break
-            case delphi_compatability.IDYES:
-                this.MenuFileSaveClick(this)
+            case IDYES:
+                this.MenuFileSaveClick()
                 result = this.lastSaveProceeded
                 break
-            case delphi_compatability.IDNO:
+            case IDNO:
                 result = true
                 break
             default:
@@ -831,24 +833,24 @@ export class TMainForm {
     }
     
     MenuFileSaveClick(): void {
-        let fileInfo: SaveFileNamesStructure
+        let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
         
-        if (pos(uppercase(udomain.kUnsavedFileName), uppercase(ExtractFileName(domain.plantFileName))) > 0) {
-            this.MenuFileSaveAsClick(this)
+        if (pos(uppercase(kUnsavedFileName), uppercase(ExtractFileName(domain.plantFileName))) > 0) {
+            this.MenuFileSaveAsClick()
             return
         }
-        this.lastSaveProceeded = usupport.getFileSaveInfo(FileType.kFileTypePlant, kDontAskForFileName, domain.plantFileName, fileInfo)
+        this.lastSaveProceeded = getFileSaveInfo(FileType.kFileTypePlant, kDontAskForFileName, domain.plantFileName, fileInfo)
         if (!this.lastSaveProceeded) {
             return
         }
         try {
-            usupport.startFileSave(fileInfo)
+            startFileSave(fileInfo)
             startWaitMessage("Saving " + ExtractFileName(fileInfo.newFile) + "...")
             domain.save(fileInfo.tempFile)
             fileInfo.writingWasSuccessful = true
         } finally {
             stopWaitMessage()
-            usupport.cleanUpAfterFileSave(fileInfo)
+            cleanUpAfterFileSave(fileInfo)
             this.setPlantFileChanged(false)
             domain.updateRecentFileNames(fileInfo.newFile)
             this.clearCommandList()
@@ -869,20 +871,20 @@ export class TMainForm {
     }
     
     MenuFileSaveAsClick(): void {
-        let fileInfo: SaveFileNamesStructure
+        let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
         
-        this.lastSaveProceeded = usupport.getFileSaveInfo(usupport.kFileTypePlant, usupport.kAskForFileName, domain.plantFileName, fileInfo)
+        this.lastSaveProceeded = getFileSaveInfo(FileType.kFileTypePlant, kAskForFileName, domain.plantFileName, fileInfo)
         if (!this.lastSaveProceeded) {
             return
         }
         try {
-            usupport.startFileSave(fileInfo)
+            startFileSave(fileInfo)
             startWaitMessage("Saving " + ExtractFileName(fileInfo.newFile) + "...")
             domain.save(fileInfo.tempFile)
             fileInfo.writingWasSuccessful = true
         } finally {
             stopWaitMessage()
-            usupport.cleanUpAfterFileSave(fileInfo)
+            cleanUpAfterFileSave(fileInfo)
             this.setPlantFileChanged(false)
             this.clearCommandList()
         }
@@ -899,13 +901,13 @@ export class TMainForm {
         if (plantFileChanged) {
             response = MessageDialog("Do you want to save your changes to " + ExtractFileName(domain.plantFileName) + chr(13) + "before you use the plant mover?", mtConfirmation, mbYesNoCancel, 0)
             switch (response) {
-                case delphi_compatability.IDCANCEL:
+                case IDCANCEL:
                     return
                     break
-                case delphi_compatability.IDYES:
-                    this.MenuFileSaveClick(this)
+                case IDYES:
+                    this.MenuFileSaveClick()
                     break
-                case delphi_compatability.IDNO:
+                case IDNO:
                     break
             }
         }
@@ -923,7 +925,7 @@ export class TMainForm {
                 }
                 // cfk fix put help context in 
                 response = MessageDialog("The current plant file has changed." + chr(13) + "Do you want to reload the changed file?", mtConfirmation, {mbYes, mbNo, }, 0)
-                if (response === delphi_compatability.IDYES) {
+                if (response === IDYES) {
                     try {
                         startWaitMessage("Opening " + ExtractFileName(domain.plantFileName))
                         this.updateForNoPlantFile()
@@ -1032,7 +1034,7 @@ export class TMainForm {
         choseAnotherFileName = false
         while (!fileSavedOK) {
             try {
-                domain.storeProfileInformation()
+                storeProfileInformation()
                 fileSavedOK = true
             } catch (e) {
                 fileSavedOK = false
@@ -1040,7 +1042,7 @@ export class TMainForm {
             if (!fileSavedOK) {
                 buttonPressed = MessageDialog("Could not save settings to " + chr(13) + chr(13) + "  " + domain.iniFileName + chr(13) + chr(13) + "Would you like to save them to another file?", delphi_compatability.TMsgDlgType.mtError, mbYesNoCancel, 0)
                 switch (buttonPressed) {
-                    case delphi_compatability.IDYES:
+                    case IDYES:
                         saveDialog = delphi_compatability.TSaveDialog().Create(delphi_compatability.Application)
                         try {
                             saveDialog.FileName = domain.iniFileName
@@ -1059,10 +1061,10 @@ export class TMainForm {
                             return result
                         }
                         break
-                    case delphi_compatability.IDNO:
+                    case IDNO:
                         return result
                         break
-                    case delphi_compatability.IDCANCEL:
+                    case IDCANCEL:
                         result = false
                         return result
                         break
@@ -1218,10 +1220,10 @@ export class TMainForm {
                     continue
                 }
                 if (pos("[", aLine) === 1) {
-                    uplantmn.checkVersionNumberInPlantNameLine(aLine)
+                    checkVersionNumberInPlantNameLine(aLine)
                     plant = new PdPlant()
-                    plantName = usupport.stringBeyond(aLine, "[")
-                    plantName = usupport.stringUpTo(plantName, "]")
+                    plantName = stringBeyond(aLine, "[")
+                    plantName = stringUpTo(plantName, "]")
                     plant.setName(plantName + " from text")
                     domain.parameterManager.setAllReadFlagsToFalse()
                     plant.readingFromMemo = true
@@ -1268,7 +1270,7 @@ export class TMainForm {
                     // the scale always seems to be way off from what is being used; this way it always
                     // looks okay when it pastes
                     plant.drawPreviewIntoCache(Point(domain.options.pasteRectSize, domain.options.pasteRectSize), kDontConsiderDomainScale, uplant.kDontDrawNow)
-                    newPlants.Add(plant)
+                    newPlants.push(plant)
                 }
             }
             newCommand = new PdPasteCommand(newPlants, this.selectedPlants)
@@ -1317,24 +1319,24 @@ export class TMainForm {
     }
     
     MenuFileSaveDrawingAsClick(): void {
-        let fileInfo: SaveFileNamesStructure
+        let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
         let bitmapForExport: TBitmap
         let suggestedFileName: string
         
         if ((domain === null) || (domain.plantManager === null) || (this.plants.length <= 0)) {
             return
         }
-        if (this.getBitmapCopySavePrintOptions(ubmpopt.kSavingDrawingToBmp) === mrCancel) {
+        if (this.getBitmapCopySavePrintOptions(kSavingDrawingToBmp) === mrCancel) {
             return
         }
         pictureFileSaveAttemptsThisSession += 1
         suggestedFileName = "picture" + IntToStr(pictureFileSaveAttemptsThisSession) + ".bmp"
-        if (!usupport.getFileSaveInfo(usupport.kFileTypeBitmap, usupport.kAskForFileName, suggestedFileName, fileInfo)) {
+        if (!getFileSaveInfo(FileType.kFileTypeBitmap, kAskForFileName, suggestedFileName, fileInfo)) {
             return
         }
         bitmapForExport = delphi_compatability.TBitmap().Create()
         try {
-            usupport.startFileSave(fileInfo)
+            startFileSave(fileInfo)
             startWaitMessage("Saving " + ExtractFileName(fileInfo.newFile) + "...")
             this.fillBitmapForExport(bitmapForExport, domain.bitmapOptions)
             if (!ubitmap.RequiresPalette(bitmapForExport)) {
@@ -1346,12 +1348,12 @@ export class TMainForm {
         } finally {
             bitmapForExport.free
             stopWaitMessage()
-            usupport.cleanUpAfterFileSave(fileInfo)
+            cleanUpAfterFileSave(fileInfo)
         }
     }
     
     MenuFileSaveJPEGClick(): void {
-        let fileInfo: SaveFileNamesStructure
+        let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
         let bitmapForExport: TBitmap
         let jpegForExport: TJPEGImage
         let suggestedFileName: string
@@ -1364,13 +1366,13 @@ export class TMainForm {
         }
         pictureFileSaveAttemptsThisSession += 1
         suggestedFileName = "picture" + IntToStr(pictureFileSaveAttemptsThisSession) + ".jpg"
-        if (!usupport.getFileSaveInfo(usupport.kFileTypeJPEG, usupport.kAskForFileName, suggestedFileName, fileInfo)) {
+        if (!getFileSaveInfo(FileType.kFileTypeJPEG, kAskForFileName, suggestedFileName, fileInfo)) {
             return
         }
         bitmapForExport = delphi_compatability.TBitmap().Create()
         jpegForExport = UNRESOLVED.TJPEGImage.create
         try {
-            usupport.startFileSave(fileInfo)
+            startFileSave(fileInfo)
             startWaitMessage("Saving " + ExtractFileName(fileInfo.newFile) + "...")
             this.fillBitmapForExport(bitmapForExport, domain.bitmapOptions)
             if (!ubitmap.RequiresPalette(bitmapForExport)) {
@@ -1388,7 +1390,7 @@ export class TMainForm {
             bitmapForExport.free
             jpegForExport.free
             stopWaitMessage()
-            usupport.cleanUpAfterFileSave(fileInfo)
+            cleanUpAfterFileSave(fileInfo)
         }
     }
     
@@ -1549,11 +1551,9 @@ export class TMainForm {
         let newPlants: PdPlant[] = []
         let newCommand: PdCommand
         
-        newPlants = null
         if (domain.plantManager.privatePlantClipboard.Count <= 0) {
             return
         }
-        newPlants = delphi_compatability.TList().Create()
         try {
             domain.plantManager.pastePlantsFromPrivatePlantClipboardToList(newPlants)
             newCommand = new PdPasteCommand(newPlants, this.selectedPlants)
@@ -1713,7 +1713,7 @@ export class TMainForm {
     }
     
     MenuPlantZeroRotationsClick(): void {
-        this.resetRotationsClick(this)
+        this.resetRotationsClick()
     }
     
     MenuPlantBreedClick(): void {
@@ -1766,7 +1766,7 @@ export class TMainForm {
     }
     
     ExportToGeneric3DType(outputType: short): void {
-        let fileInfo: SaveFileNamesStructure
+        let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
         let optionsForm: TGeneric3DOptionsForm
         let tempOptions: FileExport3DOptionsStructure
         let response: short
@@ -1802,9 +1802,9 @@ export class TMainForm {
         fileDescriptor = usupport.nameStringForFileType(fileType)
         exportTo3DFileSaveAttemptsThisSession[outputType] += 1
         suggestedFileName = "plants" + IntToStr(exportTo3DFileSaveAttemptsThisSession[outputType]) + "." + usupport.extensionForFileType(fileType)
-        if (!usupport.getFileSaveInfo(fileType, usupport.kAskForFileName, suggestedFileName, fileInfo)) {
+        if (!getFileSaveInfo(fileType, kAskForFileName, suggestedFileName, fileInfo)) {
             if (optionsChanged) {
-                if (MessageDialog(fileDescriptor + " export stopped." + chr(13) + chr(13) + "Do you want to save the changes you made" + chr(13) + "to the " + fileDescriptor + " export options?", mtConfirmation, {mbYes, mbNo, }, 0) === delphi_compatability.IDYES) {
+                if (MessageDialog(fileDescriptor + " export stopped." + chr(13) + chr(13) + "Do you want to save the changes you made" + chr(13) + "to the " + fileDescriptor + " export options?", mtConfirmation, {mbYes, mbNo, }, 0) === IDYES) {
                     newCommand = new PdChangeDomain3DOptionsCommand(tempOptions, outputType)
                     this.doCommand(newCommand)
                 }
@@ -1819,9 +1819,9 @@ export class TMainForm {
             this.doCommand(newCommand)
         }
         try {
-            usupport.startFileSave(fileInfo)
+            startFileSave(fileInfo)
             if (outputType === u3dexport.kPOV) {
-                fileInfo.newFile = usupport.replacePunctuationWithUnderscores(usupport.stringUpTo(ExtractFileName(fileInfo.newFile), ".")) + ".inc"
+                fileInfo.newFile = usupport.replacePunctuationWithUnderscores(stringUpTo(ExtractFileName(fileInfo.newFile), ".")) + ".inc"
             }
             startWaitMessage("Saving " + ExtractFileName(fileInfo.newFile) + "...")
             excludeInvisiblePlants = false
@@ -1839,7 +1839,7 @@ export class TMainForm {
             fileInfo.writingWasSuccessful = true
         } finally {
             stopWaitMessage()
-            usupport.cleanUpAfterFileSave(fileInfo)
+            cleanUpAfterFileSave(fileInfo)
         }
     }
     
@@ -1880,7 +1880,7 @@ export class TMainForm {
     }
     
     MenuFileMakePainterNozzleClick(): void {
-        let fileInfo: SaveFileNamesStructure
+        let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
         let bitmapForExport: TBitmap
         let suggestedFileName: string
         
@@ -1895,12 +1895,12 @@ export class TMainForm {
         }
         nozzleFileSaveAttemptsThisSession += 1
         suggestedFileName = "nozzle" + IntToStr(nozzleFileSaveAttemptsThisSession) + " " + IntToStr(domain.nozzleOptions.cellSize.X) + "x" + IntToStr(domain.nozzleOptions.cellSize.Y) + "x" + IntToStr(domain.nozzleOptions.cellCount) + ".bmp"
-        if (!usupport.getFileSaveInfo(usupport.kFileTypeBitmap, usupport.kAskForFileName, suggestedFileName, fileInfo)) {
+        if (!getFileSaveInfo(FileType.kFileTypeBitmap, kAskForFileName, suggestedFileName, fileInfo)) {
             return
         }
         bitmapForExport = delphi_compatability.TBitmap().Create()
         try {
-            usupport.startFileSave(fileInfo)
+            startFileSave(fileInfo)
             startWaitMessage("Saving " + ExtractFileName(fileInfo.newFile) + "...")
             this.fillBitmapForPainterNozzle(bitmapForExport)
             bitmapForExport.SaveToFile(fileInfo.tempFile)
@@ -1908,7 +1908,7 @@ export class TMainForm {
         } finally {
             bitmapForExport.free
             stopWaitMessage()
-            usupport.cleanUpAfterFileSave(fileInfo)
+            cleanUpAfterFileSave(fileInfo)
         }
     }
     
@@ -2016,7 +2016,7 @@ export class TMainForm {
                 ucursor.cursor_startWait()
                 startWaitMessage("Starting...")
                 try {
-                    this.writeAnimationFilesWithFileSpec(usupport.stringUpTo(saveDialog.FileName, ".") + " ")
+                    this.writeAnimationFilesWithFileSpec(stringUpTo(saveDialog.FileName, ".") + " ")
                 } finally {
                     ucursor.cursor_stopWait()
                     stopWaitMessage()
@@ -2177,25 +2177,19 @@ export class TMainForm {
     }
     
     MenuLayoutHideOthersClick(): void {
-        let booleansList: TListCollection
-        let newCommand: PdCommand
-        let i: short
-        let plant: PdPlant
+        let booleansList: PdBooleanValue[] = []
         
         if (this.selectedPlants.length <= 0) {
             return
         }
-        booleansList = ucollect.TListCollection().Create()
-        for (i = 0; i <= this.plants.length - 1; i++) {
-            plant = this.plants[i]
-            booleansList.Add(PdBooleanValue().createWithBoolean(!this.isSelected(plant)))
+        for (let i = 0; i <= this.plants.length - 1; i++) {
+            const plant = this.plants[i]
+            booleansList.push(new PdBooleanValue(!this.isSelected(plant)))
         }
-        try {
-            newCommand = new PdHideOrShowCommand(this.plants, booleansList)
-            this.doCommand(newCommand)
-        } finally {
-            booleansList.free
-        }
+        
+        const newCommand = new PdHideOrShowCommand(this.plants, kHide, booleansList)
+        this.doCommand(newCommand)
+
     }
     
     MenuLayoutMakeBouquetClick(): void {
@@ -2209,7 +2203,7 @@ export class TMainForm {
     }
     
     MenuLayoutScaleToFitClick(): void {
-        this.centerDrawingClick(this)
+        this.centerDrawingClick()
     }
     
     // drawing 
@@ -2220,7 +2214,7 @@ export class TMainForm {
             if (this.plants.length < 0) {
                 return
             }
-            this.selectedPlants.Add(this.plants[0])
+            this.selectedPlants.push(this.plants[0])
             this.updateForChangeToPlantSelections()
         }
         newCommand = new PdChangeMainWindowViewingOptionCommand(this.plants, this.selectedPlants, aNewOption)
@@ -2235,7 +2229,7 @@ export class TMainForm {
     }
     
     viewOneOnlyClick(): void {
-        this.MenuLayoutViewOnePlantAtATimeClick(this)
+        this.MenuLayoutViewOnePlantAtATimeClick()
     }
     
     MenuLayoutViewFreeFloatingClick(): void {
@@ -2245,7 +2239,7 @@ export class TMainForm {
     }
     
     viewFreeFloatingClick(): void {
-        this.MenuLayoutViewFreeFloatingClick(this)
+        this.MenuLayoutViewFreeFloatingClick()
     }
     
     MenuLayoutBringForwardClick(): void {
@@ -2254,7 +2248,7 @@ export class TMainForm {
         if (this.selectedPlants.length <= 0) {
             return
         }
-        if (this.plants.IndexOf(this.firstSelectedPlantInList()) <= 0) {
+        if (this.plants.indexOf(this.firstSelectedPlantInList()) <= 0) {
             // don't do if you can't go forward any more 
             return
         }
@@ -2268,7 +2262,7 @@ export class TMainForm {
         if (this.selectedPlants.length <= 0) {
             return
         }
-        if (this.plants.IndexOf(this.lastSelectedPlantInList()) >= this.plants.length - 1) {
+        if (this.plants.indexOf(this.lastSelectedPlantInList()) >= this.plants.length - 1) {
             // don't do if you can't go backward any more 
             return
         }
@@ -2295,11 +2289,11 @@ export class TMainForm {
     }
     
     drawingAreaOnTopClick(): void {
-        this.MenuLayoutHorizontalOrientationClick(this)
+        this.MenuLayoutHorizontalOrientationClick()
     }
     
     drawingAreaOnSideClick(): void {
-        this.MenuLayoutVerticalOrientationClick(this)
+        this.MenuLayoutVerticalOrientationClick()
     }
     
     // --------------------------------------------------------------------------- *options menu 
@@ -2360,7 +2354,6 @@ export class TMainForm {
         try {
             customDrawForm.options = domain.options
             response = customDrawForm.ShowModal()
-            newCommand = null
             if ((response === mrOK) && (customDrawForm.optionsChanged)) {
                 newCommand = new PdChangeDomainOptionsCommand(customDrawForm.options)
                 this.doCommand(newCommand)
@@ -2389,7 +2382,7 @@ export class TMainForm {
     
     plantBitmapsIndicatorImageClick(): void {
         if ((!domain.options.cachePlantBitmaps) && (this.MenuOptionsUsePlantBitmaps.enabled)) {
-            this.MenuOptionsUsePlantBitmapsClick(this)
+            this.MenuOptionsUsePlantBitmapsClick()
         }
     }
     
@@ -2574,7 +2567,7 @@ export class TMainForm {
     // updating 
     // ---------------------------------------------------------------------------- *updating 
     updateForNoPlantFile(): void {
-        this.selectedPlants.Clear()
+        this.selectedPlants = []
         this.plantListDrawGrid.Invalidate()
         this.clearCommandList()
         this.Caption = this.captionForFile()
@@ -2596,7 +2589,7 @@ export class TMainForm {
         if ((!domain.plantFileLoaded) || (domain.plantFileName === "")) {
             result = delphi_compatability.Application.Title + " - no file"
         } else {
-            result = delphi_compatability.Application.Title + " - " + usupport.stringUpTo(ExtractFileName(domain.plantFileName), ".")
+            result = delphi_compatability.Application.Title + " - " + stringUpTo(ExtractFileName(domain.plantFileName), ".")
             if (this.plants.length <= 0) {
                 result = result + " (no plants)"
             } else if (this.plants.length === 1) {
@@ -2619,7 +2612,7 @@ export class TMainForm {
             this.Caption = this.captionForFile()
             this.updateForChangeToPlantList()
             this.updateMenusForChangedPlantFile()
-            this.selectedPlants.Clear()
+            this.selectedPlants= []
             this.magnificationPercent.Text = IntToStr(intround(domain.plantDrawScale_PixelsPerMm() * 100.0)) + "%"
             if (domain.plantManager.mainWindowOrientation !== domain.options.mainWindowOrientation) {
                 // v2.0 load and save window orientation (top or side)
@@ -2631,11 +2624,11 @@ export class TMainForm {
                     // v2.0 load and save plant hidden and selected flags
                     plant = this.plants[i]
                     if (plant.selectedWhenLastSaved) {
-                        this.selectedPlants.Add(plant)
+                        this.selectedPlants.push(plant)
                     }
                 }
                 if (this.selectedPlants.length <= 0) {
-                    this.selectedPlants.Add(this.plants[0])
+                    this.selectedPlants.push(this.plants[0])
                 }
                 this.updateForChangeToPlantSelections()
             }
@@ -2770,7 +2763,7 @@ export class TMainForm {
         if ((indexAfterMove >= 0) && (indexAfterMove <= this.plants.length - 1)) {
             newList = delphi_compatability.TList().Create()
             try {
-                newList.Add(this.plants[indexAfterMove])
+                newList.push(this.plants[indexAfterMove])
                 newCommand = new PdChangeSelectedPlantsCommand(this.selectedPlants, newList)
                 this.doCommand(newCommand)
             } finally {
@@ -2830,15 +2823,15 @@ export class TMainForm {
             if (this.selectedPlants.length > 0) {
                 for (i = 0; i <= this.selectedPlants.length - 1; i++) {
                     plant = this.selectedPlants[i]
-                    if (this.plants.IndexOf(plant) < 0) {
-                        plantsToRemove.Add(plant)
+                    if (this.plants.indexOf(plant) < 0) {
+                        plantsToRemove.push(plant)
                     }
                 }
             }
             if (plantsToRemove.length > 0) {
                 for (i = 0; i <= plantsToRemove.length - 1; i++) {
                     plant = plantsToRemove[i]
-                    this.selectedPlants.Remove(plant)
+                    this.selectedPlants = removeItem(this.selectedPlants, plant)
                 }
             }
         } finally {
@@ -3049,7 +3042,7 @@ export class TMainForm {
         this.MenuPlantExportToOBJ.enabled = havePlants
         this.MenuPlantExportToVRML.enabled = havePlants
         if (!havePlants) {
-            this.dragCursorModeClick(this)
+            this.dragCursorModeClick()
         }
         this.toolbarPanel.Enabled = havePlants
         this.dragCursorMode.Enabled = havePlants
@@ -3446,7 +3439,7 @@ export class TMainForm {
         for (i = 0; i <= plantList.length - 1; i++) {
             plant = plantList[i]
             if ((hideList !== null) && (hideList.Count > 0)) {
-                plant.hidden = PdBooleanValue(hideList[i]).saveBoolean
+                plant.hidden = new PdBooleanValue(hideList[i]).saveBoolean
             } else {
                 plant.hidden = hide
             }
@@ -3527,13 +3520,13 @@ export class TMainForm {
         try {
             if ((shift) && (this.selectedPlants.length > 0)) {
                 for (i = 0; i <= this.selectedPlants.length - 1; i++) {
-                    newList.Add(this.selectedPlants[i])
+                    newList.push(this.selectedPlants[i])
                 }
             }
-            if (newList.IndexOf(plant) >= 0) {
-                newList.Remove(plant)
+            if (newList.indexOf(plant) >= 0) {
+                newList = removeItem(newList, plant)
             } else if (plant !== null) {
-                newList.Add(plant)
+                newList.push(plant)
             }
             if (!this.twoListsAreIdentical(this.selectedPlants, newList)) {
                 newCommand = new PdChangeSelectedPlantsCommand(this.selectedPlants, newList)
@@ -3578,31 +3571,31 @@ export class TMainForm {
             if ((delphi_compatability.TShiftStateEnum.ssCtrl in Shift)) {
                 if (this.selectedPlants.length > 0) {
                     for (i = 0; i <= this.selectedPlants.length - 1; i++) {
-                        newList.Add(this.selectedPlants[i])
+                        newList.push(this.selectedPlants[i])
                     }
                 }
-                if (newList.IndexOf(plant) >= 0) {
-                    newList.Remove(plant)
+                if (newList.indexOf(plant) >= 0) {
+                    newList = removeItem(newList, plant)
                 } else {
-                    newList.Add(plant)
+                    newList.push(plant)
                 }
             } else if ((delphi_compatability.TShiftStateEnum.ssShift in Shift)) {
                 if (this.selectedPlants.length > 0) {
                     for (i = 0; i <= this.selectedPlants.length - 1; i++) {
-                        newList.Add(this.selectedPlants[i])
+                        newList.push(this.selectedPlants[i])
                     }
                 }
                 if ((this.lastSingleClickPlantIndex >= 0) && (this.lastSingleClickPlantIndex <= this.plants.length - 1) && (this.lastSingleClickPlantIndex !== index)) {
                     if (this.lastSingleClickPlantIndex < index) {
                         for (i = this.lastSingleClickPlantIndex; i <= index; i++) {
-                            if (newList.IndexOf(this.plants[i]) < 0) {
-                                newList.Add(this.plants[i])
+                            if (newList.indexOf(this.plants[i]) < 0) {
+                                newList.push(this.plants[i])
                             }
                         }
                     } else if (this.lastSingleClickPlantIndex > index) {
                         for (i = this.lastSingleClickPlantIndex; i >= index; i--) {
-                            if (newList.IndexOf(this.plants[i]) < 0) {
-                                newList.Add(this.plants[i])
+                            if (newList.indexOf(this.plants[i]) < 0) {
+                                newList.push(this.plants[i])
                             }
                         }
                     }
@@ -3611,11 +3604,11 @@ export class TMainForm {
                 if (this.isSelected(plant)) {
                     if (this.selectedPlants.length > 0) {
                         for (i = 0; i <= this.selectedPlants.length - 1; i++) {
-                            newList.Add(this.selectedPlants[i])
+                            newList.push(this.selectedPlants[i])
                         }
                     }
                 } else {
-                    newList.Add(plant)
+                    newList.push(plant)
                     this.lastSingleClickPlantIndex = index
                 }
             }
@@ -3652,7 +3645,7 @@ export class TMainForm {
     }
     
     deselectAllPlants(): void {
-        this.selectedPlants.Clear()
+        this.selectedPlants= []
         this.updateForChangeToPlantSelections()
     }
     
@@ -3663,8 +3656,8 @@ export class TMainForm {
             return
         }
         firstPlant = this.focusedPlant()
-        this.selectedPlants.Clear()
-        this.selectedPlants.Add(firstPlant)
+        this.selectedPlants= []
+        this.selectedPlants.push(firstPlant)
         this.updateForChangeToPlantSelections()
     }
     
@@ -3672,8 +3665,8 @@ export class TMainForm {
         if (this.plants.length <= 0) {
             return
         }
-        this.selectedPlants.Clear()
-        this.selectedPlants.Add(this.plants[0])
+        this.selectedPlants= []
+        this.selectedPlants.push(this.plants[0])
         this.updateForChangeToPlantSelections()
     }
     
@@ -3691,7 +3684,7 @@ export class TMainForm {
             for (i = 0; i <= this.plants.length - 1; i++) {
                 plant = this.plants[i]
                 if (plant !== null) {
-                    booleansList.Add(PdBooleanValue().createWithBoolean(!(plant === firstPlant)))
+                    booleansList.push(new PdBooleanValue().createWithBoolean(!(plant === firstPlant)))
                 }
             }
             this.hideOrShowSomePlants(this.plants, booleansList, false, kDontDrawYet)
@@ -3727,14 +3720,14 @@ export class TMainForm {
         if ((insertIndex >= 0) && (insertIndex <= this.selectedPlants.length - 1)) {
             this.selectedPlants.Insert(insertIndex, aPlant)
         } else {
-            this.selectedPlants.Add(aPlant)
+            this.selectedPlants.push(aPlant)
         }
         this.invalidateDrawingRect(aPlant.boundsRect_pixels())
     }
     
     removeSelectedPlant(aPlant: PdPlant): void {
         this.invalidateDrawingRect(aPlant.boundsRect_pixels())
-        this.selectedPlants.Remove(aPlant)
+        this.selectedPlants = removeItem(this.selectedPlants, aPlant)
     }
     
     isSelected(plant: PdPlant): boolean {
@@ -3743,7 +3736,7 @@ export class TMainForm {
         if ((this.selectedPlants === null) || (this.selectedPlants.length <= 0)) {
             return result
         }
-        result = this.selectedPlants.IndexOf(plant) >= 0
+        result = this.selectedPlants.indexOf(plant) >= 0
         return result
     }
     
@@ -3756,7 +3749,7 @@ export class TMainForm {
         if ((this.selectedPlants === null) || (this.selectedPlants.length <= 0)) {
             return result
         }
-        result = this.selectedPlants.IndexOf(plant) === 0
+        result = this.selectedPlants.indexOf(plant) === 0
         return result
     }
     
@@ -3774,7 +3767,7 @@ export class TMainForm {
         let result = 0
         result = -1
         if (this.selectedPlants.length > 0) {
-            result = this.plants.IndexOf(this.selectedPlants[0]
+            result = this.plants.indexOf(this.selectedPlants[0]
         }
         return result
     }
@@ -3905,7 +3898,7 @@ export class TMainForm {
             }
             hideList = delphi_compatability.TList().Create()
             try {
-                hideList.Add(plant)
+                hideList.push(plant)
                 newCommand = new PdHideOrShowCommand(hideList, !plant.hidden)
                 this.doCommand(newCommand)
             } finally {
@@ -3947,7 +3940,7 @@ export class TMainForm {
     }
     
     plantListDrawGridDblClick(): void {
-        this.MenuPlantRenameClick(this)
+        this.MenuPlantRenameClick()
         this.plantListDrawGrid.endDrag(false)
         this.justDoubleClickedOnDrawGrid = true
     }
@@ -3999,7 +3992,7 @@ export class TMainForm {
                 if ((delphi_compatability.TShiftStateEnum.ssShift in Shift)) {
                     //swallow key
                     Key = 0
-                    this.MenuLayoutSendBackClick(this)
+                    this.MenuLayoutSendBackClick()
                 } else {
                     Key = 0
                     this.moveUpOrDownWithKeyInPlantList(this.focusedPlantIndex() + 1)
@@ -4009,7 +4002,7 @@ export class TMainForm {
                 if ((delphi_compatability.TShiftStateEnum.ssShift in Shift)) {
                     //swallow key
                     Key = 0
-                    this.MenuLayoutSendBackClick(this)
+                    this.MenuLayoutSendBackClick()
                 } else {
                     Key = 0
                     this.moveUpOrDownWithKeyInPlantList(this.focusedPlantIndex() + 1)
@@ -4019,7 +4012,7 @@ export class TMainForm {
                 if ((delphi_compatability.TShiftStateEnum.ssShift in Shift)) {
                     //swallow key
                     Key = 0
-                    this.MenuLayoutBringForwardClick(this)
+                    this.MenuLayoutBringForwardClick()
                 } else {
                     Key = 0
                     this.moveUpOrDownWithKeyInPlantList(this.focusedPlantIndex() - 1)
@@ -4029,7 +4022,7 @@ export class TMainForm {
                 if ((delphi_compatability.TShiftStateEnum.ssShift in Shift)) {
                     //swallow key
                     Key = 0
-                    this.MenuLayoutBringForwardClick(this)
+                    this.MenuLayoutBringForwardClick()
                 } else {
                     Key = 0
                     this.moveUpOrDownWithKeyInPlantList(this.focusedPlantIndex() - 1)
@@ -4037,7 +4030,7 @@ export class TMainForm {
                 break
             case delphi_compatability.VK_RETURN:
                 Key = 0
-                this.MenuPlantRenameClick(this)
+                this.MenuPlantRenameClick()
                 break
         }
         return Key
@@ -4101,8 +4094,8 @@ export class TMainForm {
                 break
             case kCursorModePosingSelect:
                 if (domain.options.drawSpeed !== DrawMode.kDrawBest) {
-                    if (MessageDialog("To pose a plant, you need the \"Draw Using\" option set to \"Solids.\"" + chr(13) + chr(13) + "Do you want to change it?", mtConfirmation, {mbYes, mbNo, }, 0) === delphi_compatability.IDYES) {
-                        this.MenuOptionsBestDrawClick(this)
+                    if (MessageDialog("To pose a plant, you need the \"Draw Using\" option set to \"Solids.\"" + chr(13) + chr(13) + "Do you want to change it?", mtConfirmation, {mbYes, mbNo, }, 0) === IDYES) {
+                        this.MenuOptionsBestDrawClick()
                     }
                     return
                 }
@@ -4349,8 +4342,7 @@ export class TMainForm {
     
     // hint handling 
     // ------------------------------------------------------------------------------------ *hint handling 
-    DoShowHint(HintStr: ansistring, CanShow: boolean, HintInfo: THintInfo): void {
-        raise "method DoShowHint had assigned to var parameter HintStr not added to return -- fixup manually"
+    DoShowHint(HintStr: ansistring, CanShow: boolean, HintInfo: THintInfo) {
         HintInfo.HintPos = HintInfo.HintControl.ClientToScreen(Point(HintInfo.CursorPos.X + 20, HintInfo.CursorPos.Y + 20))
         HintInfo.HintMaxWidth = 200
         if (HintInfo.HintControl === this.drawingPaintBox) {
@@ -4369,7 +4361,7 @@ export class TMainForm {
                 HintStr = HintInfo.HintControl.Hint
             }
         }
-        return CanShow
+        return { CanShow, HintStr }
     }
     
     hintForPlantAtPoint(aPoint: TPoint): string {
@@ -4392,51 +4384,51 @@ export class TMainForm {
     
     // -------------------------------------------------------------------------------- *popup menu commands 
     PopupMenuCutClick(): void {
-        this.MenuEditCutClick(this)
+        this.MenuEditCutClick()
     }
     
     PopupMenuCopyClick(): void {
-        this.MenuEditCopyClick(this)
+        this.MenuEditCopyClick()
     }
     
     PopupMenuPasteClick(): void {
-        this.MenuEditPasteClick(this)
+        this.MenuEditPasteClick()
     }
     
     PopupMenuRenameClick(): void {
-        this.MenuPlantRenameClick(this)
+        this.MenuPlantRenameClick()
     }
     
     PopupMenuRandomizeClick(): void {
-        this.MenuPlantRandomizeClick(this)
+        this.MenuPlantRandomizeClick()
     }
     
     PopupMenuHideAllOthersClick(): void {
-        this.MenuLayoutHideOthersClick(this)
+        this.MenuLayoutHideOthersClick()
     }
     
     PopupMenuBreedClick(): void {
-        this.MenuPlantBreedClick(this)
+        this.MenuPlantBreedClick()
     }
     
     PopupMenuHideClick(): void {
-        this.MenuLayoutHideClick(this)
+        this.MenuLayoutHideClick()
     }
     
     PopupMenuShowClick(): void {
-        this.MenuLayoutShowClick(this)
+        this.MenuLayoutShowClick()
     }
     
     PopupMenuMakeTimeSeriesClick(): void {
-        this.MenuPlantMakeTimeSeriesClick(this)
+        this.MenuPlantMakeTimeSeriesClick()
     }
     
     PopupMenuZeroRotationsClick(): void {
-        this.MenuPlantZeroRotationsClick(this)
+        this.MenuPlantZeroRotationsClick()
     }
     
     PopupMenuAnimateClick(): void {
-        this.MenuPlantAnimateClick(this)
+        this.MenuPlantAnimateClick()
     }
     
     paramPopupMenuExpandAllInSectionClick(): void {
@@ -4481,8 +4473,8 @@ export class TMainForm {
         textToCopy = textToCopy + this.selectedParameterPanel.Caption
         if (usupport.found("[", textToCopy)) {
             // v2.1 deal with orthogonal sections
-            newText = usupport.stringUpTo(usupport.stringBeyond(textToCopy, "["), "]")
-            newText = newText + ": " + trim(usupport.stringUpTo(usupport.stringBeyond(textToCopy, ":"), "["))
+            newText = stringUpTo(stringBeyond(textToCopy, "["), "]")
+            newText = newText + ": " + trim(stringUpTo(stringBeyond(textToCopy, ":"), "["))
             textToCopy = newText
         }
         UNRESOLVED.Clipboard.asText = textToCopy
@@ -4609,7 +4601,7 @@ export class TMainForm {
         result = 1.0
         try {
             oldIntResult = intround(domain.plantDrawScale_PixelsPerMm() * 100.0)
-            intResult = StrToIntDef(usupport.stringUpTo(aText, "%"), -1)
+            intResult = StrToIntDef(stringUpTo(aText, "%"), -1)
             if ((intResult <= 0)) {
                 intResult = oldIntResult
                 this.magnificationPercent.Text = IntToStr(intResult) + "%"
@@ -4949,11 +4941,11 @@ export class TMainForm {
     }
     
     MenuLayoutSizeSameWidthClick(): void {
-        this.makeEqualWidthClick(this)
+        this.makeEqualWidthClick()
     }
     
     MenuLayoutSizeSameHeightClick(): void {
-        this.makeEqualHeightClick(this)
+        this.makeEqualHeightClick()
     }
     
     alignTopsClick(): void {
@@ -4983,19 +4975,19 @@ export class TMainForm {
     }
     
     MenuLayoutAlignTopsClick(): void {
-        this.alignTopsClick(this)
+        this.alignTopsClick()
     }
     
     MenuLayoutAlignBottomsClick(): void {
-        this.alignBottomsClick(this)
+        this.alignBottomsClick()
     }
     
     MenuLayoutAlignLeftSidesClick(): void {
-        this.alignLeftClick(this)
+        this.alignLeftClick()
     }
     
     MenuLayoutAlignRightSidesClick(): void {
-        this.alignRightClick(this)
+        this.alignRightClick()
     }
     
     packPlantsClick(): void {
@@ -5009,7 +5001,7 @@ export class TMainForm {
     }
     
     MenuLayoutPackClick(): void {
-        this.packPlantsClick(this)
+        this.packPlantsClick()
     }
     
     FormKeyDown(Key: byte, Shift: TShiftState): void {
@@ -5393,7 +5385,7 @@ export class TMainForm {
     }
     
     MenuPlantAnimateClick(): void {
-        this.animateGrowthClick(this)
+        this.animateGrowthClick()
     }
     
     // animation 
@@ -5700,7 +5692,7 @@ export class TMainForm {
                         // advanced floral params are at end of file, but want to show them
                         // in the list before inflorescences
                         // WATCH OUT: change this code if you change the names of the sections
-                        indexOfPrimaryInflors = this.sectionsComboBox.Items.IndexOf("Primary inflorescences")
+                        indexOfPrimaryInflors = this.sectionsComboBox.Items.indexOf("Primary inflorescences")
                         this.sectionsComboBox.Items.InsertObject(indexOfPrimaryInflors, section.name, section)
                     } else {
                         this.sectionsComboBox.Items.AddObject(section.name, section)
@@ -6176,7 +6168,7 @@ export class TMainForm {
     }
     
     NotePopupMenuEditClick(): void {
-        this.noteEditClick(this)
+        this.noteEditClick()
     }
     
     NotePopupMenuSelectAllClick(): void {
@@ -6184,11 +6176,11 @@ export class TMainForm {
     }
     
     MenuPlantEditNoteClick(): void {
-        this.noteEditClick(this)
+        this.noteEditClick()
     }
     
     PopupMenuEditNoteClick(): void {
-        this.noteEditClick(this)
+        this.noteEditClick()
     }
     
     // rotations panel
@@ -6229,7 +6221,7 @@ export class TMainForm {
         this.posingPosePart.Enabled = false
         this.posingUnposePart.Enabled = false
         // called when plant changes
-        this.posedPlantParts.Clear()
+        this.posedPlantParts= []
         this.updatePlantNameLabel(kTabPosing)
         if (this.focusedPlant() === null) {
             this.posedPlantParts.Text = ""
@@ -6243,7 +6235,7 @@ export class TMainForm {
                 for (i = 0; i <= this.focusedPlant().amendments.length - 1; i++) {
                     amendment = uamendmt.PdPlantDrawingAmendment(this.focusedPlant().amendments[i])
                     partString = this.partDescriptionForIDAndType(amendment.partID, amendment.typeOfPart)
-                    if (this.posedPlantParts.Items.IndexOf(partString) < 0) {
+                    if (this.posedPlantParts.Items.indexOf(partString) < 0) {
                         this.posedPlantParts.Items.Add(partString)
                     }
                 }
@@ -6269,7 +6261,7 @@ export class TMainForm {
         if (this.selectedPlantPartID >= 0) {
             partString = this.partDescriptionForIDAndType(this.selectedPlantPartID, this.selectedPlantPartType)
             this.selectedPartLabel.Caption = "Selected part: " + partString
-            index = this.posedPlantParts.Items.IndexOf(partString)
+            index = this.posedPlantParts.Items.indexOf(partString)
             if (index >= 0) {
                 this.posedPlantParts.ItemIndex = index
             } else {
@@ -6578,7 +6570,7 @@ export class TMainForm {
         this.posedPlantParts.Items.Add(newString)
         indexToSave = this.posedPlantParts.Items.Count - 1
         // add "select none" to end - move down if already there
-        selectNoneIndex = this.posedPlantParts.Items.IndexOf(kSelectNoPosedPartString)
+        selectNoneIndex = this.posedPlantParts.Items.indexOf(kSelectNoPosedPartString)
         if (selectNoneIndex >= 0) {
             this.posedPlantParts.Items.Delete(selectNoneIndex)
         }
@@ -6594,7 +6586,7 @@ export class TMainForm {
         
         oldItemIndex = this.posedPlantParts.ItemIndex
         oldString = this.partDescriptionForIDAndType(partID, partType)
-        index = this.posedPlantParts.Items.IndexOf(oldString)
+        index = this.posedPlantParts.Items.indexOf(oldString)
         if (index >= 0) {
             this.posedPlantParts.Items.Delete(index)
         }
@@ -6613,7 +6605,7 @@ export class TMainForm {
     
     partIDForFullDescription(aString: string): long {
         let result = 0
-        result = StrToIntDef(usupport.stringUpTo(aString, " ("), -1)
+        result = StrToIntDef(stringUpTo(aString, " ("), -1)
         return result
     }
     
@@ -6623,8 +6615,8 @@ export class TMainForm {
         if (len(aString) <= 0) {
             return result
         }
-        result = usupport.stringBeyond(aString, "(")
-        result = usupport.stringUpTo(result, ")")
+        result = stringBeyond(aString, "(")
+        result = stringUpTo(result, ")")
         return result
     }
     
@@ -7070,20 +7062,20 @@ export class TMainForm {
             // ask if want to save file first
             response = MessageDialog("Do you want to save your changes to " + ExtractFileName(domain.plantFileName) + chr(13) + "before you reconcile its 3D objects" + chr(13) + "with those in the current 3D object file?", mtConfirmation, mbYesNoCancel, 0)
             switch (response) {
-                case delphi_compatability.IDCANCEL:
+                case IDCANCEL:
                     return
                     break
-                case delphi_compatability.IDYES:
-                    this.MenuFileSaveClick(this)
+                case IDYES:
+                    this.MenuFileSaveClick()
                     break
-                case delphi_compatability.IDNO:
+                case IDNO:
                     break
             }
         }
         if (!domain.checkForExistingDefaultTdoLibrary()) {
             return
         }
-        if (MessageDialog("You are about to add any 3D objects in the current plant file" + chr(13) + chr(13) + "    (" + domain.plantFileName + ")" + chr(13) + chr(13) + "that are not already in the current 3D object library" + chr(13) + chr(13) + "    (" + domain.defaultTdoLibraryFileName + ")" + chr(13) + chr(13) + "into that library. Do you want to go ahead?", mtConfirmation, {mbYes, mbNo, }, 0) === delphi_compatability.IDYES) {
+        if (MessageDialog("You are about to add any 3D objects in the current plant file" + chr(13) + chr(13) + "    (" + domain.plantFileName + ")" + chr(13) + chr(13) + "that are not already in the current 3D object library" + chr(13) + chr(13) + "    (" + domain.defaultTdoLibraryFileName + ")" + chr(13) + chr(13) + "into that library. Do you want to go ahead?", mtConfirmation, {mbYes, mbNo, }, 0) === IDYES) {
             numTdosAdded = domain.plantManager.reconcileFileWithTdoLibrary(domain.plantFileName, domain.defaultTdoLibraryFileName)
             if (numTdosAdded <= 0) {
                 MessageDialog("All the 3D objects in the current plant file" + chr(13) + chr(13) + "    (" + domain.plantFileName + ")" + chr(13) + chr(13) + "were already in the current 3D object library" + chr(13) + chr(13) + "    (" + domain.defaultTdoLibraryFileName + ").", mtInformation, {mbOK, }, 0)
@@ -7142,6 +7134,8 @@ export class TMainForm {
     
 }
 
+/// Unfinished Stub Function
+
 function startWaitMessage(arg0: string) {
     throw new Error("Function not implemented.")
 }
@@ -7149,3 +7143,17 @@ function startWaitMessage(arg0: string) {
 function stopWaitMessage() {
     throw new Error("Function not implemented.")
 }
+
+function getFileOpenInfo(kFileTypePlant: FileType, plantFileName: string, arg2: string): string {
+    throw new Error("Function not implemented.")
+}
+
+function InputQuery(arg0: string, arg1: string, newName: ansistring): boolean {
+    throw new Error("Function not implemented.")
+}
+
+const kSavingDrawingToBmp = 1
+function storeProfileInformation() {
+    throw new Error("Function not implemented.")
+}
+

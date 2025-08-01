@@ -27,13 +27,13 @@ const kRotateY = 2
 const kRotateZ = 3
 
 const kCopyToClipboard = true
-const kDontCopyToClipboard = false
+export const kDontCopyToClipboard = false
 
 const kNewPlantAge = 5
 const kNewPlantPosition = 100
 
-const kHide = true
-const kShow = false
+export const kHide = true
+export const kShow = false
 
 export const kSendBackward = true
 export const kBringForward = false
