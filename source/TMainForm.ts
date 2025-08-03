@@ -6352,6 +6352,186 @@ export class TMainForm {
         MainForm = this
     }
 
+    viewMainMenu() {
+        const menu: any = [
+            // // [type = radio/checkbox, ] ID, label, items or action
+            // "MainMenu", "Main", [
+            //     "MenuFile", "&File", [
+            //         "MenuFileNew", "&New", this.MenuFileNewClick,
+            //         "MenuFileOpen", "&Open...", this.MenuFileOpenClick,
+            //         "MenuFileReopen", "&Reopen", [
+            //             "Recent0", "0", this.Recent0Click,
+            //             "Recent1", "1", this.Recent0Click,
+            //             "Recent2", "2", this.Recent0Click,
+            //             "Recent3", "3", this.Recent0Click,
+            //             "Recent4", "4", this.Recent0Click,
+            //             "Recent5", "5", this.Recent0Click,
+            //             "Recent6", "6", this.Recent0Click,
+            //             "Recent7", "7", this.Recent0Click,
+            //             "Recent8", "8", this.Recent0Click,
+            //             "Recent9", "9", this.Recent0Click,
+            //         ],
+            //         "MenuFileClose", "&Close", this.MenuFileCloseClick,
+            //         "-",
+            //         "MenuFileSave", "&Save", this.MenuFileSaveClick,
+            //         "MenuFileSaveAs", "Save &As...", this.MenuFileSaveAsClick,
+            //         "-",
+            //         "MenuFileExport", "&Export", [
+            //             "MenuPlantExportTo3DS", "&3DS...", this.CaptionMenuPlantExportTo3DSClick,
+            //             "MenuPlantExportToLWO", "&LWO...", this.MenuPlantExportToLWOClick,
+            //             "MenuPlantExportToOBJ", "&OBJ...", this.MenuPlantExportToOBJClick,
+            //             "MenuPlantExportToDXF", "&DXF...", this.MenuPlantExportToDXFClick,
+            //             "MenuPlantExportToPOV", "PO&V INC...", this.MenuPlantExportToPOVClick,
+            //             "MenuPlantExportToVRML", "V&RML...", this.MenuPlantExportToVRMLClick,
+            //             "-",
+            //             "MenuFileSaveDrawingAs", "&Bitmap...", this.MenuFileSaveDrawingAsClick,
+            //             "MenuFileSaveJPEG", "&JPEG...", this.MenuFileSaveJPEGClick,
+            //             "MenuFileMakePainterNozzle", "&Nozzle/Tube Bitmap...", this.MenuFileMakePainterNozzleClick,
+            //             "MenuFileMakePainterAnimation", "&Animation Files...", this.MenuFileMakePainterAnimationClick,
+            //         ],
+
+            //         "MenuFileMove", "&Move", [
+            //             "MenuFilePlantMover", "&Plant Mover...", this.MenuFilePlantMoverClick,
+            //             "MenuFileTdoMover", "&3D Object Mover...", this.MenuFileTdoMoverClick,
+            //             "Reconcile3DObjects1", "&Reconcile 3D Objects...", this.Reconcile3DObjects1Click,
+            //         ],
+            //         "-",
+            //         "MenuFilePrintDrawing", "&Print Picture...", this.MenuFilePrintDrawingClick,
+            //         "-",
+            //         "MenuFileExit", "E&xit", this.MenuFileExitClick,
+            //     ],
+            //     "MenuEdit", "&Edit", [
+            //         "MenuEditUndo", "&Undo", this.MenuEditUndoClick,
+            //         "MenuEditRedo", "&Redo", this.MenuEditRedoClick,
+            //         "UndoMenuEditUndoRedoList", "Undo/Redo &List...", this.UndoMenuEditUndoRedoListClick,
+            //         "-",
+            //         "MenuEditCut", "&Cut", this.MenuEditCutClick,
+            //         "MenuEditCopy", "C&opy", this.MenuEditCopyClick,
+            //         "MenuEditPaste", "&Paste", this.MenuEditPasteClick,
+            //         "MenuEditDelete", "&Delete", this.MenuEditDeleteClick,
+            //         "MenuEditDuplicate", "Duplic&ate", this.MenuEditDuplicateClick,
+            //         "-",
+            //         "MenuEditCopyDrawing", "Copy P&icture", this.MenuEditCopyDrawingClick,
+            //         "MenuEditCopyAsText", "Copy &To Text", this.MenuEditCopyAsTextClick,
+            //         "MenuEditPasteAsText", "Paste &From Text", this.MenuEditPasteAsTextClick,
+            //         "-",
+            //         "MenuEditPreferences", "Pr&eferences...", this.MenuEditPreferencesClick,
+            //     ],
+            //     "MenuPlant", "&Plant", [
+            //         "MenuPlantNew", "Create &New...", this.MenuPlantNewClick,
+            //         "MenuPlantNewUsingLastWizardSettings", "Create Same as &Last", this.MenuPlantNewUsingLastWizardSettingsClick,
+            //         "-",
+            //         "MenuPlantBreed", "&Breed", this.MenuPlantBreedClick,
+            //         "MenuPlantMakeTimeSeries", "Make &Time Series", this.MenuPlantMakeTimeSeriesClick,
+            //         "-",
+            //         "MenuPlantRandomize", "&Randomize", this.MenuPlantRandomizeClick,
+            //         "MenuPlantZeroRotations", "Re&set Rotations", this.MenuPlantZeroRotationsClick,
+            //         "MenuPlantAnimate", "&Animate through Life Cycle", this.MenuPlantAnimateClick,
+            //         "-",
+            //         "MenuPlantRename", "R&ename...", this.MenuPlantRenameClick,
+            //         "MenuPlantEditNote", "E&dit Note...", this.MenuPlantEditNoteClick,
+            //     ],
+            //     "MenuLayout", "&Layout", [
+            //         "MenuLayoutSelectAll", "Select &All", this.MenuLayoutSelectAllClick,
+            //         "MenuLayoutDeselect", "Select &None", this.MenuLayoutDeselectClick,
+            //         "-",
+            //         "MenuLayoutScaleToFit", "Scale to &Fit", this.MenuLayoutScaleToFitClick,
+            //         "MenuLayoutAlign.TMenuItem", "A&lign", [
+            //             "MenuLayoutAlignTops", "&Tops", this.MenuLayoutAlignTopsClick,
+            //             "MenuLayoutAlignBottoms", "&Bottoms", this.MenuLayoutAlignBottomsClick,
+            //             "MenuLayoutAlignLeftSides", "&Left Sides", this.MenuLayoutAlignLeftSidesClick,
+            //             "MenuLayoutAlignRightSides", "&Right Sides", this.MenuLayoutAlignRightSidesClick,
+            //             "MenuLayoutMakeBouquet", "Make into Bou&quet", this.MenuLayoutMakeBouquetClick,
+            //         ],
+            //         "MenuLayoutSize.TMenuItem", "Si&ze", [
+            //             "MenuLayoutSizeSameWidth", "Equal &Width", this.MenuLayoutSizeSameWidthClick,
+            //             "MenuLayoutSizeSameHeight", "Equal &Height", this.MenuLayoutSizeSameHeightClick,
+            //         ],
+            //         "MenuLayoutPack", "&Pack", this.MenuLayoutPackClick,
+            //         "-",
+            //         "MenuLayoutBringForward", "Bring Fo&rward", this.MenuLayoutBringForwardClick,
+            //         "MenuLayoutSendBack", "Send &Back", this.MenuLayoutSendBackClick,
+            //         "-",
+            //         "MenuLayoutShow", "&Show", this.MenuLayoutShowClick,
+            //         "MenuLayoutHide", "&Hide", this.MenuLayoutHideClick,
+            //         "MenuLayoutHideOthers", "Hide &Others", this.MenuLayoutHideOthersClick,
+            //     ],
+            //     "MenuOptions.TMenuItem", "&Options", [
+            //         "MenuOptionsDrawAs.TMenuItem", "&Draw Using", [
+            //             "radio", "MenuOptionsFastDraw", "&Bounding Boxes", this.MenuOptionsFastDrawClick,
+            //             "radio", "MenuOptionsMediumDraw", "&Wire Frames", this.MenuOptionsMediumDrawClick,
+            //             "radio", "MenuOptionsBestDraw", "&Solids", this.MenuOptionsBestDrawClick,
+            //             "radio", "MenuOptionsCustomDraw", "&Custom...", this.MenuOptionsCustomDrawClick,
+            //         ],
+            //         "MenuLayoutView.TMenuItem", "&View What Plants", [
+            //             "radio", "MenuLayoutViewFreeFloating", this.MenuLayoutViewFreeFloatingClick,
+            //             "radio", "MenuLayoutViewOnePlantAtATime", this.MenuLayoutViewOnePlantAtATimeClick,
+            //         ],
+            //         "MenuLayoutDrawingAreaOn.TMenuItem", "Place Drawing &Area", [
+            //             "radio", "MenuLayoutHorizontalOrientation", "On &Top", this.MenuLayoutHorizontalOrientationClick,
+            //             "radio", "MenuLayoutVerticalOrientation", "On &Left Side", this.MenuLayoutVerticalOrientationClick,
+            //         ],
+            //         "MenuOptionsDrawRectangles.TMenuItem", "Draw &Rectangles", [
+            //             "radio", "MenuOptionsShowSelectionRectangles", "Around &Selected Plants", this.MenuOptionsShowSelectionRectanglesClick,
+            //             "radio", "MenuOptionsShowBoundsRectangles", "Around &All Plants", this.MenuOptionsShowBoundsRectanglesClick,
+            //         ],
+            //         "MenuOptionsPosing.TMenuItem", "&Posing", [
+            //             "checkbox", "MenuOptionsHighlightPosedParts", "&Highlight Posed Parts", this.MenuOptionsHighlightPosedPartsClick,
+            //             "checkbox", "MenuOptionsGhostHiddenParts", "&Ghost Hidden Parts", this.MenuOptionsGhostHiddenPartsClick,
+            //             "checkbox", "MenuOptionsHidePosing", "&Ignore All Posing", this.MenuOptionsHidePosingClick,
+            //         ],
+            //         "MenuOptionsHints.TMenuItem", "&Hints", [
+            //             "checkbox", "MenuOptionsShowLongButtonHints", "Show Long Button &Hints", this.MenuOptionsShowLongButtonHintsClick,
+            //             "checkbox", "MenuOptionsShowParameterHints", "Show Para&meter Hints", this.MenuOptionsShowParameterHintsClick,
+            //         ],
+            //         "-",
+            //         "checkbox", "MenuOptionsUsePlantBitmaps", "Use Plant &Bitmaps", this.MenuOptionsUsePlantBitmapsClick,
+            //     ],
+            //     "MenuWindow.TMenuItem", "&Window", [
+            //         "MenuWindowBreeder", "&Breeder", this.MenuWindowBreederClick,
+            //         "MenuWindowTimeSeries", "&Time Series", this.MenuWindowTimeSeriesClick,
+            //         "-",
+            //         "MenuWindowNumericalExceptions", "&Messages", this.MenuWindowNumericalExceptionsClick,
+            //     ],
+            //     "MenuHelp.TMenuItem", "&Help", [
+            //         "MenuHelpTopics", "Help &Topics", this.MenuHelpTopicsClick,
+            //         "MenuHelpSuperSpeedTour", "&Super-Speed Tour", this.MenuHelpSuperSpeedTourClick,
+            //         "MenuHelpTutorial", "T&utorial", this.MenuHelpTutorialClick,
+            //         "-",
+            //         "MenuHelpAbout", "&About PlantStudio", this.MenuHelpAboutClick,
+            //     ],
+            // ],
+        ]
+
+        const paramPopupMenu = [
+            // "paramPopupMenuExpand.TMenuItem", "&Expand Panel", this.paramPopupMenuExpandClick,
+            // "paramPopupMenuCollapse.TMenuItem", "&Collapse Panel", this.paramPopupMenuCollapseClick,
+            // "-",
+            // "paramPopupMenuExpandAllInSection.TMenuItem", "E&xpand All Panels in This Section", this.paramPopupMenuExpandAllInSectionClick,
+            // "paramPopupMenuCollapseAllInSection.TMenuItem", "C&ollapse All Panels in This Section", this.paramPopupMenuCollapseAllInSectionClick,
+            // "-",
+            // "paramPopupMenuCopyName.TMenuItem", "Copy Parameter &Name", this.paramPopupMenuCopyNameClick,
+            // "-",
+            // "paramPopupMenuHelp.TMenuItem", "Go to &Help for This Type of Parameter Panel", this.paramPopupMenuHelpClick,
+            // "sectionPopupMenuHelp.TMenuItem", "Go to Help for This Parameter &Section", this.sectionPopupMenuHelpClick,
+        ]
+
+        const PlantPopupMenu = [
+            // "PopupMenuRandomize.TMenuItem", "&Randomize", this.PopupMenuRandomizeClick,
+            // "-",
+            // "PopupMenuCut.TMenuItem", "&Cut", this.PopupMenuCutClick,
+            // "PopupMenuCopy.TMenuItem", "C&opy", this.PopupMenuCopyClick,
+            // "PopupMenuPaste.TMenuItem", "&Paste", this.PopupMenuPasteClick,
+            // "-",
+            // "PopupMenuRename.TMenuItem", "Re&name...", this.PopupMenuRenameClick,
+            // "PopupMenuEditNote.TMenuItem", "&Edit Note...", this.PopupMenuEditNoteClick,
+            // "PopupMenuAnimate.TMenuItem", "&Animate", this.PopupMenuAnimateClick,
+            // "PopupMenuBreed.TMenuItem", "&Breed", this.PopupMenuBreedClick,
+            // "PopupMenuMakeTimeSeries.TMenuItem", "Make &Time Series", this.PopupMenuMakeTimeSeriesClick,
+            // "PopupMenuZeroRotations.TMenuItem", "Re&set Rotations", this.PopupMenuZeroRotationsClick,
+        ]
+    }
+
     view() {
         return m("div", 
             "PlantStudio Main Form",
