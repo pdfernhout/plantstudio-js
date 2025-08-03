@@ -691,7 +691,7 @@ export class TWizardForm {
     //     this.leafTdoSelectedLabel.Caption = ""
     //     this.petalTdoSelectedLabel.Caption = ""
     //     this.sectionTdoSelectedLabel.Caption = ""
-    //     this.previewPaintBox = ubitmap.PdPaintBoxWithPalette().Create(this)
+    //     this.previewPaintBox = ubitmap.PdPaintBox().Create(this)
     //     this.previewPaintBox.Parent = this.previewPanel
     //     this.previewPaintBox.Align = delphi_compatability.TAlign.alClient
     //     this.previewPaintBox.OnPaint = this.previewPaintBoxPaint
@@ -1006,7 +1006,7 @@ export class TWizardForm {
     
     // previewPaintBoxPaint(Sender: TObject): void {
     //     if ((this.plant !== null) && (this.plant.previewCache !== null)) {
-    //         ubmpsupport.copyBitmapToCanvasWithGlobalPalette(this.plant.previewCache, this.previewPaintBox.Canvas, Rect(0, 0, 0, 0))
+    //         ubmpsupport.copyBitmapToCanvas(this.plant.previewCache, this.previewPaintBox.Canvas, Rect(0, 0, 0, 0))
     //     }
     // }
     

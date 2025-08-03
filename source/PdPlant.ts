@@ -1250,12 +1250,6 @@ export class PdPlant extends PdStreamableObject {
         if ((size.X <= 0) || (size.Y <= 0)) {
             return
         }
-        // special code to make sure pictures come out all right on 256-color monitors.
-        // setting the bitmap pixel format to 24-bit and giving it the global palette stops
-        // it from dithering and gets the nearest colors from the palette when drawing.
-        // you also need to realize the palette anytime you bitblt (copyRect) from this
-        // bitmap to a display surface (timage, paint box, draw grid, etc).
-        // use the global function copyBitmapToCanvasWithGlobalPalette in umain.
         setPixelFormatBasedOnScreenForBitmap(cache)
         if ((cache.Width !== size.X) || (cache.Height !== size.Y)) {
             try {

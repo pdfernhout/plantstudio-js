@@ -351,7 +351,7 @@ export class PdTdoParameterPanel extends PdParameterPanel {
                 messageForExceptionType(e, "PdTdoParameterPanel.drawTdo")
                 // bitmap.free
             }
-            // ubmpsupport.copyBitmapToCanvasWithGlobalPalette(bitmap, this.Canvas, this.tdoRect)
+            // ubmpsupport.copyBitmapToCanvas(bitmap, this.Canvas, this.tdoRect)
         } finally {
             KfTurtle.defaultStopUsing()
             // bitmap.free

@@ -39,7 +39,6 @@ export function messageForExceptionType(e: Error, methodName: string): void {
     DebugPrint("Exception in " + methodName + " with " + e)
 }
 
-// TODO: Fix support_rgb from usupport
 export function support_rgb(r: byte, g: byte, b: byte): long {
     return (r << 16) + (g << 8) + b
 }
@@ -686,20 +685,6 @@ export function clientRectToScreenRect(handle: HWnd, clientRect: TRect): TRect {
     return result
 }
 
-export function support_rgb(R: byte, G: byte, B: byte): long {
-    let result = 0
-    //var screenDC: HDC;
-    //result := RGB(r, g, b);  
-    //try
-    //  screenDC := GetDC(0);
-    //  result := GetNearestColor(screenDC, PALETTERGB(r, g, b));
-    //finally
-    //   releaseDC(0, screenDC);
-    //end;
-    result = UNRESOLVED.PALETTERGB(R, G, B)
-    return result
-}
-
 export function combineRects(rect1: TRect, rect2: TRect): TRect {
     let result = new TRect()
     result.Left = intMin(rect1.Left, rect2.Left)
@@ -895,7 +880,6 @@ export function darkerColor(aColor: TColorRef): TColorRef {
     const g: byte = intMax(0, getGValue(aColor) - 10)
     const b: byte = intMax(0, getBValue(aColor) - 10)
     const result: TColorRef = support_rgb(r, g, b)
-    //result := support_rgb(GetRValue(aColor) div 2, GetGValue(aColor) div 2, GetBValue(aColor) div 2); 
     return result
 }
 
@@ -904,7 +888,6 @@ export function darkerColorWithSubtraction(aColor: TColorRef, subtract: short): 
     const g: byte = intMax(0, getGValue(aColor) - subtract)
     const b: byte = intMax(0, getBValue(aColor) - subtract)
     const result: TColorRef = support_rgb(r, g, b)
-    //result := support_rgb(GetRValue(aColor) div 2, GetGValue(aColor) div 2, GetBValue(aColor) div 2); 
     return result
 }
 
@@ -913,7 +896,6 @@ export function lighterColor(aColor: TColorRef): TColorRef {
     const g: byte = intMin(255, intround(getGValue(aColor) * 1.5))
     const b: byte = intMin(255, intround(getBValue(aColor) * 1.5))
     const result: TColorRef = support_rgb(r, g, b)
-    //result := support_rgb(GetRValue(aColor) div 2, GetGValue(aColor) div 2, GetBValue(aColor) div 2); 
     return result
 }
 

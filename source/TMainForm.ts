@@ -141,7 +141,6 @@ export class TMainForm {
     // scrollCursorMode: TSpeedButton = new TSpeedButton()
     // horizontalSplitter: TPanel = new TPanel()
     // verticalSplitter: TPanel = new TPanel()
-    // paletteImage: TImage = new TImage()
     // MenuEditPreferences: TMenuItem = new TMenuItem()
     // visibleBitmap: TImage = new TImage()
     // PlantPopupMenu: TPopupMenu = new TPopupMenu()
@@ -412,7 +411,7 @@ export class TMainForm {
     // Sections_Orthogonal: TImage = new TImage()
     // drawingBitmap: TBitmap = new TBitmap()
     commandList: PdCommandList = new PdCommandList()
-    // drawingPaintBox: PdPaintBoxWithPalette = new PdPaintBoxWithPalette()
+    // drawingPaintBox: PdPaintBox = new PdPaintBox()
     // statsPanel: PdStatsPanel = new PdStatsPanel()
     invalidDrawingRect: TRect = new TRect()
     internalChange: boolean = false
@@ -498,7 +497,7 @@ export class TMainForm {
     //         this.commandList =  new PdCommandList()
     //         this.commandList.setNewUndoLimit(domain.options.undoLimit)
     //         this.commandList.setNewObjectUndoLimit(domain.options.undoLimitOfPlants)
-    //         this.drawingPaintBox = ubitmap.PdPaintBoxWithPalette().Create(this)
+    //         this.drawingPaintBox = ubitmap.PdPaintBox().Create(this)
     //         this.drawingPaintBox.Parent = this
     //         this.drawingPaintBox.OnPaint = this.drawingPaintBoxPaint
     //         this.drawingPaintBox.OnMouseDown = this.PaintBoxMouseDown
@@ -1175,10 +1174,6 @@ export class TMainForm {
             startFileSave(fileInfo)
             startWaitMessage("Saving " + ExtractFileName(fileInfo.newFile) + "...")
             this.fillBitmapForExport(bitmapForExport, domain.bitmapOptions)
-            if (!ubitmap.RequiresPalette(bitmapForExport)) {
-                bitmapForExport.ReleasePalette()
-                bitmapForExport.ignorePalette = true
-            }
             bitmapForExport.SaveToFile(fileInfo.tempFile)
             fileInfo.writingWasSuccessful = true
         } finally {
@@ -1209,10 +1204,6 @@ export class TMainForm {
             startFileSave(fileInfo)
             startWaitMessage("Saving " + ExtractFileName(fileInfo.newFile) + "...")
             this.fillBitmapForExport(bitmapForExport, domain.bitmapOptions)
-            if (!ubitmap.RequiresPalette(bitmapForExport)) {
-                bitmapForExport.ReleasePalette()
-                bitmapForExport.ignorePalette = true
-            }
             jpegForExport.assign(bitmapForExport)
             // no option here
             jpegForExport.pixelFormat = UNRESOLVED.jf24Bit
@@ -1316,7 +1307,6 @@ export class TMainForm {
         if ((plantsToDraw === null) || (plantsToDraw.length <= 0)) {
             return
         }
-        bitmapForExport.Palette = UNRESOLVED.CopyPalette(this.paletteImage.Picture.Bitmap.Palette)
         const xMultiplier = safedivExcept(1.0 * rWidth(rectToDrawIn), 1.0 * rWidth(combinedBoundsRect), 1.0)
         const yMultiplier = safedivExcept(1.0 * rHeight(rectToDrawIn), 1.0 * rHeight(combinedBoundsRect), 1.0)
         const scaleMultiplier = Math.min(xMultiplier, yMultiplier)
@@ -2870,8 +2860,6 @@ export class TMainForm {
         const aRect = Rect(0, 0, this.drawingBitmap.Width, this.drawingBitmap.Height)
         // use an inset rect to avoid flicker in the boundary rectangle
         const insetOneRect = Rect(1, 1, this.drawingBitmap.Width - 1, this.drawingBitmap.Height - 1)
-        const oldPalette: HPALETTE = UNRESOLVED.selectPalette(this.drawingPaintBox.Canvas.Handle, MainForm.paletteImage.Picture.Bitmap.Palette, false)
-        UNRESOLVED.realizePalette(this.drawingPaintBox.Canvas.Handle)
         this.drawingPaintBox.Canvas.CopyRect(insetOneRect, this.drawingBitmap.Canvas, insetOneRect)
         this.drawingPaintBox.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsClear
         this.drawingPaintBox.Canvas.Pen.Width = 1
@@ -2913,8 +2901,6 @@ export class TMainForm {
         }
         this.drawingPaintBox.Canvas.Pen.Color = UNRESOLVED.clBtnText
         this.drawingPaintBox.Canvas.Rectangle(0, 0, this.drawingPaintBox.Width, this.drawingPaintBox.Height)
-        UNRESOLVED.selectPalette(this.drawingPaintBox.Canvas.Handle, oldPalette, true)
-        UNRESOLVED.realizePalette(this.drawingPaintBox.Canvas.Handle)
     }
     
     // plant bitmaps
@@ -6248,43 +6234,6 @@ export class TMainForm {
         this.verticalSplitterNeedToRedraw = false
     }
     
-    // palette stuff 
-    // ----------------------------------------------------------------------------- *palette stuff 
-    GetPalette(): HPALETTE {
-        let result = new HPALETTE()
-        result = this.paletteImage.Picture.Bitmap.Palette
-        return result
-    }
-    
-    //overriden because paint box will not update correctly
-    //makes window take first priority for palettes
-    PaletteChanged(Foreground: boolean): boolean {
-        let result = false
-        let oldPalette: HPALETTE
-        let palette: HPALETTE
-        let windowHandle: HWnd
-        let DC: HDC
-        
-        palette = this.GetPalette()
-        if (palette !== 0) {
-            DC = this.GetDeviceContext(windowHandle)
-            oldPalette = UNRESOLVED.selectPalette(DC, palette, !Foreground)
-            if ((UNRESOLVED.realizePalette(DC) !== 0) && (this.drawingPaintBox !== null)) {
-                // if palette changed, repaint drawing 
-                ubmpsupport.setPixelFormatBasedOnScreenForBitmap(this.drawingBitmap)
-                this.drawingPaintBox.Invalidate()
-            }
-            if (this.statsPanel !== null) {
-                this.statsPanel.Invalidate()
-            }
-            UNRESOLVED.selectPalette(DC, oldPalette, true)
-            UNRESOLVED.realizePalette(DC)
-            UNRESOLVED.releaseDC(windowHandle, DC)
-        }
-        result = PdForm.prototype.PaletteChanged.call(this, Foreground)
-        return result
-    }
-    
     FormShow(): void {
         UNRESOLVED.DragAcceptFiles(this.Handle, true)
     }
@@ -6399,7 +6348,10 @@ export class TMainForm {
     }
 
     view() {
-        return m("div", "PlantStudio Main Form")
+        return m("div", 
+            "PlantStudio Main Form",
+
+        )
     }
     
 }
@@ -6423,6 +6375,7 @@ function InputQuery(arg0: string, arg1: string, newName: string): boolean {
 }
 
 const kSavingDrawingToBmp = 1
+
 function storeProfileInformation() {
     throw new Error("Function not implemented.")
 }

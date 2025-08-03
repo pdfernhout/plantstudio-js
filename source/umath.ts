@@ -65,6 +65,10 @@ export function intMax(a: int, b: int): int {
     return result
 }
 
+export function intDiv(a: int, b: int) {
+    return Math.floor(a / b)
+}
+
 // RE-RAISES EXCEPTION 
 function pow(number: double, exponent: double): double {
     let result = 0.0

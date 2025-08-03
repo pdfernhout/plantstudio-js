@@ -40,12 +40,6 @@ export class PdColorParameterPanel extends PdParameterPanel {
     // blueSlider: KfSlider = new KfSlider()
     // colorRect: TRect = new TRect()
     
-    // GetPalette(): HPALETTE {
-    //     let result = new HPALETTE()
-    //     result = umain.MainForm.paletteImage.Picture.Bitmap.Palette
-    //     return result
-    // }
-    
     // initialize(): void {
     //     //assuming sliders will be deleted automatically by owner - self - otherwise would have destructor
     //     this.redSlider = usliders.KfSlider().create(this)
@@ -500,7 +494,7 @@ export class PdColorParameterPanel extends PdParameterPanel {
     //         ubmpsupport.setPixelFormatBasedOnScreenForBitmap(bitmap)
     //         bitmap.Canvas.Brush.Color = aColor
     //         bitmap.Canvas.FillRect(Rect(0, 0, bitmap.Width, bitmap.Height))
-    //         ubmpsupport.copyBitmapToCanvasWithGlobalPalette(bitmap, this.Canvas, aRect)
+    //         ubmpsupport.copyBitmapToCanvas(bitmap, this.Canvas, aRect)
     //     } finally {
     //         bitmap.free
     //     }
