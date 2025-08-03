@@ -2,7 +2,7 @@ import * as m from "mithril"
 import { TMainForm } from "../source/TMainForm"
 
 const MyComponent = { 
-    view: () => m("div",
+    view: () => m("div.overflow-auto.h-100",
         m(TMainForm)
     )
 }

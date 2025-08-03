@@ -2,7 +2,7 @@
 // Exported from: ../../plantstudio-js/converted_source/Umain.lfm
 
 import * as m from "mithril"
-import { caption } from "common"
+import { caption } from "./common"
 
 export function viewMainForm() {
     return m("MainForm.TMainForm",

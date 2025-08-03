@@ -19,6 +19,7 @@ import { ExportFormats, fileTypeFor3DExportType } from "./U3dexport"
 import { intMax, intMin, max, safedivExcept } from "./umath"
 import { kBringForward, kCopyToClipboard, kDontCopyToClipboard, kDown, kHide, kLeft, kRight, kSendBackward, kShow, kUp, PdAlignPlantsCommand, PdAnimatePlantCommand, PdBooleanValue, PdBreedFromParentsCommand, PdCenterDrawingCommand, PdChangeDomain3DOptionsCommand, PdChangeDomainOptionsCommand, PdChangeMagnificationCommand, PdChangeMainWindowOrientationCommand, PdChangeMainWindowViewingOptionCommand, PdChangePlantAgeCommand, PdChangeSelectedPlantsCommand, PdCreateAmendmentCommand, PdDeleteAmendmentCommand, PdDragCommand, PdDuplicateCommand, PdEditAmendmentCommand, PdEditNoteCommand, PdHideOrShowCommand, PdMakeTimeSeriesCommand, PdNewCommand, PdPackPlantsCommand, PdPasteCommand, PdRandomizeCommand, PdRemoveCommand, PdRenameCommand, PdResetRotationsCommand, PdResizePlantsCommand, PdResizePlantsToSameWidthOrHeightCommand, PdRotateCommand, PdScrollCommand, PdSelectOrDeselectAllCommand, PdSelectPosingPartCommand, PdSendBackwardOrForwardCommand } from "./updcom"
 import { chr, cleanUpAfterFileSave, createSaveFileNamesStructure, FileType, getFileSaveInfo, IDCANCEL, IDNO, IDYES, kAskForFileName, kDontAskForFileName, len, lowercase, mrCancel, mrOK, nameStringForFileType, Point, pos, Rect, removeItem, rHeight, rWidth, SaveFileNamesStructure, setSinglePoint, startFileSave, stringBeyond, stringUpTo, trim, uppercase } from "./usupport"
+import { viewMainForm } from "./TMainForm-view"
 
 const kCursorModeSelectDrag = 0
 const kCursorModeMagnify = 1
@@ -6322,10 +6323,14 @@ export class TMainForm {
     plantsAsTextMemo = <string[]>[]
     updateParameterValuesWithUpdateListForPlant = (something: any, updateList: any[]) => {}
 
-    // TODO: Other defintions uses by other modules
-    // showDrawProgress = (value: number) => {}
-    // plantFileChanged = false
-    // setPlantFileChanged = (changed: boolean) => {}
+    // TODO: Temp defintions used by PdTraverser
+    showDrawProgress = (value: number) => {}
+
+    // TODO: Temp defintions used by PdCommand
+    plantFileChanged = false
+    setPlantFileChanged = (changed: boolean) => {}
+
+    // TODO: Other definitions uses by other modules
     // doCommand = (command: PdCommand) => {}
     // // UNNEEDED: updateMenusForUndoRedo = () => {}
     // // UNNEEDED: MenuEditUndoClick = (Sender: any) => {}
@@ -6350,7 +6355,7 @@ export class TMainForm {
     view() {
         return m("div", 
             "PlantStudio Main Form",
-
+            viewMainForm()        
         )
     }
     
