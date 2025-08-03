@@ -6360,7 +6360,7 @@ export class TMainForm {
     
     */
 
-    // TODO: Temp definitions to get to compile
+    // TODO: Temp definitions to get PdPlant  to compile
     updateForChangeToPlantBitmaps = () => {}
     exceptionResizingPlantBitmap = () => { throw new Error("exceptionResizingPlantBitmap") }
     screenBytesPerPixel = () => 4
@@ -6372,21 +6372,23 @@ export class TMainForm {
     focusedPlant = (): PdPlant | null => null
     plantsAsTextMemo = <string[]>[]
     updateParameterValuesWithUpdateListForPlant = (something: any, updateList: any[]) => {}
-    showDrawProgress = (value: number) => {}
-    plantFileChanged = false
-    setPlantFileChanged = (changed: boolean) => {}
-    doCommand = (command: PdCommand) => {}
-    updateMenusForUndoRedo = () => {}
-    MenuEditUndoClick = (Sender: any) => {}
-    MenuEditRedoClick = (Sender: any) => {}
-    updatePasteMenuForClipboardContents = () => {}
-    standardPastePosition = () => new TPoint()
-    invalidateDrawingRect(rect: TRect) {}
-    updatePoseInfo() {}
-    updateForChangeToPlantSelections() {}
-    invalidateEntireDrawing() {}
-    recalculateAllPlantBoundsRectsForOffsetChange() {}
-    updateForChangeToSelectedPlantsDrawingScale() {}
+
+    // TODO: Other defintions uses by other modules
+    // showDrawProgress = (value: number) => {}
+    // plantFileChanged = false
+    // setPlantFileChanged = (changed: boolean) => {}
+    // doCommand = (command: PdCommand) => {}
+    // // UNNEEDED: updateMenusForUndoRedo = () => {}
+    // // UNNEEDED: MenuEditUndoClick = (Sender: any) => {}
+    // // UNNEEDED: MenuEditRedoClick = (Sender: any) => {}
+    // // UNNEEDED: updatePasteMenuForClipboardContents = () => {}
+    // standardPastePosition = () => new TPoint()
+    // invalidateDrawingRect(rect: TRect) {}
+    // updatePoseInfo() {}
+    // updateForChangeToPlantSelections() {}
+    // invalidateEntireDrawing() {}
+    // recalculateAllPlantBoundsRectsForOffsetChange() {}
+    // updateForChangeToSelectedPlantsDrawingScale() {}
 
     updateFileMenuForOtherRecentFiles(): void {
         throw new Error("TODO Unfinished duplicate function")
