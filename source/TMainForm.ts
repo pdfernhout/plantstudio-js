@@ -1,7 +1,7 @@
 // unit Umain
 
 import * as m from "mithril"
-import { arrayInsert, ColorDefs, double, ExtractFileName, float, int, intround, IntToStr, long, mbYesNo, mbYesNoCancel, MessageDialog, mtConfirmation, short, ShowMessage, StrToFloat, StrToIntDef, TColorRef } from "./common"
+import { arrayInsert, caption, ColorDefs, double, ExtractFileName, float, int, intround, IntToStr, long, mbYesNo, mbYesNoCancel, MessageDialog, mtConfirmation, short, ShowMessage, StrToFloat, StrToIntDef, TColorRef } from "./common"
 import { PdCommand } from "./PdCommand"
 import { PdCommandList } from "./PdCommandList"
 import { domain, DrawMode, kAnimateByAge, kAnimateByXRotation, kExcludeInvisiblePlants, kIncludeAllPlants, kIncludeDrawingAreaContents, kIncludeNonSelectedPlants, kIncludeSelectedPlants, kIncludeVisiblePlants, kMainWindowOrientationHorizontal, kMainWindowOrientationVertical, kMaxRecentFiles, kUnsavedFileName, ViewPlants } from "./PdDomain"
@@ -6506,150 +6506,148 @@ export class TMainForm {
 
     mainMenuSpec: any = [
         // [type = radio/checkbox, ] ID, label, items or action
-        "MainMenu", "Main", [
-            "MenuFile", "&File", [
-                "MenuFileNew", "&New", this.MenuFileNewClick,
-                "MenuFileOpen", "&Open...", this.MenuFileOpenClick,
-                "MenuFileReopen", "&Reopen", [
-                    "Recent0", "0", this.Recent0Click,
-                    "Recent1", "1", this.Recent0Click,
-                    "Recent2", "2", this.Recent0Click,
-                    "Recent3", "3", this.Recent0Click,
-                    "Recent4", "4", this.Recent0Click,
-                    "Recent5", "5", this.Recent0Click,
-                    "Recent6", "6", this.Recent0Click,
-                    "Recent7", "7", this.Recent0Click,
-                    "Recent8", "8", this.Recent0Click,
-                    "Recent9", "9", this.Recent0Click,
-                ],
-                "MenuFileClose", "&Close", this.MenuFileCloseClick,
-                "-",
-                "MenuFileSave", "&Save", this.MenuFileSaveClick,
-                "MenuFileSaveAs", "Save &As...", this.MenuFileSaveAsClick,
-                "-",
-                "MenuFileExport", "&Export", [
-                    "MenuPlantExportTo3DS", "&3DS...", this.MenuPlantExportTo3DSClick,
-                    "MenuPlantExportToLWO", "&LWO...", this.MenuPlantExportToLWOClick,
-                    "MenuPlantExportToOBJ", "&OBJ...", this.MenuPlantExportToOBJClick,
-                    "MenuPlantExportToDXF", "&DXF...", this.MenuPlantExportToDXFClick,
-                    "MenuPlantExportToPOV", "PO&V INC...", this.MenuPlantExportToPOVClick,
-                    "MenuPlantExportToVRML", "V&RML...", this.MenuPlantExportToVRMLClick,
-                    "-",
-                    "MenuFileSaveDrawingAs", "&Bitmap...", this.MenuFileSaveDrawingAsClick,
-                    "MenuFileSaveJPEG", "&JPEG...", this.MenuFileSaveJPEGClick,
-                    "MenuFileMakePainterNozzle", "&Nozzle/Tube Bitmap...", this.MenuFileMakePainterNozzleClick,
-                    "MenuFileMakePainterAnimation", "&Animation Files...", this.MenuFileMakePainterAnimationClick,
-                ],
-                "MenuFileMove", "&Move", [
-                    "MenuFilePlantMover", "&Plant Mover...", this.MenuFilePlantMoverClick,
-                    "MenuFileTdoMover", "&3D Object Mover...", this.MenuFileTdoMoverClick,
-                    "Reconcile3DObjects1", "&Reconcile 3D Objects...", this.Reconcile3DObjects1Click,
-                ],
-                "-",
-                "MenuFilePrintDrawing", "&Print Picture...", this.MenuFilePrintDrawingClick,
-                "-",
-                "MenuFileExit", "E&xit", this.MenuFileExitClick,
+        "MenuFile", "&File", [
+            "MenuFileNew", "&New", this.MenuFileNewClick,
+            "MenuFileOpen", "&Open...", this.MenuFileOpenClick,
+            "MenuFileReopen", "&Reopen", [
+                "Recent0", "0", this.Recent0Click,
+                "Recent1", "1", this.Recent0Click,
+                "Recent2", "2", this.Recent0Click,
+                "Recent3", "3", this.Recent0Click,
+                "Recent4", "4", this.Recent0Click,
+                "Recent5", "5", this.Recent0Click,
+                "Recent6", "6", this.Recent0Click,
+                "Recent7", "7", this.Recent0Click,
+                "Recent8", "8", this.Recent0Click,
+                "Recent9", "9", this.Recent0Click,
             ],
-            "MenuEdit", "&Edit", [
-                "MenuEditUndo", "&Undo", this.MenuEditUndoClick,
-                "MenuEditRedo", "&Redo", this.MenuEditRedoClick,
-                "UndoMenuEditUndoRedoList", "Undo/Redo &List...", this.UndoMenuEditUndoRedoListClick,
+            "MenuFileClose", "&Close", this.MenuFileCloseClick,
+            "-",
+            "MenuFileSave", "&Save", this.MenuFileSaveClick,
+            "MenuFileSaveAs", "Save &As...", this.MenuFileSaveAsClick,
+            "-",
+            "MenuFileExport", "&Export", [
+                "MenuPlantExportTo3DS", "&3DS...", this.MenuPlantExportTo3DSClick,
+                "MenuPlantExportToLWO", "&LWO...", this.MenuPlantExportToLWOClick,
+                "MenuPlantExportToOBJ", "&OBJ...", this.MenuPlantExportToOBJClick,
+                "MenuPlantExportToDXF", "&DXF...", this.MenuPlantExportToDXFClick,
+                "MenuPlantExportToPOV", "PO&V INC...", this.MenuPlantExportToPOVClick,
+                "MenuPlantExportToVRML", "V&RML...", this.MenuPlantExportToVRMLClick,
                 "-",
-                "MenuEditCut", "&Cut", this.MenuEditCutClick,
-                "MenuEditCopy", "C&opy", this.MenuEditCopyClick,
-                "MenuEditPaste", "&Paste", this.MenuEditPasteClick,
-                "MenuEditDelete", "&Delete", this.MenuEditDeleteClick,
-                "MenuEditDuplicate", "Duplic&ate", this.MenuEditDuplicateClick,
-                "-",
-                "MenuEditCopyDrawing", "Copy P&icture", this.MenuEditCopyDrawingClick,
-                "MenuEditCopyAsText", "Copy &To Text", this.MenuEditCopyAsTextClick,
-                "MenuEditPasteAsText", "Paste &From Text", this.MenuEditPasteAsTextClick,
-                "-",
-                "MenuEditPreferences", "Pr&eferences...", this.MenuEditPreferencesClick,
+                "MenuFileSaveDrawingAs", "&Bitmap...", this.MenuFileSaveDrawingAsClick,
+                "MenuFileSaveJPEG", "&JPEG...", this.MenuFileSaveJPEGClick,
+                "MenuFileMakePainterNozzle", "&Nozzle/Tube Bitmap...", this.MenuFileMakePainterNozzleClick,
+                "MenuFileMakePainterAnimation", "&Animation Files...", this.MenuFileMakePainterAnimationClick,
             ],
-            "MenuPlant", "&Plant", [
-                "MenuPlantNew", "Create &New...", this.MenuPlantNewClick,
-                "MenuPlantNewUsingLastWizardSettings", "Create Same as &Last", this.MenuPlantNewUsingLastWizardSettingsClick,
-                "-",
-                "MenuPlantBreed", "&Breed", this.MenuPlantBreedClick,
-                "MenuPlantMakeTimeSeries", "Make &Time Series", this.MenuPlantMakeTimeSeriesClick,
-                "-",
-                "MenuPlantRandomize", "&Randomize", this.MenuPlantRandomizeClick,
-                "MenuPlantZeroRotations", "Re&set Rotations", this.MenuPlantZeroRotationsClick,
-                "MenuPlantAnimate", "&Animate through Life Cycle", this.MenuPlantAnimateClick,
-                "-",
-                "MenuPlantRename", "R&ename...", this.MenuPlantRenameClick,
-                "MenuPlantEditNote", "E&dit Note...", this.MenuPlantEditNoteClick,
+            "MenuFileMove", "&Move", [
+                "MenuFilePlantMover", "&Plant Mover...", this.MenuFilePlantMoverClick,
+                "MenuFileTdoMover", "&3D Object Mover...", this.MenuFileTdoMoverClick,
+                "Reconcile3DObjects1", "&Reconcile 3D Objects...", this.Reconcile3DObjects1Click,
             ],
-            "MenuLayout", "&Layout", [
-                "MenuLayoutSelectAll", "Select &All", this.MenuLayoutSelectAllClick,
-                "MenuLayoutDeselect", "Select &None", this.MenuLayoutDeselectClick,
-                "-",
-                "MenuLayoutScaleToFit", "Scale to &Fit", this.MenuLayoutScaleToFitClick,
-                "MenuLayoutAlign", "A&lign", [
-                    "MenuLayoutAlignTops", "&Tops", this.MenuLayoutAlignTopsClick,
-                    "MenuLayoutAlignBottoms", "&Bottoms", this.MenuLayoutAlignBottomsClick,
-                    "MenuLayoutAlignLeftSides", "&Left Sides", this.MenuLayoutAlignLeftSidesClick,
-                    "MenuLayoutAlignRightSides", "&Right Sides", this.MenuLayoutAlignRightSidesClick,
-                    "MenuLayoutMakeBouquet", "Make into Bou&quet", this.MenuLayoutMakeBouquetClick,
-                ],
-                "MenuLayoutSize", "Si&ze", [
-                    "MenuLayoutSizeSameWidth", "Equal &Width", this.MenuLayoutSizeSameWidthClick,
-                    "MenuLayoutSizeSameHeight", "Equal &Height", this.MenuLayoutSizeSameHeightClick,
-                ],
-                "MenuLayoutPack", "&Pack", this.MenuLayoutPackClick,
-                "-",
-                "MenuLayoutBringForward", "Bring Fo&rward", this.MenuLayoutBringForwardClick,
-                "MenuLayoutSendBack", "Send &Back", this.MenuLayoutSendBackClick,
-                "-",
-                "MenuLayoutShow", "&Show", this.MenuLayoutShowClick,
-                "MenuLayoutHide", "&Hide", this.MenuLayoutHideClick,
-                "MenuLayoutHideOthers", "Hide &Others", this.MenuLayoutHideOthersClick,
+            "-",
+            "MenuFilePrintDrawing", "&Print Picture...", this.MenuFilePrintDrawingClick,
+            "-",
+            "MenuFileExit", "E&xit", this.MenuFileExitClick,
+        ],
+        "MenuEdit", "&Edit", [
+            "MenuEditUndo", "&Undo", this.MenuEditUndoClick,
+            "MenuEditRedo", "&Redo", this.MenuEditRedoClick,
+            "UndoMenuEditUndoRedoList", "Undo/Redo &List...", this.UndoMenuEditUndoRedoListClick,
+            "-",
+            "MenuEditCut", "&Cut", this.MenuEditCutClick,
+            "MenuEditCopy", "C&opy", this.MenuEditCopyClick,
+            "MenuEditPaste", "&Paste", this.MenuEditPasteClick,
+            "MenuEditDelete", "&Delete", this.MenuEditDeleteClick,
+            "MenuEditDuplicate", "Duplic&ate", this.MenuEditDuplicateClick,
+            "-",
+            "MenuEditCopyDrawing", "Copy P&icture", this.MenuEditCopyDrawingClick,
+            "MenuEditCopyAsText", "Copy &To Text", this.MenuEditCopyAsTextClick,
+            "MenuEditPasteAsText", "Paste &From Text", this.MenuEditPasteAsTextClick,
+            "-",
+            "MenuEditPreferences", "Pr&eferences...", this.MenuEditPreferencesClick,
+        ],
+        "MenuPlant", "&Plant", [
+            "MenuPlantNew", "Create &New...", this.MenuPlantNewClick,
+            "MenuPlantNewUsingLastWizardSettings", "Create Same as &Last", this.MenuPlantNewUsingLastWizardSettingsClick,
+            "-",
+            "MenuPlantBreed", "&Breed", this.MenuPlantBreedClick,
+            "MenuPlantMakeTimeSeries", "Make &Time Series", this.MenuPlantMakeTimeSeriesClick,
+            "-",
+            "MenuPlantRandomize", "&Randomize", this.MenuPlantRandomizeClick,
+            "MenuPlantZeroRotations", "Re&set Rotations", this.MenuPlantZeroRotationsClick,
+            "MenuPlantAnimate", "&Animate through Life Cycle", this.MenuPlantAnimateClick,
+            "-",
+            "MenuPlantRename", "R&ename...", this.MenuPlantRenameClick,
+            "MenuPlantEditNote", "E&dit Note...", this.MenuPlantEditNoteClick,
+        ],
+        "MenuLayout", "&Layout", [
+            "MenuLayoutSelectAll", "Select &All", this.MenuLayoutSelectAllClick,
+            "MenuLayoutDeselect", "Select &None", this.MenuLayoutDeselectClick,
+            "-",
+            "MenuLayoutScaleToFit", "Scale to &Fit", this.MenuLayoutScaleToFitClick,
+            "MenuLayoutAlign", "A&lign", [
+                "MenuLayoutAlignTops", "&Tops", this.MenuLayoutAlignTopsClick,
+                "MenuLayoutAlignBottoms", "&Bottoms", this.MenuLayoutAlignBottomsClick,
+                "MenuLayoutAlignLeftSides", "&Left Sides", this.MenuLayoutAlignLeftSidesClick,
+                "MenuLayoutAlignRightSides", "&Right Sides", this.MenuLayoutAlignRightSidesClick,
+                "MenuLayoutMakeBouquet", "Make into Bou&quet", this.MenuLayoutMakeBouquetClick,
             ],
-            "MenuOptions", "&Options", [
-                "MenuOptionsDrawAs", "&Draw Using", [
-                    "radio", "MenuOptionsFastDraw", "&Bounding Boxes", this.MenuOptionsFastDrawClick,
-                    "radio", "MenuOptionsMediumDraw", "&Wire Frames", this.MenuOptionsMediumDrawClick,
-                    "radio", "MenuOptionsBestDraw", "&Solids", this.MenuOptionsBestDrawClick,
-                    "radio", "MenuOptionsCustomDraw", "&Custom...", this.MenuOptionsCustomDrawClick,
-                ],
-                "MenuLayoutView", "&View What Plants", [
-                    "radio", "MenuLayoutViewFreeFloating", "&All Plants", this.MenuLayoutViewFreeFloatingClick,
-                    "radio", "MenuLayoutViewOnePlantAtATime", "&One Plant at a Time", this.MenuLayoutViewOnePlantAtATimeClick,
-                ],
-                "MenuLayoutDrawingAreaOn", "Place Drawing &Area", [
-                    "radio", "MenuLayoutHorizontalOrientation", "On &Top", this.MenuLayoutHorizontalOrientationClick,
-                    "radio", "MenuLayoutVerticalOrientation", "On &Left Side", this.MenuLayoutVerticalOrientationClick,
-                ],
-                "MenuOptionsDrawRectangles", "Draw &Rectangles", [
-                    "radio", "MenuOptionsShowSelectionRectangles", "Around &Selected Plants", this.MenuOptionsShowSelectionRectanglesClick,
-                    "radio", "MenuOptionsShowBoundsRectangles", "Around &All Plants", this.MenuOptionsShowBoundsRectanglesClick,
-                ],
-                "MenuOptionsPosing", "&Posing", [
-                    "checkbox", "MenuOptionsHighlightPosedParts", "&Highlight Posed Parts", this.MenuOptionsHighlightPosedPartsClick,
-                    "checkbox", "MenuOptionsGhostHiddenParts", "&Ghost Hidden Parts", this.MenuOptionsGhostHiddenPartsClick,
-                    "checkbox", "MenuOptionsHidePosing", "&Ignore All Posing", this.MenuOptionsHidePosingClick,
-                ],
-                "MenuOptionsHints", "&Hints", [
-                    "checkbox", "MenuOptionsShowLongButtonHints", "Show Long Button &Hints", this.MenuOptionsShowLongButtonHintsClick,
-                    "checkbox", "MenuOptionsShowParameterHints", "Show Para&meter Hints", this.MenuOptionsShowParameterHintsClick,
-                ],
-                "-",
-                "checkbox", "MenuOptionsUsePlantBitmaps", "Use Plant &Bitmaps", this.MenuOptionsUsePlantBitmapsClick,
+            "MenuLayoutSize", "Si&ze", [
+                "MenuLayoutSizeSameWidth", "Equal &Width", this.MenuLayoutSizeSameWidthClick,
+                "MenuLayoutSizeSameHeight", "Equal &Height", this.MenuLayoutSizeSameHeightClick,
             ],
-            "MenuWindow", "&Window", [
-                "MenuWindowBreeder", "&Breeder", this.MenuWindowBreederClick,
-                "MenuWindowTimeSeries", "&Time Series", this.MenuWindowTimeSeriesClick,
-                "-",
-                "MenuWindowNumericalExceptions", "&Messages", this.MenuWindowNumericalExceptionsClick,
+            "MenuLayoutPack", "&Pack", this.MenuLayoutPackClick,
+            "-",
+            "MenuLayoutBringForward", "Bring Fo&rward", this.MenuLayoutBringForwardClick,
+            "MenuLayoutSendBack", "Send &Back", this.MenuLayoutSendBackClick,
+            "-",
+            "MenuLayoutShow", "&Show", this.MenuLayoutShowClick,
+            "MenuLayoutHide", "&Hide", this.MenuLayoutHideClick,
+            "MenuLayoutHideOthers", "Hide &Others", this.MenuLayoutHideOthersClick,
+        ],
+        "MenuOptions", "&Options", [
+            "MenuOptionsDrawAs", "&Draw Using", [
+                "radio", "MenuOptionsFastDraw", "&Bounding Boxes", this.MenuOptionsFastDrawClick,
+                "radio", "MenuOptionsMediumDraw", "&Wire Frames", this.MenuOptionsMediumDrawClick,
+                "radio", "MenuOptionsBestDraw", "&Solids", this.MenuOptionsBestDrawClick,
+                "radio", "MenuOptionsCustomDraw", "&Custom...", this.MenuOptionsCustomDrawClick,
             ],
-            "MenuHelp", "&Help", [
-                "MenuHelpTopics", "Help &Topics", this.MenuHelpTopicsClick,
-                "MenuHelpSuperSpeedTour", "&Super-Speed Tour", this.MenuHelpSuperSpeedTourClick,
-                "MenuHelpTutorial", "T&utorial", this.MenuHelpTutorialClick,
-                "-",
-                "MenuHelpAbout", "&About PlantStudio", this.MenuHelpAboutClick,
+            "MenuLayoutView", "&View What Plants", [
+                "radio", "MenuLayoutViewFreeFloating", "&All Plants", this.MenuLayoutViewFreeFloatingClick,
+                "radio", "MenuLayoutViewOnePlantAtATime", "&One Plant at a Time", this.MenuLayoutViewOnePlantAtATimeClick,
             ],
+            "MenuLayoutDrawingAreaOn", "Place Drawing &Area", [
+                "radio", "MenuLayoutHorizontalOrientation", "On &Top", this.MenuLayoutHorizontalOrientationClick,
+                "radio", "MenuLayoutVerticalOrientation", "On &Left Side", this.MenuLayoutVerticalOrientationClick,
+            ],
+            "MenuOptionsDrawRectangles", "Draw &Rectangles", [
+                "radio", "MenuOptionsShowSelectionRectangles", "Around &Selected Plants", this.MenuOptionsShowSelectionRectanglesClick,
+                "radio", "MenuOptionsShowBoundsRectangles", "Around &All Plants", this.MenuOptionsShowBoundsRectanglesClick,
+            ],
+            "MenuOptionsPosing", "&Posing", [
+                "checkbox", "MenuOptionsHighlightPosedParts", "&Highlight Posed Parts", this.MenuOptionsHighlightPosedPartsClick,
+                "checkbox", "MenuOptionsGhostHiddenParts", "&Ghost Hidden Parts", this.MenuOptionsGhostHiddenPartsClick,
+                "checkbox", "MenuOptionsHidePosing", "&Ignore All Posing", this.MenuOptionsHidePosingClick,
+            ],
+            "MenuOptionsHints", "&Hints", [
+                "checkbox", "MenuOptionsShowLongButtonHints", "Show Long Button &Hints", this.MenuOptionsShowLongButtonHintsClick,
+                "checkbox", "MenuOptionsShowParameterHints", "Show Para&meter Hints", this.MenuOptionsShowParameterHintsClick,
+            ],
+            "-",
+            "checkbox", "MenuOptionsUsePlantBitmaps", "Use Plant &Bitmaps", this.MenuOptionsUsePlantBitmapsClick,
+        ],
+        "MenuWindow", "&Window", [
+            "MenuWindowBreeder", "&Breeder", this.MenuWindowBreederClick,
+            "MenuWindowTimeSeries", "&Time Series", this.MenuWindowTimeSeriesClick,
+            "-",
+            "MenuWindowNumericalExceptions", "&Messages", this.MenuWindowNumericalExceptionsClick,
+        ],
+        "MenuHelp", "&Help", [
+            "MenuHelpTopics", "Help &Topics", this.MenuHelpTopicsClick,
+            "MenuHelpSuperSpeedTour", "&Super-Speed Tour", this.MenuHelpSuperSpeedTourClick,
+            "MenuHelpTutorial", "T&utorial", this.MenuHelpTutorialClick,
+            "-",
+            "MenuHelpAbout", "&About PlantStudio", this.MenuHelpAboutClick,
         ],
     ]
 
@@ -6686,12 +6684,12 @@ export class TMainForm {
         return m("div.ml2", 
             menu.map(menuItem => m("div",
                 menuItem.submenu
-                    ? m("div", menuItem.label, this.viewMenu(menuItem.submenu))
+                    ? m("div.nowrap", caption(menuItem.label), this.viewMenu(menuItem.submenu))
                     : menuItem.type === "dash"
                         ? m("div", "----")
-                        : m("div", m("button", {
+                        : m("div.nowrap", m("span.hover-bg-green", {
                             onclick: () => menuItem.action?.call(this, menuItem)
-                        }, menuItem.label))
+                        }, caption(menuItem.label)))
                 )
         ))
     }
@@ -6699,7 +6697,15 @@ export class TMainForm {
     viewMainMenu() {
         const menu = buildMenuFromSpec(this.mainMenuSpec)
         
-        return this.viewMenu(menu)
+        return m("div.flex.flex-row", 
+            menu.map(menuItem => 
+                m("div.ba", 
+                    caption(menuItem.label),
+                    menuItem.submenu ? null : "MISSING SUBMENU for: " + menuItem.label,
+                    this.viewMenu(menuItem.submenu || [])
+                )
+            )
+        )
     }
 
     view() {

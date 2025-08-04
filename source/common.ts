@@ -287,5 +287,5 @@ export class TMemoryStream extends TFileStream {
 
 export function caption(text: string) {
     // TODO: What should this do?
-    return text
+    return text.replace("&", "")
 }
