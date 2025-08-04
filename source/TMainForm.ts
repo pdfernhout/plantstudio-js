@@ -461,7 +461,7 @@ export class TMainForm {
     // hintActive: boolean = false
     // lastHintString: string = ""
     // backTabbingInParametersPanel: boolean = false
-    selectedParameterPanel: PdParameterPanel | null = new PdParameterPanel()
+    selectedParameterPanel: PdParameterPanel | null = null
     selectedPlantPartID: long = 0
     // mouseDownSelectedPlantPartID: long = 0
     selectedPlantPartType: string = ""
@@ -6614,8 +6614,8 @@ export class TMainForm {
                     "radio", "MenuOptionsCustomDraw", "&Custom...", this.MenuOptionsCustomDrawClick,
                 ],
                 "MenuLayoutView", "&View What Plants", [
-                    "radio", "MenuLayoutViewFreeFloating", this.MenuLayoutViewFreeFloatingClick,
-                    "radio", "MenuLayoutViewOnePlantAtATime", this.MenuLayoutViewOnePlantAtATimeClick,
+                    "radio", "MenuLayoutViewFreeFloating", "&All Plants", this.MenuLayoutViewFreeFloatingClick,
+                    "radio", "MenuLayoutViewOnePlantAtATime", "&One Plant at a Time", this.MenuLayoutViewOnePlantAtATimeClick,
                 ],
                 "MenuLayoutDrawingAreaOn", "Place Drawing &Area", [
                     "radio", "MenuLayoutHorizontalOrientation", "On &Top", this.MenuLayoutHorizontalOrientationClick,
@@ -6687,9 +6687,11 @@ export class TMainForm {
             menu.map(menuItem => m("div",
                 menuItem.submenu
                     ? m("div", menuItem.label, this.viewMenu(menuItem.submenu))
-                    : m("div", m("button", {
-                        onclick: () => menuItem.action?.call(this, menuItem)
-                    }, menuItem.label))
+                    : menuItem.type === "dash"
+                        ? m("div", "----")
+                        : m("div", m("button", {
+                            onclick: () => menuItem.action?.call(this, menuItem)
+                        }, menuItem.label))
                 )
         ))
     }
@@ -6721,12 +6723,15 @@ interface MenuItem {
 function buildMenuFromSpec(specOriginal: any[]): MenuItem[] {
     const result: MenuItem[] = []
 
-    console.log("specOriginal", specOriginal)
     const spec = specOriginal.slice()
 
     while (spec.length) {
         let type = spec.shift()
         if (!type) break
+        if (type === "-") {
+            result.push({type: "dash", id: "", label: ""})
+            continue
+        }
         let id
         if (!["radio", "checkbox"].includes(type)) {
             id = type
