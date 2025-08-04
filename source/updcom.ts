@@ -50,8 +50,8 @@ export const kDown = 1
 export const kLeft = 2
 export const kRight = 3
 
-const kChangeWidth = true
-const kChangeHeight = false
+export const kChangeWidth = true
+export const kChangeHeight = false
 
 
 export let numPlantsCreatedThisSession: long = 0
@@ -1083,7 +1083,7 @@ export class PdResizePlantsCommand extends PdCommandWithListOfPlants {
         return this
     }
     
-    createWithListOfPlantsAndNewValue(aNewValue: float): PdResizePlantsCommand {
+    createWithNewValue(aNewValue: float): PdResizePlantsCommand {
         this.saveInitialValues()
         this.newValue = aNewValue
         return this

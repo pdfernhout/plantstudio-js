@@ -30,6 +30,7 @@ export const ColorDefs = {
     clWhite: 0xFFFFFF,
     clYellow: 0x00FFFF,
     clBtnShadow: 0x808080, // gray
+    clBtnText: 0x000000, // black
 }
 
 export function getRValue(value: TColorRef) {

@@ -50,10 +50,10 @@ const kMinPixels = 10
 const kMaxPixels = 10000
 const kMinInches = 0.0
 const kMaxInches = 100
-const kExcludeInvisiblePlants = true
+export const kExcludeInvisiblePlants = true
 const kIncludeInvisiblePlants = false
 const kExcludeNonSelectedPlants = true
-const kIncludeNonSelectedPlants = false
+export const kIncludeNonSelectedPlants = false
 const kMaxCustomColors = 16
 export const kAnimateByXRotation = 0
 export const kAnimateByAge = 1
@@ -73,7 +73,7 @@ const kDefaultV2IniFileName = "PlantStudio2.ini"
 
 const kV2IniAddition = "_v2"
 
-const kMaxRecentFiles = 10
+export const kMaxRecentFiles = 10
 
 export enum ViewPlants {
     kViewPlantsInMainWindowFreeFloating = 1,

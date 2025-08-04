@@ -1,13 +1,13 @@
 // unit Umain
 
 import * as m from "mithril"
-import { ColorDefs, double, ExtractFileName, float, int, intround, IntToStr, long, mbYesNo, mbYesNoCancel, MessageDialog, mtConfirmation, short, ShowMessage, StrToFloat, StrToIntDef, TColorRef } from "./common"
+import { arrayInsert, ColorDefs, double, ExtractFileName, float, int, intround, IntToStr, long, mbYesNo, mbYesNoCancel, MessageDialog, mtConfirmation, short, ShowMessage, StrToFloat, StrToIntDef, TColorRef } from "./common"
 import { PdCommand } from "./PdCommand"
 import { PdCommandList } from "./PdCommandList"
-import { domain, DrawMode, kAnimateByAge, kAnimateByXRotation, kIncludeAllPlants, kIncludeDrawingAreaContents, kIncludeSelectedPlants, kIncludeVisiblePlants, kMainWindowOrientationHorizontal, kMainWindowOrientationVertical, kUnsavedFileName, ViewPlants } from "./PdDomain"
+import { domain, DrawMode, kAnimateByAge, kAnimateByXRotation, kExcludeInvisiblePlants, kIncludeAllPlants, kIncludeDrawingAreaContents, kIncludeNonSelectedPlants, kIncludeSelectedPlants, kIncludeVisiblePlants, kMainWindowOrientationHorizontal, kMainWindowOrientationVertical, kMaxRecentFiles, kUnsavedFileName, ViewPlants } from "./PdDomain"
 import { FieldType } from "./PdParameter"
 import { PdParameterPanel } from "./PdParameterPanel"
-import { kDontConsiderDomainScale, kDontDrawNow, kEndNoteString, kPlantAsTextEndString, kStartNoteString, PdPlant, PdPlantUpdateEvent } from "./PdPlant"
+import { kCheckForUnreadParams, kDontConsiderDomainScale, kDontDrawNow, kEndNoteString, kPlantAsTextEndString, kStartNoteString, PdPlant, PdPlantUpdateEvent } from "./PdPlant"
 import { PdPlantDrawingAmendment } from "./PdPlantDrawingAmendment"
 import { checkVersionNumberInPlantNameLine } from "./PdPlantManager"
 import { PdSection } from "./PdSection"
@@ -17,9 +17,15 @@ import { TPoint } from "./TPoint"
 import { TRect } from "./TRect"
 import { ExportFormats, fileTypeFor3DExportType } from "./U3dexport"
 import { intMax, intMin, max, safedivExcept } from "./umath"
-import { kBringForward, kCopyToClipboard, kDontCopyToClipboard, kDown, kHide, kLeft, kRight, kSendBackward, kShow, kUp, PdAlignPlantsCommand, PdAnimatePlantCommand, PdBooleanValue, PdBreedFromParentsCommand, PdCenterDrawingCommand, PdChangeDomain3DOptionsCommand, PdChangeDomainOptionsCommand, PdChangeMagnificationCommand, PdChangeMainWindowOrientationCommand, PdChangeMainWindowViewingOptionCommand, PdChangePlantAgeCommand, PdChangeSelectedPlantsCommand, PdCreateAmendmentCommand, PdDeleteAmendmentCommand, PdDragCommand, PdDuplicateCommand, PdEditAmendmentCommand, PdEditNoteCommand, PdHideOrShowCommand, PdMakeTimeSeriesCommand, PdNewCommand, PdPackPlantsCommand, PdPasteCommand, PdRandomizeCommand, PdRemoveCommand, PdRenameCommand, PdResetRotationsCommand, PdResizePlantsCommand, PdResizePlantsToSameWidthOrHeightCommand, PdRotateCommand, PdScrollCommand, PdSelectOrDeselectAllCommand, PdSelectPosingPartCommand, PdSendBackwardOrForwardCommand } from "./updcom"
+import { kBringForward, kChangeHeight, kChangeWidth, kCopyToClipboard, kDontCopyToClipboard, kDown, kHide, kLeft, kRight, kSendBackward, kShow, kUp, PdAlignPlantsCommand, PdAnimatePlantCommand, PdBooleanValue, PdBreedFromParentsCommand, PdCenterDrawingCommand, PdChangeDomain3DOptionsCommand, PdChangeDomainOptionsCommand, PdChangeMagnificationCommand, PdChangeMainWindowOrientationCommand, PdChangeMainWindowViewingOptionCommand, PdChangePlantAgeCommand, PdChangeSelectedPlantsCommand, PdCreateAmendmentCommand, PdDeleteAmendmentCommand, PdDragCommand, PdDuplicateCommand, PdEditAmendmentCommand, PdEditNoteCommand, PdHideOrShowCommand, PdMakeTimeSeriesCommand, PdNewCommand, PdPackPlantsCommand, PdPasteCommand, PdRandomizeCommand, PdRemoveCommand, PdRenameCommand, PdResetRotationsCommand, PdResizePlantsCommand, PdResizePlantsToSameWidthOrHeightCommand, PdRotateCommand, PdScrollCommand, PdSelectOrDeselectAllCommand, PdSelectPosingPartCommand, PdSendBackwardOrForwardCommand } from "./updcom"
 import { chr, cleanUpAfterFileSave, createSaveFileNamesStructure, FileType, getFileSaveInfo, IDCANCEL, IDNO, IDYES, kAskForFileName, kDontAskForFileName, len, lowercase, mrCancel, mrOK, nameStringForFileType, Point, pos, Rect, removeItem, rHeight, rWidth, SaveFileNamesStructure, setSinglePoint, startFileSave, stringBeyond, stringUpTo, trim, uppercase } from "./usupport"
 import { viewMainForm } from "./TMainForm-view"
+import { kRotateX, kRotateY, kRotateZ } from "./PdPlantPart"
+
+// TODO PDF for gettign to compile
+type TEdit = any
+
+const Application_Title = "PlantStudio"
 
 const kCursorModeSelectDrag = 0
 const kCursorModeMagnify = 1
@@ -455,10 +461,10 @@ export class TMainForm {
     // hintActive: boolean = false
     // lastHintString: string = ""
     // backTabbingInParametersPanel: boolean = false
-    // selectedParameterPanel: PdParameterPanel = new PdParameterPanel()
+    selectedParameterPanel: PdParameterPanel | null = new PdParameterPanel()
     selectedPlantPartID: long = 0
     // mouseDownSelectedPlantPartID: long = 0
-    // selectedPlantPartType: string = ""
+    selectedPlantPartType: string = ""
     // mouseDownSelectedPlantPartType: string = ""
     // TMainForm.prototype = new PdForm()
     // TMainForm.prototype.constructor = TMainForm
@@ -599,7 +605,7 @@ export class TMainForm {
     }
     
     // FormActivate(): void {
-    //     this.MenuEditPasteAsText.enabled = (UNRESOLVED.Clipboard.hasFormat(UNRESOLVED.CF_TEXT)) && (domain.plantFileLoaded)
+    //     this.MenuEditPasteAsText.enabled = (ColorDefs.clipboard.hasFormat(UNRESOLVED.CF_TEXT)) && (domain.plantFileLoaded)
     // }
     
     // showWelcomeForm(): void {
@@ -633,6 +639,8 @@ export class TMainForm {
     //     domain.options.hideWelcomeForm = welcomeForm.hideWelcomeForm.Checked
     // }
     
+    */
+
     // ------------------------------------------------------------------------- *file menu 
     MenuFileNewClick(): void {
         if (!this.askForSaveAndProceed()) {
@@ -798,158 +806,163 @@ export class TMainForm {
     }
     
     MenuFilePlantMoverClick(): void {
-        let mover: TMoverForm
+        throw new Error("TODO Unfinished")
+        // let mover: TMoverForm
         
-        if (plantFileChanged) {
-            const response = MessageDialog("Do you want to save your changes to " + ExtractFileName(domain.plantFileName) + chr(13) + "before you use the plant mover?", mtConfirmation, mbYesNoCancel, 0)
-            switch (response) {
-                case IDCANCEL:
-                    return
-                    break
-                case IDYES:
-                    this.MenuFileSaveClick()
-                    break
-                case IDNO:
-                    break
-            }
-        }
-        mover = TMoverForm().create(this)
-        if (mover === null) {
-            throw new Error("Problem: Could not create plant mover window.")
-        }
+        // if (plantFileChanged) {
+        //     const response = MessageDialog("Do you want to save your changes to " + ExtractFileName(domain.plantFileName) + chr(13) + "before you use the plant mover?", mtConfirmation, mbYesNoCancel, 0)
+        //     switch (response) {
+        //         case IDCANCEL:
+        //             return
+        //             break
+        //         case IDYES:
+        //             this.MenuFileSaveClick()
+        //             break
+        //         case IDNO:
+        //             break
+        //     }
+        // }
+        // mover = TMoverForm().create(this)
+        // if (mover === null) {
+        //     throw new Error("Problem: Could not create plant mover window.")
+        // }
 
-        mover.ShowModal()
-        //in case mover copied something
-        this.updatePasteMenuForClipboardContents()
-        if (mover.changedCurrentPlantFile) {
-            if (mover.untitledDomainFileSavedAs !== "") {
-                domain.plantFileName = mover.untitledDomainFileSavedAs
-            }
-            // cfk fix put help context in 
-            const response = MessageDialog("The current plant file has changed." + chr(13) + "Do you want to reload the changed file?", mtConfirmation, mbYesNo, 0)
-            if (response === IDYES) {
-                try {
-                    startWaitMessage("Opening " + ExtractFileName(domain.plantFileName))
-                    this.updateForNoPlantFile()
-                    domain.load(domain.plantFileName)
-                } catch (E: any) {
-                    stopWaitMessage()
-                    ShowMessage(E.message)
-                    ShowMessage("Could not load file " + domain.plantFileName + ".")
-                    return
-                }
-                this.updateForPlantFile()
-                stopWaitMessage()
-            }
-        }
+        // mover.ShowModal()
+        // //in case mover copied something
+        // this.updatePasteMenuForClipboardContents()
+        // if (mover.changedCurrentPlantFile) {
+        //     if (mover.untitledDomainFileSavedAs !== "") {
+        //         domain.plantFileName = mover.untitledDomainFileSavedAs
+        //     }
+        //     // cfk fix put help context in 
+        //     const response = MessageDialog("The current plant file has changed." + chr(13) + "Do you want to reload the changed file?", mtConfirmation, mbYesNo, 0)
+        //     if (response === IDYES) {
+        //         try {
+        //             startWaitMessage("Opening " + ExtractFileName(domain.plantFileName))
+        //             this.updateForNoPlantFile()
+        //             domain.load(domain.plantFileName)
+        //         } catch (E: any) {
+        //             stopWaitMessage()
+        //             ShowMessage(E.message)
+        //             ShowMessage("Could not load file " + domain.plantFileName + ".")
+        //             return
+        //         }
+        //         this.updateForPlantFile()
+        //         stopWaitMessage()
+        //     }
+        // }
     }
     
     MenuFileTdoMoverClick(): void {
-        let mover: TTdoMoverForm
+        throw new Error("TODO Unfinished")
+        // let mover: TTdoMoverForm
         
-        mover = TTdoMoverForm().create(this)
-        if (mover === null) {
-            throw new Error("Problem: Could not create 3D object mover window.")
-        }
-        mover.ShowModal()
+        // mover = TTdoMoverForm().create(this)
+        // if (mover === null) {
+        //     throw new Error("Problem: Could not create 3D object mover window.")
+        // }
+        // mover.ShowModal()
     }
     
-    WMQueryEndSession(message: TWMQueryEndSession): void {
-        if (!this.askForSaveAndProceed()) {
-            // prevents windows from shutting down
-            message.result = 0
-        } else if (!this.cleanUpBeforeExit()) {
-            message.result = 0
-        }
-    }
+    // WMQueryEndSession(message: TWMQueryEndSession): void {
+    //     if (!this.askForSaveAndProceed()) {
+    //         // prevents windows from shutting down
+    //         message.result = 0
+    //     } else if (!this.cleanUpBeforeExit()) {
+    //         message.result = 0
+    //     }
+    // }
     
     MenuFileExitClick(): void {
-        if (!this.askForSaveAndProceed()) {
-            return
-        } else if (!this.cleanUpBeforeExit()) {
-            return
-        }
-        delphi_compatability.Application.Terminate()
+        throw new Error("TODO Unfinished")
+        // if (!this.askForSaveAndProceed()) {
+        //     return
+        // } else if (!this.cleanUpBeforeExit()) {
+        //     return
+        // }
+        // delphi_compatability.Application.Terminate()
     }
     
-    FormClose(Action: TCloseAction): void {
-        if (!this.askForSaveAndProceed()) {
-            // same as exit, but can't call exit because we have to set the action flag 
-            Action = delphi_compatability.TCloseAction.caNone
-        } else if (!this.cleanUpBeforeExit()) {
-            Action = delphi_compatability.TCloseAction.caNone
-        }
-    }
+    // FormClose(Action: TCloseAction): void {
+    //     if (!this.askForSaveAndProceed()) {
+    //         // same as exit, but can't call exit because we have to set the action flag 
+    //         Action = delphi_compatability.TCloseAction.caNone
+    //     } else if (!this.cleanUpBeforeExit()) {
+    //         Action = delphi_compatability.TCloseAction.caNone
+    //     }
+    // }
     
     // returns false if user cancels quit
     cleanUpBeforeExit(): boolean {
-        domain.mainWindowRect = Rect(this.Left, this.Top, this.Width, this.Height)
-        domain.horizontalSplitterPos = this.horizontalSplitter.Top
-        domain.verticalSplitterPos = this.verticalSplitter.Left
-        domain.breederWindowRect = Rect(ubreedr.BreederForm.Left, ubreedr.BreederForm.Top, ubreedr.BreederForm.Width, ubreedr.BreederForm.Height)
-        domain.timeSeriesWindowRect = Rect(utimeser.TimeSeriesForm.Left, utimeser.TimeSeriesForm.Top, utimeser.TimeSeriesForm.Width, utimeser.TimeSeriesForm.Height)
-        domain.debugWindowRect = Rect(udebug.DebugForm.Left, udebug.DebugForm.Top, udebug.DebugForm.Width, udebug.DebugForm.Height)
-        if (domain.useIniFile) {
-            const okayToQuit = this.storeIniFile()
-            if (!okayToQuit) {
-                return false
-            }
-        }
+        throw new Error("TODO Unfinished")
+        // domain.mainWindowRect = Rect(this.Left, this.Top, this.Width, this.Height)
+        // domain.horizontalSplitterPos = this.horizontalSplitter.Top
+        // domain.verticalSplitterPos = this.verticalSplitter.Left
+        // domain.breederWindowRect = Rect(ubreedr.BreederForm.Left, ubreedr.BreederForm.Top, ubreedr.BreederForm.Width, ubreedr.BreederForm.Height)
+        // domain.timeSeriesWindowRect = Rect(utimeser.TimeSeriesForm.Left, utimeser.TimeSeriesForm.Top, utimeser.TimeSeriesForm.Width, utimeser.TimeSeriesForm.Height)
+        // domain.debugWindowRect = Rect(udebug.DebugForm.Left, udebug.DebugForm.Top, udebug.DebugForm.Width, udebug.DebugForm.Height)
+        // if (domain.useIniFile) {
+        //     const okayToQuit = this.storeIniFile()
+        //     if (!okayToQuit) {
+        //         return false
+        //     }
+        // }
 
-        // have to clear out parameter panels before leaving, for some reason was making program crash
-        //    but only if tdo components existed at the time of leaving the program. this works for now,
-        //    but it would be better to understand why it was happening. 
-        this.sectionsComboBox.ItemIndex = -1
-        this.updateParameterPanelsForSectionChange()
-        delphi_compatability.Application.HelpCommand(UNRESOLVED.HELP_QUIT, 0)
-        return true
+        // // have to clear out parameter panels before leaving, for some reason was making program crash
+        // //    but only if tdo components existed at the time of leaving the program. this works for now,
+        // //    but it would be better to understand why it was happening. 
+        // this.sectionsComboBox.ItemIndex = -1
+        // this.updateParameterPanelsForSectionChange()
+        // delphi_compatability.Application.HelpCommand(UNRESOLVED.HELP_QUIT, 0)
+        // return true
     }
     
     storeIniFile(): boolean {
-        let result = true
-        let fileSavedOK = false
-        let choseAnotherFileName = false
-        while (!fileSavedOK) {
-            try {
-                storeProfileInformation()
-                fileSavedOK = true
-            } catch (e) {
-                fileSavedOK = false
-            }
-            if (!fileSavedOK) {
-                const buttonPressed = MessageDialog("Could not save settings to " + chr(13) + chr(13) + "  " + domain.iniFileName + chr(13) + chr(13) + "Would you like to save them to another file?", delphi_compatability.TMsgDlgType.mtError, mbYesNoCancel, 0)
-                switch (buttonPressed) {
-                    case IDYES:
-                        const saveDialog: TSaveDialog = TSaveDialog(delphi_compatability.Application)
-                        saveDialog.FileName = domain.iniFileName
-                        saveDialog.Filter = "Ini files (*.ini)|*.ini|All files (*.*)|*.*"
-                        saveDialog.DefaultExt = "ini"
-                        saveDialog.Options = saveDialog.Options + {TOpenOption.ofPathMustExist, TOpenOption.ofOverwritePrompt, TOpenOption.ofHideReadOnly, TOpenOption.ofNoReadOnlyReturn, }
-                        result = saveDialog.Execute()
-                        if (result) {
-                            domain.iniFileName = saveDialog.FileName
-                            choseAnotherFileName = true
-                        }
-                        if (!result) {
-                            return result
-                        }
-                        break
-                    case IDNO:
-                        return result
-                        break
-                    case IDCANCEL:
-                        result = false
-                        return result
-                        break
-                }
-            }
-        }
-        if (fileSavedOK && choseAnotherFileName) {
-            ShowMessage("Your settings have been saved in " + chr(13) + chr(13) + "  " + domain.iniFileName + chr(13) + chr(13) + "But PlantStudio will load the original settings file again at startup." + chr(13) + "To use this settings file at startup, search in the help system" + chr(13) + "for \"alternate settings file\".")
-        }
-        return result
+        throw new Error("TODO Unfinished")
+        // let result = true
+        // let fileSavedOK = false
+        // let choseAnotherFileName = false
+        // while (!fileSavedOK) {
+        //     try {
+        //         storeProfileInformation()
+        //         fileSavedOK = true
+        //     } catch (e) {
+        //         fileSavedOK = false
+        //     }
+        //     if (!fileSavedOK) {
+        //         const buttonPressed = MessageDialog("Could not save settings to " + chr(13) + chr(13) + "  " + domain.iniFileName + chr(13) + chr(13) + "Would you like to save them to another file?", delphi_compatability.TMsgDlgType.mtError, mbYesNoCancel, 0)
+        //         switch (buttonPressed) {
+        //             case IDYES:
+        //                 const saveDialog: TSaveDialog = TSaveDialog(delphi_compatability.Application)
+        //                 saveDialog.FileName = domain.iniFileName
+        //                 saveDialog.Filter = "Ini files (*.ini)|*.ini|All files (*.*)|*.*"
+        //                 saveDialog.DefaultExt = "ini"
+        //                 saveDialog.Options = saveDialog.Options + {TOpenOption.ofPathMustExist, TOpenOption.ofOverwritePrompt, TOpenOption.ofHideReadOnly, TOpenOption.ofNoReadOnlyReturn, }
+        //                 result = saveDialog.Execute()
+        //                 if (result) {
+        //                     domain.iniFileName = saveDialog.FileName
+        //                     choseAnotherFileName = true
+        //                 }
+        //                 if (!result) {
+        //                     return result
+        //                 }
+        //                 break
+        //             case IDNO:
+        //                 return result
+        //                 break
+        //             case IDCANCEL:
+        //                 result = false
+        //                 return result
+        //                 break
+        //         }
+        //     }
+        // }
+        // if (fileSavedOK && choseAnotherFileName) {
+        //     ShowMessage("Your settings have been saved in " + chr(13) + chr(13) + "  " + domain.iniFileName + chr(13) + chr(13) + "But PlantStudio will load the original settings file again at startup." + chr(13) + "To use this settings file at startup, search in the help system" + chr(13) + "for \"alternate settings file\".")
+        // }
+        // return result
     }
-    
+
     // ---------------------------------------------------------------------------- *edit menu 
     MenuEditUndoClick(): void {
         this.commandList.undoLast()
@@ -958,31 +971,32 @@ export class TMainForm {
     }
     
     UndoMenuEditUndoRedoListClick(): void {
-        const undoRedoListForm: TUndoRedoListForm = uundo.TUndoRedoListForm().create(this)
-        if (undoRedoListForm === null) {
-            throw new Error("Problem: Could not create undo/redo list window.")
-        }
-        undoRedoListForm.initializeWithCommandList(this.commandList)
-        const response = undoRedoListForm.ShowModal()
-        if (response === mrOK) {
-            try {
-                this.enableOrDisableAllForms(kDisableAllForms)
-                startWaitMessage("Multiple undo/redo in progress; please wait...")
-                if (undoRedoListForm.undoToIndex() >= 0) {
-                    for (let i = 0; i <= undoRedoListForm.undoToIndex(); i++) {
-                        this.commandList.undoLast()
-                    }
-                } else if (undoRedoListForm.redoToIndex() >= 0) {
-                    for (let i = 0; i <= undoRedoListForm.redoToIndex(); i++) {
-                        this.commandList.redoLast()
-                    }
-                }
-            } finally {
-                this.updateForPossibleChangeToDrawing()
-                stopWaitMessage()
-                this.enableOrDisableAllForms(kEnableAllForms)
-            }
-        }
+        throw new Error("TODO Unfinished")
+        // const undoRedoListForm: TUndoRedoListForm = uundo.TUndoRedoListForm().create(this)
+        // if (undoRedoListForm === null) {
+        //     throw new Error("Problem: Could not create undo/redo list window.")
+        // }
+        // undoRedoListForm.initializeWithCommandList(this.commandList)
+        // const response = undoRedoListForm.ShowModal()
+        // if (response === mrOK) {
+        //     try {
+        //         this.enableOrDisableAllForms(kDisableAllForms)
+        //         startWaitMessage("Multiple undo/redo in progress; please wait...")
+        //         if (undoRedoListForm.undoToIndex() >= 0) {
+        //             for (let i = 0; i <= undoRedoListForm.undoToIndex(); i++) {
+        //                 this.commandList.undoLast()
+        //             }
+        //         } else if (undoRedoListForm.redoToIndex() >= 0) {
+        //             for (let i = 0; i <= undoRedoListForm.redoToIndex(); i++) {
+        //                 this.commandList.redoLast()
+        //             }
+        //         }
+        //     } finally {
+        //         this.updateForPossibleChangeToDrawing()
+        //         stopWaitMessage()
+        //         this.enableOrDisableAllForms(kEnableAllForms)
+        //     }
+        // }
     }
     
     MenuEditRedoClick(): void {
@@ -1004,260 +1018,267 @@ export class TMainForm {
     }
     
     MenuEditCopyAsTextClick(): void {
-        if (this.selectedPlants.length > 0) {
-            UNRESOLVED.Clipboard.clear
-            this.plantsAsTextMemo.Clear()
-            for (let i = 0; i <= this.selectedPlants.length - 1; i++) {
-                const plant = this.selectedPlants[i]
-                if (plant === null) {
-                    continue
-                }
-                plant.writeToMainFormMemoAsText()
-            }
-            this.plantsAsTextMemo.SelectAll()
-            this.plantsAsTextMemo.CutToClipboard()
-        }
+        throw new Error("TODO Unfinished")
+        // if (this.selectedPlants.length > 0) {
+        //     ColorDefs.clipboard.clear
+        //     this.plantsAsTextMemo.Clear()
+        //     for (let i = 0; i <= this.selectedPlants.length - 1; i++) {
+        //         const plant = this.selectedPlants[i]
+        //         if (plant === null) {
+        //             continue
+        //         }
+        //         plant.writeToMainFormMemoAsText()
+        //     }
+        //     this.plantsAsTextMemo.SelectAll()
+        //     this.plantsAsTextMemo.CutToClipboard()
+        // }
     }
     
     MenuEditPasteAsTextClick(): void {
-        let fakeTextFile: TextFile
-        const newPlants: PdPlant[] = []
+        throw new Error("TODO Unfinished")
+        // let fakeTextFile: TextFile
+        // const newPlants: PdPlant[] = []
         
-        if (!UNRESOLVED.Clipboard.hasFormat(UNRESOLVED.CF_TEXT)) {
-            MessageDialog("The clipboard has no text in it.", delphi_compatability.TMsgDlgType.mtError, {mbOK, }, 0)
-            return
-        }
-        this.plantsAsTextMemo.Clear()
-        this.plantsAsTextMemo.PasteFromClipboard()
-        if (this.plantsAsTextMemo.Lines.Count <= 0) {
-            MessageDialog("The clipboard has no text in it.", delphi_compatability.TMsgDlgType.mtError, {mbOK, }, 0)
-            return
-        }
-        let startLine = -1
-        let endLine = -1
-        for (let i = 0; i <= this.plantsAsTextMemo.Lines.Count - 1; i++) {
-            if (pos(uplant.kPlantAsTextStartString, this.plantsAsTextMemo.Lines.Strings[i]) > 0) {
-                startLine = i
-                break
-            }
-        }
-        for (i = this.plantsAsTextMemo.Lines.Count - 1; i >= 0; i--) {
-            if (pos(kPlantAsTextEndString, this.plantsAsTextMemo.Lines.Strings[i]) > 0) {
-                endLine = i
-                break
-            }
-        }
-        if (startLine < 0) {
-            this.plantsAsTextMemo.Clear()
-            MessageDialog("The clipboard has text in it, but no plants." + chr(13) + chr(13) + "I can't find a starting line for a plant text description." + chr(13) + "It should have \"" + uplant.kPlantAsTextStartString + "\" in it." + chr(13) + chr(13) + "If you copied the text for a plant," + chr(13) + "make sure the first line is selected and copy it again.", delphi_compatability.TMsgDlgType.mtError, {mbOK, }, 0)
-            return
-        }
-        if (endLine < 0) {
-            this.plantsAsTextMemo.Clear()
-            MessageDialog("The clipboard has text in it, but no plants." + chr(13) + chr(13) + "I can't find an ending line for a plant text description." + chr(13) + "It should have \"" + uplant.kPlantAsTextEndString + "\" in it." + chr(13) + chr(13) + "If you copied the text for a plant," + chr(13) + "make sure the whole plant is selected and copy it again.", delphi_compatability.TMsgDlgType.mtError, {mbOK, }, 0)
-            return
-        }
-        // since startLine and endLine are comments, we can read them
-        let i = startLine
-        while (i <= endLine) {
-            const aLine: string = this.plantsAsTextMemo.Lines.Strings[i]
-            i += 1
-            if (trim(aLine) === "") {
-                // v1.60final ignore blank lines
-                continue
-            }
-            if (pos(";", aLine) === 1) {
-                continue
-            }
-            if (pos("[", aLine) === 1) {
-                checkVersionNumberInPlantNameLine(aLine)
-                const plant = new PdPlant()
-                let plantName = stringBeyond(aLine, "[")
-                plantName = stringUpTo(plantName, "]")
-                plant.setName(plantName + " from text")
-                domain.parameterManager.setAllReadFlagsToFalse()
-                plant.readingFromMemo = true
-                try {
-                    while ((pos(kPlantAsTextEndString, aLine) <= 0) && (i <= endLine)) {
-                        // v1.60final fixed cutting off plant at blank line (was changed in file read in v1.3)
-                        // aLine <> '' do
-                        let aLine = this.plantsAsTextMemo.Lines.Strings[i]
-                        i += 1
-                        if (pos(";", aLine) === 1) {
-                            continue
-                        }
-                        if (trim(aLine) === "") {
-                            continue
-                        }
-                        if (pos(uppercase(kStartNoteString), uppercase(aLine)) > 0) {
-                            // added v1.6b1 to accommodate paste from text with note
-                            plant.noteLines.Clear()
-                            while (i <= this.plantsAsTextMemo.Lines.Count - 1) {
-                                aLine = this.plantsAsTextMemo.Lines.Strings[i]
-                                i += 1
-                                if ((pos(uppercase(kEndNoteString), uppercase(aLine)) > 0) && (plant.noteLines.Count < 5000)) {
-                                    break
-                                } else if (pos(";", aLine) === 1) {
-                                    continue
-                                } else {
-                                    plant.noteLines.Add(aLine)
-                                }
-                            }
-                        }
-                        // end added v1.6b1
-                        plant.readingMemoLine = i
-                        plant.readLineAndTdoFromPlantFile(aLine, fakeTextFile)
-                        if (i !== plant.readingMemoLine) {
-                            i = plant.readingMemoLine
-                        }
-                    }
-                } finally {
-                    plant.readingFromMemo = false
-                    plant.readingMemoLine = -1
-                }
-                plant.finishLoadingOrDefaulting(uplant.kCheckForUnreadParams)
-                // cfk change v1.3 make plant fit into 100x100 box with paste from text, because
-                // the scale always seems to be way off from what is being used; this way it always
-                // looks okay when it pastes
-                plant.drawPreviewIntoCache(Point(domain.options.pasteRectSize, domain.options.pasteRectSize), kDontConsiderDomainScale, uplant.kDontDrawNow)
-                newPlants.push(plant)
-            }
-        }
-        const newCommand = new PdPasteCommand(newPlants, this.selectedPlants)
-        this.doCommand(newCommand)
+        // if (!ColorDefs.clipboard.hasFormat(UNRESOLVED.CF_TEXT)) {
+        //     MessageDialog("The clipboard has no text in it.", delphi_compatability.TMsgDlgType.mtError, {mbOK, }, 0)
+        //     return
+        // }
+        // this.plantsAsTextMemo.Clear()
+        // this.plantsAsTextMemo.PasteFromClipboard()
+        // if (this.plantsAsTextMemo.Lines.Count <= 0) {
+        //     MessageDialog("The clipboard has no text in it.", delphi_compatability.TMsgDlgType.mtError, {mbOK, }, 0)
+        //     return
+        // }
+        // let startLine = -1
+        // let endLine = -1
+        // for (let i = 0; i <= this.plantsAsTextMemo.Lines.Count - 1; i++) {
+        //     if (pos(uplant.kPlantAsTextStartString, this.plantsAsTextMemo.Lines.Strings[i]) > 0) {
+        //         startLine = i
+        //         break
+        //     }
+        // }
+        // for (i = this.plantsAsTextMemo.Lines.Count - 1; i >= 0; i--) {
+        //     if (pos(kPlantAsTextEndString, this.plantsAsTextMemo.Lines.Strings[i]) > 0) {
+        //         endLine = i
+        //         break
+        //     }
+        // }
+        // if (startLine < 0) {
+        //     this.plantsAsTextMemo.Clear()
+        //     MessageDialog("The clipboard has text in it, but no plants." + chr(13) + chr(13) + "I can't find a starting line for a plant text description." + chr(13) + "It should have \"" + uplant.kPlantAsTextStartString + "\" in it." + chr(13) + chr(13) + "If you copied the text for a plant," + chr(13) + "make sure the first line is selected and copy it again.", delphi_compatability.TMsgDlgType.mtError, {mbOK, }, 0)
+        //     return
+        // }
+        // if (endLine < 0) {
+        //     this.plantsAsTextMemo.Clear()
+        //     MessageDialog("The clipboard has text in it, but no plants." + chr(13) + chr(13) + "I can't find an ending line for a plant text description." + chr(13) + "It should have \"" + uplant.kPlantAsTextEndString + "\" in it." + chr(13) + chr(13) + "If you copied the text for a plant," + chr(13) + "make sure the whole plant is selected and copy it again.", delphi_compatability.TMsgDlgType.mtError, {mbOK, }, 0)
+        //     return
+        // }
+        // // since startLine and endLine are comments, we can read them
+        // let i = startLine
+        // while (i <= endLine) {
+        //     const aLine: string = this.plantsAsTextMemo.Lines.Strings[i]
+        //     i += 1
+        //     if (trim(aLine) === "") {
+        //         // v1.60final ignore blank lines
+        //         continue
+        //     }
+        //     if (pos(";", aLine) === 1) {
+        //         continue
+        //     }
+        //     if (pos("[", aLine) === 1) {
+        //         checkVersionNumberInPlantNameLine(aLine)
+        //         const plant = new PdPlant()
+        //         let plantName = stringBeyond(aLine, "[")
+        //         plantName = stringUpTo(plantName, "]")
+        //         plant.setName(plantName + " from text")
+        //         domain.parameterManager.setAllReadFlagsToFalse()
+        //         plant.readingFromMemo = true
+        //         try {
+        //             while ((pos(kPlantAsTextEndString, aLine) <= 0) && (i <= endLine)) {
+        //                 // v1.60final fixed cutting off plant at blank line (was changed in file read in v1.3)
+        //                 // aLine <> '' do
+        //                 let aLine = this.plantsAsTextMemo.Lines.Strings[i]
+        //                 i += 1
+        //                 if (pos(";", aLine) === 1) {
+        //                     continue
+        //                 }
+        //                 if (trim(aLine) === "") {
+        //                     continue
+        //                 }
+        //                 if (pos(uppercase(kStartNoteString), uppercase(aLine)) > 0) {
+        //                     // added v1.6b1 to accommodate paste from text with note
+        //                     plant.noteLines.Clear()
+        //                     while (i <= this.plantsAsTextMemo.Lines.Count - 1) {
+        //                         aLine = this.plantsAsTextMemo.Lines.Strings[i]
+        //                         i += 1
+        //                         if ((pos(uppercase(kEndNoteString), uppercase(aLine)) > 0) && (plant.noteLines.Count < 5000)) {
+        //                             break
+        //                         } else if (pos(";", aLine) === 1) {
+        //                             continue
+        //                         } else {
+        //                             plant.noteLines.Add(aLine)
+        //                         }
+        //                     }
+        //                 }
+        //                 // end added v1.6b1
+        //                 plant.readingMemoLine = i
+        //                 plant.readLineAndTdoFromPlantFile(aLine, fakeTextFile)
+        //                 if (i !== plant.readingMemoLine) {
+        //                     i = plant.readingMemoLine
+        //                 }
+        //             }
+        //         } finally {
+        //             plant.readingFromMemo = false
+        //             plant.readingMemoLine = -1
+        //         }
+        //         plant.finishLoadingOrDefaulting(kCheckForUnreadParams)
+        //         // cfk change v1.3 make plant fit into 100x100 box with paste from text, because
+        //         // the scale always seems to be way off from what is being used; this way it always
+        //         // looks okay when it pastes
+        //         plant.drawPreviewIntoCache(Point(domain.options.pasteRectSize, domain.options.pasteRectSize), kDontConsiderDomainScale, uplant.kDontDrawNow)
+        //         newPlants.push(plant)
+        //     }
+        // }
+        // const newCommand = new PdPasteCommand(newPlants, this.selectedPlants)
+        // this.doCommand(newCommand)
     }
     
     // export 
     getBitmapCopySavePrintOptions(copySavePrintType: short): int {
-        let bitmapOptionsForm: TBitmapOptionsForm
+        throw new Error("TODO Unfinished")
+        // let bitmapOptionsForm: TBitmapOptionsForm
         
-        let result = mrCancel
-        bitmapOptionsForm = ubmpopt.TBitmapOptionsForm().create(this)
-        if (bitmapOptionsForm === null) {
-            throw new Error("Problem: Could not create copy/save/print options window.")
-        }
-        bitmapOptionsForm.initializeWithTypeAndOptions(copySavePrintType, domain.bitmapOptions)
-        result = bitmapOptionsForm.ShowModal()
-        domain.bitmapOptions = bitmapOptionsForm.options
-        return result
+        // let result = mrCancel
+        // bitmapOptionsForm = ubmpopt.TBitmapOptionsForm().create(this)
+        // if (bitmapOptionsForm === null) {
+        //     throw new Error("Problem: Could not create copy/save/print options window.")
+        // }
+        // bitmapOptionsForm.initializeWithTypeAndOptions(copySavePrintType, domain.bitmapOptions)
+        // result = bitmapOptionsForm.ShowModal()
+        // domain.bitmapOptions = bitmapOptionsForm.options
+        // return result
     }
     
     MenuEditCopyDrawingClick(): void {
-        let bitmapForExport: TBitmap
+        throw new Error("TODO Unfinished")
+        // let bitmapForExport: TBitmap
         
-        if ((domain === null) || (domain.plantManager === null) || (this.plants.length <= 0)) {
-            return
-        }
-        if (this.getBitmapCopySavePrintOptions(ubmpopt.kCopyingDrawing) === mrOK) {
-            bitmapForExport = delphi_compatability.TBitmap().Create()
-            this.fillBitmapForExport(bitmapForExport, domain.bitmapOptions)
-            ubitmap.CopyBitmapToClipboard(bitmapForExport)
-        }
+        // if ((domain === null) || (domain.plantManager === null) || (this.plants.length <= 0)) {
+        //     return
+        // }
+        // if (this.getBitmapCopySavePrintOptions(ubmpopt.kCopyingDrawing) === mrOK) {
+        //     bitmapForExport = delphi_compatability.TBitmap().Create()
+        //     this.fillBitmapForExport(bitmapForExport, domain.bitmapOptions)
+        //     ubitmap.CopyBitmapToClipboard(bitmapForExport)
+        // }
     }
     
     MenuFileSaveDrawingAsClick(): void {
-        let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
-        let bitmapForExport: TBitmap
+        throw new Error("TODO Unfinished")
+        // let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
+        // let bitmapForExport: TBitmap
         
-        if ((domain === null) || (domain.plantManager === null) || (this.plants.length <= 0)) {
-            return
-        }
-        if (this.getBitmapCopySavePrintOptions(kSavingDrawingToBmp) === mrCancel) {
-            return
-        }
-        pictureFileSaveAttemptsThisSession += 1
-        const suggestedFileName = "picture" + IntToStr(pictureFileSaveAttemptsThisSession) + ".bmp"
-        if (!getFileSaveInfo(FileType.kFileTypeBitmap, kAskForFileName, suggestedFileName, fileInfo)) {
-            return
-        }
-        bitmapForExport = delphi_compatability.TBitmap().Create()
-        try {
-            startFileSave(fileInfo)
-            startWaitMessage("Saving " + ExtractFileName(fileInfo.newFile) + "...")
-            this.fillBitmapForExport(bitmapForExport, domain.bitmapOptions)
-            bitmapForExport.SaveToFile(fileInfo.tempFile)
-            fileInfo.writingWasSuccessful = true
-        } finally {
-            stopWaitMessage()
-            cleanUpAfterFileSave(fileInfo)
-        }
+        // if ((domain === null) || (domain.plantManager === null) || (this.plants.length <= 0)) {
+        //     return
+        // }
+        // if (this.getBitmapCopySavePrintOptions(kSavingDrawingToBmp) === mrCancel) {
+        //     return
+        // }
+        // pictureFileSaveAttemptsThisSession += 1
+        // const suggestedFileName = "picture" + IntToStr(pictureFileSaveAttemptsThisSession) + ".bmp"
+        // if (!getFileSaveInfo(FileType.kFileTypeBitmap, kAskForFileName, suggestedFileName, fileInfo)) {
+        //     return
+        // }
+        // bitmapForExport = delphi_compatability.TBitmap().Create()
+        // try {
+        //     startFileSave(fileInfo)
+        //     startWaitMessage("Saving " + ExtractFileName(fileInfo.newFile) + "...")
+        //     this.fillBitmapForExport(bitmapForExport, domain.bitmapOptions)
+        //     bitmapForExport.SaveToFile(fileInfo.tempFile)
+        //     fileInfo.writingWasSuccessful = true
+        // } finally {
+        //     stopWaitMessage()
+        //     cleanUpAfterFileSave(fileInfo)
+        // }
     }
     
     MenuFileSaveJPEGClick(): void {
-        let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
-        let bitmapForExport: TBitmap
-        let jpegForExport: TJPEGImage
+        throw new Error("TODO Unfinished")
+        // let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
+        // let bitmapForExport: TBitmap
+        // let jpegForExport: TJPEGImage
         
-        if ((domain === null) || (domain.plantManager === null) || (this.plants.length <= 0)) {
-            return
-        }
-        if (this.getBitmapCopySavePrintOptions(ubmpopt.kSavingDrawingToJpeg) === mrCancel) {
-            return
-        }
-        pictureFileSaveAttemptsThisSession += 1
-        const suggestedFileName = "picture" + IntToStr(pictureFileSaveAttemptsThisSession) + ".jpg"
-        if (!getFileSaveInfo(FileType.kFileTypeJPEG, kAskForFileName, suggestedFileName, fileInfo)) {
-            return
-        }
-        bitmapForExport = delphi_compatability.TBitmap().Create()
-        jpegForExport = UNRESOLVED.TJPEGImage.create
-        try {
-            startFileSave(fileInfo)
-            startWaitMessage("Saving " + ExtractFileName(fileInfo.newFile) + "...")
-            this.fillBitmapForExport(bitmapForExport, domain.bitmapOptions)
-            jpegForExport.assign(bitmapForExport)
-            // no option here
-            jpegForExport.pixelFormat = UNRESOLVED.jf24Bit
-            // we ask for compression, they want quality, so we switch here
-            jpegForExport.compressionQuality = UNRESOLVED.TJPEGQualityRange(100 - domain.bitmapOptions.jpegCompressionRatio)
-            jpegForExport.saveToFile(fileInfo.tempFile)
-            fileInfo.writingWasSuccessful = true
-        } finally {
-            stopWaitMessage()
-            cleanUpAfterFileSave(fileInfo)
-        }
+        // if ((domain === null) || (domain.plantManager === null) || (this.plants.length <= 0)) {
+        //     return
+        // }
+        // if (this.getBitmapCopySavePrintOptions(ubmpopt.kSavingDrawingToJpeg) === mrCancel) {
+        //     return
+        // }
+        // pictureFileSaveAttemptsThisSession += 1
+        // const suggestedFileName = "picture" + IntToStr(pictureFileSaveAttemptsThisSession) + ".jpg"
+        // if (!getFileSaveInfo(FileType.kFileTypeJPEG, kAskForFileName, suggestedFileName, fileInfo)) {
+        //     return
+        // }
+        // bitmapForExport = delphi_compatability.TBitmap().Create()
+        // jpegForExport = UNRESOLVED.TJPEGImage.create
+        // try {
+        //     startFileSave(fileInfo)
+        //     startWaitMessage("Saving " + ExtractFileName(fileInfo.newFile) + "...")
+        //     this.fillBitmapForExport(bitmapForExport, domain.bitmapOptions)
+        //     jpegForExport.assign(bitmapForExport)
+        //     // no option here
+        //     jpegForExport.pixelFormat = UNRESOLVED.jf24Bit
+        //     // we ask for compression, they want quality, so we switch here
+        //     jpegForExport.compressionQuality = UNRESOLVED.TJPEGQualityRange(100 - domain.bitmapOptions.jpegCompressionRatio)
+        //     jpegForExport.saveToFile(fileInfo.tempFile)
+        //     fileInfo.writingWasSuccessful = true
+        // } finally {
+        //     stopWaitMessage()
+        //     cleanUpAfterFileSave(fileInfo)
+        // }
     }
     
     MenuFilePrintDrawingClick(): void {
-        const printRect_pixels: TRect = new TRect()
-        let bitmapForExport: TBitmap
+        throw new Error("TODO Unfinished")
+        // const printRect_pixels: TRect = new TRect()
+        // let bitmapForExport: TBitmap
         
-        if ((domain === null) || (domain.plantManager === null) || (this.plants.length <= 0)) {
-            return
-        }
-        if (this.getBitmapCopySavePrintOptions(ubmpopt.kPrintingDrawing) === mrCancel) {
-            return
-        }
-        bitmapForExport = delphi_compatability.TBitmap().Create()
-        this.fillBitmapForExport(bitmapForExport, domain.bitmapOptions)
-        UNRESOLVED.Printer.Title = "PlantStudio Picture"
-        UNRESOLVED.Printer.beginDoc
-        const xResolution_pixelsPerInch: float = UNRESOLVED.GetDeviceCaps(UNRESOLVED.Printer.Handle, delphi_compatability.LOGPIXELSX)
-        const yResolution_pixelsPerInch: float = UNRESOLVED.GetDeviceCaps(UNRESOLVED.Printer.Handle, delphi_compatability.LOGPIXELSY)
-        const printOffsetX_px: int = UNRESOLVED.GetDeviceCaps(UNRESOLVED.Printer.Handle, UNRESOLVED.PhysicalOffsetX)
-        const printOffsetY_px: int = UNRESOLVED.GetDeviceCaps(UNRESOLVED.Printer.Handle, UNRESOLVED.PhysicalOffsetY)
-        printRect_pixels.Left = intround(domain.bitmapOptions.printLeftMargin_in * xResolution_pixelsPerInch) - printOffsetX_px
-        printRect_pixels.Top = intround(domain.bitmapOptions.printTopMargin_in * yResolution_pixelsPerInch) - printOffsetY_px
-        printRect_pixels.Right = printRect_pixels.Left + intround(domain.bitmapOptions.printWidth_in * xResolution_pixelsPerInch)
-        printRect_pixels.Bottom = printRect_pixels.Top + intround(domain.bitmapOptions.printHeight_in * yResolution_pixelsPerInch)
-        UNRESOLVED.inflateRect(printRect_pixels, -domain.bitmapOptions.borderThickness, -domain.bitmapOptions.borderThickness)
-        ubitmap.PrintBitmap(bitmapForExport, printRect_pixels)
-        //FIX unresolved WITH expression: UNRESOLVED.Printer.Canvas
-        // border
-        this.Brush.Style = delphi_compatability.TFPBrushStyle.bsClear
-        if (domain.bitmapOptions.printBorderInner) {
-            UNRESOLVED.pen.color = domain.bitmapOptions.printBorderColorInner
-            UNRESOLVED.pen.width = domain.bitmapOptions.printBorderWidthInner
-            UNRESOLVED.rectangle(printRect_pixels.Left, printRect_pixels.Top, printRect_pixels.Right, printRect_pixels.Bottom)
-        }
-        if (domain.bitmapOptions.printBorderOuter) {
-            UNRESOLVED.pen.color = domain.bitmapOptions.printBorderColorOuter
-            UNRESOLVED.pen.width = domain.bitmapOptions.printBorderWidthOuter
-            UNRESOLVED.rectangle(printRect_pixels.Left - domain.bitmapOptions.borderGap, printRect_pixels.Top - domain.bitmapOptions.borderGap, printRect_pixels.Right + domain.bitmapOptions.borderGap, printRect_pixels.Bottom + domain.bitmapOptions.borderGap)
-        }
-        UNRESOLVED.Printer.endDoc
+        // if ((domain === null) || (domain.plantManager === null) || (this.plants.length <= 0)) {
+        //     return
+        // }
+        // if (this.getBitmapCopySavePrintOptions(ubmpopt.kPrintingDrawing) === mrCancel) {
+        //     return
+        // }
+        // bitmapForExport = delphi_compatability.TBitmap().Create()
+        // this.fillBitmapForExport(bitmapForExport, domain.bitmapOptions)
+        // UNRESOLVED.Printer.Title = "PlantStudio Picture"
+        // UNRESOLVED.Printer.beginDoc
+        // const xResolution_pixelsPerInch: float = UNRESOLVED.GetDeviceCaps(UNRESOLVED.Printer.Handle, delphi_compatability.LOGPIXELSX)
+        // const yResolution_pixelsPerInch: float = UNRESOLVED.GetDeviceCaps(UNRESOLVED.Printer.Handle, delphi_compatability.LOGPIXELSY)
+        // const printOffsetX_px: int = UNRESOLVED.GetDeviceCaps(UNRESOLVED.Printer.Handle, UNRESOLVED.PhysicalOffsetX)
+        // const printOffsetY_px: int = UNRESOLVED.GetDeviceCaps(UNRESOLVED.Printer.Handle, UNRESOLVED.PhysicalOffsetY)
+        // printRect_pixels.Left = intround(domain.bitmapOptions.printLeftMargin_in * xResolution_pixelsPerInch) - printOffsetX_px
+        // printRect_pixels.Top = intround(domain.bitmapOptions.printTopMargin_in * yResolution_pixelsPerInch) - printOffsetY_px
+        // printRect_pixels.Right = printRect_pixels.Left + intround(domain.bitmapOptions.printWidth_in * xResolution_pixelsPerInch)
+        // printRect_pixels.Bottom = printRect_pixels.Top + intround(domain.bitmapOptions.printHeight_in * yResolution_pixelsPerInch)
+        // UNRESOLVED.inflateRect(printRect_pixels, -domain.bitmapOptions.borderThickness, -domain.bitmapOptions.borderThickness)
+        // ubitmap.PrintBitmap(bitmapForExport, printRect_pixels)
+        // //FIX unresolved WITH expression: UNRESOLVED.Printer.Canvas
+        // // border
+        // this.Brush.Style = delphi_compatability.TFPBrushStyle.bsClear
+        // if (domain.bitmapOptions.printBorderInner) {
+        //     UNRESOLVED.pen.color = domain.bitmapOptions.printBorderColorInner
+        //     UNRESOLVED.pen.width = domain.bitmapOptions.printBorderWidthInner
+        //     UNRESOLVED.rectangle(printRect_pixels.Left, printRect_pixels.Top, printRect_pixels.Right, printRect_pixels.Bottom)
+        // }
+        // if (domain.bitmapOptions.printBorderOuter) {
+        //     UNRESOLVED.pen.color = domain.bitmapOptions.printBorderColorOuter
+        //     UNRESOLVED.pen.width = domain.bitmapOptions.printBorderWidthOuter
+        //     UNRESOLVED.rectangle(printRect_pixels.Left - domain.bitmapOptions.borderGap, printRect_pixels.Top - domain.bitmapOptions.borderGap, printRect_pixels.Right + domain.bitmapOptions.borderGap, printRect_pixels.Bottom + domain.bitmapOptions.borderGap)
+        // }
+        // UNRESOLVED.Printer.endDoc
     }
-    
+
     // edit menu 
     copySelectedPlantsToClipboard(): void {
         if (this.selectedPlants.length <= 0) {
@@ -1267,6 +1288,8 @@ export class TMainForm {
         domain.plantManager.setCopiedFromMainWindowFlagInClipboardPlants()
         this.updatePasteMenuForClipboardContents()
     }
+
+    /*
     
     fillBitmapForExport(bitmapForExport: TBitmap, options: BitmapOptionsStructure): void {
         if ((bitmapForExport === null) || (domain === null)) {
@@ -1348,19 +1371,22 @@ export class TMainForm {
             domain.plantDrawOffsetWhenDrawingCopy_mm = setSinglePoint(0, 0)
         }
     }
+
+    */
     
     MenuEditPasteClick(): void {
         this.pastePlantsFromClipboard()
     }
     
     pastePlantsFromClipboard(): void {
-        if (domain.plantManager.privatePlantClipboard.Count <= 0) {
-            return
-        }
-        const newPlants: PdPlant[] = []
-        domain.plantManager.pastePlantsFromPrivatePlantClipboardToList(newPlants)
-        const newCommand = new PdPasteCommand(newPlants, this.selectedPlants)
-        this.doCommand(newCommand)
+        throw new Error("TODO Unfinished")
+        // if (domain.plantManager.privatePlantClipboard.Count <= 0) {
+        //     return
+        // }
+        // const newPlants: PdPlant[] = []
+        // domain.plantManager.pastePlantsFromPrivatePlantClipboardToList(newPlants)
+        // const newCommand = new PdPasteCommand(newPlants, this.selectedPlants)
+        // this.doCommand(newCommand)
     }
 
     standardPastePosition(): TPoint {
@@ -1385,76 +1411,79 @@ export class TMainForm {
     }
     
     MenuEditPreferencesClick(): void {
-        const optionsForm: TOptionsForm = uoptions.TOptionsForm().create(this)
-        if (optionsForm === null) {
-            throw new Error("Problem: Could not create preferences window.")
-        }
-        optionsForm.options = domain.options
-        const response = optionsForm.ShowModal()
-        if ((response === mrOK) && (optionsForm.optionsChanged)) {
-            const newCommand = new PdChangeDomainOptionsCommand(optionsForm.options)
-            this.doCommand(newCommand)
-        }
+        throw new Error("TODO Unfinished")
+        // const optionsForm: TOptionsForm = uoptions.TOptionsForm().create(this)
+        // if (optionsForm === null) {
+        //     throw new Error("Problem: Could not create preferences window.")
+        // }
+        // optionsForm.options = domain.options
+        // const response = optionsForm.ShowModal()
+        // if ((response === mrOK) && (optionsForm.optionsChanged)) {
+        //     const newCommand = new PdChangeDomainOptionsCommand(optionsForm.options)
+        //     this.doCommand(newCommand)
+        // }
     }
     
     // ---------------------------------------------------------------------------- *plant menu 
     MenuPlantNewClick(): void {
-        let wizardForm: TWizardForm
+        throw new Error("TODO Unfinished")
+        // let wizardForm: TWizardForm
 
-        try {
-            ucursor.cursor_startWait()
-            // on slower computer wizard takes a long time to come up
-            startWaitMessage("Starting the plant wizard...")
-            wizardForm = uwizard.TWizardForm().create(this)
-        } finally {
-            stopWaitMessage()
-            ucursor.cursor_stopWait()
-        }
-        if (wizardForm === null) {
-            throw new Error("Problem: Could not create wizard window.")
-        }
-        const response = wizardForm.ShowModal()
-        if (response === mrOK) {
-            if (wizardForm.plant === null) {
-                throw new Error("Problem: New wizard plant is nil.")
-            }
-            const newPlantFromWizard = new PdPlant()
-            wizardForm.plant.copyTo(newPlantFromWizard)
-            const newCommand = new PdNewCommand(newPlantFromWizard, this.selectedPlants)
-            this.doCommand(newCommand)
-            // command will free newPlantFromWizard 
-        }
+        // try {
+        //     ucursor.cursor_startWait()
+        //     // on slower computer wizard takes a long time to come up
+        //     startWaitMessage("Starting the plant wizard...")
+        //     wizardForm = uwizard.TWizardForm().create(this)
+        // } finally {
+        //     stopWaitMessage()
+        //     ucursor.cursor_stopWait()
+        // }
+        // if (wizardForm === null) {
+        //     throw new Error("Problem: Could not create wizard window.")
+        // }
+        // const response = wizardForm.ShowModal()
+        // if (response === mrOK) {
+        //     if (wizardForm.plant === null) {
+        //         throw new Error("Problem: New wizard plant is nil.")
+        //     }
+        //     const newPlantFromWizard = new PdPlant()
+        //     wizardForm.plant.copyTo(newPlantFromWizard)
+        //     const newCommand = new PdNewCommand(newPlantFromWizard, this.selectedPlants)
+        //     this.doCommand(newCommand)
+        //     // command will free newPlantFromWizard 
+        // }
     }
     
     MenuPlantNewUsingLastWizardSettingsClick(): void {
-        let wizardForm: TWizardForm
-        let newPlantFromWizard: PdPlant
+        throw new Error("TODO Unfinished")
+        // let wizardForm: TWizardForm
+        // let newPlantFromWizard: PdPlant
         
-        try {
-            // use wizard form to make a new plant using the current settings, but don't show the form
-            // this is a sloppy way of doing this, but using the settings to set plant params is embedded in the form.
-            ucursor.cursor_startWait()
-            startWaitMessage("Making new plant...")
-            wizardForm = uwizard.TWizardForm().create(this)
-        } finally {
-            ucursor.cursor_stopWait()
-        }
-        newPlantFromWizard = new PdPlant()
-        try {
-            if (wizardForm === null) {
-                throw new Error("Problem: Could not create plant from last wizard settings.")
-            }
-            if (wizardForm.plant === null) {
-                throw new Error("Problem: Could not create plant from last wizard settings (nil plant).")
-            }
-            wizardForm.setPlantVariables()
-            wizardForm.plant.copyTo(newPlantFromWizard)
-            newPlantFromWizard.setAge(newPlantFromWizard.pGeneral.ageAtMaturity)
-            const newCommand = new PdNewCommand(newPlantFromWizard, this.selectedPlants)
-            this.doCommand(newCommand)
-        } finally {
-            stopWaitMessage()
-        }
+        // try {
+        //     // use wizard form to make a new plant using the current settings, but don't show the form
+        //     // this is a sloppy way of doing this, but using the settings to set plant params is embedded in the form.
+        //     ucursor.cursor_startWait()
+        //     startWaitMessage("Making new plant...")
+        //     wizardForm = uwizard.TWizardForm().create(this)
+        // } finally {
+        //     ucursor.cursor_stopWait()
+        // }
+        // newPlantFromWizard = new PdPlant()
+        // try {
+        //     if (wizardForm === null) {
+        //         throw new Error("Problem: Could not create plant from last wizard settings.")
+        //     }
+        //     if (wizardForm.plant === null) {
+        //         throw new Error("Problem: Could not create plant from last wizard settings (nil plant).")
+        //     }
+        //     wizardForm.setPlantVariables()
+        //     wizardForm.plant.copyTo(newPlantFromWizard)
+        //     newPlantFromWizard.setAge(newPlantFromWizard.pGeneral.ageAtMaturity)
+        //     const newCommand = new PdNewCommand(newPlantFromWizard, this.selectedPlants)
+        //     this.doCommand(newCommand)
+        // } finally {
+        //     stopWaitMessage()
+        // }
     }
     
     MenuPlantRenameClick(): void {
@@ -1483,16 +1512,17 @@ export class TMainForm {
     }
     
     MenuPlantBreedClick(): void {
-        if (this.selectedPlants.length <= 0) {
-            return
-        }
-        if (ubreedr.BreederForm.selectedRow >= domain.breedingAndTimeSeriesOptions.maxGenerations - 2) {
-            // check if there is room in the breeder - this command will make two new generations 
-            ubreedr.BreederForm.fullWarning()
-        } else {
-            const newCommand = new PdBreedFromParentsCommand(ubreedr.BreederForm.generations, this.focusedPlant(), this.firstUnfocusedPlant(), -1, domain.breedingAndTimeSeriesOptions.percentMaxAge / 100.0, kCreateFirstGeneration)
-            this.doCommand(newCommand)
-        }
+        throw new Error("TODO Unfinished")
+        // if (this.selectedPlants.length <= 0) {
+        //     return
+        // }
+        // if (ubreedr.BreederForm.selectedRow >= domain.breedingAndTimeSeriesOptions.maxGenerations - 2) {
+        //     // check if there is room in the breeder - this command will make two new generations 
+        //     ubreedr.BreederForm.fullWarning()
+        // } else {
+        //     const newCommand = new PdBreedFromParentsCommand(ubreedr.BreederForm.generations, this.focusedPlant(), this.firstUnfocusedPlant(), -1, domain.breedingAndTimeSeriesOptions.percentMaxAge / 100.0, kCreateFirstGeneration)
+        //     this.doCommand(newCommand)
+        // }
     }
     
     MenuPlantMakeTimeSeriesClick(): void {
@@ -1503,6 +1533,8 @@ export class TMainForm {
         const newCommand = new PdMakeTimeSeriesCommand(plant)
         this.doCommand(newCommand)
     }
+    
+    /*
     
     //v2.1
     // v2.1 separated this out and added call in animation saving
@@ -1522,6 +1554,8 @@ export class TMainForm {
         }
         return result
     }
+    
+    */
     
     ExportToGeneric3DType(outputType: short): void {
         throw new Error("TODO unfinished")
@@ -1630,36 +1664,39 @@ export class TMainForm {
     }
     
     MenuFileMakePainterNozzleClick(): void {
-        let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
-        let bitmapForExport: TBitmap
+        throw new Error("TODO Unfinished")
+        // let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
+        // let bitmapForExport: TBitmap
         
-        if ((domain === null) || (domain.plantManager === null) || (this.plants.length <= 0)) {
-            return
-        }
-        if (this.getNozzleOptions() === mrCancel) {
-            return
-        }
-        if (domain.nozzleOptions.cellCount <= 0) {
-            return
-        }
-        nozzleFileSaveAttemptsThisSession += 1
-        const suggestedFileName = "nozzle" + IntToStr(nozzleFileSaveAttemptsThisSession) + " " + IntToStr(domain.nozzleOptions.cellSize.X) + "x" + IntToStr(domain.nozzleOptions.cellSize.Y) + "x" + IntToStr(domain.nozzleOptions.cellCount) + ".bmp"
-        if (!getFileSaveInfo(FileType.kFileTypeBitmap, kAskForFileName, suggestedFileName, fileInfo)) {
-            return
-        }
-        bitmapForExport = delphi_compatability.TBitmap().Create()
-        try {
-            startFileSave(fileInfo)
-            startWaitMessage("Saving " + ExtractFileName(fileInfo.newFile) + "...")
-            this.fillBitmapForPainterNozzle(bitmapForExport)
-            bitmapForExport.SaveToFile(fileInfo.tempFile)
-            fileInfo.writingWasSuccessful = true
-        } finally {
-            stopWaitMessage()
-            cleanUpAfterFileSave(fileInfo)
-        }
+        // if ((domain === null) || (domain.plantManager === null) || (this.plants.length <= 0)) {
+        //     return
+        // }
+        // if (this.getNozzleOptions() === mrCancel) {
+        //     return
+        // }
+        // if (domain.nozzleOptions.cellCount <= 0) {
+        //     return
+        // }
+        // nozzleFileSaveAttemptsThisSession += 1
+        // const suggestedFileName = "nozzle" + IntToStr(nozzleFileSaveAttemptsThisSession) + " " + IntToStr(domain.nozzleOptions.cellSize.X) + "x" + IntToStr(domain.nozzleOptions.cellSize.Y) + "x" + IntToStr(domain.nozzleOptions.cellCount) + ".bmp"
+        // if (!getFileSaveInfo(FileType.kFileTypeBitmap, kAskForFileName, suggestedFileName, fileInfo)) {
+        //     return
+        // }
+        // bitmapForExport = delphi_compatability.TBitmap().Create()
+        // try {
+        //     startFileSave(fileInfo)
+        //     startWaitMessage("Saving " + ExtractFileName(fileInfo.newFile) + "...")
+        //     this.fillBitmapForPainterNozzle(bitmapForExport)
+        //     bitmapForExport.SaveToFile(fileInfo.tempFile)
+        //     fileInfo.writingWasSuccessful = true
+        // } finally {
+        //     stopWaitMessage()
+        //     cleanUpAfterFileSave(fileInfo)
+        // }
     }
     
+    /*
+
     getNozzleOptions(): int {
         let result = 0
         let nozzleOptionsForm: TNozzleOptionsForm
@@ -1721,129 +1758,134 @@ export class TMainForm {
             domain.options.backgroundColor = oldBackgroundColor
         }
     }
+
+    */
     
     MenuFileMakePainterAnimationClick(): void {
-        let saveDialog: TSaveDialog
+        throw new Error("TODO Unfinished")
+        // let saveDialog: TSaveDialog
         
-        if ((domain === null) || (domain.plantManager === null) || (this.plants.length <= 0)) {
-            return
-        }
-        if (this.focusedPlant() === null) {
-            return
-        }
-        if (this.getAnimationOptions() === mrCancel) {
-            return
-        }
-        if (domain.animationOptions.frameCount <= 0) {
-            return
-        }
-        saveDialog = delphi_compatability.TSaveDialog().Create(delphi_compatability.Application)
-        saveDialog.Title = "Choose a file name (numbers will be added)"
-        saveDialog.FileName = this.focusedPlant().getName() + ".bmp"
-        saveDialog.Filter = "Bitmap files (*.bmp)|*.bmp"
-        saveDialog.DefaultExt = "bmp"
-        saveDialog.Options = saveDialog.Options + {delphi_compatability.TOpenOption.ofPathMustExist, delphi_compatability.TOpenOption.ofOverwritePrompt, delphi_compatability.TOpenOption.ofHideReadOnly, delphi_compatability.TOpenOption.ofNoReadOnlyReturn, }
-        if (saveDialog.Execute()) {
-            const sizeNeeded_MB = 1.0 * domain.animationOptions.fileSize / (1024 * 1024)
-            if (!this.enoughRoomToSaveFile(saveDialog.FileName, "animation", sizeNeeded_MB)) {
-                return
-            }
-            ucursor.cursor_startWait()
-            startWaitMessage("Starting...")
-            try {
-                this.writeAnimationFilesWithFileSpec(stringUpTo(saveDialog.FileName, ".") + " ")
-            } finally {
-                ucursor.cursor_stopWait()
-                stopWaitMessage()
-            }
-        }
+        // if ((domain === null) || (domain.plantManager === null) || (this.plants.length <= 0)) {
+        //     return
+        // }
+        // if (this.focusedPlant() === null) {
+        //     return
+        // }
+        // if (this.getAnimationOptions() === mrCancel) {
+        //     return
+        // }
+        // if (domain.animationOptions.frameCount <= 0) {
+        //     return
+        // }
+        // saveDialog = delphi_compatability.TSaveDialog().Create(delphi_compatability.Application)
+        // saveDialog.Title = "Choose a file name (numbers will be added)"
+        // saveDialog.FileName = this.focusedPlant().getName() + ".bmp"
+        // saveDialog.Filter = "Bitmap files (*.bmp)|*.bmp"
+        // saveDialog.DefaultExt = "bmp"
+        // saveDialog.Options = saveDialog.Options + {delphi_compatability.TOpenOption.ofPathMustExist, delphi_compatability.TOpenOption.ofOverwritePrompt, delphi_compatability.TOpenOption.ofHideReadOnly, delphi_compatability.TOpenOption.ofNoReadOnlyReturn, }
+        // if (saveDialog.Execute()) {
+        //     const sizeNeeded_MB = 1.0 * domain.animationOptions.fileSize / (1024 * 1024)
+        //     if (!this.enoughRoomToSaveFile(saveDialog.FileName, "animation", sizeNeeded_MB)) {
+        //         return
+        //     }
+        //     ucursor.cursor_startWait()
+        //     startWaitMessage("Starting...")
+        //     try {
+        //         this.writeAnimationFilesWithFileSpec(stringUpTo(saveDialog.FileName, ".") + " ")
+        //     } finally {
+        //         ucursor.cursor_stopWait()
+        //         stopWaitMessage()
+        //     }
+        // }
     }
     
     writeAnimationFilesWithFileSpec(startFileName: string): void {
-        const plant = this.focusedPlant()
-        if (plant === null) {
-            return
-        }
-        const oldXRotation = plant.xRotation
-        const oldAge = plant.age
-        const oldScale = plant.drawingScale_PixelsPerMm
-        try {
-            plant.previewCache.PixelFormat = domain.animationOptions.colorType
-            // draw plant for all frames, get min drawing scale
-            plant.fixedPreviewScale = false
-            plant.fixedDrawPosition = false
-            let minScale = 0
-            for (let i = 0; i <= domain.animationOptions.frameCount - 1; i++) {
-                setPlantCharacteristicsForAnimationFrame(plant, i)
-                plant.drawPreviewIntoCache(domain.animationOptions.scaledSize, kDontConsiderDomainScale, uplant.kDontDrawNow)
-                if ((i === 1) || (plant.drawingScale_PixelsPerMm < minScale)) {
-                    minScale = plant.drawingScale_PixelsPerMm
-                }
-            }
-            // draw plant for all frames, get common draw position
-            plant.drawingScale_PixelsPerMm = minScale
-            plant.fixedPreviewScale = true
-            const bestPosition: TPoint = new TPoint()
-            let widestWidth = 0
-            let tallestHeight = 0
-            for (let i = 0; i <= domain.animationOptions.frameCount - 1; i++) {
-                setPlantCharacteristicsForAnimationFrame(plant, i)
-                plant.drawPreviewIntoCache(domain.animationOptions.scaledSize, kDontConsiderDomainScale, kDontDrawNow)
-                if ((i === 0) || (rWidth(plant.boundsRect_pixels()) > widestWidth)) {
-                    widestWidth = rWidth(plant.boundsRect_pixels())
-                    bestPosition.X = plant.drawPositionIfFixed.X
-                }
-                if ((i === 0) || (rHeight(plant.boundsRect_pixels()) > tallestHeight)) {
-                    tallestHeight = rHeight(plant.boundsRect_pixels())
-                    bestPosition.Y = plant.drawPositionIfFixed.Y
-                }
-            }
-            // now really draw
-            plant.drawPositionIfFixed = bestPosition
-            plant.fixedDrawPosition = true
-            for (let i = 0; i <= domain.animationOptions.frameCount - 1; i++) {
-                let saveFileName = startFileName
-                if (i + 1 < 100) {
-                    saveFileName = saveFileName + "0"
-                }
-                if (i + 1 < 10) {
-                    saveFileName = saveFileName + "0"
-                }
-                saveFileName = saveFileName + IntToStr(i + 1) + ".bmp"
-                startWaitMessage("Saving " + ExtractFileName(saveFileName) + "...")
-                setPlantCharacteristicsForAnimationFrame(plant, i)
-                plant.drawPreviewIntoCache(domain.animationOptions.scaledSize, kDontConsiderDomainScale, kDrawNow)
-                plant.previewCache.SaveToFile(saveFileName)
-            }
-            // clean up for next time
-            plant.fixedPreviewScale = false
-            plant.fixedDrawPosition = false
-        } finally {
-            plant.shrinkPreviewCache()
-            plant.fixedPreviewScale = false
-            plant.xRotation = oldXRotation
-            plant.drawingScale_PixelsPerMm = oldScale
-            plant.setAge(oldAge)
-            plant.recalculateBounds(kDrawNow)
-        }
+        throw new Error("TODO Unfinished")
+        // const plant = this.focusedPlant()
+        // if (plant === null) {
+        //     return
+        // }
+        // const oldXRotation = plant.xRotation
+        // const oldAge = plant.age
+        // const oldScale = plant.drawingScale_PixelsPerMm
+        // try {
+        //     plant.previewCache.PixelFormat = domain.animationOptions.colorType
+        //     // draw plant for all frames, get min drawing scale
+        //     plant.fixedPreviewScale = false
+        //     plant.fixedDrawPosition = false
+        //     let minScale = 0
+        //     for (let i = 0; i <= domain.animationOptions.frameCount - 1; i++) {
+        //         setPlantCharacteristicsForAnimationFrame(plant, i)
+        //         plant.drawPreviewIntoCache(domain.animationOptions.scaledSize, kDontConsiderDomainScale, uplant.kDontDrawNow)
+        //         if ((i === 1) || (plant.drawingScale_PixelsPerMm < minScale)) {
+        //             minScale = plant.drawingScale_PixelsPerMm
+        //         }
+        //     }
+        //     // draw plant for all frames, get common draw position
+        //     plant.drawingScale_PixelsPerMm = minScale
+        //     plant.fixedPreviewScale = true
+        //     const bestPosition: TPoint = new TPoint()
+        //     let widestWidth = 0
+        //     let tallestHeight = 0
+        //     for (let i = 0; i <= domain.animationOptions.frameCount - 1; i++) {
+        //         setPlantCharacteristicsForAnimationFrame(plant, i)
+        //         plant.drawPreviewIntoCache(domain.animationOptions.scaledSize, kDontConsiderDomainScale, kDontDrawNow)
+        //         if ((i === 0) || (rWidth(plant.boundsRect_pixels()) > widestWidth)) {
+        //             widestWidth = rWidth(plant.boundsRect_pixels())
+        //             bestPosition.X = plant.drawPositionIfFixed.X
+        //         }
+        //         if ((i === 0) || (rHeight(plant.boundsRect_pixels()) > tallestHeight)) {
+        //             tallestHeight = rHeight(plant.boundsRect_pixels())
+        //             bestPosition.Y = plant.drawPositionIfFixed.Y
+        //         }
+        //     }
+        //     // now really draw
+        //     plant.drawPositionIfFixed = bestPosition
+        //     plant.fixedDrawPosition = true
+        //     for (let i = 0; i <= domain.animationOptions.frameCount - 1; i++) {
+        //         let saveFileName = startFileName
+        //         if (i + 1 < 100) {
+        //             saveFileName = saveFileName + "0"
+        //         }
+        //         if (i + 1 < 10) {
+        //             saveFileName = saveFileName + "0"
+        //         }
+        //         saveFileName = saveFileName + IntToStr(i + 1) + ".bmp"
+        //         startWaitMessage("Saving " + ExtractFileName(saveFileName) + "...")
+        //         setPlantCharacteristicsForAnimationFrame(plant, i)
+        //         plant.drawPreviewIntoCache(domain.animationOptions.scaledSize, kDontConsiderDomainScale, kDrawNow)
+        //         plant.previewCache.SaveToFile(saveFileName)
+        //     }
+        //     // clean up for next time
+        //     plant.fixedPreviewScale = false
+        //     plant.fixedDrawPosition = false
+        // } finally {
+        //     plant.shrinkPreviewCache()
+        //     plant.fixedPreviewScale = false
+        //     plant.xRotation = oldXRotation
+        //     plant.drawingScale_PixelsPerMm = oldScale
+        //     plant.setAge(oldAge)
+        //     plant.recalculateBounds(kDrawNow)
+        // }
     }
     
     getAnimationOptions(): int {
-        let animationOptionsForm: TAnimationFilesOptionsForm
+        throw new Error("TODO Unfinished")
+        // let animationOptionsForm: TAnimationFilesOptionsForm
         
-        let result = mrCancel
-        const plant = this.focusedPlant()
-        if (plant === null) {
-            return result
-        }
-        animationOptionsForm = uanimate.TAnimationFilesOptionsForm().create(this)
-        if (animationOptionsForm === null) {
-            throw new Error("Problem: Could not create animation options window.")
-        }
-        animationOptionsForm.initializeWithOptionsAndPlant(domain.animationOptions, plant)
-        result = animationOptionsForm.ShowModal()
-        domain.animationOptions = animationOptionsForm.options
-        return result
+        // let result = mrCancel
+        // const plant = this.focusedPlant()
+        // if (plant === null) {
+        //     return result
+        // }
+        // animationOptionsForm = uanimate.TAnimationFilesOptionsForm().create(this)
+        // if (animationOptionsForm === null) {
+        //     throw new Error("Problem: Could not create animation options window.")
+        // }
+        // animationOptionsForm.initializeWithOptionsAndPlant(domain.animationOptions, plant)
+        // result = animationOptionsForm.ShowModal()
+        // domain.animationOptions = animationOptionsForm.options
+        // return result
     }
     
     MenuLayoutShowClick(): void {
@@ -1912,16 +1954,17 @@ export class TMainForm {
     
     // drawing 
     changeViewingOptionTo(aNewOption: short): void {
-        if ((aNewOption === ViewPlants.kViewPlantsInMainWindowOneAtATime) && (this.selectedPlants.length <= 0)) {
-            if (this.plants.length < 0) {
-                return
-            }
-            this.selectedPlants.push(this.plants[0])
-            this.updateForChangeToPlantSelections()
-        }
-        const newCommand = new PdChangeMainWindowViewingOptionCommand(this.plants, this.selectedPlants, aNewOption)
-        this.doCommand(newCommand)
-        this.MenuLayoutMakeBouquet.enabled = (this.selectedPlants.length > 1) && (!domain.viewPlantsInMainWindowOnePlantAtATime())
+        throw new Error("TODO Unfinished")
+        // if ((aNewOption === ViewPlants.kViewPlantsInMainWindowOneAtATime) && (this.selectedPlants.length <= 0)) {
+        //     if (this.plants.length < 0) {
+        //         return
+        //     }
+        //     this.selectedPlants.push(this.plants[0])
+        //     this.updateForChangeToPlantSelections()
+        // }
+        // const newCommand = new PdChangeMainWindowViewingOptionCommand(this.plants, this.selectedPlants, aNewOption)
+        // this.doCommand(newCommand)
+        // this.MenuLayoutMakeBouquet.enabled = (this.selectedPlants.length > 1) && (!domain.viewPlantsInMainWindowOnePlantAtATime())
     }
     
     MenuLayoutViewOnePlantAtATimeClick(): void {
@@ -1994,70 +2037,74 @@ export class TMainForm {
     
     // --------------------------------------------------------------------------- *options menu 
     MenuOptionsFastDrawClick(): void {
-        let oldSpeed: short
+        throw new Error("TODO Unfinished")
+        // let oldSpeed: short
         
-        oldSpeed = domain.options.drawSpeed
-        domain.options.drawSpeed = DrawMode.kDrawFast
-        this.MenuOptionsFastDraw.checked = true
-        ubreedr.BreederForm.BreederMenuOptionsFastDraw.checked = true
-        utimeser.TimeSeriesForm.TimeSeriesMenuOptionsFastDraw.checked = true
-        if (oldSpeed !== domain.options.drawSpeed) {
-            this.updateForChangeToDrawOptions()
-        }
+        // oldSpeed = domain.options.drawSpeed
+        // domain.options.drawSpeed = DrawMode.kDrawFast
+        // this.MenuOptionsFastDraw.checked = true
+        // ubreedr.BreederForm.BreederMenuOptionsFastDraw.checked = true
+        // utimeser.TimeSeriesForm.TimeSeriesMenuOptionsFastDraw.checked = true
+        // if (oldSpeed !== domain.options.drawSpeed) {
+        //     this.updateForChangeToDrawOptions()
+        // }
     }
     
     MenuOptionsMediumDrawClick(): void {
-        let oldSpeed: short
+        throw new Error("TODO Unfinished")
+        // let oldSpeed: short
         
-        oldSpeed = domain.options.drawSpeed
-        domain.options.drawSpeed = DrawMode.kDrawMedium
-        this.MenuOptionsMediumDraw.checked = true
-        ubreedr.BreederForm.BreederMenuOptionsMediumDraw.checked = true
-        utimeser.TimeSeriesForm.TimeSeriesMenuOptionsMediumDraw.checked = true
-        if (oldSpeed !== domain.options.drawSpeed) {
-            this.updateForChangeToDrawOptions()
-        }
+        // oldSpeed = domain.options.drawSpeed
+        // domain.options.drawSpeed = DrawMode.kDrawMedium
+        // this.MenuOptionsMediumDraw.checked = true
+        // ubreedr.BreederForm.BreederMenuOptionsMediumDraw.checked = true
+        // utimeser.TimeSeriesForm.TimeSeriesMenuOptionsMediumDraw.checked = true
+        // if (oldSpeed !== domain.options.drawSpeed) {
+        //     this.updateForChangeToDrawOptions()
+        // }
     }
     
     MenuOptionsBestDrawClick(): void {
-        let oldSpeed: short
+        throw new Error("TODO Unfinished")
+        // let oldSpeed: short
         
-        oldSpeed = domain.options.drawSpeed
-        domain.options.drawSpeed = DrawMode.kDrawBest
-        this.MenuOptionsBestDraw.checked = true
-        ubreedr.BreederForm.BreederMenuOptionsBestDraw.checked = true
-        utimeser.TimeSeriesForm.TimeSeriesMenuOptionsBestDraw.checked = true
-        if (oldSpeed !== domain.options.drawSpeed) {
-            this.updateForChangeToDrawOptions()
-        }
+        // oldSpeed = domain.options.drawSpeed
+        // domain.options.drawSpeed = DrawMode.kDrawBest
+        // this.MenuOptionsBestDraw.checked = true
+        // ubreedr.BreederForm.BreederMenuOptionsBestDraw.checked = true
+        // utimeser.TimeSeriesForm.TimeSeriesMenuOptionsBestDraw.checked = true
+        // if (oldSpeed !== domain.options.drawSpeed) {
+        //     this.updateForChangeToDrawOptions()
+        // }
     }
     
     MenuOptionsCustomDrawClick(): void {
-        let customDrawForm: TCustomDrawOptionsForm
-        let response: int
-        let lastDrawSpeed: short
+        throw new Error("TODO Unfinished")
+        // let customDrawForm: TCustomDrawOptionsForm
+        // let response: int
+        // let lastDrawSpeed: short
         
-        lastDrawSpeed = domain.options.drawSpeed
-        domain.options.drawSpeed = DrawMode.kDrawCustom
-        this.MenuOptionsCustomDraw.checked = true
-        ubreedr.BreederForm.BreederMenuOptionsCustomDraw.checked = true
-        utimeser.TimeSeriesForm.TimeSeriesMenuOptionsCustomDraw.checked = true
-        customDrawForm = ucustdrw.TCustomDrawOptionsForm().create(this)
-        if (customDrawForm === null) {
-            throw new Error("Problem: Could not create 3D object mover window.")
-        }
-        customDrawForm.options = domain.options
-        response = customDrawForm.ShowModal()
-        if ((response === mrOK) && (customDrawForm.optionsChanged)) {
-            const newCommand = new PdChangeDomainOptionsCommand(customDrawForm.options)
-            this.doCommand(newCommand)
-        } else {
-            if (lastDrawSpeed !== DrawMode.kDrawCustom) {
-                // escape just escapes changing options in dialog, not setting to custom, should still redraw
-                // v1.4 change UNLESS it was custom before.
-                this.updateForChangeToDrawOptions()
-            }
-        }
+        // lastDrawSpeed = domain.options.drawSpeed
+        // domain.options.drawSpeed = DrawMode.kDrawCustom
+        // this.MenuOptionsCustomDraw.checked = true
+        // ubreedr.BreederForm.BreederMenuOptionsCustomDraw.checked = true
+        // utimeser.TimeSeriesForm.TimeSeriesMenuOptionsCustomDraw.checked = true
+        // customDrawForm = ucustdrw.TCustomDrawOptionsForm().create(this)
+        // if (customDrawForm === null) {
+        //     throw new Error("Problem: Could not create 3D object mover window.")
+        // }
+        // customDrawForm.options = domain.options
+        // response = customDrawForm.ShowModal()
+        // if ((response === mrOK) && (customDrawForm.optionsChanged)) {
+        //     const newCommand = new PdChangeDomainOptionsCommand(customDrawForm.options)
+        //     this.doCommand(newCommand)
+        // } else {
+        //     if (lastDrawSpeed !== DrawMode.kDrawCustom) {
+        //         // escape just escapes changing options in dialog, not setting to custom, should still redraw
+        //         // v1.4 change UNLESS it was custom before.
+        //         this.updateForChangeToDrawOptions()
+        //     }
+        // }
     }
     
     MenuOptionsUsePlantBitmapsClick(): void {
@@ -2071,148 +2118,168 @@ export class TMainForm {
     }
     
     plantBitmapsIndicatorImageClick(): void {
-        if ((!domain.options.cachePlantBitmaps) && (this.MenuOptionsUsePlantBitmaps.enabled)) {
-            this.MenuOptionsUsePlantBitmapsClick()
-        }
+        throw new Error("TODO Unfinished")
+        // if ((!domain.options.cachePlantBitmaps) && (this.MenuOptionsUsePlantBitmaps.enabled)) {
+        //     this.MenuOptionsUsePlantBitmapsClick()
+        // }
     }
     
     MenuOptionsShowSelectionRectanglesClick(): void {
-        this.MenuOptionsShowSelectionRectangles.checked = !this.MenuOptionsShowSelectionRectangles.checked
-        domain.options.showSelectionRectangle = this.MenuOptionsShowSelectionRectangles.checked
-        this.copyDrawingBitmapToPaintBox()
+        throw new Error("TODO Unfinished")
+        // this.MenuOptionsShowSelectionRectangles.checked = !this.MenuOptionsShowSelectionRectangles.checked
+        // domain.options.showSelectionRectangle = this.MenuOptionsShowSelectionRectangles.checked
+        // this.copyDrawingBitmapToPaintBox()
     }
     
     MenuOptionsShowBoundsRectanglesClick(): void {
-        this.MenuOptionsShowBoundsRectangles.checked = !this.MenuOptionsShowBoundsRectangles.checked
-        domain.options.showBoundsRectangle = this.MenuOptionsShowBoundsRectangles.checked
-        this.copyDrawingBitmapToPaintBox()
+        throw new Error("TODO Unfinished")
+        // this.MenuOptionsShowBoundsRectangles.checked = !this.MenuOptionsShowBoundsRectangles.checked
+        // domain.options.showBoundsRectangle = this.MenuOptionsShowBoundsRectangles.checked
+        // this.copyDrawingBitmapToPaintBox()
     }
     
     MenuOptionsGhostHiddenPartsClick(): void {
-        this.MenuOptionsGhostHiddenParts.checked = !this.MenuOptionsGhostHiddenParts.checked
-        domain.options.showGhostingForHiddenParts = this.MenuOptionsGhostHiddenParts.checked
-        this.internalChange = true
-        this.posingGhost.Down = domain.options.showGhostingForHiddenParts
-        this.internalChange = false
-        // cannot just redraw plants because bounds rects may have changed
-        this.redrawEverything()
+        throw new Error("TODO Unfinished")
+        // this.MenuOptionsGhostHiddenParts.checked = !this.MenuOptionsGhostHiddenParts.checked
+        // domain.options.showGhostingForHiddenParts = this.MenuOptionsGhostHiddenParts.checked
+        // this.internalChange = true
+        // this.posingGhost.Down = domain.options.showGhostingForHiddenParts
+        // this.internalChange = false
+        // // cannot just redraw plants because bounds rects may have changed
+        // this.redrawEverything()
     }
     
     MenuOptionsHighlightPosedPartsClick(): void {
-        this.MenuOptionsHighlightPosedParts.checked = !this.MenuOptionsHighlightPosedParts.checked
-        domain.options.showHighlightingForNonHiddenPosedParts = this.MenuOptionsHighlightPosedParts.checked
-        this.internalChange = true
-        this.posingHighlight.Down = domain.options.showHighlightingForNonHiddenPosedParts
-        this.internalChange = false
-        this.redrawAllPlantsInViewWithAmendments()
+        throw new Error("TODO Unfinished")
+        // this.MenuOptionsHighlightPosedParts.checked = !this.MenuOptionsHighlightPosedParts.checked
+        // domain.options.showHighlightingForNonHiddenPosedParts = this.MenuOptionsHighlightPosedParts.checked
+        // this.internalChange = true
+        // this.posingHighlight.Down = domain.options.showHighlightingForNonHiddenPosedParts
+        // this.internalChange = false
+        // this.redrawAllPlantsInViewWithAmendments()
     }
     
     MenuOptionsHidePosingClick(): void {
-        this.MenuOptionsHidePosing.checked = !this.MenuOptionsHidePosing.checked
-        domain.options.showPosingAtAll = !this.MenuOptionsHidePosing.checked
-        this.internalChange = true
-        this.posingNotShown.Down = !domain.options.showPosingAtAll
-        this.internalChange = false
-        // cannot just redraw plants because bounds rects may have changed
-        this.redrawEverything()
+        throw new Error("TODO Unfinished")
+        // this.MenuOptionsHidePosing.checked = !this.MenuOptionsHidePosing.checked
+        // domain.options.showPosingAtAll = !this.MenuOptionsHidePosing.checked
+        // this.internalChange = true
+        // this.posingNotShown.Down = !domain.options.showPosingAtAll
+        // this.internalChange = false
+        // // cannot just redraw plants because bounds rects may have changed
+        // this.redrawEverything()
     }
     
     posingHighlightClick(): void {
-        if (this.internalChange) {
-            return
-        }
-        domain.options.showHighlightingForNonHiddenPosedParts = !domain.options.showHighlightingForNonHiddenPosedParts
-        this.MenuOptionsHighlightPosedParts.checked = domain.options.showHighlightingForNonHiddenPosedParts
-        this.posingHighlight.Down = domain.options.showHighlightingForNonHiddenPosedParts
-        this.redrawAllPlantsInViewWithAmendments()
+        throw new Error("TODO Unfinished")
+        // if (this.internalChange) {
+        //     return
+        // }
+        // domain.options.showHighlightingForNonHiddenPosedParts = !domain.options.showHighlightingForNonHiddenPosedParts
+        // this.MenuOptionsHighlightPosedParts.checked = domain.options.showHighlightingForNonHiddenPosedParts
+        // this.posingHighlight.Down = domain.options.showHighlightingForNonHiddenPosedParts
+        // this.redrawAllPlantsInViewWithAmendments()
     }
     
     posingGhostClick(): void {
-        if (this.internalChange) {
-            return
-        }
-        domain.options.showGhostingForHiddenParts = !domain.options.showGhostingForHiddenParts
-        this.MenuOptionsGhostHiddenParts.checked = domain.options.showGhostingForHiddenParts
-        this.posingGhost.Down = domain.options.showGhostingForHiddenParts
-        // cannot just redraw plants because bounds rects may have changed
-        this.redrawEverything()
+        throw new Error("TODO Unfinished")
+        // if (this.internalChange) {
+        //     return
+        // }
+        // domain.options.showGhostingForHiddenParts = !domain.options.showGhostingForHiddenParts
+        // this.MenuOptionsGhostHiddenParts.checked = domain.options.showGhostingForHiddenParts
+        // this.posingGhost.Down = domain.options.showGhostingForHiddenParts
+        // // cannot just redraw plants because bounds rects may have changed
+        // this.redrawEverything()
     }
     
     posingNotShownClick(): void {
-        if (this.internalChange) {
-            return
-        }
-        domain.options.showPosingAtAll = !domain.options.showPosingAtAll
-        this.MenuOptionsHidePosing.checked = !domain.options.showPosingAtAll
-        this.posingNotShown.Down = !domain.options.showPosingAtAll
-        // cannot just redraw plants because bounds rects may have changed
-        this.redrawEverything()
+        throw new Error("TODO Unfinished")
+        // if (this.internalChange) {
+        //     return
+        // }
+        // domain.options.showPosingAtAll = !domain.options.showPosingAtAll
+        // this.MenuOptionsHidePosing.checked = !domain.options.showPosingAtAll
+        // this.posingNotShown.Down = !domain.options.showPosingAtAll
+        // // cannot just redraw plants because bounds rects may have changed
+        // this.redrawEverything()
     }
     
     MenuOptionsShowLongButtonHintsClick(): void {
-        this.MenuOptionsShowLongButtonHints.checked = !this.MenuOptionsShowLongButtonHints.checked
-        domain.options.showLongHintsForButtons = this.MenuOptionsShowLongButtonHints.checked
-        this.updateHintPauseForOptions()
-        // shows different hint
-        this.updateForChangeToPlantBitmaps()
+        throw new Error("TODO Unfinished")
+        // this.MenuOptionsShowLongButtonHints.checked = !this.MenuOptionsShowLongButtonHints.checked
+        // domain.options.showLongHintsForButtons = this.MenuOptionsShowLongButtonHints.checked
+        // this.updateHintPauseForOptions()
+        // // shows different hint
+        // this.updateForChangeToPlantBitmaps()
     }
     
     MenuOptionsShowParameterHintsClick(): void {
-        this.MenuOptionsShowParameterHints.checked = !this.MenuOptionsShowParameterHints.checked
-        domain.options.showHintsForParameters = this.MenuOptionsShowParameterHints.checked
-        this.updateHintPauseForOptions()
+        throw new Error("TODO Unfinished")
+        // this.MenuOptionsShowParameterHints.checked = !this.MenuOptionsShowParameterHints.checked
+        // domain.options.showHintsForParameters = this.MenuOptionsShowParameterHints.checked
+        // this.updateHintPauseForOptions()
     }
     
     // --------------------------------------------------------------------------- *window menu 
     MenuWindowBreederClick(): void {
-        ubreedr.BreederForm.Show()
-        ubreedr.BreederForm.BringToFront()
-        if (ubreedr.BreederForm.WindowState === delphi_compatability.TWindowState.wsMinimized) {
-            ubreedr.BreederForm.WindowState = delphi_compatability.TWindowState.wsNormal
-        }
+        throw new Error("TODO Unfinished")
+        // ubreedr.BreederForm.Show()
+        // ubreedr.BreederForm.BringToFront()
+        // if (ubreedr.BreederForm.WindowState === delphi_compatability.TWindowState.wsMinimized) {
+        //     ubreedr.BreederForm.WindowState = delphi_compatability.TWindowState.wsNormal
+        // }
     }
     
     MenuWindowTimeSeriesClick(): void {
-        utimeser.TimeSeriesForm.Show()
-        utimeser.TimeSeriesForm.BringToFront()
-        if (utimeser.TimeSeriesForm.WindowState === delphi_compatability.TWindowState.wsMinimized) {
-            utimeser.TimeSeriesForm.WindowState = delphi_compatability.TWindowState.wsNormal
-        }
+        throw new Error("TODO Unfinished")
+        // utimeser.TimeSeriesForm.Show()
+        // utimeser.TimeSeriesForm.BringToFront()
+        // if (utimeser.TimeSeriesForm.WindowState === delphi_compatability.TWindowState.wsMinimized) {
+        //     utimeser.TimeSeriesForm.WindowState = delphi_compatability.TWindowState.wsNormal
+        // }
     }
     
     MenuWindowNumericalExceptionsClick(): void {
-        udebug.DebugForm.Show()
-        udebug.DebugForm.BringToFront()
-        if (udebug.DebugForm.WindowState === delphi_compatability.TWindowState.wsMinimized) {
-            udebug.DebugForm.WindowState = delphi_compatability.TWindowState.wsNormal
-        }
+        throw new Error("TODO Unfinished")
+        // udebug.DebugForm.Show()
+        // udebug.DebugForm.BringToFront()
+        // if (udebug.DebugForm.WindowState === delphi_compatability.TWindowState.wsMinimized) {
+        //     udebug.DebugForm.WindowState = delphi_compatability.TWindowState.wsNormal
+        // }
     }
     
     // ---------------------------------------------------------------------------- *help menu 
     MenuHelpTopicsClick(): void {
-        delphi_compatability.Application.HelpCommand(UNRESOLVED.HELP_FINDER, 0)
+        throw new Error("TODO Unfinished")
+        // delphi_compatability.Application.HelpCommand(UNRESOLVED.HELP_FINDER, 0)
     }
     
     MenuHelpAboutClick(): void {
-        if (usplash.splashForm === null) {
-            return
-        }
-        usplash.splashForm.close.Visible = true
-        usplash.splashForm.supportButton.Visible = true
-        usplash.splashForm.ShowModal()
+        throw new Error("TODO Unfinished")
+        // if (usplash.splashForm === null) {
+        //     return
+        // }
+        // usplash.splashForm.close.Visible = true
+        // usplash.splashForm.supportButton.Visible = true
+        // usplash.splashForm.ShowModal()
     }
     
     MenuHelpSuperSpeedTourClick(): void {
-        delphi_compatability.Application.HelpJump("Super-Speed_Tour")
+        throw new Error("TODO Unfinished")
+        // delphi_compatability.Application.HelpJump("Super-Speed_Tour")
     }
     
     MenuHelpTutorialClick(): void {
-        delphi_compatability.Application.HelpJump("Tutorial")
+        throw new Error("TODO Unfinished")
+        // delphi_compatability.Application.HelpJump("Tutorial")
     }
     
+    /*
+
     // ---------------------------------------------------------------------------- *progress showing 
     progressPaintBoxPaint(): void {
-        this.progressPaintBox.Canvas.Brush.Color = UNRESOLVED.clBtnFace
+        this.progressPaintBox.Canvas.Brush.Color = ColorDefs.clBtnFace
         this.progressPaintBox.Canvas.Pen.Style = delphi_compatability.TFPPenStyle.psClear
         this.progressPaintBox.Canvas.Rectangle(0, 0, this.progressPaintBox.Width, this.progressPaintBox.Height)
     }
@@ -2251,6 +2318,8 @@ export class TMainForm {
         this.progressPaintBox.Refresh()
     }
     
+    */
+
     // plant menu 
     // help menu 
     // updating 
@@ -2276,9 +2345,9 @@ export class TMainForm {
         let numLeft: short
         
         if ((!domain.plantFileLoaded) || (domain.plantFileName === "")) {
-            result = delphi_compatability.Application.Title + " - no file"
+            result = Application_Title + " - no file"
         } else {
-            result = delphi_compatability.Application.Title + " - " + stringUpTo(ExtractFileName(domain.plantFileName), ".")
+            result = Application_Title + " - " + stringUpTo(ExtractFileName(domain.plantFileName), ".")
             if (this.plants.length <= 0) {
                 result = result + " (no plants)"
             } else if (this.plants.length === 1) {
@@ -2291,51 +2360,54 @@ export class TMainForm {
     }
     
     updateForPlantFile(): void {
-        this.internalChange = true
-        if (!domain.plantFileLoaded) {
-            this.updateForNoPlantFile()
-        } else {
-            this.Caption = this.captionForFile()
-            this.updateForChangeToPlantList()
-            this.updateMenusForChangedPlantFile()
-            this.selectedPlants= []
-            this.magnificationPercent.Text = IntToStr(intround(domain.plantDrawScale_PixelsPerMm() * 100.0)) + "%"
-            if (domain.plantManager.mainWindowOrientation !== domain.options.mainWindowOrientation) {
-                // v2.0 load and save window orientation (top or side)
-                domain.options.mainWindowOrientation = domain.plantManager.mainWindowOrientation
-                this.updateForChangeToOrientation()
-            }
-            if (this.plants.length > 0) {
-                for (let i = 0; i <= this.plants.length - 1; i++) {
-                    // v2.0 load and save plant hidden and selected flags
-                    const plant = this.plants[i]
-                    if (plant.selectedWhenLastSaved) {
-                        this.selectedPlants.push(plant)
-                    }
-                }
-                if (this.selectedPlants.length <= 0) {
-                    this.selectedPlants.push(this.plants[0])
-                }
-                this.updateForChangeToPlantSelections()
-            }
-            if (domain.viewPlantsInMainWindowOnePlantAtATime()) {
-                // deal with possibly changed viewing mode (one/many)
-                this.showOnePlantExclusively(kDontDrawYet)
-            }
-            this.viewOneOnly.Down = domain.viewPlantsInMainWindowOnePlantAtATime()
-            if (domain.plantManager.fitInVisibleAreaForConcentrationChange) {
-                this.fitVisiblePlantsInDrawingArea(kDrawNow, kScaleAndMove, kAlwaysMove)
-                domain.plantManager.fitInVisibleAreaForConcentrationChange = false
-            } else {
-                this.fitVisiblePlantsInDrawingArea(kDrawNow, kJustMove, kOnlyMoveIfOffTheScreen)
-                this.redrawEverything()
-            }
-        }
-        // v2.0 switch to select/drag mode - sometimes it seems to get broken - this will fix it - not unreasonable to do
-        this.cursorModeForDrawing = kCursorModeSelectDrag
-        this.dragCursorMode.Down = true
-        this.internalChange = false
+        throw new Error("TODO Unfinished")
+        // this.internalChange = true
+        // if (!domain.plantFileLoaded) {
+        //     this.updateForNoPlantFile()
+        // } else {
+        //     this.Caption = this.captionForFile()
+        //     this.updateForChangeToPlantList()
+        //     this.updateMenusForChangedPlantFile()
+        //     this.selectedPlants= []
+        //     this.magnificationPercent.Text = IntToStr(intround(domain.plantDrawScale_PixelsPerMm() * 100.0)) + "%"
+        //     if (domain.plantManager.mainWindowOrientation !== domain.options.mainWindowOrientation) {
+        //         // v2.0 load and save window orientation (top or side)
+        //         domain.options.mainWindowOrientation = domain.plantManager.mainWindowOrientation
+        //         this.updateForChangeToOrientation()
+        //     }
+        //     if (this.plants.length > 0) {
+        //         for (let i = 0; i <= this.plants.length - 1; i++) {
+        //             // v2.0 load and save plant hidden and selected flags
+        //             const plant = this.plants[i]
+        //             if (plant.selectedWhenLastSaved) {
+        //                 this.selectedPlants.push(plant)
+        //             }
+        //         }
+        //         if (this.selectedPlants.length <= 0) {
+        //             this.selectedPlants.push(this.plants[0])
+        //         }
+        //         this.updateForChangeToPlantSelections()
+        //     }
+        //     if (domain.viewPlantsInMainWindowOnePlantAtATime()) {
+        //         // deal with possibly changed viewing mode (one/many)
+        //         this.showOnePlantExclusively(kDontDrawYet)
+        //     }
+        //     this.viewOneOnly.Down = domain.viewPlantsInMainWindowOnePlantAtATime()
+        //     if (domain.plantManager.fitInVisibleAreaForConcentrationChange) {
+        //         this.fitVisiblePlantsInDrawingArea(kDrawNow, kScaleAndMove, kAlwaysMove)
+        //         domain.plantManager.fitInVisibleAreaForConcentrationChange = false
+        //     } else {
+        //         this.fitVisiblePlantsInDrawingArea(kDrawNow, kJustMove, kOnlyMoveIfOffTheScreen)
+        //         this.redrawEverything()
+        //     }
+        // }
+        // // v2.0 switch to select/drag mode - sometimes it seems to get broken - this will fix it - not unreasonable to do
+        // this.cursorModeForDrawing = kCursorModeSelectDrag
+        // this.dragCursorMode.Down = true
+        // this.internalChange = false
     }
+
+    /*
     
     updateHintPauseForOptions(): void {
         delphi_compatability.Application.HintPause = domain.options.pauseBeforeHint * 1000
@@ -2450,24 +2522,27 @@ export class TMainForm {
             this.doCommand(newCommand)
         }
     }
+
+    */
     
     updateForChangeToPlantSelections(): void {
-        if (domain.options.showSelectionRectangle) {
-            this.copyDrawingBitmapToPaintBox()
-        }
-        this.plantListDrawGrid.Repaint()
-        // must be done BEFORE updating so it picks it up
-        this.selectedPlantPartID = -1
-        this.updateRightSidePanelForFirstSelectedPlant()
-        this.updateMenusForChangedSelectedPlants()
-        if (!this.internalChange) {
-            // reset for posing because posing works only on focused plant
-            // don't do if reading file in
-            // if change selected plant, must redraw to remove red color
-            this.redrawAllPlantsInViewWithAmendments()
-        }
+        throw new Error("TODO: Unfinished")
+        // if (domain.options.showSelectionRectangle) {
+        //     this.copyDrawingBitmapToPaintBox()
+        // }
+        // this.plantListDrawGrid.Repaint()
+        // // must be done BEFORE updating so it picks it up
+        // this.selectedPlantPartID = -1
+        // this.updateRightSidePanelForFirstSelectedPlant()
+        // this.updateMenusForChangedSelectedPlants()
+        // if (!this.internalChange) {
+        //     // reset for posing because posing works only on focused plant
+        //     // don't do if reading file in
+        //     // if change selected plant, must redraw to remove red color
+        //     this.redrawAllPlantsInViewWithAmendments()
+        // }
     }
-    
+      
     invalidateSelectedPlantRectangles(): void {
         if (this.selectedPlants.length > 0) {
             for (let i = 0; i <= this.selectedPlants.length - 1; i++) {
@@ -2480,43 +2555,45 @@ export class TMainForm {
     }
     
     updateForChangeToPlantList(): void {
-        if ((domain === null) || (domain.plantManager === null)) {
-            return
-        }
-        this.Caption = this.captionForFile()
-        this.plantListDrawGrid.RowCount = this.plants.length
-        this.plantListDrawGrid.Invalidate()
-        // selected plants list - make sure no pointers are invalid 
-        const plantsToRemove: PdPlant[] = [] 
-        if (this.selectedPlants.length > 0) {
-            for (let i = 0; i <= this.selectedPlants.length - 1; i++) {
-                const plant = this.selectedPlants[i]
-                if (this.plants.indexOf(plant) < 0) {
-                    plantsToRemove.push(plant)
-                }
-            }
-        }
-        if (plantsToRemove.length > 0) {
-            for (let i = 0; i <= plantsToRemove.length - 1; i++) {
-                const plant = plantsToRemove[i]
-                this.selectedPlants = removeItem(this.selectedPlants, plant)
-            }
-        }
-        if (domain.viewPlantsInMainWindowOnePlantAtATime()) {
-            this.showOnePlantExclusively(kDrawNow)
-        }
-        this.updateRightSidePanelForFirstSelectedPlant()
-        this.updateForPossibleChangeToDrawing()
-        this.updateMenusForChangedPlantList()
+        throw new Error("TODO: Unfinished")
+        // if ((domain === null) || (domain.plantManager === null)) {
+        //     return
+        // }
+        // this.Caption = this.captionForFile()
+        // this.plantListDrawGrid.RowCount = this.plants.length
+        // this.plantListDrawGrid.Invalidate()
+        // // selected plants list - make sure no pointers are invalid 
+        // const plantsToRemove: PdPlant[] = [] 
+        // if (this.selectedPlants.length > 0) {
+        //     for (let i = 0; i <= this.selectedPlants.length - 1; i++) {
+        //         const plant = this.selectedPlants[i]
+        //         if (this.plants.indexOf(plant) < 0) {
+        //             plantsToRemove.push(plant)
+        //         }
+        //     }
+        // }
+        // if (plantsToRemove.length > 0) {
+        //     for (let i = 0; i <= plantsToRemove.length - 1; i++) {
+        //         const plant = plantsToRemove[i]
+        //         this.selectedPlants = removeItem(this.selectedPlants, plant)
+        //     }
+        // }
+        // if (domain.viewPlantsInMainWindowOnePlantAtATime()) {
+        //     this.showOnePlantExclusively(kDrawNow)
+        // }
+        // this.updateRightSidePanelForFirstSelectedPlant()
+        // this.updateForPossibleChangeToDrawing()
+        // this.updateMenusForChangedPlantList()
     }
-    
+
     updateForPossibleChangeToDrawing(): void {
-        this.updateMenusForUndoRedo()
-        if ((this.invalidDrawingRect.Top !== 0) || (this.invalidDrawingRect.Left !== 0) || (this.invalidDrawingRect.Bottom !== 0) || (this.invalidDrawingRect.Right !== 0)) {
-            this.paintDrawing(kDrawNow)
-        }
+        throw new Error("TODO: Unfinished")
+        // this.updateMenusForUndoRedo()
+        // if ((this.invalidDrawingRect.Top !== 0) || (this.invalidDrawingRect.Left !== 0) || (this.invalidDrawingRect.Bottom !== 0) || (this.invalidDrawingRect.Right !== 0)) {
+        //     this.paintDrawing(kDrawNow)
+        // }
     }
-    
+ 
     recalculateAllPlantBoundsRects(drawNow: boolean): void {
         if (this.plants.length <= 0) {
             return
@@ -2524,7 +2601,7 @@ export class TMainForm {
         let plantPartsToDraw = 0
         let showProgress = drawNow && domain.options.cachePlantBitmaps && domain.options.showPlantDrawingProgress
         if (showProgress) {
-            plantPartsToDraw = domain.plantManager.totalPlantPartCountInInvalidRect(this.plants, Rect(0, 0, this.drawingBitmap.Width, this.drawingBitmap.Height), udomain.kExcludeInvisiblePlants, udomain.kIncludeNonSelectedPlants)
+            plantPartsToDraw = domain.plantManager.totalPlantPartCountInInvalidRect(this.plants, Rect(0, 0, this.drawingBitmap.Width, this.drawingBitmap.Height), kExcludeInvisiblePlants, kIncludeNonSelectedPlants)
         }
         let partsDrawn = 0
         try {
@@ -2555,7 +2632,7 @@ export class TMainForm {
         let plantPartsToDraw = 0
         let showProgress = drawNow && domain.options.cachePlantBitmaps && domain.options.showPlantDrawingProgress
         if (showProgress) {
-            plantPartsToDraw = domain.plantManager.totalPlantPartCountInInvalidRect(this.selectedPlants, Rect(0, 0, this.drawingBitmap.Width, this.drawingBitmap.Height), udomain.kExcludeInvisiblePlants, udomain.kIncludeNonSelectedPlants)
+            plantPartsToDraw = domain.plantManager.totalPlantPartCountInInvalidRect(this.selectedPlants, Rect(0, 0, this.drawingBitmap.Width, this.drawingBitmap.Height), kExcludeInvisiblePlants, kIncludeNonSelectedPlants)
         }
         let partsDrawn = 0
         try {
@@ -2603,203 +2680,211 @@ export class TMainForm {
     }
     
     updateForChangeToPlantNote(aPlant: PdPlant): void {
-        let start: int = this.noteMemo.SelStart
-        this.noteMemo.Clear()
-        if (aPlant === null) {
-            return
-        }
-        this.internalChange = true
-        if (this.focusedPlant() !== null) {
-            this.noteMemo.Lines.AddStrings(aPlant.noteLines)
-        }
-        this.noteMemo.SelStart = start
-        this.internalChange = false
+        throw new Error("TODO Unfinished")
+        // let start: int = this.noteMemo.SelStart
+        // this.noteMemo.Clear()
+        // if (aPlant === null) {
+        //     return
+        // }
+        // this.internalChange = true
+        // if (this.focusedPlant() !== null) {
+        //     this.noteMemo.Lines.AddStrings(aPlant.noteLines)
+        // }
+        // this.noteMemo.SelStart = start
+        // this.internalChange = false
     }
-    
+
     // menu updating 
     // ---------------------------------------------------------------------------- *menu updating 
     updateMenusForUndoRedo(): void {
-        if (this.commandList.isUndoEnabled()) {
-            this.MenuEditUndo.enabled = true
-            this.MenuEditUndo.caption = "&Undo " + this.commandList.undoDescription()
-        } else {
-            this.MenuEditUndo.enabled = false
-            this.MenuEditUndo.caption = "Can't undo"
-        }
-        if (this.commandList.isRedoEnabled()) {
-            this.MenuEditRedo.enabled = true
-            this.MenuEditRedo.caption = "&Redo " + this.commandList.redoDescription()
-        } else {
-            this.MenuEditRedo.enabled = false
-            this.MenuEditRedo.caption = "Can't redo"
-        }
-        this.UndoMenuEditUndoRedoList.enabled = (this.commandList.isUndoEnabled()) || (this.commandList.isRedoEnabled())
-        if (ubreedr.BreederForm !== null) {
-            ubreedr.BreederForm.BreederMenuUndo.enabled = this.MenuEditUndo.enabled
-            ubreedr.BreederForm.BreederMenuUndo.caption = this.MenuEditUndo.caption
-            ubreedr.BreederForm.BreederMenuRedo.enabled = this.MenuEditRedo.enabled
-            ubreedr.BreederForm.BreederMenuRedo.caption = this.MenuEditRedo.caption
-            ubreedr.BreederForm.BreederMenuUndoRedoList.enabled = this.UndoMenuEditUndoRedoList.enabled
-        }
-        if (utimeser.TimeSeriesForm !== null) {
-            utimeser.TimeSeriesForm.TimeSeriesMenuUndo.enabled = this.MenuEditUndo.enabled
-            utimeser.TimeSeriesForm.TimeSeriesMenuUndo.caption = this.MenuEditUndo.caption
-            utimeser.TimeSeriesForm.TimeSeriesMenuRedo.enabled = this.MenuEditRedo.enabled
-            utimeser.TimeSeriesForm.TimeSeriesMenuRedo.caption = this.MenuEditRedo.caption
-            utimeser.TimeSeriesForm.TimeSeriesMenuUndoRedoList.enabled = this.UndoMenuEditUndoRedoList.enabled
-        }
+        throw new Error("TODO Unfinished")
+        // if (this.commandList.isUndoEnabled()) {
+        //     this.MenuEditUndo.enabled = true
+        //     this.MenuEditUndo.caption = "&Undo " + this.commandList.undoDescription()
+        // } else {
+        //     this.MenuEditUndo.enabled = false
+        //     this.MenuEditUndo.caption = "Can't undo"
+        // }
+        // if (this.commandList.isRedoEnabled()) {
+        //     this.MenuEditRedo.enabled = true
+        //     this.MenuEditRedo.caption = "&Redo " + this.commandList.redoDescription()
+        // } else {
+        //     this.MenuEditRedo.enabled = false
+        //     this.MenuEditRedo.caption = "Can't redo"
+        // }
+        // this.UndoMenuEditUndoRedoList.enabled = (this.commandList.isUndoEnabled()) || (this.commandList.isRedoEnabled())
+        // if (ubreedr.BreederForm !== null) {
+        //     ubreedr.BreederForm.BreederMenuUndo.enabled = this.MenuEditUndo.enabled
+        //     ubreedr.BreederForm.BreederMenuUndo.caption = this.MenuEditUndo.caption
+        //     ubreedr.BreederForm.BreederMenuRedo.enabled = this.MenuEditRedo.enabled
+        //     ubreedr.BreederForm.BreederMenuRedo.caption = this.MenuEditRedo.caption
+        //     ubreedr.BreederForm.BreederMenuUndoRedoList.enabled = this.UndoMenuEditUndoRedoList.enabled
+        // }
+        // if (utimeser.TimeSeriesForm !== null) {
+        //     utimeser.TimeSeriesForm.TimeSeriesMenuUndo.enabled = this.MenuEditUndo.enabled
+        //     utimeser.TimeSeriesForm.TimeSeriesMenuUndo.caption = this.MenuEditUndo.caption
+        //     utimeser.TimeSeriesForm.TimeSeriesMenuRedo.enabled = this.MenuEditRedo.enabled
+        //     utimeser.TimeSeriesForm.TimeSeriesMenuRedo.caption = this.MenuEditRedo.caption
+        //     utimeser.TimeSeriesForm.TimeSeriesMenuUndoRedoList.enabled = this.UndoMenuEditUndoRedoList.enabled
+        // }
     }
-    
+
     updateMenusForChangedPlantFile(): void {
-        this.MenuFileClose.enabled = domain.plantFileLoaded
-        this.MenuPlantNew.enabled = domain.plantFileLoaded
-        this.MenuPlantNewUsingLastWizardSettings.enabled = domain.plantFileLoaded
-        this.MenuLayoutViewFreeFloating.enabled = domain.plantFileLoaded
-        this.viewFreeFloating.Enabled = domain.plantFileLoaded
-        this.MenuLayoutViewOnePlantAtATime.enabled = domain.plantFileLoaded
-        this.viewOneOnly.Enabled = domain.plantFileLoaded
-        this.MenuLayoutHorizontalOrientation.enabled = domain.plantFileLoaded
-        this.drawingAreaOnTop.Enabled = domain.plantFileLoaded
-        this.MenuLayoutVerticalOrientation.enabled = domain.plantFileLoaded
-        this.drawingAreaOnSide.Enabled = domain.plantFileLoaded
-        this.updateMenusForChangedPlantList()
-        this.updatePasteMenuForClipboardContents()
+        throw new Error("TODO Unfinished")
+        // this.MenuFileClose.enabled = domain.plantFileLoaded
+        // this.MenuPlantNew.enabled = domain.plantFileLoaded
+        // this.MenuPlantNewUsingLastWizardSettings.enabled = domain.plantFileLoaded
+        // this.MenuLayoutViewFreeFloating.enabled = domain.plantFileLoaded
+        // this.viewFreeFloating.Enabled = domain.plantFileLoaded
+        // this.MenuLayoutViewOnePlantAtATime.enabled = domain.plantFileLoaded
+        // this.viewOneOnly.Enabled = domain.plantFileLoaded
+        // this.MenuLayoutHorizontalOrientation.enabled = domain.plantFileLoaded
+        // this.drawingAreaOnTop.Enabled = domain.plantFileLoaded
+        // this.MenuLayoutVerticalOrientation.enabled = domain.plantFileLoaded
+        // this.drawingAreaOnSide.Enabled = domain.plantFileLoaded
+        // this.updateMenusForChangedPlantList()
+        // this.updatePasteMenuForClipboardContents()
     }
     
     updateMenusForChangedPlantList(): void {
-        let havePlants: boolean
+        throw new Error("TODO Unfinished")
+        // let havePlants: boolean
         
-        havePlants = (this.plants.length > 0)
-        this.MenuFileSave.enabled = havePlants
-        this.MenuFileSaveAs.enabled = havePlants
-        this.MenuFileSaveDrawingAs.enabled = havePlants
-        this.MenuFilePrintDrawing.enabled = havePlants
-        this.MenuLayoutSelectAll.enabled = havePlants
-        this.MenuEditCopyDrawing.enabled = havePlants
-        this.MenuLayoutScaleToFit.enabled = havePlants
-        this.MenuFileMakePainterNozzle.enabled = havePlants
-        this.MenuPlantExportToDXF.enabled = havePlants
-        this.MenuPlantExportToPOV.enabled = havePlants
-        this.MenuPlantExportTo3DS.enabled = havePlants
-        this.MenuFileSaveJPEG.enabled = havePlants
-        this.MenuPlantExportToLWO.enabled = havePlants
-        this.MenuPlantExportToOBJ.enabled = havePlants
-        this.MenuPlantExportToVRML.enabled = havePlants
-        if (!havePlants) {
-            this.dragCursorModeClick()
-        }
-        this.toolbarPanel.Enabled = havePlants
-        this.dragCursorMode.Enabled = havePlants
-        this.magnifyCursorMode.Enabled = havePlants
-        this.scrollCursorMode.Enabled = havePlants
-        this.rotateCursorMode.Enabled = havePlants
-        this.posingSelectionCursorMode.Enabled = havePlants
-        this.centerDrawing.Enabled = havePlants
-        this.magnificationPercent.Enabled = havePlants
-        this.updateMenusForChangedSelectedPlants()
+        // havePlants = (this.plants.length > 0)
+        // this.MenuFileSave.enabled = havePlants
+        // this.MenuFileSaveAs.enabled = havePlants
+        // this.MenuFileSaveDrawingAs.enabled = havePlants
+        // this.MenuFilePrintDrawing.enabled = havePlants
+        // this.MenuLayoutSelectAll.enabled = havePlants
+        // this.MenuEditCopyDrawing.enabled = havePlants
+        // this.MenuLayoutScaleToFit.enabled = havePlants
+        // this.MenuFileMakePainterNozzle.enabled = havePlants
+        // this.MenuPlantExportToDXF.enabled = havePlants
+        // this.MenuPlantExportToPOV.enabled = havePlants
+        // this.MenuPlantExportTo3DS.enabled = havePlants
+        // this.MenuFileSaveJPEG.enabled = havePlants
+        // this.MenuPlantExportToLWO.enabled = havePlants
+        // this.MenuPlantExportToOBJ.enabled = havePlants
+        // this.MenuPlantExportToVRML.enabled = havePlants
+        // if (!havePlants) {
+        //     this.dragCursorModeClick()
+        // }
+        // this.toolbarPanel.Enabled = havePlants
+        // this.dragCursorMode.Enabled = havePlants
+        // this.magnifyCursorMode.Enabled = havePlants
+        // this.scrollCursorMode.Enabled = havePlants
+        // this.rotateCursorMode.Enabled = havePlants
+        // this.posingSelectionCursorMode.Enabled = havePlants
+        // this.centerDrawing.Enabled = havePlants
+        // this.magnificationPercent.Enabled = havePlants
+        // this.updateMenusForChangedSelectedPlants()
     }
     
     updateMenusForChangedSelectedPlants(): void {
-        let haveSelectedPlants: boolean
-        let haveMoreThanOneSelectedPlant: boolean
+        throw new Error("TODO Unfinished")
+        // let haveSelectedPlants: boolean
+        // let haveMoreThanOneSelectedPlant: boolean
         
-        haveSelectedPlants = (this.selectedPlants.length > 0)
-        haveMoreThanOneSelectedPlant = (this.selectedPlants.length > 1)
-        this.MenuEditCut.enabled = haveSelectedPlants
-        this.PopupMenuCut.enabled = haveSelectedPlants
-        this.MenuEditCopy.enabled = haveSelectedPlants
-        this.PopupMenuCopy.enabled = haveSelectedPlants
-        this.MenuEditCopyAsText.enabled = haveSelectedPlants
-        this.MenuEditPasteAsText.enabled = (UNRESOLVED.Clipboard.hasFormat(UNRESOLVED.CF_TEXT)) && (domain.plantFileLoaded)
-        this.MenuEditDelete.enabled = haveSelectedPlants
-        this.MenuEditDuplicate.enabled = haveSelectedPlants
-        this.MenuPlantRename.enabled = haveSelectedPlants
-        this.PopupMenuRename.enabled = haveSelectedPlants
-        this.MenuPlantEditNote.enabled = haveSelectedPlants
-        // v1.4
-        this.PopupMenuEditNote.enabled = haveSelectedPlants
-        // v1.4
-        this.noteEdit.Enabled = haveSelectedPlants
-        this.MenuPlantRandomize.enabled = haveSelectedPlants
-        this.PopupMenuRandomize.enabled = haveSelectedPlants
-        this.MenuPlantZeroRotations.enabled = haveSelectedPlants
-        this.PopupMenuZeroRotations.enabled = haveSelectedPlants
-        this.MenuPlantBreed.enabled = haveSelectedPlants
-        this.PopupMenuBreed.enabled = haveSelectedPlants
-        this.MenuPlantMakeTimeSeries.enabled = haveSelectedPlants
-        this.PopupMenuMakeTimeSeries.enabled = haveSelectedPlants
-        this.MenuPlantAnimate.enabled = haveSelectedPlants
-        this.PopupMenuAnimate.enabled = haveSelectedPlants
-        this.MenuLayoutSelectAll.enabled = (this.plants.length > 0) && (this.selectedPlants.length < this.plants.length)
-        this.MenuLayoutDeselect.enabled = haveSelectedPlants
-        this.MenuFileMakePainterAnimation.enabled = haveSelectedPlants
-        this.MenuLayoutHide.enabled = haveSelectedPlants
-        this.MenuLayoutShow.enabled = haveSelectedPlants
-        this.MenuLayoutHideOthers.enabled = (haveMoreThanOneSelectedPlant) && (!domain.viewPlantsInMainWindowOnePlantAtATime()) && (this.selectedPlants.length < this.plants.length)
-        this.MenuLayoutMakeBouquet.enabled = haveMoreThanOneSelectedPlant && !domain.viewPlantsInMainWindowOnePlantAtATime()
-        this.MenuLayoutBringForward.enabled = haveSelectedPlants && (this.selectedPlants.length < this.plants.length)
-        this.MenuLayoutSendBack.enabled = haveSelectedPlants && (this.selectedPlants.length < this.plants.length)
-        // location
-        this.xLocationEdit.Enabled = haveSelectedPlants
-        this.xLocationSpin.Enabled = haveSelectedPlants
-        this.yLocationEdit.Enabled = haveSelectedPlants
-        this.yLocationSpin.Enabled = haveSelectedPlants
-        // rotation
-        this.xRotationEdit.Enabled = haveSelectedPlants
-        this.xRotationSpin.Enabled = haveSelectedPlants
-        this.yRotationEdit.Enabled = haveSelectedPlants
-        this.yRotationSpin.Enabled = haveSelectedPlants
-        this.zRotationEdit.Enabled = haveSelectedPlants
-        this.zRotationSpin.Enabled = haveSelectedPlants
-        this.resetRotations.Enabled = haveSelectedPlants
-        // drawing scale
-        this.drawingScaleEdit.Enabled = haveSelectedPlants
-        this.drawingScaleSpin.Enabled = haveSelectedPlants
-        // alignment
-        this.alignTops.Enabled = haveMoreThanOneSelectedPlant
-        this.alignBottoms.Enabled = haveMoreThanOneSelectedPlant
-        this.alignLeft.Enabled = haveMoreThanOneSelectedPlant
-        this.alignRight.Enabled = haveMoreThanOneSelectedPlant
-        this.MenuLayoutAlign.enabled = haveMoreThanOneSelectedPlant
-        this.MenuLayoutAlignTops.enabled = haveMoreThanOneSelectedPlant
-        this.MenuLayoutAlignBottoms.enabled = haveMoreThanOneSelectedPlant
-        this.MenuLayoutAlignLeftSides.enabled = haveMoreThanOneSelectedPlant
-        this.MenuLayoutAlignRightSides.enabled = haveMoreThanOneSelectedPlant
-        // size
-        this.makeEqualWidth.Enabled = haveMoreThanOneSelectedPlant
-        this.makeEqualHeight.Enabled = haveMoreThanOneSelectedPlant
-        this.MenuLayoutSize.enabled = haveMoreThanOneSelectedPlant
-        this.MenuLayoutSizeSameWidth.enabled = haveMoreThanOneSelectedPlant
-        this.MenuLayoutSizeSameHeight.enabled = haveMoreThanOneSelectedPlant
-        // pack
-        this.packPlants.Enabled = haveMoreThanOneSelectedPlant
-        this.MenuLayoutPack.enabled = haveMoreThanOneSelectedPlant
+        // haveSelectedPlants = (this.selectedPlants.length > 0)
+        // haveMoreThanOneSelectedPlant = (this.selectedPlants.length > 1)
+        // this.MenuEditCut.enabled = haveSelectedPlants
+        // this.PopupMenuCut.enabled = haveSelectedPlants
+        // this.MenuEditCopy.enabled = haveSelectedPlants
+        // this.PopupMenuCopy.enabled = haveSelectedPlants
+        // this.MenuEditCopyAsText.enabled = haveSelectedPlants
+        // this.MenuEditPasteAsText.enabled = (ColorDefs.clipboard.hasFormat(UNRESOLVED.CF_TEXT)) && (domain.plantFileLoaded)
+        // this.MenuEditDelete.enabled = haveSelectedPlants
+        // this.MenuEditDuplicate.enabled = haveSelectedPlants
+        // this.MenuPlantRename.enabled = haveSelectedPlants
+        // this.PopupMenuRename.enabled = haveSelectedPlants
+        // this.MenuPlantEditNote.enabled = haveSelectedPlants
+        // // v1.4
+        // this.PopupMenuEditNote.enabled = haveSelectedPlants
+        // // v1.4
+        // this.noteEdit.Enabled = haveSelectedPlants
+        // this.MenuPlantRandomize.enabled = haveSelectedPlants
+        // this.PopupMenuRandomize.enabled = haveSelectedPlants
+        // this.MenuPlantZeroRotations.enabled = haveSelectedPlants
+        // this.PopupMenuZeroRotations.enabled = haveSelectedPlants
+        // this.MenuPlantBreed.enabled = haveSelectedPlants
+        // this.PopupMenuBreed.enabled = haveSelectedPlants
+        // this.MenuPlantMakeTimeSeries.enabled = haveSelectedPlants
+        // this.PopupMenuMakeTimeSeries.enabled = haveSelectedPlants
+        // this.MenuPlantAnimate.enabled = haveSelectedPlants
+        // this.PopupMenuAnimate.enabled = haveSelectedPlants
+        // this.MenuLayoutSelectAll.enabled = (this.plants.length > 0) && (this.selectedPlants.length < this.plants.length)
+        // this.MenuLayoutDeselect.enabled = haveSelectedPlants
+        // this.MenuFileMakePainterAnimation.enabled = haveSelectedPlants
+        // this.MenuLayoutHide.enabled = haveSelectedPlants
+        // this.MenuLayoutShow.enabled = haveSelectedPlants
+        // this.MenuLayoutHideOthers.enabled = (haveMoreThanOneSelectedPlant) && (!domain.viewPlantsInMainWindowOnePlantAtATime()) && (this.selectedPlants.length < this.plants.length)
+        // this.MenuLayoutMakeBouquet.enabled = haveMoreThanOneSelectedPlant && !domain.viewPlantsInMainWindowOnePlantAtATime()
+        // this.MenuLayoutBringForward.enabled = haveSelectedPlants && (this.selectedPlants.length < this.plants.length)
+        // this.MenuLayoutSendBack.enabled = haveSelectedPlants && (this.selectedPlants.length < this.plants.length)
+        // // location
+        // this.xLocationEdit.Enabled = haveSelectedPlants
+        // this.xLocationSpin.Enabled = haveSelectedPlants
+        // this.yLocationEdit.Enabled = haveSelectedPlants
+        // this.yLocationSpin.Enabled = haveSelectedPlants
+        // // rotation
+        // this.xRotationEdit.Enabled = haveSelectedPlants
+        // this.xRotationSpin.Enabled = haveSelectedPlants
+        // this.yRotationEdit.Enabled = haveSelectedPlants
+        // this.yRotationSpin.Enabled = haveSelectedPlants
+        // this.zRotationEdit.Enabled = haveSelectedPlants
+        // this.zRotationSpin.Enabled = haveSelectedPlants
+        // this.resetRotations.Enabled = haveSelectedPlants
+        // // drawing scale
+        // this.drawingScaleEdit.Enabled = haveSelectedPlants
+        // this.drawingScaleSpin.Enabled = haveSelectedPlants
+        // // alignment
+        // this.alignTops.Enabled = haveMoreThanOneSelectedPlant
+        // this.alignBottoms.Enabled = haveMoreThanOneSelectedPlant
+        // this.alignLeft.Enabled = haveMoreThanOneSelectedPlant
+        // this.alignRight.Enabled = haveMoreThanOneSelectedPlant
+        // this.MenuLayoutAlign.enabled = haveMoreThanOneSelectedPlant
+        // this.MenuLayoutAlignTops.enabled = haveMoreThanOneSelectedPlant
+        // this.MenuLayoutAlignBottoms.enabled = haveMoreThanOneSelectedPlant
+        // this.MenuLayoutAlignLeftSides.enabled = haveMoreThanOneSelectedPlant
+        // this.MenuLayoutAlignRightSides.enabled = haveMoreThanOneSelectedPlant
+        // // size
+        // this.makeEqualWidth.Enabled = haveMoreThanOneSelectedPlant
+        // this.makeEqualHeight.Enabled = haveMoreThanOneSelectedPlant
+        // this.MenuLayoutSize.enabled = haveMoreThanOneSelectedPlant
+        // this.MenuLayoutSizeSameWidth.enabled = haveMoreThanOneSelectedPlant
+        // this.MenuLayoutSizeSameHeight.enabled = haveMoreThanOneSelectedPlant
+        // // pack
+        // this.packPlants.Enabled = haveMoreThanOneSelectedPlant
+        // this.MenuLayoutPack.enabled = haveMoreThanOneSelectedPlant
     }
     
     updatePasteMenuForClipboardContents(): void {
-        this.MenuEditPaste.enabled = (domain.plantManager.privatePlantClipboard.Count > 0)
-        this.PopupMenuPaste.enabled = this.MenuEditPaste.enabled
-        if (ubreedr.BreederForm !== null) {
-            ubreedr.BreederForm.updatePasteMenuForClipboardContents()
-        }
-        if (utimeser.TimeSeriesForm !== null) {
-            utimeser.TimeSeriesForm.updatePasteMenuForClipboardContents()
-        }
+        throw new Error("TODO Unfinished")
+        // this.MenuEditPaste.enabled = (domain.plantManager.privatePlantClipboard.Count > 0)
+        // this.PopupMenuPaste.enabled = this.MenuEditPaste.enabled
+        // if (ubreedr.BreederForm !== null) {
+        //     ubreedr.BreederForm.updatePasteMenuForClipboardContents()
+        // }
+        // if (utimeser.TimeSeriesForm !== null) {
+        //     utimeser.TimeSeriesForm.updatePasteMenuForClipboardContents()
+        // }
     }
     
     updateSectionPopupMenuForSectionChange(): void {
-        const haveSection = this.currentSection() !== null
-        this.sectionPopupMenuHelp.enabled = haveSection
+        throw new Error("TODO Unfinished")
+        // const haveSection = this.currentSection() !== null
+        // this.sectionPopupMenuHelp.enabled = haveSection
     }
     
     updateParamPopupMenuForParamSelectionChange(): void {
-        const haveSection = this.currentSection() !== null
-        this.paramPopupMenuExpandAllInSection.enabled = haveSection
-        this.paramPopupMenuCollapseAllInSection.enabled = haveSection
-        const haveParam = this.selectedParameterPanel !== null
-        this.paramPopupMenuHelp.enabled = haveParam
-        this.paramPopupMenuExpand.enabled = haveParam
-        this.paramPopupMenuCollapse.enabled = haveParam
+        throw new Error("TODO Unfinished")
+        // const haveSection = this.currentSection() !== null
+        // this.paramPopupMenuExpandAllInSection.enabled = haveSection
+        // this.paramPopupMenuCollapseAllInSection.enabled = haveSection
+        // const haveParam = this.selectedParameterPanel !== null
+        // this.paramPopupMenuHelp.enabled = haveParam
+        // this.paramPopupMenuExpand.enabled = haveParam
+        // this.paramPopupMenuCollapse.enabled = haveParam
     }
 
     // ---------------------------------------------------------------------------- *drawing 
@@ -2813,41 +2898,42 @@ export class TMainForm {
         this.invalidDrawingRect = Rect(0, 0, this.drawingBitmap.Width, this.drawingBitmap.Height)
     }
     
-    paintDrawing(immediate: boolean): void { 
-        let plantPartsToDraw = 0
-        const showProgress = domain.options.showPlantDrawingProgress && (!domain.options.cachePlantBitmaps)
-        if ((this.invalidDrawingRect.Top !== 0) || (this.invalidDrawingRect.Left !== 0) || (this.invalidDrawingRect.Bottom !== 0) || (this.invalidDrawingRect.Right !== 0)) {
-            try {
-                if (!this.mouseMoveActionInProgress) {
-                    ucursor.cursor_startWait()
-                }
-                UNRESOLVED.intersectClipRect(this.drawingBitmap.Canvas.Handle, this.invalidDrawingRect.Left, this.invalidDrawingRect.Top, this.invalidDrawingRect.Right, this.invalidDrawingRect.Bottom)
-                ubmpsupport.fillBitmap(this.drawingBitmap, domain.options.backgroundColor)
-                if (showProgress) {
-                    plantPartsToDraw = domain.plantManager.totalPlantPartCountInInvalidRect(this.selectedPlants, this.invalidDrawingRect, udomain.kExcludeInvisiblePlants, udomain.kIncludeNonSelectedPlants)
-                }
-                try {
-                    this.drawing = true
-                    if (showProgress) {
-                        this.startDrawProgress(plantPartsToDraw)
-                    }
-                    domain.plantManager.drawOnInvalidRect(this.drawingBitmap.Canvas, this.selectedPlants, this.invalidDrawingRect, udomain.kExcludeInvisiblePlants, udomain.kIncludeNonSelectedPlants)
-                } finally {
-                    this.drawing = false
-                    if (showProgress) {
-                        this.finishDrawProgress()
-                    }
-                }
-                if ((immediate)) {
-                    this.copyDrawingBitmapToPaintBox()
-                }
-            } finally {
-                if (!this.mouseMoveActionInProgress) {
-                    ucursor.cursor_stopWait()
-                }
-                this.invalidDrawingRect = delphi_compatability.Bounds(0, 0, 0, 0)
-            }
-        }
+    paintDrawing(immediate: boolean): void {
+        throw new Error("TODO Unfinished")
+        // let plantPartsToDraw = 0
+        // const showProgress = domain.options.showPlantDrawingProgress && (!domain.options.cachePlantBitmaps)
+        // if ((this.invalidDrawingRect.Top !== 0) || (this.invalidDrawingRect.Left !== 0) || (this.invalidDrawingRect.Bottom !== 0) || (this.invalidDrawingRect.Right !== 0)) {
+        //     try {
+        //         if (!this.mouseMoveActionInProgress) {
+        //             ucursor.cursor_startWait()
+        //         }
+        //         UNRESOLVED.intersectClipRect(this.drawingBitmap.Canvas.Handle, this.invalidDrawingRect.Left, this.invalidDrawingRect.Top, this.invalidDrawingRect.Right, this.invalidDrawingRect.Bottom)
+        //         ubmpsupport.fillBitmap(this.drawingBitmap, domain.options.backgroundColor)
+        //         if (showProgress) {
+        //             plantPartsToDraw = domain.plantManager.totalPlantPartCountInInvalidRect(this.selectedPlants, this.invalidDrawingRect, udomain.kExcludeInvisiblePlants, udomain.kIncludeNonSelectedPlants)
+        //         }
+        //         try {
+        //             this.drawing = true
+        //             if (showProgress) {
+        //                 this.startDrawProgress(plantPartsToDraw)
+        //             }
+        //             domain.plantManager.drawOnInvalidRect(this.drawingBitmap.Canvas, this.selectedPlants, this.invalidDrawingRect, udomain.kExcludeInvisiblePlants, udomain.kIncludeNonSelectedPlants)
+        //         } finally {
+        //             this.drawing = false
+        //             if (showProgress) {
+        //                 this.finishDrawProgress()
+        //             }
+        //         }
+        //         if ((immediate)) {
+        //             this.copyDrawingBitmapToPaintBox()
+        //         }
+        //     } finally {
+        //         if (!this.mouseMoveActionInProgress) {
+        //             ucursor.cursor_stopWait()
+        //         }
+        //         this.invalidDrawingRect = delphi_compatability.Bounds(0, 0, 0, 0)
+        //     }
+        // }
     }
     
     drawingPaintBoxPaint(): void {
@@ -2855,67 +2941,69 @@ export class TMainForm {
     }
     
     copyDrawingBitmapToPaintBox(): void {
-        if ((domain === null) || (this.plants === null)) {
-            return
-        }
-        const aRect = Rect(0, 0, this.drawingBitmap.Width, this.drawingBitmap.Height)
-        // use an inset rect to avoid flicker in the boundary rectangle
-        const insetOneRect = Rect(1, 1, this.drawingBitmap.Width - 1, this.drawingBitmap.Height - 1)
-        this.drawingPaintBox.Canvas.CopyRect(insetOneRect, this.drawingBitmap.Canvas, insetOneRect)
-        this.drawingPaintBox.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsClear
-        this.drawingPaintBox.Canvas.Pen.Width = 1
-        const drawBoundingRects = (domain.options.showBoundsRectangle) && (!domain.viewPlantsInMainWindowOnePlantAtATime()) && (!domain.temporarilyHideSelectionRectangles)
-        if ((drawBoundingRects) && (this.plants.length > 0)) {
-            this.drawingPaintBox.Canvas.Pen.Color = ColorDefs.clSilver
-            for (let i = 0; i <= this.plants.length - 1; i++) {
-                const plant = this.plants[i]
-                if (!plant.hidden) {
-                    this.drawingPaintBox.Canvas.Rectangle(plant.boundsRect_pixels().Left, plant.boundsRect_pixels().Top, plant.boundsRect_pixels().Right, plant.boundsRect_pixels().Bottom)
-                }
-            }
-        }
-        const intersection: TRect = new TRect()
-        const drawSelectionRects = (domain.options.showSelectionRectangle) && (!domain.viewPlantsInMainWindowOnePlantAtATime()) && (!domain.temporarilyHideSelectionRectangles)
-        if ((drawSelectionRects) && (this.plants.length > 0)) {
-            for (let i = 0; i <= this.plants.length - 1; i++) {
-                const plant = this.plants[i]
-                let includePlant = false
-                const intersectResult = IntersectRect(intersection, plant.boundsRect_pixels(), aRect)
-                includePlant = includePlant || intersectResult
-                includePlant = includePlant && !plant.hidden
-                if (!includePlant) {
-                    continue
-                }
-                if (this.isFocused(plant)) {
-                    this.drawingPaintBox.Canvas.Pen.Color = domain.options.firstSelectionRectangleColor
-                    this.drawingPaintBox.Canvas.Rectangle(plant.boundsRect_pixels().Left, plant.boundsRect_pixels().Top, plant.boundsRect_pixels().Right, plant.boundsRect_pixels().Bottom)
-                    if (this.cursorModeForDrawing === kCursorModeSelectDrag) {
-                        this.drawingPaintBox.Canvas.Brush.Color = this.drawingPaintBox.Canvas.Pen.Color
-                        this.drawingPaintBox.Canvas.Rectangle(plant.resizingRect().Left, plant.resizingRect().Top, plant.resizingRect().Right, plant.resizingRect().Bottom)
-                        this.drawingPaintBox.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsClear
-                    }
-                } else if (this.isSelected(plant)) {
-                    this.drawingPaintBox.Canvas.Pen.Color = domain.options.multiSelectionRectangleColor
-                    this.drawingPaintBox.Canvas.Rectangle(plant.boundsRect_pixels().Left, plant.boundsRect_pixels().Top, plant.boundsRect_pixels().Right, plant.boundsRect_pixels().Bottom)
-                }
-            }
-        }
-        this.drawingPaintBox.Canvas.Pen.Color = UNRESOLVED.clBtnText
-        this.drawingPaintBox.Canvas.Rectangle(0, 0, this.drawingPaintBox.Width, this.drawingPaintBox.Height)
+        throw new Error("TODO Unfinished")
+        // if ((domain === null) || (this.plants === null)) {
+        //     return
+        // }
+        // const aRect = Rect(0, 0, this.drawingBitmap.Width, this.drawingBitmap.Height)
+        // // use an inset rect to avoid flicker in the boundary rectangle
+        // const insetOneRect = Rect(1, 1, this.drawingBitmap.Width - 1, this.drawingBitmap.Height - 1)
+        // this.drawingPaintBox.Canvas.CopyRect(insetOneRect, this.drawingBitmap.Canvas, insetOneRect)
+        // this.drawingPaintBox.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsClear
+        // this.drawingPaintBox.Canvas.Pen.Width = 1
+        // const drawBoundingRects = (domain.options.showBoundsRectangle) && (!domain.viewPlantsInMainWindowOnePlantAtATime()) && (!domain.temporarilyHideSelectionRectangles)
+        // if ((drawBoundingRects) && (this.plants.length > 0)) {
+        //     this.drawingPaintBox.Canvas.Pen.Color = ColorDefs.clSilver
+        //     for (let i = 0; i <= this.plants.length - 1; i++) {
+        //         const plant = this.plants[i]
+        //         if (!plant.hidden) {
+        //             this.drawingPaintBox.Canvas.Rectangle(plant.boundsRect_pixels().Left, plant.boundsRect_pixels().Top, plant.boundsRect_pixels().Right, plant.boundsRect_pixels().Bottom)
+        //         }
+        //     }
+        // }
+        // const intersection: TRect = new TRect()
+        // const drawSelectionRects = (domain.options.showSelectionRectangle) && (!domain.viewPlantsInMainWindowOnePlantAtATime()) && (!domain.temporarilyHideSelectionRectangles)
+        // if ((drawSelectionRects) && (this.plants.length > 0)) {
+        //     for (let i = 0; i <= this.plants.length - 1; i++) {
+        //         const plant = this.plants[i]
+        //         let includePlant = false
+        //         const intersectResult = IntersectRect(intersection, plant.boundsRect_pixels(), aRect)
+        //         includePlant = includePlant || intersectResult
+        //         includePlant = includePlant && !plant.hidden
+        //         if (!includePlant) {
+        //             continue
+        //         }
+        //         if (this.isFocused(plant)) {
+        //             this.drawingPaintBox.Canvas.Pen.Color = domain.options.firstSelectionRectangleColor
+        //             this.drawingPaintBox.Canvas.Rectangle(plant.boundsRect_pixels().Left, plant.boundsRect_pixels().Top, plant.boundsRect_pixels().Right, plant.boundsRect_pixels().Bottom)
+        //             if (this.cursorModeForDrawing === kCursorModeSelectDrag) {
+        //                 this.drawingPaintBox.Canvas.Brush.Color = this.drawingPaintBox.Canvas.Pen.Color
+        //                 this.drawingPaintBox.Canvas.Rectangle(plant.resizingRect().Left, plant.resizingRect().Top, plant.resizingRect().Right, plant.resizingRect().Bottom)
+        //                 this.drawingPaintBox.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsClear
+        //             }
+        //         } else if (this.isSelected(plant)) {
+        //             this.drawingPaintBox.Canvas.Pen.Color = domain.options.multiSelectionRectangleColor
+        //             this.drawingPaintBox.Canvas.Rectangle(plant.boundsRect_pixels().Left, plant.boundsRect_pixels().Top, plant.boundsRect_pixels().Right, plant.boundsRect_pixels().Bottom)
+        //         }
+        //     }
+        // }
+        // this.drawingPaintBox.Canvas.Pen.Color = ColorDefs.clBtnText
+        // this.drawingPaintBox.Canvas.Rectangle(0, 0, this.drawingPaintBox.Width, this.drawingPaintBox.Height)
     }
     
     // plant bitmaps
     // ---------------------------------------------------------------------------- *bitmaps for plants 
     screenBytesPerPixel(): float {
-        let result = 0.0
-        const screenDC: HDC = UNRESOLVED.GetDC(0)
-        try {
-            result = (UNRESOLVED.GetDeviceCaps(screenDC, delphi_compatability.BITSPIXEL) * UNRESOLVED.GetDeviceCaps(screenDC, delphi_compatability.PLANES))
-            result = result / 8.0
-        } finally {
-            UNRESOLVED.ReleaseDC(0, screenDC)
-        }
-        return result
+        throw new Error("TODO Unfinished")
+        // let result = 0.0
+        // const screenDC: HDC = UNRESOLVED.GetDC(0)
+        // try {
+        //     result = (UNRESOLVED.GetDeviceCaps(screenDC, delphi_compatability.BITSPIXEL) * UNRESOLVED.GetDeviceCaps(screenDC, delphi_compatability.PLANES))
+        //     result = result / 8.0
+        // } finally {
+        //     UNRESOLVED.ReleaseDC(0, screenDC)
+        // }
+        // return result
     }
     
     bytesInPlantBitmaps(plantToExclude: PdPlant): long {
@@ -2944,7 +3032,7 @@ export class TMainForm {
         const result = bytesAlreadyNotIncludingThisPlant + bytesForThisPlant < bytesLimit
         if (!result) {
             const megabytesTried = (bytesAlreadyNotIncludingThisPlant + bytesForThisPlant) / (1024 * 1024)
-            ShowMessage("The total size of plant bitmaps (" + FloatToStrF(megabytesTried, UNRESOLVED.ffFixed, 7, 1) + ") has exceeded " + "the memory limit of " + IntToStr(domain.options.memoryLimitForPlantBitmaps_MB) + " megabytes." + chr(13) + "All plant bitmaps have been dropped and plants will be drawn directly on the window." + chr(13) + "To use plant bitmaps again, choose Use Plant Bitmaps from the Options menu." + chr(13) + chr(13) + "If you have more free memory, your memory limit is set too low." + chr(13) + "To increase the memory limit, choose Preferences from the Edit menu." + chr(13) + "Click Help in the Preferences window for details.")
+            ShowMessage("The total size of plant bitmaps (" + megabytesTried.toFixed(3) + "MB) has exceeded " + "the memory limit of " + IntToStr(domain.options.memoryLimitForPlantBitmaps_MB) + " megabytes." + chr(13) + "All plant bitmaps have been dropped and plants will be drawn directly on the window." + chr(13) + "To use plant bitmaps again, choose Use Plant Bitmaps from the Options menu." + chr(13) + chr(13) + "If you have more free memory, your memory limit is set too low." + chr(13) + "To increase the memory limit, choose Preferences from the Edit menu." + chr(13) + "Click Help in the Preferences window for details.")
             this.stopUsingPlantBitmaps()
         }
         return result
@@ -2956,58 +3044,61 @@ export class TMainForm {
     }
     
     updateForChangeToPlantBitmaps(): void {
-        let aString: string
-        if (domain.options.showLongHintsForButtons) {
-            aString = "Plant bitmaps are used to speed up drawing by caching each plant into a separate " + "bitmap in memory. Plant bitmaps are turned "
-        } else {
-            aString = "Plant bitmaps are turned "
-        }
-        let bytesInUse = 0
-        let megabytesInUse = 0
-        if (domain.options.cachePlantBitmaps) {
-            bytesInUse = this.bytesInPlantBitmaps(null)
-            megabytesInUse = bytesInUse / (1024 * 1024)
-            aString = aString + "ON and are using " + FloatToStrF(megabytesInUse, UNRESOLVED.ffFixed, 7, 1) + " out of " + IntToStr(domain.options.memoryLimitForPlantBitmaps_MB) + " MB of memory."
-        } else {
-            aString = aString + "OFF."
-        }
-        if (domain.options.showLongHintsForButtons) {
-            if (!domain.options.cachePlantBitmaps) {
-                aString = aString + " You can turn plant bitmaps on using the Options menu."
-            } else {
-                aString = aString + " You can change the amount of memory dedicated to plant bitmaps in the Preferences window."
-            }
-        }
-        if (this.plantBitmapsIndicatorImage !== null) {
-            if (domain.options.cachePlantBitmaps) {
-                if (megabytesInUse / domain.options.memoryLimitForPlantBitmaps_MB <= 0.5) {
-                    this.plantBitmapsIndicatorImage.Picture = this.plantBitmapsGreenImage.Picture
-                } else if (megabytesInUse / domain.options.memoryLimitForPlantBitmaps_MB <= 0.8) {
-                    this.plantBitmapsIndicatorImage.Picture = this.plantBitmapsYellowImage.Picture
-                } else {
-                    this.plantBitmapsIndicatorImage.Picture = this.plantBitmapsRedImage.Picture
-                }
-            } else {
-                this.plantBitmapsIndicatorImage.Picture = this.noPlantBitmapsImage.Picture
-            }
-            this.plantBitmapsIndicatorImage.Hint = aString
-        }
+        throw new Error("TODO Unfinished")
+        // let aString: string
+        // if (domain.options.showLongHintsForButtons) {
+        //     aString = "Plant bitmaps are used to speed up drawing by caching each plant into a separate " + "bitmap in memory. Plant bitmaps are turned "
+        // } else {
+        //     aString = "Plant bitmaps are turned "
+        // }
+        // let bytesInUse = 0
+        // let megabytesInUse = 0
+        // if (domain.options.cachePlantBitmaps) {
+        //     bytesInUse = this.bytesInPlantBitmaps(null)
+        //     megabytesInUse = bytesInUse / (1024 * 1024)
+        //     aString = aString + "ON and are using " + megabytesInUse.toFixed(3) + "MB out of " + IntToStr(domain.options.memoryLimitForPlantBitmaps_MB) + " MB of memory."
+        // } else {
+        //     aString = aString + "OFF."
+        // }
+        // if (domain.options.showLongHintsForButtons) {
+        //     if (!domain.options.cachePlantBitmaps) {
+        //         aString = aString + " You can turn plant bitmaps on using the Options menu."
+        //     } else {
+        //         aString = aString + " You can change the amount of memory dedicated to plant bitmaps in the Preferences window."
+        //     }
+        // }
+        // if (this.plantBitmapsIndicatorImage !== null) {
+        //     if (domain.options.cachePlantBitmaps) {
+        //         if (megabytesInUse / domain.options.memoryLimitForPlantBitmaps_MB <= 0.5) {
+        //             this.plantBitmapsIndicatorImage.Picture = this.plantBitmapsGreenImage.Picture
+        //         } else if (megabytesInUse / domain.options.memoryLimitForPlantBitmaps_MB <= 0.8) {
+        //             this.plantBitmapsIndicatorImage.Picture = this.plantBitmapsYellowImage.Picture
+        //         } else {
+        //             this.plantBitmapsIndicatorImage.Picture = this.plantBitmapsRedImage.Picture
+        //         }
+        //     } else {
+        //         this.plantBitmapsIndicatorImage.Picture = this.noPlantBitmapsImage.Picture
+        //     }
+        //     this.plantBitmapsIndicatorImage.Hint = aString
+        // }
     }
     
     stopUsingPlantBitmaps(): void {
-        domain.options.cachePlantBitmaps = false
-        this.MenuOptionsUsePlantBitmaps.checked = domain.options.cachePlantBitmaps
-        this.shrinkAllPlantBitmaps()
-        this.invalidateEntireDrawing()
+        throw new Error("TODO Unfinished")
+        // domain.options.cachePlantBitmaps = false
+        // this.MenuOptionsUsePlantBitmaps.checked = domain.options.cachePlantBitmaps
+        // this.shrinkAllPlantBitmaps()
+        // this.invalidateEntireDrawing()
     }
     
     startUsingPlantBitmaps(): void {
-        domain.options.cachePlantBitmaps = true
-        this.MenuOptionsUsePlantBitmaps.checked = domain.options.cachePlantBitmaps
-        this.recalculateAllPlantBoundsRects(kDrawNow)
-        this.invalidateEntireDrawing()
+        throw new Error("TODO Unfinished")
+        // domain.options.cachePlantBitmaps = true
+        // this.MenuOptionsUsePlantBitmaps.checked = domain.options.cachePlantBitmaps
+        // this.recalculateAllPlantBoundsRects(kDrawNow)
+        // this.invalidateEntireDrawing()
     }
-    
+
     // command list management 
     // ---------------------------------------------------------------------------- *command list management 
     clearCommandList(): void {
@@ -3019,7 +3110,7 @@ export class TMainForm {
         this.commandList.doCommand(command)
         this.updateForPossibleChangeToDrawing()
     }
-    
+
     // called by commands 
     // ------------------------------------------------------------------------------- *called by commands 
     hideOrShowSomePlants(plantList: PdPlant[], hideList: PdBooleanValue[], hide: boolean, drawNow: boolean): void {
@@ -3111,10 +3202,11 @@ export class TMainForm {
         }
     }
     
-    selectPlantAtIndex(Shift: TShiftState, index: int): void {
+    selectPlantAtIndex(event: MouseEvent, index: int): void {
         if (this.plants.length <= 0) {
             return
         }
+        let newList: PdPlant[] = []
         if ((index < 0)) {
             if (this.selectedPlants.length <= 0) {
                 return
@@ -3127,8 +3219,7 @@ export class TMainForm {
         if (plant === null) {
             return
         }
-        let newList: PdPlant[] = []
-        if ((delphi_compatability.TShiftStateEnum.ssCtrl in Shift)) {
+        if ((event.ctrlKey)) {
             if (this.selectedPlants.length > 0) {
                 for (let i = 0; i <= this.selectedPlants.length - 1; i++) {
                     newList.push(this.selectedPlants[i])
@@ -3139,7 +3230,7 @@ export class TMainForm {
             } else {
                 newList.push(plant)
             }
-        } else if ((delphi_compatability.TShiftStateEnum.ssShift in Shift)) {
+        } else if ((event.shiftKey)) {
             if (this.selectedPlants.length > 0) {
                 for (let i = 0; i <= this.selectedPlants.length - 1; i++) {
                     newList.push(this.selectedPlants[i])
@@ -3204,10 +3295,10 @@ export class TMainForm {
     }
     
     deselectAllPlantsButFirst(): void {
-        if (this.selectedPlants.length <= 0) {
+        const firstPlant = this.focusedPlant()
+        if (!firstPlant) {
             return
         }
-        const firstPlant = this.focusedPlant()
         this.selectedPlants= []
         this.selectedPlants.push(firstPlant)
         this.updateForChangeToPlantSelections()
@@ -3261,7 +3352,7 @@ export class TMainForm {
     
     addSelectedPlant(aPlant: PdPlant, insertIndex: short): void {
         if ((insertIndex >= 0) && (insertIndex <= this.selectedPlants.length - 1)) {
-            this.selectedPlants.Insert(insertIndex, aPlant)
+            arrayInsert(this.selectedPlants, insertIndex, aPlant)
         } else {
             this.selectedPlants.push(aPlant)
         }
@@ -3293,7 +3384,7 @@ export class TMainForm {
         result = this.selectedPlants.indexOf(plant) === 0
         return result
     }
-    
+
     // selected plants list 
     focusedPlant(): PdPlant | null {
         let result: PdPlant | null = null
@@ -3342,6 +3433,8 @@ export class TMainForm {
         }
         return null
     }
+
+    /*
     
     // ------------------------------------------------------------------------------------- *list of plants 
     plantListDrawGridDrawCell(Col: int, Row: int, Rect: TRect, State: TGridDrawState): void {
@@ -3370,11 +3463,11 @@ export class TMainForm {
         }
         this.plantListDrawGrid.Canvas.Font = this.plantListDrawGrid.Font
         if (selected) {
-            this.plantListDrawGrid.Canvas.Brush.Color = UNRESOLVED.clHighlight
-            this.plantListDrawGrid.Canvas.Font.Color = UNRESOLVED.clHighlightText
+            this.plantListDrawGrid.Canvas.Brush.Color = ColorDefs.clHighlight
+            this.plantListDrawGrid.Canvas.Font.Color = ColorDefs.clHighlightText
         } else {
             this.plantListDrawGrid.Canvas.Brush.Color = this.plantListDrawGrid.Color
-            this.plantListDrawGrid.Canvas.Font.Color = UNRESOLVED.clBtnText
+            this.plantListDrawGrid.Canvas.Font.Color = ColorDefs.clBtnText
         }
         this.plantListDrawGrid.Canvas.FillRect(remainderRect)
         const cText = plant.getName()
@@ -3932,7 +4025,7 @@ export class TMainForm {
             newText = newText + ": " + trim(stringUpTo(stringBeyond(textToCopy, ":"), "["))
             textToCopy = newText
         }
-        UNRESOLVED.Clipboard.asText = textToCopy
+        ColorDefs.clipboard.asText = textToCopy
     }
     
     paramPopupMenuHelpClick(): void {
@@ -3957,10 +4050,11 @@ export class TMainForm {
             this.repositionParameterPanels()
         }
     }
+
+    */
     
     // ------------------------------------------------------------------------------------ *toolbar 
     dragCursorModeClick(): void {
-        this.drawingPaintBox.Cursor = delphi_compatability.crArrow
         this.cursorModeForDrawing = kCursorModeSelectDrag
         if (domain.options.showSelectionRectangle) {
             this.copyDrawingBitmapToPaintBox()
@@ -3968,7 +4062,6 @@ export class TMainForm {
     }
     
     magnifyCursorModeClick(): void {
-        this.drawingPaintBox.Cursor = ucursor.crMagPlus
         this.cursorModeForDrawing = kCursorModeMagnify
         if (domain.options.showSelectionRectangle) {
             this.copyDrawingBitmapToPaintBox()
@@ -3977,7 +4070,6 @@ export class TMainForm {
     
     posingSelectionCursorModeClick(): void {
         this.tabSet.tabIndex = kTabPosing
-        this.drawingPaintBox.Cursor = ucursor.crPosingSelect
         this.cursorModeForDrawing = kCursorModePosingSelect
         if (domain.options.showSelectionRectangle) {
             this.copyDrawingBitmapToPaintBox()
@@ -3985,7 +4077,6 @@ export class TMainForm {
     }
     
     scrollCursorModeClick(): void {
-        this.drawingPaintBox.Cursor = ucursor.crScroll
         this.cursorModeForDrawing = kCursorModeScroll
         if (domain.options.showSelectionRectangle) {
             this.copyDrawingBitmapToPaintBox()
@@ -3993,7 +4084,6 @@ export class TMainForm {
     }
     
     rotateCursorModeClick(): void {
-        this.drawingPaintBox.Cursor = ucursor.crRotate
         this.cursorModeForDrawing = kCursorModeRotate
         if (domain.options.showSelectionRectangle) {
             this.copyDrawingBitmapToPaintBox()
@@ -4128,10 +4218,11 @@ export class TMainForm {
     }
     
     xLocationEditExit(): void {
-        if (this.focusedPlant() === null) {
+        const plant = this.focusedPlant()
+        if (plant === null) {
             return
         }
-        const oldXLocation: int = this.focusedPlant().basePoint_pixels().X
+        const oldXLocation: int = plant.basePoint_pixels().X
         const newXLocation: int = StrToIntDef(this.xLocationEdit.Text, oldXLocation)
         if (newXLocation !== oldXLocation) {
             const increment = newXLocation - oldXLocation
@@ -4146,10 +4237,11 @@ export class TMainForm {
     }
     
     yLocationEditExit(): void {
-        if (this.focusedPlant() === null) {
+        const plant = this.focusedPlant()
+        if (plant === null) {
             return
         }
-        const oldYLocation = this.focusedPlant().basePoint_pixels().Y
+        const oldYLocation = plant.basePoint_pixels().Y
         const newYLocation = StrToIntDef(this.yLocationEdit.Text, oldYLocation)
         if (newYLocation !== oldYLocation) {
             const increment = newYLocation - oldYLocation
@@ -4162,13 +4254,13 @@ export class TMainForm {
             this.nudgeSelectedPlantsByPixelsAndDirection(increment, direction)
         }
     }
-    
+
     xLocationSpinDownClick(): void {
-        this.nudgeSelectedPlantsByPixelsAndDirection(domain.options.nudgeDistance, utdomove.kLeft)
+        this.nudgeSelectedPlantsByPixelsAndDirection(domain.options.nudgeDistance, kLeft)
     }
     
     xLocationSpinUpClick(): void {
-        this.nudgeSelectedPlantsByPixelsAndDirection(domain.options.nudgeDistance, utdomove.kRight)
+        this.nudgeSelectedPlantsByPixelsAndDirection(domain.options.nudgeDistance, kRight)
     }
     
     yLocationSpinDownClick(): void {
@@ -4263,7 +4355,7 @@ export class TMainForm {
         const newCommand = new PdRotateCommand(this.selectedPlants, rotateDirection, newRotation)
         this.doCommand(newCommand)
     }
-    
+
     resetRotationsClick(): void {
         if (this.selectedPlants.length <= 0) {
             return
@@ -4285,10 +4377,11 @@ export class TMainForm {
     }
     
     drawingScaleEditExit(): void {
-        if (this.focusedPlant() === null) {
+        const plant = this.focusedPlant()
+        if (plant === null) {
             return
         }
-        const oldValue = this.focusedPlant().drawingScale_PixelsPerMm
+        const oldValue = plant.drawingScale_PixelsPerMm
         let newValue: float
         try {
             newValue = StrToFloat(this.drawingScaleEdit.Text)
@@ -4315,23 +4408,25 @@ export class TMainForm {
         const resizeMultiplier = safedivExcept(1.0, domain.options.resizeKeyUpMultiplierPercent / 100.0, 0.9)
         this.resizeSelectedPlantsWithMultiplierOrNewAmount(resizeMultiplier, 0)
     }
-    
+
     makeEqualWidthClick(): void {
-        if (this.selectedPlants.length <= 0) {
+        const plant = this.focusedPlant()
+        if (!plant) {
             return
         }
-        const newCommand = new PdResizePlantsToSameWidthOrHeightCommand(this.selectedPlants, rWidth(this.focusedPlant().boundsRect_pixels()), 0, kChangeWidth)
+        const newCommand = new PdResizePlantsToSameWidthOrHeightCommand(this.selectedPlants, rWidth(plant.boundsRect_pixels()), 0, kChangeWidth)
         this.doCommand(newCommand)
     }
     
     makeEqualHeightClick(): void {
-        if (this.selectedPlants.length <= 0) {
+        const plant = this.focusedPlant()
+        if (!plant) {
             return
         }
-        const newCommand = new PdResizePlantsToSameWidthOrHeightCommand(this.selectedPlants, 0, rHeight(this.focusedPlant().boundsRect_pixels()), kChangeHeight)
+        const newCommand = new PdResizePlantsToSameWidthOrHeightCommand(this.selectedPlants, 0, rHeight(plant.boundsRect_pixels()), kChangeHeight)
         this.doCommand(newCommand)
     }
-    
+
     MenuLayoutSizeSameWidthClick(): void {
         this.makeEqualWidthClick()
     }
@@ -4349,11 +4444,11 @@ export class TMainForm {
     }
     
     alignLeftClick(): void {
-        this.alignSelectedPlants(utdomove.kLeft)
+        this.alignSelectedPlants(kLeft)
     }
     
     alignRightClick(): void {
-        this.alignSelectedPlants(utdomove.kRight)
+        this.alignSelectedPlants(kRight)
     }
     
     alignSelectedPlants(alignDirection: short): void {
@@ -4394,57 +4489,57 @@ export class TMainForm {
         this.packPlantsClick()
     }
     
-    FormKeyDown(Key: byte, Shift: TShiftState): void {
-        if (this.animateTimer.enabled) {
-            // pressing any key will stop animation 
-            Key = 0
-            this.stopAnimation()
-        }
-        if ((delphi_compatability.TShiftStateEnum.ssCtrl in Shift) && (delphi_compatability.TShiftStateEnum.ssShift in Shift)) {
-            if ((Key === delphi_compatability.VK_LEFT) || (Key === delphi_compatability.VK_RIGHT) || (Key === delphi_compatability.VK_UP) || (Key === delphi_compatability.VK_DOWN)) {
-                // hold down control and shift and press arrow keys - resize current plants 
-                this.resizeSelectedPlantsByKey(Key)
-                Key = 0
-            }
-            // hold down control and press arrow keys - shift current plants 
-        } else if ((delphi_compatability.TShiftStateEnum.ssCtrl in Shift)) {
-            if ((Key === delphi_compatability.VK_LEFT) || (Key === delphi_compatability.VK_RIGHT) || (Key === delphi_compatability.VK_UP) || (Key === delphi_compatability.VK_DOWN)) {
-                this.nudgeSelectedPlantsByKey(Key)
-                Key = 0
-            }
-            // hold down shift - do magnification as minus 
-        } else if ((Key === delphi_compatability.VK_SHIFT)) {
-            if (this.cursorModeForDrawing === kCursorModeMagnify) {
-                this.drawingPaintBox.Cursor = ucursor.crMagMinus
-            }
-        }
-        return Key
-    }
+    // FormKeyDown(Key: byte, Shift: TShiftState): void {
+    //     if (this.animateTimer.enabled) {
+    //         // pressing any key will stop animation 
+    //         Key = 0
+    //         this.stopAnimation()
+    //     }
+    //     if ((delphi_compatability.TShiftStateEnum.ssCtrl in Shift) && (delphi_compatability.TShiftStateEnum.ssShift in Shift)) {
+    //         if ((Key === delphi_compatability.VK_LEFT) || (Key === delphi_compatability.VK_RIGHT) || (Key === delphi_compatability.VK_UP) || (Key === delphi_compatability.VK_DOWN)) {
+    //             // hold down control and shift and press arrow keys - resize current plants 
+    //             this.resizeSelectedPlantsByKey(Key)
+    //             Key = 0
+    //         }
+    //         // hold down control and press arrow keys - shift current plants 
+    //     } else if ((delphi_compatability.TShiftStateEnum.ssCtrl in Shift)) {
+    //         if ((Key === delphi_compatability.VK_LEFT) || (Key === delphi_compatability.VK_RIGHT) || (Key === delphi_compatability.VK_UP) || (Key === delphi_compatability.VK_DOWN)) {
+    //             this.nudgeSelectedPlantsByKey(Key)
+    //             Key = 0
+    //         }
+    //         // hold down shift - do magnification as minus 
+    //     } else if ((Key === delphi_compatability.VK_SHIFT)) {
+    //         if (this.cursorModeForDrawing === kCursorModeMagnify) {
+    //             this.drawingPaintBox.Cursor = ucursor.crMagMinus
+    //         }
+    //     }
+    //     return Key
+    // }
     
-    nudgeSelectedPlantsByKey(key: byte): void {
-        if (this.selectedPlants.length <= 0) {
-            return
-        }
-        let direction: short
-        switch (key) {
-            case delphi_compatability.VK_LEFT:
-                direction = utdomove.kLeft
-                break
-            case delphi_compatability.VK_RIGHT:
-                direction = utdomove.kRight
-                break
-            case delphi_compatability.VK_UP:
-                direction = kUp
-                break
-            case delphi_compatability.VK_DOWN:
-                direction = kDown
-                break
-            default:
-                return
-                break
-        }
-        this.nudgeSelectedPlantsByPixelsAndDirection(domain.options.nudgeDistance, direction)
-    }
+    // nudgeSelectedPlantsByKey(key: byte): void {
+    //     if (this.selectedPlants.length <= 0) {
+    //         return
+    //     }
+    //     let direction: short
+    //     switch (key) {
+    //         case delphi_compatability.VK_LEFT:
+    //             direction = utdomove.kLeft
+    //             break
+    //         case delphi_compatability.VK_RIGHT:
+    //             direction = utdomove.kRight
+    //             break
+    //         case delphi_compatability.VK_UP:
+    //             direction = kUp
+    //             break
+    //         case delphi_compatability.VK_DOWN:
+    //             direction = kDown
+    //             break
+    //         default:
+    //             return
+    //             break
+    //     }
+    //     this.nudgeSelectedPlantsByPixelsAndDirection(domain.options.nudgeDistance, direction)
+    // }
     
     nudgeSelectedPlantsByPixelsAndDirection(pixels: int, direction: short): void {
         if (this.selectedPlants.length <= 0) {
@@ -4465,24 +4560,24 @@ export class TMainForm {
                 movePoint.X = pixels
                 break
         }
-        const newCommand = new PdDragCommand(this.selectedPlants, movePoint)
+        const newCommand = new PdDragCommand(this.selectedPlants).createWithListOfPlantsAndDragOffset(movePoint)
         this.doCommand(newCommand)
     }
     
-    resizeSelectedPlantsByKey(key: byte): void {
-        if (this.selectedPlants.length <= 0) {
-            return
-        }
-        let resizeMultiplier: float
-        if ((key === delphi_compatability.VK_LEFT) || (key === delphi_compatability.VK_UP)) {
-            resizeMultiplier = domain.options.resizeKeyUpMultiplierPercent / 100.0
-        } else if ((key === delphi_compatability.VK_RIGHT) || (key === delphi_compatability.VK_DOWN)) {
-            resizeMultiplier = safedivExcept(1.0, domain.options.resizeKeyUpMultiplierPercent / 100.0, 0.9)
-        } else {
-            return
-        }
-        this.resizeSelectedPlantsWithMultiplierOrNewAmount(resizeMultiplier, 0)
-    }
+    // resizeSelectedPlantsByKey(key: byte): void {
+    //     if (this.selectedPlants.length <= 0) {
+    //         return
+    //     }
+    //     let resizeMultiplier: float
+    //     if ((key === delphi_compatability.VK_LEFT) || (key === delphi_compatability.VK_UP)) {
+    //         resizeMultiplier = domain.options.resizeKeyUpMultiplierPercent / 100.0
+    //     } else if ((key === delphi_compatability.VK_RIGHT) || (key === delphi_compatability.VK_DOWN)) {
+    //         resizeMultiplier = safedivExcept(1.0, domain.options.resizeKeyUpMultiplierPercent / 100.0, 0.9)
+    //     } else {
+    //         return
+    //     }
+    //     this.resizeSelectedPlantsWithMultiplierOrNewAmount(resizeMultiplier, 0)
+    // }
     
     resizeSelectedPlantsWithMultiplierOrNewAmount(multiplier: float, newAmount_pixelsPerMm: float): void {
         if (this.selectedPlants.length <= 0) {
@@ -4490,37 +4585,37 @@ export class TMainForm {
         }
         let newCommand: PdCommand
         if (multiplier !== 0) {
-            newCommand = new PdResizePlantsCommand(this.selectedPlants, multiplier)
+            newCommand = new PdResizePlantsCommand(this.selectedPlants).createWithMultiplier(multiplier)
         } else {
-            newCommand = new PdResizePlantsCommand(this.selectedPlants, newAmount_pixelsPerMm)
+            newCommand = new PdResizePlantsCommand(this.selectedPlants).createWithNewValue(newAmount_pixelsPerMm)
         }
         this.doCommand(newCommand)
     }
     
-    FormKeyPress(Key: char): void {
-        Key = usupport.makeEnterWorkAsTab(this, this.ActiveControl, Key)
-        if (this.animateTimer.enabled) {
-            // pressing any key will stop animation 
-            Key = chr(0)
-            this.stopAnimation()
-        }
-        return Key
-    }
+    // FormKeyPress(Key: char): void {
+    //     Key = usupport.makeEnterWorkAsTab(this, this.ActiveControl, Key)
+    //     if (this.animateTimer.enabled) {
+    //         // pressing any key will stop animation 
+    //         Key = chr(0)
+    //         this.stopAnimation()
+    //     }
+    //     return Key
+    // }
     
-    FormKeyUp(Key: byte, Shift: TShiftState): void {
-        if (this.animateTimer.enabled) {
-            // pressing any key will stop animation 
-            Key = 0
-            this.stopAnimation()
-        }
-        if ((Key === delphi_compatability.VK_SHIFT)) {
-            if (this.cursorModeForDrawing === kCursorModeMagnify) {
-                // let up shift or control - go back to plus magnification 
-                this.drawingPaintBox.Cursor = ucursor.crMagPlus
-            }
-        }
-        return Key
-    }
+    // FormKeyUp(Key: byte, Shift: TShiftState): void {
+    //     if (this.animateTimer.enabled) {
+    //         // pressing any key will stop animation 
+    //         Key = 0
+    //         this.stopAnimation()
+    //     }
+    //     if ((Key === delphi_compatability.VK_SHIFT)) {
+    //         if (this.cursorModeForDrawing === kCursorModeMagnify) {
+    //             // let up shift or control - go back to plus magnification 
+    //             this.drawingPaintBox.Cursor = ucursor.crMagPlus
+    //         }
+    //     }
+    //     return Key
+    // }
     
     // tab set 
     // ------------------------------------------------------------------------------------ *tab set 
@@ -4554,15 +4649,16 @@ export class TMainForm {
         return result
     }
     
-    tabSetChange(NewTab: int, AllowChange: boolean): void {
-        this.lifeCyclePanel.Visible = (NewTab === kTabLifeCycle)
-        this.rotationsPanel.Visible = (NewTab === kTabRotations)
-        this.parametersPanel.Visible = (NewTab === kTabParameters)
-        this.statsScrollBox.Visible = (NewTab === kTabStatistics)
-        this.notePanel.Visible = (NewTab === kTabNote)
-        this.posingPanel.Visible = (NewTab === kTabPosing)
-        this.updateRightSidePanelForFirstSelectedPlantWithTab(NewTab)
-        return AllowChange
+    tabSetChange(NewTab: int, AllowChange: boolean): boolean {
+        throw new Error("TODO Unfinished")
+        // this.lifeCyclePanel.Visible = (NewTab === kTabLifeCycle)
+        // this.rotationsPanel.Visible = (NewTab === kTabRotations)
+        // this.parametersPanel.Visible = (NewTab === kTabParameters)
+        // this.statsScrollBox.Visible = (NewTab === kTabStatistics)
+        // this.notePanel.Visible = (NewTab === kTabNote)
+        // this.posingPanel.Visible = (NewTab === kTabPosing)
+        // this.updateRightSidePanelForFirstSelectedPlantWithTab(NewTab)
+        // return AllowChange
     }
     
     updateRightSidePanelForFirstSelectedPlant(): void {
@@ -4597,97 +4693,101 @@ export class TMainForm {
     }
     
     textColorToRepresentPlantSelection(payAttentionToMultiSelect: boolean): TColorRef {
-        let result = new TColorRef()
+        let result: TColorRef
         if (this.focusedPlant() !== null) {
             if (payAttentionToMultiSelect) {
                 if (this.selectedPlants.length <= 1) {
-                    result = UNRESOLVED.clBtnText
+                    result = ColorDefs.clBtnText
                 } else {
                     // v2.0  was clRed
-                    result = delphi_compatability.clBlue
+                    result = ColorDefs.clBlue
                 }
             } else {
-                result = UNRESOLVED.clBtnText
+                result = ColorDefs.clBtnText
             }
         } else {
-            result = delphi_compatability.clGray
+            result = ColorDefs.clGray
         }
         return result
     }
     
     updateForChangeToPlantRotations(): void {
-        const firstPlant = this.focusedPlant()
-        if (firstPlant !== null) {
-            this.xRotationEdit.Text = IntToStr(intround(firstPlant.xRotation))
-            this.yRotationEdit.Text = IntToStr(intround(firstPlant.yRotation))
-            this.zRotationEdit.Text = IntToStr(intround(firstPlant.zRotation))
-        } else {
-            this.xRotationEdit.Text = ""
-            this.yRotationEdit.Text = ""
-            this.zRotationEdit.Text = ""
-        }
-        this.xRotationEdit.Refresh()
-        this.yRotationEdit.Refresh()
-        this.zRotationEdit.Refresh()
+        throw new Error("TODO Unfinished")
+        // const firstPlant = this.focusedPlant()
+        // if (firstPlant !== null) {
+        //     this.xRotationEdit.Text = IntToStr(intround(firstPlant.xRotation))
+        //     this.yRotationEdit.Text = IntToStr(intround(firstPlant.yRotation))
+        //     this.zRotationEdit.Text = IntToStr(intround(firstPlant.zRotation))
+        // } else {
+        //     this.xRotationEdit.Text = ""
+        //     this.yRotationEdit.Text = ""
+        //     this.zRotationEdit.Text = ""
+        // }
+        // this.xRotationEdit.Refresh()
+        // this.yRotationEdit.Refresh()
+        // this.zRotationEdit.Refresh()
     }
     
     updateForChangeToSelectedPlantsDrawingScale(): void {
-        const firstPlant = this.focusedPlant()
-        if (firstPlant !== null) {
-            this.drawingScaleEdit.Text = usupport.digitValueString(firstPlant.drawingScale_PixelsPerMm)
-        } else {
-            this.drawingScaleEdit.Text = ""
-        }
-        this.drawingScaleEdit.Refresh()
+        throw new Error("TODO Unfinished")
+        // const firstPlant = this.focusedPlant()
+        // if (firstPlant !== null) {
+        //     this.drawingScaleEdit.Text = usupport.digitValueString(firstPlant.drawingScale_PixelsPerMm)
+        // } else {
+        //     this.drawingScaleEdit.Text = ""
+        // }
+        // this.drawingScaleEdit.Refresh()
     }
     
     updateForChangeToSelectedPlantsLocation(): void {
-        const firstPlant = this.focusedPlant()
-        if (firstPlant !== null) {
-            this.xLocationEdit.Text = usupport.digitValueString(firstPlant.basePoint_pixels().X)
-            this.yLocationEdit.Text = usupport.digitValueString(firstPlant.basePoint_pixels().Y)
-        } else {
-            this.xLocationEdit.Text = ""
-            this.yLocationEdit.Text = ""
-        }
-        this.xLocationEdit.Refresh()
-        this.yLocationEdit.Refresh()
+        throw new Error("TODO Unfinished")
+        // const firstPlant = this.focusedPlant()
+        // if (firstPlant !== null) {
+        //     this.xLocationEdit.Text = usupport.digitValueString(firstPlant.basePoint_pixels().X)
+        //     this.yLocationEdit.Text = usupport.digitValueString(firstPlant.basePoint_pixels().Y)
+        // } else {
+        //     this.xLocationEdit.Text = ""
+        //     this.yLocationEdit.Text = ""
+        // }
+        // this.xLocationEdit.Refresh()
+        // this.yLocationEdit.Refresh()
     }
     
     // ------------------------------------------------------- *life cycle panel drawing and mouse handling 
     updateLifeCyclePanelForFirstSelectedPlant(): void {
-        this.updatePlantNameLabel(kTabLifeCycle)
-        const firstPlant = this.focusedPlant()
-        this.lifeCycleDaysEdit.Enabled = firstPlant !== null
-        this.lifeCycleDaysSpin.Enabled = firstPlant !== null
-        this.lifeCycleDragger.Enabled = firstPlant !== null
-        this.animateGrowth.Enabled = firstPlant !== null
-        this.timeLabel.Font.Color = this.textColorToRepresentPlantSelection(false)
-        this.maxSizeAxisLabel.Font.Color = this.timeLabel.Font.Color
-        this.ageAndSizeLabel.Font.Color = this.timeLabel.Font.Color
-        this.daysAndSizeLabel.Font.Color = this.timeLabel.Font.Color
-        if (firstPlant !== null) {
-            //special case
-            this.lifeCycleDragger.Color = delphi_compatability.clRed
-        } else {
-            this.lifeCycleDragger.Color = delphi_compatability.clGray
-        }
-        // reset red dragger panel 
-        this.placeLifeCycleDragger()
-        if (firstPlant !== null) {
-            // set life cycle days in edit 
-            this.lifeCycleDaysEdit.Text = IntToStr(firstPlant.age)
-        } else {
-            this.lifeCycleDaysEdit.Text = "0"
-        }
-        if (firstPlant !== null) {
-            // set % size label
-            this.daysAndSizeLabel.Caption = "days, " + IntToStr(intround(firstPlant.totalBiomass_pctMPB)) + "% max size"
-        } else {
-            this.daysAndSizeLabel.Caption = ""
-        }
-        this.placeLifeCycleDragger()
-        this.redrawLifeCycleGraph()
+        throw new Error("TODO Unfinished")
+        // this.updatePlantNameLabel(kTabLifeCycle)
+        // const firstPlant = this.focusedPlant()
+        // this.lifeCycleDaysEdit.Enabled = firstPlant !== null
+        // this.lifeCycleDaysSpin.Enabled = firstPlant !== null
+        // this.lifeCycleDragger.Enabled = firstPlant !== null
+        // this.animateGrowth.Enabled = firstPlant !== null
+        // this.timeLabel.Font.Color = this.textColorToRepresentPlantSelection(false)
+        // this.maxSizeAxisLabel.Font.Color = this.timeLabel.Font.Color
+        // this.ageAndSizeLabel.Font.Color = this.timeLabel.Font.Color
+        // this.daysAndSizeLabel.Font.Color = this.timeLabel.Font.Color
+        // if (firstPlant !== null) {
+        //     //special case
+        //     this.lifeCycleDragger.Color = ColorDefs.clRed
+        // } else {
+        //     this.lifeCycleDragger.Color = ColorDefs.clGray
+        // }
+        // // reset red dragger panel 
+        // this.placeLifeCycleDragger()
+        // if (firstPlant !== null) {
+        //     // set life cycle days in edit 
+        //     this.lifeCycleDaysEdit.Text = IntToStr(firstPlant.age)
+        // } else {
+        //     this.lifeCycleDaysEdit.Text = "0"
+        // }
+        // if (firstPlant !== null) {
+        //     // set % size label
+        //     this.daysAndSizeLabel.Caption = "days, " + IntToStr(intround(firstPlant.totalBiomass_pctMPB)) + "% max size"
+        // } else {
+        //     this.daysAndSizeLabel.Caption = ""
+        // }
+        // this.placeLifeCycleDragger()
+        // this.redrawLifeCycleGraph()
     }
     
     updatePlantNameLabel(tabIndex: short): void {
@@ -4697,51 +4797,52 @@ export class TMainForm {
         // let prefix: string
         // let handlingDifferently: boolean
         
-        const firstPlant = this.focusedPlant()
-        let payAttentionToOtherPlants = true
-        let handlingDifferently = false
-        let prefix = ""
-        let labelToChange: string | null = null
-        switch (tabIndex) {
-            case kTabRotations:
-                labelToChange = this.arrangementPlantName
-                prefix = "Arrangement for "
-                break
-            case kTabParameters:
-                labelToChange = this.parametersPlantName
-                prefix = "Parameters for "
-                break
-            case kTabLifeCycle:
-                labelToChange = this.selectedPlantNameLabel
-                prefix = "Life cycle for "
-                break
-            case kTabPosing:
-                labelToChange = this.posingPlantName
-                payAttentionToOtherPlants = false
-                prefix = "Posing for "
-                break
-            case kTabStatistics:
-                handlingDifferently = true
-                this.statsPanel.updatePlant(firstPlant)
-                break
-            case kTabNote:
-                labelToChange = this.noteLabel
-                payAttentionToOtherPlants = false
-                prefix = "Note for "
-                break
-        }
-        if ((handlingDifferently) || (labelToChange === null)) {
-            return
-        }
-        if (firstPlant !== null) {
-            labelToChange.Caption = prefix + firstPlant.getName()
-            if ((payAttentionToOtherPlants) && (this.selectedPlants.length > 1)) {
-                labelToChange.Caption = labelToChange.Caption + " (and other plants)"
-            }
-        } else {
-            labelToChange.Caption = "(no plants selected)"
-        }
-        labelToChange.Font.Color = this.textColorToRepresentPlantSelection(payAttentionToOtherPlants)
+        throw new Error("TODO Unfinished")
+        // const firstPlant = this.focusedPlant()
+        // let payAttentionToOtherPlants = true
+        // let handlingDifferently = false
+        // let prefix = ""
+        // let labelToChange: string | null = null
+        // switch (tabIndex) {
+        //     case kTabRotations:
+        //         labelToChange = this.arrangementPlantName
+        //         prefix = "Arrangement for "
+        //         break
+        //     case kTabParameters:
+        //         labelToChange = this.parametersPlantName
+        //         prefix = "Parameters for "
+        //         break
+        //     case kTabLifeCycle:
+        //         labelToChange = this.selectedPlantNameLabel
+        //         prefix = "Life cycle for "
+        //         break
+        //     case kTabPosing:
+        //         labelToChange = this.posingPlantName
+        //         payAttentionToOtherPlants = false
+        //         prefix = "Posing for "
+        //         break
+        //     case kTabStatistics:
+        //         handlingDifferently = true
+        //         this.statsPanel.updatePlant(firstPlant)
+        //         break
+        //     case kTabNote:
+        //         labelToChange = this.noteLabel
+        //         payAttentionToOtherPlants = false
+        //         prefix = "Note for "
+        //         break
+        // }
+        // if ((handlingDifferently) || (labelToChange === null)) {
+        //     return
+        // }
+        // if (firstPlant !== null) {
+        //     labelToChange.Caption = prefix + firstPlant.getName()
+        //     if ((payAttentionToOtherPlants) && (this.selectedPlants.length > 1)) {
+        //         labelToChange.Caption = labelToChange.Caption + " (and other plants)"
+        //     }
+        // } else {
+        //     labelToChange.Caption = "(no plants selected)"
+        // }
+        // labelToChange.Font.Color = this.textColorToRepresentPlantSelection(payAttentionToOtherPlants)
     }
     
     animateGrowthClick(): void {
@@ -4758,49 +4859,55 @@ export class TMainForm {
     
     // animation 
     startAnimation(): void {
-        // called by animate command, which also sets up the pointer for the timer to call 
-        // disable all non-modal forms 
-        // keeps space bar from affecting magnification
-        this.ActiveControl = this.plantListDrawGrid
-        this.enableOrDisableAllForms(kDisableAllForms)
-        // add warning about disabled forms 
-        this.animatingLabel.Visible = true
-        this.tabSet.visible = false
-        // start timer 
-        this.animateTimer.enabled = true
+        throw new Error("TODO Unfinished")
+        // // called by animate command, which also sets up the pointer for the timer to call 
+        // // disable all non-modal forms 
+        // // keeps space bar from affecting magnification
+        // this.ActiveControl = this.plantListDrawGrid
+        // this.enableOrDisableAllForms(kDisableAllForms)
+        // // add warning about disabled forms 
+        // this.animatingLabel.Visible = true
+        // this.tabSet.visible = false
+        // // start timer 
+        // this.animateTimer.enabled = true
     }
     
     animateTimerTimer(): void {
-        if (this.animateCommand !== null) {
-            PdAnimatePlantCommand(this.animateCommand).animateOneDay()
-        }
+        throw new Error("TODO Unfinished")
+        // if (this.animateCommand !== null) {
+        //     PdAnimatePlantCommand(this.animateCommand).animateOneDay()
+        // }
     }
     
     stopAnimation(): void {
-        // called by animate command or self (if user clicks in drawing area or presses a key) 
-        // stop timer 
-        this.animateTimer.enabled = false
-        // nil out pointer 
-        this.animateCommand = null
-        // re-enable everything 
-        this.enableOrDisableAllForms(kEnableAllForms)
-        // remove warning about disabled forms 
-        this.animatingLabel.Visible = false
-        this.tabSet.visible = true
-        if (domain.options.showSelectionRectangle) {
-            // if there were selection rectangles before, put them back 
-            this.copyDrawingBitmapToPaintBox()
-        }
+        throw new Error("TODO Unfinished")
+        // // called by animate command or self (if user clicks in drawing area or presses a key) 
+        // // stop timer 
+        // this.animateTimer.enabled = false
+        // // nil out pointer 
+        // this.animateCommand = null
+        // // re-enable everything 
+        // this.enableOrDisableAllForms(kEnableAllForms)
+        // // remove warning about disabled forms 
+        // this.animatingLabel.Visible = false
+        // this.tabSet.visible = true
+        // if (domain.options.showSelectionRectangle) {
+        //     // if there were selection rectangles before, put them back 
+        //     this.copyDrawingBitmapToPaintBox()
+        // }
     }
     
     enableOrDisableAllForms(enable: boolean): void {
-        // cfk note: put any new NON-MODAL forms here 
-        this.Enabled = enable
-        ubreedr.BreederForm.Enabled = enable
-        utimeser.TimeSeriesForm.Enabled = enable
-        udebug.DebugForm.Enabled = enable
+        throw new Error("TODO Unfinished")
+        // // cfk note: put any new NON-MODAL forms here 
+        // this.Enabled = enable
+        // ubreedr.BreederForm.Enabled = enable
+        // utimeser.TimeSeriesForm.Enabled = enable
+        // udebug.DebugForm.Enabled = enable
     }
     
+    /*
+
     lifeCycleDaysEditExit(): void {
         const plant = this.focusedPlant()
         if (plant === null) {
@@ -4811,27 +4918,29 @@ export class TMainForm {
             return
         }
         if (newAge > plant.pGeneral.ageAtMaturity) {
-            newAge = this.focusedPlant().pGeneral.ageAtMaturity
+            newAge = plant.pGeneral.ageAtMaturity
             this.lifeCycleDaysEdit.Text = IntToStr(newAge)
         }
         this.changeSelectedPlantAges(newAge)
     }
     
     lifeCycleDaysSpinUpClick(): void {
-        if (this.focusedPlant() === null) {
+        const plant = this.focusedPlant()
+        if (plant === null) {
             return
         }
-        let newAge = intMin(StrToIntDef(this.lifeCycleDaysEdit.Text, 0) + 1, this.focusedPlant().pGeneral.ageAtMaturity)
+        let newAge = intMin(StrToIntDef(this.lifeCycleDaysEdit.Text, 0) + 1, plant.pGeneral.ageAtMaturity)
         newAge = intMax(0, newAge)
         this.lifeCycleDaysEdit.Text = IntToStr(newAge)
         this.changeSelectedPlantAges(newAge)
     }
     
     lifeCycleDaysSpinDownClick(): void {
-        if (this.focusedPlant() === null) {
+        const plant = this.focusedPlant()
+        if (plant === null) {
             return
         }
-        let newAge = intMin(StrToIntDef(this.lifeCycleDaysEdit.Text, 0) - 1, this.focusedPlant().pGeneral.ageAtMaturity)
+        let newAge = intMin(StrToIntDef(this.lifeCycleDaysEdit.Text, 0) - 1, plant.pGeneral.ageAtMaturity)
         newAge = intMax(0, newAge)
         this.lifeCycleDaysEdit.Text = IntToStr(newAge)
         this.changeSelectedPlantAges(newAge)
@@ -4898,6 +5007,8 @@ export class TMainForm {
         this.lifeCycleDraggingNeedToRedraw = false
     }
     
+    */
+
     changeSelectedPlantAges(newAge: short): void {
         if (this.selectedPlants.length <= 0) {
             return
@@ -4906,9 +5017,11 @@ export class TMainForm {
         this.doCommand(newCommand)
     }
     
+    /*
+
     // life cycle panel drawing and mouse handling 
     redrawLifeCycleGraph(): void {
-        this.lifeCycleGraphImage.Picture.Bitmap.Canvas.Brush.Color = UNRESOLVED.clBtnFace
+        this.lifeCycleGraphImage.Picture.Bitmap.Canvas.Brush.Color = ColorDefs.clBtnFace
         this.lifeCycleGraphImage.Picture.Bitmap.Canvas.Rectangle(0, 0, this.lifeCycleGraphImage.ClientWidth, this.lifeCycleGraphImage.ClientHeight)
         const sCurveError = this.drawSCurveOrCheckForError(this.lifeCycleGraphImage.Picture.Bitmap.Canvas, delphi_compatability.Bounds(0, 0, this.lifeCycleGraphImage.ClientWidth, this.lifeCycleGraphImage.ClientHeight), true, false)
         if (sCurveError && (this.focusedPlant() !== null)) {
@@ -4917,7 +5030,7 @@ export class TMainForm {
             null
         }
     }
-    
+
     drawSCurveOrCheckForError(aCanvas: TCanvas, aRect: TRect, draw: boolean, failed: boolean): boolean {
         const firstPlant = this.focusedPlant()
         if (firstPlant === null) {
@@ -4932,7 +5045,7 @@ export class TMainForm {
         curve.x2 = firstPlant.pGeneral.growthSCurve.x2
         curve.y2 = firstPlant.pGeneral.growthSCurve.y2
         try {
-            failed = calcSCurveCoeffsWithResult(curve)
+            failed = calcSCurveCoeffsWithResult(curve, failed)
             if (failed) {
                 return failed
             }
@@ -4981,11 +5094,11 @@ export class TMainForm {
         this.sectionsComboBox.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsSolid
         this.sectionsComboBox.Canvas.Font = this.sectionsComboBox.Font
         if (selected) {
-            this.sectionsComboBox.Canvas.Brush.Color = UNRESOLVED.clHighlight
-            this.sectionsComboBox.Canvas.Font.Color = UNRESOLVED.clHighlightText
+            this.sectionsComboBox.Canvas.Brush.Color = ColorDefs.clHighlight
+            this.sectionsComboBox.Canvas.Font.Color = ColorDefs.clHighlightText
         } else {
             this.sectionsComboBox.Canvas.Brush.Color = this.sectionsComboBox.Color
-            this.sectionsComboBox.Canvas.Font.Color = UNRESOLVED.clBtnText
+            this.sectionsComboBox.Canvas.Font.Color = ColorDefs.clBtnText
         }
         this.sectionsComboBox.Canvas.FillRect(Rect)
         const textDrawRect = new TRect()
@@ -5229,18 +5342,21 @@ export class TMainForm {
         return result
     }
     
+    */
+
     updateParametersPanelForFirstSelectedPlant(): void {
-        this.updatePlantNameLabel(kTabParameters)
-        if (this.parametersScrollBox.ControlCount > 0) {
-            for (let i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
-                if (this.parametersScrollBox.Controls[i] instanceof uppanel.PdParameterPanel) {
-                    const paramPanel: PdParameterPanel = this.parametersScrollBox.Controls[i]
-                    //panels check if the new plant is different from current one
-                    paramPanel.updatePlant(this.focusedPlant())
-                }
-            }
-        }
-        this.repositionParameterPanels()
+        throw new Error("TODO Unfinished")
+        // this.updatePlantNameLabel(kTabParameters)
+        // if (this.parametersScrollBox.ControlCount > 0) {
+        //     for (let i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
+        //         if (this.parametersScrollBox.Controls[i] instanceof uppanel.PdParameterPanel) {
+        //             const paramPanel: PdParameterPanel = this.parametersScrollBox.Controls[i]
+        //             //panels check if the new plant is different from current one
+        //             paramPanel.updatePlant(this.focusedPlant())
+        //         }
+        //     }
+        // }
+        // this.repositionParameterPanels()
     }
     
     enteringAParameterPanel(aPanel: PdParameterPanel): void {
@@ -5254,157 +5370,162 @@ export class TMainForm {
     }
     
     repositionParameterPanels(): void {
-        if (this.parametersScrollBox.ControlCount > 0) {
-            let totalMaxWidth = 0
-            let lastPos = 0
-            const oldPosition: int = this.parametersScrollBox.VertScrollBar.Position
-            this.parametersScrollBox.VertScrollBar.Position = 0
-            const windowLock: boolean = UNRESOLVED.lockWindowUpdate(this.Handle)
-            const requestedWidth: int = this.parametersScrollBox.ClientWidth
-            for (let i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
-                const paramPanel: PdParameterPanel = this.parametersScrollBox.Controls[i]
-                paramPanel.Left = 0
-                paramPanel.Top = lastPos
-                paramPanel.calculateTextDimensions()
-                const panelMaxWidth = paramPanel.maxWidth()
-                const panelMinWidth = paramPanel.minWidth(requestedWidth)
-                if (panelMaxWidth <= requestedWidth) {
-                    paramPanel.Width = panelMaxWidth
-                } else {
-                    if (panelMinWidth === -1) {
-                        paramPanel.Width = requestedWidth
-                    } else {
-                        paramPanel.Width = panelMinWidth
-                    }
-                }
-                paramPanel.calculateHeight()
-                lastPos = lastPos + paramPanel.Height
-                if (paramPanel.Width > totalMaxWidth) {
-                    totalMaxWidth = paramPanel.Width
-                }
-            }
-            lastPos = 0
-            for (let i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
-                const paramPanel: PdParameterPanel = this.parametersScrollBox.Controls[i]
-                paramPanel.Top = lastPos
-                // cfk change v2.0 final - can't remember why we had a max width - looks better this way
-                // paramPanel.width := totalMaxWidth;   // was this
-                // changed to
-                paramPanel.Width = this.parametersScrollBox.Width - 20
-                paramPanel.calculateHeight()
-                paramPanel.resizeElements()
-                lastPos = lastPos + paramPanel.Height
-            }
-            this.parametersScrollBox.VertScrollBar.Position = oldPosition
-            if (windowLock) {
-                UNRESOLVED.lockWindowUpdate(0)
-            }
-        }
+        throw new Error("TODO Unfinished")
+        // if (this.parametersScrollBox.ControlCount > 0) {
+        //     let totalMaxWidth = 0
+        //     let lastPos = 0
+        //     const oldPosition: int = this.parametersScrollBox.VertScrollBar.Position
+        //     this.parametersScrollBox.VertScrollBar.Position = 0
+        //     const windowLock: boolean = UNRESOLVED.lockWindowUpdate(this.Handle)
+        //     const requestedWidth: int = this.parametersScrollBox.ClientWidth
+        //     for (let i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
+        //         const paramPanel: PdParameterPanel = this.parametersScrollBox.Controls[i]
+        //         paramPanel.Left = 0
+        //         paramPanel.Top = lastPos
+        //         paramPanel.calculateTextDimensions()
+        //         const panelMaxWidth = paramPanel.maxWidth()
+        //         const panelMinWidth = paramPanel.minWidth(requestedWidth)
+        //         if (panelMaxWidth <= requestedWidth) {
+        //             paramPanel.Width = panelMaxWidth
+        //         } else {
+        //             if (panelMinWidth === -1) {
+        //                 paramPanel.Width = requestedWidth
+        //             } else {
+        //                 paramPanel.Width = panelMinWidth
+        //             }
+        //         }
+        //         paramPanel.calculateHeight()
+        //         lastPos = lastPos + paramPanel.Height
+        //         if (paramPanel.Width > totalMaxWidth) {
+        //             totalMaxWidth = paramPanel.Width
+        //         }
+        //     }
+        //     lastPos = 0
+        //     for (let i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
+        //         const paramPanel: PdParameterPanel = this.parametersScrollBox.Controls[i]
+        //         paramPanel.Top = lastPos
+        //         // cfk change v2.0 final - can't remember why we had a max width - looks better this way
+        //         // paramPanel.width := totalMaxWidth;   // was this
+        //         // changed to
+        //         paramPanel.Width = this.parametersScrollBox.Width - 20
+        //         paramPanel.calculateHeight()
+        //         paramPanel.resizeElements()
+        //         lastPos = lastPos + paramPanel.Height
+        //     }
+        //     this.parametersScrollBox.VertScrollBar.Position = oldPosition
+        //     if (windowLock) {
+        //         UNRESOLVED.lockWindowUpdate(0)
+        //     }
+        // }
     }
     
     collapseOrExpandParameterPanelsUntilNextHeader(headerPanel: PdParameterPanel): void {
-        let collapsing = false
-        this.internalChange = true
-        if (this.parametersScrollBox.ControlCount > 0) {
-            for (let i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
-                const paramPanel: PdParameterPanel = this.parametersScrollBox.Controls[i]
-                if (paramPanel === headerPanel) {
-                    collapsing = true
-                } else if (collapsing && (paramPanel instanceof upp_hed.PdHeaderParameterPanel)) {
-                    collapsing = false
-                } else if (collapsing) {
-                    if (headerPanel.param.collapsed) {
-                        paramPanel.expand()
-                    } else {
-                        paramPanel.collapse()
-                    }
-                }
-            }
-        }
-        this.internalChange = false
-        this.repositionParameterPanels()
+        throw new Error("TODO Unfinished")
+        // let collapsing = false
+        // this.internalChange = true
+        // if (this.parametersScrollBox.ControlCount > 0) {
+        //     for (let i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
+        //         const paramPanel: PdParameterPanel = this.parametersScrollBox.Controls[i]
+        //         if (paramPanel === headerPanel) {
+        //             collapsing = true
+        //         } else if (collapsing && (paramPanel instanceof upp_hed.PdHeaderParameterPanel)) {
+        //             collapsing = false
+        //         } else if (collapsing) {
+        //             if (headerPanel.param.collapsed) {
+        //                 paramPanel.expand()
+        //             } else {
+        //                 paramPanel.collapse()
+        //             }
+        //         }
+        //     }
+        // }
+        // this.internalChange = false
+        // this.repositionParameterPanels()
     }
     
     collapseOrExpandAllParameterPanelsInCurrentSection(doWhat: short): void {
-        this.internalChange = true
-        if (this.sectionsComboBox.ItemIndex < 0) {
-            return
-        }
-        const section: PdSection = this.sectionsComboBox.Items.Objects[this.sectionsComboBox.ItemIndex]
-        if (section === null) {
-            return
-        }
-        switch (doWhat) {
-            case kExpand:
-                section.expanded = true
-                break
-            case kCollapse:
-                section.expanded = false
-                break
-            case kExpandOrCollapse:
-                section.expanded = !section.expanded
-                break
-        }
-        if (this.parametersScrollBox.ControlCount > 0) {
-            for (let i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
-                const paramPanel: PdParameterPanel = this.parametersScrollBox.Controls[i]
-                if (section.expanded) {
-                    paramPanel.expand()
-                } else {
-                    paramPanel.collapse()
-                }
-            }
-        }
-        this.internalChange = false
-        this.repositionParameterPanels()
+        throw new Error("TODO Unfinished")
+        // this.internalChange = true
+        // if (this.sectionsComboBox.ItemIndex < 0) {
+        //     return
+        // }
+        // const section: PdSection = this.sectionsComboBox.Items.Objects[this.sectionsComboBox.ItemIndex]
+        // if (section === null) {
+        //     return
+        // }
+        // switch (doWhat) {
+        //     case kExpand:
+        //         section.expanded = true
+        //         break
+        //     case kCollapse:
+        //         section.expanded = false
+        //         break
+        //     case kExpandOrCollapse:
+        //         section.expanded = !section.expanded
+        //         break
+        // }
+        // if (this.parametersScrollBox.ControlCount > 0) {
+        //     for (let i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
+        //         const paramPanel: PdParameterPanel = this.parametersScrollBox.Controls[i]
+        //         if (section.expanded) {
+        //             paramPanel.expand()
+        //         } else {
+        //             paramPanel.collapse()
+        //         }
+        //     }
+        // }
+        // this.internalChange = false
+        // this.repositionParameterPanels()
     }
     
     updateParameterValuesWithUpdateListForPlant(aPlant: PdPlant, updateList: PdPlantUpdateEvent[]): void {
-        // let i: long
-        // let paramPanel: PdParameterPanel
-        // let updateEvent: PdPlantUpdateEvent
-        // let needToUpdateWholePlant: boolean
+        throw new Error("TODO Unfinished")
+        // // let i: long
+        // // let paramPanel: PdParameterPanel
+        // // let updateEvent: PdPlantUpdateEvent
+        // // let needToUpdateWholePlant: boolean
         
-        if (aPlant !== this.focusedPlant()) {
-            return
-        }
-        if (updateList.Count <= 0) {
-            return
-        }
-        // first look to see if the whole plant needs updated - if any do, update it 
-        // this is for side effects in GWI - left in just in case we need it later 
-        let needToUpdateWholePlant = false
-        for (let i = 0; i <= updateList.length - 1; i++) {
-            const updateEvent: PdPlantUpdateEvent = updateList[i]
-            if ((updateEvent.plant !== null) && (updateEvent.plant.wholePlantUpdateNeeded)) {
-                needToUpdateWholePlant = true
-                updateEvent.plant.wholePlantUpdateNeeded = false
-            }
-        }
-        if (needToUpdateWholePlant) {
-            this.updateParametersPanelForFirstSelectedPlant()
-            return
-        }
-        if (this.parametersScrollBox.ControlCount > 0) {
-            for (i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
-                if (this.parametersScrollBox.Controls[i] instanceof uppanel.PdParameterPanel) {
-                    // if not updating everything, update based on list 
-                    // tell all components to look at list to see if they need updating 
-                    const paramPanel: PdParameterPanel = this.parametersScrollBox.Controls[i]
-                    // components check if use models and fields in list 
-                    paramPanel.updateFromUpdateEventList(updateList)
-                }
-            }
-        }
+        // if (aPlant !== this.focusedPlant()) {
+        //     return
+        // }
+        // if (updateList.Count <= 0) {
+        //     return
+        // }
+        // // first look to see if the whole plant needs updated - if any do, update it 
+        // // this is for side effects in GWI - left in just in case we need it later 
+        // let needToUpdateWholePlant = false
+        // for (let i = 0; i <= updateList.length - 1; i++) {
+        //     const updateEvent: PdPlantUpdateEvent = updateList[i]
+        //     if ((updateEvent.plant !== null) && (updateEvent.plant.wholePlantUpdateNeeded)) {
+        //         needToUpdateWholePlant = true
+        //         updateEvent.plant.wholePlantUpdateNeeded = false
+        //     }
+        // }
+        // if (needToUpdateWholePlant) {
+        //     this.updateParametersPanelForFirstSelectedPlant()
+        //     return
+        // }
+        // if (this.parametersScrollBox.ControlCount > 0) {
+        //     for (i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
+        //         if (this.parametersScrollBox.Controls[i] instanceof uppanel.PdParameterPanel) {
+        //             // if not updating everything, update based on list 
+        //             // tell all components to look at list to see if they need updating 
+        //             const paramPanel: PdParameterPanel = this.parametersScrollBox.Controls[i]
+        //             // components check if use models and fields in list 
+        //             paramPanel.updateFromUpdateEventList(updateList)
+        //         }
+        //     }
+        // }
     }
     
     // stats panel
     updateStatisticsPanelForFirstSelectedPlant(): void {
-        if (this.statsPanel === null) {
-            return
-        }
-        this.statsPanel.updatePlant(this.focusedPlant())
-        this.statsPanel.updatePlantValues()
+        throw new Error("TODO Unfinished")
+        // if (this.statsPanel === null) {
+        //     return
+        // }
+        // this.statsPanel.updatePlant(this.focusedPlant())
+        // this.statsPanel.updatePlantValues()
     }
     
     // note panel
@@ -5415,28 +5536,31 @@ export class TMainForm {
         if (this.noteMemo === null) {
             return
         }
+        const plant = this.focusedPlant()
+        if (plant === null) { return }
         this.updatePlantNameLabel(kTabNote)
-        this.updateForChangeToPlantNote(this.focusedPlant())
+        this.updateForChangeToPlantNote(plant)
     }
     
     noteEditClick(): void {
-        const plant = this.focusedPlant()
-        if (plant === null) {
-            return
-        }
-        const noteForm: TNoteEditForm = unoted.TNoteEditForm().create(this)
-        if (noteForm === null) {
-            throw new Error("Problem: Could not create note edit window.")
-        }
-        noteForm.noteEditMemo.Lines.AddStrings(plant.noteLines)
-        noteForm.Caption = "Edit note for " + plant.getName()
-        if (noteForm.ShowModal() !== mrCancel) {
-            // command will take ownership of this and free it if necessary
-            const commandLines: TStringList = delphi_compatability.TStringList.create
-            commandLines.AddStrings(noteForm.noteEditMemo.Lines)
-            const newCommand = new PdEditNoteCommand(plant, commandLines)
-            this.doCommand(newCommand)
-        }
+        throw new Error("TODO Unfinished")
+        // const plant = this.focusedPlant()
+        // if (plant === null) {
+        //     return
+        // }
+        // const noteForm: TNoteEditForm = unoted.TNoteEditForm().create(this)
+        // if (noteForm === null) {
+        //     throw new Error("Problem: Could not create note edit window.")
+        // }
+        // noteForm.noteEditMemo.Lines.AddStrings(plant.noteLines)
+        // noteForm.Caption = "Edit note for " + plant.getName()
+        // if (noteForm.ShowModal() !== mrCancel) {
+        //     // command will take ownership of this and free it if necessary
+        //     const commandLines: TStringList = delphi_compatability.TStringList.create
+        //     commandLines.AddStrings(noteForm.noteEditMemo.Lines)
+        //     const newCommand = new PdEditNoteCommand(plant, commandLines)
+        //     this.doCommand(newCommand)
+        // }
     }
     
     NotePopupMenuCopyClick(): void {
@@ -5461,143 +5585,148 @@ export class TMainForm {
     
     // rotations panel
     updateRotationsPanelForFirstSelectedPlant(): void {
-        this.updatePlantNameLabel(kTabRotations)
-        const color: TColorRef = this.textColorToRepresentPlantSelection(false)
-        // location
-        this.locationLabel.Font.Color = color
-        this.xLocationLabel.Font.Color = color
-        this.yLocationLabel.Font.Color = color
-        this.locationPixelsLabel.Font.Color = color
-        // size
-        this.sizingLabel.Font.Color = color
-        this.drawingScalePixelsPerMmLabel.Font.Color = color
-        // rotation
-        this.rotationLabel.Font.Color = color
-        this.xRotationLabel.Font.Color = color
-        this.yRotationLabel.Font.Color = color
-        this.zRotationLabel.Font.Color = color
-        // other updates
-        this.updateForChangeToPlantRotations()
-        this.updateForChangeToSelectedPlantsDrawingScale()
-        this.updateForChangeToSelectedPlantsLocation()
+        throw new Error("TODO Unfinished")
+        // this.updatePlantNameLabel(kTabRotations)
+        // const color: TColorRef = this.textColorToRepresentPlantSelection(false)
+        // // location
+        // this.locationLabel.Font.Color = color
+        // this.xLocationLabel.Font.Color = color
+        // this.yLocationLabel.Font.Color = color
+        // this.locationPixelsLabel.Font.Color = color
+        // // size
+        // this.sizingLabel.Font.Color = color
+        // this.drawingScalePixelsPerMmLabel.Font.Color = color
+        // // rotation
+        // this.rotationLabel.Font.Color = color
+        // this.xRotationLabel.Font.Color = color
+        // this.yRotationLabel.Font.Color = color
+        // this.zRotationLabel.Font.Color = color
+        // // other updates
+        // this.updateForChangeToPlantRotations()
+        // this.updateForChangeToSelectedPlantsDrawingScale()
+        // this.updateForChangeToSelectedPlantsLocation()
     }
     
     // posing panel
     // ------------------------------------------------------------------------------------- *posing - updating 
     updatePosingForFirstSelectedPlant(): void {
-        this.internalChange = true
-        this.posedPartsLabel.Font.Color = this.textColorToRepresentPlantSelection(false)
-        this.selectedPartLabel.Font.Color = this.textColorToRepresentPlantSelection(false)
-        this.posingPosePart.Enabled = false
-        this.posingUnposePart.Enabled = false
-        // called when plant changes
-        this.posedPlantParts = []
-        this.updatePlantNameLabel(kTabPosing)
-        if (this.focusedPlant() === null) {
-            this.posedPlantParts.Text = ""
-            this.posedPlantParts.Enabled = false
-        } else {
-            this.posedPlantParts.Enabled = true
-            if (this.focusedPlant().amendments.length <= 0) {
-                // load list of parts with amendments
-                this.selectedPlantPartID = -1
-            } else {
-                for (let i = 0; i <= this.focusedPlant().amendments.length - 1; i++) {
-                    const amendment: PdPlantDrawingAmendment = this.focusedPlant().amendments[i]
-                    const partString = this.partDescriptionForIDAndType(amendment.partID, amendment.typeOfPart)
-                    if (this.posedPlantParts.Items.indexOf(partString) < 0) {
-                        this.posedPlantParts.Items.Add(partString)
-                    }
-                }
-                this.posedPlantParts.Items.Add(kSelectNoPosedPartString)
-            }
-        }
-        this.internalChange = false
-        this.updatePosingForSelectedPlantPart()
+        throw new Error("TODO Unfinished")
+        // this.internalChange = true
+        // this.posedPartsLabel.Font.Color = this.textColorToRepresentPlantSelection(false)
+        // this.selectedPartLabel.Font.Color = this.textColorToRepresentPlantSelection(false)
+        // this.posingPosePart.Enabled = false
+        // this.posingUnposePart.Enabled = false
+        // // called when plant changes
+        // this.posedPlantParts = []
+        // this.updatePlantNameLabel(kTabPosing)
+        // if (this.focusedPlant() === null) {
+        //     this.posedPlantParts.Text = ""
+        //     this.posedPlantParts.Enabled = false
+        // } else {
+        //     this.posedPlantParts.Enabled = true
+        //     if (this.focusedPlant().amendments.length <= 0) {
+        //         // load list of parts with amendments
+        //         this.selectedPlantPartID = -1
+        //     } else {
+        //         for (let i = 0; i <= this.focusedPlant().amendments.length - 1; i++) {
+        //             const amendment: PdPlantDrawingAmendment = this.focusedPlant().amendments[i]
+        //             const partString = this.partDescriptionForIDAndType(amendment.partID, amendment.typeOfPart)
+        //             if (this.posedPlantParts.Items.indexOf(partString) < 0) {
+        //                 this.posedPlantParts.Items.Add(partString)
+        //             }
+        //         }
+        //         this.posedPlantParts.Items.Add(kSelectNoPosedPartString)
+        //     }
+        // }
+        // this.internalChange = false
+        // this.updatePosingForSelectedPlantPart()
     }
     
     updatePosingForSelectedPlantPart(): void {
-        // PDF PORT -- removed semicolon from after begin
-        this.internalChange = true
-        if (this.focusedPlant() === null) {
-            // called when selected part changes
-            this.selectedPlantPartID = -1
-            this.selectedPlantPartType = ""
-            this.selectedPartLabel.Caption = kNoPartSelected
-        }
-        if (this.selectedPlantPartID >= 0) {
-            const partString = this.partDescriptionForIDAndType(this.selectedPlantPartID, this.selectedPlantPartType)
-            this.selectedPartLabel.Caption = "Selected part: " + partString
-            const index = this.posedPlantParts.Items.indexOf(partString)
-            if (index >= 0) {
-                this.posedPlantParts.ItemIndex = index
-            } else {
-                this.posedPlantParts.ItemIndex = -1
-            }
-        } else {
-            this.posedPlantParts.ItemIndex = -1
-            this.selectedPartLabel.Caption = kNoPartSelected
-        }
-        this.posingPosePart.Enabled = !(this.selectedPartLabel.Caption === kNoPartSelected)
-        this.posingUnposePart.Enabled = false
-        this.internalChange = false
-        this.updatePoseInfo()
+        throw new Error("TODO Unfinished")
+        // // PDF PORT -- removed semicolon from after begin
+        // this.internalChange = true
+        // if (this.focusedPlant() === null) {
+        //     // called when selected part changes
+        //     this.selectedPlantPartID = -1
+        //     this.selectedPlantPartType = ""
+        //     this.selectedPartLabel.Caption = kNoPartSelected
+        // }
+        // if (this.selectedPlantPartID >= 0) {
+        //     const partString = this.partDescriptionForIDAndType(this.selectedPlantPartID, this.selectedPlantPartType)
+        //     this.selectedPartLabel.Caption = "Selected part: " + partString
+        //     const index = this.posedPlantParts.Items.indexOf(partString)
+        //     if (index >= 0) {
+        //         this.posedPlantParts.ItemIndex = index
+        //     } else {
+        //         this.posedPlantParts.ItemIndex = -1
+        //     }
+        // } else {
+        //     this.posedPlantParts.ItemIndex = -1
+        //     this.selectedPartLabel.Caption = kNoPartSelected
+        // }
+        // this.posingPosePart.Enabled = !(this.selectedPartLabel.Caption === kNoPartSelected)
+        // this.posingUnposePart.Enabled = false
+        // this.internalChange = false
+        // this.updatePoseInfo()
     }
     
     updatePoseInfo(): void {
-        this.internalChange = true
-        let amendment: PdPlantDrawingAmendment | null = null
-        const partID = this.selectedPartIDInAmendedPartsList()
-        if (partID >= 0) {
-            amendment = this.focusedPlant().amendmentForPartID(partID)
-        }
-        this.posingPosePart.Enabled = (!(this.selectedPartLabel.Caption === kNoPartSelected)) && (amendment === null)
-        this.posingUnposePart.Enabled = (!(this.selectedPartLabel.Caption === kNoPartSelected)) && (!(amendment === null))
-        this.posingDetailsPanel.Visible = amendment !== null
-        if (amendment !== null) {
-            this.posingHidePart.Checked = amendment.hide
-            //
-            //    posingChangeColors.checked := changeColors;
-            //    posingFrontfaceColor.color := faceColor;
-            //    posingBackfaceColor.color := BackfaceColor;
-            //    posingLineColor.color := lineColor;
-            //    posingChangeAllColorsAfter.checked := propagateColors;
-            //    
-            this.posingAddExtraRotation.Checked = amendment.addRotations
-            this.posingXRotationEdit.Text = IntToStr(intround(amendment.xRotation))
-            this.posingYRotationEdit.Text = IntToStr(intround(amendment.yRotation))
-            this.posingZRotationEdit.Text = IntToStr(intround(amendment.zRotation))
-            this.posingMultiplyScale.Checked = amendment.multiplyScale
-            this.posingMultiplyScaleAllPartsAfter.Checked = amendment.propagateScale
-            this.posingScaleMultiplierEdit.Text = IntToStr(amendment.scaleMultiplier_pct)
-            this.posingLengthMultiplierEdit.Text = IntToStr(amendment.lengthMultiplier_pct)
-            this.posingWidthMultiplierEdit.Text = IntToStr(amendment.widthMultiplier_pct)
-        }
-        this.internalChange = false
-        this.updateForDependenciesWithinPoseInfo()
+        throw new Error("TODO Unfinished")
+        // this.internalChange = true
+        // let amendment: PdPlantDrawingAmendment | null = null
+        // const partID = this.selectedPartIDInAmendedPartsList()
+        // if (partID >= 0) {
+        //     amendment = this.focusedPlant().amendmentForPartID(partID)
+        // }
+        // this.posingPosePart.Enabled = (!(this.selectedPartLabel.Caption === kNoPartSelected)) && (amendment === null)
+        // this.posingUnposePart.Enabled = (!(this.selectedPartLabel.Caption === kNoPartSelected)) && (!(amendment === null))
+        // this.posingDetailsPanel.Visible = amendment !== null
+        // if (amendment !== null) {
+        //     this.posingHidePart.Checked = amendment.hide
+        //     //
+        //     //    posingChangeColors.checked := changeColors;
+        //     //    posingFrontfaceColor.color := faceColor;
+        //     //    posingBackfaceColor.color := BackfaceColor;
+        //     //    posingLineColor.color := lineColor;
+        //     //    posingChangeAllColorsAfter.checked := propagateColors;
+        //     //    
+        //     this.posingAddExtraRotation.Checked = amendment.addRotations
+        //     this.posingXRotationEdit.Text = IntToStr(intround(amendment.xRotation))
+        //     this.posingYRotationEdit.Text = IntToStr(intround(amendment.yRotation))
+        //     this.posingZRotationEdit.Text = IntToStr(intround(amendment.zRotation))
+        //     this.posingMultiplyScale.Checked = amendment.multiplyScale
+        //     this.posingMultiplyScaleAllPartsAfter.Checked = amendment.propagateScale
+        //     this.posingScaleMultiplierEdit.Text = IntToStr(amendment.scaleMultiplier_pct)
+        //     this.posingLengthMultiplierEdit.Text = IntToStr(amendment.lengthMultiplier_pct)
+        //     this.posingWidthMultiplierEdit.Text = IntToStr(amendment.widthMultiplier_pct)
+        // }
+        // this.internalChange = false
+        // this.updateForDependenciesWithinPoseInfo()
     }
     
     updateForDependenciesWithinPoseInfo(): void {
-        this.internalChange = true
-        this.posingChangeAllColorsAfter.Enabled = this.posingChangeColors.Checked
-        this.posingMultiplyScaleAllPartsAfter.Enabled = this.posingMultiplyScale.Checked
-        this.posingMultiplyScaleAllPartsAfterLabel.Enabled = this.posingMultiplyScaleAllPartsAfter.Enabled
-        //
-        //  posingLineColor.visible := posingChangeColors.checked;
-        //  posingLineColorLabel.enabled := posingChangeColors.checked;
-        //  posingFrontfaceColor.visible := posingChangeColors.checked;
-        //  posingFrontfaceColorLabel.enabled := posingChangeColors.checked;
-        //  posingBackfaceColor.visible := posingChangeColors.checked;
-        //  posingBackfaceColorLabel.enabled := posingChangeColors.checked;
-        //  
-        enableOrDisableSet(this.posingXRotationLabel, this.posingXRotationEdit, this.posingXRotationSpin, null, this.posingAddExtraRotation.Checked)
-        enableOrDisableSet(this.posingYRotationLabel, this.posingYRotationEdit, this.posingYRotationSpin, null, this.posingAddExtraRotation.Checked)
-        enableOrDisableSet(this.posingZRotationLabel, this.posingZRotationEdit, this.posingZRotationSpin, null, this.posingAddExtraRotation.Checked)
-        this.rotationDegreesLabel.Enabled = this.posingAddExtraRotation.Checked
-        enableOrDisableSet(this.posingScaleMultiplierLabel, this.posingScaleMultiplierEdit, this.posingScaleMultiplierSpin, this.posingScaleMultiplierPercent, this.posingMultiplyScale.Checked)
-        enableOrDisableSet(this.posingLengthMultiplierLabel, this.posingLengthMultiplierEdit, this.posingLengthMultiplierSpin, this.posingLengthMultiplierPercent, this.posingMultiplyScale.Checked)
-        enableOrDisableSet(this.posingWidthMultiplierLabel, this.posingWidthMultiplierEdit, this.posingWidthMultiplierSpin, this.posingWidthMultiplierPercent, this.posingMultiplyScale.Checked)
-        this.internalChange = false
+        throw new Error("TODO Unfinished")
+        // this.internalChange = true
+        // this.posingChangeAllColorsAfter.Enabled = this.posingChangeColors.Checked
+        // this.posingMultiplyScaleAllPartsAfter.Enabled = this.posingMultiplyScale.Checked
+        // this.posingMultiplyScaleAllPartsAfterLabel.Enabled = this.posingMultiplyScaleAllPartsAfter.Enabled
+        // //
+        // //  posingLineColor.visible := posingChangeColors.checked;
+        // //  posingLineColorLabel.enabled := posingChangeColors.checked;
+        // //  posingFrontfaceColor.visible := posingChangeColors.checked;
+        // //  posingFrontfaceColorLabel.enabled := posingChangeColors.checked;
+        // //  posingBackfaceColor.visible := posingChangeColors.checked;
+        // //  posingBackfaceColorLabel.enabled := posingChangeColors.checked;
+        // //  
+        // enableOrDisableSet(this.posingXRotationLabel, this.posingXRotationEdit, this.posingXRotationSpin, null, this.posingAddExtraRotation.Checked)
+        // enableOrDisableSet(this.posingYRotationLabel, this.posingYRotationEdit, this.posingYRotationSpin, null, this.posingAddExtraRotation.Checked)
+        // enableOrDisableSet(this.posingZRotationLabel, this.posingZRotationEdit, this.posingZRotationSpin, null, this.posingAddExtraRotation.Checked)
+        // this.rotationDegreesLabel.Enabled = this.posingAddExtraRotation.Checked
+        // enableOrDisableSet(this.posingScaleMultiplierLabel, this.posingScaleMultiplierEdit, this.posingScaleMultiplierSpin, this.posingScaleMultiplierPercent, this.posingMultiplyScale.Checked)
+        // enableOrDisableSet(this.posingLengthMultiplierLabel, this.posingLengthMultiplierEdit, this.posingLengthMultiplierSpin, this.posingLengthMultiplierPercent, this.posingMultiplyScale.Checked)
+        // enableOrDisableSet(this.posingWidthMultiplierLabel, this.posingWidthMultiplierEdit, this.posingWidthMultiplierSpin, this.posingWidthMultiplierPercent, this.posingMultiplyScale.Checked)
+        // this.internalChange = false
     }
     
     redrawAllPlantsInViewWithAmendments(): void {
@@ -5631,6 +5760,7 @@ export class TMainForm {
         this.doCommand(newCommand)
     }
     
+    /*
     posingFrontfaceColorMouseUp(Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
         this.posingFrontfaceColor.Color = domain.getColorUsingCustomColors(this.posingFrontfaceColor.Color)
         this.changeSelectedPose(this.posingFrontfaceColor)
@@ -5708,79 +5838,82 @@ export class TMainForm {
         }
     }
     
+    */
+    
     // ------------------------------------------------------------------------------------- *posing - commands 
-    changeSelectedPose(): void {
-        // TODO sender was event or component sending event
-        if (this.internalChange) {
-            return
-        }
-        this.updateForDependenciesWithinPoseInfo()
-        const plant = this.focusedPlant()
-        if (plant === null) {
-            return
-        }
-        // command will take ownership of this and free it if necessary
-        const newAmendment = new PdPlantDrawingAmendment()
-        const partID = this.selectedPartIDInAmendedPartsList()
-        const currentAmendment: PdPlantDrawingAmendment | null = this.focusedPlant().amendmentForPartID(partID)
-        if (currentAmendment === null) {
-            return
-        }
-        let field: string
-        if ((Sender === this.posingHidePart)) {
-            field = "hide"
-        } else if ((Sender === this.posingAddExtraRotation)) {
-            field = "rotate"
-        } else if (((Sender === this.posingXRotationEdit) || (Sender === this.posingXRotationSpin))) {
-            field = "X rotation"
-        } else if (((Sender === this.posingYRotationEdit) || (Sender === this.posingYRotationSpin))) {
-            field = "Y rotation"
-        } else if (((Sender === this.posingZRotationEdit) || (Sender === this.posingZRotationSpin))) {
-            field = "Z rotation"
-        } else if ((Sender === this.posingMultiplyScale)) {
-            field = "scale"
-        } else if ((Sender === this.posingMultiplyScaleAllPartsAfter)) {
-            field = "scale above"
-        } else if (((Sender === this.posingScaleMultiplierEdit) || (Sender === this.posingScaleMultiplierSpin))) {
-            field = "3D object scale"
-        } else if (((Sender === this.posingLengthMultiplierEdit) || (Sender === this.posingLengthMultiplierSpin))) {
-            field = "line length"
-        } else if (((Sender === this.posingWidthMultiplierEdit) || (Sender === this.posingWidthMultiplierSpin))) {
-            field = "line width"
-        } else {
-            field = ""
-        }
-        //   cfk if bring back color finish these
-        //    posingChangeColors: TCheckBox;
-        //    posingChangeAllColorsAfter: TCheckBox;
-        //    posingLineColor: TPanel;
-        //    posingFrontfaceColor: TPanel;
-        //    posingBackfaceColor: TPanel;
-        //    posingLineColorLabel: TLabel;
-        //    posingFrontfaceColorLabel: TLabel;
-        //    posingBackfaceColorLabel: TLabel;
-        //    
-        newAmendment.partID = this.partIDForFullDescription(this.posedPlantParts.Text)
-        newAmendment.typeOfPart = this.partTypeForFullDescription(this.posedPlantParts.Text)
-        newAmendment.hide = this.posingHidePart.Checked
-        //
-        //    changeColors := posingChangeColors.checked;
-        //    faceColor := posingFrontfaceColor.color;
-        //    backfaceColor := posingBackfaceColor.color;
-        //    lineColor := posingLineColor.color;
-        //    propagateColors := posingChangeAllColorsAfter.checked;
-        //    
-        newAmendment.addRotations = this.posingAddExtraRotation.Checked
-        newAmendment.xRotation = intMax(-360, intMin(360, StrToIntDef(this.posingXRotationEdit.Text, intround(currentAmendment.xRotation))))
-        newAmendment.yRotation = intMax(-360, intMin(360, StrToIntDef(this.posingYRotationEdit.Text, intround(currentAmendment.yRotation))))
-        newAmendment.zRotation = intMax(-360, intMin(360, StrToIntDef(this.posingZRotationEdit.Text, intround(currentAmendment.zRotation))))
-        newAmendment.multiplyScale = this.posingMultiplyScale.Checked
-        newAmendment.propagateScale = this.posingMultiplyScaleAllPartsAfter.Checked
-        newAmendment.scaleMultiplier_pct = intMax(0, intMin(1000, StrToIntDef(this.posingScaleMultiplierEdit.Text, currentAmendment.scaleMultiplier_pct)))
-        newAmendment.lengthMultiplier_pct = intMax(0, intMin(1000, StrToIntDef(this.posingLengthMultiplierEdit.Text, currentAmendment.lengthMultiplier_pct)))
-        newAmendment.widthMultiplier_pct = intMax(0, intMin(1000, StrToIntDef(this.posingWidthMultiplierEdit.Text, currentAmendment.widthMultiplier_pct)))
-        const newCommand = new PdEditAmendmentCommand(plant, newAmendment, field)
-        this.doCommand(newCommand)
+    changeSelectedPose(Sender: any): void {
+        throw new Error("Unfinished")
+        // // TODO sender was event or component sending event
+        // if (this.internalChange) {
+        //     return
+        // }
+        // this.updateForDependenciesWithinPoseInfo()
+        // const plant = this.focusedPlant()
+        // if (plant === null) {
+        //     return
+        // }
+        // // command will take ownership of this and free it if necessary
+        // const newAmendment = new PdPlantDrawingAmendment()
+        // const partID = this.selectedPartIDInAmendedPartsList()
+        // const currentAmendment: PdPlantDrawingAmendment | null = plant.amendmentForPartID(partID)
+        // if (currentAmendment === null) {
+        //     return
+        // }
+        // let field: string
+        // if ((Sender === this.posingHidePart)) {
+        //     field = "hide"
+        // } else if ((Sender === this.posingAddExtraRotation)) {
+        //     field = "rotate"
+        // } else if (((Sender === this.posingXRotationEdit) || (Sender === this.posingXRotationSpin))) {
+        //     field = "X rotation"
+        // } else if (((Sender === this.posingYRotationEdit) || (Sender === this.posingYRotationSpin))) {
+        //     field = "Y rotation"
+        // } else if (((Sender === this.posingZRotationEdit) || (Sender === this.posingZRotationSpin))) {
+        //     field = "Z rotation"
+        // } else if ((Sender === this.posingMultiplyScale)) {
+        //     field = "scale"
+        // } else if ((Sender === this.posingMultiplyScaleAllPartsAfter)) {
+        //     field = "scale above"
+        // } else if (((Sender === this.posingScaleMultiplierEdit) || (Sender === this.posingScaleMultiplierSpin))) {
+        //     field = "3D object scale"
+        // } else if (((Sender === this.posingLengthMultiplierEdit) || (Sender === this.posingLengthMultiplierSpin))) {
+        //     field = "line length"
+        // } else if (((Sender === this.posingWidthMultiplierEdit) || (Sender === this.posingWidthMultiplierSpin))) {
+        //     field = "line width"
+        // } else {
+        //     field = ""
+        // }
+        // //   cfk if bring back color finish these
+        // //    posingChangeColors: TCheckBox;
+        // //    posingChangeAllColorsAfter: TCheckBox;
+        // //    posingLineColor: TPanel;
+        // //    posingFrontfaceColor: TPanel;
+        // //    posingBackfaceColor: TPanel;
+        // //    posingLineColorLabel: TLabel;
+        // //    posingFrontfaceColorLabel: TLabel;
+        // //    posingBackfaceColorLabel: TLabel;
+        // //    
+        // newAmendment.partID = this.partIDForFullDescription(this.posedPlantParts.Text)
+        // newAmendment.typeOfPart = this.partTypeForFullDescription(this.posedPlantParts.Text)
+        // newAmendment.hide = this.posingHidePart.Checked
+        // //
+        // //    changeColors := posingChangeColors.checked;
+        // //    faceColor := posingFrontfaceColor.color;
+        // //    backfaceColor := posingBackfaceColor.color;
+        // //    lineColor := posingLineColor.color;
+        // //    propagateColors := posingChangeAllColorsAfter.checked;
+        // //    
+        // newAmendment.addRotations = this.posingAddExtraRotation.Checked
+        // newAmendment.xRotation = intMax(-360, intMin(360, StrToIntDef(this.posingXRotationEdit.Text, intround(currentAmendment.xRotation))))
+        // newAmendment.yRotation = intMax(-360, intMin(360, StrToIntDef(this.posingYRotationEdit.Text, intround(currentAmendment.yRotation))))
+        // newAmendment.zRotation = intMax(-360, intMin(360, StrToIntDef(this.posingZRotationEdit.Text, intround(currentAmendment.zRotation))))
+        // newAmendment.multiplyScale = this.posingMultiplyScale.Checked
+        // newAmendment.propagateScale = this.posingMultiplyScaleAllPartsAfter.Checked
+        // newAmendment.scaleMultiplier_pct = intMax(0, intMin(1000, StrToIntDef(this.posingScaleMultiplierEdit.Text, currentAmendment.scaleMultiplier_pct)))
+        // newAmendment.lengthMultiplier_pct = intMax(0, intMin(1000, StrToIntDef(this.posingLengthMultiplierEdit.Text, currentAmendment.lengthMultiplier_pct)))
+        // newAmendment.widthMultiplier_pct = intMax(0, intMin(1000, StrToIntDef(this.posingWidthMultiplierEdit.Text, currentAmendment.widthMultiplier_pct)))
+        // const newCommand = new PdEditAmendmentCommand(plant, newAmendment, field)
+        // this.doCommand(newCommand)
     }
     
     posingPosePartClick(): void {
@@ -5884,239 +6017,251 @@ export class TMainForm {
     
     // ------------------------------------------------------------------------------------- *resizing 
     FormResize(): void {
-        let newTop: short
-        let newLeft: short
-        let newWidth: short
-        let newHeight: short
-        let splitterWidthOrHeight: short
-        let windowLock: boolean
+        throw new Error("TODO Unfinished")
+        // let newTop: short
+        // let newLeft: short
+        // let newWidth: short
+        // let newHeight: short
+        // let splitterWidthOrHeight: short
+        // let windowLock: boolean
         
-        if (this.WindowState === delphi_compatability.TWindowState.wsMinimized) {
-            return
-        }
-        if (domain === null) {
-            return
-        }
-        if (this.drawingBitmap === null) {
-            return
-        }
-        if (this.selectedPlants === null) {
-            return
-        }
-        this.horizontalSplitter.Visible = false
-        this.verticalSplitter.Visible = false
-        this.plantListPanel.Visible = false
-        this.plantFocusPanel.Visible = false
-        windowLock = UNRESOLVED.lockWindowUpdate(this.Handle)
-        this.toolbarPanel.SetBounds(0, 0, this.ClientWidth, this.toolbarPanel.Height)
-        //assumes they are equal, I have at 4 now
-        splitterWidthOrHeight = this.verticalSplitter.Width
-        if (this.lastHeight !== 0) {
-            newTop = intround(1.0 * this.horizontalSplitter.Top * this.ClientHeight / this.lastHeight)
-        } else {
-            newTop = this.ClientHeight / 2
-        }
-        newTop = intMax(0, intMin(this.ClientHeight - 1, newTop))
-        newHeight = intMax(0, this.ClientHeight - newTop - splitterWidthOrHeight)
-        if (this.lastWidth !== 0) {
-            newLeft = intround(1.0 * this.verticalSplitter.Left * this.ClientWidth / this.lastWidth)
-        } else {
-            newLeft = this.ClientWidth / 2
-        }
-        newLeft = intMax(0, intMin(this.ClientWidth - 1, newLeft))
-        newWidth = intMax(0, this.ClientWidth - newLeft - splitterWidthOrHeight)
-        if (domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal) {
-            this.horizontalSplitter.SetBounds(0, newTop, this.ClientWidth, this.horizontalSplitter.Height)
-            this.verticalSplitter.SetBounds(newLeft, newTop + this.horizontalSplitter.Height, this.verticalSplitter.Width, newHeight)
-        } else if (domain.options.mainWindowOrientation === kMainWindowOrientationVertical) {
-            this.verticalSplitter.SetBounds(newLeft, this.toolbarPanel.Height, this.verticalSplitter.Width, intMax(0, this.ClientHeight - this.toolbarPanel.Height))
-            this.horizontalSplitter.SetBounds(newLeft + this.verticalSplitter.Width, newTop, newWidth, this.horizontalSplitter.Height)
-        }
-        // resize images and panels 
-        this.resizePanelsToHorizontalSplitter()
-        this.resizePanelsToVerticalSplitter()
-        this.lastHeight = this.ClientHeight
-        this.lastWidth = this.ClientWidth
-        if (windowLock) {
-            UNRESOLVED.lockWindowUpdate(0)
-        }
-        this.horizontalSplitter.Visible = true
-        this.verticalSplitter.Visible = true
-        this.plantListPanel.Visible = true
-        this.plantFocusPanel.Visible = true
+        // if (this.WindowState === delphi_compatability.TWindowState.wsMinimized) {
+        //     return
+        // }
+        // if (domain === null) {
+        //     return
+        // }
+        // if (this.drawingBitmap === null) {
+        //     return
+        // }
+        // if (this.selectedPlants === null) {
+        //     return
+        // }
+        // this.horizontalSplitter.Visible = false
+        // this.verticalSplitter.Visible = false
+        // this.plantListPanel.Visible = false
+        // this.plantFocusPanel.Visible = false
+        // windowLock = UNRESOLVED.lockWindowUpdate(this.Handle)
+        // this.toolbarPanel.SetBounds(0, 0, this.ClientWidth, this.toolbarPanel.Height)
+        // //assumes they are equal, I have at 4 now
+        // splitterWidthOrHeight = this.verticalSplitter.Width
+        // if (this.lastHeight !== 0) {
+        //     newTop = intround(1.0 * this.horizontalSplitter.Top * this.ClientHeight / this.lastHeight)
+        // } else {
+        //     newTop = this.ClientHeight / 2
+        // }
+        // newTop = intMax(0, intMin(this.ClientHeight - 1, newTop))
+        // newHeight = intMax(0, this.ClientHeight - newTop - splitterWidthOrHeight)
+        // if (this.lastWidth !== 0) {
+        //     newLeft = intround(1.0 * this.verticalSplitter.Left * this.ClientWidth / this.lastWidth)
+        // } else {
+        //     newLeft = this.ClientWidth / 2
+        // }
+        // newLeft = intMax(0, intMin(this.ClientWidth - 1, newLeft))
+        // newWidth = intMax(0, this.ClientWidth - newLeft - splitterWidthOrHeight)
+        // if (domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal) {
+        //     this.horizontalSplitter.SetBounds(0, newTop, this.ClientWidth, this.horizontalSplitter.Height)
+        //     this.verticalSplitter.SetBounds(newLeft, newTop + this.horizontalSplitter.Height, this.verticalSplitter.Width, newHeight)
+        // } else if (domain.options.mainWindowOrientation === kMainWindowOrientationVertical) {
+        //     this.verticalSplitter.SetBounds(newLeft, this.toolbarPanel.Height, this.verticalSplitter.Width, intMax(0, this.ClientHeight - this.toolbarPanel.Height))
+        //     this.horizontalSplitter.SetBounds(newLeft + this.verticalSplitter.Width, newTop, newWidth, this.horizontalSplitter.Height)
+        // }
+        // // resize images and panels 
+        // this.resizePanelsToHorizontalSplitter()
+        // this.resizePanelsToVerticalSplitter()
+        // this.lastHeight = this.ClientHeight
+        // this.lastWidth = this.ClientWidth
+        // if (windowLock) {
+        //     UNRESOLVED.lockWindowUpdate(0)
+        // }
+        // this.horizontalSplitter.Visible = true
+        // this.verticalSplitter.Visible = true
+        // this.plantListPanel.Visible = true
+        // this.plantFocusPanel.Visible = true
     }
     
     // resizing 
     resizePanelsToVerticalSplitter(): void {
-        let newLeft: short
-        let newWidth: short
-        let newTop: short
-        let newHeight: short
+        throw new Error("TODO Unfinished")
+        // let newLeft: short
+        // let newWidth: short
+        // let newTop: short
+        // let newHeight: short
         
-        newLeft = this.verticalSplitter.Left + this.verticalSplitter.Width
-        newWidth = intMax(0, this.ClientWidth - newLeft)
-        newTop = this.horizontalSplitter.Top + this.horizontalSplitter.Height
-        newHeight = intMax(0, this.ClientHeight - newTop)
-        if (domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal) {
-            this.plantListPanel.SetBounds(0, newTop, this.verticalSplitter.Left, newHeight)
-            this.plantFocusPanel.SetBounds(newLeft, newTop, newWidth, newHeight)
-        } else if (domain.options.mainWindowOrientation === kMainWindowOrientationVertical) {
-            this.plantListPanel.SetBounds(newLeft, this.toolbarPanel.Height, newWidth, this.horizontalSplitter.Top - this.toolbarPanel.Height)
-            this.plantFocusPanel.SetBounds(newLeft, newTop, newWidth, newHeight)
-            //don't change top here
-            this.horizontalSplitter.SetBounds(newLeft, this.horizontalSplitter.Top, newWidth, this.horizontalSplitter.Height)
-            this.drawingPaintBox.SetBounds(0, this.toolbarPanel.Height, newLeft, intMax(0, this.ClientHeight - this.toolbarPanel.Height))
-            this.resizeDrawingBitmapIfNecessary()
-        }
-        this.resizePlantListPanel()
-        this.resizePlantFocusPanel()
+        // newLeft = this.verticalSplitter.Left + this.verticalSplitter.Width
+        // newWidth = intMax(0, this.ClientWidth - newLeft)
+        // newTop = this.horizontalSplitter.Top + this.horizontalSplitter.Height
+        // newHeight = intMax(0, this.ClientHeight - newTop)
+        // if (domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal) {
+        //     this.plantListPanel.SetBounds(0, newTop, this.verticalSplitter.Left, newHeight)
+        //     this.plantFocusPanel.SetBounds(newLeft, newTop, newWidth, newHeight)
+        // } else if (domain.options.mainWindowOrientation === kMainWindowOrientationVertical) {
+        //     this.plantListPanel.SetBounds(newLeft, this.toolbarPanel.Height, newWidth, this.horizontalSplitter.Top - this.toolbarPanel.Height)
+        //     this.plantFocusPanel.SetBounds(newLeft, newTop, newWidth, newHeight)
+        //     //don't change top here
+        //     this.horizontalSplitter.SetBounds(newLeft, this.horizontalSplitter.Top, newWidth, this.horizontalSplitter.Height)
+        //     this.drawingPaintBox.SetBounds(0, this.toolbarPanel.Height, newLeft, intMax(0, this.ClientHeight - this.toolbarPanel.Height))
+        //     this.resizeDrawingBitmapIfNecessary()
+        // }
+        // this.resizePlantListPanel()
+        // this.resizePlantFocusPanel()
     }
     
     resizePanelsToHorizontalSplitter(): void {
-        let newLeft: short
-        let newWidth: short
-        let newTop: short
-        let newHeight: short
+        throw new Error("TODO Unfinished")
+        // let newLeft: short
+        // let newWidth: short
+        // let newTop: short
+        // let newHeight: short
         
-        newLeft = this.verticalSplitter.Left + this.verticalSplitter.Width
-        newWidth = intMax(0, this.ClientWidth - newLeft)
-        newTop = this.horizontalSplitter.Top + this.horizontalSplitter.Height
-        newHeight = intMax(0, this.ClientHeight - newTop)
-        if (domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal) {
-            this.plantListPanel.SetBounds(0, newTop, this.verticalSplitter.Left, newHeight)
-            //don't change left here
-            this.verticalSplitter.SetBounds(this.verticalSplitter.Left, newTop, this.verticalSplitter.Width, newHeight)
-            this.plantFocusPanel.SetBounds(newLeft, newTop, newWidth, newHeight)
-            this.drawingPaintBox.SetBounds(0, this.toolbarPanel.Height, this.ClientWidth, intMax(0, this.horizontalSplitter.Top - this.toolbarPanel.Height))
-            this.resizeDrawingBitmapIfNecessary()
-        } else if (domain.options.mainWindowOrientation === kMainWindowOrientationVertical) {
-            this.plantListPanel.SetBounds(newLeft, this.toolbarPanel.Height, newWidth, this.horizontalSplitter.Top - this.toolbarPanel.Height)
-            this.plantFocusPanel.SetBounds(newLeft, newTop, newWidth, newHeight)
-        }
-        this.resizePlantListPanel()
-        this.resizePlantFocusPanel()
+        // newLeft = this.verticalSplitter.Left + this.verticalSplitter.Width
+        // newWidth = intMax(0, this.ClientWidth - newLeft)
+        // newTop = this.horizontalSplitter.Top + this.horizontalSplitter.Height
+        // newHeight = intMax(0, this.ClientHeight - newTop)
+        // if (domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal) {
+        //     this.plantListPanel.SetBounds(0, newTop, this.verticalSplitter.Left, newHeight)
+        //     //don't change left here
+        //     this.verticalSplitter.SetBounds(this.verticalSplitter.Left, newTop, this.verticalSplitter.Width, newHeight)
+        //     this.plantFocusPanel.SetBounds(newLeft, newTop, newWidth, newHeight)
+        //     this.drawingPaintBox.SetBounds(0, this.toolbarPanel.Height, this.ClientWidth, intMax(0, this.horizontalSplitter.Top - this.toolbarPanel.Height))
+        //     this.resizeDrawingBitmapIfNecessary()
+        // } else if (domain.options.mainWindowOrientation === kMainWindowOrientationVertical) {
+        //     this.plantListPanel.SetBounds(newLeft, this.toolbarPanel.Height, newWidth, this.horizontalSplitter.Top - this.toolbarPanel.Height)
+        //     this.plantFocusPanel.SetBounds(newLeft, newTop, newWidth, newHeight)
+        // }
+        // this.resizePlantListPanel()
+        // this.resizePlantFocusPanel()
     }
     
     resizeDrawingBitmapIfNecessary(): void {
-        let bitmapWasMadeBigger: boolean
+        throw new Error("TODO Unfinished")
+        // let bitmapWasMadeBigger: boolean
         
-        if ((this.drawingBitmap.Width !== this.drawingPaintBox.Width) || (this.drawingBitmap.Height !== this.drawingPaintBox.Height)) {
-            // if have to make bitmap larger, redraw all plants in case some were not drawing before
-            // because they were off the bitmap
-            bitmapWasMadeBigger = (this.drawingPaintBox.Width > this.drawingBitmap.Width) || (this.drawingPaintBox.Height > this.drawingBitmap.Height)
-            ubmpsupport.resizeBitmap(this.drawingBitmap, Point(this.drawingPaintBox.Width, this.drawingPaintBox.Height))
-            if (!this.inFormCreation) {
-                if (bitmapWasMadeBigger) {
-                    this.recalculateAllPlantBoundsRects(kDontDrawYet)
-                }
-                this.invalidateEntireDrawing()
-                this.updateForPossibleChangeToDrawing()
-            }
-        }
+        // if ((this.drawingBitmap.Width !== this.drawingPaintBox.Width) || (this.drawingBitmap.Height !== this.drawingPaintBox.Height)) {
+        //     // if have to make bitmap larger, redraw all plants in case some were not drawing before
+        //     // because they were off the bitmap
+        //     bitmapWasMadeBigger = (this.drawingPaintBox.Width > this.drawingBitmap.Width) || (this.drawingPaintBox.Height > this.drawingBitmap.Height)
+        //     ubmpsupport.resizeBitmap(this.drawingBitmap, Point(this.drawingPaintBox.Width, this.drawingPaintBox.Height))
+        //     if (!this.inFormCreation) {
+        //         if (bitmapWasMadeBigger) {
+        //             this.recalculateAllPlantBoundsRects(kDontDrawYet)
+        //         }
+        //         this.invalidateEntireDrawing()
+        //         this.updateForPossibleChangeToDrawing()
+        //     }
+        // }
     }
     
     resizePlantListPanel(): void {
-        this.plantListDrawGrid.SetBounds(0, 0, this.plantListPanel.Width, this.plantListPanel.Height - this.plantFileChangedImage.Height - kBetweenGap * 2)
-        this.plantListDrawGrid.DefaultColWidth = this.plantListDrawGrid.ClientWidth
-        this.plantFileChangedImage.SetBounds(kBetweenGap, this.plantListDrawGrid.Top + this.plantListDrawGrid.Height + kBetweenGap, this.plantFileChangedImage.Width, this.plantFileChangedImage.Height)
-        this.plantBitmapsIndicatorImage.SetBounds(this.plantFileChangedImage.Left + this.plantFileChangedImage.Width + kBetweenGap, this.plantFileChangedImage.Top, this.plantBitmapsIndicatorImage.Width, this.plantBitmapsIndicatorImage.Height)
-        this.progressPaintBox.SetBounds(this.plantBitmapsIndicatorImage.Left + this.plantBitmapsIndicatorImage.Width + kBetweenGap, this.plantBitmapsIndicatorImage.Top + this.plantBitmapsIndicatorImage.Height / 2 - this.progressPaintBox.Height / 2, this.plantListPanel.Width - this.plantFileChangedImage.Width - this.plantBitmapsIndicatorImage.Width - kBetweenGap * 4, this.progressPaintBox.Height)
+        throw new Error("TODO Unfinished")
+        // this.plantListDrawGrid.SetBounds(0, 0, this.plantListPanel.Width, this.plantListPanel.Height - this.plantFileChangedImage.Height - kBetweenGap * 2)
+        // this.plantListDrawGrid.DefaultColWidth = this.plantListDrawGrid.ClientWidth
+        // this.plantFileChangedImage.SetBounds(kBetweenGap, this.plantListDrawGrid.Top + this.plantListDrawGrid.Height + kBetweenGap, this.plantFileChangedImage.Width, this.plantFileChangedImage.Height)
+        // this.plantBitmapsIndicatorImage.SetBounds(this.plantFileChangedImage.Left + this.plantFileChangedImage.Width + kBetweenGap, this.plantFileChangedImage.Top, this.plantBitmapsIndicatorImage.Width, this.plantBitmapsIndicatorImage.Height)
+        // this.progressPaintBox.SetBounds(this.plantBitmapsIndicatorImage.Left + this.plantBitmapsIndicatorImage.Width + kBetweenGap, this.plantBitmapsIndicatorImage.Top + this.plantBitmapsIndicatorImage.Height / 2 - this.progressPaintBox.Height / 2, this.plantListPanel.Width - this.plantFileChangedImage.Width - this.plantBitmapsIndicatorImage.Width - kBetweenGap * 4, this.progressPaintBox.Height)
     }
     
     resizePlantFocusPanel(): void {
-        let newTop: int
+        throw new Error("TODO Unfinished")
+        // let newTop: int
         
-        //FIX unresolved WITH expression: self.tabSet
-        // tab set 
-        this.SetBounds(0, this.plantFocusPanel.Height - this.Height, this.plantFocusPanel.Width, this.Height)
-        // v1.4 change
-        this.animatingLabel.SetBounds(intMax(0, this.plantFocusPanel.Width - this.animatingLabel.Width - kBetweenGap), this.plantFocusPanel.Height - this.animatingLabel.Height - kBetweenGap, this.animatingLabel.Width, this.animatingLabel.Height)
-        // life cycle panel 
-        this.lifeCyclePanel.SetBounds(0, 0, this.plantFocusPanel.Width, intMax(0, this.plantFocusPanel.Height - this.tabSet.height))
-        // v1.4 change - 2
-        this.lifeCycleEditPanel.Height = this.animateGrowth.Height + kBetweenGap * 2 - 2
-        // v1.4 change +1, -1, -2
-        this.lifeCycleEditPanel.SetBounds(1, intMax(0, this.lifeCyclePanel.Height - this.lifeCycleEditPanel.Height - 1), this.lifeCyclePanel.Width - 2, this.lifeCycleEditPanel.Height)
-        // rotations panel
-        this.rotationsPanel.SetBounds(0, 0, this.lifeCyclePanel.Width, this.lifeCyclePanel.Height)
-        // posing panel
-        this.posingPanel.SetBounds(0, 0, this.lifeCyclePanel.Width, this.lifeCyclePanel.Height)
-        newTop = this.posingPlantName.Top + this.posingPlantName.Height + kBetweenGap
-        this.posingNotShown.SetBounds(this.posingPanel.Width - this.posingNotShown.Width - kBetweenGap, newTop, this.posingNotShown.Width, this.posingNotShown.Height)
-        this.posingGhost.SetBounds(this.posingNotShown.Left - this.posingGhost.Width - kBetweenGap, newTop, this.posingGhost.Width, this.posingGhost.Height)
-        this.posingHighlight.SetBounds(this.posingGhost.Left - this.posingHighlight.Width - kBetweenGap, newTop, this.posingHighlight.Width, this.posingHighlight.Height)
-        newTop = this.posingNotShown.Top + this.posingNotShown.Height + kBetweenGap
-        this.posedPartsLabel.SetBounds(kBetweenGap, newTop + (this.posedPlantParts.Height / 2 - this.posedPartsLabel.Height / 2), this.posedPartsLabel.Width, this.posedPartsLabel.Height)
-        this.posedPlantParts.SetBounds(this.posedPartsLabel.Left + this.posedPartsLabel.Width + kBetweenGap, newTop, intMax(10, this.posingPanel.Width - this.posedPartsLabel.Width - kBetweenGap * 3), this.posedPlantParts.Height)
-        newTop = this.posedPlantParts.Top + this.posedPlantParts.Height + kBetweenGap
-        // fix later
-        this.selectedPartLabel.SetBounds(kBetweenGap, newTop + (this.posingUnposePart.Height / 2 - this.selectedPartLabel.Height / 2), this.selectedPartLabel.Width, this.selectedPartLabel.Height)
-        newTop = this.selectedPartLabel.Top + this.selectedPartLabel.Height + kBetweenGap
-        this.posingPosePart.SetBounds(kBetweenGap, newTop, this.posingPosePart.Width, this.posingPosePart.Height)
-        this.posingUnposePart.SetBounds(this.posingPosePart.Left + this.posingPosePart.Width + kBetweenGap, newTop, this.posingUnposePart.Width, this.posingUnposePart.Height)
-        newTop = this.posingUnposePart.Top + this.posingUnposePart.Height + kBetweenGap
-        this.posingDetailsPanel.SetBounds(0, newTop, this.lifeCyclePanel.Width, intMax(230, this.lifeCyclePanel.Height - newTop))
-        // lifeCycleEditPanel 
-        this.lifeCycleDaysEdit.SetBounds(this.ageAndSizeLabel.Width + kBetweenGap * 2, kBetweenGap, this.lifeCycleDaysEdit.Width, this.lifeCycleDaysEdit.Height)
-        this.lifeCycleDaysSpin.SetBounds(this.lifeCycleDaysEdit.Left + this.lifeCycleDaysEdit.Width, kBetweenGap + this.lifeCycleDaysEdit.Height / 2 - this.lifeCycleDaysSpin.Height / 2, this.lifeCycleDaysSpin.Width, this.lifeCycleDaysSpin.Height)
-        this.ageAndSizeLabel.SetBounds(kBetweenGap, intMax(0, this.lifeCycleDaysEdit.Top + this.lifeCycleDaysEdit.Height / 2 - this.ageAndSizeLabel.Height / 2), this.ageAndSizeLabel.Width, this.ageAndSizeLabel.Height)
-        this.daysAndSizeLabel.SetBounds(this.lifeCycleDaysSpin.Left + this.lifeCycleDaysSpin.Width + kBetweenGap, intMax(0, this.lifeCycleDaysEdit.Top + this.lifeCycleDaysEdit.Height / 2 - this.daysAndSizeLabel.Height / 2), this.daysAndSizeLabel.Width, this.daysAndSizeLabel.Height)
-        this.animateGrowth.SetBounds(this.lifeCycleEditPanel.Width - this.animateGrowth.Width - kBetweenGap, this.lifeCycleDaysEdit.Top, this.animateGrowth.Width, this.animateGrowth.Height)
-        // above lifeCycleEditPanel 
-        this.timeLabel.SetBounds(intMax(0, this.lifeCyclePanel.Width / 2 - this.timeLabel.Width / 2), intMax(0, this.lifeCycleEditPanel.Top - this.timeLabel.Height - kBetweenGap), this.timeLabel.Width, this.timeLabel.Height)
-        this.lifeCycleGraphImage.SetBounds(kBetweenGap + this.maxSizeAxisLabel.Width + kBetweenGap, intMax(1, this.selectedPlantNameLabel.Top + this.selectedPlantNameLabel.Height + kBetweenGap), intMax(1, this.lifeCyclePanel.Width - this.maxSizeAxisLabel.Width - kBetweenGap * 3), intMax(1, this.timeLabel.Top - this.selectedPlantNameLabel.Height - kBetweenGap * 2))
-        this.maxSizeAxisLabel.SetBounds(kBetweenGap, intMax(0, this.lifeCycleGraphImage.Top + this.lifeCycleGraphImage.Height / 2 - this.maxSizeAxisLabel.Height / 2), this.maxSizeAxisLabel.Width, this.maxSizeAxisLabel.Height)
-        this.selectedPlantNameLabel.SetBounds(kBetweenGap, kBetweenGap, this.selectedPlantNameLabel.Width, this.selectedPlantNameLabel.Height)
-        if ((this.lifeCycleGraphImage.Picture.Bitmap.Width !== this.lifeCycleGraphImage.Width) || (this.lifeCycleGraphImage.Picture.Bitmap.Height !== this.lifeCycleGraphImage.Height)) {
-            // with selectedPlantNameLabel do setBounds(lifeCycleGraphImage.left, kBetweenGap, width, height);
-            ubmpsupport.resizeBitmap(this.lifeCycleGraphImage.Picture.Bitmap, Point(this.lifeCycleGraphImage.Width, this.lifeCycleGraphImage.Height))
-        }
-        this.placeLifeCycleDragger()
-        this.redrawLifeCycleGraph()
-        this.resizeParametersPanel()
-        // stats scroll box 
-        this.statsScrollBox.SetBounds(0, 0, this.plantFocusPanel.Width, intMax(0, this.plantFocusPanel.Height - this.tabSet.height))
-        this.statsPanel.resizeElements()
-        this.notePanel.SetBounds(0, 0, this.plantFocusPanel.Width, intMax(0, this.plantFocusPanel.Height - this.tabSet.height))
-        this.noteLabel.SetBounds(kBetweenGap, kBetweenGap, this.noteLabel.Width, this.noteLabel.Height)
-        //kBetweenGap + noteEdit.height div 2 - height div 2, width, height);
-        this.noteEdit.SetBounds(intMax(0, this.notePanel.Width - this.noteEdit.Width - kBetweenGap), kBetweenGap, this.noteEdit.Width, this.noteEdit.Height)
-        this.noteMemo.SetBounds(0, this.noteEdit.Height + kBetweenGap * 2, this.notePanel.Width, intMax(0, this.notePanel.Height - this.noteEdit.Height - kBetweenGap * 2))
+        // //FIX unresolved WITH expression: self.tabSet
+        // // tab set 
+        // this.SetBounds(0, this.plantFocusPanel.Height - this.Height, this.plantFocusPanel.Width, this.Height)
+        // // v1.4 change
+        // this.animatingLabel.SetBounds(intMax(0, this.plantFocusPanel.Width - this.animatingLabel.Width - kBetweenGap), this.plantFocusPanel.Height - this.animatingLabel.Height - kBetweenGap, this.animatingLabel.Width, this.animatingLabel.Height)
+        // // life cycle panel 
+        // this.lifeCyclePanel.SetBounds(0, 0, this.plantFocusPanel.Width, intMax(0, this.plantFocusPanel.Height - this.tabSet.height))
+        // // v1.4 change - 2
+        // this.lifeCycleEditPanel.Height = this.animateGrowth.Height + kBetweenGap * 2 - 2
+        // // v1.4 change +1, -1, -2
+        // this.lifeCycleEditPanel.SetBounds(1, intMax(0, this.lifeCyclePanel.Height - this.lifeCycleEditPanel.Height - 1), this.lifeCyclePanel.Width - 2, this.lifeCycleEditPanel.Height)
+        // // rotations panel
+        // this.rotationsPanel.SetBounds(0, 0, this.lifeCyclePanel.Width, this.lifeCyclePanel.Height)
+        // // posing panel
+        // this.posingPanel.SetBounds(0, 0, this.lifeCyclePanel.Width, this.lifeCyclePanel.Height)
+        // newTop = this.posingPlantName.Top + this.posingPlantName.Height + kBetweenGap
+        // this.posingNotShown.SetBounds(this.posingPanel.Width - this.posingNotShown.Width - kBetweenGap, newTop, this.posingNotShown.Width, this.posingNotShown.Height)
+        // this.posingGhost.SetBounds(this.posingNotShown.Left - this.posingGhost.Width - kBetweenGap, newTop, this.posingGhost.Width, this.posingGhost.Height)
+        // this.posingHighlight.SetBounds(this.posingGhost.Left - this.posingHighlight.Width - kBetweenGap, newTop, this.posingHighlight.Width, this.posingHighlight.Height)
+        // newTop = this.posingNotShown.Top + this.posingNotShown.Height + kBetweenGap
+        // this.posedPartsLabel.SetBounds(kBetweenGap, newTop + (this.posedPlantParts.Height / 2 - this.posedPartsLabel.Height / 2), this.posedPartsLabel.Width, this.posedPartsLabel.Height)
+        // this.posedPlantParts.SetBounds(this.posedPartsLabel.Left + this.posedPartsLabel.Width + kBetweenGap, newTop, intMax(10, this.posingPanel.Width - this.posedPartsLabel.Width - kBetweenGap * 3), this.posedPlantParts.Height)
+        // newTop = this.posedPlantParts.Top + this.posedPlantParts.Height + kBetweenGap
+        // // fix later
+        // this.selectedPartLabel.SetBounds(kBetweenGap, newTop + (this.posingUnposePart.Height / 2 - this.selectedPartLabel.Height / 2), this.selectedPartLabel.Width, this.selectedPartLabel.Height)
+        // newTop = this.selectedPartLabel.Top + this.selectedPartLabel.Height + kBetweenGap
+        // this.posingPosePart.SetBounds(kBetweenGap, newTop, this.posingPosePart.Width, this.posingPosePart.Height)
+        // this.posingUnposePart.SetBounds(this.posingPosePart.Left + this.posingPosePart.Width + kBetweenGap, newTop, this.posingUnposePart.Width, this.posingUnposePart.Height)
+        // newTop = this.posingUnposePart.Top + this.posingUnposePart.Height + kBetweenGap
+        // this.posingDetailsPanel.SetBounds(0, newTop, this.lifeCyclePanel.Width, intMax(230, this.lifeCyclePanel.Height - newTop))
+        // // lifeCycleEditPanel 
+        // this.lifeCycleDaysEdit.SetBounds(this.ageAndSizeLabel.Width + kBetweenGap * 2, kBetweenGap, this.lifeCycleDaysEdit.Width, this.lifeCycleDaysEdit.Height)
+        // this.lifeCycleDaysSpin.SetBounds(this.lifeCycleDaysEdit.Left + this.lifeCycleDaysEdit.Width, kBetweenGap + this.lifeCycleDaysEdit.Height / 2 - this.lifeCycleDaysSpin.Height / 2, this.lifeCycleDaysSpin.Width, this.lifeCycleDaysSpin.Height)
+        // this.ageAndSizeLabel.SetBounds(kBetweenGap, intMax(0, this.lifeCycleDaysEdit.Top + this.lifeCycleDaysEdit.Height / 2 - this.ageAndSizeLabel.Height / 2), this.ageAndSizeLabel.Width, this.ageAndSizeLabel.Height)
+        // this.daysAndSizeLabel.SetBounds(this.lifeCycleDaysSpin.Left + this.lifeCycleDaysSpin.Width + kBetweenGap, intMax(0, this.lifeCycleDaysEdit.Top + this.lifeCycleDaysEdit.Height / 2 - this.daysAndSizeLabel.Height / 2), this.daysAndSizeLabel.Width, this.daysAndSizeLabel.Height)
+        // this.animateGrowth.SetBounds(this.lifeCycleEditPanel.Width - this.animateGrowth.Width - kBetweenGap, this.lifeCycleDaysEdit.Top, this.animateGrowth.Width, this.animateGrowth.Height)
+        // // above lifeCycleEditPanel 
+        // this.timeLabel.SetBounds(intMax(0, this.lifeCyclePanel.Width / 2 - this.timeLabel.Width / 2), intMax(0, this.lifeCycleEditPanel.Top - this.timeLabel.Height - kBetweenGap), this.timeLabel.Width, this.timeLabel.Height)
+        // this.lifeCycleGraphImage.SetBounds(kBetweenGap + this.maxSizeAxisLabel.Width + kBetweenGap, intMax(1, this.selectedPlantNameLabel.Top + this.selectedPlantNameLabel.Height + kBetweenGap), intMax(1, this.lifeCyclePanel.Width - this.maxSizeAxisLabel.Width - kBetweenGap * 3), intMax(1, this.timeLabel.Top - this.selectedPlantNameLabel.Height - kBetweenGap * 2))
+        // this.maxSizeAxisLabel.SetBounds(kBetweenGap, intMax(0, this.lifeCycleGraphImage.Top + this.lifeCycleGraphImage.Height / 2 - this.maxSizeAxisLabel.Height / 2), this.maxSizeAxisLabel.Width, this.maxSizeAxisLabel.Height)
+        // this.selectedPlantNameLabel.SetBounds(kBetweenGap, kBetweenGap, this.selectedPlantNameLabel.Width, this.selectedPlantNameLabel.Height)
+        // if ((this.lifeCycleGraphImage.Picture.Bitmap.Width !== this.lifeCycleGraphImage.Width) || (this.lifeCycleGraphImage.Picture.Bitmap.Height !== this.lifeCycleGraphImage.Height)) {
+        //     // with selectedPlantNameLabel do setBounds(lifeCycleGraphImage.left, kBetweenGap, width, height);
+        //     ubmpsupport.resizeBitmap(this.lifeCycleGraphImage.Picture.Bitmap, Point(this.lifeCycleGraphImage.Width, this.lifeCycleGraphImage.Height))
+        // }
+        // this.placeLifeCycleDragger()
+        // this.redrawLifeCycleGraph()
+        // this.resizeParametersPanel()
+        // // stats scroll box 
+        // this.statsScrollBox.SetBounds(0, 0, this.plantFocusPanel.Width, intMax(0, this.plantFocusPanel.Height - this.tabSet.height))
+        // this.statsPanel.resizeElements()
+        // this.notePanel.SetBounds(0, 0, this.plantFocusPanel.Width, intMax(0, this.plantFocusPanel.Height - this.tabSet.height))
+        // this.noteLabel.SetBounds(kBetweenGap, kBetweenGap, this.noteLabel.Width, this.noteLabel.Height)
+        // //kBetweenGap + noteEdit.height div 2 - height div 2, width, height);
+        // this.noteEdit.SetBounds(intMax(0, this.notePanel.Width - this.noteEdit.Width - kBetweenGap), kBetweenGap, this.noteEdit.Width, this.noteEdit.Height)
+        // this.noteMemo.SetBounds(0, this.noteEdit.Height + kBetweenGap * 2, this.notePanel.Width, intMax(0, this.notePanel.Height - this.noteEdit.Height - kBetweenGap * 2))
     }
     
     resizeParametersPanel(): void {
-        let newTop: short
+        throw new Error("TODO Unfinished")
+        // let newTop: short
         
-        this.parametersPanel.SetBounds(0, 0, this.plantFocusPanel.Width, intMax(0, this.plantFocusPanel.Height - this.tabSet.height))
-        this.parametersPlantName.SetBounds(kBetweenGap, kBetweenGap, this.parametersPlantName.Width, this.parametersPlantName.Height)
-        this.sectionsComboBox.SetBounds(kBetweenGap, this.parametersPlantName.Top + this.parametersPlantName.Height + kBetweenGap, this.parametersPanel.Width - kBetweenGap * 2, this.sectionsComboBox.Height)
-        const newTop = this.sectionsComboBox.Top + this.sectionsComboBox.Height + kBetweenGap
-        this.parametersScrollBox.SetBounds(0, this.sectionsComboBox.Top + this.sectionsComboBox.Height + kBetweenGap, this.parametersPanel.Width, this.parametersPanel.Height - newTop)
-        this.repositionParameterPanels()
+        // this.parametersPanel.SetBounds(0, 0, this.plantFocusPanel.Width, intMax(0, this.plantFocusPanel.Height - this.tabSet.height))
+        // this.parametersPlantName.SetBounds(kBetweenGap, kBetweenGap, this.parametersPlantName.Width, this.parametersPlantName.Height)
+        // this.sectionsComboBox.SetBounds(kBetweenGap, this.parametersPlantName.Top + this.parametersPlantName.Height + kBetweenGap, this.parametersPanel.Width - kBetweenGap * 2, this.sectionsComboBox.Height)
+        // const newTop = this.sectionsComboBox.Top + this.sectionsComboBox.Height + kBetweenGap
+        // this.parametersScrollBox.SetBounds(0, this.sectionsComboBox.Top + this.sectionsComboBox.Height + kBetweenGap, this.parametersPanel.Width, this.parametersPanel.Height - newTop)
+        // this.repositionParameterPanels()
     }
     
     placeLifeCycleDragger(): void {
-        const firstPlant = this.focusedPlant()
-        let fractionOfMaxAge = 0.0
-        if (firstPlant !== null) {
-            try {
-                fractionOfMaxAge = firstPlant.age / firstPlant.pGeneral.ageAtMaturity
-            } catch (e) {
-                fractionOfMaxAge = 0.0
-            }
-        }
-        this.lifeCycleDragger.SetBounds(this.lifeCycleGraphImage.Left + intround((this.lifeCycleGraphImage.Width - this.lifeCycleDragger.Width) * fractionOfMaxAge), this.lifeCycleGraphImage.Top + 1, this.lifeCycleDragger.Width, this.lifeCycleGraphImage.Height - 2)
+        throw new Error("TODO Unfinished")
+        // const firstPlant = this.focusedPlant()
+        // let fractionOfMaxAge = 0.0
+        // if (firstPlant !== null) {
+        //     try {
+        //         fractionOfMaxAge = firstPlant.age / firstPlant.pGeneral.ageAtMaturity
+        //     } catch (e) {
+        //         fractionOfMaxAge = 0.0
+        //     }
+        // }
+        // this.lifeCycleDragger.SetBounds(this.lifeCycleGraphImage.Left + intround((this.lifeCycleGraphImage.Width - this.lifeCycleDragger.Width) * fractionOfMaxAge), this.lifeCycleGraphImage.Top + 1, this.lifeCycleDragger.Width, this.lifeCycleGraphImage.Height - 2)
     }
     
-    WMGetMinMaxInfo(MSG: Tmessage): void {
-        PdForm.prototype.WMGetMinMaxInfo.call(this)
-        //FIX unresolved WITH expression: UNRESOLVED.PMinMaxInfo(MSG.lparam).PDF_FIX_POINTER_ACCESS
-        UNRESOLVED.ptMinTrackSize.x = 300
-        UNRESOLVED.ptMinTrackSize.y = 300
+    WMGetMinMaxInfo(MSG: any): void {
+        throw new Error("TODO Unfinished")
+        // PdForm.prototype.WMGetMinMaxInfo.call(this)
+        // //FIX unresolved WITH expression: UNRESOLVED.PMinMaxInfo(MSG.lparam).PDF_FIX_POINTER_ACCESS
+        // UNRESOLVED.ptMinTrackSize.x = 300
+        // UNRESOLVED.ptMinTrackSize.y = 300
     }
     
+    /*
+
     // ------------------------------------------------------------------------------------- *splitting 
     horizontalSplitterMouseDown(Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
+        throw new Error("TODO Unfinished")
         this.horizontalSplitterDragging = true
         this.horizontalSplitterStartPos = Y
         this.horizontalSplitterLastDrawPos = -1
@@ -6239,33 +6384,36 @@ export class TMainForm {
         UNRESOLVED.DragAcceptFiles(this.Handle, true)
     }
     
+    */
+
     // v1.11
     Reconcile3DObjects1Click(): void {
-        if (plantFileChanged) {
-            // ask if want to save file first
-            const response = MessageDialog("Do you want to save your changes to " + ExtractFileName(domain.plantFileName) + chr(13) + "before you reconcile its 3D objects" + chr(13) + "with those in the current 3D object file?", mtConfirmation, mbYesNoCancel, 0)
-            switch (response) {
-                case IDCANCEL:
-                    return
-                    break
-                case IDYES:
-                    this.MenuFileSaveClick()
-                    break
-                case IDNO:
-                    break
-            }
-        }
-        if (!domain.checkForExistingDefaultTdoLibrary()) {
-            return
-        }
-        if (MessageDialog("You are about to add any 3D objects in the current plant file" + chr(13) + chr(13) + "    (" + domain.plantFileName + ")" + chr(13) + chr(13) + "that are not already in the current 3D object library" + chr(13) + chr(13) + "    (" + domain.defaultTdoLibraryFileName + ")" + chr(13) + chr(13) + "into that library. Do you want to go ahead?", mtConfirmation, mbYesNo, 0) === IDYES) {
-            const numTdosAdded = domain.plantManager.reconcileFileWithTdoLibrary(domain.plantFileName, domain.defaultTdoLibraryFileName)
-            if (numTdosAdded <= 0) {
-                MessageDialog("All the 3D objects in the current plant file" + chr(13) + chr(13) + "    (" + domain.plantFileName + ")" + chr(13) + chr(13) + "were already in the current 3D object library" + chr(13) + chr(13) + "    (" + domain.defaultTdoLibraryFileName + ").", mtInformation, {mbOK, }, 0)
-            } else {
-                MessageDialog(IntToStr(numTdosAdded) + " 3D objects from the current plant file" + chr(13) + chr(13) + "    (" + domain.plantFileName + ")" + chr(13) + chr(13) + "were copied to the current 3D object library" + chr(13) + chr(13) + "    (" + domain.defaultTdoLibraryFileName + ").", mtInformation, {mbOK, }, 0)
-            }
-        }
+        throw new Error("TODO Unfinished")
+        // if (plantFileChanged) {
+        //     // ask if want to save file first
+        //     const response = MessageDialog("Do you want to save your changes to " + ExtractFileName(domain.plantFileName) + chr(13) + "before you reconcile its 3D objects" + chr(13) + "with those in the current 3D object file?", mtConfirmation, mbYesNoCancel, 0)
+        //     switch (response) {
+        //         case IDCANCEL:
+        //             return
+        //             break
+        //         case IDYES:
+        //             this.MenuFileSaveClick()
+        //             break
+        //         case IDNO:
+        //             break
+        //     }
+        // }
+        // if (!domain.checkForExistingDefaultTdoLibrary()) {
+        //     return
+        // }
+        // if (MessageDialog("You are about to add any 3D objects in the current plant file" + chr(13) + chr(13) + "    (" + domain.plantFileName + ")" + chr(13) + chr(13) + "that are not already in the current 3D object library" + chr(13) + chr(13) + "    (" + domain.defaultTdoLibraryFileName + ")" + chr(13) + chr(13) + "into that library. Do you want to go ahead?", mtConfirmation, mbYesNo, 0) === IDYES) {
+        //     const numTdosAdded = domain.plantManager.reconcileFileWithTdoLibrary(domain.plantFileName, domain.defaultTdoLibraryFileName)
+        //     if (numTdosAdded <= 0) {
+        //         MessageDialog("All the 3D objects in the current plant file" + chr(13) + chr(13) + "    (" + domain.plantFileName + ")" + chr(13) + chr(13) + "were already in the current 3D object library" + chr(13) + chr(13) + "    (" + domain.defaultTdoLibraryFileName + ").", mtInformation, {mbOK, }, 0)
+        //     } else {
+        //         MessageDialog(IntToStr(numTdosAdded) + " 3D objects from the current plant file" + chr(13) + chr(13) + "    (" + domain.plantFileName + ")" + chr(13) + chr(13) + "were copied to the current 3D object library" + chr(13) + chr(13) + "    (" + domain.defaultTdoLibraryFileName + ").", mtInformation, {mbOK, }, 0)
+        //     }
+        // }
     }
     
     // v1.60
@@ -6273,62 +6421,70 @@ export class TMainForm {
     // v1.60 recent files menu
     // PDF PORT removed empty parens
     updateFileMenuForOtherRecentFiles(): void {
-        let atLeastOneFileNameExists = false
-        let numSet = 0
-        for (let i = 0; i <= udomain.kMaxRecentFiles - 1; i++) {
-            let shortcutString: string
-            if (numSet + 1 === 10) {
-                shortcutString = "1&0"
-            } else {
-                shortcutString = "&" + IntToStr(numSet + 1)
-            }
-            this.MenuFileReopen.items[i].caption = shortcutString + " " + domain.options.recentFiles[udomain.kMaxRecentFiles - 1 - i]
-            const showThis = (domain.options.recentFiles[udomain.kMaxRecentFiles - 1 - i] !== "") && (FileExists(domain.options.recentFiles[udomain.kMaxRecentFiles - 1 - i]))
-            this.MenuFileReopen.items[i].visible = showThis
-            if (showThis) {
-                numSet += 1
-            }
-            if (!atLeastOneFileNameExists) {
-                atLeastOneFileNameExists = showThis
-            }
-        }
-        this.MenuFileReopen.enabled = atLeastOneFileNameExists
+        throw new Error("TODO Unfinished")
+        // let atLeastOneFileNameExists = false
+        // let numSet = 0
+        // for (let i = 0; i <= kMaxRecentFiles - 1; i++) {
+        //     let shortcutString: string
+        //     if (numSet + 1 === 10) {
+        //         shortcutString = "1&0"
+        //     } else {
+        //         shortcutString = "&" + IntToStr(numSet + 1)
+        //     }
+        //     this.MenuFileReopen.items[i].caption = shortcutString + " " + domain.options.recentFiles[kMaxRecentFiles - 1 - i]
+        //     const showThis = (domain.options.recentFiles[kMaxRecentFiles - 1 - i] !== "") && (FileExists(domain.options.recentFiles[kMaxRecentFiles - 1 - i]))
+        //     this.MenuFileReopen.items[i].visible = showThis
+        //     if (showThis) {
+        //         numSet += 1
+        //     }
+        //     if (!atLeastOneFileNameExists) {
+        //         atLeastOneFileNameExists = showThis
+        //     }
+        // }
+        // this.MenuFileReopen.enabled = atLeastOneFileNameExists
     }
     
     // v1.60 recent files menu
     Recent0Click(): void {
-        const index = udomain.kMaxRecentFiles - 1 - this.MenuFileReopen.indexOf(Sender)
-        if (!FileExists(domain.options.recentFiles[index])) {
-            MessageDialog("Cannot find the file" + chr(13) + domain.options.recentFiles[index] + ".", delphi_compatability.TMsgDlgType.mtError, {mbOK, }, 0)
-            return
-        }
-        if (!this.askForSaveAndProceed()) {
-            return
-        }
-        this.openFile(domain.options.recentFiles[index])
+        throw new Error("TODO Unfinished")
+        // const index = kMaxRecentFiles - 1 - this.MenuFileReopen.indexOf(Sender)
+        // if (!FileExists(domain.options.recentFiles[index])) {
+        //     MessageDialog("Cannot find the file" + chr(13) + domain.options.recentFiles[index] + ".", delphi_compatability.TMsgDlgType.mtError, {mbOK, }, 0)
+        //     return
+        // }
+        // if (!this.askForSaveAndProceed()) {
+        //     return
+        // }
+        // this.openFile(domain.options.recentFiles[index])
     }
-    
-    */
 
     // TODO: Temp definitions to get PdPlant  to compile
-    updateForChangeToPlantBitmaps = () => {}
-    exceptionResizingPlantBitmap = () => { throw new Error("exceptionResizingPlantBitmap") }
-    screenBytesPerPixel = () => 4
-    drawingPaintBox = new TRect()
-    roomForPlantBitmap = (something: any, bytesThisBitmapWillBe: number) => true
     startDrawProgress = (totalPlantParts: number) => {}
     finishDrawProgress = () => {}
-    isSelected = (something: any) => false
-    focusedPlant = (): PdPlant | null => null
     plantsAsTextMemo = <string[]>[]
-    updateParameterValuesWithUpdateListForPlant = (something: any, updateList: any[]) => {}
 
     // TODO: Temp defintions used by PdTraverser
     showDrawProgress = (value: number) => {}
 
-    // TODO: Temp defintions used by PdCommand
+    // TODO: Temp defintions used by PdCommand - confusion as also at tiop level
     plantFileChanged = false
-    setPlantFileChanged = (changed: boolean) => {}
+
+    // TODO: PDF fix tabSet stub
+    tabSet: any = {}
+    lifeCycleDaysEdit: any = {}
+    drawingPaintBox: any = {}
+    plantListDrawGrid: any = {}
+    drawingBitmap: any = {}
+    xLocationEdit: any = {}
+    yLocationEdit: any = {}
+    xRotationEdit: any = {}
+    yRotationEdit: any = {}
+    zRotationEdit: any = {}
+    drawingScaleEdit: any = {}
+    noteMemo: any = {}
+    notePanel: any = {}
+    statPanel: any = {}
+    posedPlantParts: any = {}
 
     // TODO: Other definitions uses by other modules
     // doCommand = (command: PdCommand) => {}
@@ -6344,201 +6500,251 @@ export class TMainForm {
     // recalculateAllPlantBoundsRectsForOffsetChange() {}
     // updateForChangeToSelectedPlantsDrawingScale() {}
 
-    updateFileMenuForOtherRecentFiles(): void {
-        throw new Error("TODO Unfinished duplicate function")
-    }
-
     oninit() {
         MainForm = this
     }
 
+    mainMenuSpec: any = [
+        // [type = radio/checkbox, ] ID, label, items or action
+        "MainMenu", "Main", [
+            "MenuFile", "&File", [
+                "MenuFileNew", "&New", this.MenuFileNewClick,
+                "MenuFileOpen", "&Open...", this.MenuFileOpenClick,
+                "MenuFileReopen", "&Reopen", [
+                    "Recent0", "0", this.Recent0Click,
+                    "Recent1", "1", this.Recent0Click,
+                    "Recent2", "2", this.Recent0Click,
+                    "Recent3", "3", this.Recent0Click,
+                    "Recent4", "4", this.Recent0Click,
+                    "Recent5", "5", this.Recent0Click,
+                    "Recent6", "6", this.Recent0Click,
+                    "Recent7", "7", this.Recent0Click,
+                    "Recent8", "8", this.Recent0Click,
+                    "Recent9", "9", this.Recent0Click,
+                ],
+                "MenuFileClose", "&Close", this.MenuFileCloseClick,
+                "-",
+                "MenuFileSave", "&Save", this.MenuFileSaveClick,
+                "MenuFileSaveAs", "Save &As...", this.MenuFileSaveAsClick,
+                "-",
+                "MenuFileExport", "&Export", [
+                    "MenuPlantExportTo3DS", "&3DS...", this.MenuPlantExportTo3DSClick,
+                    "MenuPlantExportToLWO", "&LWO...", this.MenuPlantExportToLWOClick,
+                    "MenuPlantExportToOBJ", "&OBJ...", this.MenuPlantExportToOBJClick,
+                    "MenuPlantExportToDXF", "&DXF...", this.MenuPlantExportToDXFClick,
+                    "MenuPlantExportToPOV", "PO&V INC...", this.MenuPlantExportToPOVClick,
+                    "MenuPlantExportToVRML", "V&RML...", this.MenuPlantExportToVRMLClick,
+                    "-",
+                    "MenuFileSaveDrawingAs", "&Bitmap...", this.MenuFileSaveDrawingAsClick,
+                    "MenuFileSaveJPEG", "&JPEG...", this.MenuFileSaveJPEGClick,
+                    "MenuFileMakePainterNozzle", "&Nozzle/Tube Bitmap...", this.MenuFileMakePainterNozzleClick,
+                    "MenuFileMakePainterAnimation", "&Animation Files...", this.MenuFileMakePainterAnimationClick,
+                ],
+                "MenuFileMove", "&Move", [
+                    "MenuFilePlantMover", "&Plant Mover...", this.MenuFilePlantMoverClick,
+                    "MenuFileTdoMover", "&3D Object Mover...", this.MenuFileTdoMoverClick,
+                    "Reconcile3DObjects1", "&Reconcile 3D Objects...", this.Reconcile3DObjects1Click,
+                ],
+                "-",
+                "MenuFilePrintDrawing", "&Print Picture...", this.MenuFilePrintDrawingClick,
+                "-",
+                "MenuFileExit", "E&xit", this.MenuFileExitClick,
+            ],
+            "MenuEdit", "&Edit", [
+                "MenuEditUndo", "&Undo", this.MenuEditUndoClick,
+                "MenuEditRedo", "&Redo", this.MenuEditRedoClick,
+                "UndoMenuEditUndoRedoList", "Undo/Redo &List...", this.UndoMenuEditUndoRedoListClick,
+                "-",
+                "MenuEditCut", "&Cut", this.MenuEditCutClick,
+                "MenuEditCopy", "C&opy", this.MenuEditCopyClick,
+                "MenuEditPaste", "&Paste", this.MenuEditPasteClick,
+                "MenuEditDelete", "&Delete", this.MenuEditDeleteClick,
+                "MenuEditDuplicate", "Duplic&ate", this.MenuEditDuplicateClick,
+                "-",
+                "MenuEditCopyDrawing", "Copy P&icture", this.MenuEditCopyDrawingClick,
+                "MenuEditCopyAsText", "Copy &To Text", this.MenuEditCopyAsTextClick,
+                "MenuEditPasteAsText", "Paste &From Text", this.MenuEditPasteAsTextClick,
+                "-",
+                "MenuEditPreferences", "Pr&eferences...", this.MenuEditPreferencesClick,
+            ],
+            "MenuPlant", "&Plant", [
+                "MenuPlantNew", "Create &New...", this.MenuPlantNewClick,
+                "MenuPlantNewUsingLastWizardSettings", "Create Same as &Last", this.MenuPlantNewUsingLastWizardSettingsClick,
+                "-",
+                "MenuPlantBreed", "&Breed", this.MenuPlantBreedClick,
+                "MenuPlantMakeTimeSeries", "Make &Time Series", this.MenuPlantMakeTimeSeriesClick,
+                "-",
+                "MenuPlantRandomize", "&Randomize", this.MenuPlantRandomizeClick,
+                "MenuPlantZeroRotations", "Re&set Rotations", this.MenuPlantZeroRotationsClick,
+                "MenuPlantAnimate", "&Animate through Life Cycle", this.MenuPlantAnimateClick,
+                "-",
+                "MenuPlantRename", "R&ename...", this.MenuPlantRenameClick,
+                "MenuPlantEditNote", "E&dit Note...", this.MenuPlantEditNoteClick,
+            ],
+            "MenuLayout", "&Layout", [
+                "MenuLayoutSelectAll", "Select &All", this.MenuLayoutSelectAllClick,
+                "MenuLayoutDeselect", "Select &None", this.MenuLayoutDeselectClick,
+                "-",
+                "MenuLayoutScaleToFit", "Scale to &Fit", this.MenuLayoutScaleToFitClick,
+                "MenuLayoutAlign", "A&lign", [
+                    "MenuLayoutAlignTops", "&Tops", this.MenuLayoutAlignTopsClick,
+                    "MenuLayoutAlignBottoms", "&Bottoms", this.MenuLayoutAlignBottomsClick,
+                    "MenuLayoutAlignLeftSides", "&Left Sides", this.MenuLayoutAlignLeftSidesClick,
+                    "MenuLayoutAlignRightSides", "&Right Sides", this.MenuLayoutAlignRightSidesClick,
+                    "MenuLayoutMakeBouquet", "Make into Bou&quet", this.MenuLayoutMakeBouquetClick,
+                ],
+                "MenuLayoutSize", "Si&ze", [
+                    "MenuLayoutSizeSameWidth", "Equal &Width", this.MenuLayoutSizeSameWidthClick,
+                    "MenuLayoutSizeSameHeight", "Equal &Height", this.MenuLayoutSizeSameHeightClick,
+                ],
+                "MenuLayoutPack", "&Pack", this.MenuLayoutPackClick,
+                "-",
+                "MenuLayoutBringForward", "Bring Fo&rward", this.MenuLayoutBringForwardClick,
+                "MenuLayoutSendBack", "Send &Back", this.MenuLayoutSendBackClick,
+                "-",
+                "MenuLayoutShow", "&Show", this.MenuLayoutShowClick,
+                "MenuLayoutHide", "&Hide", this.MenuLayoutHideClick,
+                "MenuLayoutHideOthers", "Hide &Others", this.MenuLayoutHideOthersClick,
+            ],
+            "MenuOptions", "&Options", [
+                "MenuOptionsDrawAs", "&Draw Using", [
+                    "radio", "MenuOptionsFastDraw", "&Bounding Boxes", this.MenuOptionsFastDrawClick,
+                    "radio", "MenuOptionsMediumDraw", "&Wire Frames", this.MenuOptionsMediumDrawClick,
+                    "radio", "MenuOptionsBestDraw", "&Solids", this.MenuOptionsBestDrawClick,
+                    "radio", "MenuOptionsCustomDraw", "&Custom...", this.MenuOptionsCustomDrawClick,
+                ],
+                "MenuLayoutView", "&View What Plants", [
+                    "radio", "MenuLayoutViewFreeFloating", this.MenuLayoutViewFreeFloatingClick,
+                    "radio", "MenuLayoutViewOnePlantAtATime", this.MenuLayoutViewOnePlantAtATimeClick,
+                ],
+                "MenuLayoutDrawingAreaOn", "Place Drawing &Area", [
+                    "radio", "MenuLayoutHorizontalOrientation", "On &Top", this.MenuLayoutHorizontalOrientationClick,
+                    "radio", "MenuLayoutVerticalOrientation", "On &Left Side", this.MenuLayoutVerticalOrientationClick,
+                ],
+                "MenuOptionsDrawRectangles", "Draw &Rectangles", [
+                    "radio", "MenuOptionsShowSelectionRectangles", "Around &Selected Plants", this.MenuOptionsShowSelectionRectanglesClick,
+                    "radio", "MenuOptionsShowBoundsRectangles", "Around &All Plants", this.MenuOptionsShowBoundsRectanglesClick,
+                ],
+                "MenuOptionsPosing", "&Posing", [
+                    "checkbox", "MenuOptionsHighlightPosedParts", "&Highlight Posed Parts", this.MenuOptionsHighlightPosedPartsClick,
+                    "checkbox", "MenuOptionsGhostHiddenParts", "&Ghost Hidden Parts", this.MenuOptionsGhostHiddenPartsClick,
+                    "checkbox", "MenuOptionsHidePosing", "&Ignore All Posing", this.MenuOptionsHidePosingClick,
+                ],
+                "MenuOptionsHints", "&Hints", [
+                    "checkbox", "MenuOptionsShowLongButtonHints", "Show Long Button &Hints", this.MenuOptionsShowLongButtonHintsClick,
+                    "checkbox", "MenuOptionsShowParameterHints", "Show Para&meter Hints", this.MenuOptionsShowParameterHintsClick,
+                ],
+                "-",
+                "checkbox", "MenuOptionsUsePlantBitmaps", "Use Plant &Bitmaps", this.MenuOptionsUsePlantBitmapsClick,
+            ],
+            "MenuWindow", "&Window", [
+                "MenuWindowBreeder", "&Breeder", this.MenuWindowBreederClick,
+                "MenuWindowTimeSeries", "&Time Series", this.MenuWindowTimeSeriesClick,
+                "-",
+                "MenuWindowNumericalExceptions", "&Messages", this.MenuWindowNumericalExceptionsClick,
+            ],
+            "MenuHelp", "&Help", [
+                "MenuHelpTopics", "Help &Topics", this.MenuHelpTopicsClick,
+                "MenuHelpSuperSpeedTour", "&Super-Speed Tour", this.MenuHelpSuperSpeedTourClick,
+                "MenuHelpTutorial", "T&utorial", this.MenuHelpTutorialClick,
+                "-",
+                "MenuHelpAbout", "&About PlantStudio", this.MenuHelpAboutClick,
+            ],
+        ],
+    ]
+
+    paramPopupMenuSpec = [
+        // "paramPopupMenuExpand", "&Expand Panel", this.paramPopupMenuExpandClick,
+        // "paramPopupMenuCollapse", "&Collapse Panel", this.paramPopupMenuCollapseClick,
+        // "-",
+        // "paramPopupMenuExpandAllInSection", "E&xpand All Panels in This Section", this.paramPopupMenuExpandAllInSectionClick,
+        // "paramPopupMenuCollapseAllInSection", "C&ollapse All Panels in This Section", this.paramPopupMenuCollapseAllInSectionClick,
+        // "-",
+        // "paramPopupMenuCopyName", "Copy Parameter &Name", this.paramPopupMenuCopyNameClick,
+        // "-",
+        // "paramPopupMenuHelp", "Go to &Help for This Type of Parameter Panel", this.paramPopupMenuHelpClick,
+        // "sectionPopupMenuHelp", "Go to Help for This Parameter &Section", this.sectionPopupMenuHelpClick,
+    ]
+
+    plantPopupMenuSpec = [
+        // "PopupMenuRandomize", "&Randomize", this.PopupMenuRandomizeClick,
+        // "-",
+        // "PopupMenuCut", "&Cut", this.PopupMenuCutClick,
+        // "PopupMenuCopy", "C&opy", this.PopupMenuCopyClick,
+        // "PopupMenuPaste", "&Paste", this.PopupMenuPasteClick,
+        // "-",
+        // "PopupMenuRename", "Re&name...", this.PopupMenuRenameClick,
+        // "PopupMenuEditNote", "&Edit Note...", this.PopupMenuEditNoteClick,
+        // "PopupMenuAnimate", "&Animate", this.PopupMenuAnimateClick,
+        // "PopupMenuBreed", "&Breed", this.PopupMenuBreedClick,
+        // "PopupMenuMakeTimeSeries", "Make &Time Series", this.PopupMenuMakeTimeSeriesClick,
+        // "PopupMenuZeroRotations", "Re&set Rotations", this.PopupMenuZeroRotationsClick,
+    ]
+
+    //  recursive
+    viewMenu(menu: MenuItem[]): any {
+        return m("div.ml2", 
+            menu.map(menuItem => m("div",
+                menuItem.submenu
+                    ? m("div", menuItem.label, this.viewMenu(menuItem.submenu))
+                    : m("div", m("button", {
+                        onclick: () => menuItem.action?.call(this, menuItem)
+                    }, menuItem.label))
+                )
+        ))
+    }
+
     viewMainMenu() {
-        const menu: any = [
-            // // [type = radio/checkbox, ] ID, label, items or action
-            // "MainMenu", "Main", [
-            //     "MenuFile", "&File", [
-            //         "MenuFileNew", "&New", this.MenuFileNewClick,
-            //         "MenuFileOpen", "&Open...", this.MenuFileOpenClick,
-            //         "MenuFileReopen", "&Reopen", [
-            //             "Recent0", "0", this.Recent0Click,
-            //             "Recent1", "1", this.Recent0Click,
-            //             "Recent2", "2", this.Recent0Click,
-            //             "Recent3", "3", this.Recent0Click,
-            //             "Recent4", "4", this.Recent0Click,
-            //             "Recent5", "5", this.Recent0Click,
-            //             "Recent6", "6", this.Recent0Click,
-            //             "Recent7", "7", this.Recent0Click,
-            //             "Recent8", "8", this.Recent0Click,
-            //             "Recent9", "9", this.Recent0Click,
-            //         ],
-            //         "MenuFileClose", "&Close", this.MenuFileCloseClick,
-            //         "-",
-            //         "MenuFileSave", "&Save", this.MenuFileSaveClick,
-            //         "MenuFileSaveAs", "Save &As...", this.MenuFileSaveAsClick,
-            //         "-",
-            //         "MenuFileExport", "&Export", [
-            //             "MenuPlantExportTo3DS", "&3DS...", this.CaptionMenuPlantExportTo3DSClick,
-            //             "MenuPlantExportToLWO", "&LWO...", this.MenuPlantExportToLWOClick,
-            //             "MenuPlantExportToOBJ", "&OBJ...", this.MenuPlantExportToOBJClick,
-            //             "MenuPlantExportToDXF", "&DXF...", this.MenuPlantExportToDXFClick,
-            //             "MenuPlantExportToPOV", "PO&V INC...", this.MenuPlantExportToPOVClick,
-            //             "MenuPlantExportToVRML", "V&RML...", this.MenuPlantExportToVRMLClick,
-            //             "-",
-            //             "MenuFileSaveDrawingAs", "&Bitmap...", this.MenuFileSaveDrawingAsClick,
-            //             "MenuFileSaveJPEG", "&JPEG...", this.MenuFileSaveJPEGClick,
-            //             "MenuFileMakePainterNozzle", "&Nozzle/Tube Bitmap...", this.MenuFileMakePainterNozzleClick,
-            //             "MenuFileMakePainterAnimation", "&Animation Files...", this.MenuFileMakePainterAnimationClick,
-            //         ],
-
-            //         "MenuFileMove", "&Move", [
-            //             "MenuFilePlantMover", "&Plant Mover...", this.MenuFilePlantMoverClick,
-            //             "MenuFileTdoMover", "&3D Object Mover...", this.MenuFileTdoMoverClick,
-            //             "Reconcile3DObjects1", "&Reconcile 3D Objects...", this.Reconcile3DObjects1Click,
-            //         ],
-            //         "-",
-            //         "MenuFilePrintDrawing", "&Print Picture...", this.MenuFilePrintDrawingClick,
-            //         "-",
-            //         "MenuFileExit", "E&xit", this.MenuFileExitClick,
-            //     ],
-            //     "MenuEdit", "&Edit", [
-            //         "MenuEditUndo", "&Undo", this.MenuEditUndoClick,
-            //         "MenuEditRedo", "&Redo", this.MenuEditRedoClick,
-            //         "UndoMenuEditUndoRedoList", "Undo/Redo &List...", this.UndoMenuEditUndoRedoListClick,
-            //         "-",
-            //         "MenuEditCut", "&Cut", this.MenuEditCutClick,
-            //         "MenuEditCopy", "C&opy", this.MenuEditCopyClick,
-            //         "MenuEditPaste", "&Paste", this.MenuEditPasteClick,
-            //         "MenuEditDelete", "&Delete", this.MenuEditDeleteClick,
-            //         "MenuEditDuplicate", "Duplic&ate", this.MenuEditDuplicateClick,
-            //         "-",
-            //         "MenuEditCopyDrawing", "Copy P&icture", this.MenuEditCopyDrawingClick,
-            //         "MenuEditCopyAsText", "Copy &To Text", this.MenuEditCopyAsTextClick,
-            //         "MenuEditPasteAsText", "Paste &From Text", this.MenuEditPasteAsTextClick,
-            //         "-",
-            //         "MenuEditPreferences", "Pr&eferences...", this.MenuEditPreferencesClick,
-            //     ],
-            //     "MenuPlant", "&Plant", [
-            //         "MenuPlantNew", "Create &New...", this.MenuPlantNewClick,
-            //         "MenuPlantNewUsingLastWizardSettings", "Create Same as &Last", this.MenuPlantNewUsingLastWizardSettingsClick,
-            //         "-",
-            //         "MenuPlantBreed", "&Breed", this.MenuPlantBreedClick,
-            //         "MenuPlantMakeTimeSeries", "Make &Time Series", this.MenuPlantMakeTimeSeriesClick,
-            //         "-",
-            //         "MenuPlantRandomize", "&Randomize", this.MenuPlantRandomizeClick,
-            //         "MenuPlantZeroRotations", "Re&set Rotations", this.MenuPlantZeroRotationsClick,
-            //         "MenuPlantAnimate", "&Animate through Life Cycle", this.MenuPlantAnimateClick,
-            //         "-",
-            //         "MenuPlantRename", "R&ename...", this.MenuPlantRenameClick,
-            //         "MenuPlantEditNote", "E&dit Note...", this.MenuPlantEditNoteClick,
-            //     ],
-            //     "MenuLayout", "&Layout", [
-            //         "MenuLayoutSelectAll", "Select &All", this.MenuLayoutSelectAllClick,
-            //         "MenuLayoutDeselect", "Select &None", this.MenuLayoutDeselectClick,
-            //         "-",
-            //         "MenuLayoutScaleToFit", "Scale to &Fit", this.MenuLayoutScaleToFitClick,
-            //         "MenuLayoutAlign.TMenuItem", "A&lign", [
-            //             "MenuLayoutAlignTops", "&Tops", this.MenuLayoutAlignTopsClick,
-            //             "MenuLayoutAlignBottoms", "&Bottoms", this.MenuLayoutAlignBottomsClick,
-            //             "MenuLayoutAlignLeftSides", "&Left Sides", this.MenuLayoutAlignLeftSidesClick,
-            //             "MenuLayoutAlignRightSides", "&Right Sides", this.MenuLayoutAlignRightSidesClick,
-            //             "MenuLayoutMakeBouquet", "Make into Bou&quet", this.MenuLayoutMakeBouquetClick,
-            //         ],
-            //         "MenuLayoutSize.TMenuItem", "Si&ze", [
-            //             "MenuLayoutSizeSameWidth", "Equal &Width", this.MenuLayoutSizeSameWidthClick,
-            //             "MenuLayoutSizeSameHeight", "Equal &Height", this.MenuLayoutSizeSameHeightClick,
-            //         ],
-            //         "MenuLayoutPack", "&Pack", this.MenuLayoutPackClick,
-            //         "-",
-            //         "MenuLayoutBringForward", "Bring Fo&rward", this.MenuLayoutBringForwardClick,
-            //         "MenuLayoutSendBack", "Send &Back", this.MenuLayoutSendBackClick,
-            //         "-",
-            //         "MenuLayoutShow", "&Show", this.MenuLayoutShowClick,
-            //         "MenuLayoutHide", "&Hide", this.MenuLayoutHideClick,
-            //         "MenuLayoutHideOthers", "Hide &Others", this.MenuLayoutHideOthersClick,
-            //     ],
-            //     "MenuOptions.TMenuItem", "&Options", [
-            //         "MenuOptionsDrawAs.TMenuItem", "&Draw Using", [
-            //             "radio", "MenuOptionsFastDraw", "&Bounding Boxes", this.MenuOptionsFastDrawClick,
-            //             "radio", "MenuOptionsMediumDraw", "&Wire Frames", this.MenuOptionsMediumDrawClick,
-            //             "radio", "MenuOptionsBestDraw", "&Solids", this.MenuOptionsBestDrawClick,
-            //             "radio", "MenuOptionsCustomDraw", "&Custom...", this.MenuOptionsCustomDrawClick,
-            //         ],
-            //         "MenuLayoutView.TMenuItem", "&View What Plants", [
-            //             "radio", "MenuLayoutViewFreeFloating", this.MenuLayoutViewFreeFloatingClick,
-            //             "radio", "MenuLayoutViewOnePlantAtATime", this.MenuLayoutViewOnePlantAtATimeClick,
-            //         ],
-            //         "MenuLayoutDrawingAreaOn.TMenuItem", "Place Drawing &Area", [
-            //             "radio", "MenuLayoutHorizontalOrientation", "On &Top", this.MenuLayoutHorizontalOrientationClick,
-            //             "radio", "MenuLayoutVerticalOrientation", "On &Left Side", this.MenuLayoutVerticalOrientationClick,
-            //         ],
-            //         "MenuOptionsDrawRectangles.TMenuItem", "Draw &Rectangles", [
-            //             "radio", "MenuOptionsShowSelectionRectangles", "Around &Selected Plants", this.MenuOptionsShowSelectionRectanglesClick,
-            //             "radio", "MenuOptionsShowBoundsRectangles", "Around &All Plants", this.MenuOptionsShowBoundsRectanglesClick,
-            //         ],
-            //         "MenuOptionsPosing.TMenuItem", "&Posing", [
-            //             "checkbox", "MenuOptionsHighlightPosedParts", "&Highlight Posed Parts", this.MenuOptionsHighlightPosedPartsClick,
-            //             "checkbox", "MenuOptionsGhostHiddenParts", "&Ghost Hidden Parts", this.MenuOptionsGhostHiddenPartsClick,
-            //             "checkbox", "MenuOptionsHidePosing", "&Ignore All Posing", this.MenuOptionsHidePosingClick,
-            //         ],
-            //         "MenuOptionsHints.TMenuItem", "&Hints", [
-            //             "checkbox", "MenuOptionsShowLongButtonHints", "Show Long Button &Hints", this.MenuOptionsShowLongButtonHintsClick,
-            //             "checkbox", "MenuOptionsShowParameterHints", "Show Para&meter Hints", this.MenuOptionsShowParameterHintsClick,
-            //         ],
-            //         "-",
-            //         "checkbox", "MenuOptionsUsePlantBitmaps", "Use Plant &Bitmaps", this.MenuOptionsUsePlantBitmapsClick,
-            //     ],
-            //     "MenuWindow.TMenuItem", "&Window", [
-            //         "MenuWindowBreeder", "&Breeder", this.MenuWindowBreederClick,
-            //         "MenuWindowTimeSeries", "&Time Series", this.MenuWindowTimeSeriesClick,
-            //         "-",
-            //         "MenuWindowNumericalExceptions", "&Messages", this.MenuWindowNumericalExceptionsClick,
-            //     ],
-            //     "MenuHelp.TMenuItem", "&Help", [
-            //         "MenuHelpTopics", "Help &Topics", this.MenuHelpTopicsClick,
-            //         "MenuHelpSuperSpeedTour", "&Super-Speed Tour", this.MenuHelpSuperSpeedTourClick,
-            //         "MenuHelpTutorial", "T&utorial", this.MenuHelpTutorialClick,
-            //         "-",
-            //         "MenuHelpAbout", "&About PlantStudio", this.MenuHelpAboutClick,
-            //     ],
-            // ],
-        ]
-
-        const paramPopupMenu = [
-            // "paramPopupMenuExpand.TMenuItem", "&Expand Panel", this.paramPopupMenuExpandClick,
-            // "paramPopupMenuCollapse.TMenuItem", "&Collapse Panel", this.paramPopupMenuCollapseClick,
-            // "-",
-            // "paramPopupMenuExpandAllInSection.TMenuItem", "E&xpand All Panels in This Section", this.paramPopupMenuExpandAllInSectionClick,
-            // "paramPopupMenuCollapseAllInSection.TMenuItem", "C&ollapse All Panels in This Section", this.paramPopupMenuCollapseAllInSectionClick,
-            // "-",
-            // "paramPopupMenuCopyName.TMenuItem", "Copy Parameter &Name", this.paramPopupMenuCopyNameClick,
-            // "-",
-            // "paramPopupMenuHelp.TMenuItem", "Go to &Help for This Type of Parameter Panel", this.paramPopupMenuHelpClick,
-            // "sectionPopupMenuHelp.TMenuItem", "Go to Help for This Parameter &Section", this.sectionPopupMenuHelpClick,
-        ]
-
-        const PlantPopupMenu = [
-            // "PopupMenuRandomize.TMenuItem", "&Randomize", this.PopupMenuRandomizeClick,
-            // "-",
-            // "PopupMenuCut.TMenuItem", "&Cut", this.PopupMenuCutClick,
-            // "PopupMenuCopy.TMenuItem", "C&opy", this.PopupMenuCopyClick,
-            // "PopupMenuPaste.TMenuItem", "&Paste", this.PopupMenuPasteClick,
-            // "-",
-            // "PopupMenuRename.TMenuItem", "Re&name...", this.PopupMenuRenameClick,
-            // "PopupMenuEditNote.TMenuItem", "&Edit Note...", this.PopupMenuEditNoteClick,
-            // "PopupMenuAnimate.TMenuItem", "&Animate", this.PopupMenuAnimateClick,
-            // "PopupMenuBreed.TMenuItem", "&Breed", this.PopupMenuBreedClick,
-            // "PopupMenuMakeTimeSeries.TMenuItem", "Make &Time Series", this.PopupMenuMakeTimeSeriesClick,
-            // "PopupMenuZeroRotations.TMenuItem", "Re&set Rotations", this.PopupMenuZeroRotationsClick,
-        ]
+        const menu = buildMenuFromSpec(this.mainMenuSpec)
+        
+        return this.viewMenu(menu)
     }
 
     view() {
         return m("div", 
             "PlantStudio Main Form",
-            viewMainForm()        
+            this.viewMainMenu()
+            // viewMainForm()        
         )
+    }   
+}
+
+interface MenuItem {
+    type: string
+    id: string
+    label: string
+    action?: (menuItem: MenuItem) => void
+    submenu?: MenuItem[]
+}
+
+// recursive
+function buildMenuFromSpec(specOriginal: any[]): MenuItem[] {
+    const result: MenuItem[] = []
+
+    console.log("specOriginal", specOriginal)
+    const spec = specOriginal.slice()
+
+    while (spec.length) {
+        let type = spec.shift()
+        if (!type) break
+        let id
+        if (!["radio", "checkbox"].includes(type)) {
+            id = type
+            type = "menu"
+        } else {
+            id = spec.shift()
+        }
+        const label = spec.shift()
+        const actionOrMenuSpec = spec.shift()
+        if (typeof actionOrMenuSpec !== "function") {
+            const submenu = buildMenuFromSpec(actionOrMenuSpec)
+            result.push({type, id, label, submenu})
+        } else {
+            const action = actionOrMenuSpec
+            result.push({type, id, label, action})
+        }
     }
-    
+    return result
 }
 
 /// Unfinished Stub Function

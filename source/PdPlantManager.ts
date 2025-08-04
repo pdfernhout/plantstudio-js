@@ -264,126 +264,127 @@ export class PdPlantManager {
     }
 
     // TODO when convert MainForm -- reconcileFileWithTdoLibrary
-    // // v1.11
-    // reconcileFileWithTdoLibrary(plantFileName: string, tdoLibrary: string): int {
-    //     let plantFileTdos: KfObject3D[] = []
-    //     let libraryFileTdos: KfObject3D[] = []
-    //     let plantFile: TextFile = new TextFile()
-    //     let tdoFile: TextFile = new TextFile()
-    //     let outputTdoFile: TextFile = new TextFile()
-    //     let fileInfo: SaveFileNamesStructure
+    // v1.11
+    reconcileFileWithTdoLibrary(plantFileName: string, tdoLibrary: string): int {
+        throw new Error("TOD Unfinished")
+        // let plantFileTdos: KfObject3D[] = []
+        // let libraryFileTdos: KfObject3D[] = []
+        // let plantFile: TextFile = new TextFile()
+        // let tdoFile: TextFile = new TextFile()
+        // let outputTdoFile: TextFile = new TextFile()
+        // let fileInfo: SaveFileNamesStructure
         
-    //     let result = 0
-    //     if (!FileExists(plantFileName)) {
-    //         // check that files exist
-    //         plantFileName = usupport.getFileOpenInfo(FileType.kFileTypePlant, plantFileName, "Choose a plant file")
-    //         if (plantFileName === "") {
-    //             return result
-    //         }
-    //     }
-    //     if (!FileExists(tdoLibrary)) {
-    //         tdoLibrary = usupport.getFileOpenInfo(FileType.kFileTypeTdo, tdoLibrary, "Choose a 3D object library (tdo) file")
-    //         if (tdoLibrary === "") {
-    //             return result
-    //         }
-    //     }
-    //     try {
-    //         ucursor.cursor_startWait()
-    //         // read tdos from plants
-    //         AssignFile(plantFile, plantFileName)
-    //         try {
-    //             // v1.5
-    //             setDecimalSeparator()
-    //             Reset(plantFile)
-    //             while (!eof(plantFile)) {
-    //                 const aLine = readln(plantFile)
-    //                 if (pos(kStartTdoString, aLine) > 0) {
-    //                     const tdo = new KfObject3D()
-    //                     tdo.readFromFileStream(plantFile, kInTdoLibrary)
-    //                     plantFileTdos.push(tdo)
-    //                 }
-    //             }
-    //         } finally {
-    //             CloseFile(plantFile)
-    //         }
-    //         // read tdos from library
-    //         AssignFile(tdoFile, tdoLibrary)
-    //         try {
-    //             // v1.5
-    //             setDecimalSeparator()
-    //             Reset(tdoFile)
-    //             while (!eof(tdoFile)) {
-    //                 const tdo = new KfObject3D()
-    //                 tdo.readFromFileStream(tdoFile, kInTdoLibrary)
-    //                 libraryFileTdos.push(tdo)
-    //             }
-    //         } finally {
-    //             CloseFile(tdoFile)
-    //         }
-    //         if (plantFileTdos.length > 0) {
-    //             for (let i = 0; i <= plantFileTdos.length - 1; i++) {
-    //                 // add plant tdos not in library list to library list
-    //                 const plantFileTdo = plantFileTdos[i]
-    //                 let matchInLibrary = false
-    //                 if (libraryFileTdos.length > 0) {
-    //                     for (let j = 0; j <= libraryFileTdos.length - 1; j++) {
-    //                         const libraryTdo = libraryFileTdos[j]
-    //                         if (plantFileTdo.isSameAs(libraryTdo)) {
-    //                             matchInLibrary = true
-    //                             break
-    //                         }
-    //                     }
-    //                 }
-    //                 if (!matchInLibrary) {
-    //                     const tdo = new KfObject3D()
-    //                     tdo.copyFrom(plantFileTdo)
-    //                     libraryFileTdos.push(tdo)
-    //                     result += 1
-    //                 }
-    //             }
-    //         }
-    //         if (result > 0) {
-    //             if (usupport.getFileSaveInfo(FileType.kFileTypeTdo, kDontAskForFileName, tdoLibrary, fileInfo)) {
-    //                 // if any tdos in plant file but not in library, rewrite library
-    //                 AssignFile(outputTdoFile, fileInfo.tempFile)
-    //                 try {
-    //                     // v1.5
-    //                     setDecimalSeparator()
-    //                     Rewrite(outputTdoFile)
-    //                     usupport.startFileSave(fileInfo)
-    //                     if (libraryFileTdos.length > 0) {
-    //                         for (let i = 0; i <= libraryFileTdos.length - 1; i++) {
-    //                             const tdo = libraryFileTdos[i]
-    //                             if (tdo === null) {
-    //                                 continue
-    //                             }
-    //                             tdo.writeToFileStream(outputTdoFile, kInTdoLibrary)
-    //                         }
-    //                     }
-    //                     fileInfo.writingWasSuccessful = true
-    //                 } finally {
-    //                     CloseFile(outputTdoFile)
-    //                     usupport.cleanUpAfterFileSave(fileInfo)
-    //                 }
-    //             }
-    //         }
-    //     } finally {
-    //         ucursor.cursor_stopWait()
-    //     }
-    //     return result
-    // }
+        // let result = 0
+        // if (!FileExists(plantFileName)) {
+        //     // check that files exist
+        //     plantFileName = usupport.getFileOpenInfo(FileType.kFileTypePlant, plantFileName, "Choose a plant file")
+        //     if (plantFileName === "") {
+        //         return result
+        //     }
+        // }
+        // if (!FileExists(tdoLibrary)) {
+        //     tdoLibrary = usupport.getFileOpenInfo(FileType.kFileTypeTdo, tdoLibrary, "Choose a 3D object library (tdo) file")
+        //     if (tdoLibrary === "") {
+        //         return result
+        //     }
+        // }
+        // try {
+        //     ucursor.cursor_startWait()
+        //     // read tdos from plants
+        //     AssignFile(plantFile, plantFileName)
+        //     try {
+        //         // v1.5
+        //         setDecimalSeparator()
+        //         Reset(plantFile)
+        //         while (!eof(plantFile)) {
+        //             const aLine = readln(plantFile)
+        //             if (pos(kStartTdoString, aLine) > 0) {
+        //                 const tdo = new KfObject3D()
+        //                 tdo.readFromFileStream(plantFile, kInTdoLibrary)
+        //                 plantFileTdos.push(tdo)
+        //             }
+        //         }
+        //     } finally {
+        //         CloseFile(plantFile)
+        //     }
+        //     // read tdos from library
+        //     AssignFile(tdoFile, tdoLibrary)
+        //     try {
+        //         // v1.5
+        //         setDecimalSeparator()
+        //         Reset(tdoFile)
+        //         while (!eof(tdoFile)) {
+        //             const tdo = new KfObject3D()
+        //             tdo.readFromFileStream(tdoFile, kInTdoLibrary)
+        //             libraryFileTdos.push(tdo)
+        //         }
+        //     } finally {
+        //         CloseFile(tdoFile)
+        //     }
+        //     if (plantFileTdos.length > 0) {
+        //         for (let i = 0; i <= plantFileTdos.length - 1; i++) {
+        //             // add plant tdos not in library list to library list
+        //             const plantFileTdo = plantFileTdos[i]
+        //             let matchInLibrary = false
+        //             if (libraryFileTdos.length > 0) {
+        //                 for (let j = 0; j <= libraryFileTdos.length - 1; j++) {
+        //                     const libraryTdo = libraryFileTdos[j]
+        //                     if (plantFileTdo.isSameAs(libraryTdo)) {
+        //                         matchInLibrary = true
+        //                         break
+        //                     }
+        //                 }
+        //             }
+        //             if (!matchInLibrary) {
+        //                 const tdo = new KfObject3D()
+        //                 tdo.copyFrom(plantFileTdo)
+        //                 libraryFileTdos.push(tdo)
+        //                 result += 1
+        //             }
+        //         }
+        //     }
+        //     if (result > 0) {
+        //         if (usupport.getFileSaveInfo(FileType.kFileTypeTdo, kDontAskForFileName, tdoLibrary, fileInfo)) {
+        //             // if any tdos in plant file but not in library, rewrite library
+        //             AssignFile(outputTdoFile, fileInfo.tempFile)
+        //             try {
+        //                 // v1.5
+        //                 setDecimalSeparator()
+        //                 Rewrite(outputTdoFile)
+        //                 usupport.startFileSave(fileInfo)
+        //                 if (libraryFileTdos.length > 0) {
+        //                     for (let i = 0; i <= libraryFileTdos.length - 1; i++) {
+        //                         const tdo = libraryFileTdos[i]
+        //                         if (tdo === null) {
+        //                             continue
+        //                         }
+        //                         tdo.writeToFileStream(outputTdoFile, kInTdoLibrary)
+        //                     }
+        //                 }
+        //                 fileInfo.writingWasSuccessful = true
+        //             } finally {
+        //                 CloseFile(outputTdoFile)
+        //                 usupport.cleanUpAfterFileSave(fileInfo)
+        //             }
+        //         }
+        //     }
+        // } finally {
+        //     ucursor.cursor_stopWait()
+        // }
+        // return result
+    }
     
-    // visiblePlantCount(): short {
-    //     let result = 0
-    //     if (this.plants.length > 0) {
-    //         for (let i = 0; i <= this.plants.length - 1; i++) {
-    //             if (!this.plants[i].hidden) {
-    //                 result += 1
-    //             }
-    //         }
-    //     }
-    //     return result
-    // }
+    visiblePlantCount(): short {
+        let result = 0
+        if (this.plants.length > 0) {
+            for (let i = 0; i <= this.plants.length - 1; i++) {
+                if (!this.plants[i].hidden) {
+                    result += 1
+                }
+            }
+        }
+        return result
+    }
     
     // --------------------------------------------------------------------------------------- drawing 
     drawOnInvalidRect(destCanvas: CanvasRenderingContext2D, selectedPlants: PdPlant[], invalidRect: TRect, excludeInvisiblePlants: boolean, excludeNonSelectedPlants: boolean): void {

@@ -32,9 +32,9 @@ export const kDontUseAmendment = false
 // const
 const kDrawingTdo = true
 const kDrawingLine = false
-const kRotateX = 0
-const kRotateY = 1
-const kRotateZ = 2
+export const kRotateX = 0
+export const kRotateY = 1
+export const kRotateZ = 2
 
 // const
 const kMaxLineOutputPoints = 200
