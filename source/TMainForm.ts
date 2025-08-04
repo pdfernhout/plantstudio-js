@@ -1,7 +1,7 @@
 // unit Umain
 
 import * as m from "mithril"
-import { arrayInsert, caption, ColorDefs, double, ExtractFileName, float, int, intround, IntToStr, long, mbYesNo, mbYesNoCancel, MessageDialog, mtConfirmation, short, ShowMessage, StrToFloat, StrToIntDef, TColorRef } from "./common"
+import { arrayInsert, arraySwap, caption, ColorDefs, double, ExtractFileName, float, int, intround, IntToStr, long, mbYesNo, mbYesNoCancel, MessageDialog, mtConfirmation, short, ShowMessage, StrToFloat, StrToIntDef, TColorRef } from "./common"
 import { PdCommand } from "./PdCommand"
 import { PdCommandList } from "./PdCommandList"
 import { domain, DrawMode, kAnimateByAge, kAnimateByXRotation, kExcludeInvisiblePlants, kIncludeAllPlants, kIncludeDrawingAreaContents, kIncludeNonSelectedPlants, kIncludeSelectedPlants, kIncludeVisiblePlants, kMainWindowOrientationHorizontal, kMainWindowOrientationVertical, kMaxRecentFiles, kUnsavedFileName, ViewPlants } from "./PdDomain"
@@ -436,7 +436,7 @@ export class TMainForm {
     // rubberBandStartDragPoint: TPoint = new TPoint()
     // rubberBandLastDrawPoint: TPoint = new TPoint()
     drawing: boolean = false
-    // animateCommand: PdCommand = new PdCommand()
+    animateCommand: PdAnimatePlantCommand | null = null
     // drawProgressMax: long = 0
     cursorModeForDrawing: short = 0
     // actionInProgress: boolean = false
@@ -1954,17 +1954,15 @@ export class TMainForm {
     
     // drawing 
     changeViewingOptionTo(aNewOption: short): void {
-        throw new Error("TODO Unfinished")
-        // if ((aNewOption === ViewPlants.kViewPlantsInMainWindowOneAtATime) && (this.selectedPlants.length <= 0)) {
-        //     if (this.plants.length < 0) {
-        //         return
-        //     }
-        //     this.selectedPlants.push(this.plants[0])
-        //     this.updateForChangeToPlantSelections()
-        // }
-        // const newCommand = new PdChangeMainWindowViewingOptionCommand(this.plants, this.selectedPlants, aNewOption)
-        // this.doCommand(newCommand)
-        // this.MenuLayoutMakeBouquet.enabled = (this.selectedPlants.length > 1) && (!domain.viewPlantsInMainWindowOnePlantAtATime())
+        console.log("changeViewingOptionTo", aNewOption, this.selectedPlants)
+        if ((aNewOption === ViewPlants.kViewPlantsInMainWindowOneAtATime) && (this.selectedPlants.length <= 0)) {
+            if (this.plants.length > 0) {
+                this.selectedPlants.push(this.plants[0])
+                this.updateForChangeToPlantSelections()
+            }
+        }
+        const newCommand = new PdChangeMainWindowViewingOptionCommand(this.plants, this.selectedPlants, aNewOption)
+        this.doCommand(newCommand)
     }
     
     MenuLayoutViewOnePlantAtATimeClick(): void {
@@ -1978,6 +1976,7 @@ export class TMainForm {
     }
     
     MenuLayoutViewFreeFloatingClick(): void {
+        console.log("domain", domain)
         if (domain.options.mainWindowViewMode !== ViewPlants.kViewPlantsInMainWindowFreeFloating) {
             this.changeViewingOptionTo(ViewPlants.kViewPlantsInMainWindowFreeFloating)
         }
@@ -2037,58 +2036,35 @@ export class TMainForm {
     
     // --------------------------------------------------------------------------- *options menu 
     MenuOptionsFastDrawClick(): void {
-        throw new Error("TODO Unfinished")
-        // let oldSpeed: short
-        
-        // oldSpeed = domain.options.drawSpeed
-        // domain.options.drawSpeed = DrawMode.kDrawFast
-        // this.MenuOptionsFastDraw.checked = true
-        // ubreedr.BreederForm.BreederMenuOptionsFastDraw.checked = true
-        // utimeser.TimeSeriesForm.TimeSeriesMenuOptionsFastDraw.checked = true
-        // if (oldSpeed !== domain.options.drawSpeed) {
-        //     this.updateForChangeToDrawOptions()
-        // }
+        const oldSpeed = domain.options.drawSpeed
+        domain.options.drawSpeed = DrawMode.kDrawFast
+        if (oldSpeed !== domain.options.drawSpeed) {
+            this.updateForChangeToDrawOptions()
+        }
     }
     
     MenuOptionsMediumDrawClick(): void {
-        throw new Error("TODO Unfinished")
-        // let oldSpeed: short
-        
-        // oldSpeed = domain.options.drawSpeed
-        // domain.options.drawSpeed = DrawMode.kDrawMedium
-        // this.MenuOptionsMediumDraw.checked = true
-        // ubreedr.BreederForm.BreederMenuOptionsMediumDraw.checked = true
-        // utimeser.TimeSeriesForm.TimeSeriesMenuOptionsMediumDraw.checked = true
-        // if (oldSpeed !== domain.options.drawSpeed) {
-        //     this.updateForChangeToDrawOptions()
-        // }
+        const oldSpeed = domain.options.drawSpeed
+        domain.options.drawSpeed = DrawMode.kDrawMedium
+        if (oldSpeed !== domain.options.drawSpeed) {
+            this.updateForChangeToDrawOptions()
+        }
     }
     
     MenuOptionsBestDrawClick(): void {
-        throw new Error("TODO Unfinished")
-        // let oldSpeed: short
-        
-        // oldSpeed = domain.options.drawSpeed
-        // domain.options.drawSpeed = DrawMode.kDrawBest
-        // this.MenuOptionsBestDraw.checked = true
-        // ubreedr.BreederForm.BreederMenuOptionsBestDraw.checked = true
-        // utimeser.TimeSeriesForm.TimeSeriesMenuOptionsBestDraw.checked = true
-        // if (oldSpeed !== domain.options.drawSpeed) {
-        //     this.updateForChangeToDrawOptions()
-        // }
+        const oldSpeed = domain.options.drawSpeed
+        domain.options.drawSpeed = DrawMode.kDrawBest
+        if (oldSpeed !== domain.options.drawSpeed) {
+            this.updateForChangeToDrawOptions()
+        }
     }
     
     MenuOptionsCustomDrawClick(): void {
-        throw new Error("TODO Unfinished")
+        const lastDrawSpeed = domain.options.drawSpeed
+        domain.options.drawSpeed = DrawMode.kDrawCustom
+        // TODO PDF: Fix this
         // let customDrawForm: TCustomDrawOptionsForm
         // let response: int
-        // let lastDrawSpeed: short
-        
-        // lastDrawSpeed = domain.options.drawSpeed
-        // domain.options.drawSpeed = DrawMode.kDrawCustom
-        // this.MenuOptionsCustomDraw.checked = true
-        // ubreedr.BreederForm.BreederMenuOptionsCustomDraw.checked = true
-        // utimeser.TimeSeriesForm.TimeSeriesMenuOptionsCustomDraw.checked = true
         // customDrawForm = ucustdrw.TCustomDrawOptionsForm().create(this)
         // if (customDrawForm === null) {
         //     throw new Error("Problem: Could not create 3D object mover window.")
@@ -2125,49 +2101,39 @@ export class TMainForm {
     }
     
     MenuOptionsShowSelectionRectanglesClick(): void {
-        throw new Error("TODO Unfinished")
-        // this.MenuOptionsShowSelectionRectangles.checked = !this.MenuOptionsShowSelectionRectangles.checked
-        // domain.options.showSelectionRectangle = this.MenuOptionsShowSelectionRectangles.checked
-        // this.copyDrawingBitmapToPaintBox()
+        domain.options.showSelectionRectangle = !domain.options.showSelectionRectangle
+        this.copyDrawingBitmapToPaintBox()
     }
     
     MenuOptionsShowBoundsRectanglesClick(): void {
-        throw new Error("TODO Unfinished")
-        // this.MenuOptionsShowBoundsRectangles.checked = !this.MenuOptionsShowBoundsRectangles.checked
-        // domain.options.showBoundsRectangle = this.MenuOptionsShowBoundsRectangles.checked
-        // this.copyDrawingBitmapToPaintBox()
+        domain.options.showBoundsRectangle = !domain.options.showBoundsRectangle
+        this.copyDrawingBitmapToPaintBox()
     }
     
     MenuOptionsGhostHiddenPartsClick(): void {
-        throw new Error("TODO Unfinished")
-        // this.MenuOptionsGhostHiddenParts.checked = !this.MenuOptionsGhostHiddenParts.checked
-        // domain.options.showGhostingForHiddenParts = this.MenuOptionsGhostHiddenParts.checked
-        // this.internalChange = true
-        // this.posingGhost.Down = domain.options.showGhostingForHiddenParts
-        // this.internalChange = false
-        // // cannot just redraw plants because bounds rects may have changed
-        // this.redrawEverything()
+        domain.options.showGhostingForHiddenParts = !domain.options.showGhostingForHiddenParts
+        this.internalChange = true
+        // TODO PDF make sure button uses this: this.posingGhost.Down = domain.options.showGhostingForHiddenParts
+        this.internalChange = false
+        // cannot just redraw plants because bounds rects may have changed
+        this.redrawEverything()
     }
     
     MenuOptionsHighlightPosedPartsClick(): void {
-        throw new Error("TODO Unfinished")
-        // this.MenuOptionsHighlightPosedParts.checked = !this.MenuOptionsHighlightPosedParts.checked
-        // domain.options.showHighlightingForNonHiddenPosedParts = this.MenuOptionsHighlightPosedParts.checked
-        // this.internalChange = true
-        // this.posingHighlight.Down = domain.options.showHighlightingForNonHiddenPosedParts
-        // this.internalChange = false
-        // this.redrawAllPlantsInViewWithAmendments()
+        domain.options.showHighlightingForNonHiddenPosedParts = !domain.options.showHighlightingForNonHiddenPosedParts
+        this.internalChange = true
+        // TODO PDF make sure button uses this: this.posingHighlight.Down = domain.options.showHighlightingForNonHiddenPosedParts
+        this.internalChange = false
+        this.redrawAllPlantsInViewWithAmendments()
     }
     
     MenuOptionsHidePosingClick(): void {
-        throw new Error("TODO Unfinished")
-        // this.MenuOptionsHidePosing.checked = !this.MenuOptionsHidePosing.checked
-        // domain.options.showPosingAtAll = !this.MenuOptionsHidePosing.checked
-        // this.internalChange = true
-        // this.posingNotShown.Down = !domain.options.showPosingAtAll
-        // this.internalChange = false
-        // // cannot just redraw plants because bounds rects may have changed
-        // this.redrawEverything()
+        domain.options.showPosingAtAll = !domain.options.showPosingAtAll
+        this.internalChange = true
+        // TODO PDF make sure button uses this: this.posingNotShown.Down = !domain.options.showPosingAtAll
+        this.internalChange = false
+        // cannot just redraw plants because bounds rects may have changed
+        this.redrawEverything()
     }
     
     posingHighlightClick(): void {
@@ -2194,31 +2160,26 @@ export class TMainForm {
     }
     
     posingNotShownClick(): void {
-        throw new Error("TODO Unfinished")
-        // if (this.internalChange) {
-        //     return
-        // }
-        // domain.options.showPosingAtAll = !domain.options.showPosingAtAll
-        // this.MenuOptionsHidePosing.checked = !domain.options.showPosingAtAll
-        // this.posingNotShown.Down = !domain.options.showPosingAtAll
-        // // cannot just redraw plants because bounds rects may have changed
-        // this.redrawEverything()
+        if (this.internalChange) {
+            return
+        }
+        domain.options.showPosingAtAll = !domain.options.showPosingAtAll
+        // TODO PDF make sure button uses this: this.posingNotShown.Down = !domain.options.showPosingAtAll
+        // cannot just redraw plants because bounds rects may have changed
+        this.redrawEverything()
     }
     
     MenuOptionsShowLongButtonHintsClick(): void {
-        throw new Error("TODO Unfinished")
-        // this.MenuOptionsShowLongButtonHints.checked = !this.MenuOptionsShowLongButtonHints.checked
-        // domain.options.showLongHintsForButtons = this.MenuOptionsShowLongButtonHints.checked
-        // this.updateHintPauseForOptions()
-        // // shows different hint
-        // this.updateForChangeToPlantBitmaps()
+        domain.options.showLongHintsForButtons = !domain.options.showLongHintsForButtons
+        console.log("MenuOptionsShowLongButtonHintsClick", domain.options.showLongHintsForButtons)
+        this.updateHintPauseForOptions()
+        // shows different hint
+        this.updateForChangeToPlantBitmaps()
     }
     
     MenuOptionsShowParameterHintsClick(): void {
-        throw new Error("TODO Unfinished")
-        // this.MenuOptionsShowParameterHints.checked = !this.MenuOptionsShowParameterHints.checked
-        // domain.options.showHintsForParameters = this.MenuOptionsShowParameterHints.checked
-        // this.updateHintPauseForOptions()
+        domain.options.showHintsForParameters = !domain.options.showHintsForParameters
+        this.updateHintPauseForOptions()
     }
     
     // --------------------------------------------------------------------------- *window menu 
@@ -2407,18 +2368,17 @@ export class TMainForm {
         // this.internalChange = false
     }
 
-    /*
-    
     updateHintPauseForOptions(): void {
-        delphi_compatability.Application.HintPause = domain.options.pauseBeforeHint * 1000
-        if (domain.options.showLongHintsForButtons || domain.options.showHintsForParameters) {
-            delphi_compatability.Application.HintHidePause = domain.options.pauseDuringHint * 1000
-        } else {
-            delphi_compatability.Application.HintHidePause = 2500
-        }
-        this.statsPanel.updateHint()
+        // TODO PDF: Fix this
+        // delphi_compatability.Application.HintPause = domain.options.pauseBeforeHint * 1000
+        // if (domain.options.showLongHintsForButtons || domain.options.showHintsForParameters) {
+        //     delphi_compatability.Application.HintHidePause = domain.options.pauseDuringHint * 1000
+        // } else {
+        //     delphi_compatability.Application.HintHidePause = 2500
+        // }
+        // this.statsPanel.updateHint()
     }
-    
+
     updateForChangedExportCount(): void {
         this.Caption = this.captionForFile()
     }
@@ -2427,42 +2387,44 @@ export class TMainForm {
         this.internalChange = true
         // fonts
         // v1.6b1 -- fix for large fonts problem
-        this.Font.Size = domain.options.parametersFontSize
-        this.parametersScrollBox.Font.Size = domain.options.parametersFontSize
-        this.parametersScrollBox.Invalidate()
-        // viewing option
-        this.MenuLayoutMakeBouquet.enabled = (this.selectedPlants.length > 1) && (!domain.viewPlantsInMainWindowOnePlantAtATime())
-        this.updateMenusForChangeToViewingOption()
-        // drawing
-        this.MenuOptionsUsePlantBitmaps.checked = domain.options.cachePlantBitmaps
-        // showing optional things
-        this.MenuOptionsShowSelectionRectangles.checked = domain.options.showSelectionRectangle
-        this.MenuOptionsShowBoundsRectangles.checked = domain.options.showBoundsRectangle
-        this.MenuOptionsShowLongButtonHints.checked = domain.options.showLongHintsForButtons
-        this.MenuOptionsShowParameterHints.checked = domain.options.showHintsForParameters
-        // posing
-        this.MenuOptionsGhostHiddenParts.checked = domain.options.showGhostingForHiddenParts
-        this.posingGhost.Down = domain.options.showGhostingForHiddenParts
-        this.MenuOptionsHighlightPosedParts.checked = domain.options.showHighlightingForNonHiddenPosedParts
-        this.posingHighlight.Down = domain.options.showHighlightingForNonHiddenPosedParts
-        this.MenuOptionsHidePosing.checked = !domain.options.showPosingAtAll
-        this.posingNotShown.Down = !domain.options.showPosingAtAll
-        // vertical/horizontal
-        this.MenuLayoutHorizontalOrientation.checked = domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal
-        this.MenuLayoutVerticalOrientation.checked = domain.options.mainWindowOrientation === kMainWindowOrientationVertical
-        this.drawingAreaOnTop.Down = domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal
-        this.drawingAreaOnSide.Down = domain.options.mainWindowOrientation === kMainWindowOrientationVertical
-        this.internalChange = false
+         // TODO PDF: Fix this or remove
+        // this.Font.Size = domain.options.parametersFontSize
+        // this.parametersScrollBox.Font.Size = domain.options.parametersFontSize
+        // this.parametersScrollBox.Invalidate()
+        // // viewing option
+        // this.MenuLayoutMakeBouquet.enabled = (this.selectedPlants.length > 1) && (!domain.viewPlantsInMainWindowOnePlantAtATime())
+        // this.updateMenusForChangeToViewingOption()
+        // // drawing
+        // this.MenuOptionsUsePlantBitmaps.checked = domain.options.cachePlantBitmaps
+        // // showing optional things
+        // this.MenuOptionsShowSelectionRectangles.checked = domain.options.showSelectionRectangle
+        // this.MenuOptionsShowBoundsRectangles.checked = domain.options.showBoundsRectangle
+        // this.MenuOptionsShowLongButtonHints.checked = domain.options.showLongHintsForButtons
+        // this.MenuOptionsShowParameterHints.checked = domain.options.showHintsForParameters
+        // // posing
+        // this.MenuOptionsGhostHiddenParts.checked = domain.options.showGhostingForHiddenParts
+        // this.posingGhost.Down = domain.options.showGhostingForHiddenParts
+        // this.MenuOptionsHighlightPosedParts.checked = domain.options.showHighlightingForNonHiddenPosedParts
+        // this.posingHighlight.Down = domain.options.showHighlightingForNonHiddenPosedParts
+        // this.MenuOptionsHidePosing.checked = !domain.options.showPosingAtAll
+        // this.posingNotShown.Down = !domain.options.showPosingAtAll
+        // // vertical/horizontal
+        // this.MenuLayoutHorizontalOrientation.checked = domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal
+        // this.MenuLayoutVerticalOrientation.checked = domain.options.mainWindowOrientation === kMainWindowOrientationVertical
+        // this.drawingAreaOnTop.Down = domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal
+        // this.drawingAreaOnSide.Down = domain.options.mainWindowOrientation === kMainWindowOrientationVertical
+        // this.internalChange = false
         // hint, undo
         this.updateHintPauseForOptions()
         this.commandList.setNewUndoLimit(domain.options.undoLimit)
         this.commandList.setNewObjectUndoLimit(domain.options.undoLimitOfPlants)
-        if (ubreedr.BreederForm !== null) {
-            ubreedr.BreederForm.updateForChangeToDomainOptions()
-        }
-        if (utimeser.TimeSeriesForm !== null) {
-            utimeser.TimeSeriesForm.updateForChangeToDomainOptions()
-        }
+        // TODO PDF: Fix this or remove
+        // if (ubreedr.BreederForm !== null) {
+        //     ubreedr.BreederForm.updateForChangeToDomainOptions()
+        // }
+        // if (utimeser.TimeSeriesForm !== null) {
+        //     utimeser.TimeSeriesForm.updateForChangeToDomainOptions()
+        // }
         if (this.lifeCycleShowing()) {
             //because max drawing scale might have changed
             this.updateLifeCyclePanelForFirstSelectedPlant()
@@ -2476,37 +2438,42 @@ export class TMainForm {
     
     updateForChangeToDrawOptions(): void {
         this.redrawEverything()
-        if (ubreedr.BreederForm !== null) {
-            if ((ubreedr.BreederForm.Visible) && (ubreedr.BreederForm.WindowState !== delphi_compatability.TWindowState.wsMinimized)) {
-                ubreedr.BreederForm.redrawPlants(ubreedr.kDontConsiderIfPreviewCacheIsUpToDate)
-            } else {
-                ubreedr.BreederForm.needToRedrawFromChangeToDrawOptions = true
-            }
-        }
-        if (utimeser.TimeSeriesForm !== null) {
-            if ((utimeser.TimeSeriesForm.Visible) && (utimeser.TimeSeriesForm.WindowState !== delphi_compatability.TWindowState.wsMinimized)) {
-                utimeser.TimeSeriesForm.redrawPlants()
-            } else {
-                utimeser.TimeSeriesForm.needToRedrawFromChangeToDrawOptions = true
-            }
-        }
+        // TODO PDF: Fix this for other forms
+        // if (ubreedr.BreederForm !== null) {
+        //     if ((ubreedr.BreederForm.Visible) && (ubreedr.BreederForm.WindowState !== delphi_compatability.TWindowState.wsMinimized)) {
+        //         ubreedr.BreederForm.redrawPlants(ubreedr.kDontConsiderIfPreviewCacheIsUpToDate)
+        //     } else {
+        //         ubreedr.BreederForm.needToRedrawFromChangeToDrawOptions = true
+        //     }
+        // }
+        // if (utimeser.TimeSeriesForm !== null) {
+        //     if ((utimeser.TimeSeriesForm.Visible) && (utimeser.TimeSeriesForm.WindowState !== delphi_compatability.TWindowState.wsMinimized)) {
+        //         utimeser.TimeSeriesForm.redrawPlants()
+        //     } else {
+        //         utimeser.TimeSeriesForm.needToRedrawFromChangeToDrawOptions = true
+        //     }
+        // }
     }
-    
+ 
     updateMenusForChangeToViewingOption(): void {
-        this.MenuLayoutViewOnePlantAtATime.checked = domain.viewPlantsInMainWindowOnePlantAtATime()
-        this.MenuLayoutViewFreeFloating.checked = domain.viewPlantsInMainWindowFreeFloating()
-        this.viewOneOnly.Down = domain.viewPlantsInMainWindowOnePlantAtATime()
-        this.viewFreeFloating.Down = domain.viewPlantsInMainWindowFreeFloating()
+        // TODO PDF: Fix or delete obsoletecode
+        // this.MenuLayoutViewOnePlantAtATime.checked = domain.viewPlantsInMainWindowOnePlantAtATime()
+        // this.MenuLayoutViewFreeFloating.checked = domain.viewPlantsInMainWindowFreeFloating()
+        // this.viewOneOnly.Down = domain.viewPlantsInMainWindowOnePlantAtATime()
+        // this.viewFreeFloating.Down = domain.viewPlantsInMainWindowFreeFloating()
     }
     
     updateForChangeToOrientation(): void {
-        this.MenuLayoutHorizontalOrientation.checked = domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal
-        this.MenuLayoutVerticalOrientation.checked = domain.options.mainWindowOrientation === kMainWindowOrientationVertical
-        this.drawingAreaOnTop.Down = domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal
-        this.drawingAreaOnSide.Down = domain.options.mainWindowOrientation === kMainWindowOrientationVertical
-        this.Resize()
+        // TODO PDF: Fix or delete obsolete code
+        // this.MenuLayoutHorizontalOrientation.checked = domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal
+        // this.MenuLayoutVerticalOrientation.checked = domain.options.mainWindowOrientation === kMainWindowOrientationVertical
+        // this.drawingAreaOnTop.Down = domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal
+        // this.drawingAreaOnSide.Down = domain.options.mainWindowOrientation === kMainWindowOrientationVertical
+        // this.Resize()
     }
     
+    /*
+
     moveUpOrDownWithKeyInPlantList(indexAfterMove: short): void {
         if (indexAfterMove > this.plants.length - 1) {
             // loop around 
@@ -2526,21 +2493,20 @@ export class TMainForm {
     */
     
     updateForChangeToPlantSelections(): void {
-        throw new Error("TODO: Unfinished")
-        // if (domain.options.showSelectionRectangle) {
-        //     this.copyDrawingBitmapToPaintBox()
-        // }
-        // this.plantListDrawGrid.Repaint()
-        // // must be done BEFORE updating so it picks it up
-        // this.selectedPlantPartID = -1
-        // this.updateRightSidePanelForFirstSelectedPlant()
-        // this.updateMenusForChangedSelectedPlants()
-        // if (!this.internalChange) {
-        //     // reset for posing because posing works only on focused plant
-        //     // don't do if reading file in
-        //     // if change selected plant, must redraw to remove red color
-        //     this.redrawAllPlantsInViewWithAmendments()
-        // }
+        if (domain.options.showSelectionRectangle) {
+            this.copyDrawingBitmapToPaintBox()
+        }
+        this.plantListDrawGrid.Repaint()
+        // must be done BEFORE updating so it picks it up
+        this.selectedPlantPartID = -1
+        this.updateRightSidePanelForFirstSelectedPlant()
+        this.updateMenusForChangedSelectedPlants()
+        if (!this.internalChange) {
+            // reset for posing because posing works only on focused plant
+            // don't do if reading file in
+            // if change selected plant, must redraw to remove red color
+            this.redrawAllPlantsInViewWithAmendments()
+        }
     }
       
     invalidateSelectedPlantRectangles(): void {
@@ -2587,11 +2553,10 @@ export class TMainForm {
     }
 
     updateForPossibleChangeToDrawing(): void {
-        throw new Error("TODO: Unfinished")
-        // this.updateMenusForUndoRedo()
-        // if ((this.invalidDrawingRect.Top !== 0) || (this.invalidDrawingRect.Left !== 0) || (this.invalidDrawingRect.Bottom !== 0) || (this.invalidDrawingRect.Right !== 0)) {
-        //     this.paintDrawing(kDrawNow)
-        // }
+        this.updateMenusForUndoRedo()
+        if ((this.invalidDrawingRect.Top !== 0) || (this.invalidDrawingRect.Left !== 0) || (this.invalidDrawingRect.Bottom !== 0) || (this.invalidDrawingRect.Right !== 0)) {
+            this.paintDrawing(kDrawNow)
+        }
     }
  
     recalculateAllPlantBoundsRects(drawNow: boolean): void {
@@ -2697,7 +2662,7 @@ export class TMainForm {
     // menu updating 
     // ---------------------------------------------------------------------------- *menu updating 
     updateMenusForUndoRedo(): void {
-        throw new Error("TODO Unfinished")
+        // TODO PDF: Fix this
         // if (this.commandList.isUndoEnabled()) {
         //     this.MenuEditUndo.enabled = true
         //     this.MenuEditUndo.caption = "&Undo " + this.commandList.undoDescription()
@@ -2781,7 +2746,7 @@ export class TMainForm {
     }
     
     updateMenusForChangedSelectedPlants(): void {
-        throw new Error("TODO Unfinished")
+        // TODO PDF: Fix this or remove  obsolete code
         // let haveSelectedPlants: boolean
         // let haveMoreThanOneSelectedPlant: boolean
         
@@ -2899,7 +2864,7 @@ export class TMainForm {
     }
     
     paintDrawing(immediate: boolean): void {
-        throw new Error("TODO Unfinished")
+        // TODO PDF: Fix this
         // let plantPartsToDraw = 0
         // const showProgress = domain.options.showPlantDrawingProgress && (!domain.options.cachePlantBitmaps)
         // if ((this.invalidDrawingRect.Top !== 0) || (this.invalidDrawingRect.Left !== 0) || (this.invalidDrawingRect.Bottom !== 0) || (this.invalidDrawingRect.Right !== 0)) {
@@ -2941,7 +2906,7 @@ export class TMainForm {
     }
     
     copyDrawingBitmapToPaintBox(): void {
-        throw new Error("TODO Unfinished")
+        // TODO PDF: Fix this
         // if ((domain === null) || (this.plants === null)) {
         //     return
         // }
@@ -2994,19 +2959,11 @@ export class TMainForm {
     // plant bitmaps
     // ---------------------------------------------------------------------------- *bitmaps for plants 
     screenBytesPerPixel(): float {
-        throw new Error("TODO Unfinished")
-        // let result = 0.0
-        // const screenDC: HDC = UNRESOLVED.GetDC(0)
-        // try {
-        //     result = (UNRESOLVED.GetDeviceCaps(screenDC, delphi_compatability.BITSPIXEL) * UNRESOLVED.GetDeviceCaps(screenDC, delphi_compatability.PLANES))
-        //     result = result / 8.0
-        // } finally {
-        //     UNRESOLVED.ReleaseDC(0, screenDC)
-        // }
-        // return result
+        let result = 4
+        return result
     }
     
-    bytesInPlantBitmaps(plantToExclude: PdPlant): long {
+    bytesInPlantBitmaps(plantToExclude: PdPlant | null): long {
         let result = 0
         const bytesPerPixel = this.screenBytesPerPixel()
         if (this.plants.length > 0) {
@@ -3044,29 +3001,29 @@ export class TMainForm {
     }
     
     updateForChangeToPlantBitmaps(): void {
-        throw new Error("TODO Unfinished")
-        // let aString: string
-        // if (domain.options.showLongHintsForButtons) {
-        //     aString = "Plant bitmaps are used to speed up drawing by caching each plant into a separate " + "bitmap in memory. Plant bitmaps are turned "
-        // } else {
-        //     aString = "Plant bitmaps are turned "
-        // }
-        // let bytesInUse = 0
-        // let megabytesInUse = 0
-        // if (domain.options.cachePlantBitmaps) {
-        //     bytesInUse = this.bytesInPlantBitmaps(null)
-        //     megabytesInUse = bytesInUse / (1024 * 1024)
-        //     aString = aString + "ON and are using " + megabytesInUse.toFixed(3) + "MB out of " + IntToStr(domain.options.memoryLimitForPlantBitmaps_MB) + " MB of memory."
-        // } else {
-        //     aString = aString + "OFF."
-        // }
-        // if (domain.options.showLongHintsForButtons) {
-        //     if (!domain.options.cachePlantBitmaps) {
-        //         aString = aString + " You can turn plant bitmaps on using the Options menu."
-        //     } else {
-        //         aString = aString + " You can change the amount of memory dedicated to plant bitmaps in the Preferences window."
-        //     }
-        // }
+        let aString: string
+        if (domain.options.showLongHintsForButtons) {
+            aString = "Plant bitmaps are used to speed up drawing by caching each plant into a separate " + "bitmap in memory. Plant bitmaps are turned "
+        } else {
+            aString = "Plant bitmaps are turned "
+        }
+        let bytesInUse = 0
+        let megabytesInUse = 0
+        if (domain.options.cachePlantBitmaps) {
+            bytesInUse = this.bytesInPlantBitmaps(null)
+            megabytesInUse = bytesInUse / (1024 * 1024)
+            aString = aString + "ON and are using " + megabytesInUse.toFixed(3) + "MB out of " + IntToStr(domain.options.memoryLimitForPlantBitmaps_MB) + " MB of memory."
+        } else {
+            aString = aString + "OFF."
+        }
+        if (domain.options.showLongHintsForButtons) {
+            if (!domain.options.cachePlantBitmaps) {
+                aString = aString + " You can turn plant bitmaps on using the Options menu."
+            } else {
+                aString = aString + " You can change the amount of memory dedicated to plant bitmaps in the Preferences window."
+            }
+        }
+        // TODO PDF: Fix this
         // if (this.plantBitmapsIndicatorImage !== null) {
         //     if (domain.options.cachePlantBitmaps) {
         //         if (megabytesInUse / domain.options.memoryLimitForPlantBitmaps_MB <= 0.5) {
@@ -3084,19 +3041,15 @@ export class TMainForm {
     }
     
     stopUsingPlantBitmaps(): void {
-        throw new Error("TODO Unfinished")
-        // domain.options.cachePlantBitmaps = false
-        // this.MenuOptionsUsePlantBitmaps.checked = domain.options.cachePlantBitmaps
-        // this.shrinkAllPlantBitmaps()
-        // this.invalidateEntireDrawing()
+        domain.options.cachePlantBitmaps = false
+        this.shrinkAllPlantBitmaps()
+        this.invalidateEntireDrawing()
     }
     
     startUsingPlantBitmaps(): void {
-        throw new Error("TODO Unfinished")
-        // domain.options.cachePlantBitmaps = true
-        // this.MenuOptionsUsePlantBitmaps.checked = domain.options.cachePlantBitmaps
-        // this.recalculateAllPlantBoundsRects(kDrawNow)
-        // this.invalidateEntireDrawing()
+        domain.options.cachePlantBitmaps = true
+        this.recalculateAllPlantBoundsRects(kDrawNow)
+        this.invalidateEntireDrawing()
     }
 
     // command list management 
@@ -3113,7 +3066,7 @@ export class TMainForm {
 
     // called by commands 
     // ------------------------------------------------------------------------------- *called by commands 
-    hideOrShowSomePlants(plantList: PdPlant[], hideList: PdBooleanValue[], hide: boolean, drawNow: boolean): void {
+    hideOrShowSomePlants(plantList: PdPlant[] | null, hideList: PdBooleanValue[] | null, hide: boolean, drawNow: boolean): void {
         if ((plantList === null) || (plantList.length <= 0)) {
             return
         }
@@ -3545,6 +3498,8 @@ export class TMainForm {
         this.justDoubleClickedOnDrawGrid = true
     }
     
+    */
+
     // list box 
     moveSelectedPlantsUp(): void {
         if (this.plants.length > 1) {
@@ -3553,7 +3508,7 @@ export class TMainForm {
             while (i <= this.plants.length - 1) {
                 const plant = this.plants[i]
                 if (this.isSelected(plant)) {
-                    this.plants.Move(i, i - 1)
+                    arraySwap(this.plants, i, i - 1)
                 }
                 i += 1
             }
@@ -3570,7 +3525,7 @@ export class TMainForm {
             while (i >= 0) {
                 const plant = this.plants[i]
                 if (this.isSelected(plant)) {
-                    this.plants.Move(i, i + 1)
+                    arraySwap(this.plants, i, i + 1)
                 }
                 i -= 1
             }
@@ -3579,6 +3534,8 @@ export class TMainForm {
         this.updateForPossibleChangeToDrawing()
         this.plantListDrawGrid.Invalidate()
     }
+
+    /*
     
     plantListDrawGridKeyDown(Key: byte, Shift: TShiftState): void {
         switch (Key) {
@@ -4873,28 +4830,26 @@ export class TMainForm {
     }
     
     animateTimerTimer(): void {
-        throw new Error("TODO Unfinished")
-        // if (this.animateCommand !== null) {
-        //     PdAnimatePlantCommand(this.animateCommand).animateOneDay()
-        // }
+        if (this.animateCommand !== null) {
+            this.animateCommand.animateOneDay()
+        }
     }
     
     stopAnimation(): void {
-        throw new Error("TODO Unfinished")
-        // // called by animate command or self (if user clicks in drawing area or presses a key) 
-        // // stop timer 
-        // this.animateTimer.enabled = false
-        // // nil out pointer 
-        // this.animateCommand = null
-        // // re-enable everything 
-        // this.enableOrDisableAllForms(kEnableAllForms)
-        // // remove warning about disabled forms 
-        // this.animatingLabel.Visible = false
-        // this.tabSet.visible = true
-        // if (domain.options.showSelectionRectangle) {
-        //     // if there were selection rectangles before, put them back 
-        //     this.copyDrawingBitmapToPaintBox()
-        // }
+        // called by animate command or self (if user clicks in drawing area or presses a key) 
+        // stop timer 
+        // TODO PDF: Fix this: this.animateTimer.enabled = false
+        // nil out pointer 
+        this.animateCommand = null
+        // re-enable everything 
+        this.enableOrDisableAllForms(kEnableAllForms)
+        // remove warning about disabled forms 
+        // TODO PDF: Fix this: this.animatingLabel.Visible = false
+        this.tabSet.visible = true
+        if (domain.options.showSelectionRectangle) {
+            // if there were selection rectangles before, put them back 
+            this.copyDrawingBitmapToPaintBox()
+        }
     }
     
     enableOrDisableAllForms(enable: boolean): void {
@@ -6473,7 +6428,7 @@ export class TMainForm {
     tabSet: any = {}
     lifeCycleDaysEdit: any = {}
     drawingPaintBox: any = {}
-    plantListDrawGrid: any = {}
+    plantListDrawGrid: any = { Repaint: () => {} }
     drawingBitmap: any = {}
     xLocationEdit: any = {}
     yLocationEdit: any = {}
@@ -6590,7 +6545,8 @@ export class TMainForm {
                 "MenuLayoutAlignBottoms", "&Bottoms", this.MenuLayoutAlignBottomsClick,
                 "MenuLayoutAlignLeftSides", "&Left Sides", this.MenuLayoutAlignLeftSidesClick,
                 "MenuLayoutAlignRightSides", "&Right Sides", this.MenuLayoutAlignRightSidesClick,
-                "MenuLayoutMakeBouquet", "Make into Bou&quet", this.MenuLayoutMakeBouquetClick,
+                "MenuLayoutMakeBouquet", "Make into Bou&quet", this.MenuLayoutMakeBouquetClick, () => false, 
+                    () => (this.selectedPlants.length > 1) && (!domain.viewPlantsInMainWindowOnePlantAtATime()),
             ],
             "MenuLayoutSize", "Si&ze", [
                 "MenuLayoutSizeSameWidth", "Equal &Width", this.MenuLayoutSizeSameWidthClick,
@@ -6607,34 +6563,34 @@ export class TMainForm {
         ],
         "MenuOptions", "&Options", [
             "MenuOptionsDrawAs", "&Draw Using", [
-                "radio", "MenuOptionsFastDraw", "&Bounding Boxes", this.MenuOptionsFastDrawClick,
-                "radio", "MenuOptionsMediumDraw", "&Wire Frames", this.MenuOptionsMediumDrawClick,
-                "radio", "MenuOptionsBestDraw", "&Solids", this.MenuOptionsBestDrawClick,
-                "radio", "MenuOptionsCustomDraw", "&Custom...", this.MenuOptionsCustomDrawClick,
+                "radio", "MenuOptionsFastDraw", "&Bounding Boxes", this.MenuOptionsFastDrawClick, () => domain.options.drawSpeed === DrawMode.kDrawFast,
+                "radio", "MenuOptionsMediumDraw", "&Wire Frames", this.MenuOptionsMediumDrawClick, () => domain.options.drawSpeed === DrawMode.kDrawMedium,
+                "radio", "MenuOptionsBestDraw", "&Solids", this.MenuOptionsBestDrawClick, () => domain.options.drawSpeed === DrawMode.kDrawBest,
+                "radio", "MenuOptionsCustomDraw", "&Custom...", this.MenuOptionsCustomDrawClick, () => domain.options.drawSpeed === DrawMode.kDrawCustom,
             ],
             "MenuLayoutView", "&View What Plants", [
-                "radio", "MenuLayoutViewFreeFloating", "&All Plants", this.MenuLayoutViewFreeFloatingClick,
-                "radio", "MenuLayoutViewOnePlantAtATime", "&One Plant at a Time", this.MenuLayoutViewOnePlantAtATimeClick,
+                "radio", "MenuLayoutViewFreeFloating", "&All Plants", this.MenuLayoutViewFreeFloatingClick, () => domain.options.mainWindowViewMode === ViewPlants.kViewPlantsInMainWindowFreeFloating,
+                "radio", "MenuLayoutViewOnePlantAtATime", "&One Plant at a Time", this.MenuLayoutViewOnePlantAtATimeClick, () => domain.options.mainWindowViewMode === ViewPlants.kViewPlantsInMainWindowOneAtATime,
             ],
             "MenuLayoutDrawingAreaOn", "Place Drawing &Area", [
-                "radio", "MenuLayoutHorizontalOrientation", "On &Top", this.MenuLayoutHorizontalOrientationClick,
-                "radio", "MenuLayoutVerticalOrientation", "On &Left Side", this.MenuLayoutVerticalOrientationClick,
+                "radio", "MenuLayoutHorizontalOrientation", "On &Top", this.MenuLayoutHorizontalOrientationClick, () => domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal,
+                "radio", "MenuLayoutVerticalOrientation", "On &Left Side", this.MenuLayoutVerticalOrientationClick, () => domain.options.mainWindowOrientation === kMainWindowOrientationVertical,
             ],
             "MenuOptionsDrawRectangles", "Draw &Rectangles", [
-                "radio", "MenuOptionsShowSelectionRectangles", "Around &Selected Plants", this.MenuOptionsShowSelectionRectanglesClick,
-                "radio", "MenuOptionsShowBoundsRectangles", "Around &All Plants", this.MenuOptionsShowBoundsRectanglesClick,
+                "checkbox", "MenuOptionsShowSelectionRectangles", "Around &Selected Plants", this.MenuOptionsShowSelectionRectanglesClick, () => domain.options.showSelectionRectangle,
+                "checkbox", "MenuOptionsShowBoundsRectangles", "Around &All Plants", this.MenuOptionsShowBoundsRectanglesClick, () => domain.options.showBoundsRectangle,
             ],
             "MenuOptionsPosing", "&Posing", [
-                "checkbox", "MenuOptionsHighlightPosedParts", "&Highlight Posed Parts", this.MenuOptionsHighlightPosedPartsClick,
-                "checkbox", "MenuOptionsGhostHiddenParts", "&Ghost Hidden Parts", this.MenuOptionsGhostHiddenPartsClick,
-                "checkbox", "MenuOptionsHidePosing", "&Ignore All Posing", this.MenuOptionsHidePosingClick,
+                "checkbox", "MenuOptionsHighlightPosedParts", "&Highlight Posed Parts", this.MenuOptionsHighlightPosedPartsClick, () => domain.options.showHighlightingForNonHiddenPosedParts,
+                "checkbox", "MenuOptionsGhostHiddenParts", "&Ghost Hidden Parts", this.MenuOptionsGhostHiddenPartsClick, () => domain.options.showGhostingForHiddenParts,
+                "checkbox", "MenuOptionsHidePosing", "&Ignore All Posing", this.MenuOptionsHidePosingClick, () => !domain.options.showPosingAtAll,
             ],
             "MenuOptionsHints", "&Hints", [
-                "checkbox", "MenuOptionsShowLongButtonHints", "Show Long Button &Hints", this.MenuOptionsShowLongButtonHintsClick,
-                "checkbox", "MenuOptionsShowParameterHints", "Show Para&meter Hints", this.MenuOptionsShowParameterHintsClick,
+                "checkbox", "MenuOptionsShowLongButtonHints", "Show Long Button &Hints", this.MenuOptionsShowLongButtonHintsClick, () => domain.options.showLongHintsForButtons,
+                "checkbox", "MenuOptionsShowParameterHints", "Show Para&meter Hints", this.MenuOptionsShowParameterHintsClick, () => domain.options.showHintsForParameters,
             ],
             "-",
-            "checkbox", "MenuOptionsUsePlantBitmaps", "Use Plant &Bitmaps", this.MenuOptionsUsePlantBitmapsClick,
+            "checkbox", "MenuOptionsUsePlantBitmaps", "Use Plant &Bitmaps", this.MenuOptionsUsePlantBitmapsClick, () => domain.options.cachePlantBitmaps,
         ],
         "MenuWindow", "&Window", [
             "MenuWindowBreeder", "&Breeder", this.MenuWindowBreederClick,
@@ -6679,17 +6635,55 @@ export class TMainForm {
         // "PopupMenuZeroRotations", "Re&set Rotations", this.PopupMenuZeroRotationsClick,
     ]
 
+    viewMenuItem(menuItem: MenuItem) {
+        switch(menuItem.type) {
+            case "dash":
+                return m("div", "----")
+            case "menu":
+                return m("div.nowrap", m("span.hover-bg-green", {
+                    disabled: menuItem.enabledFunction ? !menuItem.enabledFunction() : false,
+                    onclick: () => menuItem.action?.call(this, menuItem),
+                    }, caption(menuItem.label)))
+            case "checkbox":
+                return m("div.nowrap",
+                    m("label",
+                        m("input[type=checkbox].mr1", {
+                            checked: menuItem.checkedFunction!(),
+                            disabled: menuItem.enabledFunction ? !menuItem.enabledFunction() : false,
+                            onchange: () => menuItem.action?.call(this, menuItem),
+                        }),
+                        m("span.hover-bg-green", {
+                            disabled: menuItem.enabledFunction ? !menuItem.enabledFunction() : false,
+                            // onclick: () => menuItem.action?.call(this, menuItem)
+                        }, caption(menuItem.label))
+                    )
+                )
+            case "radio":
+                return m("div.nowrap",
+                    m("label",
+                        m("input[type=radio].mr1", {
+                            checked: menuItem.checkedFunction!(),
+                            disabled: menuItem.enabledFunction ? !menuItem.enabledFunction() : false,
+                            onchange: () => menuItem.action?.call(this, menuItem)
+                        }),
+                        m("span.hover-bg-green", {
+                            disabled: menuItem.enabledFunction ? !menuItem.enabledFunction() : false,
+                            // onclick: () => menuItem.action?.call(this, menuItem)
+                        }, caption(menuItem.label))
+                    )
+                )
+            default:
+                return m("div", "Unsupported MenuItem.type: " + menuItem.type)
+        }
+    }
+
     //  recursive
     viewMenu(menu: MenuItem[]): any {
         return m("div.ml2", 
             menu.map(menuItem => m("div",
                 menuItem.submenu
                     ? m("div.nowrap", caption(menuItem.label), this.viewMenu(menuItem.submenu))
-                    : menuItem.type === "dash"
-                        ? m("div", "----")
-                        : m("div.nowrap", m("span.hover-bg-green", {
-                            onclick: () => menuItem.action?.call(this, menuItem)
-                        }, caption(menuItem.label)))
+                    : this.viewMenuItem(menuItem)
                 )
         ))
     }
@@ -6723,6 +6717,8 @@ interface MenuItem {
     label: string
     action?: (menuItem: MenuItem) => void
     submenu?: MenuItem[]
+    checkedFunction?: () => boolean
+    enabledFunction?: () => boolean
 }
 
 // recursive
@@ -6747,12 +6743,22 @@ function buildMenuFromSpec(specOriginal: any[]): MenuItem[] {
         }
         const label = spec.shift()
         const actionOrMenuSpec = spec.shift()
+        let checkedFunction = spec.shift()
+        if (typeof checkedFunction !== "function") {
+            spec.unshift(checkedFunction)
+            checkedFunction = undefined
+        }
+        let enabledFunction = spec.shift()
+        if (typeof enabledFunction !== "function") {
+            spec.unshift(enabledFunction)
+            enabledFunction = undefined
+        }
         if (typeof actionOrMenuSpec !== "function") {
             const submenu = buildMenuFromSpec(actionOrMenuSpec)
-            result.push({type, id, label, submenu})
+            result.push({type, id, label, submenu, checkedFunction, enabledFunction})
         } else {
             const action = actionOrMenuSpec
-            result.push({type, id, label, action})
+            result.push({type, id, label, action, checkedFunction, enabledFunction})
         }
     }
     return result

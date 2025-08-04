@@ -182,7 +182,7 @@ export class DomainOptionsStructure {
     pauseDuringHint: short = 0
     noteEditorWrapLines: boolean = false
     updateTimeSeriesPlantsOnParameterChange: boolean = false
-    mainWindowViewMode: short = 0
+    mainWindowViewMode: short = ViewPlants.kViewPlantsInMainWindowFreeFloating
     nudgeDistance: short = 0
     resizeKeyUpMultiplierPercent: short = 0
     parametersFontSize: short = 0
@@ -672,7 +672,7 @@ export class PdDomain {
         this.options.pauseDuringHint = StrToInt(this.stringForSectionAndKey(section, "Pause during hint", "60"))
         this.options.noteEditorWrapLines = strToBool(this.stringForSectionAndKey(section, "Wrap lines in note editor", "true"))
         this.options.updateTimeSeriesPlantsOnParameterChange = strToBool(this.stringForSectionAndKey(section, "Update time series plants on parameter change", "true"))
-        this.options.mainWindowViewMode = StrToInt(this.stringForSectionAndKey(section, "Main window view option (all/one)", "0"))
+        this.options.mainWindowViewMode = StrToInt(this.stringForSectionAndKey(section, "Main window view option (all/one)", "1"))
         this.options.nudgeDistance = StrToInt(this.stringForSectionAndKey(section, "Distance plant moves with Control-arrow key", "5"))
         this.options.resizeKeyUpMultiplierPercent = StrToInt(this.stringForSectionAndKey(section, "Percent size increase with Control-Shift-up-arrow key", "110"))
         this.options.parametersFontSize = StrToInt(this.stringForSectionAndKey(section, "Parameter panels font size", "8"))

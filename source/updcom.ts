@@ -14,9 +14,9 @@ import { PdPlantDrawingAmendment } from "./PdPlantDrawingAmendment"
 import { PdParameter, FieldType, kNotArray } from "./PdParameter"
 import { KfObject3D } from "./KfObject3D"
 import { PdGeneration } from "./PdGeneration"
+import { MainForm } from "./TMainForm"
 
 // TODO: temporary fix MainForm and BreederForm and TimeSeriesForm
-const MainForm: any = undefined
 const BreederForm: any = undefined
 const TimeSeriesForm: any = undefined
 
@@ -528,7 +528,7 @@ export class PdEditNoteCommand extends PdCommand {
 }
 
 export class PdNewCommand extends PdCommand {
-    newPlant: PdPlant | null = null
+    newPlant: PdPlant
     useWizardPlant: boolean = false
     wizardPlant: PdPlant
     oldSelectedList: PdPlant[] = []
@@ -536,6 +536,7 @@ export class PdNewCommand extends PdCommand {
     // v2.0
     constructor(aPlant: PdPlant, anOldSelectedList: PdPlant[]) {
         super()
+        this.newPlant = aPlant
         this.useWizardPlant = true
         this.wizardPlant = aPlant
         // selected list is just pointers, this doesn't take control of them
@@ -968,7 +969,7 @@ export class PdChangeSelectedPlantsCommand extends PdCommandWithListOfPlants {
         this.commandChangesPlantFile = false
         super.doCommand()
         // MainForm.deselectAllPlants; // don't want this, it updates, and we will be updating soon
-        MainForm.selectedPlants.Clear()
+        MainForm.selectedPlants = []
         if (this.newList.length > 0) {
             MainForm.selectedPlants.push(this.newList[0])
             if (domain.viewPlantsInMainWindowOnePlantAtATime()) {
@@ -987,7 +988,7 @@ export class PdChangeSelectedPlantsCommand extends PdCommandWithListOfPlants {
     undoCommand(): void {
         super.undoCommand()
         // MainForm.deselectAllPlants; // don't want this, it updates, and we will be updating soon
-        MainForm.selectedPlants.Clear()
+        MainForm.selectedPlants = []
         if (this.plantList.length > 0) {
             MainForm.selectedPlants.push(this.plantList[0])
             if (domain.viewPlantsInMainWindowOnePlantAtATime()) {
@@ -1026,7 +1027,7 @@ export class PdSelectOrDeselectAllCommand extends PdCommandWithListOfPlants {
             // MainForm.deselectAllPlants;
             MainForm.deselectAllPlants()
         } else {
-            MainForm.selectedPlants.Clear()
+            MainForm.selectedPlants = []
         }
         if (!this.deselect) {
             if (domain.plantManager.plants.length > 0) {
@@ -1044,7 +1045,7 @@ export class PdSelectOrDeselectAllCommand extends PdCommandWithListOfPlants {
             // MainForm.deselectAllPlants;
             MainForm.deselectAllPlants()
         } else {
-            MainForm.selectedPlants.Clear()
+            MainForm.selectedPlants = []
         }
         if (this.plantList.length > 0) {
             for (let i = 0; i <= this.plantList.length - 1; i++) {
@@ -1576,7 +1577,7 @@ export class PdChangeMainWindowViewingOptionCommand extends PdCommandWithListOfP
                     // MainForm.invalidateSelectedPlantRectangles;
                     MainForm.invalidateEntireDrawing()
                     // restore original selection - selected plants only 
-                    MainForm.selectedPlants.Clear()
+                    MainForm.selectedPlants = []
                     if (this.selectedList.length > 0) {
                         for (let i = 0; i <= this.selectedList.length - 1; i++) {
                             MainForm.selectedPlants.push(this.selectedList[i])
