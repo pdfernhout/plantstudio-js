@@ -1279,6 +1279,11 @@ export class TMainForm {
         // TODO PDF: Temp for testing
         const plant = new PdPlant()
         plant.defaultAllParameters()
+        plant.randomize()
+        plant.age = 90
+        plant.basePoint_mm.x = Math.floor(Math.random() * 800)
+        plant.basePoint_mm.y = 200 + Math.floor(Math.random() * 200)
+        // plant.xRotation = Math.random() * 365
         this.plants.push(plant)
         // TODO PDF: Fix this
         // let wizardForm: TWizardForm
@@ -5288,7 +5293,7 @@ export class TMainForm {
     }
     
     updateParameterValuesWithUpdateListForPlant(aPlant: PdPlant, updateList: PdPlantUpdateEvent[]): void {
-        throw new Error("TODO Unfinished")
+        // TODO PDF: Fix this
         // // let i: long
         // // let paramPanel: PdParameterPanel
         // // let updateEvent: PdPlantUpdateEvent
