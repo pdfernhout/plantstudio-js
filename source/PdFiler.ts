@@ -1,8 +1,7 @@
 // PdFiler was unit Ufiler
 
 import { TRect } from "./TRect"
-import { short, long, byte, float, double, TColor, TColorRef, TMemoryStream, TFileStream } from "./common"
-import { TPoint } from "./TPoint"
+import { short, long, byte, float, TColorRef, TFileStream } from "./common"
 import { SinglePoint } from "./usupport";
 import { PdStreamableObject } from "./PdStreamableObject";
 
