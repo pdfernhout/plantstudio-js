@@ -656,7 +656,7 @@ export class TMainForm {
     }
     
     MenuFilePlantMoverClick(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // let mover: TMoverForm
         
         // if (plantFileChanged) {
@@ -704,7 +704,7 @@ export class TMainForm {
     }
     
     MenuFileTdoMoverClick(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // let mover: TTdoMoverForm
         
         // mover = TTdoMoverForm().create(this)
@@ -724,7 +724,7 @@ export class TMainForm {
     // }
     
     MenuFileExitClick(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // if (!this.askForSaveAndProceed()) {
         //     return
         // } else if (!this.cleanUpBeforeExit()) {
@@ -744,7 +744,7 @@ export class TMainForm {
     
     // returns false if user cancels quit
     cleanUpBeforeExit(): boolean {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // domain.mainWindowRect = Rect(this.Left, this.Top, this.Width, this.Height)
         // domain.horizontalSplitterPos = this.horizontalSplitter.Top
         // domain.verticalSplitterPos = this.verticalSplitter.Left
@@ -768,7 +768,7 @@ export class TMainForm {
     }
     
     storeIniFile(): boolean {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // let result = true
         // let fileSavedOK = false
         // let choseAnotherFileName = false
@@ -821,7 +821,7 @@ export class TMainForm {
     }
     
     UndoMenuEditUndoRedoListClick(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // const undoRedoListForm: TUndoRedoListForm = uundo.TUndoRedoListForm().create(this)
         // if (undoRedoListForm === null) {
         //     throw new Error("Problem: Could not create undo/redo list window.")
@@ -868,7 +868,7 @@ export class TMainForm {
     }
     
     MenuEditCopyAsTextClick(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // if (this.selectedPlants.length > 0) {
         //     ColorDefs.clipboard.clear
         //     this.plantsAsTextMemo.Clear()
@@ -885,7 +885,7 @@ export class TMainForm {
     }
     
     MenuEditPasteAsTextClick(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // let fakeTextFile: TextFile
         // const newPlants: PdPlant[] = []
         
@@ -995,7 +995,7 @@ export class TMainForm {
     
     // export 
     getBitmapCopySavePrintOptions(copySavePrintType: short): int {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // let bitmapOptionsForm: TBitmapOptionsForm
         
         // let result = mrCancel
@@ -1010,7 +1010,7 @@ export class TMainForm {
     }
     
     MenuEditCopyDrawingClick(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // let bitmapForExport: TBitmap
         
         // if ((domain === null) || (domain.plantManager === null) || (this.plants.length <= 0)) {
@@ -1024,7 +1024,7 @@ export class TMainForm {
     }
     
     MenuFileSaveDrawingAsClick(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
         // let bitmapForExport: TBitmap
         
@@ -1053,7 +1053,7 @@ export class TMainForm {
     }
     
     MenuFileSaveJPEGClick(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
         // let bitmapForExport: TBitmap
         // let jpegForExport: TJPEGImage
@@ -1089,7 +1089,7 @@ export class TMainForm {
     }
     
     MenuFilePrintDrawingClick(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // const printRect_pixels: TRect = new TRect()
         // let bitmapForExport: TBitmap
         
@@ -1229,7 +1229,7 @@ export class TMainForm {
     }
     
     pastePlantsFromClipboard(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // if (domain.plantManager.privatePlantClipboard.Count <= 0) {
         //     return
         // }
@@ -1261,7 +1261,7 @@ export class TMainForm {
     }
     
     MenuEditPreferencesClick(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // const optionsForm: TOptionsForm = uoptions.TOptionsForm().create(this)
         // if (optionsForm === null) {
         //     throw new Error("Problem: Could not create preferences window.")
@@ -1314,7 +1314,7 @@ export class TMainForm {
     }
     
     MenuPlantNewUsingLastWizardSettingsClick(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // let wizardForm: TWizardForm
         // let newPlantFromWizard: PdPlant
         
@@ -1371,7 +1371,7 @@ export class TMainForm {
     }
     
     MenuPlantBreedClick(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // if (this.selectedPlants.length <= 0) {
         //     return
         // }
@@ -1417,7 +1417,7 @@ export class TMainForm {
     */
     
     ExportToGeneric3DType(outputType: short): void {
-        throw new Error("TODO unfinished")
+        alert("TODO Unfinished")
         // let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
         // let optionsForm: TGeneric3DOptionsForm
         // let tempOptions: FileExport3DOptionsStructure
@@ -1523,7 +1523,7 @@ export class TMainForm {
     }
     
     MenuFileMakePainterNozzleClick(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
         // let bitmapForExport: TBitmap
         
@@ -1621,7 +1621,7 @@ export class TMainForm {
     */
     
     MenuFileMakePainterAnimationClick(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // let saveDialog: TSaveDialog
         
         // if ((domain === null) || (domain.plantManager === null) || (this.plants.length <= 0)) {
@@ -1659,7 +1659,7 @@ export class TMainForm {
     }
     
     writeAnimationFilesWithFileSpec(startFileName: string): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // const plant = this.focusedPlant()
         // if (plant === null) {
         //     return
@@ -1729,7 +1729,7 @@ export class TMainForm {
     }
     
     getAnimationOptions(): int {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // let animationOptionsForm: TAnimationFilesOptionsForm
         
         // let result = mrCancel
@@ -1953,7 +1953,7 @@ export class TMainForm {
     }
     
     plantBitmapsIndicatorImageClick(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // if ((!domain.options.cachePlantBitmaps) && (this.MenuOptionsUsePlantBitmaps.enabled)) {
         //     this.MenuOptionsUsePlantBitmapsClick()
         // }
@@ -1996,7 +1996,7 @@ export class TMainForm {
     }
     
     posingHighlightClick(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // if (this.internalChange) {
         //     return
         // }
@@ -2007,7 +2007,7 @@ export class TMainForm {
     }
     
     posingGhostClick(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // if (this.internalChange) {
         //     return
         // }
@@ -2043,7 +2043,7 @@ export class TMainForm {
     
     // --------------------------------------------------------------------------- *window menu 
     MenuWindowBreederClick(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // ubreedr.BreederForm.Show()
         // ubreedr.BreederForm.BringToFront()
         // if (ubreedr.BreederForm.WindowState === delphi_compatability.TWindowState.wsMinimized) {
@@ -2052,7 +2052,7 @@ export class TMainForm {
     }
     
     MenuWindowTimeSeriesClick(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // utimeser.TimeSeriesForm.Show()
         // utimeser.TimeSeriesForm.BringToFront()
         // if (utimeser.TimeSeriesForm.WindowState === delphi_compatability.TWindowState.wsMinimized) {
@@ -2061,7 +2061,7 @@ export class TMainForm {
     }
     
     MenuWindowNumericalExceptionsClick(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // udebug.DebugForm.Show()
         // udebug.DebugForm.BringToFront()
         // if (udebug.DebugForm.WindowState === delphi_compatability.TWindowState.wsMinimized) {
@@ -2071,12 +2071,12 @@ export class TMainForm {
     
     // ---------------------------------------------------------------------------- *help menu 
     MenuHelpTopicsClick(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // delphi_compatability.Application.HelpCommand(UNRESOLVED.HELP_FINDER, 0)
     }
     
     MenuHelpAboutClick(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // if (usplash.splashForm === null) {
         //     return
         // }
@@ -2086,12 +2086,12 @@ export class TMainForm {
     }
     
     MenuHelpSuperSpeedTourClick(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // delphi_compatability.Application.HelpJump("Super-Speed_Tour")
     }
     
     MenuHelpTutorialClick(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // delphi_compatability.Application.HelpJump("Tutorial")
     }
     
@@ -2180,7 +2180,7 @@ export class TMainForm {
     }
     
     updateForPlantFile(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // this.internalChange = true
         // if (!domain.plantFileLoaded) {
         //     this.updateForNoPlantFile()
@@ -2380,7 +2380,7 @@ export class TMainForm {
     }
     
     updateForChangeToPlantList(): void {
-        throw new Error("TODO: Unfinished")
+        alert("TODO Unfinished")
         // if ((domain === null) || (domain.plantManager === null)) {
         //     return
         // }
@@ -2504,7 +2504,7 @@ export class TMainForm {
     }
     
     updateForChangeToPlantNote(aPlant: PdPlant): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // let start: int = this.noteMemo.SelStart
         // this.noteMemo.Clear()
         // if (aPlant === null) {
@@ -2554,7 +2554,7 @@ export class TMainForm {
     }
 
     updateMenusForChangedPlantFile(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // this.MenuFileClose.enabled = domain.plantFileLoaded
         // this.MenuPlantNew.enabled = domain.plantFileLoaded
         // this.MenuPlantNewUsingLastWizardSettings.enabled = domain.plantFileLoaded
@@ -2571,7 +2571,7 @@ export class TMainForm {
     }
     
     updateMenusForChangedPlantList(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // let havePlants: boolean
         
         // havePlants = (this.plants.length > 0)
@@ -2683,7 +2683,7 @@ export class TMainForm {
     }
     
     updatePasteMenuForClipboardContents(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // this.MenuEditPaste.enabled = (domain.plantManager.privatePlantClipboard.Count > 0)
         // this.PopupMenuPaste.enabled = this.MenuEditPaste.enabled
         // if (ubreedr.BreederForm !== null) {
@@ -2695,13 +2695,13 @@ export class TMainForm {
     }
     
     updateSectionPopupMenuForSectionChange(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // const haveSection = this.currentSection() !== null
         // this.sectionPopupMenuHelp.enabled = haveSection
     }
     
     updateParamPopupMenuForParamSelectionChange(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // const haveSection = this.currentSection() !== null
         // this.paramPopupMenuExpandAllInSection.enabled = haveSection
         // this.paramPopupMenuCollapseAllInSection.enabled = haveSection
@@ -4466,7 +4466,7 @@ export class TMainForm {
     }
     
     tabSetChange(NewTab: int, AllowChange: boolean): boolean {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // this.lifeCyclePanel.Visible = (NewTab === kTabLifeCycle)
         // this.rotationsPanel.Visible = (NewTab === kTabRotations)
         // this.parametersPanel.Visible = (NewTab === kTabParameters)
@@ -4528,7 +4528,7 @@ export class TMainForm {
     }
     
     updateForChangeToPlantRotations(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // const firstPlant = this.focusedPlant()
         // if (firstPlant !== null) {
         //     this.xRotationEdit.Text = IntToStr(intround(firstPlant.xRotation))
@@ -4545,7 +4545,7 @@ export class TMainForm {
     }
     
     updateForChangeToSelectedPlantsDrawingScale(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // const firstPlant = this.focusedPlant()
         // if (firstPlant !== null) {
         //     this.drawingScaleEdit.Text = usupport.digitValueString(firstPlant.drawingScale_PixelsPerMm)
@@ -4556,7 +4556,7 @@ export class TMainForm {
     }
     
     updateForChangeToSelectedPlantsLocation(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // const firstPlant = this.focusedPlant()
         // if (firstPlant !== null) {
         //     this.xLocationEdit.Text = usupport.digitValueString(firstPlant.basePoint_pixels().X)
@@ -4571,7 +4571,7 @@ export class TMainForm {
     
     // ------------------------------------------------------- *life cycle panel drawing and mouse handling 
     updateLifeCyclePanelForFirstSelectedPlant(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // this.updatePlantNameLabel(kTabLifeCycle)
         // const firstPlant = this.focusedPlant()
         // this.lifeCycleDaysEdit.Enabled = firstPlant !== null
@@ -4613,7 +4613,7 @@ export class TMainForm {
         // let prefix: string
         // let handlingDifferently: boolean
         
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // const firstPlant = this.focusedPlant()
         // let payAttentionToOtherPlants = true
         // let handlingDifferently = false
@@ -4675,7 +4675,7 @@ export class TMainForm {
     
     // animation 
     startAnimation(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // // called by animate command, which also sets up the pointer for the timer to call 
         // // disable all non-modal forms 
         // // keeps space bar from affecting magnification
@@ -4712,7 +4712,7 @@ export class TMainForm {
     }
     
     enableOrDisableAllForms(enable: boolean): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // // cfk note: put any new NON-MODAL forms here 
         // this.Enabled = enable
         // ubreedr.BreederForm.Enabled = enable
@@ -5159,7 +5159,7 @@ export class TMainForm {
     */
 
     updateParametersPanelForFirstSelectedPlant(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // this.updatePlantNameLabel(kTabParameters)
         // if (this.parametersScrollBox.ControlCount > 0) {
         //     for (let i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
@@ -5184,7 +5184,7 @@ export class TMainForm {
     }
     
     repositionParameterPanels(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // if (this.parametersScrollBox.ControlCount > 0) {
         //     let totalMaxWidth = 0
         //     let lastPos = 0
@@ -5234,7 +5234,7 @@ export class TMainForm {
     }
     
     collapseOrExpandParameterPanelsUntilNextHeader(headerPanel: PdParameterPanel): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // let collapsing = false
         // this.internalChange = true
         // if (this.parametersScrollBox.ControlCount > 0) {
@@ -5258,7 +5258,7 @@ export class TMainForm {
     }
     
     collapseOrExpandAllParameterPanelsInCurrentSection(doWhat: short): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // this.internalChange = true
         // if (this.sectionsComboBox.ItemIndex < 0) {
         //     return
@@ -5334,7 +5334,7 @@ export class TMainForm {
     
     // stats panel
     updateStatisticsPanelForFirstSelectedPlant(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // if (this.statsPanel === null) {
         //     return
         // }
@@ -5357,7 +5357,7 @@ export class TMainForm {
     }
     
     noteEditClick(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // const plant = this.focusedPlant()
         // if (plant === null) {
         //     return
@@ -5399,7 +5399,7 @@ export class TMainForm {
     
     // rotations panel
     updateRotationsPanelForFirstSelectedPlant(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // this.updatePlantNameLabel(kTabRotations)
         // const color: TColorRef = this.textColorToRepresentPlantSelection(false)
         // // location
@@ -5424,7 +5424,7 @@ export class TMainForm {
     // posing panel
     // ------------------------------------------------------------------------------------- *posing - updating 
     updatePosingForFirstSelectedPlant(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // this.internalChange = true
         // this.posedPartsLabel.Font.Color = this.textColorToRepresentPlantSelection(false)
         // this.selectedPartLabel.Font.Color = this.textColorToRepresentPlantSelection(false)
@@ -5457,7 +5457,7 @@ export class TMainForm {
     }
     
     updatePosingForSelectedPlantPart(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // // PDF PORT -- removed semicolon from after begin
         // this.internalChange = true
         // if (this.focusedPlant() === null) {
@@ -5486,7 +5486,7 @@ export class TMainForm {
     }
     
     updatePoseInfo(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // this.internalChange = true
         // let amendment: PdPlantDrawingAmendment | null = null
         // const partID = this.selectedPartIDInAmendedPartsList()
@@ -5520,7 +5520,7 @@ export class TMainForm {
     }
     
     updateForDependenciesWithinPoseInfo(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // this.internalChange = true
         // this.posingChangeAllColorsAfter.Enabled = this.posingChangeColors.Checked
         // this.posingMultiplyScaleAllPartsAfter.Enabled = this.posingMultiplyScale.Checked
@@ -5656,7 +5656,7 @@ export class TMainForm {
     
     // ------------------------------------------------------------------------------------- *posing - commands 
     changeSelectedPose(Sender: any): void {
-        throw new Error("Unfinished")
+        alert("TODO Unfinished")
         // // TODO sender was event or component sending event
         // if (this.internalChange) {
         //     return
@@ -5831,7 +5831,7 @@ export class TMainForm {
     
     // ------------------------------------------------------------------------------------- *resizing 
     FormResize(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // let newTop: short
         // let newLeft: short
         // let newWidth: short
@@ -5896,7 +5896,7 @@ export class TMainForm {
     
     // resizing 
     resizePanelsToVerticalSplitter(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // let newLeft: short
         // let newWidth: short
         // let newTop: short
@@ -5922,7 +5922,7 @@ export class TMainForm {
     }
     
     resizePanelsToHorizontalSplitter(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // let newLeft: short
         // let newWidth: short
         // let newTop: short
@@ -5948,7 +5948,7 @@ export class TMainForm {
     }
     
     resizeDrawingBitmapIfNecessary(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // let bitmapWasMadeBigger: boolean
         
         // if ((this.drawingBitmap.Width !== this.drawingPaintBox.Width) || (this.drawingBitmap.Height !== this.drawingPaintBox.Height)) {
@@ -5967,7 +5967,7 @@ export class TMainForm {
     }
     
     resizePlantListPanel(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // this.plantListDrawGrid.SetBounds(0, 0, this.plantListPanel.Width, this.plantListPanel.Height - this.plantFileChangedImage.Height - kBetweenGap * 2)
         // this.plantListDrawGrid.DefaultColWidth = this.plantListDrawGrid.ClientWidth
         // this.plantFileChangedImage.SetBounds(kBetweenGap, this.plantListDrawGrid.Top + this.plantListDrawGrid.Height + kBetweenGap, this.plantFileChangedImage.Width, this.plantFileChangedImage.Height)
@@ -5976,7 +5976,7 @@ export class TMainForm {
     }
     
     resizePlantFocusPanel(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // let newTop: int
         
         // //FIX unresolved WITH expression: self.tabSet
@@ -6038,7 +6038,7 @@ export class TMainForm {
     }
     
     resizeParametersPanel(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // let newTop: short
         
         // this.parametersPanel.SetBounds(0, 0, this.plantFocusPanel.Width, intMax(0, this.plantFocusPanel.Height - this.tabSet.height))
@@ -6050,7 +6050,7 @@ export class TMainForm {
     }
     
     placeLifeCycleDragger(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // const firstPlant = this.focusedPlant()
         // let fractionOfMaxAge = 0.0
         // if (firstPlant !== null) {
@@ -6064,7 +6064,7 @@ export class TMainForm {
     }
     
     WMGetMinMaxInfo(MSG: any): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // PdForm.prototype.WMGetMinMaxInfo.call(this)
         // //FIX unresolved WITH expression: UNRESOLVED.PMinMaxInfo(MSG.lparam).PDF_FIX_POINTER_ACCESS
         // UNRESOLVED.ptMinTrackSize.x = 300
@@ -6075,7 +6075,7 @@ export class TMainForm {
 
     // ------------------------------------------------------------------------------------- *splitting 
     horizontalSplitterMouseDown(Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         this.horizontalSplitterDragging = true
         this.horizontalSplitterStartPos = Y
         this.horizontalSplitterLastDrawPos = -1
@@ -6202,7 +6202,7 @@ export class TMainForm {
 
     // v1.11
     Reconcile3DObjects1Click(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // if (plantFileChanged) {
         //     // ask if want to save file first
         //     const response = MessageDialog("Do you want to save your changes to " + ExtractFileName(domain.plantFileName) + chr(13) + "before you reconcile its 3D objects" + chr(13) + "with those in the current 3D object file?", mtConfirmation, mbYesNoCancel, 0)
@@ -6235,7 +6235,7 @@ export class TMainForm {
     // v1.60 recent files menu
     // PDF PORT removed empty parens
     updateFileMenuForOtherRecentFiles(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // let atLeastOneFileNameExists = false
         // let numSet = 0
         // for (let i = 0; i <= kMaxRecentFiles - 1; i++) {
@@ -6260,7 +6260,7 @@ export class TMainForm {
     
     // v1.60 recent files menu
     Recent0Click(): void {
-        throw new Error("TODO Unfinished")
+        alert("TODO Unfinished")
         // const index = kMaxRecentFiles - 1 - this.MenuFileReopen.indexOf(Sender)
         // if (!FileExists(domain.options.recentFiles[index])) {
         //     MessageDialog("Cannot find the file" + chr(13) + domain.options.recentFiles[index] + ".", delphi_compatability.TMsgDlgType.mtError, {mbOK, }, 0)
