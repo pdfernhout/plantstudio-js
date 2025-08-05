@@ -14,7 +14,11 @@ import { PdPlantDrawingAmendment } from "./PdPlantDrawingAmendment"
 import { PdParameter, FieldType, kNotArray } from "./PdParameter"
 import { KfObject3D } from "./KfObject3D"
 import { PdGeneration } from "./PdGeneration"
-import { MainForm } from "./TMainForm"
+
+let MainForm: any
+export function setMainFormForCommands(aForm: any) {
+    MainForm = aForm
+}
 
 // TODO: temporary fix BreederForm and TimeSeriesForm
 const BreederForm: any = undefined

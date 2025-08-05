@@ -1,8 +1,6 @@
-import { int } from "./common"
-
 export class TPoint {
-    X: int
-    Y: int
+    X: number
+    Y: number
 
     constructor(x = 0, y = 0) {
         this.X = Math.round(x)

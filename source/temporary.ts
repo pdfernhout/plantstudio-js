@@ -1,16 +1,9 @@
 // TODO: Temporary definitions that belong elsewhere used to get code to compile
 
-import { float, ColorDefs, short, int, StrToFloat, byte, long, TColorRef } from "./common"
-import { TRect } from "./TRect"
-import { PdTraverser } from "./PdTraverser"
-import { PdPlant } from "./PdPlant"
-import { PdPlantPart } from "./PdPlantPart"
-import { SinglePoint, support_rgb } from "./usupport"
-import { PdCommand } from "./PdCommand";
-import { TPoint } from "./TPoint";
+import { ColorDefs, int, long, TColorRef } from "./common"
+import { support_rgb } from "./usupport"
 import { PdFiler } from "./PdFiler";
 import { PdStreamableObject } from "./PdStreamableObject";
-import { TMainForm } from "./TMainForm"
 
 // TODO: Fix copied code from utdo
 export const kMaximumRecordedPoints = 10000
@@ -123,12 +116,6 @@ export enum CursorMode {
     kCursorModeScroll = 2,
     kCursorModeRotate = 3,
     kCursorModePosingSelect = 4,
-}
-
-// TODO: Implement TimeSeriesForm from utmimeser
-export const TimeSeriesForm = {
-    updatePlantsFromParent(plant: PdPlant) {
-    }
 }
 
 // TODO: Replace with version from umain

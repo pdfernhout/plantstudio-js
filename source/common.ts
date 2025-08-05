@@ -1,5 +1,3 @@
-import { max } from "./umath"
-
 export type float = number
 export type double = number
 export type long = number
@@ -241,14 +239,14 @@ export class TFileStream {
                     throw new Error("Writing past end of file: " + this.position + " >= " + this.contents.length)
                 }
                 this.contents[this.position++] = buffer[i] & 255
-                this.contentsLengthUsed = max(this.contentsLengthUsed, this.position)
+                this.contentsLengthUsed = Math.max(this.contentsLengthUsed, this.position)
             } 
         } else {
             if (this.position >= this.contents.length) {
                 throw new Error("Writing past end of file: " + this.position + " >= " + this.contents.length)
             }
             this.contents[this.position++] = buffer & 255
-            this.contentsLengthUsed = max(this.contentsLengthUsed, this.position)
+            this.contentsLengthUsed =  Math.max(this.contentsLengthUsed, this.position)
         }
     }
 

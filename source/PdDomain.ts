@@ -10,7 +10,7 @@ import { ExportFormats, FileExport3DOptionsStructure, nameFor3DExportType, Expor
 import { BreedingAndTimeSeriesOptionsStructure, kMaxBreedingSections } from "./PdPlant"
 import { PdPlantManager } from "./PdPlantManager"
 import { KfObject3D } from "./KfObject3D"
-import { MainForm } from "./TMainForm"
+import { getMainForm } from "./TMainFormInterface"
 
 // const
 const kMaxWizardQuestions = 30
@@ -1233,9 +1233,7 @@ export class PdDomain {
                 throw new Error("Unfinished")
                 this.plantManager.loadPlantsFromFile(fileName, kNotInPlantMover, "")
                 this.plantFileLoaded = true
-                if (MainForm !== null) {
-                    MainForm.setPlantFileChanged(false)
-                }
+                getMainForm().setPlantFileChanged(false)
                 this.lastOpenedPlantFileName = this.plantFileName
                 this.lastOpenedPlantFileName = this.lastOpenedPlantFileName.trim()
                 // v1.60
@@ -1283,10 +1281,8 @@ export class PdDomain {
                 }
             }
         }
-        if (MainForm !== null) {
             // PDF PORTING -- maybe syntax error in original -- had empty parens -- unless intended as procedure or function call from pointer? Probably not
-            MainForm.updateFileMenuForOtherRecentFiles()
-        }
+        getMainForm().updateFileMenuForOtherRecentFiles()
     }
 
     resetForEmptyPlantFile(): void {
@@ -1294,9 +1290,7 @@ export class PdDomain {
         this.plantFileLoaded = true
         this.plantFileName = kUnsavedFileName + "." + extensionForFileType(FileType.kFileTypePlant)
         this.lastOpenedPlantFileName = ""
-        if (MainForm !== null) {
-            MainForm.setPlantFileChanged(false)
-        }
+        getMainForm().setPlantFileChanged(false)
     }
     
     resetForNoPlantFile(): void {
@@ -1304,9 +1298,7 @@ export class PdDomain {
         this.plantFileLoaded = false
         this.plantFileName = ""
         this.lastOpenedPlantFileName = ""
-        if (MainForm !== null) {
-            MainForm.setPlantFileChanged(false)
-        }
+        getMainForm().setPlantFileChanged(false)
     }
     
     checkForExistingDefaultTdoLibrary(): boolean {

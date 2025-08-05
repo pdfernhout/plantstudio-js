@@ -8,7 +8,6 @@ import { PdTraverser, Activity, PdPlantStatistics } from "./PdTraverser"
 import { safedivExcept } from "./umath"
 import { KfObject3D } from "./KfObject3D"
 import { KfTurtle } from "./KfTurtle"
-import { KfTriangle } from "./KfTriangle"
 import { KfPoint3D } from "./KfPoint3D"
 import { domain } from "./PdDomain"
 import { ClassId } from "./uclasses"
@@ -18,8 +17,8 @@ import { ExportFormats, ExportPart, longNameForDXFPartType, shortNameForDXFPartT
 import { PdStreamableObject } from "./PdStreamableObject"
 import { PdClassAndVersionInformationRecord, PdFiler } from "./PdFiler"
 import { DebugPrint } from "./udebug"
-import { MainForm } from "./TMainForm"
 import { kRotateX, kRotateY, kRotateZ } from "./updcom"
+import { getMainForm } from "./TMainFormInterface"
 
 // const
 const kAddingBiomassToPlant = true
@@ -539,7 +538,7 @@ export class PdPlantPart extends PdStreamableObject {
         myParentHasAnAmendment = this.parentAmendment !== null && this.parentAmendment.changeColors
         myAmendmentSaysIAmHidden = (this.amendment !== null) && (this.amendment.hide)
         myParentsAmendmentSaysIAmHidden = (this.parentAmendment !== null) && (this.parentAmendment.hide)
-        iAmSelectedInTheMainWindow = (this.partID === MainForm.selectedPlantPartID) && (MainForm.focusedPlant() === this.plant)
+        iAmSelectedInTheMainWindow = (this.partID === getMainForm().selectedPlantPartID) && (getMainForm().focusedPlant() === this.plant)
         showHighlights = domain.options.showHighlightingForNonHiddenPosedParts && (this.plant.turtle.writingTo === ExportFormats.kScreen) && (!domain.drawingToMakeCopyBitmap) && (!this.plant.drawingIntoPreviewCache)
         if (iHaveAnAmendment || myParentHasAnAmendment) {
             result = false

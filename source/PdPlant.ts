@@ -1,6 +1,6 @@
 // PdPlant was unit Uplant
 
-import { ucursor, PdBitmap, TListCollection_streamUsingFiler, CursorMode, TimeSeriesForm, TTransparentMode, setPixelFormatBasedOnScreenForBitmap, TFPPenStyle, TFPBrushStyle, fillBitmap } from "./temporary"
+import { ucursor, PdBitmap, TListCollection_streamUsingFiler, CursorMode, TTransparentMode, setPixelFormatBasedOnScreenForBitmap, fillBitmap } from "./temporary"
 import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor, ColorDefs, StrToIntDef, IntToStr, compareTextIgnoreCase, arrayRemove, TextFile, writeln, eof } from "./common"
 import { KfObject3D, kEmbeddedInPlant, kAdjustForOrigin } from "./KfObject3D"
 import { TPoint } from "./TPoint"
@@ -8,7 +8,6 @@ import { TRect } from "./TRect"
 import { KfTurtle } from "./KfTurtle"
 import { intMin, intMax, safedivExcept, min, max } from "./umath"
 import { SCurveStructure, stringToSCurve, calcSCurveCoeffs, scurve, sCurveToString } from "./SCurveStructure"
-import { KfPoint3D } from "./KfPoint3D"
 import { PdRandom } from "./PdRandom"
 import { domain, DrawMode, MutationRate } from "./PdDomain"
 import { PdTraverser, Activity, TraverserGlobals, PdPlantStatistics, Statistics } from "./PdTraverser"
@@ -17,7 +16,7 @@ import { PdParameter, FieldType, IndexType } from "./PdParameter"
 import { PdSection } from "./PdSection"
 import { PdPlantDrawingAmendment, kStartAmendmentString } from "./PdPlantDrawingAmendment"
 import { PdPlantPart } from "./PdPlantPart"
-import { SinglePoint, messageForExceptionType, support_rgb, boundForString, stringUpTo, strToBool, stringBeyond, tolerantReadln, trimLeftAndRight, boolToStr, rgbStringToColor, digitValueString } from "./usupport"
+import { SinglePoint, messageForExceptionType, boundForString, stringUpTo, strToBool, stringBeyond, tolerantReadln, trimLeftAndRight, boolToStr, rgbStringToColor, digitValueString } from "./usupport"
 import { Plant_directTransferField, kFruitSCurve, kLeafSCurve, kGeneralGrowthSCurve, kGeneralAgeAtMaturity, kFlowerMaleBudOption, kFlowerFemaleBudOption, kLeafCompoundPinnateArrangement, kMeristemAndLeafArrangement, kLeafCompoundPinnateOrPalmate, kGeneralStartingSeedForRandomNumberGenerator, kStateBasePointY } from "./utransfr"
 import { KfFileExportSurface, ExportPart, ExportFormats, KfDrawingSurfaceFor3DS } from "./U3dexport"
 import { PdMeristem } from "./PdMeristem"
@@ -25,7 +24,13 @@ import { PdInternode } from "./PdInternode"
 import { PdStreamableObject } from "./PdStreamableObject"
 import { PdClassAndVersionInformationRecord, PdFiler } from "./PdFiler"
 import { DebugPrint } from "./udebug"
-import { MainForm } from "./TMainForm"
+import { getMainForm } from "./TMainFormInterface"
+
+// TODO: Implement TimeSeriesForm from utmimeser
+const TimeSeriesForm = {
+    updatePlantsFromParent(plant: PdPlant) {
+    }
+}
 
 // const
 export enum Gender {
@@ -1018,6 +1023,7 @@ export class PdPlant extends PdStreamableObject {
     }
     
     recalculateBoundsForOffsetChange(): void {
+        const MainForm = getMainForm()
         this.fakeDrawToGetBounds()
         if (this.hidden) {
             return
@@ -1032,7 +1038,8 @@ export class PdPlant extends PdStreamableObject {
     }
     
     // procedure drawOnUsingOpenGL(turtle: KfTurtle; selected, firstSelected: boolean);
-    recalculateBounds(drawNow: boolean): void { 
+    recalculateBounds(drawNow: boolean): void {
+        const MainForm = getMainForm()
         this.fakeDrawToGetBounds()
         if (!domain.options.cachePlantBitmaps) {
             if (this.previewCache.Width > 5) {
@@ -1250,6 +1257,7 @@ export class PdPlant extends PdStreamableObject {
         if ((size.X <= 0) || (size.Y <= 0)) {
             return
         }
+        const MainForm = getMainForm()
         setPixelFormatBasedOnScreenForBitmap(cache)
         if ((cache.Width !== size.X) || (cache.Height !== size.Y)) {
             try {
@@ -1329,6 +1337,7 @@ export class PdPlant extends PdStreamableObject {
     }
     
     getHint(point: TPoint): string {
+        const MainForm = getMainForm()
         let result = this.getName()
         if ((MainForm.cursorModeForDrawing === CursorMode.kCursorModePosingSelect) && (MainForm.focusedPlant() === this)) {
             const plantPart = this.findPlantPartAtPositionByTestingPolygons(point)
@@ -1710,6 +1719,7 @@ export class PdPlant extends PdStreamableObject {
     }
     
     writeLine(plantFile: TextFile, aString: string): void {
+        const MainForm = getMainForm()
         if (this.writingToMemo) {
             MainForm.plantsAsTextMemo.push(aString)
         } else {
@@ -1718,6 +1728,7 @@ export class PdPlant extends PdStreamableObject {
     }
     
     writeToPlantFile(plantFile: TextFile): void {
+        const MainForm = getMainForm()
         let tempBoolean: boolean = false
         let tempSmallint: short = 0
         let tempLongint: long = 0
@@ -1818,7 +1829,8 @@ export class PdPlant extends PdStreamableObject {
         this.writeLine(plantFile, "")
     }
     
-    readLineAndTdoFromPlantFile(aLine: string, plantFile: TextFile): void {        
+    readLineAndTdoFromPlantFile(aLine: string, plantFile: TextFile): void {    
+        const MainForm = getMainForm()    
         if (compareTextIgnoreCase(kStartNoteString, aLine)) {
             // read note if this line starts it
             // this only will happen if in file
@@ -2017,6 +2029,7 @@ export class PdPlant extends PdStreamableObject {
     }
     
     editTransferField(d: int, value: any, fieldID: int, fieldType: int, fieldIndex: int, regrow: boolean): any {
+        const MainForm = getMainForm()
         if (fieldType === FieldType.kFieldHeader) {
             return value
         }
@@ -2601,6 +2614,7 @@ export class PdPlant extends PdStreamableObject {
     }
     
     randomizeWithSeedsAndXRotation(generalSeed: short, breedingSeed: long, anXRotation: float): void {
+        const MainForm = getMainForm()
         this.pGeneral.startingSeedForRandomNumberGenerator = generalSeed
         this.breedingGenerator.setSeed(breedingSeed)
         this.xRotation = anXRotation

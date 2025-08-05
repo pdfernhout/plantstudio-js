@@ -1,6 +1,6 @@
 // PdTraverser was unit Utravers
 
-import { float, int, TColorRef, short, long } from "./common"
+import { float, int, short, long } from "./common"
 import { max, safedivExcept, min } from "./umath"
 import { PdPlant } from "./PdPlant"
 import { TPoint } from "./TPoint"
@@ -9,7 +9,7 @@ import { PdPlantPart } from "./PdPlantPart"
 import { PdInternode } from "./PdInternode"
 import { ExportPart } from "./U3dexport"
 import { PdFiler } from "./PdFiler"
-import { MainForm } from "./TMainForm"
+import { getMainForm } from "./TMainFormInterface"
 
 export enum TraverseDirection {
     kTraverseNone = 0,
@@ -302,8 +302,8 @@ export class PdTraverser {
                 if (this.totalPlantParts % 4 !== 0) {
                     continue
                 }
-                if ((MainForm !== null) && (MainForm.drawing)) {
-                    MainForm.showDrawProgress(this.plantPartsDrawnAtStart + this.totalPlantParts)
+                if (getMainForm().drawing) {
+                    getMainForm().showDrawProgress(this.plantPartsDrawnAtStart + this.totalPlantParts)
                 }
             }
         }
