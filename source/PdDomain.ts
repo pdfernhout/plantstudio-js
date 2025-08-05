@@ -642,7 +642,7 @@ export class PdDomain {
         // Todo: Use or remove and replace next line: section = iniSections[kSectionPrefs]
         this.options.openMostRecentFileAtStart = strToBool(this.stringForSectionAndKey(section, "Open most recent file at start", "true"))
         this.options.ignoreWindowSettingsInFile = strToBool(this.stringForSectionAndKey(section, "Ignore window settings saved in files", "false"))
-        this.options.cachePlantBitmaps = strToBool(this.stringForSectionAndKey(section, "Draw plants into separate bitmaps", "true"))
+        this.options.cachePlantBitmaps = strToBool(this.stringForSectionAndKey(section, "Draw plants into separate bitmaps", "false"))
         this.options.memoryLimitForPlantBitmaps_MB = StrToInt(this.stringForSectionAndKey(section, "Memory limit for plant bitmaps (in MB)", "5"))
         this.options.maxPartsPerPlant_thousands = StrToInt(this.stringForSectionAndKey(section, "Max parts per plant (in thousands)", "10"))
         this.options.hideWelcomeForm = strToBool(this.stringForSectionAndKey(section, "Hide welcome window", "false"))

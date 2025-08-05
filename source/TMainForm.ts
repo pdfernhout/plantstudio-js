@@ -266,7 +266,7 @@ export class TMainForm {
     // posingUnposePart: TSpeedButton = new TSpeedButton()
     // posingMultiplyScaleAllPartsAfterLabel: TLabel = new TLabel()
     // Sections_Orthogonal: TImage = new TImage()
-    // drawingBitmap: TBitmap = new TBitmap()
+    drawingBitmap: HTMLCanvasElement = document.createElement("canvas") // Create temporary element to keep TypeScript happy
     commandList: PdCommandList = new PdCommandList()
     // drawingPaintBox: PdPaintBox = new PdPaintBox()
     // statsPanel: PdStatsPanel = new PdStatsPanel()
@@ -290,7 +290,7 @@ export class TMainForm {
     // drawProgressMax: long = 0
     cursorModeForDrawing: short = 0
     // actionInProgress: boolean = false
-    // mouseMoveActionInProgress: boolean = false
+    mouseMoveActionInProgress: boolean = false
     // lifeCycleDragging: boolean = false
     // lifeCycleDraggingNeedToRedraw: boolean = false
     // lifeCycleDraggingStartPos: short = 0
@@ -319,6 +319,11 @@ export class TMainForm {
     // TMainForm.prototype = new PdForm()
     // TMainForm.prototype.constructor = TMainForm
     Caption: string = "PlantStudio"
+
+    constructor() {
+        // Any code that replaces this.plants will need to update plantManager.plants too
+        this.plants = domain.plantManager.plants
+    }
 
     /*
     
@@ -744,7 +749,7 @@ export class TMainForm {
     
     // returns false if user cancels quit
     cleanUpBeforeExit(): boolean {
-        alert("TODO Unfinished")
+        alert("TODO Unfinished"); return true
         // domain.mainWindowRect = Rect(this.Left, this.Top, this.Width, this.Height)
         // domain.horizontalSplitterPos = this.horizontalSplitter.Top
         // domain.verticalSplitterPos = this.verticalSplitter.Left
@@ -768,7 +773,7 @@ export class TMainForm {
     }
     
     storeIniFile(): boolean {
-        alert("TODO Unfinished")
+        alert("TODO Unfinished"); return true
         // let result = true
         // let fileSavedOK = false
         // let choseAnotherFileName = false
@@ -995,7 +1000,7 @@ export class TMainForm {
     
     // export 
     getBitmapCopySavePrintOptions(copySavePrintType: short): int {
-        alert("TODO Unfinished")
+        alert("TODO Unfinished"); return 0
         // let bitmapOptionsForm: TBitmapOptionsForm
         
         // let result = mrCancel
@@ -1729,7 +1734,7 @@ export class TMainForm {
     }
     
     getAnimationOptions(): int {
-        alert("TODO Unfinished")
+        alert("TODO Unfinished"); return 0
         // let animationOptionsForm: TAnimationFilesOptionsForm
         
         // let result = mrCancel
@@ -2425,7 +2430,7 @@ export class TMainForm {
         let plantPartsToDraw = 0
         let showProgress = drawNow && domain.options.cachePlantBitmaps && domain.options.showPlantDrawingProgress
         if (showProgress) {
-            plantPartsToDraw = domain.plantManager.totalPlantPartCountInInvalidRect(this.plants, Rect(0, 0, this.drawingBitmap.Width, this.drawingBitmap.Height), kExcludeInvisiblePlants, kIncludeNonSelectedPlants)
+            plantPartsToDraw = domain.plantManager.totalPlantPartCountInInvalidRect(this.plants, Rect(0, 0, this.drawingBitmap.width, this.drawingBitmap.height), kExcludeInvisiblePlants, kIncludeNonSelectedPlants)
         }
         let partsDrawn = 0
         try {
@@ -2456,7 +2461,7 @@ export class TMainForm {
         let plantPartsToDraw = 0
         let showProgress = drawNow && domain.options.cachePlantBitmaps && domain.options.showPlantDrawingProgress
         if (showProgress) {
-            plantPartsToDraw = domain.plantManager.totalPlantPartCountInInvalidRect(this.selectedPlants, Rect(0, 0, this.drawingBitmap.Width, this.drawingBitmap.Height), kExcludeInvisiblePlants, kIncludeNonSelectedPlants)
+            plantPartsToDraw = domain.plantManager.totalPlantPartCountInInvalidRect(this.selectedPlants, Rect(0, 0, this.drawingBitmap.width, this.drawingBitmap.height), kExcludeInvisiblePlants, kIncludeNonSelectedPlants)
         }
         let partsDrawn = 0
         try {
@@ -2719,45 +2724,47 @@ export class TMainForm {
     }
     
     invalidateEntireDrawing(): void {
-        this.invalidDrawingRect = Rect(0, 0, this.drawingBitmap.Width, this.drawingBitmap.Height)
+        this.invalidDrawingRect = Rect(0, 0, this.drawingBitmap.width, this.drawingBitmap.height)
     }
     
     paintDrawing(immediate: boolean): void {
-        // TODO PDF: Fix this
-        // let plantPartsToDraw = 0
-        // const showProgress = domain.options.showPlantDrawingProgress && (!domain.options.cachePlantBitmaps)
-        // if ((this.invalidDrawingRect.Top !== 0) || (this.invalidDrawingRect.Left !== 0) || (this.invalidDrawingRect.Bottom !== 0) || (this.invalidDrawingRect.Right !== 0)) {
-        //     try {
-        //         if (!this.mouseMoveActionInProgress) {
-        //             ucursor.cursor_startWait()
-        //         }
-        //         UNRESOLVED.intersectClipRect(this.drawingBitmap.Canvas.Handle, this.invalidDrawingRect.Left, this.invalidDrawingRect.Top, this.invalidDrawingRect.Right, this.invalidDrawingRect.Bottom)
-        //         ubmpsupport.fillBitmap(this.drawingBitmap, domain.options.backgroundColor)
-        //         if (showProgress) {
-        //             plantPartsToDraw = domain.plantManager.totalPlantPartCountInInvalidRect(this.selectedPlants, this.invalidDrawingRect, udomain.kExcludeInvisiblePlants, udomain.kIncludeNonSelectedPlants)
-        //         }
-        //         try {
-        //             this.drawing = true
-        //             if (showProgress) {
-        //                 this.startDrawProgress(plantPartsToDraw)
-        //             }
-        //             domain.plantManager.drawOnInvalidRect(this.drawingBitmap.Canvas, this.selectedPlants, this.invalidDrawingRect, udomain.kExcludeInvisiblePlants, udomain.kIncludeNonSelectedPlants)
-        //         } finally {
-        //             this.drawing = false
-        //             if (showProgress) {
-        //                 this.finishDrawProgress()
-        //             }
-        //         }
-        //         if ((immediate)) {
-        //             this.copyDrawingBitmapToPaintBox()
-        //         }
-        //     } finally {
-        //         if (!this.mouseMoveActionInProgress) {
-        //             ucursor.cursor_stopWait()
-        //         }
-        //         this.invalidDrawingRect = delphi_compatability.Bounds(0, 0, 0, 0)
-        //     }
-        // }
+        let plantPartsToDraw = 0
+        const showProgress = domain.options.showPlantDrawingProgress && (!domain.options.cachePlantBitmaps)
+        if ((this.invalidDrawingRect.Top !== 0) || (this.invalidDrawingRect.Left !== 0) || (this.invalidDrawingRect.Bottom !== 0) || (this.invalidDrawingRect.Right !== 0)) {
+            try {
+                if (!this.mouseMoveActionInProgress) {
+                    ucursor.cursor_startWait()
+                }
+                // TODO PDF: Fix background color drawing
+                // Clear the canvas
+                this.drawingBitmap.width = this.drawingBitmap.width
+                // UNRESOLVED.intersectClipRect(this.drawingBitmap.Canvas.Handle, this.invalidDrawingRect.Left, this.invalidDrawingRect.Top, this.invalidDrawingRect.Right, this.invalidDrawingRect.Bottom)
+                // ubmpsupport.fillBitmap(this.drawingBitmap, domain.options.backgroundColor)
+                if (showProgress) {
+                    plantPartsToDraw = domain.plantManager.totalPlantPartCountInInvalidRect(this.selectedPlants, this.invalidDrawingRect, kExcludeInvisiblePlants, kIncludeNonSelectedPlants)
+                }
+                try {
+                    this.drawing = true
+                    if (showProgress) {
+                        this.startDrawProgress(plantPartsToDraw)
+                    }
+                    domain.plantManager.drawOnInvalidRect(this.drawingBitmap, this.selectedPlants, this.invalidDrawingRect, kExcludeInvisiblePlants, kIncludeNonSelectedPlants)
+                } finally {
+                    this.drawing = false
+                    if (showProgress) {
+                        this.finishDrawProgress()
+                    }
+                }
+                if ((immediate)) {
+                    this.copyDrawingBitmapToPaintBox()
+                }
+            } finally {
+                if (!this.mouseMoveActionInProgress) {
+                    ucursor.cursor_stopWait()
+                }
+                this.invalidDrawingRect = Rect(0, 0, 0, 0)
+            }
+        }
     }
     
     drawingPaintBoxPaint(): void {
@@ -4466,7 +4473,7 @@ export class TMainForm {
     }
     
     tabSetChange(NewTab: int, AllowChange: boolean): boolean {
-        alert("TODO Unfinished")
+        alert("TODO Unfinished"); return true
         // this.lifeCyclePanel.Visible = (NewTab === kTabLifeCycle)
         // this.rotationsPanel.Visible = (NewTab === kTabRotations)
         // this.parametersPanel.Visible = (NewTab === kTabParameters)
@@ -4837,7 +4844,7 @@ export class TMainForm {
     redrawLifeCycleGraph(): void {
         this.lifeCycleGraphImage.Picture.Bitmap.Canvas.Brush.Color = ColorDefs.clBtnFace
         this.lifeCycleGraphImage.Picture.Bitmap.Canvas.Rectangle(0, 0, this.lifeCycleGraphImage.ClientWidth, this.lifeCycleGraphImage.ClientHeight)
-        const sCurveError = this.drawSCurveOrCheckForError(this.lifeCycleGraphImage.Picture.Bitmap.Canvas, delphi_compatability.Bounds(0, 0, this.lifeCycleGraphImage.ClientWidth, this.lifeCycleGraphImage.ClientHeight), true, false)
+        const sCurveError = this.drawSCurveOrCheckForError(this.lifeCycleGraphImage.Picture.Bitmap.Canvas, Rect(0, 0, this.lifeCycleGraphImage.ClientWidth, this.lifeCycleGraphImage.ClientHeight), true, false)
         if (sCurveError && (this.focusedPlant() !== null)) {
             // error - do something, should be caught by parameter panel 
             // PDF PORT -- put in NIL
@@ -6288,7 +6295,6 @@ export class TMainForm {
     lifeCycleDaysEdit: any = {}
     drawingPaintBox: any = {}
     plantListDrawGrid: any = { Repaint: () => {} }
-    drawingBitmap: any = {}
     xLocationEdit: any = {}
     yLocationEdit: any = {}
     xRotationEdit: any = {}
@@ -6636,15 +6642,11 @@ export class TMainForm {
                 width: 800,
                 height: 500,
                 onupdate(vnode: m.VnodeDOM) {
+                    // TODO PDF: Fix invalidDrawingRect somehow
+                    self.invalidDrawingRect = Rect(0, 0, 800, 500)
                     const canvas = <HTMLCanvasElement>vnode.dom
-
-                    // Clear the canvas
-                    canvas.width = canvas.width
-
-                    const context = canvas.getContext("2d")
-                    if (!context) return
-
-                    self.plants.forEach(plant => plant.drawOn(context))
+                    self.drawingBitmap = canvas
+                    self.paintDrawing(true)
                 }
             }),       
         )

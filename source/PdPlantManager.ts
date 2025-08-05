@@ -387,7 +387,7 @@ export class PdPlantManager {
     }
     
     // --------------------------------------------------------------------------------------- drawing 
-    drawOnInvalidRect(destCanvas: CanvasRenderingContext2D, selectedPlants: PdPlant[], invalidRect: TRect, excludeInvisiblePlants: boolean, excludeNonSelectedPlants: boolean): void {
+    drawOnInvalidRect(destCanvas: HTMLCanvasElement, selectedPlants: PdPlant[], invalidRect: TRect, excludeInvisiblePlants: boolean, excludeNonSelectedPlants: boolean): void {
         let partsDrawn: long
         
         partsDrawn = 0
@@ -421,7 +421,9 @@ export class PdPlantManager {
                             //     destCanvas.drawImage(context.createImageData, plantRect.Left, plantRect.Top)
                             // }
                         } else {
-                            plant.drawOn(destCanvas)
+                            const context = destCanvas.getContext("2d")
+                            if (!context) return
+                            plant.drawOn(context)
                         }
                     } finally {
                         plant.computeBounds = false
