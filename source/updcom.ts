@@ -16,15 +16,15 @@ import { KfObject3D } from "./KfObject3D"
 import { PdGeneration } from "./PdGeneration"
 import { MainForm } from "./TMainForm"
 
-// TODO: temporary fix MainForm and BreederForm and TimeSeriesForm
+// TODO: temporary fix BreederForm and TimeSeriesForm
 const BreederForm: any = undefined
 const TimeSeriesForm: any = undefined
 
 // const
 const kRotateNotInitialized = 0
-const kRotateX = 1
-const kRotateY = 2
-const kRotateZ = 3
+export const kRotateX = 1
+export const kRotateY = 2
+export const kRotateZ = 3
 
 export const kCopyToClipboard = true
 export const kDontCopyToClipboard = false

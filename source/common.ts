@@ -45,7 +45,6 @@ export function getBValue(value: TColorRef) {
     return value & 255
 }
 
-
 export function IntToStr(value: int) {
     return "" + value
 }

@@ -19,6 +19,7 @@ import { PdStreamableObject } from "./PdStreamableObject"
 import { PdClassAndVersionInformationRecord, PdFiler } from "./PdFiler"
 import { DebugPrint } from "./udebug"
 import { MainForm } from "./TMainForm"
+import { kRotateX, kRotateY, kRotateZ } from "./updcom"
 
 // const
 const kAddingBiomassToPlant = true
@@ -32,9 +33,6 @@ export const kDontUseAmendment = false
 // const
 const kDrawingTdo = true
 const kDrawingLine = false
-export const kRotateX = 0
-export const kRotateY = 1
-export const kRotateZ = 2
 
 // const
 const kMaxLineOutputPoints = 200
