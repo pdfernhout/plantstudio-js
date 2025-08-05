@@ -20,7 +20,7 @@ import { intMax, intMin, max, safedivExcept } from "./umath"
 import { kBringForward, kChangeHeight, kChangeWidth, kCopyToClipboard, kDontCopyToClipboard, kDown, kHide, kLeft, kRight, kRotateX, kRotateY, kRotateZ, kSendBackward, kShow, kUp, PdAlignPlantsCommand, PdAnimatePlantCommand, PdBooleanValue, PdBreedFromParentsCommand, PdCenterDrawingCommand, PdChangeDomain3DOptionsCommand, PdChangeDomainOptionsCommand, PdChangeMagnificationCommand, PdChangeMainWindowOrientationCommand, PdChangeMainWindowViewingOptionCommand, PdChangePlantAgeCommand, PdChangeSelectedPlantsCommand, PdCreateAmendmentCommand, PdDeleteAmendmentCommand, PdDragCommand, PdDuplicateCommand, PdEditAmendmentCommand, PdEditNoteCommand, PdHideOrShowCommand, PdMakeTimeSeriesCommand, PdNewCommand, PdPackPlantsCommand, PdPasteCommand, PdRandomizeCommand, PdRemoveCommand, PdRenameCommand, PdResetRotationsCommand, PdResizePlantsCommand, PdResizePlantsToSameWidthOrHeightCommand, PdRotateCommand, PdScrollCommand, PdSelectOrDeselectAllCommand, PdSelectPosingPartCommand, PdSendBackwardOrForwardCommand, setMainFormForCommands } from "./updcom"
 import { chr, cleanUpAfterFileSave, createSaveFileNamesStructure, FileType, getFileSaveInfo, IDCANCEL, IDNO, IDYES, kAskForFileName, kDontAskForFileName, len, lowercase, mrCancel, mrOK, nameStringForFileType, Point, pos, Rect, removeItem, rHeight, rWidth, SaveFileNamesStructure, setSinglePoint, startFileSave, stringBeyond, stringUpTo, trim, uppercase } from "./usupport"
 import { viewMainForm } from "./TMainForm-view"
-import { setMainForm, TMainFormInterface } from "./TMainFormInterface"
+import { setMainForm } from "./TMainFormInterface"
 
 // TODO PDF for getting to compile
 type TEdit = any
@@ -113,7 +113,7 @@ function setPlantCharacteristicsForAnimationFrame(plant: PdPlant, frame: short):
 // }
 
 
-export class TMainForm implements TMainFormInterface {
+export class TMainForm {
     // toolbarPanel: TPanel = new TPanel()
     // dragCursorMode: TSpeedButton = new TSpeedButton()
     // magnifyCursorMode: TSpeedButton = new TSpeedButton()

@@ -17,9 +17,12 @@ import { PdTdoParameterPanel } from "../source/PdTdoParameterPanel";
 import { FieldType, IndexType, PdParameter } from "../source/PdParameter";
 import { readTDOsFile } from "../source/KfObject3D";
 import { ModalInputView } from "../source/ModalInputView";
+import { TMainForm } from "../source/TMainForm";
 
 PdDomain.createDefault()
 domain.defaultTdoLibraryFileName = "../plants/3D object library.tdo"
+const fakeMainForm = new TMainForm()
+fakeMainForm.oninit()
 
 async function fetchDefaultTDOLibrary() {
     domain.defaultTdoLibrary = await readTDOsFile(domain.defaultTdoLibraryFileName)

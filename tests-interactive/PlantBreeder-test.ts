@@ -8,21 +8,15 @@ import { PdDomain, domain } from "../source/PdDomain"
 import { PdPlantDrawingAmendment } from "../source/PdPlantDrawingAmendment";
 import { ColorDefs } from "../source/common";
 import { PdPlantManager } from "../source/PdPlantManager";
-import { PdSmallintParameterPanel } from "../source/PdSmallintParameterPanel";
-import { PdBooleanParameterPanel } from "../source/PdBooleanParameterPanel";
-import { PdListParameterPanel } from "../source/PdListParameterPanel";
-import { PdRealParameterPanel } from "../source/PdRealParameterPanel";
-import { PdColorParameterPanel } from "../source/PdColorParameterPanel";
-import { PdHeaderParameterPanel } from "../source/PdHeaderParameterPanel";
-import { PdSCurveParameterPanel } from "../source/PdSCurveParameterPanel";
-import { PdTdoParameterPanel } from "../source/PdTdoParameterPanel";
-import { FieldType, IndexType, PdParameter } from "../source/PdParameter";
 import { readTDOsFile } from "../source/KfObject3D";
 import { ModalInputView } from "../source/ModalInputView";
 import { TBreederForm } from "../source/TBreederForm";
+import { TMainForm } from "../source/TMainForm";
 
 PdDomain.createDefault()
 domain.defaultTdoLibraryFileName = "../plants/3D object library.tdo"
+const fakeMainForm = new TMainForm()
+fakeMainForm.oninit()
 
 async function fetchDefaultTDOLibrary() {
     domain.defaultTdoLibrary = await readTDOsFile(domain.defaultTdoLibraryFileName)

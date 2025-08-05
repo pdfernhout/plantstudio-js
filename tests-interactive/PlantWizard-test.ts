@@ -11,9 +11,12 @@ import { PdPlantManager } from "../source/PdPlantManager";
 import { readTDOsFile } from "../source/KfObject3D";
 import { ModalInputView } from "../source/ModalInputView";
 import { TWizardForm } from "../source/TWizardForm";
+import { TMainForm } from "../source/TMainForm";
 
 PdDomain.createDefault()
 domain.defaultTdoLibraryFileName = "../plants/3D object library.tdo"
+const fakeMainForm = new TMainForm()
+fakeMainForm.oninit()
 
 let loading = true
 
