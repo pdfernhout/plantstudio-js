@@ -6749,20 +6749,45 @@ export class TMainForm {
                         }
                     }, 
                     m("span.hover-bg-green.b" + (this.droppedDownMenuId === menuItem.id ? ".ba" : ""), {
-                        onclick: () => this.droppedDownMenuId === menuItem.id ? this.droppedDownMenuId = "" : this.droppedDownMenuId = menuItem.id
+                        onclick: (event: any) => {
+                            this.droppedDownMenuId === menuItem.id 
+                                ? this.droppedDownMenuId = ""
+                                : this.droppedDownMenuId = menuItem.id
+                            event.stopPropagation()
+                        }
                     }, caption(menuItem.label)),
                     menuItem.submenu ? null : "MISSING SUBMENU for: " + menuItem.label,
-                    this.droppedDownMenuId === menuItem.id && m("div.absolute.ba", { id: "droppedDownMenu", style: { left: 0 } }, this.viewMenu(menuItem.submenu || []))
+                    this.droppedDownMenuId === menuItem.id && m("div.absolute.ba.bg-light-gray", { id: "droppedDownMenu", style: { left: 0 } }, this.viewMenu(menuItem.submenu || []))
                 )
             )
         )
     }
 
     view() {
-        return m("div", 
+        const self = this
+        return m("div", {
+                onclick: (event: any) => {
+                    this.droppedDownMenuId = ""
+                }
+            },
             "PlantStudio Main Form",
-            this.viewMainMenu()
-            // viewMainForm()        
+            this.viewMainMenu(),
+            // viewMainForm() 
+            m("canvas.ba", {
+                width: 800,
+                height: 500,
+                onupdate(vnode: m.VnodeDOM) {
+                    const canvas = <HTMLCanvasElement>vnode.dom
+
+                    // Clear the canvas
+                    canvas.width = canvas.width
+
+                    const context = canvas.getContext("2d")
+                    if (!context) return
+
+                    self.plants.forEach(plant => plant.drawOn(context))
+                }
+            }),       
         )
     }   
 }
