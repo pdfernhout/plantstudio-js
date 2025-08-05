@@ -1276,7 +1276,11 @@ export class TMainForm {
     
     // ---------------------------------------------------------------------------- *plant menu 
     MenuPlantNewClick(): void {
-        throw new Error("TODO Unfinished")
+        // TODO PDF: Temp for testing
+        const plant = new PdPlant()
+        plant.defaultAllParameters()
+        this.plants.push(plant)
+        // TODO PDF: Fix this
         // let wizardForm: TWizardForm
 
         // try {
