@@ -1954,8 +1954,8 @@ export class TMainForm {
     
     // drawing 
     changeViewingOptionTo(aNewOption: short): void {
-        console.log("changeViewingOptionTo", aNewOption, this.selectedPlants)
         if ((aNewOption === ViewPlants.kViewPlantsInMainWindowOneAtATime) && (this.selectedPlants.length <= 0)) {
+            // PORT: Changed from the Delphi which was maybe buggy?
             if (this.plants.length > 0) {
                 this.selectedPlants.push(this.plants[0])
                 this.updateForChangeToPlantSelections()
@@ -6636,40 +6636,44 @@ export class TMainForm {
     ]
 
     viewMenuItem(menuItem: MenuItem) {
+        const disabled = menuItem.enabledFunction ? !menuItem.enabledFunction() : false
         switch(menuItem.type) {
             case "dash":
                 return m("div", "----")
             case "menu":
-                return m("div.nowrap", m("span.hover-bg-green", {
-                    disabled: menuItem.enabledFunction ? !menuItem.enabledFunction() : false,
-                    onclick: () => menuItem.action?.call(this, menuItem),
+                return m("div.nowrap" + (disabled ? ".gray.disabled" : ".hover-bg-green"),
+                    m("span.menuItem", {
+                        tabindex: "0",
+                        onclick: () => menuItem.action?.call(this, menuItem),
+                        onkeydown: (event: any) => {
+                            if (event.key === "Enter") {
+                                event.stopPropagation()
+                                menuItem.action?.call(this, menuItem)
+                            }
+                        }
                     }, caption(menuItem.label)))
             case "checkbox":
-                return m("div.nowrap",
-                    m("label",
+                return m("div.nowrap" + (disabled ? ".gray.disabled" : ".hover-bg-green"),
+                    m("label.menuItem",
+                        { tabindex: "0" },
                         m("input[type=checkbox].mr1", {
                             checked: menuItem.checkedFunction!(),
-                            disabled: menuItem.enabledFunction ? !menuItem.enabledFunction() : false,
+                            disabled,
                             onchange: () => menuItem.action?.call(this, menuItem),
                         }),
-                        m("span.hover-bg-green", {
-                            disabled: menuItem.enabledFunction ? !menuItem.enabledFunction() : false,
-                            // onclick: () => menuItem.action?.call(this, menuItem)
-                        }, caption(menuItem.label))
+                        caption(menuItem.label)
                     )
                 )
             case "radio":
-                return m("div.nowrap",
-                    m("label",
+                return m("div.nowrap" + (disabled ? ".gray.disabled" : ".hover-bg-green"),
+                    m("label.menuItem",
+                        { tabindex: "0" },
                         m("input[type=radio].mr1", {
                             checked: menuItem.checkedFunction!(),
-                            disabled: menuItem.enabledFunction ? !menuItem.enabledFunction() : false,
+                            disabled,
                             onchange: () => menuItem.action?.call(this, menuItem)
                         }),
-                        m("span.hover-bg-green", {
-                            disabled: menuItem.enabledFunction ? !menuItem.enabledFunction() : false,
-                            // onclick: () => menuItem.action?.call(this, menuItem)
-                        }, caption(menuItem.label))
+                        caption(menuItem.label)
                     )
                 )
             default:
@@ -6682,21 +6686,73 @@ export class TMainForm {
         return m("div.ml2", 
             menu.map(menuItem => m("div",
                 menuItem.submenu
-                    ? m("div.nowrap", caption(menuItem.label), this.viewMenu(menuItem.submenu))
+                    ? m("div.nowrap", m("span.i", caption(menuItem.label)), this.viewMenu(menuItem.submenu))
                     : this.viewMenuItem(menuItem)
                 )
         ))
     }
 
+    droppedDownMenuId = ""
+
+    // TODO MAYBE: 
+    // sendTabKey() {
+    //     console.log("sending tab")
+    //     // const newEvent = new KeyboardEvent("keydown", {
+    //     //     key: "Tab",
+    //     //     keyCode: 9,
+    //     //     code: "Tab",
+    //     //     which: 9,
+    //     //     bubbles: true,
+    //     //     location: 0
+    //     // })
+    //     // document.dispatchEvent(newEvent)
+    //     // const element = document.getElementById("droppedDownMenu")
+    //     // console.log("element", element)
+    //     // if (element) {
+    //     //     const child = element.getElementsByClassName(".menuItem")[0];
+    //     //     (child as any).focus()
+    //     // }
+    //     setTimeout(() => {
+    //         const elements = document.getElementsByClassName("menuItem");
+    //         const element = elements[0];
+    //         (element as any).focus()
+    //     }, 10)
+    // }
+
     viewMainMenu() {
         const menu = buildMenuFromSpec(this.mainMenuSpec)
         
-        return m("div.flex.flex-row", 
+        return m("div", 
             menu.map(menuItem => 
-                m("div.ba", 
-                    caption(menuItem.label),
+                m("span.ml2.relative", {
+                        tabindex: "0",
+                        onkeydown: (event: any) => {
+                            if (event.key === "Escape") {
+                                this.droppedDownMenuId = ""
+                                event.stopPropagation()
+                            } else if (event.key === "Enter") {
+                                this.droppedDownMenuId === menuItem.id
+                                    ? this.droppedDownMenuId == ""
+                                    : this.droppedDownMenuId = menuItem.id
+                                event.stopPropagation()
+                            } else if (event.key === "ArrowDown" && this.droppedDownMenuId !== menuItem.id) {
+                                this.droppedDownMenuId = menuItem.id
+                                // event.stopPropagation()
+                                // TODO MAYBE: this.sendTabKey()
+                            } else if (event.key === "ArrowDown" && this.droppedDownMenuId === menuItem.id) {
+                                // event.stopPropagation()
+                                // TODO MAYBE: this.sendTabKey()
+                            // } else if (event.key === "ArrowRight") {
+                            //     this.droppedDownMenuId = menuItem.id
+                            //     event.stopPropagation()
+                            }
+                        }
+                    }, 
+                    m("span.hover-bg-green.b" + (this.droppedDownMenuId === menuItem.id ? ".ba" : ""), {
+                        onclick: () => this.droppedDownMenuId === menuItem.id ? this.droppedDownMenuId = "" : this.droppedDownMenuId = menuItem.id
+                    }, caption(menuItem.label)),
                     menuItem.submenu ? null : "MISSING SUBMENU for: " + menuItem.label,
-                    this.viewMenu(menuItem.submenu || [])
+                    this.droppedDownMenuId === menuItem.id && m("div.absolute.ba", { id: "droppedDownMenu", style: { left: 0 } }, this.viewMenu(menuItem.submenu || []))
                 )
             )
         )
