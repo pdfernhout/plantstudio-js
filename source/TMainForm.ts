@@ -6602,7 +6602,7 @@ export class TMainForm {
                         }
                     }, caption(menuItem.label)),
                     menuItem.submenu ? null : "MISSING SUBMENU for: " + menuItem.label,
-                    this.droppedDownMenuId === menuItem.id && m("div.absolute.ba.bg-light-gray", { id: "droppedDownMenu", style: { left: 0 } }, this.viewMenu(menuItem.submenu || []))
+                    this.droppedDownMenuId === menuItem.id && m("div.absolute.ba.bg-light-gray.pr2", { id: "droppedDownMenu", style: { left: 0 } }, this.viewMenu(menuItem.submenu || []))
                 )
             )
         )
