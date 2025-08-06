@@ -295,3 +295,8 @@ export function caption(text: string | (() => string)) {
     }
     return text.replace("&", "")
 }
+
+export enum MouseButton {
+    mbLeft = 0,
+    mbRight = 2
+}

@@ -1,7 +1,7 @@
 // unit Umain
 
 import * as m from "mithril"
-import { arrayInsert, arraySwap, caption, ColorDefs, double, ExtractFileName, float, int, intround, IntToStr, long, mbYesNo, mbYesNoCancel, MessageDialog, mtConfirmation, short, ShowMessage, StrToFloat, StrToIntDef, TColorRef } from "./common"
+import { arrayInsert, arraySwap, caption, ColorDefs, double, ExtractFileName, float, int, intround, IntToStr, long, mbYesNo, mbYesNoCancel, MessageDialog, MouseButton, mtConfirmation, short, ShowMessage, StrToFloat, StrToIntDef, TColorRef } from "./common"
 import { PdCommand } from "./PdCommand"
 import { PdCommandList } from "./PdCommandList"
 import { domain, DrawMode, kAnimateByAge, kAnimateByXRotation, kExcludeInvisiblePlants, kIncludeAllPlants, kIncludeDrawingAreaContents, kIncludeNonSelectedPlants, kIncludeSelectedPlants, kIncludeVisiblePlants, kMainWindowOrientationHorizontal, kMainWindowOrientationVertical, kMaxRecentFiles, kUnsavedFileName, ViewPlants } from "./PdDomain"
@@ -21,18 +21,13 @@ import { chr, cleanUpAfterFileSave, createSaveFileNamesStructure, FileType, getF
 import { viewMainForm } from "./TMainForm-view"
 import { setMainForm } from "./TMainFormInterface"
 import { convertColor } from "./KfDrawingSurface"
-import { cursor_getCurrentCursorAsCSS, cursor_startWait, cursor_stopWait } from "./ucursor"
+import { Cursor, cursor_change, cursor_getCurrentCursorAsCSS, cursor_startWait, cursor_stopWait, CursorMode } from "./ucursor"
 
 // TODO PDF for getting to compile
 type TEdit = any
 
 const Application_Title = "PlantStudio"
 
-const kCursorModeSelectDrag = 0
-const kCursorModeMagnify = 1
-const kCursorModeScroll = 2
-const kCursorModeRotate = 3
-const kCursorModePosingSelect = 4
 const kMinWidthOnScreen = 100
 const kMinHeightOnScreen = 100
 const kDrawNow = true
@@ -78,6 +73,11 @@ let plantFileChanged: boolean  = false
 let pictureFileSaveAttemptsThisSession: short = 0
 let nozzleFileSaveAttemptsThisSession: short = 0
 let exportTo3DFileSaveAttemptsThisSession: short[] = Array(7) // Array(ExportFormats.k3DExportTypeLast + 1)
+
+type TShiftState = {
+    isShift: boolean
+    isCtrl: boolean
+}
 
 function setPlantCharacteristicsForAnimationFrame(plant: PdPlant, frame: short): void {
     if (plant === null) {
@@ -282,15 +282,15 @@ export class TMainForm {
     // numPlantsInClipboard: short = 0
     lastSingleClickPlantIndex: int = 0
     // justDoubleClickedOnDrawGrid: boolean = false
-    // rubberBanding: boolean = false
-    // rubberBandNeedToRedraw: boolean = false
-    // rubberBandStartDragPoint: TPoint = new TPoint()
-    // rubberBandLastDrawPoint: TPoint = new TPoint()
+    rubberBanding: boolean = false
+    rubberBandNeedToRedraw: boolean = false
+    rubberBandStartDragPoint: TPoint = new TPoint()
+    rubberBandLastDrawPoint: TPoint = new TPoint()
     drawing: boolean = false
     animateCommand: PdAnimatePlantCommand | null = null
     // drawProgressMax: long = 0
     cursorModeForDrawing: short = 0
-    // actionInProgress: boolean = false
+    actionInProgress: boolean = false
     mouseMoveActionInProgress: boolean = false
     // lifeCycleDragging: boolean = false
     // lifeCycleDraggingNeedToRedraw: boolean = false
@@ -307,16 +307,16 @@ export class TMainForm {
     // verticalSplitterLastDrawPos: int = 0
     // lastWidth: int = 0
     // lastHeight: int = 0
-    // hintX: int = 0
-    // hintY: int = 0
-    // hintActive: boolean = false
-    // lastHintString: string = ""
+    hintX: int = 0
+    hintY: int = 0
+    hintActive: boolean = false
+    lastHintString: string = ""
     // backTabbingInParametersPanel: boolean = false
     selectedParameterPanel: PdParameterPanel | null = null
     selectedPlantPartID: long = 0
-    // mouseDownSelectedPlantPartID: long = 0
+    mouseDownSelectedPlantPartID: long = 0
     selectedPlantPartType: string = ""
-    // mouseDownSelectedPlantPartType: string = ""
+    mouseDownSelectedPlantPartType: string = ""
     // TMainForm.prototype = new PdForm()
     // TMainForm.prototype.constructor = TMainForm
     Caption: string = "PlantStudio"
@@ -1291,7 +1291,6 @@ export class TMainForm {
         plant.basePoint_mm.y = 200 + Math.floor(Math.random() * 200)
         // plant.xRotation = Math.random() * 365
         this.plants.push(plant)
-        this.selectedPlants.push(plant)
         // TODO PDF: Fix this
         // let wizardForm: TWizardForm
 
@@ -2741,7 +2740,7 @@ export class TMainForm {
                 if (this.isFocused(plant)) {
                     context.strokeStyle = convertColor(domain.options.firstSelectionRectangleColor)
                     context.strokeRect(plant.boundsRect_pixels().Left, plant.boundsRect_pixels().Top, plant.boundsRect_pixels().Right - plant.boundsRect_pixels().Left, plant.boundsRect_pixels().Bottom - plant.boundsRect_pixels().Top)
-                    if (this.cursorModeForDrawing === kCursorModeSelectDrag) {
+                    if (this.cursorModeForDrawing === CursorMode.kCursorModeSelectDrag) {
                         context.strokeRect(plant.resizingRect().Left, plant.resizingRect().Top, plant.resizingRect().Right - plant.resizingRect().Left, plant.resizingRect().Bottom - plant.resizingRect().Top)
                     }
                 } else if (this.isSelected(plant)) {
@@ -3122,7 +3121,7 @@ export class TMainForm {
         return result
     }
     
-    isFocused(plant: PdPlant): boolean {
+    isFocused(plant: PdPlant | null): boolean {
         let result = false
         if (plant === null) {
             return result
@@ -3383,24 +3382,30 @@ export class TMainForm {
         return Key
     }
     
+    */
+    
     // mouse handling in drawing 
     // -------------------------------------------------------------------------- *mouse handling in drawing 
-    PaintBoxMouseDown(Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
+    PaintBoxMouseDown(event: MouseEvent): void {
+        const X = event.x
+        const Y = event.y
+        const isShift = event.shiftKey
+        const isCtrl = event.ctrlKey
         if (this.plants.length <= 0) {
             return
         }
         if (this.actionInProgress) {
             try {
                 // error somewhere - user did weird things with mouse buttons - teminate action...
-                this.PaintBoxMouseUp(Sender, Button, Shift, X, Y)
+                this.PaintBoxMouseUp(event)
             } finally {
                 this.actionInProgress = false
             }
         }
-        let plantClickedOn: PdPlant
+        let plantClickedOn: PdPlant | null
         switch (this.cursorModeForDrawing) {
-            case kCursorModeSelectDrag:
-                if (Button === delphi_compatability.TMouseButton.mbRight) {
+            case CursorMode.kCursorModeSelectDrag:
+                if (event.button === MouseButton.mbRight) {
                     return
                 }
                 plantClickedOn = domain.plantManager.findPlantAtPoint(Point(X, Y))
@@ -3416,23 +3421,23 @@ export class TMainForm {
                     return
                 } else {
                     this.actionInProgress = true
-                    if ((!plantClickedOn.pointIsInResizingRect(Point(X, Y))) && ((!this.isSelected(plantClickedOn)) || (delphi_compatability.TShiftStateEnum.ssShift in Shift))) {
-                        this.selectPlantAtPoint(Point(X, Y), (delphi_compatability.TShiftStateEnum.ssShift in Shift) && (!(delphi_compatability.TShiftStateEnum.ssCtrl in Shift)))
+                    if ((!plantClickedOn.pointIsInResizingRect(Point(X, Y))) && ((!this.isSelected(plantClickedOn)) || isShift)) {
+                        this.selectPlantAtPoint(Point(X, Y), isShift && !isCtrl)
                         this.updateForPossibleChangeToDrawing()
                     }
                 }
                 break
-            case kCursorModeScroll:
+            case CursorMode.kCursorModeScroll:
                 break
-            case kCursorModeMagnify:
+            case CursorMode.kCursorModeMagnify:
                 this.rubberBanding = true
                 this.rubberBandStartDragPoint = Point(X, Y)
                 this.rubberBandLastDrawPoint = Point(X, Y)
                 this.rubberBandNeedToRedraw = true
                 break
-            case kCursorModeRotate:
+            case CursorMode.kCursorModeRotate:
                 break
-            case kCursorModePosingSelect:
+            case CursorMode.kCursorModePosingSelect:
                 if (domain.options.drawSpeed !== DrawMode.kDrawBest) {
                     if (MessageDialog("To pose a plant, you need the \"Draw Using\" option set to \"Solids.\"" + chr(13) + chr(13) + "Do you want to change it?", mtConfirmation, mbYesNo, 0) === IDYES) {
                         this.MenuOptionsBestDrawClick()
@@ -3443,8 +3448,8 @@ export class TMainForm {
                     this.tabSet.tabIndex = kTabPosing
                 }
                 plantClickedOn = domain.plantManager.findPlantAtPoint(Point(X, Y))
-                if (this.isFocused(plantClickedOn)) {
-                    this.mouseDownSelectedPlantPartID, this.mouseDownSelectedPlantPartType = plantClickedOn.getInfoForPlantPartAtPoint(Point(X, Y), this.mouseDownSelectedPlantPartID, this.mouseDownSelectedPlantPartType)
+                if (plantClickedOn && this.isFocused(plantClickedOn)) {
+                    [this.mouseDownSelectedPlantPartID, this.mouseDownSelectedPlantPartType] = plantClickedOn.getInfoForPlantPartAtPoint(Point(X, Y))
                 } else {
                     this.mouseDownSelectedPlantPartID = -1
                 }
@@ -3455,8 +3460,8 @@ export class TMainForm {
         }
         const anchorPoint = Point(X, Y)
         // makes shift-click work as right-click
-        this.commandList.rightButtonDown = (Button === delphi_compatability.TMouseButton.mbRight) || (delphi_compatability.TShiftStateEnum.ssShift in Shift)
-        const newCommand = this.makeMouseCommand(anchorPoint, Shift)
+        this.commandList.rightButtonDown = (event.button === MouseButton.mbRight) || isShift
+        const newCommand = this.makeMouseCommand(anchorPoint, {isShift, isCtrl})
         if (newCommand !== null) {
             this.actionInProgress = this.commandList.mouseDown(newCommand, anchorPoint)
         } else {
@@ -3467,16 +3472,18 @@ export class TMainForm {
         }
     }
     
-    PaintBoxMouseMove(Shift: TShiftState, X: int, Y: int): void {
+    PaintBoxMouseMove(event: MouseEvent): void {
+        const X = event.x
+        const Y = event.y
         if (this.plants.length <= 0) {
             return
         }
-        if (this.cursorModeForDrawing === kCursorModeSelectDrag) {
+        if (this.cursorModeForDrawing === CursorMode.kCursorModeSelectDrag) {
             // show cursor that tells you you can resize plant when mouse is in resize rect, but only in select mode
-            delphi_compatability.Screen.Cursor = delphi_compatability.crDefault
+            cursor_change(Cursor.crDefault)
             const plantClickedOn = domain.plantManager.findPlantAtPoint(Point(X, Y))
             if ((domain.options.showSelectionRectangle) && (plantClickedOn !== null) && (plantClickedOn === this.focusedPlant()) && (plantClickedOn.pointIsInResizingRect(Point(X, Y)))) {
-                delphi_compatability.Screen.Cursor = delphi_compatability.crSizeNS
+                cursor_change(Cursor.crSizeNS)
             }
         }
         if (!this.actionInProgress) {
@@ -3493,12 +3500,12 @@ export class TMainForm {
                     shouldCancelHint = true
                 }
                 if (shouldCancelHint) {
-                    delphi_compatability.Application.CancelHint()
                     this.hintActive = false
                 }
             }
         }
         if (this.rubberBanding) {
+            console.log("moving with rubber banding")
             // continue rubber banding - could be done in either select or magnify mode
             this.undrawRubberBandBox()
             this.drawRubberBandBox(Point(X, Y))
@@ -3514,21 +3521,24 @@ export class TMainForm {
         }
     }
     
-    PaintBoxMouseUp(Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
+    PaintBoxMouseUp(event: MouseEvent): void {
+        const X = event.x
+        const Y = event.y
         if (this.plants.length <= 0) {
             return
         }
-        if ((Button === delphi_compatability.TMouseButton.mbRight) && (this.cursorModeForDrawing === kCursorModeSelectDrag)) {
+        if ((event.button === MouseButton.mbRight) && (this.cursorModeForDrawing === CursorMode.kCursorModeSelectDrag)) {
             // show popup menu but only if in select/drag mode
-            const popupPositionInScreenCoords: TPoint = this.ClientToScreen(Point(X, Y))
-            this.PlantPopupMenu.popup(popupPositionInScreenCoords.X, popupPositionInScreenCoords.Y)
+            unfinished()
+            // const popupPositionInScreenCoords: TPoint = this.ClientToScreen(Point(X, Y))
+            // this.PlantPopupMenu.popup(popupPositionInScreenCoords.X, popupPositionInScreenCoords.Y)
             return
         }
         if (this.rubberBanding) {
             // finish rubber banding if doing that, could be in select or magnify mode
             this.rubberBanding = false
             this.undrawRubberBandBox()
-            if (this.cursorModeForDrawing === kCursorModeSelectDrag) {
+            if (this.cursorModeForDrawing === CursorMode.kCursorModeSelectDrag) {
                 this.selectPlantsInRubberBandBox()
                 return
             }
@@ -3543,13 +3553,15 @@ export class TMainForm {
             this.updateForPossibleChangeToDrawing()
         } finally {
             // clear out all mouse settings
-            delphi_compatability.Screen.Cursor = delphi_compatability.crDefault
+            cursor_change(Cursor.crDefault)
             this.mouseMoveActionInProgress = false
             this.commandList.rightButtonDown = false
             this.actionInProgress = false
         }
     }
     
+    /*
+
     PaintBoxDragOver(Source: TObject, X: int, Y: int, State: TDragState, Accept: boolean): void {
         Accept = (Source !== null) && (Sender !== null) && ((ubreedr.BreederForm !== null) && (Source === ubreedr.BreederForm.plantsDrawGrid) || (utimeser.TimeSeriesForm !== null) && (Source === utimeser.TimeSeriesForm.grid))
         return Accept
@@ -3569,50 +3581,63 @@ export class TMainForm {
         }
     }
     
+    */
+
     makeMouseCommand(point: TPoint, shift: TShiftState): PdCommand | null {
         let result: PdCommand | null
+        const focusedPlant = this.focusedPlant()
         switch (this.cursorModeForDrawing) {
-            case kCursorModeSelectDrag:
-                if ((delphi_compatability.TShiftStateEnum.ssShift in shift) && (delphi_compatability.TShiftStateEnum.ssCtrl in shift)) {
+            case CursorMode.kCursorModeSelectDrag:
+                if (shift.isShift && shift.isCtrl) {
                     result = null
                     this.commandList.anchorPoint = point
-                    this.drawingPaintBox.BeginDrag(true)
-                } else if ((delphi_compatability.TShiftStateEnum.ssCtrl in shift)) {
+                    // TODO PDF: Fix this: this.drawingPaintBox.BeginDrag(true)
+                    unfinished()
+                } else if (shift.isCtrl) {
                     result = new PdDuplicateCommand(this.selectedPlants)
-                } else if ((this.focusedPlant() !== null) && (this.focusedPlant().pointIsInResizingRect(point))) {
-                    delphi_compatability.Screen.Cursor = delphi_compatability.crSizeNS
+                } else if (focusedPlant !== null && focusedPlant.pointIsInResizingRect(point)) {
+                    cursor_change(Cursor.crSizeNS)
                     result = new PdResizePlantsCommand(this.selectedPlants)
                 } else {
                     result = new PdDragCommand(this.selectedPlants)
                 }
                 break
-            case kCursorModeScroll:
+            case CursorMode.kCursorModeScroll:
                 result = new PdScrollCommand()
                 break
-            case kCursorModeMagnify:
+            case CursorMode.kCursorModeMagnify:
                 if ((this.commandList.rightButtonDown)) {
                     // to zoom out, can do right button or shift
-                    delphi_compatability.Screen.Cursor = ucursor.crMagMinus
-                    result = new PdChangeMagnificationCommand()
-                    (result).shift = true
+                    cursor_change(Cursor.crMagMinus)
+                    // TODO PDF: veridy OK to use 0 here
+                    const newCommand = new PdChangeMagnificationCommand(0, Point(0,0))
+                    newCommand.shift = shift.isShift
+                    result = newCommand
                 } else {
-                    result = new PdChangeMagnificationCommand()
-                    result.shift = (delphi_compatability.TShiftStateEnum.ssShift in shift)
+                    // TODO PDF: veridy OK to use 0 here
+                    const newCommand = new PdChangeMagnificationCommand(0, Point(0,0))
+                    newCommand.shift = shift.isShift
+                    result = newCommand
                 }
                 break
-            case kCursorModeRotate:
+            case CursorMode.kCursorModeRotate:
                 if (this.commandList.rightButtonDown) {
-                    delphi_compatability.Screen.Cursor = delphi_compatability.crSizeWE
+                    cursor_change(Cursor.crSizeWE)
                 }
-                result = new PdRotateCommand(this.selectedPlants)
+                result = new PdRotateCommand(this.selectedPlants, 0, 0)
                 break
-            case kCursorModePosingSelect:
-                result = new PdSelectPosingPartCommand(this.focusedPlant(), this.mouseDownSelectedPlantPartID, this.selectedPlantPartID, this.mouseDownSelectedPlantPartType, this.selectedPlantPartType)
+            case CursorMode.kCursorModePosingSelect:
+                if (focusedPlant !== null) {
+                    result = new PdSelectPosingPartCommand(focusedPlant, this.mouseDownSelectedPlantPartID, this.selectedPlantPartID, this.mouseDownSelectedPlantPartType, this.selectedPlantPartType)
+                } else {
+                    throw new Error("unexpected no focused plant")
+                }
                 break
+            default: throw new Error("unexpected cursorModeForDrawing: " + this.cursorModeForDrawing)
         }
         return result
     }
-    
+
     // rubber banding 
     // ----------------------------------------------------------------------- *rubber banding 
     selectPlantsInRubberBandBox(): void {
@@ -3641,14 +3666,16 @@ export class TMainForm {
     }
     
     drawOrUndrawRubberBandBox(): void {
-        const theDC: HDC = UNRESOLVED.getDC(0)
-        const drawRect = Rect(this.ClientOrigin.X + this.drawingPaintBox.Left + this.rubberBandStartDragPoint.X, this.ClientOrigin.Y + this.drawingPaintBox.Top + this.rubberBandStartDragPoint.Y, this.ClientOrigin.X + this.drawingPaintBox.Left + this.rubberBandLastDrawPoint.X, this.ClientOrigin.Y + this.drawingPaintBox.Top + this.rubberBandLastDrawPoint.Y)
-        UNRESOLVED.patBlt(theDC, drawRect.Left, drawRect.Top, drawRect.Right - drawRect.Left, 1, delphi_compatability.DSTINVERT)
-        UNRESOLVED.patBlt(theDC, drawRect.Right, drawRect.Top, 1, drawRect.Bottom - drawRect.Top, delphi_compatability.DSTINVERT)
-        UNRESOLVED.patBlt(theDC, drawRect.Left, drawRect.Bottom, drawRect.Right - drawRect.Left, 1, delphi_compatability.DSTINVERT)
-        UNRESOLVED.patBlt(theDC, drawRect.Left, drawRect.Top, 1, drawRect.Bottom - drawRect.Top, delphi_compatability.DSTINVERT)
-        UNRESOLVED.releaseDC(0, theDC)
+        const context = this.drawingPaintBox.getContext("2d")
+        if (!context) return
+        console.log("drawOrUndrawRubberBandBox", this.rubberBandStartDragPoint, this.rubberBandLastDrawPoint)
+        context.setLineDash([10, 5])
+        context.strokeStyle = convertColor(ColorDefs.clTeal)
+        context.strokeRect(this.rubberBandStartDragPoint.X, this.rubberBandStartDragPoint.Y, this.rubberBandLastDrawPoint.X - this.rubberBandStartDragPoint.X, this.rubberBandLastDrawPoint.Y - this.rubberBandStartDragPoint.Y)
+        context.setLineDash([])
     }
+
+    /*
     
     // hint handling 
     // ------------------------------------------------------------------------------------ *hint handling 
@@ -3674,6 +3701,8 @@ export class TMainForm {
         return { CanShow, HintStr }
     }
     
+    */
+
     hintForPlantAtPoint(aPoint: TPoint): string {
         let result = ""
         const plant = domain.plantManager.findPlantAtPoint(aPoint)
@@ -3681,13 +3710,15 @@ export class TMainForm {
             // v1.60 final
             result = plant.getHint(aPoint)
         }
-        if ((this.cursorModeForDrawing === kCursorModeSelectDrag) && (domain.options.showLongHintsForButtons) && (domain.options.showSelectionRectangle) && (plant !== null) && (plant === this.focusedPlant()) && (plant.pointIsInResizingRect(aPoint))) {
+        if ((this.cursorModeForDrawing === CursorMode.kCursorModeSelectDrag) && (domain.options.showLongHintsForButtons) && (domain.options.showSelectionRectangle) && (plant !== null) && (plant === this.focusedPlant()) && (plant.pointIsInResizingRect(aPoint))) {
             // extra hint if over resizing rect on focused plant in select/drag mode
             result = result + ": Click here and drag up or down to resize all selected plants."
         }
         return result
     }
     
+    /*
+
     // -------------------------------------------------------------------------------- *popup menu commands 
     PopupMenuCutClick(): void {
         this.MenuEditCutClick()
@@ -3808,14 +3839,14 @@ export class TMainForm {
     
     // ------------------------------------------------------------------------------------ *toolbar 
     dragCursorModeClick(): void {
-        this.cursorModeForDrawing = kCursorModeSelectDrag
+        this.cursorModeForDrawing = CursorMode.kCursorModeSelectDrag
         if (domain.options.showSelectionRectangle) {
             this.copyDrawingBitmapToPaintBox()
         }
     }
     
     magnifyCursorModeClick(): void {
-        this.cursorModeForDrawing = kCursorModeMagnify
+        this.cursorModeForDrawing = CursorMode.kCursorModeMagnify
         if (domain.options.showSelectionRectangle) {
             this.copyDrawingBitmapToPaintBox()
         }
@@ -3823,21 +3854,21 @@ export class TMainForm {
     
     posingSelectionCursorModeClick(): void {
         this.tabSet.tabIndex = kTabPosing
-        this.cursorModeForDrawing = kCursorModePosingSelect
+        this.cursorModeForDrawing = CursorMode.kCursorModePosingSelect
         if (domain.options.showSelectionRectangle) {
             this.copyDrawingBitmapToPaintBox()
         }
     }
     
     scrollCursorModeClick(): void {
-        this.cursorModeForDrawing = kCursorModeScroll
+        this.cursorModeForDrawing = CursorMode.kCursorModeScroll
         if (domain.options.showSelectionRectangle) {
             this.copyDrawingBitmapToPaintBox()
         }
     }
     
     rotateCursorModeClick(): void {
-        this.cursorModeForDrawing = kCursorModeRotate
+        this.cursorModeForDrawing = CursorMode.kCursorModeRotate
         if (domain.options.showSelectionRectangle) {
             this.copyDrawingBitmapToPaintBox()
         }
@@ -6627,6 +6658,20 @@ export class TMainForm {
                     self.paintDrawing(true)
                     self.drawingPaintBox = <HTMLCanvasElement>vnode.dom
                     self.copyDrawingBitmapToPaintBox()
+                    // TODO PDF: May need to rethink how hint is drawn
+                    if (this.hintActive && this.lastHintString) {
+                        const context = this.drawingPaintBox.getContext("2d")
+                        context.fillText(this.lastHintString, this.hintX, this.hintY)
+                    }
+                },
+                onmousedown: (event: MouseEvent) => {
+                    this.PaintBoxMouseDown(event)
+                },
+                onmousemove: (event: MouseEvent) => {
+                    this.PaintBoxMouseMove(event)
+                },
+                onmouseup: (event: MouseEvent) => {
+                    this.PaintBoxMouseUp(event)
                 }
             }),       
         )

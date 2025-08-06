@@ -102,16 +102,6 @@ export function TListCollection_streamUsingFiler(list: PdStreamableObject[], fil
     }
 }
 
-
-// TODO: Fix CursorMode enum from umain
-export enum CursorMode {
-    kCursorModeSelectDrag = 0,
-    kCursorModeMagnify = 1,
-    kCursorModeScroll = 2,
-    kCursorModeRotate = 3,
-    kCursorModePosingSelect = 4,
-}
-
 // TODO: Replace with version from umain
 export const kScaleAndMove = true
 export const kAlwaysMove = true

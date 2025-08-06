@@ -1,7 +1,14 @@
 // unit ucursor
 
-// const
-enum Cursor {
+export enum CursorMode {
+    kCursorModeSelectDrag = 0,
+    kCursorModeMagnify = 1,
+    kCursorModeScroll = 2,
+    kCursorModeRotate = 3,
+    kCursorModePosingSelect = 4,
+}
+
+export enum Cursor {
     crDefault = 0,
     crMagMinus = 1,
     crMagPlus = 2,
@@ -15,6 +22,8 @@ enum Cursor {
     crDragTdo = 10,
     crPosingSelect = 11,
     crHourGlass = 12,
+    crSizeNS = 13,
+    crSizeWE = 14,
 }
 
 let waitState: number = 0
@@ -25,16 +34,18 @@ export function cursor_getCurrentCursorAsCSS() {
         case Cursor.crDefault: return "default" 
         case Cursor.crMagMinus: return "zoom-out"
         case Cursor.crMagPlus: return "zoom-in"
-        case Cursor.crScroll: return "default" // "FIXME"
+        case Cursor.crScroll: return "all-scroll"
         case Cursor.crRotate: return "default" // "FIXME"
-        case Cursor.crDragPlant: return "default" // "FIXME"
+        case Cursor.crDragPlant: return "grab"
         case Cursor.crAddTriangle: return "default" // "FIXME"
         case Cursor.crDeleteTriangle: return "default" // "FIXME"
         case Cursor.crFlipTriangle: return "default" // "FIXME"
-        case Cursor.crDragPoint: return "default" // "FIXME"
-        case Cursor.crDragTdo: return "default" // "FIXME"
+        case Cursor.crDragPoint: return "grab"
+        case Cursor.crDragTdo: return "grab"
         case Cursor.crPosingSelect: return "default" // "FIXME"
         case Cursor.crHourGlass: return "wait"
+        case Cursor.crSizeNS: return "ns-resize"
+        case Cursor.crSizeWE: return "ew-resize"
         default: throw new Error("Unexpected cursor: " + currentCursor)
     }
 }

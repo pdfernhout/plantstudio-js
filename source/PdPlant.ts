@@ -1,6 +1,6 @@
 // PdPlant was unit Uplant
 
-import { PdBitmap, TListCollection_streamUsingFiler, CursorMode, TTransparentMode, setPixelFormatBasedOnScreenForBitmap, fillBitmap } from "./temporary"
+import { PdBitmap, TListCollection_streamUsingFiler, TTransparentMode, setPixelFormatBasedOnScreenForBitmap, fillBitmap } from "./temporary"
 import { short, float, double, long, intround, TColorRef, int, ShowMessage, TColor, ColorDefs, StrToIntDef, IntToStr, compareTextIgnoreCase, arrayRemove, TextFile, writeln, eof } from "./common"
 import { KfObject3D, kEmbeddedInPlant, kAdjustForOrigin } from "./KfObject3D"
 import { TPoint } from "./TPoint"
@@ -25,7 +25,7 @@ import { PdStreamableObject } from "./PdStreamableObject"
 import { PdClassAndVersionInformationRecord, PdFiler } from "./PdFiler"
 import { DebugPrint } from "./udebug"
 import { getMainForm } from "./TMainFormInterface"
-import { cursor_startWait, cursor_stopWait } from "./ucursor"
+import { cursor_startWait, cursor_stopWait, CursorMode } from "./ucursor"
 
 // TODO: Implement TimeSeriesForm from utmimeser
 const TimeSeriesForm = {
