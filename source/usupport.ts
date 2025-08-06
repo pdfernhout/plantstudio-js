@@ -677,7 +677,7 @@ export function clientRectToScreenRect(handle: HWnd, clientRect: TRect): TRect {
     UNRESOLVED.clientToScreen(handle, p1)
     p2 = point(clientRect.Right, clientRect.Bottom)
     UNRESOLVED.clientToScreen(handle, p2)
-    result = Rect(p1.X, p1.Y, p2.X, p2.Y)
+    result = new TRect(p1.X, p1.Y, p2.X, p2.Y)
     return result
 }
 
@@ -929,7 +929,7 @@ export function draw3DButton(ACanvas: TCanvas, Client: TRect, Selected: boolean,
     } else {
         ACanvas.Pen.Color = UNRESOLVED.clBtnShadow
         ACanvas.Polyline({Point(Client.Left, Client.Bottom - 1), Point(Client.Left, Client.Top), Point(Client.Right, Client.Top), })
-        Client = Rect(Client.Left + 3, Client.Top + 3, Client.Right - 1, Client.Bottom - 1)
+        Client = new TRect(Client.Left + 3, Client.Top + 3, Client.Right - 1, Client.Bottom - 1)
     }
     ACanvas.Brush.Color = UNRESOLVED.clBtnFace
     ACanvas.FillRect(Client)

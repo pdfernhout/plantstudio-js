@@ -651,7 +651,7 @@ export class PdSCurveParameterPanel extends PdParameterPanel {
     //         for (i = 0; i <= 1; i++) {
     //             // draw point rectangles and labels (labels first because brush color will affect them 
     //             // first put text at lower right of point 
-    //             pointTextRect = Rect(this.pointRects[i].Right + 5, this.pointRects[i].Top, this.pointRects[i].Right + 5 + this.Canvas.TextWidth(IntToStr(i + 1)), this.pointRects[i].Top + this.textHeight)
+    //             pointTextRect = new TRect(this.pointRects[i].Right + 5, this.pointRects[i].Top, this.pointRects[i].Right + 5 + this.Canvas.TextWidth(IntToStr(i + 1)), this.pointRects[i].Top + this.textHeight)
     //             if (pointTextRect.Right >= this.graphRect.Right) {
     //                 // adjust point text rectangle if could not be seen 
     //                 delphi_compatability.OffsetRect(pointTextRect, -20, 0)
@@ -923,7 +923,6 @@ export class PdSCurveParameterPanel extends PdParameterPanel {
                 m("canvas", {
                     style: { height: "300px", width: "300px" },
                     oncreate(vnode: m.VnodeDOM) {
-                        console.log("oncreate for canvas")
                         const canvas = <HTMLCanvasElement>vnode.dom
                         canvas.width = 300
                         canvas.height = 300
@@ -934,7 +933,6 @@ export class PdSCurveParameterPanel extends PdParameterPanel {
                         self.drawSCurve(context, true)
                     },
                     onupdate(vnode: m.VnodeDOM) {
-                        console.log("onupdate for canvas")
                         const canvas = <HTMLCanvasElement>vnode.dom
 
                         // Clear the canvas

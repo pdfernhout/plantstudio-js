@@ -397,7 +397,6 @@ export class PdTdoParameterPanel extends PdParameterPanel {
             m("canvas.ba", {
                 style: { height: "64px", width: "64px" },
                 oncreate(vnode: m.VnodeDOM) {
-                    console.log("oncreate for canvas")
                     const canvas = <HTMLCanvasElement>vnode.dom
                     canvas.width = 64
                     canvas.height = 64
@@ -406,7 +405,6 @@ export class PdTdoParameterPanel extends PdParameterPanel {
                     self.drawTdo(context)
                 },
                 onupdate(vnode: m.VnodeDOM) {
-                    console.log("onupdate for canvas")
                     const canvas = <HTMLCanvasElement>vnode.dom
                     // Clear the canvas
                     canvas.width = canvas.width

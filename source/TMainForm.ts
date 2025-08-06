@@ -1287,10 +1287,13 @@ export class TMainForm {
         plant.defaultAllParameters()
         plant.randomize()
         plant.age = 90
-        plant.basePoint_mm.x = Math.floor(Math.random() * 800)
-        plant.basePoint_mm.y = 200 + Math.floor(Math.random() * 200)
+        plant.basePoint_mm.x = Math.floor(Math.random() * 600)
+        plant.basePoint_mm.y = 300 + Math.floor(Math.random() * 300)
         // plant.xRotation = Math.random() * 365
-        this.plants.push(plant)
+        // this.plants.push(plant)
+        const newCommand = new PdNewCommand(plant, this.selectedPlants)
+        this.doCommand(newCommand)
+        //     this.doCommand(newCommand)
         // TODO PDF: Fix this
         // let wizardForm: TWizardForm
 
@@ -2150,7 +2153,7 @@ export class TMainForm {
     // ---------------------------------------------------------------------------- *updating 
     updateForNoPlantFile(): void {
         this.selectedPlants = []
-        this.plantListDrawGrid.Invalidate()
+        // TODO PDF: Fix or remove: this.plantListDrawGrid.Invalidate()
         this.clearCommandList()
         this.Caption = this.captionForFile()
         this.updateRightSidePanelForFirstSelectedPlant()
@@ -2384,35 +2387,34 @@ export class TMainForm {
     }
     
     updateForChangeToPlantList(): void {
-        unfinished()
-        // if ((domain === null) || (domain.plantManager === null)) {
-        //     return
-        // }
-        // this.Caption = this.captionForFile()
-        // this.plantListDrawGrid.RowCount = this.plants.length
-        // this.plantListDrawGrid.Invalidate()
-        // // selected plants list - make sure no pointers are invalid 
-        // const plantsToRemove: PdPlant[] = [] 
-        // if (this.selectedPlants.length > 0) {
-        //     for (let i = 0; i <= this.selectedPlants.length - 1; i++) {
-        //         const plant = this.selectedPlants[i]
-        //         if (this.plants.indexOf(plant) < 0) {
-        //             plantsToRemove.push(plant)
-        //         }
-        //     }
-        // }
-        // if (plantsToRemove.length > 0) {
-        //     for (let i = 0; i <= plantsToRemove.length - 1; i++) {
-        //         const plant = plantsToRemove[i]
-        //         this.selectedPlants = removeItem(this.selectedPlants, plant)
-        //     }
-        // }
-        // if (domain.viewPlantsInMainWindowOnePlantAtATime()) {
-        //     this.showOnePlantExclusively(kDrawNow)
-        // }
-        // this.updateRightSidePanelForFirstSelectedPlant()
-        // this.updateForPossibleChangeToDrawing()
-        // this.updateMenusForChangedPlantList()
+        if ((domain === null) || (domain.plantManager === null)) {
+            return
+        }
+        this.Caption = this.captionForFile()
+        this.plantListDrawGrid.RowCount = this.plants.length
+        // TODO PDF: Fix or remove: this.plantListDrawGrid.Invalidate()
+        // selected plants list - make sure no pointers are invalid 
+        const plantsToRemove: PdPlant[] = [] 
+        if (this.selectedPlants.length > 0) {
+            for (let i = 0; i <= this.selectedPlants.length - 1; i++) {
+                const plant = this.selectedPlants[i]
+                if (this.plants.indexOf(plant) < 0) {
+                    plantsToRemove.push(plant)
+                }
+            }
+        }
+        if (plantsToRemove.length > 0) {
+            for (let i = 0; i <= plantsToRemove.length - 1; i++) {
+                const plant = plantsToRemove[i]
+                this.selectedPlants = removeItem(this.selectedPlants, plant)
+            }
+        }
+        if (domain.viewPlantsInMainWindowOnePlantAtATime()) {
+            this.showOnePlantExclusively(kDrawNow)
+        }
+        this.updateRightSidePanelForFirstSelectedPlant()
+        this.updateForPossibleChangeToDrawing()
+        this.updateMenusForChangedPlantList()
     }
 
     updateForPossibleChangeToDrawing(): void {
@@ -2501,7 +2503,7 @@ export class TMainForm {
     }
     
     updateForRenamingPlant(aPlant: PdPlant): void {
-        this.plantListDrawGrid.Invalidate()
+        // TODO PDF: Fix or remove: this.plantListDrawGrid.Invalidate()
         for (let i = 0; i <= kTabHighest; i++) {
             this.updatePlantNameLabel(i)
         }
@@ -2544,7 +2546,7 @@ export class TMainForm {
     }
 
     updateMenusForChangedPlantFile(): void {
-        unfinished()
+        // TODO PDF: Fix this or remove  obsolete code
         // this.viewFreeFloating.Enabled = domain.plantFileLoaded
         // this.viewOneOnly.Enabled = domain.plantFileLoaded
         // this.drawingAreaOnTop.Enabled = domain.plantFileLoaded
@@ -2554,7 +2556,7 @@ export class TMainForm {
     }
     
     updateMenusForChangedPlantList(): void {
-        unfinished()
+        // TODO PDF: Fix this or remove  obsolete code
         // let havePlants: boolean
         
         // havePlants = (this.plants.length > 0)
@@ -2620,7 +2622,7 @@ export class TMainForm {
     }
     
     updatePasteMenuForClipboardContents(): void {
-        unfinished()
+        // TODO PDF: Fix this or remove  obsolete code
         // this.PopupMenuPaste.enabled = this.MenuEditPaste.enabled
         // if (ubreedr.BreederForm !== null) {
         //     ubreedr.BreederForm.updatePasteMenuForClipboardContents()
@@ -2679,6 +2681,7 @@ export class TMainForm {
                     if (showProgress) {
                         this.startDrawProgress(plantPartsToDraw)
                     }
+                    console.log("drawing all plants")
                     domain.plantManager.drawOnInvalidRect(this.drawingBitmap, this.selectedPlants, this.invalidDrawingRect, kExcludeInvisiblePlants, kIncludeNonSelectedPlants)
                 } finally {
                     this.drawing = false
@@ -2749,6 +2752,7 @@ export class TMainForm {
                 }
             }
         }
+        if (this.rubberBanding) this.drawOrUndrawRubberBandBox()
     }
     
     // plant bitmaps
@@ -2878,7 +2882,7 @@ export class TMainForm {
             UnionRect(redrawRect, redrawRect, plant.boundsRect_pixels())
         }
         this.invalidateDrawingRect(redrawRect)
-        // TODO PDF: Fix or remove this.plantListDrawGrid.Invalidate()
+        // TODO PDF: Fix or remove: this.plantListDrawGrid.Invalidate()
         if (drawNow) {
             this.updateForPossibleChangeToDrawing()
         }
@@ -3310,7 +3314,7 @@ export class TMainForm {
         }
         this.invalidateSelectedPlantRectangles()
         this.updateForPossibleChangeToDrawing()
-        this.plantListDrawGrid.Invalidate()
+        // TODO PDF: Fix or remove: this.plantListDrawGrid.Invalidate()
     }
     
     moveSelectedPlantsDown(): void {
@@ -3327,7 +3331,7 @@ export class TMainForm {
         }
         this.invalidateSelectedPlantRectangles()
         this.updateForPossibleChangeToDrawing()
-        this.plantListDrawGrid.Invalidate()
+        // TODO PDF: Fix or remove: this.plantListDrawGrid.Invalidate()
     }
 
     /*
@@ -3505,7 +3509,6 @@ export class TMainForm {
             }
         }
         if (this.rubberBanding) {
-            console.log("moving with rubber banding")
             // continue rubber banding - could be done in either select or magnify mode
             this.undrawRubberBandBox()
             this.drawRubberBandBox(Point(X, Y))
@@ -3643,8 +3646,15 @@ export class TMainForm {
     selectPlantsInRubberBandBox(): void {
         const newList: PdPlant[] = []
         
-        const rubberBandRect = Rect(intMin(this.rubberBandStartDragPoint.X, this.rubberBandLastDrawPoint.X), intMin(this.rubberBandStartDragPoint.Y, this.rubberBandLastDrawPoint.Y), intMax(this.rubberBandStartDragPoint.X, this.rubberBandLastDrawPoint.X), intMax(this.rubberBandStartDragPoint.Y, this.rubberBandLastDrawPoint.Y))
+        const x1 = intMin(this.rubberBandStartDragPoint.X, this.rubberBandLastDrawPoint.X)
+        const y1 = intMin(this.rubberBandStartDragPoint.Y, this.rubberBandLastDrawPoint.Y)
+        const x2 = intMax(this.rubberBandStartDragPoint.X, this.rubberBandLastDrawPoint.X)
+        const y2 = intMax(this.rubberBandStartDragPoint.Y, this.rubberBandLastDrawPoint.Y)
+        const rubberBandRect = new TRect(x1, y1, x2, y2)
+        console.log("selectPlantsInRubberBandBox", rubberBandRect)
+        
         domain.plantManager.fillListWithPlantsInRectangle(rubberBandRect, newList)
+        console.log("selectPlantsInRubberBandBox", rubberBandRect, newList)
         if (!this.twoListsAreIdentical(this.selectedPlants, newList)) {
             const newCommand = new PdChangeSelectedPlantsCommand(this.selectedPlants, newList)
             this.doCommand(newCommand)
@@ -3668,9 +3678,8 @@ export class TMainForm {
     drawOrUndrawRubberBandBox(): void {
         const context = this.drawingPaintBox.getContext("2d")
         if (!context) return
-        console.log("drawOrUndrawRubberBandBox", this.rubberBandStartDragPoint, this.rubberBandLastDrawPoint)
         context.setLineDash([10, 5])
-        context.strokeStyle = convertColor(ColorDefs.clTeal)
+        context.strokeStyle = convertColor(ColorDefs.clBlack)
         context.strokeRect(this.rubberBandStartDragPoint.X, this.rubberBandStartDragPoint.Y, this.rubberBandLastDrawPoint.X - this.rubberBandStartDragPoint.X, this.rubberBandLastDrawPoint.Y - this.rubberBandStartDragPoint.Y)
         context.setLineDash([])
     }
@@ -6655,7 +6664,7 @@ export class TMainForm {
                 onupdate(vnode: m.VnodeDOM) {
                     // TODO PDF: Fix invalidDrawingRect somehow
                     self.invalidDrawingRect = Rect(0, 0, self.drawingBitmap.width, self.drawingBitmap.height)
-                    self.paintDrawing(true)
+                    // self.paintDrawing(true)
                     self.drawingPaintBox = <HTMLCanvasElement>vnode.dom
                     self.copyDrawingBitmapToPaintBox()
                     // TODO PDF: May need to rethink how hint is drawn
