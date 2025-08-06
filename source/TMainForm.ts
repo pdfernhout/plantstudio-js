@@ -1286,6 +1286,7 @@ export class TMainForm {
         plant.defaultAllParameters()
         plant.randomize()
         plant.age = 90
+        plant.name = "UUID:" + plant.uuid
         plant.basePoint_mm.x = Math.floor(Math.random() * 600)
         plant.basePoint_mm.y = 300 + Math.floor(Math.random() * 300)
         // plant.xRotation = Math.random() * 365
