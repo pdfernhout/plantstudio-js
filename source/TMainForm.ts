@@ -6585,7 +6585,8 @@ export class TMainForm {
     viewMainMenu() {
         const menu = buildMenuFromSpec(this.mainMenuSpec)
         
-        return m("div", 
+        return m("div.sticky.bg-light-gray",
+            m("span.green", {onclick: () => window.open("https://www.kurtz-fernhout.com/summary_plantstudio.html", "_blank") } "PlantStudio"),
             menu.map(menuItem => 
                 m("span.ml2.relative", {
                         tabindex: "0",
@@ -6633,7 +6634,6 @@ export class TMainForm {
                     this.droppedDownMenuId = ""
                 }
             },
-            "PlantStudio Main Form",
             this.viewMainMenu(),
             // viewMainForm() 
             m("canvas.ba", {
