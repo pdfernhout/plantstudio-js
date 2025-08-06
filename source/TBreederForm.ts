@@ -3,13 +3,14 @@
 import * as m from "mithril"
 import { TRect } from "./TRect"
 import { TPoint } from "./TPoint"
-import { TFPBrushStyle, ucursor } from "./temporary"
+import { TFPBrushStyle } from "./temporary"
 import { BreederVariation, domain, DrawMode } from "./PdDomain"
 import { intround, short, long, ColorDefs, int, IntToStr, MessageDialog, arrayRemove } from "./common"
 import { PdPlant, BreedingAndTimeSeriesOptionsStructure, kDrawNow, kDontConsiderDomainScale } from "./PdPlant"
 import { PdGeneration } from "./PdGeneration"
 import { PdCommand } from "./PdCommand"
 import { PdBreedFromParentsCommand, PdMakeTimeSeriesCommand, PdDeleteBreederGenerationCommand, PdDeleteAllBreederGenerationsCommand, PdRandomizeCommand, PdChangeBreedingAndTimeSeriesOptionsCommand, PdPasteCommand, PdReplaceBreederPlant } from "./updcom"
+import { cursor_stopWait } from "./ucursor"
 
 // let BreederForm: TBreederForm
 
@@ -333,7 +334,7 @@ export class TBreederForm {
             //     this.plantsDrawGrid.Canvas.TextOut(rect.Left + 4, rect.Top + 2, "p2")
             // }
         } finally {
-            ucursor.cursor_stopWait()
+            cursor_stopWait()
         }
     }
     
@@ -466,10 +467,10 @@ export class TBreederForm {
 //             const newCommand = new PdPasteCommand(newPlants, MainForm.selectedPlants)
 //             newCommand.useSpecialPastePosition = true
 //             try {
-//                 ucursor.cursor_startWait()
+//                 cursor_startWait()
 //                 MainForm.doCommand(newCommand)
 //             } finally {
-//                 ucursor.cursor_stopWait()
+//                 cursor_stopWait()
 //             }
 //             // command will free plant if paste is undone
 //         } else if (Target === utimeser.TimeSeriesForm.grid) {
@@ -492,10 +493,10 @@ export class TBreederForm {
 //             // make replace command 
 //             const newCommand: PdCommand = new PdReplaceBreederPlant(plant, row, col)
 //             try {
-//                 ucursor.cursor_startWait()
+//                 cursor_startWait()
 //                 MainForm.doCommand(newCommand)
 //             } finally {
-//                 ucursor.cursor_stopWait()
+//                 cursor_stopWait()
 //             }
 //         }
 //     }
@@ -860,10 +861,10 @@ export class TBreederForm {
 //             }
 //             const newCommand = new PdRandomizeCommand(randomizeList)
 //             newCommand.isInBreeder = true
-//             ucursor.cursor_startWait()
+//             cursor_startWait()
 //             MainForm.doCommand(newCommand)
 //         } finally {
-//             ucursor.cursor_stopWait()
+//             cursor_stopWait()
 //         }
 //     }
     
@@ -872,7 +873,7 @@ export class TBreederForm {
 //             return
 //         }
 //         try {
-//             ucursor.cursor_startWait()
+//             cursor_startWait()
 //             const randomizeList: PdPlant[] = []
 //             if (this.generations.length > 0) {
 //                 for (let i = 0; i <= this.generations.length - 1; i++) {
@@ -889,7 +890,7 @@ export class TBreederForm {
 //             newCommand.isRandomizeAllInBreeder = true
 //             MainForm.doCommand(newCommand)
 //         } finally {
-//             ucursor.cursor_stopWait()
+//             cursor_stopWait()
 //         }
 //     }
     

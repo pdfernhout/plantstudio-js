@@ -11,12 +11,6 @@ export const kTdoLineContrastIndex = 10
 export const kTdoForeColor = ColorDefs.clSilver
 export const kTdoBackColor = ColorDefs.clGray
 
-// TODO: Fix ucursor stub from ucursor
-export const ucursor = {
-    cursor_startWait: () => {},
-    cursor_stopWait: () => {},
-}
-
 // TODO: Fix PdBitmap stub
 export class PdBitmap extends PdStreamableObject {
     canvas = document.createElement("canvas")

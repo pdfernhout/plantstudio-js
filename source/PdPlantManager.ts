@@ -9,7 +9,6 @@ import { TRect } from "./TRect"
 import { kPasteMoveDistance } from "./updcom"
 import { SinglePoint, SaveFileNamesStructure, rWidth, rHeight, stringBetween, setDecimalSeparator, strToBool, stringBeyond, stringUpTo, singlePointToString, digitValueString, boolToStr, FileType, setSinglePoint, pos, stringToSinglePoint, kDontAskForFileName, tolerantReadln } from "./usupport"
 import { KfObject3D, kInTdoLibrary, kStartTdoString } from "./KfObject3D"
-import { ucursor } from "./temporary"
 
 export function checkVersionNumberInPlantNameLine(aLine: string): void {
     let versionNumberString: string
@@ -289,7 +288,7 @@ export class PdPlantManager {
         //     }
         // }
         // try {
-        //     ucursor.cursor_startWait()
+        //     cursor_startWait()
         //     // read tdos from plants
         //     AssignFile(plantFile, plantFileName)
         //     try {
@@ -369,7 +368,7 @@ export class PdPlantManager {
         //         }
         //     }
         // } finally {
-        //     ucursor.cursor_stopWait()
+        //     cursor_stopWait()
         // }
         // return result
     }

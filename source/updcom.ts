@@ -5,7 +5,7 @@ import { PdPlant, kDrawNow, kDontDrawNow, BreedingAndTimeSeriesOptionsStructure,
 import { TPoint } from "./TPoint"
 import { PdCommand, TrackPhase } from "./PdCommand"
 import { domain, DomainOptionsStructure, ViewPlants } from "./PdDomain"
-import { ucursor, kScaleAndMove, kAlwaysMove, kDontRecalculateScale, kRecalculateScale } from "./temporary"
+import { kScaleAndMove, kAlwaysMove, kDontRecalculateScale, kRecalculateScale } from "./temporary"
 import { SinglePoint, digitValueString, nameStringForFileType } from "./usupport";
 import { FileExport3DOptionsStructure, fileTypeFor3DExportType } from "./U3dexport"
 import { min, safedivExcept, intMax, max, intMin } from "./umath"
@@ -14,6 +14,7 @@ import { PdPlantDrawingAmendment } from "./PdPlantDrawingAmendment"
 import { PdParameter, FieldType, kNotArray } from "./PdParameter"
 import { KfObject3D } from "./KfObject3D"
 import { PdGeneration } from "./PdGeneration"
+import { cursor_startWait, cursor_stopWait } from "./ucursor"
 
 let MainForm: any
 export function setMainFormForCommands(aForm: any) {
@@ -381,22 +382,22 @@ export class PdChangeMainWindowOrientationCommand extends PdCommand {
     doCommand(): void {
         super.doCommand()
         try {
-            ucursor.cursor_startWait()
+            cursor_startWait()
             domain.options.mainWindowOrientation = this.newWindowOrientation
             MainForm.updateForChangeToOrientation()
         } finally {
-            ucursor.cursor_stopWait()
+            cursor_stopWait()
         }
     }
     
     undoCommand(): void {
         super.undoCommand()
         try {
-            ucursor.cursor_startWait()
+            cursor_startWait()
             domain.options.mainWindowOrientation = this.oldWindowOrientation
             MainForm.updateForChangeToOrientation()
         } finally {
-            ucursor.cursor_stopWait()
+            cursor_stopWait()
         }
     }
     
@@ -566,7 +567,7 @@ export class PdNewCommand extends PdCommand {
         super.doCommand()
         this.newPlant = new PdPlant()
         try {
-            ucursor.cursor_startWait()
+            cursor_startWait()
             if ((this.useWizardPlant) && (this.wizardPlant !== null)) {
                 this.wizardPlant.copyTo(this.newPlant)
             } else {
@@ -585,7 +586,7 @@ export class PdNewCommand extends PdCommand {
             MainForm.addSelectedPlant(this.newPlant, kAddAtEnd)
             MainForm.updateForChangeToPlantList()
         } finally {
-            ucursor.cursor_stopWait()
+            cursor_stopWait()
         }
     }
     
@@ -1150,7 +1151,7 @@ export class PdResizePlantsCommand extends PdCommandWithListOfPlants {
         }
         try {
             if (!this.doneInMouseCommand) {
-                ucursor.cursor_startWait()
+                cursor_startWait()
             }
             this.invalidateCombinedPlantRects()
             this.newValues.length = 0
@@ -1184,7 +1185,7 @@ export class PdResizePlantsCommand extends PdCommandWithListOfPlants {
             MainForm.updateForChangeToSelectedPlantsDrawingScale()
         } finally {
             if (!this.doneInMouseCommand) {
-                ucursor.cursor_stopWait()
+                cursor_stopWait()
             }
         }
     }
@@ -1192,7 +1193,7 @@ export class PdResizePlantsCommand extends PdCommandWithListOfPlants {
     undoCommand(): void {
         super.undoCommand()
         try {
-            ucursor.cursor_startWait()
+            cursor_startWait()
             this.invalidateCombinedPlantRects()
             if (this.plantList.length > 0) {
                 for (let i = 0; i <= this.plantList.length - 1; i++) {
@@ -1204,7 +1205,7 @@ export class PdResizePlantsCommand extends PdCommandWithListOfPlants {
             this.invalidateCombinedPlantRects()
             MainForm.updateForChangeToSelectedPlantsDrawingScale()
         } finally {
-            ucursor.cursor_stopWait()
+            cursor_stopWait()
         }
     }
     
@@ -1214,7 +1215,7 @@ export class PdResizePlantsCommand extends PdCommandWithListOfPlants {
         }
         super.undoCommand()
         try {
-            ucursor.cursor_startWait()
+            cursor_startWait()
             this.invalidateCombinedPlantRects()
             if (this.plantList.length > 0) {
                 for (let i = 0; i <= this.plantList.length - 1; i++) {
@@ -1226,7 +1227,7 @@ export class PdResizePlantsCommand extends PdCommandWithListOfPlants {
             this.invalidateCombinedPlantRects()
             MainForm.updateForChangeToSelectedPlantsDrawingScale()
         } finally {
-            ucursor.cursor_stopWait()
+            cursor_stopWait()
         }
     }
     
@@ -1270,7 +1271,7 @@ export class PdResizePlantsToSameWidthOrHeightCommand extends PdCommandWithListO
             return
         }
         try {
-            ucursor.cursor_startWait()
+            cursor_startWait()
             this.invalidateCombinedPlantRects()
             this.newValues.length = 0
             if (this.plantList.length > 0) {
@@ -1289,7 +1290,7 @@ export class PdResizePlantsToSameWidthOrHeightCommand extends PdCommandWithListO
             this.invalidateCombinedPlantRects()
             MainForm.updateForChangeToSelectedPlantsDrawingScale()
         } finally {
-            ucursor.cursor_stopWait()
+            cursor_stopWait()
         }
     }
     
@@ -1377,7 +1378,7 @@ export class PdPackPlantsCommand extends PdCommandWithListOfPlants {
         totalHeight = 0
         tallestHeight = 0
         try {
-            ucursor.cursor_startWait()
+            cursor_startWait()
             if (this.plantList.length > 0) {
                 for (let i = 0; i <= this.plantList.length - 1; i++) {
                     this.plant = this.plantList[i]
@@ -1430,7 +1431,7 @@ export class PdPackPlantsCommand extends PdCommandWithListOfPlants {
             this.invalidateCombinedPlantRects()
             MainForm.updateForChangeToSelectedPlantsDrawingScale()
         } finally {
-            ucursor.cursor_stopWait()
+            cursor_stopWait()
         }
     }
     
@@ -1439,7 +1440,7 @@ export class PdPackPlantsCommand extends PdCommandWithListOfPlants {
         
         super.undoCommand()
         try {
-            ucursor.cursor_startWait()
+            cursor_startWait()
             this.invalidateCombinedPlantRects()
             if (this.plantList.length > 0) {
                 for (let i = 0; i <= this.plantList.length - 1; i++) {
@@ -1458,7 +1459,7 @@ export class PdPackPlantsCommand extends PdCommandWithListOfPlants {
             this.invalidateCombinedPlantRects()
             MainForm.updateForChangeToSelectedPlantsDrawingScale()
         } finally {
-            ucursor.cursor_stopWait()
+            cursor_stopWait()
         }
     }
     
@@ -1467,7 +1468,7 @@ export class PdPackPlantsCommand extends PdCommandWithListOfPlants {
         
         super.undoCommand()
         try {
-            ucursor.cursor_startWait()
+            cursor_startWait()
             this.invalidateCombinedPlantRects()
             if (this.plantList.length > 0) {
                 for (let i = 0; i <= this.plantList.length - 1; i++) {
@@ -1486,7 +1487,7 @@ export class PdPackPlantsCommand extends PdCommandWithListOfPlants {
             this.invalidateCombinedPlantRects()
             MainForm.updateForChangeToSelectedPlantsDrawingScale()
         } finally {
-            ucursor.cursor_stopWait()
+            cursor_stopWait()
         }
     }
     
@@ -1528,7 +1529,7 @@ export class PdChangeMainWindowViewingOptionCommand extends PdCommandWithListOfP
     doCommand(): void {
         super.doCommand()
         try {
-            ucursor.cursor_startWait()
+            cursor_startWait()
             domain.options.mainWindowViewMode = this.newMainWindowViewingOption
             switch (this.newMainWindowViewingOption) {
                 case ViewPlants.kViewPlantsInMainWindowOneAtATime:
@@ -1558,14 +1559,14 @@ export class PdChangeMainWindowViewingOptionCommand extends PdCommandWithListOfP
             }
             MainForm.updateMenusForChangeToViewingOption()
         } finally {
-            ucursor.cursor_stopWait()
+            cursor_stopWait()
         }
     }
     
     undoCommand(): void {
         super.doCommand()
         try {
-            ucursor.cursor_startWait()
+            cursor_startWait()
             domain.options.mainWindowViewMode = this.oldMainWindowViewingOption
             switch (this.newMainWindowViewingOption) {
                 case ViewPlants.kViewPlantsInMainWindowOneAtATime:
@@ -1604,7 +1605,7 @@ export class PdChangeMainWindowViewingOptionCommand extends PdCommandWithListOfP
             }
             MainForm.updateMenusForChangeToViewingOption()
         } finally {
-            ucursor.cursor_stopWait()
+            cursor_stopWait()
         }
     }
     
@@ -2219,7 +2220,7 @@ export class PdChangePlantAgeCommand extends PdCommandWithListOfPlants {
     doCommand(): void {
         super.doCommand()
         try {
-            ucursor.cursor_startWait()
+            cursor_startWait()
             this.invalidateCombinedPlantRects()
             if (this.plantList.length > 0) {
                 for (let i = 0; i <= this.plantList.length - 1; i++) {
@@ -2235,14 +2236,14 @@ export class PdChangePlantAgeCommand extends PdCommandWithListOfPlants {
             // changing age causes life cycle panel to need to redraw 
             MainForm.updateLifeCyclePanelForFirstSelectedPlant()
         } finally {
-            ucursor.cursor_stopWait()
+            cursor_stopWait()
         }
     }
     
     undoCommand(): void {
         super.undoCommand()
         try {
-            ucursor.cursor_startWait()
+            cursor_startWait()
             this.invalidateCombinedPlantRects()
             if (this.plantList.length > 0) {
                 for (let i = 0; i <= this.plantList.length - 1; i++) {
@@ -2256,7 +2257,7 @@ export class PdChangePlantAgeCommand extends PdCommandWithListOfPlants {
             // changing age causes life cycle panel to need to redraw 
             MainForm.updateLifeCyclePanelForFirstSelectedPlant()
         } finally {
-            ucursor.cursor_stopWait()
+            cursor_stopWait()
         }
     }
     
@@ -2351,7 +2352,7 @@ export class PdAnimatePlantCommand extends PdCommandWithListOfPlants {
     undoCommand(): void {
         super.undoCommand()
         try {
-            ucursor.cursor_startWait()
+            cursor_startWait()
             this.invalidateCombinedPlantRects()
             if (this.plantList.length > 0) {
                 for (let i = 0; i <= this.plantList.length - 1; i++) {
@@ -2365,7 +2366,7 @@ export class PdAnimatePlantCommand extends PdCommandWithListOfPlants {
             // changing age causes life cycle panel to need to redraw 
             MainForm.updateLifeCyclePanelForFirstSelectedPlant()
         } finally {
-            ucursor.cursor_stopWait()
+            cursor_stopWait()
         }
     }
     
@@ -2442,7 +2443,7 @@ export class PdRandomizeCommand extends PdCommandWithListOfPlants {
     doCommand(): void {
         super.doCommand()
         try {
-            ucursor.cursor_startWait()
+            cursor_startWait()
             if (!this.isInBreeder) {
                 this.invalidateCombinedPlantRects()
             }
@@ -2475,7 +2476,7 @@ export class PdRandomizeCommand extends PdCommandWithListOfPlants {
                 MainForm.updateForChangeToPlantRotations()
             }
         } finally {
-            ucursor.cursor_stopWait()
+            cursor_stopWait()
         }
     }
     
@@ -2486,7 +2487,7 @@ export class PdRandomizeCommand extends PdCommandWithListOfPlants {
         
         super.undoCommand()
         try {
-            ucursor.cursor_startWait()
+            cursor_startWait()
             if (!this.isInBreeder) {
                 this.invalidateCombinedPlantRects()
             }
@@ -2516,7 +2517,7 @@ export class PdRandomizeCommand extends PdCommandWithListOfPlants {
                 MainForm.updateForChangeToPlantRotations()
             }
         } finally {
-            ucursor.cursor_stopWait()
+            cursor_stopWait()
         }
     }
     
@@ -2527,7 +2528,7 @@ export class PdRandomizeCommand extends PdCommandWithListOfPlants {
         
         super.doCommand()
         try {
-            ucursor.cursor_startWait()
+            cursor_startWait()
             if (!this.isInBreeder) {
                 this.invalidateCombinedPlantRects()
             }
@@ -2557,7 +2558,7 @@ export class PdRandomizeCommand extends PdCommandWithListOfPlants {
                 MainForm.updateForChangeToPlantRotations()
             }
         } finally {
-            ucursor.cursor_stopWait()
+            cursor_stopWait()
         }
     }
     
@@ -2912,7 +2913,7 @@ export class PdChangeRealValueCommand extends PdChangeValueCommand {
         PdChangeValueCommand.prototype.doCommand.call(this)
         try {
             if (this.regrow) {
-                ucursor.cursor_startWait()
+                cursor_startWait()
             }
             this.invalidateCombinedPlantRects()
             if (this.plantList.length > 0) {
@@ -2925,7 +2926,7 @@ export class PdChangeRealValueCommand extends PdChangeValueCommand {
             this.invalidateCombinedPlantRects()
         } finally {
             if (this.regrow) {
-                ucursor.cursor_stopWait()
+                cursor_stopWait()
             }
         }
     }
@@ -2983,7 +2984,7 @@ export class PdChangeSCurvePointValueCommand extends PdChangeValueCommand {
         PdChangeValueCommand.prototype.doCommand.call(this)
         try {
             if (this.regrow) {
-                ucursor.cursor_startWait()
+                cursor_startWait()
             }
             this.invalidateCombinedPlantRects()
             if (this.plantList.length > 0) {
@@ -3002,7 +3003,7 @@ export class PdChangeSCurvePointValueCommand extends PdChangeValueCommand {
             this.invalidateCombinedPlantRects()
         } finally {
             if (this.regrow) {
-                ucursor.cursor_stopWait()
+                cursor_stopWait()
             }
         }
     }
@@ -3055,7 +3056,7 @@ export class PdChangeColorValueCommand extends PdChangeValueCommand {
         PdChangeValueCommand.prototype.doCommand.call(this)
         try {
             if (this.regrow) {
-                ucursor.cursor_startWait()
+                cursor_startWait()
             }
             this.invalidateCombinedPlantRects()
             if (this.plantList.length > 0) {
@@ -3068,7 +3069,7 @@ export class PdChangeColorValueCommand extends PdChangeValueCommand {
             this.invalidateCombinedPlantRects()
         } finally {
             if (this.regrow) {
-                ucursor.cursor_stopWait()
+                cursor_stopWait()
             }
         }
     }
@@ -3118,7 +3119,7 @@ export class PdChangeTdoValueCommand extends PdChangeValueCommand {
         PdChangeValueCommand.prototype.doCommand.call(this)
         try {
             if (this.regrow) {
-                ucursor.cursor_startWait()
+                cursor_startWait()
             }
             this.invalidateCombinedPlantRects()
             if (this.plantList.length > 0) {
@@ -3131,7 +3132,7 @@ export class PdChangeTdoValueCommand extends PdChangeValueCommand {
             this.invalidateCombinedPlantRects()
         } finally {
             if (this.regrow) {
-                ucursor.cursor_stopWait()
+                cursor_stopWait()
             }
         }
     }
@@ -3182,7 +3183,7 @@ export class PdChangeSmallintValueCommand extends PdChangeValueCommand {
         PdChangeValueCommand.prototype.doCommand.call(this)
         try {
             if (this.regrow) {
-                ucursor.cursor_startWait()
+                cursor_startWait()
             }
             this.invalidateCombinedPlantRects()
             if (this.plantList.length > 0) {
@@ -3195,7 +3196,7 @@ export class PdChangeSmallintValueCommand extends PdChangeValueCommand {
             this.invalidateCombinedPlantRects()
         } finally {
             if (this.regrow) {
-                ucursor.cursor_stopWait()
+                cursor_stopWait()
             }
         }
     }
@@ -3246,7 +3247,7 @@ export class PdChangeBooleanValueCommand extends PdChangeValueCommand {
         PdChangeValueCommand.prototype.doCommand.call(this)
         try {
             if (this.regrow) {
-                ucursor.cursor_startWait()
+                cursor_startWait()
             }
             this.invalidateCombinedPlantRects()
             if (this.plantList.length > 0) {
@@ -3259,7 +3260,7 @@ export class PdChangeBooleanValueCommand extends PdChangeValueCommand {
             this.invalidateCombinedPlantRects()
         } finally {
             if (this.regrow) {
-                ucursor.cursor_stopWait()
+                cursor_stopWait()
             }
         }
     }
@@ -3357,7 +3358,7 @@ export class PdBreedFromParentsCommand extends PdCommand {
         
         super.doCommand()
         try {
-            ucursor.cursor_startWait()
+            cursor_startWait()
             this.rowSelectedAtStart = BreederForm.selectedRow
             if (this.createFirstGeneration) {
                 // if command created from main window, create first generation to put in breeder 
@@ -3385,7 +3386,7 @@ export class PdBreedFromParentsCommand extends PdCommand {
             BreederForm.selectGeneration(this.newGeneration)
             BreederForm.updateForChangeToGenerations()
         } finally {
-            ucursor.cursor_stopWait()
+            cursor_stopWait()
         }
     }
     

@@ -12,7 +12,6 @@ import { PdPlantDrawingAmendment } from "./PdPlantDrawingAmendment"
 import { checkVersionNumberInPlantNameLine } from "./PdPlantManager"
 import { PdSection } from "./PdSection"
 import { calcSCurveCoeffsWithResult, SCurveStructure, scurveWithResult } from "./SCurveStructure"
-import { ucursor } from "./temporary"
 import { TPoint } from "./TPoint"
 import { TRect } from "./TRect"
 import { ExportFormats, fileTypeFor3DExportType } from "./U3dexport"
@@ -22,6 +21,7 @@ import { chr, cleanUpAfterFileSave, createSaveFileNamesStructure, FileType, getF
 import { viewMainForm } from "./TMainForm-view"
 import { setMainForm } from "./TMainFormInterface"
 import { convertColor } from "./KfDrawingSurface"
+import { cursor_getCurrentCursorAsCSS, cursor_startWait, cursor_stopWait } from "./ucursor"
 
 // TODO PDF for getting to compile
 type TEdit = any
@@ -333,7 +333,7 @@ export class TMainForm {
     // FormCreate(): void {
     //     let tempBoundsRect: TRect
         
-    //     ucursor.cursor_startWait()
+    //     cursor_startWait()
     //     try {
     //         delphi_compatability.Application.helpFile = ExtractFilePath(delphi_compatability.Application.exeName) + "PlantStudio.hlp"
     //         delphi_compatability.Application.OnActivate = this.FormActivate
@@ -429,12 +429,12 @@ export class TMainForm {
     //             this.verticalSplitter.Left = this.ClientWidth / 3
     //         }
     //     } finally {
-    //         ucursor.cursor_stopWait()
+    //         cursor_stopWait()
     //     }
     // }
     
     loadPlantFileAtStartup(): void {
-        ucursor.cursor_startWait()
+        cursor_startWait()
         try {
             if (domain.plantFileLoaded) {
                 // if file loaded at startup, update for it, else act as if they picked new 
@@ -456,7 +456,7 @@ export class TMainForm {
             this.selectedPlantPartID = -1
             this.inFormCreation = false
         } finally {
-            ucursor.cursor_stopWait()
+            cursor_stopWait()
         }
     }
     
@@ -1191,7 +1191,7 @@ export class TMainForm {
         const yMultiplier = safedivExcept(1.0 * rHeight(rectToDrawIn), 1.0 * rHeight(combinedBoundsRect), 1.0)
         const scaleMultiplier = Math.min(xMultiplier, yMultiplier)
         try {
-            ucursor.cursor_startWait()
+            cursor_startWait()
             ubmpsupport.resizeBitmap(bitmapForExport, Point(intround(rWidth(combinedBoundsRect) * scaleMultiplier), intround(rHeight(combinedBoundsRect) * scaleMultiplier)))
             domain.drawingToMakeCopyBitmap = true
             domain.temporarilyHideSelectionRectangles = true
@@ -1220,7 +1220,7 @@ export class TMainForm {
                 }
             }
         } finally {
-            ucursor.cursor_stopWait()
+            cursor_stopWait()
             domain.temporarilyHideSelectionRectangles = false
             domain.drawingToMakeCopyBitmap = false
             domain.plantDrawScaleWhenDrawingCopy_PixelsPerMm = 1.0
@@ -1296,13 +1296,13 @@ export class TMainForm {
         // let wizardForm: TWizardForm
 
         // try {
-        //     ucursor.cursor_startWait()
+        //     cursor_startWait()
         //     // on slower computer wizard takes a long time to come up
         //     startWaitMessage("Starting the plant wizard...")
         //     wizardForm = uwizard.TWizardForm().create(this)
         // } finally {
         //     stopWaitMessage()
-        //     ucursor.cursor_stopWait()
+        //     cursor_stopWait()
         // }
         // if (wizardForm === null) {
         //     throw new Error("Problem: Could not create wizard window.")
@@ -1328,11 +1328,11 @@ export class TMainForm {
         // try {
         //     // use wizard form to make a new plant using the current settings, but don't show the form
         //     // this is a sloppy way of doing this, but using the settings to set plant params is embedded in the form.
-        //     ucursor.cursor_startWait()
+        //     cursor_startWait()
         //     startWaitMessage("Making new plant...")
         //     wizardForm = uwizard.TWizardForm().create(this)
         // } finally {
-        //     ucursor.cursor_stopWait()
+        //     cursor_stopWait()
         // }
         // newPlantFromWizard = new PdPlant()
         // try {
@@ -1594,7 +1594,7 @@ export class TMainForm {
             return
         }
         try {
-            ucursor.cursor_startWait()
+            cursor_startWait()
             ubmpsupport.resizeBitmap(bitmapForExport, Point(intround(domain.nozzleOptions.cellSize.X * plantsToDraw.length), domain.nozzleOptions.cellSize.Y))
             let scaleMultiplier = safedivExcept(1.0 * domain.nozzleOptions.resolution_pixelsPerInch, 1.0 * delphi_compatability.Screen.PixelsPerInch, 1.0)
             // v1.4 changed 0.8 to 0.9 because fitting algorithm works better now
@@ -1620,7 +1620,7 @@ export class TMainForm {
                 }
             }
         } finally {
-            ucursor.cursor_stopWait()
+            cursor_stopWait()
             domain.options.backgroundColor = oldBackgroundColor
         }
     }
@@ -1654,12 +1654,12 @@ export class TMainForm {
         //     if (!this.enoughRoomToSaveFile(saveDialog.FileName, "animation", sizeNeeded_MB)) {
         //         return
         //     }
-        //     ucursor.cursor_startWait()
+        //     cursor_startWait()
         //     startWaitMessage("Starting...")
         //     try {
         //         this.writeAnimationFilesWithFileSpec(stringUpTo(saveDialog.FileName, ".") + " ")
         //     } finally {
-        //         ucursor.cursor_stopWait()
+        //         cursor_stopWait()
         //         stopWaitMessage()
         //     }
         // }
@@ -2434,7 +2434,7 @@ export class TMainForm {
         }
         let partsDrawn = 0
         try {
-            ucursor.cursor_startWait()
+            cursor_startWait()
             this.drawing = true
             if (showProgress) {
                 this.startDrawProgress(plantPartsToDraw)
@@ -2446,7 +2446,7 @@ export class TMainForm {
                 partsDrawn = partsDrawn + plant.totalPlantParts
             }
         } finally {
-            ucursor.cursor_stopWait()
+            cursor_stopWait()
             this.drawing = false
             if (showProgress) {
                 this.finishDrawProgress()
@@ -2465,7 +2465,7 @@ export class TMainForm {
         }
         let partsDrawn = 0
         try {
-            ucursor.cursor_startWait()
+            cursor_startWait()
             this.drawing = true
             if (showProgress) {
                 this.startDrawProgress(plantPartsToDraw)
@@ -2477,7 +2477,7 @@ export class TMainForm {
                 partsDrawn = partsDrawn + plant.totalPlantParts
             }
         } finally {
-            ucursor.cursor_stopWait()
+            cursor_stopWait()
             this.drawing = false
             if (showProgress) {
                 this.finishDrawProgress()
@@ -2665,7 +2665,7 @@ export class TMainForm {
         if ((this.invalidDrawingRect.Top !== 0) || (this.invalidDrawingRect.Left !== 0) || (this.invalidDrawingRect.Bottom !== 0) || (this.invalidDrawingRect.Right !== 0)) {
             try {
                 if (!this.mouseMoveActionInProgress) {
-                    ucursor.cursor_startWait()
+                    cursor_startWait()
                 }
                 // TODO PDF: Fix background color drawing
                 // Clear the canvas
@@ -2692,7 +2692,7 @@ export class TMainForm {
                 }
             } finally {
                 if (!this.mouseMoveActionInProgress) {
-                    ucursor.cursor_stopWait()
+                    cursor_stopWait()
                 }
                 this.invalidDrawingRect = Rect(0, 0, 0, 0)
             }
@@ -3065,7 +3065,7 @@ export class TMainForm {
     showOnePlantExclusively(drawNow: boolean): void {
         const firstPlant = this.focusedPlant()
         try {
-            ucursor.cursor_startWait()
+            cursor_startWait()
             const booleansList: PdBooleanValue[] = []
             for (let i = 0; i <= this.plants.length - 1; i++) {
                 const plant = this.plants[i]
@@ -3084,7 +3084,7 @@ export class TMainForm {
                 this.updateForPossibleChangeToDrawing()
             }
         } finally {
-            ucursor.cursor_stopWait()
+            cursor_stopWait()
         }
     }
     
@@ -4994,7 +4994,7 @@ export class TMainForm {
     
     updateParameterPanelsForSectionChange(): void {
         try {
-            ucursor.cursor_startWait()
+            cursor_startWait()
             // clear out any earlier panels 
             this.selectedParameterPanel = null
             if (this.parametersScrollBox.ControlCount > 0) {
@@ -5066,7 +5066,7 @@ export class TMainForm {
             this.updateParametersPanelForFirstSelectedPlant()
             this.repositionParameterPanels()
         } finally {
-            ucursor.cursor_stopWait()
+            cursor_stopWait()
         }
     }
     
@@ -6613,7 +6613,8 @@ export class TMainForm {
         return m("div", {
                 onclick: (event: any) => {
                     this.droppedDownMenuId = ""
-                }
+                },
+                style: { cursor: cursor_getCurrentCursorAsCSS()}
             },
             this.viewMainMenu(),
             // viewMainForm() 

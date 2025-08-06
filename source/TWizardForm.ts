@@ -993,13 +993,13 @@ export class TWizardForm {
     //     }
     //     try {
     //         // always update cache in case any params have changed 
-    //         ucursor.cursor_startWait()
+    //         cursor_startWait()
     //         // want nice drawing here, only case
     //         this.plant.useBestDrawingForPreview = true
     //         this.plant.drawPreviewIntoCache(Point(this.previewPaintBox.Width, this.previewPaintBox.Height), uplant.kDontConsiderDomainScale, umain.kDrawNow)
     //         this.plant.previewCache.Transparent = false
     //     } finally {
-    //         ucursor.cursor_stopWait()
+    //         cursor_stopWait()
     //     }
     //     this.previewPaintBox.Invalidate()
     // }

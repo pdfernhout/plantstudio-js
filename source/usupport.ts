@@ -4,7 +4,7 @@ import { intMax, max, min, intMin } from "./umath"
 import { TRect } from "./TRect"
 import { DebugPrint } from "./udebug"
 import { TPoint } from "./TPoint"
-import { ucursor } from "./temporary"
+import { cursor_startWait } from "./ucursor"
 
 // unit Usupport
 
@@ -1296,7 +1296,7 @@ export function getFileSaveInfo(fileType: short, askForFileName: boolean, sugges
 }
 
 export function startFileSave(fileInfo: SaveFileNamesStructure): void {
-    ucursor.cursor_startWait()
+    cursor_startWait()
 }
 
 /*
@@ -1342,7 +1342,7 @@ export function cleanUpAfterFileSave(fileInfo: SaveFileNamesStructure): void {
     // let deletingFailed: boolean
     // let prompt: string
     
-    // ucursor.cursor_stopWait()
+    // cursor_stopWait()
     // uwait.stopWaitMessage()
     // useBackup = true
     // if (!fileInfo.writingWasSuccessful) {
