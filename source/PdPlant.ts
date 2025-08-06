@@ -1402,8 +1402,7 @@ export class PdPlant extends PdStreamableObject {
     }
     
     boundsRect_pixels(): TRect {
-        let result = new TRect()
-        result = this.normalBoundsRect_pixels
+        const result = this.normalBoundsRect_pixels.copy()
         return result
     }
     
