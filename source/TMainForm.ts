@@ -2527,20 +2527,6 @@ export class TMainForm {
     // ---------------------------------------------------------------------------- *menu updating 
     updateMenusForUndoRedo(): void {
         // TODO PDF: Fix this
-        // if (this.commandList.isUndoEnabled()) {
-        //     this.MenuEditUndo.enabled = true
-        //     this.MenuEditUndo.caption = "&Undo " + this.commandList.undoDescription()
-        // } else {
-        //     this.MenuEditUndo.enabled = false
-        //     this.MenuEditUndo.caption = "Can't undo"
-        // }
-        // if (this.commandList.isRedoEnabled()) {
-        //     this.MenuEditRedo.enabled = true
-        //     this.MenuEditRedo.caption = "&Redo " + this.commandList.redoDescription()
-        // } else {
-        //     this.MenuEditRedo.enabled = false
-        //     this.MenuEditRedo.caption = "Can't redo"
-        // }
         // this.UndoMenuEditUndoRedoList.enabled = (this.commandList.isUndoEnabled()) || (this.commandList.isRedoEnabled())
         // if (ubreedr.BreederForm !== null) {
         //     ubreedr.BreederForm.BreederMenuUndo.enabled = this.MenuEditUndo.enabled
@@ -2560,16 +2546,9 @@ export class TMainForm {
 
     updateMenusForChangedPlantFile(): void {
         unfinished()
-        // this.MenuFileClose.enabled = domain.plantFileLoaded
-        // this.MenuPlantNew.enabled = domain.plantFileLoaded
-        // this.MenuPlantNewUsingLastWizardSettings.enabled = domain.plantFileLoaded
-        // this.MenuLayoutViewFreeFloating.enabled = domain.plantFileLoaded
         // this.viewFreeFloating.Enabled = domain.plantFileLoaded
-        // this.MenuLayoutViewOnePlantAtATime.enabled = domain.plantFileLoaded
         // this.viewOneOnly.Enabled = domain.plantFileLoaded
-        // this.MenuLayoutHorizontalOrientation.enabled = domain.plantFileLoaded
         // this.drawingAreaOnTop.Enabled = domain.plantFileLoaded
-        // this.MenuLayoutVerticalOrientation.enabled = domain.plantFileLoaded
         // this.drawingAreaOnSide.Enabled = domain.plantFileLoaded
         // this.updateMenusForChangedPlantList()
         // this.updatePasteMenuForClipboardContents()
@@ -2580,21 +2559,6 @@ export class TMainForm {
         // let havePlants: boolean
         
         // havePlants = (this.plants.length > 0)
-        // this.MenuFileSave.enabled = havePlants
-        // this.MenuFileSaveAs.enabled = havePlants
-        // this.MenuFileSaveDrawingAs.enabled = havePlants
-        // this.MenuFilePrintDrawing.enabled = havePlants
-        // this.MenuLayoutSelectAll.enabled = havePlants
-        // this.MenuEditCopyDrawing.enabled = havePlants
-        // this.MenuLayoutScaleToFit.enabled = havePlants
-        // this.MenuFileMakePainterNozzle.enabled = havePlants
-        // this.MenuPlantExportToDXF.enabled = havePlants
-        // this.MenuPlantExportToPOV.enabled = havePlants
-        // this.MenuPlantExportTo3DS.enabled = havePlants
-        // this.MenuFileSaveJPEG.enabled = havePlants
-        // this.MenuPlantExportToLWO.enabled = havePlants
-        // this.MenuPlantExportToOBJ.enabled = havePlants
-        // this.MenuPlantExportToVRML.enabled = havePlants
         // if (!havePlants) {
         //     this.dragCursorModeClick()
         // }
@@ -2616,40 +2580,18 @@ export class TMainForm {
         
         // haveSelectedPlants = (this.selectedPlants.length > 0)
         // haveMoreThanOneSelectedPlant = (this.selectedPlants.length > 1)
-        // this.MenuEditCut.enabled = haveSelectedPlants
         // this.PopupMenuCut.enabled = haveSelectedPlants
-        // this.MenuEditCopy.enabled = haveSelectedPlants
         // this.PopupMenuCopy.enabled = haveSelectedPlants
-        // this.MenuEditCopyAsText.enabled = haveSelectedPlants
-        // this.MenuEditPasteAsText.enabled = (ColorDefs.clipboard.hasFormat(UNRESOLVED.CF_TEXT)) && (domain.plantFileLoaded)
-        // this.MenuEditDelete.enabled = haveSelectedPlants
-        // this.MenuEditDuplicate.enabled = haveSelectedPlants
-        // this.MenuPlantRename.enabled = haveSelectedPlants
         // this.PopupMenuRename.enabled = haveSelectedPlants
-        // this.MenuPlantEditNote.enabled = haveSelectedPlants
         // // v1.4
         // this.PopupMenuEditNote.enabled = haveSelectedPlants
         // // v1.4
         // this.noteEdit.Enabled = haveSelectedPlants
-        // this.MenuPlantRandomize.enabled = haveSelectedPlants
         // this.PopupMenuRandomize.enabled = haveSelectedPlants
-        // this.MenuPlantZeroRotations.enabled = haveSelectedPlants
         // this.PopupMenuZeroRotations.enabled = haveSelectedPlants
-        // this.MenuPlantBreed.enabled = haveSelectedPlants
         // this.PopupMenuBreed.enabled = haveSelectedPlants
-        // this.MenuPlantMakeTimeSeries.enabled = haveSelectedPlants
         // this.PopupMenuMakeTimeSeries.enabled = haveSelectedPlants
-        // this.MenuPlantAnimate.enabled = haveSelectedPlants
         // this.PopupMenuAnimate.enabled = haveSelectedPlants
-        // this.MenuLayoutSelectAll.enabled = (this.plants.length > 0) && (this.selectedPlants.length < this.plants.length)
-        // this.MenuLayoutDeselect.enabled = haveSelectedPlants
-        // this.MenuFileMakePainterAnimation.enabled = haveSelectedPlants
-        // this.MenuLayoutHide.enabled = haveSelectedPlants
-        // this.MenuLayoutShow.enabled = haveSelectedPlants
-        // this.MenuLayoutHideOthers.enabled = (haveMoreThanOneSelectedPlant) && (!domain.viewPlantsInMainWindowOnePlantAtATime()) && (this.selectedPlants.length < this.plants.length)
-        // this.MenuLayoutMakeBouquet.enabled = haveMoreThanOneSelectedPlant && !domain.viewPlantsInMainWindowOnePlantAtATime()
-        // this.MenuLayoutBringForward.enabled = haveSelectedPlants && (this.selectedPlants.length < this.plants.length)
-        // this.MenuLayoutSendBack.enabled = haveSelectedPlants && (this.selectedPlants.length < this.plants.length)
         // // location
         // this.xLocationEdit.Enabled = haveSelectedPlants
         // this.xLocationSpin.Enabled = haveSelectedPlants
@@ -2671,25 +2613,15 @@ export class TMainForm {
         // this.alignBottoms.Enabled = haveMoreThanOneSelectedPlant
         // this.alignLeft.Enabled = haveMoreThanOneSelectedPlant
         // this.alignRight.Enabled = haveMoreThanOneSelectedPlant
-        // this.MenuLayoutAlign.enabled = haveMoreThanOneSelectedPlant
-        // this.MenuLayoutAlignTops.enabled = haveMoreThanOneSelectedPlant
-        // this.MenuLayoutAlignBottoms.enabled = haveMoreThanOneSelectedPlant
-        // this.MenuLayoutAlignLeftSides.enabled = haveMoreThanOneSelectedPlant
-        // this.MenuLayoutAlignRightSides.enabled = haveMoreThanOneSelectedPlant
         // // size
         // this.makeEqualWidth.Enabled = haveMoreThanOneSelectedPlant
         // this.makeEqualHeight.Enabled = haveMoreThanOneSelectedPlant
-        // this.MenuLayoutSize.enabled = haveMoreThanOneSelectedPlant
-        // this.MenuLayoutSizeSameWidth.enabled = haveMoreThanOneSelectedPlant
-        // this.MenuLayoutSizeSameHeight.enabled = haveMoreThanOneSelectedPlant
         // // pack
         // this.packPlants.Enabled = haveMoreThanOneSelectedPlant
-        // this.MenuLayoutPack.enabled = haveMoreThanOneSelectedPlant
     }
     
     updatePasteMenuForClipboardContents(): void {
         unfinished()
-        // this.MenuEditPaste.enabled = (domain.plantManager.privatePlantClipboard.Count > 0)
         // this.PopupMenuPaste.enabled = this.MenuEditPaste.enabled
         // if (ubreedr.BreederForm !== null) {
         //     ubreedr.BreederForm.updatePasteMenuForClipboardContents()
@@ -6324,10 +6256,52 @@ export class TMainForm {
         setMainFormForCommands(this)
     }
 
+    havePlants() : boolean {
+        return this.plants.length > 0
+    }
+
+    haveSelectedPlants() : boolean {
+        return this.selectedPlants.length > 0
+    }
+
+    haveMoreThanOnSelectedPlant(): boolean {
+        return this.selectedPlants.length > 1
+    }
+
+    haveUnselectedPlants() : boolean {
+        return this.selectedPlants.length < this.plants.length
+    }
+
+    haveClipboardText(): boolean {
+        // TODO PDF: Fix this
+        return false
+    }
+
+    havePrivateClipboardPlants(): boolean {
+        // TODO PDF: Fix this
+        return false
+    }
+
+    menuUndoCaption(): string {
+        if (this.commandList.isUndoEnabled()) {
+            return "&Undo " + this.commandList.undoDescription()
+        } else {
+            return "Can't undo"
+        }
+    }
+
+    menuRedoCaption(): string {
+        if (this.commandList.isRedoEnabled()) {
+            return "&Redo " + this.commandList.redoDescription()
+        } else {
+            return "Can't redo"
+        }
+    }
+
     mainMenuSpec: any = [
-        // [type = radio/checkbox, ] ID, label, items or action
+        // [type = radio/checkbox, ] ID, label, items or action [, checked function][, enabled function]
         "MenuFile", "&File", [
-            "MenuFileNew", "&New", this.MenuFileNewClick,
+            "MenuFileNew", "&New", this.MenuFileNewClick, () => false, () => domain.plantFileLoaded,
             "MenuFileOpen", "&Open...", this.MenuFileOpenClick,
             "MenuFileReopen", "&Reopen", [
                 "Recent0", "0", this.Recent0Click,
@@ -6341,84 +6315,84 @@ export class TMainForm {
                 // "Recent8", "8", this.Recent0Click,
                 // "Recent9", "9", this.Recent0Click,
             ],
-            "MenuFileClose", "&Close", this.MenuFileCloseClick,
+            "MenuFileClose", "&Close", this.MenuFileCloseClick, () => false, () => domain.plantFileLoaded,
             "-",
-            "MenuFileSave", "&Save", this.MenuFileSaveClick,
-            "MenuFileSaveAs", "Save &As...", this.MenuFileSaveAsClick,
+            "MenuFileSave", "&Save", this.MenuFileSaveClick, () => false, () => this.havePlants(),
+            "MenuFileSaveAs", "Save &As...", this.MenuFileSaveAsClick, () => false, () => this.havePlants(),
             "-",
-            "MenuFilePrintDrawing", "&Print Picture...", this.MenuFilePrintDrawingClick,
+            "MenuFilePrintDrawing", "&Print Picture...", this.MenuFilePrintDrawingClick, () => false, () => this.havePlants(),
             "-",
             "MenuFileExit", "E&xit", this.MenuFileExitClick,
         ],
         "MenuEdit", "&Edit", [
-            "MenuEditUndo", "&Undo", this.MenuEditUndoClick,
-            "MenuEditRedo", "&Redo", this.MenuEditRedoClick,
+            "MenuEditUndo", () => this.menuUndoCaption(), this.MenuEditUndoClick, () => false, () => this.commandList.isUndoEnabled(),
+            "MenuEditRedo", () => this.menuRedoCaption(), this.MenuEditRedoClick, () => false, () => this.commandList.isRedoEnabled(),
             "UndoMenuEditUndoRedoList", "Undo/Redo &List...", this.UndoMenuEditUndoRedoListClick,
             "-",
-            "MenuEditCut", "&Cut", this.MenuEditCutClick,
-            "MenuEditCopy", "C&opy", this.MenuEditCopyClick,
-            "MenuEditPaste", "&Paste", this.MenuEditPasteClick,
-            "MenuEditDelete", "&Delete", this.MenuEditDeleteClick,
-            "MenuEditDuplicate", "Duplic&ate", this.MenuEditDuplicateClick,
+            "MenuEditCut", "&Cut", this.MenuEditCutClick, () => false, () => this.haveSelectedPlants(),
+            "MenuEditCopy", "C&opy", this.MenuEditCopyClick, () => false, () => this.haveSelectedPlants(),
+            "MenuEditPaste", "&Paste", this.MenuEditPasteClick, () => false, () => this.havePrivateClipboardPlants(),
+            "MenuEditDelete", "&Delete", this.MenuEditDeleteClick, () => false, () => this.haveSelectedPlants(),
+            "MenuEditDuplicate", "Duplic&ate", this.MenuEditDuplicateClick, () => false, () => this.haveSelectedPlants(),
             "-",
-            "MenuEditCopyDrawing", "Copy P&icture", this.MenuEditCopyDrawingClick,
-            "MenuEditCopyAsText", "Copy &To Text", this.MenuEditCopyAsTextClick,
-            "MenuEditPasteAsText", "Paste &From Text", this.MenuEditPasteAsTextClick,
+            "MenuEditCopyDrawing", "Copy P&icture", this.MenuEditCopyDrawingClick, () => false, () => this.havePlants(),
+            "MenuEditCopyAsText", "Copy &To Text", this.MenuEditCopyAsTextClick, () => false, () => this.haveSelectedPlants(),
+            "MenuEditPasteAsText", "Paste &From Text", this.MenuEditPasteAsTextClick, () => false, () => this.haveClipboardText() && domain.plantFileLoaded,
             "-",
             "MenuEditPreferences", "Pr&eferences...", this.MenuEditPreferencesClick,
         ],
         "MenuPlant", "&Plant", [
             "MenuPlantNew", "Create &New...", this.MenuPlantNewClick,
-            "MenuPlantNewUsingLastWizardSettings", "Create Same as &Last", this.MenuPlantNewUsingLastWizardSettingsClick,
+            "MenuPlantNewUsingLastWizardSettings", "Create Same as &Last", this.MenuPlantNewUsingLastWizardSettingsClick, () => false, () => domain.plantFileLoaded,
             "-",
-            "MenuPlantBreed", "&Breed", this.MenuPlantBreedClick,
-            "MenuPlantMakeTimeSeries", "Make &Time Series", this.MenuPlantMakeTimeSeriesClick,
+            "MenuPlantBreed", "&Breed", this.MenuPlantBreedClick, () => false, () => this.haveSelectedPlants(),
+            "MenuPlantMakeTimeSeries", "Make &Time Series", this.MenuPlantMakeTimeSeriesClick, () => false, () => this.haveSelectedPlants(),
             "-",
-            "MenuPlantRandomize", "&Randomize", this.MenuPlantRandomizeClick,
-            "MenuPlantZeroRotations", "Re&set Rotations", this.MenuPlantZeroRotationsClick,
-            "MenuPlantAnimate", "&Animate through Life Cycle", this.MenuPlantAnimateClick,
+            "MenuPlantRandomize", "&Randomize", this.MenuPlantRandomizeClick, () => false, () => this.haveSelectedPlants(),
+            "MenuPlantZeroRotations", "Re&set Rotations", this.MenuPlantZeroRotationsClick, () => false, () => this.haveSelectedPlants(),
+            "MenuPlantAnimate", "&Animate through Life Cycle", this.MenuPlantAnimateClick, () => false, () => this.haveSelectedPlants(),
             "-",
-            "MenuPlantRename", "R&ename...", this.MenuPlantRenameClick,
-            "MenuPlantEditNote", "E&dit Note...", this.MenuPlantEditNoteClick,
+            "MenuPlantRename", "R&ename...", this.MenuPlantRenameClick, () => false, () => this.haveSelectedPlants(),
+            "MenuPlantEditNote", "E&dit Note...", this.MenuPlantEditNoteClick, () => false, () => this.haveSelectedPlants(),
         ],
         "MenuLayout", "&Layout", [
-            "MenuLayoutSelectAll", "Select &All", this.MenuLayoutSelectAllClick,
-            "MenuLayoutDeselect", "Select &None", this.MenuLayoutDeselectClick,
+            "MenuLayoutSelectAll", "Select &All", this.MenuLayoutSelectAllClick, () => false, () => this.havePlants() && this.haveUnselectedPlants(),
+            "MenuLayoutDeselect", "Select &None", this.MenuLayoutDeselectClick, () => false, () => this.haveSelectedPlants(),
             "-",
-            "MenuLayoutScaleToFit", "Scale to &Fit", this.MenuLayoutScaleToFitClick,
+            "MenuLayoutScaleToFit", "Scale to &Fit", this.MenuLayoutScaleToFitClick, () => false, () => this.havePlants(),
             "MenuLayoutAlign", "A&lign", [
-                "MenuLayoutAlignTops", "&Tops", this.MenuLayoutAlignTopsClick,
-                "MenuLayoutAlignBottoms", "&Bottoms", this.MenuLayoutAlignBottomsClick,
-                "MenuLayoutAlignLeftSides", "&Left Sides", this.MenuLayoutAlignLeftSidesClick,
-                "MenuLayoutAlignRightSides", "&Right Sides", this.MenuLayoutAlignRightSidesClick,
+                "MenuLayoutAlignTops", "&Tops", this.MenuLayoutAlignTopsClick, () => false, () => this.haveMoreThanOnSelectedPlant(),
+                "MenuLayoutAlignBottoms", "&Bottoms", this.MenuLayoutAlignBottomsClick, () => false, () => this.haveMoreThanOnSelectedPlant(),
+                "MenuLayoutAlignLeftSides", "&Left Sides", this.MenuLayoutAlignLeftSidesClick, () => false, () => this.haveMoreThanOnSelectedPlant(),
+                "MenuLayoutAlignRightSides", "&Right Sides", this.MenuLayoutAlignRightSidesClick, () => false, () => this.haveMoreThanOnSelectedPlant(),
                 "MenuLayoutMakeBouquet", "Make into Bou&quet", this.MenuLayoutMakeBouquetClick, () => false, 
-                    () => (this.selectedPlants.length > 1) && (!domain.viewPlantsInMainWindowOnePlantAtATime()),
-            ],
+                    () => this.haveMoreThanOnSelectedPlant() && !domain.viewPlantsInMainWindowOnePlantAtATime(),
+            ], () => false, () => this.haveMoreThanOnSelectedPlant(),
             "MenuLayoutSize", "Si&ze", [
-                "MenuLayoutSizeSameWidth", "Equal &Width", this.MenuLayoutSizeSameWidthClick,
-                "MenuLayoutSizeSameHeight", "Equal &Height", this.MenuLayoutSizeSameHeightClick,
-            ],
-            "MenuLayoutPack", "&Pack", this.MenuLayoutPackClick,
+                "MenuLayoutSizeSameWidth", "Equal &Width", this.MenuLayoutSizeSameWidthClick, () => false, () => this.haveMoreThanOnSelectedPlant(),
+                "MenuLayoutSizeSameHeight", "Equal &Height", this.MenuLayoutSizeSameHeightClick, () => false, () => this.haveMoreThanOnSelectedPlant(),
+            ], () => false, () => this.haveMoreThanOnSelectedPlant(),
+            "MenuLayoutPack", "&Pack", this.MenuLayoutPackClick, () => false, () => this.haveMoreThanOnSelectedPlant(),
             "-",
-            "MenuLayoutBringForward", "Bring Fo&rward", this.MenuLayoutBringForwardClick,
-            "MenuLayoutSendBack", "Send &Back", this.MenuLayoutSendBackClick,
+            "MenuLayoutBringForward", "Bring Fo&rward", this.MenuLayoutBringForwardClick, () => false, () => this.haveSelectedPlants() && this.haveUnselectedPlants(),
+            "MenuLayoutSendBack", "Send &Back", this.MenuLayoutSendBackClick, () => false, () => this.haveSelectedPlants() && this.haveUnselectedPlants(),
             "-",
-            "MenuLayoutShow", "&Show", this.MenuLayoutShowClick,
-            "MenuLayoutHide", "&Hide", this.MenuLayoutHideClick,
-            "MenuLayoutHideOthers", "Hide &Others", this.MenuLayoutHideOthersClick,
+            "MenuLayoutShow", "&Show", this.MenuLayoutShowClick, () => false, () => this.haveSelectedPlants(),
+            "MenuLayoutHide", "&Hide", this.MenuLayoutHideClick, () => false, () => this.haveSelectedPlants(),
+            "MenuLayoutHideOthers", "Hide &Others", this.MenuLayoutHideOthersClick, () => false, () => this.haveMoreThanOnSelectedPlant() && !domain.viewPlantsInMainWindowOnePlantAtATime() && this.haveUnselectedPlants(),
         ],
         "MenuFileExport", "&Export", [
-            "MenuPlantExportTo3DS", "&3DS...", this.MenuPlantExportTo3DSClick,
-            "MenuPlantExportToLWO", "&LWO...", this.MenuPlantExportToLWOClick,
-            "MenuPlantExportToOBJ", "&OBJ...", this.MenuPlantExportToOBJClick,
-            "MenuPlantExportToDXF", "&DXF...", this.MenuPlantExportToDXFClick,
-            "MenuPlantExportToPOV", "PO&V INC...", this.MenuPlantExportToPOVClick,
-            "MenuPlantExportToVRML", "V&RML...", this.MenuPlantExportToVRMLClick,
+            "MenuPlantExportTo3DS", "&3DS...", this.MenuPlantExportTo3DSClick, () => false, () => this.havePlants(),
+            "MenuPlantExportToLWO", "&LWO...", this.MenuPlantExportToLWOClick, () => false, () => this.havePlants(),
+            "MenuPlantExportToOBJ", "&OBJ...", this.MenuPlantExportToOBJClick, () => false, () => this.havePlants(),
+            "MenuPlantExportToDXF", "&DXF...", this.MenuPlantExportToDXFClick, () => false, () => this.havePlants(),
+            "MenuPlantExportToPOV", "PO&V INC...", this.MenuPlantExportToPOVClick, () => false, () => this.havePlants(),
+            "MenuPlantExportToVRML", "V&RML...", this.MenuPlantExportToVRMLClick, () => false, () => this.havePlants(),
             "-",
-            "MenuFileSaveDrawingAs", "&Bitmap...", this.MenuFileSaveDrawingAsClick,
-            "MenuFileSaveJPEG", "&JPEG...", this.MenuFileSaveJPEGClick,
-            "MenuFileMakePainterNozzle", "&Nozzle/Tube Bitmap...", this.MenuFileMakePainterNozzleClick,
-            "MenuFileMakePainterAnimation", "&Animation Files...", this.MenuFileMakePainterAnimationClick,
+            "MenuFileSaveDrawingAs", "&Bitmap...", this.MenuFileSaveDrawingAsClick, () => false, () => this.havePlants(),
+            "MenuFileSaveJPEG", "&JPEG...", this.MenuFileSaveJPEGClick, () => false, () => this.havePlants(),
+            "MenuFileMakePainterNozzle", "&Nozzle/Tube Bitmap...", this.MenuFileMakePainterNozzleClick, () => false, () => this.havePlants(),
+            "MenuFileMakePainterAnimation", "&Animation Files...", this.MenuFileMakePainterAnimationClick, () => false, () => this.haveSelectedPlants(),
         ],
         "MenuOptions", "&Options", [
             "MenuOptionsDrawAs", "&Draw Using", [
@@ -6428,13 +6402,13 @@ export class TMainForm {
                 "radio", "MenuOptionsCustomDraw", "&Custom...", this.MenuOptionsCustomDrawClick, () => domain.options.drawSpeed === DrawMode.kDrawCustom,
             ],
             "MenuLayoutView", "&View What Plants", [
-                "radio", "MenuLayoutViewFreeFloating", "&All Plants", this.MenuLayoutViewFreeFloatingClick, () => domain.options.mainWindowViewMode === ViewPlants.kViewPlantsInMainWindowFreeFloating,
-                "radio", "MenuLayoutViewOnePlantAtATime", "&One Plant at a Time", this.MenuLayoutViewOnePlantAtATimeClick, () => domain.options.mainWindowViewMode === ViewPlants.kViewPlantsInMainWindowOneAtATime,
-            ],
+                "radio", "MenuLayoutViewFreeFloating", "&All Plants", this.MenuLayoutViewFreeFloatingClick, () => domain.options.mainWindowViewMode === ViewPlants.kViewPlantsInMainWindowFreeFloating, () => domain.plantFileLoaded,
+                "radio", "MenuLayoutViewOnePlantAtATime", "&One Plant at a Time", this.MenuLayoutViewOnePlantAtATimeClick, () => domain.options.mainWindowViewMode === ViewPlants.kViewPlantsInMainWindowOneAtATime, () => domain.plantFileLoaded,
+            ], () => false,  () => domain.plantFileLoaded,
             "MenuLayoutDrawingAreaOn", "Place Drawing &Area", [
-                "radio", "MenuLayoutHorizontalOrientation", "On &Top", this.MenuLayoutHorizontalOrientationClick, () => domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal,
-                "radio", "MenuLayoutVerticalOrientation", "On &Left Side", this.MenuLayoutVerticalOrientationClick, () => domain.options.mainWindowOrientation === kMainWindowOrientationVertical,
-            ],
+                "radio", "MenuLayoutHorizontalOrientation", "On &Top", this.MenuLayoutHorizontalOrientationClick, () => domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal, () => domain.plantFileLoaded,
+                "radio", "MenuLayoutVerticalOrientation", "On &Left Side", this.MenuLayoutVerticalOrientationClick, () => domain.options.mainWindowOrientation === kMainWindowOrientationVertical, () => domain.plantFileLoaded,
+            ], () => false,  () => domain.plantFileLoaded,
             "MenuOptionsDrawRectangles", "Draw &Rectangles", [
                 "checkbox", "MenuOptionsShowSelectionRectangles", "Around &Selected Plants", this.MenuOptionsShowSelectionRectanglesClick, () => domain.options.showSelectionRectangle,
                 "checkbox", "MenuOptionsShowBoundsRectangles", "Around &All Plants", this.MenuOptionsShowBoundsRectanglesClick, () => domain.options.showBoundsRectangle,
@@ -6549,11 +6523,18 @@ export class TMainForm {
     //  recursive
     viewMenu(menu: MenuItem[]): any {
         return m("div.ml2", 
-            menu.map(menuItem => m("div",
-                menuItem.submenu
-                    ? m("div.nowrap", m("span.i", caption(menuItem.label)), this.viewMenu(menuItem.submenu))
-                    : this.viewMenuItem(menuItem)
-                )
+            menu.map(menuItem => {
+                const disabled = menuItem.enabledFunction ? !menuItem.enabledFunction() : false
+                return m("div",
+                    menuItem.submenu
+                        ? m("div.nowrap", 
+                            m("span.i"  + (disabled ? ".gray.disabled" : ""), 
+                            caption(menuItem.label)), 
+                            this.viewMenu(menuItem.submenu)
+                        )
+                        : this.viewMenuItem(menuItem)
+                    )
+                }
         ))
     }
 
@@ -6586,7 +6567,7 @@ export class TMainForm {
         const menu = buildMenuFromSpec(this.mainMenuSpec)
         
         return m("div.sticky.bg-light-gray",
-            m("span.green", {onclick: () => window.open("https://www.kurtz-fernhout.com/summary_plantstudio.html", "_blank") } "PlantStudio"),
+            m("span.green", {onclick: () => window.open("https://www.kurtz-fernhout.com/summary_plantstudio.html", "_blank") }, "PlantStudio"),
             menu.map(menuItem => 
                 m("span.ml2.relative", {
                         tabindex: "0",
@@ -6654,7 +6635,7 @@ export class TMainForm {
 interface MenuItem {
     type: string
     id: string
-    label: string
+    label: string | (() => string)
     action?: (menuItem: MenuItem) => void
     submenu?: MenuItem[]
     checkedFunction?: () => boolean

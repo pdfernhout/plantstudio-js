@@ -288,7 +288,10 @@ export class TMemoryStream extends TFileStream {
     }
 }
 
-export function caption(text: string) {
-    // TODO: What should this do?
+export function caption(text: string | (() => string)) {
+    // TODO: What should this do with ampersand?
+    if (typeof text === "function") {
+        text = text()
+    }
     return text.replace("&", "")
 }
