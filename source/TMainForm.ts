@@ -283,7 +283,6 @@ export class TMainForm {
     lastSingleClickPlantIndex: int = 0
     // justDoubleClickedOnDrawGrid: boolean = false
     rubberBanding: boolean = false
-    rubberBandNeedToRedraw: boolean = false
     rubberBandStartDragPoint: TPoint = new TPoint()
     rubberBandLastDrawPoint: TPoint = new TPoint()
     drawing: boolean = false
@@ -2749,7 +2748,9 @@ export class TMainForm {
                 }
             }
         }
-        if (this.rubberBanding) this.drawOrUndrawRubberBandBox()
+        if (this.rubberBanding) {
+            this.drawRubberBandBox()
+        }
     }
     
     // plant bitmaps
@@ -3417,7 +3418,6 @@ export class TMainForm {
                     this.rubberBanding = true
                     this.rubberBandStartDragPoint = Point(X, Y)
                     this.rubberBandLastDrawPoint = Point(X, Y)
-                    this.rubberBandNeedToRedraw = true
                     // select command made in mouse up
                     return
                 } else {
@@ -3434,7 +3434,6 @@ export class TMainForm {
                 this.rubberBanding = true
                 this.rubberBandStartDragPoint = Point(X, Y)
                 this.rubberBandLastDrawPoint = Point(X, Y)
-                this.rubberBandNeedToRedraw = true
                 break
             case CursorMode.kCursorModeRotate:
                 break
@@ -3505,12 +3504,9 @@ export class TMainForm {
                 }
             }
         }
-        // TODO PDF: Could optimize out rubber brand drawing here but not point setting as rubber band drawn elsewhere now
-        // TODO PDF: Alternatively, could get rubber band XOR drawing and undrawing working again on HTML Canvas
         if (this.rubberBanding) {
             // continue rubber banding - could be done in either select or magnify mode
-            this.undrawRubberBandBox()
-            this.drawRubberBandBox(Point(X, Y))
+            this.rubberBandLastDrawPoint = Point(X, Y)
             return
         }
         if (this.actionInProgress) {
@@ -3539,7 +3535,6 @@ export class TMainForm {
         if (this.rubberBanding) {
             // finish rubber banding if doing that, could be in select or magnify mode
             this.rubberBanding = false
-            this.undrawRubberBandBox()
             if (this.cursorModeForDrawing === CursorMode.kCursorModeSelectDrag) {
                 this.selectPlantsInRubberBandBox()
                 return
@@ -3658,21 +3653,7 @@ export class TMainForm {
         }
     }
     
-    drawRubberBandBox(newPoint: TPoint): void {
-        this.rubberBandLastDrawPoint = newPoint
-        this.drawOrUndrawRubberBandBox()
-        this.rubberBandNeedToRedraw = true
-    }
-    
-    undrawRubberBandBox(): void {
-        if (!this.rubberBandNeedToRedraw) {
-            return
-        }
-        this.drawOrUndrawRubberBandBox()
-        this.rubberBandNeedToRedraw = false
-    }
-    
-    drawOrUndrawRubberBandBox(): void {
+    drawRubberBandBox(): void {
         const context = this.drawingPaintBox.getContext("2d")
         if (!context) return
         context.setLineDash([10, 5])
