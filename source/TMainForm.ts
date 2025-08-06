@@ -2668,11 +2668,11 @@ export class TMainForm {
                 if (!this.mouseMoveActionInProgress) {
                     cursor_startWait()
                 }
-                // TODO PDF: Fix background color drawing
-                // Clear the canvas
-                this.drawingBitmap.width = this.drawingBitmap.width
-                // UNRESOLVED.intersectClipRect(this.drawingBitmap.Canvas.Handle, this.invalidDrawingRect.Left, this.invalidDrawingRect.Top, this.invalidDrawingRect.Right, this.invalidDrawingRect.Bottom)
-                // ubmpsupport.fillBitmap(this.drawingBitmap, domain.options.backgroundColor)
+                // Clear the canvas section needing to be redrawn
+                const context = this.drawingBitmap.getContext("2d")
+                if (!context) return
+                context.fillStyle = convertColor(domain.options.backgroundColor)
+                context.fillRect(this.invalidDrawingRect.Left, this.invalidDrawingRect.Top, this.invalidDrawingRect.Right - this.invalidDrawingRect.Left, this.invalidDrawingRect.Bottom - this.invalidDrawingRect.Top)
                 if (showProgress) {
                     plantPartsToDraw = domain.plantManager.totalPlantPartCountInInvalidRect(this.selectedPlants, this.invalidDrawingRect, kExcludeInvisiblePlants, kIncludeNonSelectedPlants)
                 }
@@ -2681,7 +2681,6 @@ export class TMainForm {
                     if (showProgress) {
                         this.startDrawProgress(plantPartsToDraw)
                     }
-                    console.log("drawing all plants")
                     domain.plantManager.drawOnInvalidRect(this.drawingBitmap, this.selectedPlants, this.invalidDrawingRect, kExcludeInvisiblePlants, kIncludeNonSelectedPlants)
                 } finally {
                     this.drawing = false
@@ -2706,6 +2705,7 @@ export class TMainForm {
     }
     
     copyDrawingBitmapToPaintBox(): void {
+        // Copies the bitmaps with te planst and overlays selection rectangles and rubber banding
         if ((domain === null) || (this.plants === null)) {
             return
         }
@@ -2714,9 +2714,6 @@ export class TMainForm {
         this.drawingPaintBox.width = this.drawingPaintBox.width
         context.drawImage(this.drawingBitmap, 0, 0)
         
-        // this.drawingPaintBox.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsClear
-        // this.drawingPaintBox.Canvas.Pen.Width = 1
-
         const drawBoundingRects = (domain.options.showBoundsRectangle) && (!domain.viewPlantsInMainWindowOnePlantAtATime()) && (!domain.temporarilyHideSelectionRectangles)
         if ((drawBoundingRects) && (this.plants.length > 0)) {
             context.strokeStyle = convertColor(ColorDefs.clSilver)
@@ -3508,6 +3505,8 @@ export class TMainForm {
                 }
             }
         }
+        // TODO PDF: Could optimize out rubber brand drawing here but not point setting as rubber band drawn elsewhere now
+        // TODO PDF: Alternatively, could get rubber band XOR drawing and undrawing working again on HTML Canvas
         if (this.rubberBanding) {
             // continue rubber banding - could be done in either select or magnify mode
             this.undrawRubberBandBox()
@@ -3651,10 +3650,8 @@ export class TMainForm {
         const x2 = intMax(this.rubberBandStartDragPoint.X, this.rubberBandLastDrawPoint.X)
         const y2 = intMax(this.rubberBandStartDragPoint.Y, this.rubberBandLastDrawPoint.Y)
         const rubberBandRect = new TRect(x1, y1, x2, y2)
-        console.log("selectPlantsInRubberBandBox", rubberBandRect)
         
         domain.plantManager.fillListWithPlantsInRectangle(rubberBandRect, newList)
-        console.log("selectPlantsInRubberBandBox", rubberBandRect, newList)
         if (!this.twoListsAreIdentical(this.selectedPlants, newList)) {
             const newCommand = new PdChangeSelectedPlantsCommand(this.selectedPlants, newList)
             this.doCommand(newCommand)
@@ -6292,6 +6289,8 @@ export class TMainForm {
     oninit() {
         this.drawingBitmap.width = 800
         this.drawingBitmap.height = 600
+        // this.drawingPaintBox.width = 800
+        // this.drawingPaintBox.height = 600
         setMainForm(this)
         setMainFormForCommands(this)
     }
@@ -6662,9 +6661,6 @@ export class TMainForm {
                 width: self.drawingBitmap.width,
                 height: self.drawingBitmap.height,
                 onupdate(vnode: m.VnodeDOM) {
-                    // TODO PDF: Fix invalidDrawingRect somehow
-                    self.invalidDrawingRect = Rect(0, 0, self.drawingBitmap.width, self.drawingBitmap.height)
-                    // self.paintDrawing(true)
                     self.drawingPaintBox = <HTMLCanvasElement>vnode.dom
                     self.copyDrawingBitmapToPaintBox()
                     // TODO PDF: May need to rethink how hint is drawn

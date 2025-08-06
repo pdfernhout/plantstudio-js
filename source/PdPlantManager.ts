@@ -413,6 +413,7 @@ export class PdPlantManager {
                     try {
                         plant.computeBounds = true
                         if ((domain.options.cachePlantBitmaps) && (!domain.drawingToMakeCopyBitmap)) {
+                            console.log("Caching Weirdness UNFINISHED")
                             // TODO -- FIX ME plant.previewCache
                             // destCanvas.Draw(plantRect.Left, plantRect.Top, plant.previewCache)
                             // const context = plant.previewCache.Context
