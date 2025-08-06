@@ -12,10 +12,6 @@ import { ucursor } from "./temporary"
 // TODO: Use or remove: let iniFileChanged: boolean
 // TODO: Use or remove: let gVersionName: string
 
-// const
-// TODO: Use or remove kMaxEvaluationTime_hours
-const kMaxEvaluationTime_hours = 10
-
 // record
 export class SinglePoint {
     x: float
@@ -1424,7 +1420,7 @@ export function ExpandFileName(fileName: string) {
 }
 
 export function Point(width: number, height: number): import("./TPoint").TPoint {
-    throw new TPoint(width, height)
+    return new TPoint(width, height)
 }
 
 export function Rect(x: number, y: number, width: number, height: number) {

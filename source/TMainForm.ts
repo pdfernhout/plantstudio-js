@@ -1810,7 +1810,7 @@ export class TMainForm {
         if (!plant || this.selectedPlants.length <= 1) {
             return
         }
-        const newCommand = new PdDragCommand(this.selectedPlants) // TODO: resolve: had another arg plant.basePoint_pixels()
+        const newCommand = new PdDragCommand(this.selectedPlants).createWithListOfPlantsAndNewPoint(plant.basePoint_pixels())
         this.doCommand(newCommand)
     }
     
@@ -2777,6 +2777,7 @@ export class TMainForm {
         }
         const context = this.drawingPaintBox.getContext("2d")
         if (!context) return
+        this.drawingPaintBox.width = this.drawingPaintBox.width
         context.drawImage(this.drawingBitmap, 0, 0)
         
         // this.drawingPaintBox.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsClear
@@ -2946,7 +2947,7 @@ export class TMainForm {
             UnionRect(redrawRect, redrawRect, plant.boundsRect_pixels())
         }
         this.invalidateDrawingRect(redrawRect)
-        this.plantListDrawGrid.Invalidate()
+        // TODO PDF: Fix or remove this.plantListDrawGrid.Invalidate()
         if (drawNow) {
             this.updateForPossibleChangeToDrawing()
         }
@@ -4549,7 +4550,7 @@ export class TMainForm {
     }
     
     updateForChangeToSelectedPlantsDrawingScale(): void {
-        unfinished()
+        // TODO PDF: Fix this
         // const firstPlant = this.focusedPlant()
         // if (firstPlant !== null) {
         //     this.drawingScaleEdit.Text = usupport.digitValueString(firstPlant.drawingScale_PixelsPerMm)
@@ -4560,7 +4561,7 @@ export class TMainForm {
     }
     
     updateForChangeToSelectedPlantsLocation(): void {
-        unfinished()
+        // TODO PDF: Fix this
         // const firstPlant = this.focusedPlant()
         // if (firstPlant !== null) {
         //     this.xLocationEdit.Text = usupport.digitValueString(firstPlant.basePoint_pixels().X)
