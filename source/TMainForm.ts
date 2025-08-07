@@ -6519,7 +6519,7 @@ export class TMainForm {
             case "menu":
                 return m("div.nowrap.pl1.pr1" + (disabled ? ".gray.disabled" : ".hover-bg-green"),
                     m("span.menuItem", {
-                        tabindex: "0",
+                        tabindex: disabled ? undefined: "0",
                         onclick: () => menuItem.action?.call(this, menuItem),
                         onkeydown: (event: any) => {
                             if (event.key === "Enter") {
@@ -6531,7 +6531,7 @@ export class TMainForm {
             case "checkbox":
                 return m("div.nowrap.pl1.pr1" + (disabled ? ".gray.disabled" : ".hover-bg-green"),
                     m("label.menuItem",
-                        { tabindex: "0" },
+                        { tabindex: disabled ? undefined : "0" },
                         m("input[type=checkbox].mr1", {
                             checked: menuItem.checkedFunction!(),
                             disabled,
@@ -6543,7 +6543,7 @@ export class TMainForm {
             case "radio":
                 return m("div.nowrap.pl1.pr1" + (disabled ? ".gray.disabled" : ".hover-bg-green"),
                     m("label.menuItem",
-                        { tabindex: "0" },
+                        { tabindex: disabled ? undefined : "0" },
                         m("input[type=radio].mr1", {
                             checked: menuItem.checkedFunction!(),
                             disabled,
