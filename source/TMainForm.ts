@@ -118,10 +118,6 @@ function setPlantCharacteristicsForAnimationFrame(plant: PdPlant, frame: short):
 
 export class TMainForm {
 
-    // toolbarPanel: TPanel = new TPanel()
-    // dragCursorMode: TSpeedButton = new TSpeedButton()
-    // magnifyCursorMode: TSpeedButton = new TSpeedButton()
-    // scrollCursorMode: TSpeedButton = new TSpeedButton()
     // horizontalSplitter: TPanel = new TPanel()
     // verticalSplitter: TPanel = new TPanel()
     // visibleBitmap: TImage = new TImage()
@@ -138,9 +134,7 @@ export class TMainForm {
     // Sections_Internodes: TImage = new TImage()
     // Sections_SeedlingLeaves: TImage = new TImage()
     // Sections_FlowersSecondary: TImage = new TImage()
-    // rotateCursorMode: TSpeedButton = new TSpeedButton()
     animateTimerTimeoutId: any = null
-    // centerDrawing: TSpeedButton = new TSpeedButton()
     // paramPanelOpenArrowImage: TImage = new TImage()
     // paramPanelClosedArrowImage: TImage = new TImage()
     // plantListPanel: TPanel = new TPanel()
@@ -192,10 +186,6 @@ export class TMainForm {
     // noteMemo: TMemo = new TMemo()
     // noteLabel: TLabel = new TLabel()
     // noteEdit: TSpeedButton = new TSpeedButton()
-    // viewFreeFloating: TSpeedButton = new TSpeedButton()
-    // viewOneOnly: TSpeedButton = new TSpeedButton()
-    // drawingAreaOnTop: TSpeedButton = new TSpeedButton()
-    // drawingAreaOnSide: TSpeedButton = new TSpeedButton()
     // Sections_FlowersPrimaryAdvanced: TImage = new TImage()
     // sizingLabel: TLabel = new TLabel()
     // drawingScaleEdit: TEdit = new TEdit()
@@ -290,7 +280,7 @@ export class TMainForm {
     drawing: boolean = false
     animateCommand: PdAnimatePlantCommand | null = null
     // drawProgressMax: long = 0
-    cursorModeForDrawing: short = 0
+    cursorModeForDrawing: short = CursorMode.kCursorModeSelectDrag
     actionInProgress: boolean = false
     mouseMoveActionInProgress: boolean = false
     // lifeCycleDragging: boolean = false
@@ -383,21 +373,6 @@ export class TMainForm {
     //         this.dragCursorMode.Down = true
     //         // loading info 
     //         this.loadSectionsIntoListBox()
-    //         switch (domain.options.drawSpeed) {
-    //             case DrawMode.kDrawFast:
-    //                 // updating 
-    //                 this.MenuOptionsFastDraw.checked = true
-    //                 break
-    //             case DrawMode.kDrawMedium:
-    //                 this.MenuOptionsMediumDraw.checked = true
-    //                 break
-    //             case DrawMode.kDrawBest:
-    //                 this.MenuOptionsBestDraw.checked = true
-    //                 break
-    //             case DrawMode.kDrawCustom:
-    //                 this.MenuOptionsCustomDraw.checked = true
-    //                 break
-    //         }
     //         this.updateMenusForUndoRedo()
     //         this.updatePasteMenuForClipboardContents()
     //         if (this.sectionsComboBox.Items.Count > 0) {
@@ -2011,7 +1986,6 @@ export class TMainForm {
         //     return
         // }
         // domain.options.showHighlightingForNonHiddenPosedParts = !domain.options.showHighlightingForNonHiddenPosedParts
-        // this.MenuOptionsHighlightPosedParts.checked = domain.options.showHighlightingForNonHiddenPosedParts
         // this.posingHighlight.Down = domain.options.showHighlightingForNonHiddenPosedParts
         // this.redrawAllPlantsInViewWithAmendments()
     }
@@ -2022,7 +1996,6 @@ export class TMainForm {
         //     return
         // }
         // domain.options.showGhostingForHiddenParts = !domain.options.showGhostingForHiddenParts
-        // this.MenuOptionsGhostHiddenParts.checked = domain.options.showGhostingForHiddenParts
         // this.posingGhost.Down = domain.options.showGhostingForHiddenParts
         // // cannot just redraw plants because bounds rects may have changed
         // this.redrawEverything()
@@ -2253,27 +2226,13 @@ export class TMainForm {
         // this.parametersScrollBox.Font.Size = domain.options.parametersFontSize
         // this.parametersScrollBox.Invalidate()
         // // viewing option
-        // this.MenuLayoutMakeBouquet.enabled = (this.selectedPlants.length > 1) && (!domain.viewPlantsInMainWindowOnePlantAtATime())
         // this.updateMenusForChangeToViewingOption()
         // // drawing
-        // this.MenuOptionsUsePlantBitmaps.checked = domain.options.cachePlantBitmaps
         // // showing optional things
-        // this.MenuOptionsShowSelectionRectangles.checked = domain.options.showSelectionRectangle
-        // this.MenuOptionsShowBoundsRectangles.checked = domain.options.showBoundsRectangle
-        // this.MenuOptionsShowLongButtonHints.checked = domain.options.showLongHintsForButtons
-        // this.MenuOptionsShowParameterHints.checked = domain.options.showHintsForParameters
         // // posing
-        // this.MenuOptionsGhostHiddenParts.checked = domain.options.showGhostingForHiddenParts
         // this.posingGhost.Down = domain.options.showGhostingForHiddenParts
-        // this.MenuOptionsHighlightPosedParts.checked = domain.options.showHighlightingForNonHiddenPosedParts
         // this.posingHighlight.Down = domain.options.showHighlightingForNonHiddenPosedParts
-        // this.MenuOptionsHidePosing.checked = !domain.options.showPosingAtAll
         // this.posingNotShown.Down = !domain.options.showPosingAtAll
-        // // vertical/horizontal
-        // this.MenuLayoutHorizontalOrientation.checked = domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal
-        // this.MenuLayoutVerticalOrientation.checked = domain.options.mainWindowOrientation === kMainWindowOrientationVertical
-        // this.drawingAreaOnTop.Down = domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal
-        // this.drawingAreaOnSide.Down = domain.options.mainWindowOrientation === kMainWindowOrientationVertical
         // this.internalChange = false
         // hint, undo
         this.updateHintPauseForOptions()
@@ -2326,10 +2285,6 @@ export class TMainForm {
     
     updateForChangeToOrientation(): void {
         // TODO PDF: Fix or delete obsolete code
-        // this.MenuLayoutHorizontalOrientation.checked = domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal
-        // this.MenuLayoutVerticalOrientation.checked = domain.options.mainWindowOrientation === kMainWindowOrientationVertical
-        // this.drawingAreaOnTop.Down = domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal
-        // this.drawingAreaOnSide.Down = domain.options.mainWindowOrientation === kMainWindowOrientationVertical
         // this.Resize()
     }
     
@@ -6671,6 +6626,24 @@ export class TMainForm {
                 return this.cursorModeForDrawing === CursorMode.kCursorModePosingSelect
                     ? selected
                     : ""
+
+            case "viewFreeFloating":
+                return domain.options.mainWindowViewMode === ViewPlants.kViewPlantsInMainWindowFreeFloating
+                    ? selected
+                    : ""
+            case "viewOneOnly":
+                return domain.options.mainWindowViewMode === ViewPlants.kViewPlantsInMainWindowOneAtATime
+                    ? selected
+                    : ""
+            case "drawingAreaOnTop":
+                return domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal
+                    ? selected
+                    : ""
+            case "drawingAreaOnSide":
+                return domain.options.mainWindowOrientation === kMainWindowOrientationVertical
+                    ? selected
+                    : ""
+
             default: {
                 throw new Error("Unexpected buttonId: " + buttonId)
             }
@@ -6795,7 +6768,7 @@ export class TMainForm {
                     m("img.mr1", { src: imageDir + "MainForm_centerDrawing.png" }),
                     "Scale to Fit",
                 ),
-                m("button.viewFreeFloating.TSpeedButton",
+                m("button.viewFreeFloating.TSpeedButton" + this.backgroundForSpeedButton("viewFreeFloating"),
                     {
                         onclick: () => this.viewFreeFloatingClick(),
                         title: "View free floating",
@@ -6811,7 +6784,7 @@ export class TMainForm {
                     },
                     m("img", { src: imageDir + "MainForm_viewFreeFloating.png" })
                 ),
-                m("button.viewOneOnly.TSpeedButton",
+                m("button.viewOneOnly.TSpeedButton" + this.backgroundForSpeedButton("viewOneOnly"),
                     {
                         onclick: () => this.viewOneOnlyClick(),
                         title: "View one only",
@@ -6826,7 +6799,7 @@ export class TMainForm {
                     },
                     m("img", { src: imageDir + "MainForm_viewOneOnly.png" })
                 ),
-                m("button.drawingAreaOnTop.TSpeedButton",
+                m("button.drawingAreaOnTop.TSpeedButton" + this.backgroundForSpeedButton("drawingAreaOnTop"),
                     {
                         onclick: () => this.drawingAreaOnTopClick(),
                         title: "Drawing area on top",
@@ -6840,7 +6813,7 @@ export class TMainForm {
                     },
                     m("img", { src: imageDir + "MainForm_drawingAreaOnTop.png" })
                 ),
-                m("button.drawingAreaOnSide.TSpeedButton",
+                m("button.drawingAreaOnSide.TSpeedButton" + this.backgroundForSpeedButton("drawingAreaOnSide"),
                     {
                         onclick: () => this.drawingAreaOnSideClick(),
                         title: "Drawing area on side",
