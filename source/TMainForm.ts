@@ -2080,8 +2080,7 @@ export class TMainForm {
     
     // ---------------------------------------------------------------------------- *help menu 
     MenuHelpTopicsClick(): void {
-        unfinished()
-        // delphi_compatability.Application.HelpCommand(UNRESOLVED.HELP_FINDER, 0)
+        window.open("https://www.kurtz-fernhout.com/PlantStudio/help/index.htm")
     }
     
     async MenuHelpAboutClick() {
@@ -2091,13 +2090,11 @@ export class TMainForm {
     }
     
     MenuHelpSuperSpeedTourClick(): void {
-        unfinished()
-        // delphi_compatability.Application.HelpJump("Super-Speed_Tour")
+        window.open("https://www.kurtz-fernhout.com/PlantStudio/help/plantstudioSuperSpeed_Tour.html")
     }
     
     MenuHelpTutorialClick(): void {
-        unfinished()
-        // delphi_compatability.Application.HelpJump("Tutorial")
+        window.open("https://www.kurtz-fernhout.com/PlantStudio/help/plantstudioTutorial.html")
     }
     
     /*
