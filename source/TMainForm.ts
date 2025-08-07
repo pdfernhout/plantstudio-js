@@ -22,7 +22,7 @@ import { viewMainForm } from "./TMainForm-view"
 import { setMainForm } from "./TMainFormInterface"
 import { convertColor } from "./KfDrawingSurface"
 import { Cursor, cursor_change, cursor_getCurrentCursorAsCSS, cursor_startWait, cursor_stopWait, CursorMode } from "./ucursor"
-import { customModal, ModalInputView } from "./ModalInputView"
+import { customModal, ModalInputView, modalPrompt } from "./ModalInputView"
 import { TSplashForm } from "./TSplashForm"
 
 // TODO PDF for getting to compile
@@ -1356,15 +1356,15 @@ export class TMainForm {
         // }
     }
     
-    MenuPlantRenameClick(): void {
+    async MenuPlantRenameClick(): Promise<void> {
         const plant = this.focusedPlant()
         if (plant === null) {
             return
         }
         const newName = plant.getName()
-        const response = InputQuery("Rename plant", "Enter a new name for " + plant.getName(), newName)
-        if (response) {
-            const newCommand = new PdRenameCommand(plant, newName)
+        const response = await InputQuery("Rename plant", "Enter a new name for " + plant.getName(), newName)
+        if (response !== null) {
+            const newCommand = new PdRenameCommand(plant, response)
             this.doCommand(newCommand)
         }
     }
@@ -4562,13 +4562,13 @@ export class TMainForm {
     }
     
     updatePlantNameLabel(tabIndex: short): void {
+        // TODO PDF: Fix or remove obsolete code
         // let firstPlant: PdPlant
         // let labelToChange: TLabel
         // let payAttentionToOtherPlants: boolean
         // let prefix: string
         // let handlingDifferently: boolean
         
-        unfinished()
         // const firstPlant = this.focusedPlant()
         // let payAttentionToOtherPlants = true
         // let handlingDifferently = false
@@ -6749,8 +6749,8 @@ function getFileOpenInfo(kFileTypePlant: FileType, plantFileName: string, arg2: 
     throw new Error("Function not implemented.")
 }
 
-function InputQuery(arg0: string, arg1: string, newName: string): boolean {
-    throw new Error("Function not implemented.")
+async function InputQuery(title: string, prompt: string, defaultValue: string): Promise<string | null> {
+    return await modalPrompt(prompt, defaultValue)
 }
 
 const kSavingDrawingToBmp = 1
