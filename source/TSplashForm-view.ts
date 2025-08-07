@@ -1,8 +1,7 @@
 
 // Exported from: ../../plantstudio-js/converted_source/usplash.lfm
 
-import { m } from "mithril"
-import { caption } from "common"
+import * as m from "mithril"
 
 export function viewSplashForm() {
     return m("SplashForm.TSplashForm",

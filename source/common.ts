@@ -8,6 +8,8 @@ export type TColor = number
 export type TColorRef = number
 export type TMemo = string[]
 
+export const imageDir = "../source/resources/"
+
 export function intround(x: number) {
     return Math.round(x)
 }

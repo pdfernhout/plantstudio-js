@@ -22,6 +22,8 @@ import { viewMainForm } from "./TMainForm-view"
 import { setMainForm } from "./TMainFormInterface"
 import { convertColor } from "./KfDrawingSurface"
 import { Cursor, cursor_change, cursor_getCurrentCursorAsCSS, cursor_startWait, cursor_stopWait, CursorMode } from "./ucursor"
+import { customModal, ModalInputView } from "./ModalInputView"
+import { TSplashForm } from "./TSplashForm"
 
 // TODO PDF for getting to compile
 type TEdit = any
@@ -2082,14 +2084,10 @@ export class TMainForm {
         // delphi_compatability.Application.HelpCommand(UNRESOLVED.HELP_FINDER, 0)
     }
     
-    MenuHelpAboutClick(): void {
-        unfinished()
-        // if (usplash.splashForm === null) {
-        //     return
-        // }
-        // usplash.splashForm.close.Visible = true
-        // usplash.splashForm.supportButton.Visible = true
-        // usplash.splashForm.ShowModal()
+    async MenuHelpAboutClick() {
+        return customModal((resolve: any) => {
+            return m(TSplashForm, { close: () => resolve(true) } )
+        })
     }
     
     MenuHelpSuperSpeedTourClick(): void {
@@ -6655,6 +6653,7 @@ export class TMainForm {
                 style: { cursor: cursor_getCurrentCursorAsCSS()}
             },
             this.viewMainMenu(),
+            m(ModalInputView),
             // viewMainForm() 
             m("canvas.ba", {
                 width: self.drawingBitmap.width,

@@ -1,7 +1,7 @@
 // unit uwizard
 
 import * as m from "mithril"
-import { AssignFile, CloseFile, Reset } from "./common"
+import { AssignFile, CloseFile, imageDir, Reset } from "./common"
 import { CompoundLeafStyle, FloralPart, Gender, LeafArrangement, PdPlant } from "./PdPlant"
 import { darkerColor, messageForExceptionType } from "./usupport"
 import { domain } from "./PdDomain"
@@ -1247,8 +1247,6 @@ export class TWizardForm {
     }
     
 }
-
-const imageDir = "../source/resources/"
 
 function fileForImage(id: string, option: string) {
     if (option === "one (simple)") { option = "one"}
