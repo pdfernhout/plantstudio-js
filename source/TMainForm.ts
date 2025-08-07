@@ -2505,7 +2505,7 @@ export class TMainForm {
     }
     
     updateForChangeToPlantNote(aPlant: PdPlant): void {
-        unfinished()
+        // TODO PDF: Fix or remove obsolete code
         // let start: int = this.noteMemo.SelStart
         // this.noteMemo.Clear()
         // if (aPlant === null) {
@@ -5323,25 +5323,29 @@ export class TMainForm {
         this.updateForChangeToPlantNote(plant)
     }
     
-    noteEditClick(): void {
-        unfinished()
-        // const plant = this.focusedPlant()
-        // if (plant === null) {
-        //     return
-        // }
-        // const noteForm: TNoteEditForm = unoted.TNoteEditForm().create(this)
-        // if (noteForm === null) {
-        //     throw new Error("Problem: Could not create note edit window.")
-        // }
-        // noteForm.noteEditMemo.Lines.AddStrings(plant.noteLines)
-        // noteForm.Caption = "Edit note for " + plant.getName()
-        // if (noteForm.ShowModal() !== mrCancel) {
-        //     // command will take ownership of this and free it if necessary
-        //     const commandLines: TStringList = delphi_compatability.TStringList.create
-        //     commandLines.AddStrings(noteForm.noteEditMemo.Lines)
-        //     const newCommand = new PdEditNoteCommand(plant, commandLines)
-        //     this.doCommand(newCommand)
-        // }
+    async noteEditClick(): Promise<void> {
+        const plant = this.focusedPlant()
+        if (plant === null) {
+            return
+        }
+        let note = plant.noteLines.join("\n")
+        const changed = await customModal((resolve: any) => {
+            return m("div",
+                m("h4", "Edit note for: " + plant.getName()),
+                m("textarea.pa2.w-100", { rows: 10, value: note, onchange: (event: any) => note = event.target.value }),
+                m("div.ma2.flex.justify-end", 
+                    m("button", { onclick: () => { resolve(false) }
+                    }, "Cancel"),
+                    m("button.ml2", { onclick: () => { resolve(true) }
+                    }, "OK")
+                )
+            )
+        })
+        if (changed) {
+            const commandLines = note.split("\n")
+            const newCommand = new PdEditNoteCommand(plant, commandLines)
+            this.doCommand(newCommand)
+        }
     }
     
     NotePopupMenuCopyClick(): void {
