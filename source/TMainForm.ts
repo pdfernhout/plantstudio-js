@@ -6515,9 +6515,9 @@ export class TMainForm {
         const disabled = menuItem.enabledFunction ? !menuItem.enabledFunction() : false
         switch(menuItem.type) {
             case "dash":
-                return m("div", "----")
+                return m("div.bt.mt1.mb1")
             case "menu":
-                return m("div.nowrap" + (disabled ? ".gray.disabled" : ".hover-bg-green"),
+                return m("div.nowrap.pl1.pr1" + (disabled ? ".gray.disabled" : ".hover-bg-green"),
                     m("span.menuItem", {
                         tabindex: "0",
                         onclick: () => menuItem.action?.call(this, menuItem),
@@ -6529,7 +6529,7 @@ export class TMainForm {
                         }
                     }, caption(menuItem.label)))
             case "checkbox":
-                return m("div.nowrap" + (disabled ? ".gray.disabled" : ".hover-bg-green"),
+                return m("div.nowrap.pl1.pr1" + (disabled ? ".gray.disabled" : ".hover-bg-green"),
                     m("label.menuItem",
                         { tabindex: "0" },
                         m("input[type=checkbox].mr1", {
@@ -6541,7 +6541,7 @@ export class TMainForm {
                     )
                 )
             case "radio":
-                return m("div.nowrap" + (disabled ? ".gray.disabled" : ".hover-bg-green"),
+                return m("div.nowrap.pl1.pr1" + (disabled ? ".gray.disabled" : ".hover-bg-green"),
                     m("label.menuItem",
                         { tabindex: "0" },
                         m("input[type=radio].mr1", {
@@ -6559,15 +6559,15 @@ export class TMainForm {
 
     //  recursive
     viewMenu(menu: MenuItem[]): any {
-        return m("div.ml2", 
+        return m("div", 
             menu.map(menuItem => {
                 const disabled = menuItem.enabledFunction ? !menuItem.enabledFunction() : false
                 return m("div",
                     menuItem.submenu
-                        ? m("div.nowrap", 
-                            m("span.i"  + (disabled ? ".gray.disabled" : ""), 
+                        ? m("div.nowrap.mt1.mb1", 
+                            m("span.i.ml1"  + (disabled ? ".gray.disabled" : ""), 
                             caption(menuItem.label)), 
-                            this.viewMenu(menuItem.submenu)
+                            m("div.ml2", this.viewMenu(menuItem.submenu))
                         )
                         : this.viewMenuItem(menuItem)
                     )
@@ -6606,7 +6606,7 @@ export class TMainForm {
         return m("div.sticky.bg-light-gray",
             m("span.green", {onclick: () => window.open("https://www.kurtz-fernhout.com/summary_plantstudio.html", "_blank") }, "PlantStudio"),
             menu.map(menuItem => 
-                m("span.ml2.relative", {
+                m("span.relative", {
                         tabindex: "0",
                         onkeydown: (event: any) => {
                             if (event.key === "Escape") {
@@ -6630,7 +6630,7 @@ export class TMainForm {
                             }
                         }
                     }, 
-                    m("span.hover-bg-green.b" + (this.droppedDownMenuId === menuItem.id ? ".ba" : ""), {
+                    m("span.hover-bg-green.b.ml2" + (this.droppedDownMenuId === menuItem.id ? ".ba" : ""), {
                         onclick: (event: any) => {
                             this.droppedDownMenuId === menuItem.id 
                                 ? this.droppedDownMenuId = ""
@@ -6639,7 +6639,7 @@ export class TMainForm {
                         }
                     }, caption(menuItem.label)),
                     menuItem.submenu ? null : "MISSING SUBMENU for: " + menuItem.label,
-                    this.droppedDownMenuId === menuItem.id && m("div.absolute.ba.bg-light-gray.pr2", { id: "droppedDownMenu", style: { left: 0 } }, this.viewMenu(menuItem.submenu || []))
+                    this.droppedDownMenuId === menuItem.id && m("div.absolute.ba.bg-light-gray.pb1", { id: "droppedDownMenu", style: { left: 0 } }, this.viewMenu(menuItem.submenu || []))
                 )
             )
         )
