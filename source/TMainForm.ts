@@ -137,7 +137,7 @@ export class TMainForm {
     // Sections_SeedlingLeaves: TImage = new TImage()
     // Sections_FlowersSecondary: TImage = new TImage()
     // rotateCursorMode: TSpeedButton = new TSpeedButton()
-    // animateTimer: TTimer = new TTimer()
+    animateTimerTimeoutId: any = null
     // centerDrawing: TSpeedButton = new TSpeedButton()
     // paramPanelOpenArrowImage: TImage = new TImage()
     // paramPanelClosedArrowImage: TImage = new TImage()
@@ -2749,7 +2749,7 @@ export class TMainForm {
                 }
             }
         }
-        if (this.rubberBanding) {
+        if (this.rubberBanding && !domain.temporarilyHideSelectionRectangles) {
             this.drawRubberBandBox()
         }
     }
@@ -3394,6 +3394,10 @@ export class TMainForm {
         const Y = event.y
         const isShift = event.shiftKey
         const isCtrl = event.ctrlKey
+        if (this.animateCommand) { 
+            this.stopAnimation()
+            return
+        }
         if (this.plants.length <= 0) {
             return
         }
@@ -3480,7 +3484,7 @@ export class TMainForm {
             return
         }
         if (this.cursorModeForDrawing === CursorMode.kCursorModeSelectDrag) {
-            // show cursor that tells you you can resize plant when mouse is in resize rect, but only in select mode
+            // show cursor that tells you that you can resize plant when mouse is in resize rect, but only in select mode
             cursor_change(Cursor.crDefault)
             const plantClickedOn = domain.plantManager.findPlantAtPoint(Point(X, Y))
             if ((domain.options.showSelectionRectangle) && (plantClickedOn !== null) && (plantClickedOn === this.focusedPlant()) && (plantClickedOn.pointIsInResizingRect(Point(X, Y)))) {
@@ -4527,7 +4531,7 @@ export class TMainForm {
     
     // ------------------------------------------------------- *life cycle panel drawing and mouse handling 
     updateLifeCyclePanelForFirstSelectedPlant(): void {
-        unfinished()
+        // TODO PDF: Fix this or remove obsolete code
         // this.updatePlantNameLabel(kTabLifeCycle)
         // const firstPlant = this.focusedPlant()
         // this.lifeCycleDaysEdit.Enabled = firstPlant !== null
@@ -4626,34 +4630,46 @@ export class TMainForm {
     }
     
     MenuPlantAnimateClick(): void {
+        if (this.animateCommand) {
+            this.stopAnimation()
+            return
+        }
         this.animateGrowthClick()
     }
     
     // animation 
     startAnimation(): void {
-        unfinished()
-        // // called by animate command, which also sets up the pointer for the timer to call 
-        // // disable all non-modal forms 
-        // // keeps space bar from affecting magnification
-        // this.ActiveControl = this.plantListDrawGrid
-        // this.enableOrDisableAllForms(kDisableAllForms)
-        // // add warning about disabled forms 
-        // this.animatingLabel.Visible = true
-        // this.tabSet.visible = false
-        // // start timer 
-        // this.animateTimer.enabled = true
+        // called by animate command, which also sets up the pointer for the timer to call 
+        domain.temporarilyHideSelectionRectangles = true
+        // disable all non-modal forms 
+        // keeps space bar from affecting magnification
+        // TODO PDF: Fix or remove: this.ActiveControl = this.plantListDrawGrid
+        this.enableOrDisableAllForms(kDisableAllForms)
+        // add warning about disabled forms 
+        // TODO PDF: Fix or remove: this.animatingLabel.Visible = true
+        this.tabSet.visible = false
+        // start timer 
+        this.animateTimerTimeoutId = setTimeout(() => this. animateTimerFired(), 100)
     }
     
-    animateTimerTimer(): void {
+     animateTimerFired(): void {
         if (this.animateCommand !== null) {
             this.animateCommand.animateOneDay()
+            this.animateTimerTimeoutId = setTimeout(() => this. animateTimerFired(), 100)
+        } else {
+            this.animateTimerTimeoutId = null
         }
+        m.redraw()
     }
     
     stopAnimation(): void {
         // called by animate command or self (if user clicks in drawing area or presses a key) 
+        domain.temporarilyHideSelectionRectangles = false
         // stop timer 
-        // TODO PDF: Fix this: this.animateTimer.enabled = false
+        if (this.animateTimerTimeoutId !== null) {
+            clearTimeout(this.animateTimerTimeoutId)
+            this.animateTimerTimeoutId = null
+        }
         // nil out pointer 
         this.animateCommand = null
         // re-enable everything 
@@ -4668,7 +4684,7 @@ export class TMainForm {
     }
     
     enableOrDisableAllForms(enable: boolean): void {
-        unfinished()
+        // TODO PDF: Fix or remove obsolete code
         // // cfk note: put any new NON-MODAL forms here 
         // this.Enabled = enable
         // ubreedr.BreederForm.Enabled = enable
@@ -6375,7 +6391,7 @@ export class TMainForm {
             "MenuPlantRename", "R&ename...", this.MenuPlantRenameClick, () => false, () => this.haveSelectedPlants(),
             "MenuPlantEditNote", "E&dit Note...", this.MenuPlantEditNoteClick, () => false, () => this.haveSelectedPlants(),
             "-",
-            "MenuPlantAnimate", "&Animate through Life Cycle", this.MenuPlantAnimateClick, () => false, () => this.haveSelectedPlants(),
+            "MenuPlantAnimate", () => this.animateCommand ? "Stop &Animate through Life Cycle" : "&Animate through Life Cycle", this.MenuPlantAnimateClick, () => false, () => this.haveSelectedPlants(),
             "MenuPlantBreed", "&Breed", this.MenuPlantBreedClick, () => false, () => this.haveSelectedPlants(),
             "MenuPlantMakeTimeSeries", "Make &Time Series", this.MenuPlantMakeTimeSeriesClick, () => false, () => this.haveSelectedPlants(),
 
@@ -6632,7 +6648,7 @@ export class TMainForm {
 
     view() {
         const self = this
-        return m("div", {
+        return m("div.relative", {
                 onclick: (event: any) => {
                     this.droppedDownMenuId = ""
                 },
@@ -6661,7 +6677,11 @@ export class TMainForm {
                 onmouseup: (event: MouseEvent) => {
                     this.PaintBoxMouseUp(event)
                 }
-            }),       
+            }),
+            this.animateCommand && m("div.absolute.green.ma3", 
+                { style: { bottom: 0 } },
+                "Animating day " + this.animateCommand.age + " of " + this.animateCommand.oldestAgeAtMaturity + " (click anywhere to stop)"
+            )      
         )
     }   
 }

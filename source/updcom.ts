@@ -2300,19 +2300,14 @@ export class PdAnimatePlantCommand extends PdCommandWithListOfPlants {
             }
         }
         // reset all plants to age zero and draw them 
-        domain.temporarilyHideSelectionRectangles = true
         this.invalidateCombinedPlantRects()
-        try {
-            for (let i = 0; i <= this.plantList.length - 1; i++) {
-                plant = this.plantList[i]
-                plant.reset()
-                plant.recalculateBounds(kDrawNow)
-            }
-            this.invalidateCombinedPlantRects()
-            MainForm.updateForPossibleChangeToDrawing()
-        } finally {
-            domain.temporarilyHideSelectionRectangles = false
+        for (let i = 0; i <= this.plantList.length - 1; i++) {
+            plant = this.plantList[i]
+            plant.reset()
+            plant.recalculateBounds(kDrawNow)
         }
+        this.invalidateCombinedPlantRects()
+        MainForm.updateForPossibleChangeToDrawing()
         MainForm.animateCommand = this
         MainForm.startAnimation()
     }
@@ -2321,28 +2316,23 @@ export class PdAnimatePlantCommand extends PdCommandWithListOfPlants {
         let plant: PdPlant
         
         // grow all plants one day 
-        domain.temporarilyHideSelectionRectangles = true
-        try {
-            this.invalidateCombinedPlantRects()
-            for (let i = 0; i <= this.plantList.length - 1; i++) {
-                plant = this.plantList[i]
-                if (this.age < plant.pGeneral.ageAtMaturity) {
-                    plant.nextDay()
-                    plant.recalculateBounds(kDrawNow)
-                }
+        this.invalidateCombinedPlantRects()
+        for (let i = 0; i <= this.plantList.length - 1; i++) {
+            plant = this.plantList[i]
+            if (this.age < plant.pGeneral.ageAtMaturity) {
+                plant.nextDay()
+                plant.recalculateBounds(kDrawNow)
             }
-            this.invalidateCombinedPlantRects()
-            if (MainForm.lifeCycleShowing()) {
-                // don't want to update params, because they don't change during animation 
-                MainForm.updateLifeCyclePanelForFirstSelectedPlant()
-            } else if (MainForm.statsShowing()) {
-                MainForm.updateStatisticsPanelForFirstSelectedPlant()
-            }
-            MainForm.updateForPossibleChangeToDrawing()
-            this.age += 1
-        } finally {
-            domain.temporarilyHideSelectionRectangles = false
         }
+        this.invalidateCombinedPlantRects()
+        if (MainForm.lifeCycleShowing()) {
+            // don't want to update params, because they don't change during animation 
+            MainForm.updateLifeCyclePanelForFirstSelectedPlant()
+        } else if (MainForm.statsShowing()) {
+            MainForm.updateStatisticsPanelForFirstSelectedPlant()
+        }
+        MainForm.updateForPossibleChangeToDrawing()
+        this.age += 1
         if (this.age >= this.oldestAgeAtMaturity) {
             MainForm.stopAnimation()
         }
