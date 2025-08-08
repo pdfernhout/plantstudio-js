@@ -1821,7 +1821,7 @@ export class PdAlignPlantsCommand extends PdCommandWithListOfPlants {
                         newPoint.X = this.focusRect.Left + offset.X
                         break
                     case kRight:
-                        newPoint.X = this.focusRect.Right - (this.plant.boundsRect_pixels().height - offset.X)
+                        newPoint.X = this.focusRect.Right - (this.plant.boundsRect_pixels().width - offset.X)
                         break
                 }
                 this.plant.moveTo(newPoint)
