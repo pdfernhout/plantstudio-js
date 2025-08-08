@@ -3437,11 +3437,11 @@ export class TMainForm {
         let cursorChanged = false
         if (this.cursorModeForDrawing === CursorMode.kCursorModeSelectDrag) {
             // show cursor that tells you that you can resize plant when mouse is in resize rect, but only in select mode
-            cursor_change(Cursor.crDefault)
             const plantClickedOn = domain.plantManager.findPlantAtPoint(Point(X, Y))
             if ((domain.options.showSelectionRectangle) && (plantClickedOn !== null) && (plantClickedOn === this.focusedPlant()) && (plantClickedOn.pointIsInResizingRect(Point(X, Y)))) {
-                cursor_change(Cursor.crSizeNS)
-                cursorChanged = true
+                cursorChanged = cursor_change(Cursor.crSizeNS)
+            } else {
+                cursorChanged = cursor_change(Cursor.crDefault)
             }
         }
         if (!this.actionInProgress) {

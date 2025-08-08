@@ -55,6 +55,7 @@ export function basic_cursor_getCurrentCursorAsCSS() {
 export function cursor_getCurrentCursorAsCSS() {
     const result = basic_cursor_getCurrentCursorAsCSS()
     if (debugCursor) console.log("cursor_getCurrentCursorAsCSS", currentCursor, result)
+    return result
 }
 
 // export function cursor_initializeWait(): void {
@@ -81,11 +82,12 @@ export function cursor_stopWait(): void {
     }
 }
 
-export function cursor_change(newCursor: Cursor) {
-    if (newCursor === currentCursor) return
+export function cursor_change(newCursor: Cursor): boolean  {
+    if (newCursor === currentCursor) return false
     if (debugCursor) console.log("cursor_change", newCursor)
     currentCursor = newCursor
     if (debugCursor) cursor_getCurrentCursorAsCSS()
+    return true
 }
 
 // TODO PDF: load custom cursors somehow
