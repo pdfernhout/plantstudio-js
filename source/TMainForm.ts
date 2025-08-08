@@ -3431,14 +3431,17 @@ export class TMainForm {
         const X = event.x
         const Y = event.y
         if (this.plants.length <= 0) {
+            (event as any).redraw = false
             return
         }
+        let cursorChanged = false
         if (this.cursorModeForDrawing === CursorMode.kCursorModeSelectDrag) {
             // show cursor that tells you that you can resize plant when mouse is in resize rect, but only in select mode
             cursor_change(Cursor.crDefault)
             const plantClickedOn = domain.plantManager.findPlantAtPoint(Point(X, Y))
             if ((domain.options.showSelectionRectangle) && (plantClickedOn !== null) && (plantClickedOn === this.focusedPlant()) && (plantClickedOn.pointIsInResizingRect(Point(X, Y)))) {
                 cursor_change(Cursor.crSizeNS)
+                cursorChanged = true
             }
         }
         if (!this.actionInProgress) {
@@ -3471,6 +3474,9 @@ export class TMainForm {
                 this.mouseMoveActionInProgress = true
             }
             this.updateForPossibleChangeToDrawing()
+        }
+        if (!this.rubberBanding && !this.actionInProgress && !cursorChanged) {
+           (event as any).redraw = false
         }
     }
     
@@ -6837,7 +6843,6 @@ export class TMainForm {
                 onclick: (event: any) => {
                     this.droppedDownMenuId = ""
                 },
-                style: { cursor: cursor_getCurrentCursorAsCSS()}
             },
             this.viewMainMenu(),
             m(ModalInputView),
@@ -6862,7 +6867,8 @@ export class TMainForm {
                 },
                 onmouseup: (event: MouseEvent) => {
                     this.PaintBoxMouseUp(event)
-                }
+                },
+                style: { cursor: cursor_getCurrentCursorAsCSS() }
             }),
             this.animateCommand && m("div.absolute.green.ma3", 
                 { style: { bottom: 0 } },
