@@ -3340,8 +3340,8 @@ export class TMainForm {
     // mouse handling in drawing 
     // -------------------------------------------------------------------------- *mouse handling in drawing 
     PaintBoxMouseDown(event: MouseEvent): void {
-        const X = event.x
-        const Y = event.y
+        const X = event.offsetX
+        const Y = event.offsetY
         const isShift = event.shiftKey
         const isCtrl = event.ctrlKey
         if (this.animateCommand) { 
@@ -3428,8 +3428,8 @@ export class TMainForm {
     }
     
     PaintBoxMouseMove(event: MouseEvent): void {
-        const X = event.x
-        const Y = event.y
+        const X = event.offsetX
+        const Y = event.offsetY
         if (this.plants.length <= 0) {
             (event as any).redraw = false
             return
@@ -3481,8 +3481,8 @@ export class TMainForm {
     }
     
     PaintBoxMouseUp(event: MouseEvent): void {
-        const X = event.x
-        const Y = event.y
+        const X = event.offsetX
+        const Y = event.offsetY
         if (this.plants.length <= 0) {
             return
         }
