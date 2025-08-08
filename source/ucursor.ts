@@ -29,7 +29,9 @@ export enum Cursor {
 let waitState: number = 0
 let currentCursor: Cursor = Cursor.crDefault
 
-export function cursor_getCurrentCursorAsCSS() {
+const debugCursor = false
+
+export function basic_cursor_getCurrentCursorAsCSS() {
     switch (currentCursor) {
         case Cursor.crDefault: return "default" 
         case Cursor.crMagMinus: return "zoom-out"
@@ -48,6 +50,11 @@ export function cursor_getCurrentCursorAsCSS() {
         case Cursor.crSizeWE: return "ew-resize"
         default: throw new Error("Unexpected cursor: " + currentCursor)
     }
+}
+
+export function cursor_getCurrentCursorAsCSS() {
+    const result = basic_cursor_getCurrentCursorAsCSS()
+    if (debugCursor) console.log("cursor_getCurrentCursorAsCSS", currentCursor, result)
 }
 
 // export function cursor_initializeWait(): void {
@@ -75,7 +82,10 @@ export function cursor_stopWait(): void {
 }
 
 export function cursor_change(newCursor: Cursor) {
+    if (newCursor === currentCursor) return
+    if (debugCursor) console.log("cursor_change", newCursor)
     currentCursor = newCursor
+    if (debugCursor) cursor_getCurrentCursorAsCSS()
 }
 
 // TODO PDF: load custom cursors somehow
