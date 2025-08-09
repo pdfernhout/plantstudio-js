@@ -599,6 +599,7 @@ export class TMainForm {
     
     setPlantFileChanged(fileChanged: boolean): void {
         this.plantFileChanged = fileChanged
+        this.plants = domain.plantManager.plants
     }
     
     MenuFileSaveAsClick(): void {
@@ -6132,6 +6133,7 @@ export class TMainForm {
         // this.drawingPaintBox.height = 600
         setMainForm(this)
         setMainFormForCommands(this)
+        domain.resetForEmptyPlantFile()
     }
 
     havePlants() : boolean {
@@ -6554,12 +6556,6 @@ export class TMainForm {
                         onclick: () => this.dragCursorModeClick(),
                         title: "Drag cursor mode",
                         disabled: !this.havePlants()
-                        // Top: "4",
-                        // Left: "6",
-                        // Height: "25",
-                        // Width: "25",
-                        // GroupIndex: "1",
-                        // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF0088888888888888888888888800088888888888880C08888888808880CC08888888800880C08888888880C00CC08888888880CC0C088888888880CCCC000088888880CCCCCC0888888880CCCCC08888888880CCCC088888888880CCC0888888888880CC08888888888880C0888888888888800888888888888880888888888888",
                     },
                     m("img", { src: imageDir + "MainForm_dragCursorMode.png" })
                 ),
@@ -6568,12 +6564,6 @@ export class TMainForm {
                         onclick: () => this.scrollCursorModeClick(),
                         title: "Scroll cursor mode",
                         disabled: !this.havePlants()
-                        // Top: "4",
-                        // Left: "31",
-                        // Height: "25",
-                        // Width: "25",
-                        // GroupIndex: "1",
-                        // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF008888888888888888888800000000888888880CCCCCC0888888880CCCCCC0888888880CCCCCC088888880CCCCCCCC0888880CCCCCCCCCC088800CCCCCCCCCC08880CCCCCCCCCCC08880CC00C0C0C0C08880CC00C0C0C0C088880080C0C0C0C088888880C0C0C00888888880C0C0C0888888888808080888888888888888888888",
                     },
                     m("img", { src: imageDir + "MainForm_scrollCursorMode.png" })
                 ),
@@ -6582,13 +6572,6 @@ export class TMainForm {
                         onclick: () => this.rotateCursorModeClick(),
                         title: "Rotate cursor mode",
                         disabled: !this.havePlants()
-                        // Top: "4",
-                        // Left: "56",
-                        // Height: "25",
-                        // Width: "25",
-                        // GroupIndex: "1",
-                        // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF008888888888888888888880000088888888800CCCCC008888880CC88888CC088880CC8888888CC0888CC888888888C088C088888888888C08C088888888888C08C088888888888888C088888888888888C0888888880000088C0888888880CC088CC0888888880C0888CC08888800CC08888CC00000CC880888888CCCCC888888",
-                        // Layout: "blGlyphTop",
                     },
                     m("img", { src: imageDir + "MainForm_rotateCursorMode.png" })
                 ),
@@ -6597,12 +6580,6 @@ export class TMainForm {
                         onclick: () => this.magnifyCursorModeClick(),
                         title: "Magnify cursor mode",
                         disabled: !this.havePlants()
-                        // Top: "4",
-                        // Left: "81",
-                        // Height: "25",
-                        // Width: "25",
-                        // GroupIndex: "1",
-                        // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888888888888888888888888888888888880088888888888880C08888880000080C08888880CCCCC0C08888880C8FFE8C08888880C8FFFFE8C0888880CFEFFFFEC0888880CEEFFFFFC0888880CFEEFFFFC0888880C8EEEEF8C08888880C8FEF8C0888888880CCCCC088888888880000088888888888888888888888",
                     },
                     m("img", { src: imageDir + "MainForm_magnifyCursorMode.png" })
                 ),
@@ -6611,15 +6588,8 @@ export class TMainForm {
                         onclick: () => this.posingSelectionCursorModeClick(),
                         title: "Posing selection cursor mode",
                         disabled: !this.havePlants()
-                        // Top: "4",
-                        // Left: "106",
-                        // Height: "25",
-                        // Width: "25",
-                        // GroupIndex: "1",
-                        // Glyph.Data: "76010000424D760100000000000076000000280000002000000010000000010004000000000000010000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF008000088888888888877778888888888880CC088888888888878878888888888880CC088888888888878878888888888880CC088888888888878878888888888880CC088888888888878878888888888880CC088800000088878878887777778880CC08000CCCC088878878777888878880CC000CCCCC0088878877788888778880CC00CCCCCC0888878877888888788880CC00CCCCC00888878877888887788880CC0CCCCC008888878878888877888880CC0CCCC0088888878878888778888880CC0CCC00888888878878887788888880CC0C000888888887888877788888888000000888888888877777788888888888888888888888888888888888888888",
-                        // NumGlyphs: "2",
                     },
-                    m("img", { src: imageDir + "MainForm_posingSelectionCursorMode.png" })
+                    m("img", { src: imageDir + (this.havePlants() ? "MainForm_posingSelectionCursorMode.png" : "MainForm_posingSelectionCursorMode-disabled.png") })
                 ),
                 m("select.magnificationPercent.TComboBox.w3",
                     {
@@ -6647,17 +6617,6 @@ export class TMainForm {
                         onclick: () => this.centerDrawingClick(),
                         title: "Center drawing",
                         disabled: !this.havePlants()
-                        // Top: "4",
-                        // Left: "214",
-                        // Height: "25",
-                        // Width: "88",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clBtnText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF008888888888888888800000000000000880FFFFFFFFFFFF0880FFF0FFFFFFFF0880FF000FFFFFFF0880F0F0F0FF000F0880FFF0FFFFF00F0880FFF0FFFF0F0F0880FFFFFFF0FF0F0880FCCCCCFFFFFF0880FCCCCCFFFFFF0880FCCCCCFFFFFF0880FCCCCCFFFFFF0880FFFFFFFFFFFF0880000000000000088888888888888888",
-                        // ParentFont: "False",
                     },
                     m("img.mr1", { src: imageDir + "MainForm_centerDrawing.png" }),
                     "Scale to Fit",
@@ -6666,60 +6625,33 @@ export class TMainForm {
                     {
                         onclick: () => this.viewFreeFloatingClick(),
                         title: "View free floating",
-                        // Top: "4",
-                        // Left: "319",
-                        // Height: "25",
-                        // Width: "25",
-                        // GroupIndex: "5",
-                        // Down: "True",
-                        // Glyph.Data: "76010000424D760100000000000076000000280000002000000010000000010004000000000000010000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF0088888888888888888888888888888888FFFFFFFFFFFFFFF88888888888888888FFFFFFFFFFFFFFF88888888888888888FFFFFFFFFFFFFFF88888888888888888FFFFFFFFFFFFFFF88888888888888888FFFFFFFFCCCFFFF88888888877788888FFFCCCFFCCCFFFF88887778877788888FFFCCCFFCCCFFFF88887778877788888FFFCCCFFFFFFFFF88887778888888888FFFFFFFFFFFFFFF88888888888888888FFFFFFFFCCCFFFF88888888877788888FFFFFFFFCCCFFFF88888888877788888FFFFFFFFCCCFFFF88888888877788888FFFFFFFFFFFFFFF88888888888888888FFFFFFFFFFFFFFF88888888888888888FFFFFFFFFFFFFFF88888888888888888",
-                        // Margin: "2",
-                        // NumGlyphs: "2",
+                        disabled: !domain.plantFileLoaded
                     },
-                    m("img", { src: imageDir + "MainForm_viewFreeFloating.png" })
+                    m("img", { src: imageDir + (domain.plantFileLoaded ? "MainForm_viewFreeFloating.png" : "MainForm_viewFreeFloating-disabled.png" ) })
                 ),
                 m("button.viewOneOnly.TSpeedButton" + this.backgroundForSpeedButton("viewOneOnly"),
                     {
                         onclick: () => this.viewOneOnlyClick(),
                         title: "View one only",
-                        // Top: "4",
-                        // Left: "346",
-                        // Height: "25",
-                        // Width: "25",
-                        // GroupIndex: "5",
-                        // Glyph.Data: "76010000424D760100000000000076000000280000002000000010000000010004000000000000010000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF0088888888888888888888888888888888FFFFFFFFFFFFFFF88888888888888888FFFFFFFFFFFFFFF88888888888888888FFFFFFFFFFFFFFF88888888888888888FFFFFFFFFFFFFFF88888888888888888FFFFFFFFFFFFFFF88888888888888888FFFFFFFFFFFFFFF88888888888888888FFFFFFCCCFFFFFF88888887778888888FFFFFFCCCFFFFFF88888887778888888FFFFFFCCCFFFFFF88888887778888888FFFFFFFFFFFFFFF88888888888888888FFFFFFFFFFFFFFF88888888888888888FFFFFFFFFFFFFFF88888888888888888FFFFFFFFFFFFFFF88888888888888888FFFFFFFFFFFFFFF88888888888888888FFFFFFFFFFFFFFF88888888888888888",
-                        // Margin: "2",
-                        // NumGlyphs: "2",
+                        disabled: !domain.plantFileLoaded
                     },
-                    m("img", { src: imageDir + "MainForm_viewOneOnly.png" })
+                    m("img", { src: imageDir + (domain.plantFileLoaded ? "MainForm_viewOneOnly.png" : "MainForm_viewOneOnly-disabled.png" ) })
                 ),
                 m("button.drawingAreaOnTop.TSpeedButton" + this.backgroundForSpeedButton("drawingAreaOnTop"),
                     {
                         onclick: () => this.drawingAreaOnTopClick(),
                         title: "Drawing area on top",
-                        // Top: "4",
-                        // Left: "387",
-                        // Height: "25",
-                        // Width: "25",
-                        // GroupIndex: "6",
-                        // Glyph.Data: "76010000424D760100000000000076000000280000002000000010000000010004000000000000010000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888888888888888888888887777777777777778777777777777777878888888888888787888888888888878787777888777787878777788877778787888888888888878788888888888887878888888888888787888888888888878787777888777787878777788877778787888888888888878788888888888887877777777777777787777777777777778FFFFFFFFFFFFFFF88888888888888888FFFFFFFFFFFFFFF88888888888888888FFFFFFCCCFFFFFF88888887778888888FFFFFFCCCFFFFFF88888887778888888FFFFFFCCCFFFFFF88888887778888888FFFFFFFFFFFFFFF88888888888888888FFFFFFFFFFFFFFF88888888888888888",
-                        // NumGlyphs: "2",
+                        disabled: !domain.plantFileLoaded
                     },
-                    m("img", { src: imageDir + "MainForm_drawingAreaOnTop.png" })
+                    m("img", { src: imageDir + (domain.plantFileLoaded ? "MainForm_drawingAreaOnTop.png" : "MainForm_drawingAreaOnTop-disabled.png") })
                 ),
                 m("button.drawingAreaOnSide.TSpeedButton" + this.backgroundForSpeedButton("drawingAreaOnSide"),
                     {
                         onclick: () => this.drawingAreaOnSideClick(),
                         title: "Drawing area on side",
-                        // Top: "4",
-                        // Left: "415",
-                        // Height: "25",
-                        // Width: "25",
-                        // GroupIndex: "6",
-                        // Glyph.Data: "76010000424D760100000000000076000000280000002000000010000000010004000000000000010000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF008888888888888888888888888888888877777777777777787777777777777778FFFFFFF7888888788888888788888878FFFFFFF7877778788888888787777878FFFFFFF7888888788888888788888878FFFFFFF7888888788888888788888878FFFFFFF7877778788888888787777878FFFFFFF7888888788888888788888878FFCCCFF7888888788877788788888878FFCCCFF7877778788877788787777878FFCCCFF7888888788877788788888878FFFFFFF7888888788888888788888878FFFFFFF7877778788888888787777878FFFFFFF7888888788888888788888878FFFFFFF7888888788888888788888878FFFFFFF7777777788888888777777778",
-                        // NumGlyphs: "2",
+                        disabled: !domain.plantFileLoaded
                     },
-                    m("img", { src: imageDir + "MainForm_drawingAreaOnSide.png" })
+                    m("img", { src: imageDir + (domain.plantFileLoaded ? "MainForm_drawingAreaOnSide.png" : "MainForm_drawingAreaOnSide-disabled.png") })
                 ),
                 m("span", "|"),
                 m("button.alignTops.TSpeedButton",
@@ -6727,12 +6659,6 @@ export class TMainForm {
                         onclick: () => this.alignTopsClick(),
                         title: "Align tops",
                         disabled: !this.haveMoreThanOnSelectedPlant()
-                        // Top: "58",
-                        // Left: "66",
-                        // Height: "25",
-                        // Width: "25",
-                        // Glyph.Data: "76010000424D760100000000000076000000280000002000000010000000010004000000000000010000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF0088888888888888888888888888888888888888888888888888888888888888888CCCCC888CCCCC8887777788877777888CCCCC888CCCCC8887777788877777888CCCCC888CCCCC8887777788877777888CCCCC888CCCCC8887777788877777888CCCCC888CCCCC8887777788877777888CCCCC888CCCCC8887777788877777888CCCCC888888888887777788888888888CCCCC88888C888887777788888788888CCCCC88888C888887777788888788888CCCCC88888C888887777788888788888CCCCC888C8C8C8887777788878787888CCCCC8888CCC88887777788887778888CCCCC88888C8888877777888887888888888888888888888888888888888888",
-                        // NumGlyphs: "2",
                     },
                     m("img", { src: imageDir + (this.haveMoreThanOnSelectedPlant() ? "MainForm_alignTops.png" : "MainForm_alignTops-disabled.png") })
                 ),
@@ -6741,12 +6667,6 @@ export class TMainForm {
                         onclick: () => this.alignBottomsClick(),
                         title: "Align bottoms",
                         disabled: !this.haveMoreThanOnSelectedPlant()
-                        // Top: "58",
-                        // Left: "95",
-                        // Height: "25",
-                        // Width: "25",
-                        // Glyph.Data: "76010000424D760100000000000076000000280000002000000010000000010004000000000000010000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF0088888888888888888888888888888888888888888888888888888888888888888CCCCC88888C888888777778888878888CCCCC8888CCC88888777778888777888CCCCC888C8C8C8888777778887878788CCCCC88888C888888777778888878888CCCCC88888C888888777778888878888CCCCC88888C888888777778888878888CCCCC888888888888777778888888888CCCCC888CCCCC8888777778887777788CCCCC888CCCCC8888777778887777788CCCCC888CCCCC8888777778887777788CCCCC888CCCCC8888777778887777788CCCCC888CCCCC8888777778887777788CCCCC888CCCCC88887777788877777888888888888888888888888888888888",
-                        // NumGlyphs: "2",
                     },
                     m("img", { src: imageDir + (this.haveMoreThanOnSelectedPlant() ? "MainForm_alignBottoms.png" : "MainForm_alignBottoms-disabled.png") })
                 ),
@@ -6755,12 +6675,6 @@ export class TMainForm {
                         onclick: () => this.alignLeftClick(),
                         title: "Align left",
                         disabled: !this.haveMoreThanOnSelectedPlant()
-                        // Top: "58",
-                        // Left: "123",
-                        // Height: "25",
-                        // Width: "25",
-                        // Glyph.Data: "76010000424D760100000000000076000000280000002000000010000000010004000000000000010000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888C88888CCCCCC8888788888777777888C888888CCCCCC888788888877777788CCCCCC88CCCCCC8877777788777777888C888888CCCCCC88878888887777778888C88888CCCCCC8888788888777777888888888888888888888888888888888888888888888888888888888888888888CCCCCCCCCCCCCC887777777777777788CCCCCCCCCCCCCC887777777777777788CCCCCCCCCCCCCC887777777777777788CCCCCCCCCCCCCC887777777777777788CCCCCCCCCCCCCC8877777777777777888888888888888888888888888888888",
-                        // NumGlyphs: "2",
                     },
                     m("img", { src: imageDir + (this.haveMoreThanOnSelectedPlant() ? "MainForm_alignLeft.png" : "MainForm_alignLeft-disabled.png") })
                 ),
@@ -6769,12 +6683,6 @@ export class TMainForm {
                         onclick: () => this.alignRightClick(),
                         title: "Align right",
                         disabled: !this.haveMoreThanOnSelectedPlant()
-                        // Top: "58",
-                        // Left: "152",
-                        // Height: "25",
-                        // Width: "25",
-                        // Glyph.Data: "76010000424D760100000000000076000000280000002000000010000000010004000000000000010000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF008888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888CCCCCC88888C88887777778888878888CCCCCC888888C8887777778888887888CCCCCC88CCCCCC887777778877777788CCCCCC888888C8887777778888887888CCCCCC88888C888877777788888788888888888888888888888888888888888888888888888888888888888888888888CCCCCCCCCCCCCC887777777777777788CCCCCCCCCCCCCC887777777777777788CCCCCCCCCCCCCC887777777777777788CCCCCCCCCCCCCC887777777777777788CCCCCCCCCCCCCC8877777777777777888888888888888888888888888888888",
-                        // NumGlyphs: "2",
                     },
                     m("img", { src: imageDir + (this.haveMoreThanOnSelectedPlant() ? "MainForm_alignRight.png" : "MainForm_alignRight-disabled.png")})
                 ),
@@ -6783,18 +6691,6 @@ export class TMainForm {
                         onclick: () => this.packPlantsClick(),
                         title: "Pack plants",
                         disabled: !this.haveMoreThanOnSelectedPlant()
-                        // Top: "58",
-                        // Left: "188",
-                        // Height: "25",
-                        // Width: "65",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // Glyph.Data: "76010000424D760100000000000076000000280000002000000010000000010004000000000000010000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF008888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888CCCCC88CCCCC88887777788777778888CCCCC88CCCCC88887777788777778888CCCCC88CCCCC88887777788777778888CCCCC88CCCCC88887777788777778888CCCCC88CCCCC888877777887777788888888888888888888888888888888888888888888888888888888888888888888CCCCC88CCCCC88887777788777778888CCCCC88CCCCC88887777788777778888CCCCC88CCCCC88887777788777778888CCCCC88CCCCC88887777788777778888CCCCC88CCCCC888877777887777788888888888888888888888888888888888",
-                        // NumGlyphs: "2",
-                        // ParentFont: "False",
                     },
                     m("img", { src: imageDir + (this.haveMoreThanOnSelectedPlant() ? "MainForm_packPlants.png" : "MainForm_packPlants-disabled.png")}),
                 ),
@@ -6803,18 +6699,6 @@ export class TMainForm {
                         onclick: () => this.makeEqualWidthClick(),
                         title: "Make equal Width",
                         disabled: !this.haveMoreThanOnSelectedPlant()
-                        // Top: "128",
-                        // Left: "62",
-                        // Height: "25",
-                        // Width: "89",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // Glyph.Data: "76010000424D760100000000000076000000280000002000000010000000010004000000000000010000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF008888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888CCCCCCCCCCCCC8887777777777777888CCCCCCCCCCCCC8887777777777777888CCCCCCCCCCCCC8887777777777777888CCCCCCCCCCCCC8887777777777777888CCCCCCCCCCCCC88877777777777778888888888888888888888888888888888888888888888888888888888888888888CCCCCCCCCCCCC8887777777777777888CCCCCCCCCCCCC8887777777777777888CCCCCCCCCCCCC8887777777777777888CCCCCCCCCCCCC8887777777777777888CCCCCCCCCCCCC88877777777777778888888888888888888888888888888888",
-                        // NumGlyphs: "2",
-                        // ParentFont: "False",
                     },
                     m("img", { src: imageDir + (this.haveMoreThanOnSelectedPlant() ? "MainForm_makeEqualWidth.png" : "MainForm_makeEqualWidth-disabled.png")}),
                 ),
@@ -6823,18 +6707,6 @@ export class TMainForm {
                         onclick: () => this.makeEqualHeightClick(),
                         title: "Make equal height",
                         disabled: !this.haveMoreThanOnSelectedPlant()
-                        // Top: "128",
-                        // Left: "154",
-                        // Height: "25",
-                        // Width: "89",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // Glyph.Data: "76010000424D760100000000000076000000280000002000000010000000010004000000000000010000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF008888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888CCCCC8888CCCCC887777788887777788CCCCC8888CCCCC887777788887777788CCCCC8888CCCCC887777788887777788CCCCC8888CCCCC887777788887777788CCCCC8888CCCCC887777788887777788CCCCC8888CCCCC887777788887777788CCCCC8888CCCCC887777788887777788CCCCC8888CCCCC887777788887777788CCCCC8888CCCCC887777788887777788CCCCC8888CCCCC887777788887777788CCCCC8888CCCCC887777788887777788CCCCC8888CCCCC8877777888877777888888888888888888888888888888888",
-                        // NumGlyphs: "2",
-                        // ParentFont: "False",
                     },
                     m("img", { src: imageDir + (this.haveMoreThanOnSelectedPlant() ? "MainForm_makeEqualHeight.png" : "MainForm_makeEqualHeight-disabled.png")}),
                 ),
