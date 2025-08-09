@@ -3517,12 +3517,12 @@ export class TMainForm {
                 if ((this.commandList.rightButtonDown)) {
                     // to zoom out, can do right button or shift
                     cursor_change(Cursor.crMagMinus)
-                    // TODO PDF: veridy OK to use 0 here
+                    // TODO PDF: verify OK to use 0 here
                     const newCommand = new PdChangeMagnificationCommand(0, Point(0,0))
                     newCommand.shift = shift.isShift
                     result = newCommand
                 } else {
-                    // TODO PDF: veridy OK to use 0 here
+                    // TODO PDF: verify OK to use 0 here
                     const newCommand = new PdChangeMagnificationCommand(0, Point(0,0))
                     newCommand.shift = shift.isShift
                     result = newCommand
