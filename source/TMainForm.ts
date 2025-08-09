@@ -2276,9 +2276,6 @@ export class TMainForm {
     }
     
     updateForChangeToPlantSelections(): void {
-        if (domain.options.showSelectionRectangle) {
-            this.copyDrawingBitmapToPaintBox()
-        }
         this.plantListDrawGrid.Repaint()
         // must be done BEFORE updating so it picks it up
         this.selectedPlantPartID = -1
@@ -2289,6 +2286,9 @@ export class TMainForm {
             // don't do if reading file in
             // if change selected plant, must redraw to remove red color
             this.redrawAllPlantsInViewWithAmendments()
+        }
+        if (domain.options.showSelectionRectangle) {
+            this.copyDrawingBitmapToPaintBox()
         }
     }
       
@@ -3125,39 +3125,39 @@ export class TMainForm {
         }
     }
     
-    plantListDrawGridMouseDown(Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
-        let col: int
-        let row: int
-        
-        if (this.plants.length <= 0) {
+    */
+
+    plantListDrawGridMouseDown(event: MouseEvent, index: number, inHideShowIcon: boolean): void {
+        if (!this.havePlants()) {
             return
         }
-        if (Button === delphi_compatability.TMouseButton.mbRight) {
+        if (event.button !== MouseButton.mbLeft) {
             return
         }
-        if (this.justDoubleClickedOnDrawGrid) {
-            this.justDoubleClickedOnDrawGrid = false
-            return
-        } else {
-            this.justDoubleClickedOnDrawGrid = false
-        }
-        col, row = this.plantListDrawGrid.MouseToCell(X, Y, col, row)
+        // TODO PDF: Fix or remove obsolete code
+        // if (this.justDoubleClickedOnDrawGrid) {
+        //     this.justDoubleClickedOnDrawGrid = false
+        //     return
+        // } else {
+        //     this.justDoubleClickedOnDrawGrid = false
+        // }
         const hideList: PdPlant[] = []
         // does updating in command
-        this.selectPlantAtIndex(Shift, row)
-        if ((X <= 16) && (row >= 0) && (row <= this.plants.length - 1)) {
-            const plant = this.plants[row]
+        this.selectPlantAtIndex(event, index)
+        if (inHideShowIcon) {
+            const plant = this.plants[index]
             if (plant === null) {
                 return
             }
             hideList.push(plant)
             const newCommand = new PdHideOrShowCommand(hideList, !plant.hidden)
             this.doCommand(newCommand)
-        }
-        if (X > 16) {
-            this.plantListDrawGrid.BeginDrag(false)
+        } else {
+            // TOD PDF: Fix or remove: this.plantListDrawGrid.BeginDrag(false)
         }
     }
+
+    /*
     
     plantListDrawGridMouseUp(Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
         let popupPositionInScreenCoords: TPoint
@@ -6906,6 +6906,89 @@ export class TMainForm {
         )
     }
 
+    viewPlantList() {
+        return m("div.plantListPanel.TPanel.ba",
+            {
+                style: "min-height: 4rem"
+                // Top: "36",
+                // Left: "8",
+                // Height: "127",
+                // Width: "147",
+                // TabOrder: "4",
+            },
+            m("TDrawGrid.plantListDrawGrid.TDrawGrid.overflow-auto",
+                {
+                    // Top: "4",
+                    // Left: "4",
+                    // Height: "103",
+                    // Width: "137",
+                    // ColCount: "1",
+                    // DefaultColWidth: "200",
+                    // DefaultRowHeight: "16",
+                    // DefaultDrawing: "False",
+                    // FixedCols: "0",
+                    // RowCount: "10",
+                    // FixedRows: "0",
+                    // Font.Charset: "DEFAULT_CHARSET",
+                    // Font.Color: "clWindowText",
+                    // Font.Height: "-11",
+                    // Font.Name: "Arial",
+                    // Font.Style: "[]",
+                    // GridLineWidth: "0",
+                    // ParentFont: "False",
+                    // ScrollBars: "ssVertical",
+                    // TabOrder: "0",
+                    // OnDblClick: "plantListDrawGridDblClick",
+                    // OnDragOver: "plantListDrawGridDragOver",
+                    // OnDrawCell: "plantListDrawGridDrawCell",
+                    // OnEndDrag: "plantListDrawGridEndDrag",
+                    // OnKeyDown: "plantListDrawGridKeyDown",
+                    // OnMouseDown: "plantListDrawGridMouseDown",
+                    // OnMouseUp: "plantListDrawGridMouseUp",
+                },
+                this.plants.map((plant, index) => m("div", 
+                    m("img", {
+                        title: "Hide or show plant",
+                        src: imageDir + (plant.hidden ? "MainForm_visibleBitmap-hidden.png" : "MainForm_visibleBitmap.png"),
+                        onclick: (event: MouseEvent) => this.plantListDrawGridMouseDown(event, index, true)
+                    }), m("span", { onclick: (event: MouseEvent) => this.plantListDrawGridMouseDown(event, index, false) }, plant.getName())
+                ))
+            ),
+            m("img.plantBitmapsIndicatorImage.TImage",
+                {
+                    onclick: () => this.plantBitmapsIndicatorImageClick(),
+                    // Top: "107",
+                    // Left: "28",
+                    // Height: "16",
+                    // Width: "16",
+                    // AutoSize: "True",
+                    // Picture.Data: "07544269746D6170F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF008888888888888888877777777777777887888887888888788788888788888878878888878888887887888777778888788788778787788878878878878878887887888887888888788788877777888878878877878778887887888887888888788788888788888878878888888888887887777777777777788888888888888888",
+                    // Transparent: "True",
+                },
+            ),
+            m("img.plantFileChangedImage.TImage",
+                {
+                    // Top: "108",
+                    // Left: "6",
+                    // Height: "16",
+                    // Width: "16",
+                    // AutoSize: "True",
+                    // Picture.Data: "07544269746D6170F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF008888888888888888888888888888777888888888888788788888888888788878888888888788878888888888788878888888888788878888888888788878888888888788878888888888788878888888888788878888888888787878888888888777878888888888788778888888888878878888888888888778888888888888",
+                    // Transparent: "True",
+                },
+            ),
+            m("TPaintBox.progressPaintBox.TPaintBox",
+                {
+                    // Top: "114",
+                    // Left: "48",
+                    // Height: "3",
+                    // Width: "85",
+                    // OnPaint: "progressPaintBoxPaint",
+                },
+            ),
+        )
+    }
+
     view() {
         const self = this
         return m("div.relative", {
@@ -6942,7 +7025,8 @@ export class TMainForm {
             this.animateCommand && m("div.absolute.green.ma3", 
                 { style: { bottom: 0 } },
                 "Animating day " + this.animateCommand.age + " of " + this.animateCommand.oldestAgeAtMaturity + " (click anywhere to stop)"
-            )      
+            ),
+            this.viewPlantList()
         )
     }   
 }

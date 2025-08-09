@@ -6,7 +6,7 @@ import { TPoint } from "./TPoint"
 import { PdCommand, TrackPhase } from "./PdCommand"
 import { domain, DomainOptionsStructure, ViewPlants } from "./PdDomain"
 import { kScaleAndMove, kAlwaysMove, kDontRecalculateScale, kRecalculateScale } from "./temporary"
-import { SinglePoint, digitValueString, nameStringForFileType } from "./usupport";
+import { Rect, SinglePoint, digitValueString, nameStringForFileType } from "./usupport";
 import { FileExport3DOptionsStructure, fileTypeFor3DExportType } from "./U3dexport"
 import { min, safedivExcept, intMax, max, intMin } from "./umath"
 import { TRect } from "./TRect"
@@ -15,8 +15,9 @@ import { PdParameter, FieldType, kNotArray } from "./PdParameter"
 import { KfObject3D } from "./KfObject3D"
 import { PdGeneration } from "./PdGeneration"
 import { cursor_startWait, cursor_stopWait } from "./ucursor"
+import { TMainForm } from "./TMainForm"
 
-let MainForm: any
+let MainForm: TMainForm
 export function setMainFormForCommands(aForm: any) {
     MainForm = aForm
 }
@@ -269,8 +270,8 @@ export class PdChangeMagnificationCommand extends PdCommand {
                 // have min size in case they move the mouse by mistake
                 this.clickPoint.x = min(nextPoint.X, this.startDragPoint.X) + Math.abs(nextPoint.X - this.startDragPoint.X) / 2
                 this.clickPoint.y = min(nextPoint.Y, this.startDragPoint.Y) + Math.abs(nextPoint.Y - this.startDragPoint.Y) / 2
-                newScaleX = safedivExcept(domain.plantDrawScale_PixelsPerMm() * MainForm.drawingPaintBox.Width, size.X, 1.0)
-                newScaleY = safedivExcept(domain.plantDrawScale_PixelsPerMm() * MainForm.drawingPaintBox.Height, size.Y, 1.0)
+                newScaleX = safedivExcept(domain.plantDrawScale_PixelsPerMm() * MainForm.drawingPaintBox.width, size.X, 1.0)
+                newScaleY = safedivExcept(domain.plantDrawScale_PixelsPerMm() * MainForm.drawingPaintBox.height, size.Y, 1.0)
                 this.oldScale_PixelsPerMm = domain.plantDrawScale_PixelsPerMm()
                 this.oldOffset_mm = domain.plantDrawOffset_mm()
                 this.newScale_pixelsPerMm = min(newScaleX, newScaleY)
@@ -384,7 +385,6 @@ export class PdChangeMainWindowOrientationCommand extends PdCommand {
         try {
             cursor_startWait()
             domain.options.mainWindowOrientation = this.newWindowOrientation
-            MainForm.updateForChangeToOrientation()
         } finally {
             cursor_stopWait()
         }
@@ -395,7 +395,6 @@ export class PdChangeMainWindowOrientationCommand extends PdCommand {
         try {
             cursor_startWait()
             domain.options.mainWindowOrientation = this.oldWindowOrientation
-            MainForm.updateForChangeToOrientation()
         } finally {
             cursor_stopWait()
         }
@@ -1411,7 +1410,7 @@ export class PdPackPlantsCommand extends PdCommandWithListOfPlants {
                         newPoint.X = lastPlant.boundsRect_pixels().Right + kGapBetweenArrangedPlants + offset.X
                         newPoint.Y = lastPlant.boundsRect_pixels().Top + offset.Y
                     }
-                    if (newPoint.X + remainingX > MainForm.drawingPaintBox.Width) {
+                    if (newPoint.X + remainingX > MainForm.drawingPaintBox.width) {
                         newPoint.X = offset.X + kGapBetweenArrangedPlants
                         newPoint.Y = tallestHeight + kGapBetweenArrangedPlants + offset.Y
                     }
@@ -1557,7 +1556,6 @@ export class PdChangeMainWindowViewingOptionCommand extends PdCommandWithListOfP
                     this.newOffset_mm = domain.plantDrawOffset_mm()
                     break
             }
-            MainForm.updateMenusForChangeToViewingOption()
         } finally {
             cursor_stopWait()
         }
@@ -1603,7 +1601,6 @@ export class PdChangeMainWindowViewingOptionCommand extends PdCommandWithListOfP
                     MainForm.updateForChangeToPlantSelections()
                     break
             }
-            MainForm.updateMenusForChangeToViewingOption()
         } finally {
             cursor_stopWait()
         }
@@ -2671,7 +2668,7 @@ export class PdDuplicateCommand extends PdCommandWithListOfPlants {
             if (!this.done) {
                 return result
             }
-            if (!MainForm.drawingPaintBox.ClientRect.contains(nextPoint)) {
+            if (!Rect(0, 0, MainForm.drawingPaintBox.width, MainForm.drawingPaintBox.height).contains(nextPoint)) {
                 this.undoCommand()
                 result = null
             } else {
