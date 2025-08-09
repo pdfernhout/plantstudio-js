@@ -1929,9 +1929,8 @@ export class TMainForm {
     }
     
     plantBitmapsIndicatorImageClick(): void {
-        unfinished()
-        // if ((!domain.options.cachePlantBitmaps) && (this.MenuOptionsUsePlantBitmaps.enabled)) {
-        //     this.MenuOptionsUsePlantBitmapsClick()
+        // TODO PDF: Fix or remove  -- does not seem eneded?: if ((!domain.options.cachePlantBitmaps) {
+        this.MenuOptionsUsePlantBitmapsClick()
         // }
     }
     
@@ -2686,6 +2685,9 @@ export class TMainForm {
         ShowMessage("An exception occurred while resizing a plant bitmap. " + chr(13) + "All plant bitmaps have been dropped and plants will be drawn directly on the window." + chr(13) + "To use plant bitmaps again, choose Use Plant Bitmaps from the Options menu." + chr(13) + chr(13) + "This exception means that your memory limit is set too high for the available memory." + chr(13) + "To decrease the memory limit, choose Preferences from the Edit menu." + chr(13) + "Click Help in the Preferences window for details.")
         this.stopUsingPlantBitmaps()
     }
+
+    plantBitmapsIndicatorImage_Picture: string = "MainForm_plantBitmapsIndicatorImage.png"
+    plantBitmapsIndicatorImage_Hint: string = ""
     
     updateForChangeToPlantBitmaps(): void {
         let aString: string
@@ -2710,21 +2712,18 @@ export class TMainForm {
                 aString = aString + " You can change the amount of memory dedicated to plant bitmaps in the Preferences window."
             }
         }
-        // TODO PDF: Fix this
-        // if (this.plantBitmapsIndicatorImage !== null) {
-        //     if (domain.options.cachePlantBitmaps) {
-        //         if (megabytesInUse / domain.options.memoryLimitForPlantBitmaps_MB <= 0.5) {
-        //             this.plantBitmapsIndicatorImage.Picture = this.plantBitmapsGreenImage.Picture
-        //         } else if (megabytesInUse / domain.options.memoryLimitForPlantBitmaps_MB <= 0.8) {
-        //             this.plantBitmapsIndicatorImage.Picture = this.plantBitmapsYellowImage.Picture
-        //         } else {
-        //             this.plantBitmapsIndicatorImage.Picture = this.plantBitmapsRedImage.Picture
-        //         }
-        //     } else {
-        //         this.plantBitmapsIndicatorImage.Picture = this.noPlantBitmapsImage.Picture
-        //     }
-        //     this.plantBitmapsIndicatorImage.Hint = aString
-        // }
+        if (domain.options.cachePlantBitmaps) {
+            if (megabytesInUse / domain.options.memoryLimitForPlantBitmaps_MB <= 0.5) {
+                this.plantBitmapsIndicatorImage_Picture = "MainForm_plantBitmapsGreenImage.png"
+            } else if (megabytesInUse / domain.options.memoryLimitForPlantBitmaps_MB <= 0.8) {
+                this.plantBitmapsIndicatorImage_Picture = "MainForm_plantBitmapsYelloImage.png"
+            } else {
+                this.plantBitmapsIndicatorImage_Picture = "MainForm_plantBitmapsRedImage.png"
+            }
+        } else {
+            this.plantBitmapsIndicatorImage_Picture = "MainForm_plantBitmapsIndicatorImage.png"
+        }
+        this.plantBitmapsIndicatorImage_Hint = aString
     }
     
     stopUsingPlantBitmaps(): void {
@@ -6862,7 +6861,6 @@ export class TMainForm {
     viewPlantList() {
         return m("div.plantListPanel.TPanel.ba",
             {
-                style: "min-height: 4rem"
                 // Top: "36",
                 // Left: "8",
                 // Height: "127",
@@ -6871,6 +6869,7 @@ export class TMainForm {
             },
             m("TDrawGrid.plantListDrawGrid.TDrawGrid.overflow-auto",
                 {
+                    style: "min-height: 4rem",
                     // Top: "4",
                     // Left: "4",
                     // Height: "103",
@@ -6912,6 +6911,8 @@ export class TMainForm {
             ),
             m("img.plantBitmapsIndicatorImage.TImage",
                 {
+                    title: this.plantBitmapsIndicatorImage_Hint,
+                    src: imageDir + this.plantBitmapsIndicatorImage_Picture,
                     onclick: () => this.plantBitmapsIndicatorImageClick(),
                     // Top: "107",
                     // Left: "28",
