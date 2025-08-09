@@ -3127,14 +3127,15 @@ export class TMainForm {
             }
         }
     }
+
+    */
     
     plantListDrawGridDblClick(): void {
+        console.log("plantListDrawGridDblClick")
         this.MenuPlantRenameClick()
-        this.plantListDrawGrid.endDrag(false)
-        this.justDoubleClickedOnDrawGrid = true
+        // TODO PDF: Fix or remove: this.plantListDrawGrid.endDrag(false)
+        // TODO PDF: Fix or remove: this.justDoubleClickedOnDrawGrid = true
     }
-    
-    */
 
     // list box 
     moveSelectedPlantsUp(): void {
@@ -6766,7 +6767,8 @@ export class TMainForm {
                 },
                 this.plants.map((plant, index) => m("div.bl.bw2", 
                     {   id: plant.uuid,
-                        style: { borderColor: this.plantListSelectionStyling(plant) }
+                        style: { borderColor: this.plantListSelectionStyling(plant) },
+                        ondblclick: () => this.plantListDrawGridDblClick()
                     },
                     m("img", {
                         title: "Hide or show plant",
