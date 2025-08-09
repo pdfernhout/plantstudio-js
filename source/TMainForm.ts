@@ -158,7 +158,6 @@ export class TMainForm {
     // plantFileChangedImage: TImage = new TImage()
     // fileChangedImage: TImage = new TImage()
     // fileNotChangedImage: TImage = new TImage()
-    // plantListDrawGrid: TDrawGrid = new TDrawGrid()
     // animateGrowth: TSpeedButton = new TSpeedButton()
     // plantsAsTextMemo: TMemo = new TMemo()
     // plantBitmapsIndicatorImage: TImage = new TImage()
@@ -2113,7 +2112,6 @@ export class TMainForm {
     // ---------------------------------------------------------------------------- *updating 
     updateForNoPlantFile(): void {
         this.selectedPlants = []
-        // TODO PDF: Fix or remove: this.plantListDrawGrid.Invalidate()
         this.clearCommandList()
         this.Caption = this.captionForFile()
         this.updateRightSidePanelForFirstSelectedPlant()
@@ -2276,7 +2274,6 @@ export class TMainForm {
     }
     
     updateForChangeToPlantSelections(): void {
-        this.plantListDrawGrid.Repaint()
         // must be done BEFORE updating so it picks it up
         this.selectedPlantPartID = -1
         this.updateRightSidePanelForFirstSelectedPlant()
@@ -2308,8 +2305,6 @@ export class TMainForm {
             return
         }
         this.Caption = this.captionForFile()
-        this.plantListDrawGrid.RowCount = this.plants.length
-        // TODO PDF: Fix or remove: this.plantListDrawGrid.Invalidate()
         // selected plants list - make sure no pointers are invalid 
         const plantsToRemove: PdPlant[] = [] 
         if (this.selectedPlants.length > 0) {
@@ -2420,7 +2415,6 @@ export class TMainForm {
     }
     
     updateForRenamingPlant(aPlant: PdPlant): void {
-        // TODO PDF: Fix or remove: this.plantListDrawGrid.Invalidate()
         for (let i = 0; i <= kTabHighest; i++) {
             this.updatePlantNameLabel(i)
         }
@@ -2776,7 +2770,6 @@ export class TMainForm {
             UnionRect(redrawRect, redrawRect, plant.boundsRect_pixels())
         }
         this.invalidateDrawingRect(redrawRect)
-        // TODO PDF: Fix or remove: this.plantListDrawGrid.Invalidate()
         if (drawNow) {
             this.updateForPossibleChangeToDrawing()
         }
@@ -3080,53 +3073,6 @@ export class TMainForm {
         return null
     }
 
-    /*
-    
-    // ------------------------------------------------------------------------------------- *list of plants 
-    plantListDrawGridDrawCell(Col: int, Row: int, Rect: TRect, State: TGridDrawState): void {
-        this.plantListDrawGrid.Canvas.Brush.Color = this.plantListDrawGrid.Color
-        this.plantListDrawGrid.Canvas.FillRect(Rect)
-        if ((this.plants.length <= 0) || (Row < 0) || (Row > this.plants.length - 1)) {
-            return
-        }
-        // set up plant pointer 
-        const plant = this.plants[Row]
-        if (plant === null) {
-            return
-        }
-        const selected = this.isSelected(plant)
-        // set up rectangles 
-        const visibleRect = new TRect()
-        visibleRect.Right = visibleRect.Left + this.plantListDrawGrid.DefaultRowHeight
-        const remainderRect = new TRect()
-        remainderRect.Left = remainderRect.Left + rWidth(visibleRect)
-        // fill first box with white, rest with clHighlight if selected 
-        this.plantListDrawGrid.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsSolid
-        this.plantListDrawGrid.Canvas.Brush.Color = this.plantListDrawGrid.Color
-        this.plantListDrawGrid.Canvas.FillRect(visibleRect)
-        if (!plant.hidden) {
-            this.plantListDrawGrid.Canvas.Draw(visibleRect.Left + (visibleRect.Right - visibleRect.Left) / 2 - this.visibleBitmap.Picture.Bitmap.Width / 2, Rect.top, this.visibleBitmap.Picture.Bitmap)
-        }
-        this.plantListDrawGrid.Canvas.Font = this.plantListDrawGrid.Font
-        if (selected) {
-            this.plantListDrawGrid.Canvas.Brush.Color = ColorDefs.clHighlight
-            this.plantListDrawGrid.Canvas.Font.Color = ColorDefs.clHighlightText
-        } else {
-            this.plantListDrawGrid.Canvas.Brush.Color = this.plantListDrawGrid.Color
-            this.plantListDrawGrid.Canvas.Font.Color = ColorDefs.clBtnText
-        }
-        this.plantListDrawGrid.Canvas.FillRect(remainderRect)
-        const cText = plant.getName()
-        // margin for text 
-        remainderRect.Left = remainderRect.Left + 5
-        UNRESOLVED.winprocs.drawText(this.plantListDrawGrid.Canvas.Handle, cText, len(cText), remainderRect, delphi_compatability.DT_LEFT)
-        if (plant === this.focusedPlant()) {
-            UNRESOLVED.drawFocusRect(Rect)
-        }
-    }
-    
-    */
-
     plantListDrawGridMouseDown(event: MouseEvent, index: number, inHideShowIcon: boolean): void {
         if (!this.havePlants()) {
             return
@@ -3208,7 +3154,6 @@ export class TMainForm {
         }
         this.invalidateSelectedPlantRectangles()
         this.updateForPossibleChangeToDrawing()
-        // TODO PDF: Fix or remove: this.plantListDrawGrid.Invalidate()
     }
     
     moveSelectedPlantsDown(): void {
@@ -3225,7 +3170,6 @@ export class TMainForm {
         }
         this.invalidateSelectedPlantRectangles()
         this.updateForPossibleChangeToDrawing()
-        // TODO PDF: Fix or remove: this.plantListDrawGrid.Invalidate()
     }
 
     /*
@@ -6163,7 +6107,6 @@ export class TMainForm {
     // TODO: PDF fix tabSet stub
     tabSet: any = {}
     lifeCycleDaysEdit: any = {}
-    plantListDrawGrid: any = { Repaint: () => {} }
     xLocationEdit: any = {}
     yLocationEdit: any = {}
     xRotationEdit: any = {}
@@ -6906,6 +6849,16 @@ export class TMainForm {
         )
     }
 
+    plantListSelectionStyling(plant: PdPlant): string {
+        if (this.isFocused(plant)) {
+            return convertColor(domain.options.firstSelectionRectangleColor)
+        } else if (this.isSelected(plant)) {
+            return convertColor(domain.options.multiSelectionRectangleColor)
+        } else {
+            return "white"
+        }
+    }
+
     viewPlantList() {
         return m("div.plantListPanel.TPanel.ba",
             {
@@ -6946,7 +6899,10 @@ export class TMainForm {
                     // OnMouseDown: "plantListDrawGridMouseDown",
                     // OnMouseUp: "plantListDrawGridMouseUp",
                 },
-                this.plants.map((plant, index) => m("div", 
+                this.plants.map((plant, index) => m("div.bl.bw2", 
+                    {   id: plant.uuid,
+                        style: { borderColor: this.plantListSelectionStyling(plant) }
+                    },
                     m("img", {
                         title: "Hide or show plant",
                         src: imageDir + (plant.hidden ? "MainForm_visibleBitmap-hidden.png" : "MainForm_visibleBitmap.png"),
