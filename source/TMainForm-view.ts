@@ -353,44 +353,6 @@ export function viewMainForm() {
                             "pixels/mm",
                         ),
                     ),
-                    m("Group.Group.g00000128",
-                        m("button.makeEqualWidth.TSpeedButton",
-                            {
-                                onclick: makeEqualWidthClick,
-                                // Top: "128",
-                                // Left: "62",
-                                // Height: "25",
-                                // Width: "89",
-                                // Font.Charset: "DEFAULT_CHARSET",
-                                // Font.Color: "clWindowText",
-                                // Font.Height: "-11",
-                                // Font.Name: "Arial",
-                                // Font.Style: "[]",
-                                // Glyph.Data: "76010000424D760100000000000076000000280000002000000010000000010004000000000000010000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF008888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888CCCCCCCCCCCCC8887777777777777888CCCCCCCCCCCCC8887777777777777888CCCCCCCCCCCCC8887777777777777888CCCCCCCCCCCCC8887777777777777888CCCCCCCCCCCCC88877777777777778888888888888888888888888888888888888888888888888888888888888888888CCCCCCCCCCCCC8887777777777777888CCCCCCCCCCCCC8887777777777777888CCCCCCCCCCCCC8887777777777777888CCCCCCCCCCCCC8887777777777777888CCCCCCCCCCCCC88877777777777778888888888888888888888888888888888",
-                                // NumGlyphs: "2",
-                                // ParentFont: "False",
-                            },
-                            "Equal Width",
-                        ),
-                        m("button.makeEqualHeight.TSpeedButton",
-                            {
-                                onclick: makeEqualHeightClick,
-                                // Top: "128",
-                                // Left: "154",
-                                // Height: "25",
-                                // Width: "89",
-                                // Font.Charset: "DEFAULT_CHARSET",
-                                // Font.Color: "clWindowText",
-                                // Font.Height: "-11",
-                                // Font.Name: "Arial",
-                                // Font.Style: "[]",
-                                // Glyph.Data: "76010000424D760100000000000076000000280000002000000010000000010004000000000000010000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF008888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888CCCCC8888CCCCC887777788887777788CCCCC8888CCCCC887777788887777788CCCCC8888CCCCC887777788887777788CCCCC8888CCCCC887777788887777788CCCCC8888CCCCC887777788887777788CCCCC8888CCCCC887777788887777788CCCCC8888CCCCC887777788887777788CCCCC8888CCCCC887777788887777788CCCCC8888CCCCC887777788887777788CCCCC8888CCCCC887777788887777788CCCCC8888CCCCC887777788887777788CCCCC8888CCCCC8877777888877777888888888888888888888888888888888",
-                                // NumGlyphs: "2",
-                                // ParentFont: "False",
-                            },
-                            "Equal Height",
-                        ),
-                    ),
                     m("Group.Group.g00000174",
                         m("input.xRotationEdit.TEdit",
                             {
@@ -1968,10 +1930,6 @@ export function viewMainForm() {
 function animateGrowthClick() { console.log("animateGrowthClick") }
 
 function changeSelectedPose() { console.log("changeSelectedPose") }
-
-function makeEqualHeightClick() { console.log("makeEqualHeightClick") }
-
-function makeEqualWidthClick() { console.log("makeEqualWidthClick") }
 
 function noteEditClick() { console.log("noteEditClick") }
 
