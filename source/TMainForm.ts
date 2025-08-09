@@ -3131,7 +3131,6 @@ export class TMainForm {
     */
     
     plantListDrawGridDblClick(): void {
-        console.log("plantListDrawGridDblClick")
         this.MenuPlantRenameClick()
         // TODO PDF: Fix or remove: this.plantListDrawGrid.endDrag(false)
         // TODO PDF: Fix or remove: this.justDoubleClickedOnDrawGrid = true
@@ -6592,7 +6591,7 @@ export class TMainForm {
                     },
                     m("img", { src: imageDir + (this.havePlants() ? "MainForm_posingSelectionCursorMode.png" : "MainForm_posingSelectionCursorMode-disabled.png") })
                 ),
-                m("select.magnificationPercent.TComboBox.w3",
+                m("select.magnificationPercent.TComboBox.w3.ml1",
                     {
                         onclick: () => this.magnificationPercentClick(),
                         disabled: !this.havePlants()
@@ -6613,7 +6612,7 @@ export class TMainForm {
                         // OnExit: "magnificationPercentExit",
                     },
                 ),
-                m("button.centerDrawing.TSpeedButton",
+                m("button.centerDrawing.TSpeedButton.ml1",
                     {
                         onclick: () => this.centerDrawingClick(),
                         title: "Center drawing",
@@ -6622,7 +6621,7 @@ export class TMainForm {
                     m("img.mr1", { src: imageDir + "MainForm_centerDrawing.png" }),
                     "Scale to Fit",
                 ),
-                m("button.viewFreeFloating.TSpeedButton" + this.backgroundForSpeedButton("viewFreeFloating"),
+                m("button.viewFreeFloating.TSpeedButton.ml1" + this.backgroundForSpeedButton("viewFreeFloating"),
                     {
                         onclick: () => this.viewFreeFloatingClick(),
                         title: "View free floating",
@@ -6638,7 +6637,7 @@ export class TMainForm {
                     },
                     m("img", { src: imageDir + (domain.plantFileLoaded ? "MainForm_viewOneOnly.png" : "MainForm_viewOneOnly-disabled.png" ) })
                 ),
-                m("button.drawingAreaOnTop.TSpeedButton" + this.backgroundForSpeedButton("drawingAreaOnTop"),
+                m("button.drawingAreaOnTop.TSpeedButton.ml1" + this.backgroundForSpeedButton("drawingAreaOnTop"),
                     {
                         onclick: () => this.drawingAreaOnTopClick(),
                         title: "Drawing area on top",
@@ -6654,8 +6653,7 @@ export class TMainForm {
                     },
                     m("img", { src: imageDir + (domain.plantFileLoaded ? "MainForm_drawingAreaOnSide.png" : "MainForm_drawingAreaOnSide-disabled.png") })
                 ),
-                m("span", "|"),
-                m("button.alignTops.TSpeedButton",
+                m("button.alignTops.TSpeedButton.ml1",
                     {
                         onclick: () => this.alignTopsClick(),
                         title: "Align tops",
@@ -6687,7 +6685,7 @@ export class TMainForm {
                     },
                     m("img", { src: imageDir + (this.haveMoreThanOnSelectedPlant() ? "MainForm_alignRight.png" : "MainForm_alignRight-disabled.png")})
                 ),
-                m("button.packPlants.TSpeedButton",
+                m("button.packPlants.TSpeedButton.ml1",
                     {
                         onclick: () => this.packPlantsClick(),
                         title: "Pack plants",
@@ -6695,7 +6693,7 @@ export class TMainForm {
                     },
                     m("img", { src: imageDir + (this.haveMoreThanOnSelectedPlant() ? "MainForm_packPlants.png" : "MainForm_packPlants-disabled.png")}),
                 ),
-                m("button.makeEqualWidth.TSpeedButton",
+                m("button.makeEqualWidth.TSpeedButton.ml1",
                     {
                         onclick: () => this.makeEqualWidthClick(),
                         title: "Make equal Width",
