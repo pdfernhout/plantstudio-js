@@ -191,7 +191,6 @@ export class TMainForm {
     // drawingScaleEdit: TEdit = new TEdit()
     // drawingScaleSpin: TSpinButton = new TSpinButton()
     // drawingScalePixelsPerMmLabel: TLabel = new TLabel()
-    // packPlants: TSpeedButton = new TSpeedButton()
     // locationLabel: TLabel = new TLabel()
     // xLocationLabel: TLabel = new TLabel()
     // xLocationEdit: TEdit = new TEdit()
@@ -201,10 +200,6 @@ export class TMainForm {
     // yLocationSpin: TSpinButton = new TSpinButton()
     // locationPixelsLabel: TLabel = new TLabel()
     // arrangementPlantName: TLabel = new TLabel()
-    // alignTops: TSpeedButton = new TSpeedButton()
-    // alignBottoms: TSpeedButton = new TSpeedButton()
-    // alignLeft: TSpeedButton = new TSpeedButton()
-    // alignRight: TSpeedButton = new TSpeedButton()
     // makeEqualWidth: TSpeedButton = new TSpeedButton()
     // makeEqualHeight: TSpeedButton = new TSpeedButton()
     // parametersPlantName: TLabel = new TLabel()
@@ -248,7 +243,6 @@ export class TMainForm {
     // posingLineColor: TPanel = new TPanel()
     // posingFrontfaceColor: TPanel = new TPanel()
     // posingBackfaceColor: TPanel = new TPanel()
-    // posingSelectionCursorMode: TSpeedButton = new TSpeedButton()
     // posedPartsLabel: TLabel = new TLabel()
     // posedPlantParts: TComboBox = new TComboBox()
     // posingHighlight: TSpeedButton = new TSpeedButton()
@@ -2155,51 +2149,47 @@ export class TMainForm {
     }
     
     updateForPlantFile(): void {
-        unfinished()
-        // this.internalChange = true
-        // if (!domain.plantFileLoaded) {
-        //     this.updateForNoPlantFile()
-        // } else {
-        //     this.Caption = this.captionForFile()
-        //     this.updateForChangeToPlantList()
-        //     this.updateMenusForChangedPlantFile()
-        //     this.selectedPlants= []
-        //     this.magnificationPercent.Text = IntToStr(intround(domain.plantDrawScale_PixelsPerMm() * 100.0)) + "%"
-        //     if (domain.plantManager.mainWindowOrientation !== domain.options.mainWindowOrientation) {
-        //         // v2.0 load and save window orientation (top or side)
-        //         domain.options.mainWindowOrientation = domain.plantManager.mainWindowOrientation
-        //         this.updateForChangeToOrientation()
-        //     }
-        //     if (this.plants.length > 0) {
-        //         for (let i = 0; i <= this.plants.length - 1; i++) {
-        //             // v2.0 load and save plant hidden and selected flags
-        //             const plant = this.plants[i]
-        //             if (plant.selectedWhenLastSaved) {
-        //                 this.selectedPlants.push(plant)
-        //             }
-        //         }
-        //         if (this.selectedPlants.length <= 0) {
-        //             this.selectedPlants.push(this.plants[0])
-        //         }
-        //         this.updateForChangeToPlantSelections()
-        //     }
-        //     if (domain.viewPlantsInMainWindowOnePlantAtATime()) {
-        //         // deal with possibly changed viewing mode (one/many)
-        //         this.showOnePlantExclusively(kDontDrawYet)
-        //     }
-        //     this.viewOneOnly.Down = domain.viewPlantsInMainWindowOnePlantAtATime()
-        //     if (domain.plantManager.fitInVisibleAreaForConcentrationChange) {
-        //         this.fitVisiblePlantsInDrawingArea(kDrawNow, kScaleAndMove, kAlwaysMove)
-        //         domain.plantManager.fitInVisibleAreaForConcentrationChange = false
-        //     } else {
-        //         this.fitVisiblePlantsInDrawingArea(kDrawNow, kJustMove, kOnlyMoveIfOffTheScreen)
-        //         this.redrawEverything()
-        //     }
-        // }
-        // // v2.0 switch to select/drag mode - sometimes it seems to get broken - this will fix it - not unreasonable to do
-        // this.cursorModeForDrawing = kCursorModeSelectDrag
-        // this.dragCursorMode.Down = true
-        // this.internalChange = false
+        this.internalChange = true
+        if (!domain.plantFileLoaded) {
+            this.updateForNoPlantFile()
+        } else {
+            this.Caption = this.captionForFile()
+            this.updateForChangeToPlantList()
+            this.updateMenusForChangedPlantFile()
+            this.selectedPlants= []
+            this.magnificationPercent.Text = IntToStr(intround(domain.plantDrawScale_PixelsPerMm() * 100.0)) + "%"
+            if (domain.plantManager.mainWindowOrientation !== domain.options.mainWindowOrientation) {
+                // v2.0 load and save window orientation (top or side)
+                domain.options.mainWindowOrientation = domain.plantManager.mainWindowOrientation
+            }
+            if (this.plants.length > 0) {
+                for (let i = 0; i <= this.plants.length - 1; i++) {
+                    // v2.0 load and save plant hidden and selected flags
+                    const plant = this.plants[i]
+                    if (plant.selectedWhenLastSaved) {
+                        this.selectedPlants.push(plant)
+                    }
+                }
+                if (this.selectedPlants.length <= 0) {
+                    this.selectedPlants.push(this.plants[0])
+                }
+                this.updateForChangeToPlantSelections()
+            }
+            if (domain.viewPlantsInMainWindowOnePlantAtATime()) {
+                // deal with possibly changed viewing mode (one/many)
+                this.showOnePlantExclusively(kDontDrawYet)
+            }
+            if (domain.plantManager.fitInVisibleAreaForConcentrationChange) {
+                this.fitVisiblePlantsInDrawingArea(kDrawNow, kScaleAndMove, kAlwaysMove)
+                domain.plantManager.fitInVisibleAreaForConcentrationChange = false
+            } else {
+                this.fitVisiblePlantsInDrawingArea(kDrawNow, kJustMove, kOnlyMoveIfOffTheScreen)
+                this.redrawEverything()
+            }
+        }
+        // v2.0 switch to select/drag mode - sometimes it seems to get broken - this will fix it - not unreasonable to do
+        this.cursorModeForDrawing = CursorMode.kCursorModeSelectDrag
+        this.internalChange = false
     }
 
     updateHintPauseForOptions(): void {
@@ -2225,10 +2215,6 @@ export class TMainForm {
         // this.Font.Size = domain.options.parametersFontSize
         // this.parametersScrollBox.Font.Size = domain.options.parametersFontSize
         // this.parametersScrollBox.Invalidate()
-        // // viewing option
-        // this.updateMenusForChangeToViewingOption()
-        // // drawing
-        // // showing optional things
         // // posing
         // this.posingGhost.Down = domain.options.showGhostingForHiddenParts
         // this.posingHighlight.Down = domain.options.showHighlightingForNonHiddenPosedParts
@@ -2274,22 +2260,7 @@ export class TMainForm {
         //     }
         // }
     }
- 
-    updateMenusForChangeToViewingOption(): void {
-        // TODO PDF: Fix or delete obsoletecode
-        // this.MenuLayoutViewOnePlantAtATime.checked = domain.viewPlantsInMainWindowOnePlantAtATime()
-        // this.MenuLayoutViewFreeFloating.checked = domain.viewPlantsInMainWindowFreeFloating()
-        // this.viewOneOnly.Down = domain.viewPlantsInMainWindowOnePlantAtATime()
-        // this.viewFreeFloating.Down = domain.viewPlantsInMainWindowFreeFloating()
-    }
     
-    updateForChangeToOrientation(): void {
-        // TODO PDF: Fix or delete obsolete code
-        // this.Resize()
-    }
-    
-    /*
-
     moveUpOrDownWithKeyInPlantList(indexAfterMove: short): void {
         if (indexAfterMove > this.plants.length - 1) {
             // loop around 
@@ -2305,8 +2276,6 @@ export class TMainForm {
             this.doCommand(newCommand)
         }
     }
-
-    */
     
     updateForChangeToPlantSelections(): void {
         if (domain.options.showSelectionRectangle) {
@@ -2506,22 +2475,10 @@ export class TMainForm {
     }
     
     updateMenusForChangedPlantList(): void {
-        // TODO PDF: Fix this or remove  obsolete code
-        // let havePlants: boolean
-        
-        // havePlants = (this.plants.length > 0)
-        // if (!havePlants) {
-        //     this.dragCursorModeClick()
-        // }
-        // this.toolbarPanel.Enabled = havePlants
-        // this.dragCursorMode.Enabled = havePlants
-        // this.magnifyCursorMode.Enabled = havePlants
-        // this.scrollCursorMode.Enabled = havePlants
-        // this.rotateCursorMode.Enabled = havePlants
-        // this.posingSelectionCursorMode.Enabled = havePlants
-        // this.centerDrawing.Enabled = havePlants
-        // this.magnificationPercent.Enabled = havePlants
-        // this.updateMenusForChangedSelectedPlants()
+        if (!this.havePlants) {
+            this.dragCursorModeClick()
+        }
+        this.updateMenusForChangedSelectedPlants()
     }
     
     updateMenusForChangedSelectedPlants(): void {
@@ -2559,16 +2516,9 @@ export class TMainForm {
         // // drawing scale
         // this.drawingScaleEdit.Enabled = haveSelectedPlants
         // this.drawingScaleSpin.Enabled = haveSelectedPlants
-        // // alignment
-        // this.alignTops.Enabled = haveMoreThanOneSelectedPlant
-        // this.alignBottoms.Enabled = haveMoreThanOneSelectedPlant
-        // this.alignLeft.Enabled = haveMoreThanOneSelectedPlant
-        // this.alignRight.Enabled = haveMoreThanOneSelectedPlant
         // // size
         // this.makeEqualWidth.Enabled = haveMoreThanOneSelectedPlant
         // this.makeEqualHeight.Enabled = haveMoreThanOneSelectedPlant
-        // // pack
-        // this.packPlants.Enabled = haveMoreThanOneSelectedPlant
     }
     
     updatePasteMenuForClipboardContents(): void {
@@ -6400,8 +6350,8 @@ export class TMainForm {
                 "radio", "MenuOptionsCustomDraw", "&Custom...", this.MenuOptionsCustomDrawClick, () => domain.options.drawSpeed === DrawMode.kDrawCustom,
             ],
             "MenuLayoutView", "&View What Plants", [
-                "radio", "MenuLayoutViewFreeFloating", "&All Plants", this.MenuLayoutViewFreeFloatingClick, () => domain.options.mainWindowViewMode === ViewPlants.kViewPlantsInMainWindowFreeFloating, () => domain.plantFileLoaded,
-                "radio", "MenuLayoutViewOnePlantAtATime", "&One Plant at a Time", this.MenuLayoutViewOnePlantAtATimeClick, () => domain.options.mainWindowViewMode === ViewPlants.kViewPlantsInMainWindowOneAtATime, () => domain.plantFileLoaded,
+                "radio", "MenuLayoutViewFreeFloating", "&All Plants", this.MenuLayoutViewFreeFloatingClick, () => domain.viewPlantsInMainWindowFreeFloating(), () => domain.plantFileLoaded,
+                "radio", "MenuLayoutViewOnePlantAtATime", "&One Plant at a Time", this.MenuLayoutViewOnePlantAtATimeClick, () => domain.viewPlantsInMainWindowOnePlantAtATime(), () => domain.plantFileLoaded,
             ], () => false,  () => domain.plantFileLoaded,
             "MenuLayoutDrawingAreaOn", "Place Drawing &Area", [
                 "radio", "MenuLayoutHorizontalOrientation", "On &Top", this.MenuLayoutHorizontalOrientationClick, () => domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal, () => domain.plantFileLoaded,
@@ -6672,6 +6622,7 @@ export class TMainForm {
                     {
                         onclick: () => this.dragCursorModeClick(),
                         title: "Drag cursor mode",
+                        disabled: !this.havePlants()
                         // Top: "4",
                         // Left: "6",
                         // Height: "25",
@@ -6685,6 +6636,7 @@ export class TMainForm {
                     {
                         onclick: () => this.scrollCursorModeClick(),
                         title: "Scroll cursor mode",
+                        disabled: !this.havePlants()
                         // Top: "4",
                         // Left: "31",
                         // Height: "25",
@@ -6698,6 +6650,7 @@ export class TMainForm {
                     {
                         onclick: () => this.rotateCursorModeClick(),
                         title: "Rotate cursor mode",
+                        disabled: !this.havePlants()
                         // Top: "4",
                         // Left: "56",
                         // Height: "25",
@@ -6712,6 +6665,7 @@ export class TMainForm {
                     {
                         onclick: () => this.magnifyCursorModeClick(),
                         title: "Magnify cursor mode",
+                        disabled: !this.havePlants()
                         // Top: "4",
                         // Left: "81",
                         // Height: "25",
@@ -6725,6 +6679,7 @@ export class TMainForm {
                     {
                         onclick: () => this.posingSelectionCursorModeClick(),
                         title: "Posing selection cursor mode",
+                        disabled: !this.havePlants()
                         // Top: "4",
                         // Left: "106",
                         // Height: "25",
@@ -6738,6 +6693,7 @@ export class TMainForm {
                 m("select.magnificationPercent.TComboBox.w3",
                     {
                         onclick: () => this.magnificationPercentClick(),
+                        disabled: !this.havePlants()
                         // Top: "6",
                         // Left: "147",
                         // Height: "22",
@@ -6759,6 +6715,7 @@ export class TMainForm {
                     {
                         onclick: () => this.centerDrawingClick(),
                         title: "Center drawing",
+                        disabled: !this.havePlants()
                         // Top: "4",
                         // Left: "214",
                         // Height: "25",
@@ -6894,7 +6851,7 @@ export class TMainForm {
                     {
                         onclick: () => this.packPlantsClick(),
                         title: "Pack plants",
-                        disabled: !this.haveSelectedPlants()
+                        disabled: !this.haveMoreThanOnSelectedPlant()
                         // Top: "58",
                         // Left: "188",
                         // Height: "25",
