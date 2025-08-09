@@ -71,7 +71,6 @@ const kOffscreenMargin = 20
 const kSelectNoPosedPartString = "< Select None >"
 const kNoPartSelected = "Selected part: (none)"
 
-let plantFileChanged: boolean  = false
 let pictureFileSaveAttemptsThisSession: short = 0
 let nozzleFileSaveAttemptsThisSession: short = 0
 let exportTo3DFileSaveAttemptsThisSession: short[] = Array(7) // Array(ExportFormats.k3DExportTypeLast + 1)
@@ -155,9 +154,6 @@ export class TMainForm {
     // parametersPanel: TPanel = new TPanel()
     // parametersScrollBox: TScrollBox = new TScrollBox()
     // maxSizeAxisLabel: TLabel = new TLabel()
-    // plantFileChangedImage: TImage = new TImage()
-    // fileChangedImage: TImage = new TImage()
-    // fileNotChangedImage: TImage = new TImage()
     // animateGrowth: TSpeedButton = new TSpeedButton()
     // plantsAsTextMemo: TMemo = new TMemo()
     // plantBitmapsIndicatorImage: TImage = new TImage()
@@ -302,6 +298,7 @@ export class TMainForm {
     // TMainForm.prototype = new PdForm()
     // TMainForm.prototype.constructor = TMainForm
     Caption: string = "PlantStudio"
+    plantFileChanged = false
 
     constructor() {
         // Any code that replaces this.plants will need to update plantManager.plants too
@@ -551,7 +548,7 @@ export class TMainForm {
     // returns false if user canceled leaving
     askForSaveAndProceed(): boolean {
         let result = true
-        if (!plantFileChanged) {
+        if (!this.plantFileChanged) {
             return result
         }
         //cfk fix - put help context in - for all messageDlgs 
@@ -601,7 +598,7 @@ export class TMainForm {
     }
     
     setPlantFileChanged(fileChanged: boolean): void {
-        plantFileChanged = fileChanged
+        this.plantFileChanged = fileChanged
     }
     
     MenuFileSaveAsClick(): void {
@@ -632,7 +629,7 @@ export class TMainForm {
         unfinished()
         // let mover: TMoverForm
         
-        // if (plantFileChanged) {
+        // if (this.plantFileChanged) {
         //     const response = MessageDialog("Do you want to save your changes to " + ExtractFileName(domain.plantFileName) + chr(13) + "before you use the plant mover?", mtConfirmation, mbYesNoCancel, 0)
         //     switch (response) {
         //         case IDCANCEL:
@@ -6023,7 +6020,7 @@ export class TMainForm {
     // v1.11
     Reconcile3DObjects1Click(): void {
         unfinished()
-        // if (plantFileChanged) {
+        // if (this.plantFileChanged) {
         //     // ask if want to save file first
         //     const response = MessageDialog("Do you want to save your changes to " + ExtractFileName(domain.plantFileName) + chr(13) + "before you reconcile its 3D objects" + chr(13) + "with those in the current 3D object file?", mtConfirmation, mbYesNoCancel, 0)
         //     switch (response) {
@@ -6099,9 +6096,6 @@ export class TMainForm {
 
     // TODO: Temp defintions used by PdTraverser
     showDrawProgress = (value: number) => {}
-
-    // TODO: Temp defintions used by PdCommand - confusion as also at tiop level
-    plantFileChanged = false
 
     // TODO: PDF fix tabSet stub
     tabSet: any = {}
@@ -6923,8 +6917,10 @@ export class TMainForm {
                     // Transparent: "True",
                 },
             ),
-            m("img.plantFileChangedImage.TImage",
+            m("img.plantFileChangedImage.TImage.ml1",
                 {
+                    title: this.plantFileChanged ? "Plant file has changed" : "Plant file has not changed",
+                    src: imageDir + (this.plantFileChanged ? "MainForm_fileChangedImage.png" : "MainForm_fileNotChangedImage.png"),
                     // Top: "108",
                     // Left: "6",
                     // Height: "16",
