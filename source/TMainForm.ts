@@ -4821,9 +4821,9 @@ export class TMainForm {
         } else if (usupport.found("inflo", aName) && usupport.found("secondary", aName)) {
             image = this.Sections_InflorSecondary
         } else if (usupport.found("root", aName)) {
-            // v2.1 otherwise assume it is an orthogonal section
             image = this.Sections_RootTop
         } else {
+            // v2.1 otherwise assume it is an orthogonal section
             image = this.Sections_Orthogonal
         }
         if (image !== null) {
@@ -4860,10 +4860,10 @@ export class TMainForm {
         } else if (usupport.found("fruit", aName)) {
             result = "Fruit_parameters"
         } else if (usupport.found("root", aName)) {
-            // add more sections here if any are added to the params file 
-            // v2.1 otherwise assume it is an orthogonal section
             result = "Root_top_parameters"
         } else {
+            // add more sections here if any are added to the params file 
+            // v2.1 otherwise assume it is an orthogonal section
             result = "Transverse_parameter_sections"
         }
         return result
