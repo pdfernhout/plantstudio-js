@@ -17,7 +17,7 @@ import { TRect } from "./TRect"
 import { ExportFormats, fileTypeFor3DExportType } from "./U3dexport"
 import { intMax, intMin, max, safedivExcept } from "./umath"
 import { kBringForward, kChangeHeight, kChangeWidth, kCopyToClipboard, kDontCopyToClipboard, kDown, kHide, kLeft, kRight, kRotateX, kRotateY, kRotateZ, kSendBackward, kShow, kUp, PdAlignPlantsCommand, PdAnimatePlantCommand, PdBooleanValue, PdBreedFromParentsCommand, PdCenterDrawingCommand, PdChangeDomain3DOptionsCommand, PdChangeDomainOptionsCommand, PdChangeMagnificationCommand, PdChangeMainWindowOrientationCommand, PdChangeMainWindowViewingOptionCommand, PdChangePlantAgeCommand, PdChangeSelectedPlantsCommand, PdCreateAmendmentCommand, PdDeleteAmendmentCommand, PdDragCommand, PdDuplicateCommand, PdEditAmendmentCommand, PdEditNoteCommand, PdHideOrShowCommand, PdMakeTimeSeriesCommand, PdNewCommand, PdPackPlantsCommand, PdPasteCommand, PdRandomizeCommand, PdRemoveCommand, PdRenameCommand, PdResetRotationsCommand, PdResizePlantsCommand, PdResizePlantsToSameWidthOrHeightCommand, PdRotateCommand, PdScrollCommand, PdSelectOrDeselectAllCommand, PdSelectPosingPartCommand, PdSendBackwardOrForwardCommand, setMainFormForCommands } from "./updcom"
-import { chr, cleanUpAfterFileSave, createSaveFileNamesStructure, FileType, getFileSaveInfo, IDCANCEL, IDNO, IDYES, kAskForFileName, kDontAskForFileName, len, lowercase, mrCancel, mrOK, nameStringForFileType, Point, pos, Rect, removeItem, rHeight, rWidth, SaveFileNamesStructure, setSinglePoint, startFileSave, stringBeyond, stringUpTo, trim, uppercase } from "./usupport"
+import { chr, cleanUpAfterFileSave, createSaveFileNamesStructure, FileType, found, getFileSaveInfo, IDCANCEL, IDNO, IDYES, kAskForFileName, kDontAskForFileName, len, lowercase, mrCancel, mrOK, nameStringForFileType, Point, pos, Rect, removeItem, rHeight, rWidth, SaveFileNamesStructure, setSinglePoint, startFileSave, stringBeyond, stringUpTo, trim, uppercase } from "./usupport"
 import { viewMainForm } from "./TMainForm-view"
 import { setMainForm } from "./TMainFormInterface"
 import { convertColor } from "./KfDrawingSurface"
@@ -3637,7 +3637,7 @@ export class TMainForm {
             textToCopy = ""
         }
         textToCopy = textToCopy + this.selectedParameterPanel.Caption
-        if (usupport.found("[", textToCopy)) {
+        if (found("[", textToCopy)) {
             // v2.1 deal with orthogonal sections
             let newText = stringUpTo(stringBeyond(textToCopy, "["), "]")
             newText = newText + ": " + trim(stringUpTo(stringBeyond(textToCopy, ":"), "["))
@@ -4789,48 +4789,48 @@ export class TMainForm {
         return result
     }
     
-    sectionPictureForSectionName(aName: string): TPicture {
-        let result: TPicture | null = null
-        let image: TImage | null = null
+    */
+
+    sectionPictureForSectionName(aName: string): string {
+        let result: string = "MISSING.ico"
         
         if (aName === "(no section)") {
             return result
         }
         aName = lowercase(aName)
-        if (usupport.found("general", aName)) {
-            image = this.Sections_General
-        } else if (usupport.found("meris", aName)) {
-            image = this.Sections_Meristems
-        } else if (usupport.found("inter", aName)) {
-            image = this.Sections_Internodes
-        } else if (usupport.found("seed", aName)) {
-            image = this.Sections_SeedlingLeaves
-        } else if (usupport.found("lea", aName)) {
+        if (found("general", aName)) {
+            result = "Sections_General"
+        } else if (found("meris", aName)) {
+            result = "Sections_Meristems"
+        } else if (found("inter", aName)) {
+            result = "Sections_Internodes"
+        } else if (found("seed", aName)) {
+            result = "Sections_SeedlingLeaves"
+        } else if (found("lea", aName)) {
             //must be below seedling leaves
-            image = this.Sections_Leaves
-        } else if (usupport.found("flow", aName) && usupport.found("primary", aName) && usupport.found("advanced", aName)) {
-            image = this.Sections_FlowersPrimaryAdvanced
-        } else if (usupport.found("flow", aName) && usupport.found("primary", aName)) {
-            image = this.Sections_FlowersPrimary
-        } else if (usupport.found("inflo", aName) && usupport.found("primary", aName)) {
-            image = this.Sections_InflorPrimary
-        } else if (usupport.found("fruit", aName)) {
-            image = this.Sections_Fruit
-        } else if (usupport.found("flow", aName) && usupport.found("secondary", aName)) {
-            image = this.Sections_FlowersSecondary
-        } else if (usupport.found("inflo", aName) && usupport.found("secondary", aName)) {
-            image = this.Sections_InflorSecondary
-        } else if (usupport.found("root", aName)) {
-            image = this.Sections_RootTop
+            result = "Sections_Leaves"
+        } else if (found("flow", aName) && found("primary", aName) && found("advanced", aName)) {
+            result = "Sections_FlowersPrimaryAdvanced"
+        } else if (found("flow", aName) && found("primary", aName)) {
+            result = "Sections_FlowersPrimary"
+        } else if (found("inflo", aName) && found("primary", aName)) {
+            result = "Sections_InflorPrimary"
+        } else if (found("fruit", aName)) {
+            result = "Sections_Fruit"
+        } else if (found("flow", aName) && found("secondary", aName)) {
+            result = "Sections_FlowersSecondary"
+        } else if (found("inflo", aName) && found("secondary", aName)) {
+            result = "Sections_InflorSecondary"
+        } else if (found("root", aName)) {
+            result = "Sections_RootTop"
         } else {
             // v2.1 otherwise assume it is an orthogonal section
-            image = this.Sections_Orthogonal
-        }
-        if (image !== null) {
-            result = image.Picture
+            result = "Sections_Orthogonal"
         }
         return result
     }
+
+    /*
     
     sectionHelpIDForSectionName(aName: string): string {
         let result = ""
@@ -4838,28 +4838,28 @@ export class TMainForm {
             return result
         }
         aName = lowercase(aName)
-        if (usupport.found("general", aName)) {
+        if (found("general", aName)) {
             // trying to be flexible about possible name changes here 
             result = "General_parameters"
-        } else if (usupport.found("meris", aName)) {
+        } else if (found("meris", aName)) {
             result = "Meristem_parameters"
-        } else if (usupport.found("inter", aName)) {
+        } else if (found("inter", aName)) {
             result = "Internode_parameters"
-        } else if (usupport.found("first", aName)) {
+        } else if (found("first", aName)) {
             result = "First_leaf_parameters"
-        } else if (usupport.found("lea", aName)) {
+        } else if (found("lea", aName)) {
             //must be below seedling leaves
             result = "Leaf_parameters"
-        } else if (usupport.found("advanced", aName)) {
+        } else if (found("advanced", aName)) {
             // must be above flower params
             result = "Advanced_flower_parameters"
-        } else if (usupport.found("flow", aName)) {
+        } else if (found("flow", aName)) {
             result = "Flower_parameters"
-        } else if (usupport.found("inflo", aName)) {
+        } else if (found("inflo", aName)) {
             result = "Inflorescence_parameters"
-        } else if (usupport.found("fruit", aName)) {
+        } else if (found("fruit", aName)) {
             result = "Fruit_parameters"
-        } else if (usupport.found("root", aName)) {
+        } else if (found("root", aName)) {
             result = "Root_top_parameters"
         } else {
             // add more sections here if any are added to the params file 
