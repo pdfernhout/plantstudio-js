@@ -6814,6 +6814,8 @@ export class TMainForm {
         )
     }
 
+    plantFocusTab = "Arrangement"
+
     viewPlantFocusPanel() {
         return m("div.plantFocusPanel.TPanel.ba",
             {
@@ -6824,7 +6826,13 @@ export class TMainForm {
                 // TabOrder: "5",
             },
             "plantFocusPanel UNFINISHED",
-            m("Group.Group.g00000006",
+            m("div",
+                ["Arrangement", "Parameters", "Age", "Posing", "Stats", "Note"].map(
+                    tab => m("div.ml1.br--top.bl.bt.br.bw1.br2.dib" + (this.plantFocusTab === tab ? ".bg-green" : ""), {
+                        onclick: () => this.plantFocusTab = tab 
+                    }, tab)
+            )),
+            this.plantFocusTab === "Arrangement" && m("Group.Group.g00000006",
                 m("div.rotationsPanel.TPanel",
                     {
                         // Top: "6",
@@ -7842,7 +7850,7 @@ export class TMainForm {
                     ),
                 ),
             ),
-            m("div.parametersPanel.TPanel",
+            this.plantFocusTab === "Parameters" && m("div.parametersPanel.TPanel",
                 {
                     // Top: "240",
                     // Left: "4",
@@ -7901,7 +7909,7 @@ export class TMainForm {
                     },
                 ),
             ),
-            m("div.lifeCyclePanel.TPanel",
+            this.plantFocusTab === "Age" && m("div.lifeCyclePanel.TPanel",
                 {
                     // Top: "318",
                     // Left: "4",
@@ -8076,7 +8084,7 @@ export class TMainForm {
                     ),
                 ),
             ),
-            m("TScrollBox.statsScrollBox.TScrollBox",
+            this.plantFocusTab === "Stats" && m("TScrollBox.statsScrollBox.TScrollBox",
                 {
                     // Top: "334",
                     // Left: "284",
@@ -8094,7 +8102,7 @@ export class TMainForm {
                     // Visible: "False",
                 },
             ),
-            m("div.notePanel.TPanel",
+            this.plantFocusTab === "Note" && m("div.notePanel.TPanel",
                 {
                     // Top: "360",
                     // Left: "286",
