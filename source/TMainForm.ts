@@ -6653,6 +6653,14 @@ export class TMainForm {
                     },
                     m("img", { src: imageDir + (domain.plantFileLoaded ? "MainForm_drawingAreaOnSide.png" : "MainForm_drawingAreaOnSide-disabled.png") })
                 ),
+                m("button.packPlants.TSpeedButton.ml1",
+                    {
+                        onclick: () => this.packPlantsClick(),
+                        title: "Pack plants",
+                        disabled: !this.haveMoreThanOnSelectedPlant()
+                    },
+                    m("img", { src: imageDir + (this.haveMoreThanOnSelectedPlant() ? "MainForm_packPlants.png" : "MainForm_packPlants-disabled.png")}),
+                ),
                 m("button.alignTops.TSpeedButton.ml1",
                     {
                         onclick: () => this.alignTopsClick(),
@@ -6684,14 +6692,6 @@ export class TMainForm {
                         disabled: !this.haveMoreThanOnSelectedPlant()
                     },
                     m("img", { src: imageDir + (this.haveMoreThanOnSelectedPlant() ? "MainForm_alignRight.png" : "MainForm_alignRight-disabled.png")})
-                ),
-                m("button.packPlants.TSpeedButton.ml1",
-                    {
-                        onclick: () => this.packPlantsClick(),
-                        title: "Pack plants",
-                        disabled: !this.haveMoreThanOnSelectedPlant()
-                    },
-                    m("img", { src: imageDir + (this.haveMoreThanOnSelectedPlant() ? "MainForm_packPlants.png" : "MainForm_packPlants-disabled.png")}),
                 ),
                 m("button.makeEqualWidth.TSpeedButton.ml1",
                     {
