@@ -49,12 +49,10 @@ const kPlantListChanged = true
 const kPlantListNotChanged = false
 const kHintRange = 1
 const kMaxHintRangeForLargeAreas = 50
-const kTabRotations = 0
-const kTabParameters = 1
-const kTabLifeCycle = 2
-const kTabPosing = 3
-const kTabStatistics = 4
-const kTabNote = 5
+
+type PlantFocusTab = "Arrangement" | "Parameters" | "Age" | "Posing" | "Stats" | "Note"
+const plantFocusTabs: PlantFocusTab[] = ["Arrangement", "Parameters", "Age", "Posing", "Stats", "Note"]
+
 const kTabHighest = 5
 const kMaxMagnificationToTypeIn = 10000
 const kEnableAllForms = true
@@ -2411,12 +2409,6 @@ export class TMainForm {
         }
     }
     
-    updateForRenamingPlant(aPlant: PdPlant): void {
-        for (let i = 0; i <= kTabHighest; i++) {
-            this.updatePlantNameLabel(i)
-        }
-    }
-    
     updateForChangeToPlantNote(aPlant: PdPlant): void {
         // TODO PDF: Fix or remove obsolete code
         // let start: int = this.noteMemo.SelStart
@@ -3285,9 +3277,7 @@ export class TMainForm {
                     }
                     return
                 }
-                if (this.tabSet.tabIndex !== kTabPosing) {
-                    this.tabSet.tabIndex = kTabPosing
-                }
+                this.setCurrentPlantFocusTab("Posing")
                 plantClickedOn = domain.plantManager.findPlantAtPoint(Point(X, Y))
                 if (plantClickedOn && this.isFocused(plantClickedOn)) {
                     [this.mouseDownSelectedPlantPartID, this.mouseDownSelectedPlantPartType] = plantClickedOn.getInfoForPlantPartAtPoint(Point(X, Y))
@@ -3687,7 +3677,7 @@ export class TMainForm {
     }
     
     posingSelectionCursorModeClick(): void {
-        this.tabSet.tabIndex = kTabPosing
+        this.setCurrentPlantFocusTab("Posing")
         this.cursorModeForDrawing = CursorMode.kCursorModePosingSelect
         if (domain.options.showSelectionRectangle) {
             this.copyDrawingBitmapToPaintBox()
@@ -4238,33 +4228,11 @@ export class TMainForm {
     // tab set 
     // ------------------------------------------------------------------------------------ *tab set 
     lifeCycleShowing(): boolean {
-        const result = (this.tabSet.tabIndex === kTabLifeCycle)
-        return result
-    }
-    
-    rotationsShowing(): boolean {
-        const result = (this.tabSet.tabIndex === kTabRotations)
-        return result
-    }
-    
-    parametersShowing(): boolean {
-        const result = (this.tabSet.tabIndex === kTabParameters)
-        return result
+        return this.currentPlantFocusTab === "Age"
     }
     
     statsShowing(): boolean {
-        const result = (this.tabSet.tabIndex === kTabStatistics)
-        return result
-    }
-    
-    noteShowing(): boolean {
-        const result = (this.tabSet.tabIndex === kTabNote)
-        return result
-    }
-    
-    posingShowing(): boolean {
-        const result = (this.tabSet.tabIndex === kTabPosing)
-        return result
+        return this.currentPlantFocusTab === "Stats"
     }
     
     tabSetChange(NewTab: int, AllowChange: boolean): boolean {
@@ -4288,26 +4256,27 @@ export class TMainForm {
     }
     
     updateRightSidePanelForFirstSelectedPlantWithTab(newTab: int): void {
-        switch (newTab) {
-            case kTabLifeCycle:
-                this.updateLifeCyclePanelForFirstSelectedPlant()
-                break
-            case kTabRotations:
-                this.updateRotationsPanelForFirstSelectedPlant()
-                break
-            case kTabParameters:
-                this.updateParametersPanelForFirstSelectedPlant()
-                break
-            case kTabStatistics:
-                this.updateStatisticsPanelForFirstSelectedPlant()
-                break
-            case kTabNote:
-                this.updateNoteForFirstSelectedPlant()
-                break
-            case kTabPosing:
-                this.updatePosingForFirstSelectedPlant()
-                break
-        }
+        // TODO PDF: FIx or remove code
+        // switch (newTab) {
+        //     case kTabLifeCycle:
+        //         this.updateLifeCyclePanelForFirstSelectedPlant()
+        //         break
+        //     case kTabRotations:
+        //         this.updateRotationsPanelForFirstSelectedPlant()
+        //         break
+        //     case kTabParameters:
+        //         this.updateParametersPanelForFirstSelectedPlant()
+        //         break
+        //     case kTabStatistics:
+        //         this.updateStatisticsPanelForFirstSelectedPlant()
+        //         break
+        //     case kTabNote:
+        //         this.updateNoteForFirstSelectedPlant()
+        //         break
+        //     case kTabPosing:
+        //         this.updatePosingForFirstSelectedPlant()
+        //         break
+        // }
     }
     
     textColorToRepresentPlantSelection(payAttentionToMultiSelect: boolean): TColorRef {
@@ -4408,59 +4377,44 @@ export class TMainForm {
         // this.redrawLifeCycleGraph()
     }
     
-    updatePlantNameLabel(tabIndex: short): void {
-        // TODO PDF: Fix or remove obsolete code
-        // let firstPlant: PdPlant
-        // let labelToChange: TLabel
-        // let payAttentionToOtherPlants: boolean
-        // let prefix: string
-        // let handlingDifferently: boolean
-        
-        // const firstPlant = this.focusedPlant()
-        // let payAttentionToOtherPlants = true
-        // let handlingDifferently = false
-        // let prefix = ""
-        // let labelToChange: string | null = null
-        // switch (tabIndex) {
-        //     case kTabRotations:
-        //         labelToChange = this.arrangementPlantName
-        //         prefix = "Arrangement for "
-        //         break
-        //     case kTabParameters:
-        //         labelToChange = this.parametersPlantName
-        //         prefix = "Parameters for "
-        //         break
-        //     case kTabLifeCycle:
-        //         labelToChange = this.selectedPlantNameLabel
-        //         prefix = "Life cycle for "
-        //         break
-        //     case kTabPosing:
-        //         labelToChange = this.posingPlantName
-        //         payAttentionToOtherPlants = false
-        //         prefix = "Posing for "
-        //         break
-        //     case kTabStatistics:
-        //         handlingDifferently = true
-        //         this.statsPanel.updatePlant(firstPlant)
-        //         break
-        //     case kTabNote:
-        //         labelToChange = this.noteLabel
-        //         payAttentionToOtherPlants = false
-        //         prefix = "Note for "
-        //         break
-        // }
-        // if ((handlingDifferently) || (labelToChange === null)) {
-        //     return
-        // }
-        // if (firstPlant !== null) {
-        //     labelToChange.Caption = prefix + firstPlant.getName()
-        //     if ((payAttentionToOtherPlants) && (this.selectedPlants.length > 1)) {
-        //         labelToChange.Caption = labelToChange.Caption + " (and other plants)"
-        //     }
-        // } else {
-        //     labelToChange.Caption = "(no plants selected)"
-        // }
-        // labelToChange.Font.Color = this.textColorToRepresentPlantSelection(payAttentionToOtherPlants)
+    plantNameLabelAndColorForTab(tab: PlantFocusTab) {
+        const firstPlant = this.focusedPlant()
+        let payAttentionToOtherPlants = true
+        let prefix = ""
+        switch (tab) {
+            case "Arrangement":
+                prefix = "Arrangement for "
+                break
+            case "Parameters":
+                prefix = "Parameters for "
+                break
+            case "Age":
+                prefix = "Life cycle for "
+                break
+            case "Posing":
+                payAttentionToOtherPlants = false
+                prefix = "Posing for "
+                break
+            case "Stats":
+                payAttentionToOtherPlants = false
+                prefix = "Stats for "
+                break
+            case "Note":
+                payAttentionToOtherPlants = false
+                prefix = "Note for "
+                break
+            default:
+                throw new Error("Unexpected tab: " + tab)
+        }
+        let label = "(no plants selected)"
+        if (firstPlant !== null) {
+            label = prefix + firstPlant.getName()
+            if ((payAttentionToOtherPlants) && (this.selectedPlants.length > 1)) {
+                label = label + " (and other plants)"
+            }
+        }
+        const color = convertColor(this.textColorToRepresentPlantSelection(payAttentionToOtherPlants))
+        return { plantNameLabel: label, plantNameColor: color }
     }
     
     animateGrowthClick(): void {
@@ -5166,7 +5120,6 @@ export class TMainForm {
         }
         const plant = this.focusedPlant()
         if (plant === null) { return }
-        this.updatePlantNameLabel(kTabNote)
         this.updateForChangeToPlantNote(plant)
     }
     
@@ -6814,9 +6767,14 @@ export class TMainForm {
         )
     }
 
-    plantFocusTab = "Arrangement"
+    currentPlantFocusTab: PlantFocusTab = "Arrangement"
+
+    setCurrentPlantFocusTab(tab: PlantFocusTab) {
+        this.currentPlantFocusTab = tab
+    }
 
     viewPlantFocusPanel() {
+        const { plantNameLabel, plantNameColor } = this.plantNameLabelAndColorForTab(this.currentPlantFocusTab)
         return m("div.plantFocusPanel.TPanel.ba",
             {
                 // Top: "38",
@@ -6825,14 +6783,13 @@ export class TMainForm {
                 // Width: "550",
                 // TabOrder: "5",
             },
-            "plantFocusPanel UNFINISHED",
             m("div.TTabSet.tabSet.TTabSet",
-                ["Arrangement", "Parameters", "Age", "Posing", "Stats", "Note"].map(
-                    tab => m("div.ml1.br--top.bl.bt.br.bw1.br2.dib" + (this.plantFocusTab === tab ? ".bg-green" : ""), {
-                        onclick: () => this.plantFocusTab = tab 
+                plantFocusTabs.map(
+                    tab => m("div.ml1.br--top.bl.bt.br.bw1.br2.dib" + (this.currentPlantFocusTab === tab ? ".bg-green" : ""), {
+                        onclick: () => this.setCurrentPlantFocusTab(tab)
                     }, tab)
             )),
-            this.plantFocusTab === "Arrangement" && m("div.rotationsPanel.TPanel",
+            this.currentPlantFocusTab === "Arrangement" && m("div.rotationsPanel.TPanel",
                 {
                     // Top: "6",
                     // Left: "6",
@@ -6845,6 +6802,7 @@ export class TMainForm {
                 },
                 m("div.arrangementPlantName.TLabel",
                     {
+                        style: { color: plantNameColor }
                         // Top: "4",
                         // Left: "4",
                         // Height: "14",
@@ -6858,7 +6816,7 @@ export class TMainForm {
                         // ParentColor: "False",
                         // ParentFont: "False",
                     },
-                    "(no plants selected)",
+                    plantNameLabel,
                 ),
                 m("Group.Group.g00000032",
                     m("input.xLocationEdit.TEdit",
@@ -7233,7 +7191,7 @@ export class TMainForm {
                     ),
                 ),
             ),
-            this.plantFocusTab === "Parameters" && m("div.parametersPanel.TPanel",
+            this.currentPlantFocusTab === "Parameters" && m("div.parametersPanel.TPanel",
                 {
                     // Top: "240",
                     // Left: "4",
@@ -7246,6 +7204,7 @@ export class TMainForm {
                 },
                 m("div.parametersPlantName.TLabel",
                     {
+                        style: { color: plantNameColor }
                         // Top: "8",
                         // Left: "8",
                         // Height: "14",
@@ -7257,7 +7216,7 @@ export class TMainForm {
                         // Font.Style: "[fsBold]",
                         // ParentFont: "False",
                     },
-                    "Parameters for xx",
+                    plantNameLabel,
                 ),
                 m("select.sectionsComboBox.TComboBox",
                     {
@@ -7292,7 +7251,7 @@ export class TMainForm {
                     },
                 ),
             ),
-            this.plantFocusTab === "Age" && m("div.lifeCyclePanel.TPanel",
+            this.currentPlantFocusTab === "Age" && m("div.lifeCyclePanel.TPanel",
                 {
                     // Top: "318",
                     // Left: "4",
@@ -7306,6 +7265,7 @@ export class TMainForm {
                 },
                 m("div.selectedPlantNameLabel.TLabel",
                     {
+                        style: { color: plantNameColor }
                         // Top: "4",
                         // Left: "10",
                         // Height: "14",
@@ -7317,7 +7277,7 @@ export class TMainForm {
                         // Font.Style: "[fsBold]",
                         // ParentFont: "False",
                     },
-                    "Selected plant",
+                    plantNameLabel,
                 ),
                 m("img.lifeCycleGraphImage.TImage",
                     {
@@ -7467,7 +7427,7 @@ export class TMainForm {
                     ),
                 ),
             ),
-            this.plantFocusTab === "Posing" && m("div.posingPanel.TPanel",
+            this.currentPlantFocusTab === "Posing" && m("div.posingPanel.TPanel",
                 {
                     // Top: "6",
                     // Left: "284",
@@ -7480,6 +7440,7 @@ export class TMainForm {
                 },
                 m("div.posingPlantName.TLabel",
                     {
+                        style: { color: plantNameColor }
                         // Top: "4",
                         // Left: "4",
                         // Height: "14",
@@ -7491,7 +7452,7 @@ export class TMainForm {
                         // Font.Style: "[fsBold]",
                         // ParentFont: "False",
                     },
-                    "Posing for plant x",
+                    plantNameLabel,
                 ),
                 m("Group.Group.g00000018",
                     m("button.posingHighlight.TSpeedButton",
@@ -8082,8 +8043,9 @@ export class TMainForm {
                     ),
                 ),
             ),
-            this.plantFocusTab === "Stats" && m("TScrollBox.statsScrollBox.TScrollBox",
+            this.currentPlantFocusTab === "Stats" && m("TScrollBox.statsScrollBox.TScrollBox",
                 {
+                    style: { color: plantNameColor }
                     // Top: "334",
                     // Left: "284",
                     // Height: "23",
@@ -8099,8 +8061,9 @@ export class TMainForm {
                     // TabOrder: "1",
                     // Visible: "False",
                 },
+                plantNameLabel
             ),
-            this.plantFocusTab === "Note" && m("div.notePanel.TPanel",
+            this.currentPlantFocusTab === "Note" && m("div.notePanel.TPanel",
                 {
                     // Top: "360",
                     // Left: "286",
@@ -8132,6 +8095,7 @@ export class TMainForm {
                 ),
                 m("div.noteLabel.TLabel",
                     {
+                        style: { color: plantNameColor }
                         // Top: "8",
                         // Left: "8",
                         // Height: "14",
@@ -8143,7 +8107,7 @@ export class TMainForm {
                         // Font.Style: "[fsBold]",
                         // ParentFont: "False",
                     },
-                    "Note for daisy",
+                    plantNameLabel,
                 ),
                 m("textarea.noteMemo.TMemo",
                     {
@@ -8165,24 +8129,7 @@ export class TMainForm {
                         // WantReturns: "False",
                     },
                 ),
-            ),
-            m("TTabSet.tabSet.TTabSet",
-                {
-                    // Top: "433",
-                    // Left: "4",
-                    // Height: "21",
-                    // Width: "437",
-                    // DitherBackground: "False",
-                    // Font.Charset: "DEFAULT_CHARSET",
-                    // Font.Color: "clWindowText",
-                    // Font.Height: "-11",
-                    // Font.Name: "Arial",
-                    // Font.Style: "[]",
-                    // Tabs.Strings: [" Arrangement"," Parameters"," Age"," Posing"," Stats"," Note"],
-                    // TabIndex: "0",
-                    // OnChange: "tabSetChange",
-                },
-            ),
+            )
         )
     }
 

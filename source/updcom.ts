@@ -485,13 +485,11 @@ export class PdRenameCommand extends PdCommand {
     doCommand(): void {
         super.doCommand()
         this.plant.setName(this.newName)
-        MainForm.updateForRenamingPlant(this.plant)
     }
     
     undoCommand(): void {
         super.undoCommand()
         this.plant.setName(this.oldName)
-        MainForm.updateForRenamingPlant(this.plant)
     }
     
     description(): string {
