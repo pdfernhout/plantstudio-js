@@ -4459,28 +4459,6 @@ export class TMainForm {
     
     /*
     
-    lifeCycleDaysSpinUpClick(): void {
-        const plant = this.focusedPlant()
-        if (plant === null) {
-            return
-        }
-        let newAge = intMin(StrToIntDef(this.lifeCycleDaysEdit.Text, 0) + 1, plant.pGeneral.ageAtMaturity)
-        newAge = intMax(0, newAge)
-        this.lifeCycleDaysEdit.Text = IntToStr(newAge)
-        this.changeSelectedPlantAges(newAge)
-    }
-    
-    lifeCycleDaysSpinDownClick(): void {
-        const plant = this.focusedPlant()
-        if (plant === null) {
-            return
-        }
-        let newAge = intMin(StrToIntDef(this.lifeCycleDaysEdit.Text, 0) - 1, plant.pGeneral.ageAtMaturity)
-        newAge = intMax(0, newAge)
-        this.lifeCycleDaysEdit.Text = IntToStr(newAge)
-        this.changeSelectedPlantAges(newAge)
-    }
-    
     lifeCycleDraggerMouseDown(Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
         if (this.focusedPlant() !== null) {
             this.lifeCycleDragging = true
@@ -6660,7 +6638,8 @@ export class TMainForm {
             { style: { height: "15rem" } },
             m("div.TTabSet.tabSet.TTabSet",
                 plantFocusTabs.map(
-                    tab => m("div.ml1.br--top.bl.bt.br.bw1.br2.dib" + (this.currentPlantFocusTab === tab ? ".bg-green" : ""), {
+                    tab => m("div.ml1.br--top.bl.bt.br.bw1.br2.dib.pa1" + (this.currentPlantFocusTab === tab ? ".bg-green" : ""), {
+                        style: { minWidth: "4rem" },
                         onclick: () => this.setCurrentPlantFocusTab(tab)
                     }, tab)
             )),
@@ -6884,18 +6863,6 @@ export class TMainForm {
             ),
             m("Group.Group.g00000024",
                 m("div.maxSizeAxisLabel.TLabel",
-                    {
-                        // Top: "24",
-                        // Left: "4",
-                        // Height: "14",
-                        // Width: "30",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // ParentFont: "False",
-                    },
                     "%max",
                 ),
                 m("div.lifeCycleDragger.TPanel",
@@ -6916,29 +6883,9 @@ export class TMainForm {
                 ),
             ),
             m("div.timeLabel.TLabel",
-                {
-                    // Top: "48",
-                    // Left: "104",
-                    // Height: "14",
-                    // Width: "54",
-                    // Font.Charset: "DEFAULT_CHARSET",
-                    // Font.Color: "clWindowText",
-                    // Font.Height: "-11",
-                    // Font.Name: "Arial",
-                    // Font.Style: "[]",
-                    // ParentFont: "False",
-                },
                 "time (days)",
             ),
             m("div.lifeCycleEditPanel.TPanel",
-                {
-                    // Top: "64",
-                    // Left: "6",
-                    // Height: "29",
-                    // Width: "269",
-                    // BevelOuter: "bvNone",
-                    // TabOrder: "0",
-                },
                 m("Group.Group.g00000002",
                     "Age",
                     m("input[type=number].lifeCycleDaysEdit.TEdit.ml1.mw3",
@@ -6953,17 +6900,6 @@ export class TMainForm {
                     m("button.animateGrowth.TSpeedButton.ml3",
                         {
                             onclick: () => this.animateGrowthClick(),
-                            // Top: "2",
-                            // Left: "194",
-                            // Height: "23",
-                            // Width: "72",
-                            // Font.Charset: "DEFAULT_CHARSET",
-                            // Font.Color: "clWindowText",
-                            // Font.Height: "-11",
-                            // Font.Name: "Arial",
-                            // Font.Style: "[]",
-                            // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF008888888888888888820888208888208882088820888820882228882088882088222888208888208888882820282820288888222228222228888822222888208888888888882820288888888888222228888888888888208888888888888820888888888888882088888888888828202888888888882222288888888888222228",
-                            // ParentFont: "False",
                         },
                         m("img.mr1", { src: imageDir + "MainForm_animateGrowth.png" }),
                         "Animate",
