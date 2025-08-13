@@ -1,81 +1,61 @@
 // unit Ustats
 
-from conversion_common import *
-import ubmpsupport
-import udomain
-import umath
-import usupport
-import utravers
-import uppanel
-import uplant
-import delphi_compatability
+import * as m from "mithril"
+import { ColorDefs, float, int, intround, IntToStr, long, short } from "./common"
+import { PdPlant } from "./PdPlant"
+import { PdPlantStatistics, Statistics } from "./PdTraverser"
+import { TRect } from "./TRect"
+import { digitValueString, len, Rect } from "./usupport"
+import { domain } from "./PdDomain"
+import { intMax } from "./umath"
+import { convertColor } from "./KfDrawingSurface"
 
-// const
+// from conversion_common import *
+// import ubmpsupport
+// import udomain
+// import umath
+// import usupport
+// import utravers
+// import uppanel
+// import uplant
+// import delphi_compatability
+
 const kLive = 0
 const kDead = 1
 const kBothLiveAndDead = 2
 
-
-// const
 const kMinGraphWidth = 50
 
-
-
 export class PdStatsPanel {
-    drawBitmap: TBitmap = new TBitmap()
+    plant: PdPlant | null = null
+    // TOD PDF: Fix or remove: drawBitmap: TBitmap = new TBitmap()
     statistics: PdPlantStatistics = new PdPlantStatistics()
     graphRect: TRect = new TRect()
     percentRect: TRect = new TRect()
-    labelRects: TRect[] /* kStatisticsPartTypeLast + 1 */ = Array(kStatisticsPartTypeLast + 1)
+    labelRects: TRect[] = Array(Statistics.kStatisticsPartTypeLast + 1)
     maxLabelWidth: short = 0
-    PdStatsPanel.prototype = new PdParameterPanel()
-    PdStatsPanel.prototype.constructor = PdStatsPanel
     
-    create(anOwner: TComponent): void {
-        PdParameterPanel.prototype.create.call(this, anOwner)
-        this.plant = null
-        this.PopupMenu = null
-        this.drawBitmap = delphi_compatability.TBitmap().Create()
-        this.statistics = utravers.PdPlantStatistics.create
-        this.ParentFont = true
-        this.OnMouseUp = this.doMouseUp
-        this.OnKeyDown = this.doKeyDown
-        this.TabStop = true
-        this.Enabled = true
-        this.selectedItemIndex = uppanel.kItemNone
-        this.BevelInner = UNRESOLVED.bvNone
-        this.BevelOuter = UNRESOLVED.bvNone
-        this.updateHint()
-    }
-    
-    updateHint(): void {
-        if (udomain.domain.options.showLongHintsForButtons) {
-            this.Hint = "Parts of the plant showing counts and percent of total biomass taken up by" + " each plant part. You can't change anything here; it is for display only." + " See the help system for details."
+    getHint(): string {
+        if (domain.options.showLongHintsForButtons) {
+            return "This is a chart of parts of the plant showing counts and percent of total biomass taken up by" + 
+            " each plant part. You can't change anything here; it is for display only." + 
+            " See the help system for details."
         } else {
-            this.Hint = ""
+            return "Parts of the plant showing counts and percent of total biomass"
         }
-        this.ShowHint = true
     }
     
-    destroy(): void {
-        this.drawBitmap.free
-        this.drawBitmap = null
-        this.statistics.free
-        this.statistics = null
-        PdParameterPanel.prototype.destroy.call(this)
-    }
+    // maxSelectedItemIndex(): int {
+    //     let result = 0
+    //     result = uppanel.kItemNone
+    //     return result
+    // }
     
-    maxSelectedItemIndex(): int {
-        let result = 0
-        result = uppanel.kItemNone
-        return result
-    }
-    
-    collapsedHeight(): int {
-        let result = 0
-        result = this.textHeight + uppanel.kTopBottomGap
-        return result
-    }
+    // collapsedHeight(): int {
+    //     let result = 0
+    //     result = this.textHeight + uppanel.kTopBottomGap
+    //     return result
+    // }
     
     collapseOrExpand(y: int): void {
         // do nothing 
@@ -84,24 +64,24 @@ export class PdStatsPanel {
     updatePlant(newPlant: PdPlant): void {
         if (this.plant !== newPlant) {
             this.plant = newPlant
-            this.updateCurrentValue(0)
+            this.updateCurrentValue()
         }
     }
     
     updatePlantValues(): void {
-        this.updateCurrentValue(0)
+        this.updateCurrentValue()
         // NOT refresh 
-        this.Repaint()
+        // TOD PDF: Fix or remove: this.Repaint()
     }
     
     updateCurrentValue(): void {
         this.statistics.zeroAllFields()
-        this.Enabled = false
+        // TOD PDF: Fix or remove: this.Enabled = false
         if (this.plant === null) {
             return
         }
         this.plant.getPlantStatistics(this.statistics)
-        this.Enabled = true
+        // TOD PDF: Fix or remove: this.Enabled = true
         this.updateDisplay()
     }
     
@@ -109,32 +89,32 @@ export class PdStatsPanel {
         if (this.plant === null) {
             return
         }
-        this.Invalidate()
+        // TOD PDF: FIx or remove: this.Invalidate()
     }
     
-    resizeElements(): void {
-        let fullRect: TRect
+    // resizeElements(): void {
+    //     let fullRect: TRect
         
-        if (this.textHeight === 0) {
-            this.calculateTextDimensions()
-        }
-        if (this.maxLabelWidth === 0) {
-            this.paint()
-        }
-        fullRect = Rect(0, 0, kMinGraphWidth + this.maxLabelWidth + uppanel.kLeftRightGap * 2 + uppanel.kBetweenGap, (this.numNonZeroPlantParts() + 2) * this.textHeight + uppanel.kTopBottomGap * 2 + uppanel.kBetweenGap * 2)
-        this.ClientHeight = umath.intMax(0, umath.intMax(usupport.rHeight(fullRect), this.Parent.ClientHeight))
-        this.ClientWidth = umath.intMax(0, umath.intMax(usupport.rWidth(fullRect), this.Parent.ClientWidth))
-        try {
-            this.drawBitmap.Width = this.ClientWidth
-            this.drawBitmap.Height = this.ClientHeight
-        } catch (e) {
-            this.drawBitmap.Width = 1
-            this.drawBitmap.Height = 1
-        }
-        this.updateDisplay()
-    }
+    //     if (this.textHeight === 0) {
+    //         this.calculateTextDimensions()
+    //     }
+    //     if (this.maxLabelWidth === 0) {
+    //         this.paint()
+    //     }
+    //     fullRect = Rect(0, 0, kMinGraphWidth + this.maxLabelWidth + uppanel.kLeftRightGap * 2 + uppanel.kBetweenGap, (this.numNonZeroPlantParts() + 2) * this.textHeight + uppanel.kTopBottomGap * 2 + uppanel.kBetweenGap * 2)
+    //     this.ClientHeight = intMax(0, intMax(usupport.rHeight(fullRect), this.Parent.ClientHeight))
+    //     this.ClientWidth = intMax(0, intMax(usupport.rWidth(fullRect), this.Parent.ClientWidth))
+    //     try {
+    //         this.drawBitmap.Width = this.ClientWidth
+    //         this.drawBitmap.Height = this.ClientHeight
+    //     } catch (e) {
+    //         this.drawBitmap.Width = 1
+    //         this.drawBitmap.Height = 1
+    //     }
+    //     this.updateDisplay()
+    // }
     
-    labelStringForPartType(index: short): string {
+    labelStringForPartTypeIndex(index: short): string {
         let result = ""
         let partType: short
         let hasStuff: boolean
@@ -149,7 +129,7 @@ export class PdStatsPanel {
             result = IntToStr(this.statistics.count[partType]) + " "
         }
         result = result + this.nameForPartType(partType, this.statistics.count[partType] === 1)
-        result = result + ": " + usupport.digitValueString(this.displayPercentForPartType(partType, kBothLiveAndDead)) + "%"
+        result = result + ": " + digitValueString(this.displayPercentForPartType(partType, kBothLiveAndDead)) + "%"
         return result
     }
     
@@ -158,7 +138,7 @@ export class PdStatsPanel {
         let total_pctMPB: float
         
         result = 0.0
-        total_pctMPB = this.statistics.liveBiomass_pctMPB[utravers.kStatisticsPartTypeAllVegetative] + this.statistics.deadBiomass_pctMPB[utravers.kStatisticsPartTypeAllVegetative] + this.statistics.liveBiomass_pctMPB[utravers.kStatisticsPartTypeAllReproductive] + this.statistics.deadBiomass_pctMPB[utravers.kStatisticsPartTypeAllReproductive]
+        total_pctMPB = this.statistics.liveBiomass_pctMPB[Statistics.kStatisticsPartTypeAllVegetative] + this.statistics.deadBiomass_pctMPB[Statistics.kStatisticsPartTypeAllVegetative] + this.statistics.liveBiomass_pctMPB[Statistics.kStatisticsPartTypeAllReproductive] + this.statistics.deadBiomass_pctMPB[Statistics.kStatisticsPartTypeAllReproductive]
         if (total_pctMPB === 0.0) {
             return result
         }
@@ -173,7 +153,7 @@ export class PdStatsPanel {
                 result = this.statistics.liveBiomass_pctMPB[partType] + this.statistics.deadBiomass_pctMPB[partType]
                 break
         }
-        result = umath.min(100.0, umath.max(0.0, 100.0 * result / total_pctMPB))
+        result = Math.min(100.0, Math.max(0.0, 100.0 * result / total_pctMPB))
         return result
     }
     
@@ -184,7 +164,7 @@ export class PdStatsPanel {
         let hasStuff: boolean
         
         result = 0
-        for (i = 0; i <= utravers.kStatisticsPartTypeLast; i++) {
+        for (i = 0; i <= Statistics.kStatisticsPartTypeLast; i++) {
             partType = this.partTypeForIndex(i)
             hasStuff = (this.statistics.liveBiomass_pctMPB[partType] + this.statistics.deadBiomass_pctMPB[partType] > 0) || (this.statistics.count[partType] > 0)
             if (hasStuff) {
@@ -194,292 +174,289 @@ export class PdStatsPanel {
         return result
     }
     
-    paint(): void {
-        let fullRect: TRect
-        let minRect: TRect
-        let maxRect: TRect
-        let minText: string
-        let maxText: string
-        let percentText: string
-        let i: short
-        let partType: short
-        let topPos: short
-        let labelTexts: ansistring[] /* kStatisticsPartTypeLast + 1 */
-        let hasStuff: boolean
+    // paint(): void {
+    //     let fullRect: TRect
+    //     let minRect: TRect = new TRect()
+    //     let maxRect: TRect
+    //     let minText: string
+    //     let maxText: string
+    //     let percentText: string
+    //     let i: short
+    //     let partType: short
+    //     let topPos: short
+    //     let labelTexts: string[] = Array(Statistics.kStatisticsPartTypeLast + 1)
+    //     let hasStuff: boolean
         
-        fullRect = this.GetClientRect()
-        this.Canvas.Font = this.Font
-        if (this.textHeight === 0) {
-            this.calculateTextDimensions()
-        }
-        if (this.plant !== null) {
-            // v2.0 + ' (% of total)'
-            percentText = "Statistics for " + this.plant.getName()
-        } else {
-            // v2.0
-            percentText = "(no plants selected)"
-        }
-        this.percentRect.Top = fullRect.Top + uppanel.kTopBottomGap
-        this.percentRect.Bottom = this.percentRect.Top + this.textHeight
-        this.percentRect.Left = fullRect.Left + uppanel.kLeftRightGap
-        // v2.0 bold font
-        this.Canvas.Font.Style = {UNRESOLVED.fsBold, }
-        this.percentRect.Right = this.percentRect.Left + this.Canvas.TextWidth(percentText)
-        this.Canvas.Font.Style = {}
-        for (i = 0; i <= utravers.kStatisticsPartTypeLast; i++) {
-            labelTexts[i] = this.labelStringForPartType(i)
-        }
-        topPos = this.percentRect.Bottom + uppanel.kBetweenGap
-        this.maxLabelWidth = 0
-        for (i = 0; i <= utravers.kStatisticsPartTypeLast; i++) {
-            this.labelRects[i] = Rect(0, 0, 0, 0)
-        }
-        for (i = 0; i <= utravers.kStatisticsPartTypeLast; i++) {
-            this.labelRects[i].Left = uppanel.kLeftRightGap
-            this.labelRects[i].Right = this.labelRects[i].Left + this.Canvas.TextWidth(labelTexts[i])
-            if (this.labelRects[i].Right - this.labelRects[i].Left > this.maxLabelWidth) {
-                this.maxLabelWidth = this.labelRects[i].Right - this.labelRects[i].Left
-            }
-            this.labelRects[i].Top = topPos
-            if (labelTexts[i] === "") {
-                this.labelRects[i].Bottom = this.labelRects[i].Top
-            } else {
-                this.labelRects[i].Bottom = this.labelRects[i].Top + this.textHeight
-            }
-            topPos = topPos + (this.labelRects[i].Bottom - this.labelRects[i].Top)
-            if (this.labelRects[i].Right - this.labelRects[i].Left > this.maxLabelWidth) {
-                this.maxLabelWidth = this.labelRects[i].Right - this.labelRects[i].Left
-            }
-        }
-        for (i = 0; i <= utravers.kStatisticsPartTypeLast; i++) {
-            // set all label widths equal to largest, so can right-justify them 
-            this.labelRects[i].Right = this.labelRects[i].Left + this.maxLabelWidth
-        }
-        this.graphRect.Left = uppanel.kLeftRightGap + this.maxLabelWidth + uppanel.kBetweenGap
-        this.graphRect.Right = fullRect.Right - uppanel.kLeftRightGap
-        this.graphRect.Top = this.percentRect.Bottom + uppanel.kBetweenGap
-        this.graphRect.Bottom = fullRect.Bottom - uppanel.kTopBottomGap - this.textHeight - uppanel.kBetweenGap
-        minText = "0"
-        minRect.Left = this.graphRect.Left
-        minRect.Right = minRect.Left + this.Canvas.TextWidth(minText)
-        minRect.Top = this.graphRect.Bottom
-        minRect.Bottom = minRect.Top + this.textHeight
-        maxText = "100 %"
-        maxRect = minRect
-        maxRect.Right = this.graphRect.Right
-        maxRect.Left = maxRect.Right - this.Canvas.TextWidth(maxText)
-        this.drawBitmap.Canvas.Brush.Color = UNRESOLVED.clBtnFace
-        // v1.4
-        this.drawBitmap.Canvas.Pen.Color = UNRESOLVED.clBtnFace
-        this.drawBitmap.Canvas.Rectangle(0, 0, this.drawBitmap.Width, this.drawBitmap.Height)
-        for (i = 0; i <= utravers.kStatisticsPartTypeLast; i++) {
-            if (this.labelRects[i].Bottom <= this.graphRect.Bottom) {
-                partType = this.partTypeForIndex(i)
-                hasStuff = (this.statistics.liveBiomass_pctMPB[partType] + this.statistics.deadBiomass_pctMPB[partType] > 0) || (this.statistics.count[partType] > 0)
-                this.drawTextLabel(labelTexts[i], this.labelRects[i], hasStuff, false, false)
-            }
-        }
-        if (this.plant !== null) {
-            this.drawGraph()
-        }
-        this.drawBitmap.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsClear
-        if (this.plant !== null) {
-            this.drawBitmap.Canvas.Pen.Color = UNRESOLVED.clBtnText
-        } else {
-            this.drawBitmap.Canvas.Pen.Color = UNRESOLVED.clBtnFace
-        }
-        this.drawBitmap.Canvas.Rectangle(this.graphRect.Left, this.graphRect.Top, this.graphRect.Right, this.graphRect.Bottom)
-        // v2.0 top label in bold
-        this.Canvas.Font.Style = {UNRESOLVED.fsBold, }
-        this.drawTextLabel(percentText, this.percentRect, (this.plant !== null), false, false)
-        this.Canvas.Font.Style = {}
-        if (this.plant !== null) {
-            this.drawTextLabel(minText, minRect, true, false, false)
-            this.drawTextLabel(maxText, maxRect, true, false, false)
-        }
-        if (this.drawBitmap.Width > 0) {
-            ubmpsupport.copyBitmapToCanvasWithGlobalPalette(this.drawBitmap, this.Canvas, Rect(0, 0, 0, 0))
-        }
-    }
+    //     fullRect = this.GetClientRect()
+    //     this.Canvas.Font = this.Font
+    //     if (this.textHeight === 0) {
+    //         this.calculateTextDimensions()
+    //     }
+    //     if (this.plant !== null) {
+    //         // v2.0 + ' (% of total)'
+    //         percentText = "Statistics for " + this.plant.getName()
+    //     } else {
+    //         // v2.0
+    //         percentText = "(no plants selected)"
+    //     }
+    //     this.percentRect.Top = fullRect.Top + uppanel.kTopBottomGap
+    //     this.percentRect.Bottom = this.percentRect.Top + this.textHeight
+    //     this.percentRect.Left = fullRect.Left + uppanel.kLeftRightGap
+    //     // v2.0 bold font
+    //     this.Canvas.Font.Style = {UNRESOLVED.fsBold, }
+    //     this.percentRect.Right = this.percentRect.Left + this.Canvas.TextWidth(percentText)
+    //     this.Canvas.Font.Style = {}
+    //     for (i = 0; i <= Statistics.kStatisticsPartTypeLast; i++) {
+    //         labelTexts[i] = this.labelStringForPartTypeIndex(i)
+    //     }
+    //     topPos = this.percentRect.Bottom + uppanel.kBetweenGap
+    //     this.maxLabelWidth = 0
+    //     for (i = 0; i <= Statistics.kStatisticsPartTypeLast; i++) {
+    //         this.labelRects[i] = Rect(0, 0, 0, 0)
+    //     }
+    //     for (i = 0; i <= Statistics.kStatisticsPartTypeLast; i++) {
+    //         this.labelRects[i].Left = uppanel.kLeftRightGap
+    //         this.labelRects[i].Right = this.labelRects[i].Left + this.Canvas.TextWidth(labelTexts[i])
+    //         if (this.labelRects[i].Right - this.labelRects[i].Left > this.maxLabelWidth) {
+    //             this.maxLabelWidth = this.labelRects[i].Right - this.labelRects[i].Left
+    //         }
+    //         this.labelRects[i].Top = topPos
+    //         if (labelTexts[i] === "") {
+    //             this.labelRects[i].Bottom = this.labelRects[i].Top
+    //         } else {
+    //             this.labelRects[i].Bottom = this.labelRects[i].Top + this.textHeight
+    //         }
+    //         topPos = topPos + (this.labelRects[i].Bottom - this.labelRects[i].Top)
+    //         if (this.labelRects[i].Right - this.labelRects[i].Left > this.maxLabelWidth) {
+    //             this.maxLabelWidth = this.labelRects[i].Right - this.labelRects[i].Left
+    //         }
+    //     }
+    //     for (i = 0; i <= Statistics.kStatisticsPartTypeLast; i++) {
+    //         // set all label widths equal to largest, so can right-justify them 
+    //         this.labelRects[i].Right = this.labelRects[i].Left + this.maxLabelWidth
+    //     }
+    //     this.graphRect.Left = uppanel.kLeftRightGap + this.maxLabelWidth + uppanel.kBetweenGap
+    //     this.graphRect.Right = fullRect.Right - uppanel.kLeftRightGap
+    //     this.graphRect.Top = this.percentRect.Bottom + uppanel.kBetweenGap
+    //     this.graphRect.Bottom = fullRect.Bottom - uppanel.kTopBottomGap - this.textHeight - uppanel.kBetweenGap
+    //     minText = "0"
+    //     minRect.Left = this.graphRect.Left
+    //     minRect.Right = minRect.Left + this.Canvas.TextWidth(minText)
+    //     minRect.Top = this.graphRect.Bottom
+    //     minRect.Bottom = minRect.Top + this.textHeight
+    //     maxText = "100 %"
+    //     maxRect = minRect.copy()
+    //     maxRect.Right = this.graphRect.Right
+    //     maxRect.Left = maxRect.Right - this.Canvas.TextWidth(maxText)
+    //     this.drawBitmap.Canvas.Brush.Color = ColorDefs.clBtnFace
+    //     // v1.4
+    //     this.drawBitmap.Canvas.Pen.Color = ColorDefs.clBtnFace
+    //     this.drawBitmap.Canvas.Rectangle(0, 0, this.drawBitmap.Width, this.drawBitmap.Height)
+    //     for (i = 0; i <= Statistics.kStatisticsPartTypeLast; i++) {
+    //         if (this.labelRects[i].Bottom <= this.graphRect.Bottom) {
+    //             partType = this.partTypeForIndex(i)
+    //             hasStuff = (this.statistics.liveBiomass_pctMPB[partType] + this.statistics.deadBiomass_pctMPB[partType] > 0) || (this.statistics.count[partType] > 0)
+    //             this.drawTextLabel(labelTexts[i], this.labelRects[i], hasStuff, false, false)
+    //         }
+    //     }
+    //     if (this.plant !== null) {
+    //         this.drawGraph()
+    //     }
+    //     this.drawBitmap.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsClear
+    //     if (this.plant !== null) {
+    //         this.drawBitmap.Canvas.Pen.Color = ColorDefs.clBtnText
+    //     } else {
+    //         this.drawBitmap.Canvas.Pen.Color = ColorDefs.clBtnFace
+    //     }
+    //     this.drawBitmap.Canvas.Rectangle(this.graphRect.Left, this.graphRect.Top, this.graphRect.Right, this.graphRect.Bottom)
+    //     // v2.0 top label in bold
+    //     this.Canvas.Font.Style = {UNRESOLVED.fsBold, }
+    //     this.drawTextLabel(percentText, this.percentRect, (this.plant !== null), false, false)
+    //     this.Canvas.Font.Style = {}
+    //     if (this.plant !== null) {
+    //         this.drawTextLabel(minText, minRect, true, false, false)
+    //         this.drawTextLabel(maxText, maxRect, true, false, false)
+    //     }
+    //     if (this.drawBitmap.Width > 0) {
+    //         ubmpsupport.copyBitmapToCanvasWithGlobalPalette(this.drawBitmap, this.Canvas, Rect(0, 0, 0, 0))
+    //     }
+    // }
     
-    drawTextLabel(text: string, drawRect: TRect, active: boolean, drawLine: boolean, drawBox: boolean): void {
-        let cText: char[] /* 255 + 1 */
-        
-        if (text !== "") {
-            this.drawBitmap.Canvas.Font = this.Font
-            if (active) {
-                this.drawBitmap.Canvas.Font.Color = UNRESOLVED.clBtnText
-            } else {
-                this.drawBitmap.Canvas.Font.Color = UNRESOLVED.clBtnShadow
-            }
-            UNRESOLVED.strPCopy(cText, text)
-            // changed DT_LEFT to DT_RIGHT to right-justify labels; ok because nothing else matters here 
-            UNRESOLVED.winprocs.drawText(this.drawBitmap.Canvas.Handle, cText, len(cText), drawRect, delphi_compatability.DT_RIGHT)
-        }
-        if (drawLine) {
-            this.drawBitmap.Canvas.Pen.Color = UNRESOLVED.clBtnShadow
-            this.drawBitmap.Canvas.MoveTo(drawRect.Left, drawRect.Bottom - 2)
-            this.drawBitmap.Canvas.LineTo(drawRect.Right, drawRect.Bottom - 2)
-        }
-        if (drawBox) {
-            this.drawBitmap.Canvas.Pen.Color = UNRESOLVED.clBtnShadow
-            this.drawBitmap.Canvas.MoveTo(drawRect.Right + 2, drawRect.Top)
-            this.drawBitmap.Canvas.LineTo(drawRect.Left - 2, drawRect.Top)
-            this.drawBitmap.Canvas.LineTo(drawRect.Left - 2, drawRect.Bottom - 2)
-            this.drawBitmap.Canvas.LineTo(drawRect.Right + 2, drawRect.Bottom - 2)
-            this.drawBitmap.Canvas.LineTo(drawRect.Right + 2, drawRect.Top)
-        }
-    }
+    // drawTextLabel(text: string, drawRect: TRect, active: boolean, drawLine: boolean, drawBox: boolean): void {
+    //     if (text !== "") {
+    //         this.drawBitmap.Canvas.Font = this.Font
+    //         if (active) {
+    //             this.drawBitmap.Canvas.Font.Color = ColorDefs.clBtnText
+    //         } else {
+    //             this.drawBitmap.Canvas.Font.Color = ColorDefs.clBtnShadow
+    //         }
+    //         // changed DT_LEFT to DT_RIGHT to right-justify labels; ok because nothing else matters here 
+    //         UNRESOLVED.winprocs.drawText(this.drawBitmap.Canvas.Handle, text, len(text), drawRect, delphi_compatability.DT_RIGHT)
+    //     }
+    //     if (drawLine) {
+    //         this.drawBitmap.Canvas.Pen.Color = ColorDefs.clBtnShadow
+    //         this.drawBitmap.Canvas.MoveTo(drawRect.Left, drawRect.Bottom - 2)
+    //         this.drawBitmap.Canvas.LineTo(drawRect.Right, drawRect.Bottom - 2)
+    //     }
+    //     if (drawBox) {
+    //         this.drawBitmap.Canvas.Pen.Color = ColorDefs.clBtnShadow
+    //         this.drawBitmap.Canvas.MoveTo(drawRect.Right + 2, drawRect.Top)
+    //         this.drawBitmap.Canvas.LineTo(drawRect.Left - 2, drawRect.Top)
+    //         this.drawBitmap.Canvas.LineTo(drawRect.Left - 2, drawRect.Bottom - 2)
+    //         this.drawBitmap.Canvas.LineTo(drawRect.Right + 2, drawRect.Bottom - 2)
+    //         this.drawBitmap.Canvas.LineTo(drawRect.Right + 2, drawRect.Top)
+    //     }
+    // }
     
-    drawGraph(): void {
-        let i: long
-        let partType: long
+    // drawGraph(): void {
+    //     let i: long
+    //     let partType: long
         
-        this.drawBitmap.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsSolid
-        this.drawBitmap.Canvas.Pen.Color = delphi_compatability.clBlack
-        this.drawBitmap.Canvas.Pen.Width = 1
-        this.drawBitmap.Canvas.Pen.Style = delphi_compatability.TFPPenStyle.psSolid
-        for (i = 0; i <= utravers.kStatisticsPartTypeLast; i++) {
-            if (this.labelRects[i].Bottom <= this.graphRect.Bottom) {
-                partType = this.partTypeForIndex(i)
-                // first draw all biomass 
-                this.drawBitmap.Canvas.Brush.Color = delphi_compatability.clBlack
-                this.drawBar(i, this.displayPercentForPartType(partType, kDead))
-                // next draw only live biomass 
-                this.drawBitmap.Canvas.Brush.Color = delphi_compatability.clLime
-                this.drawBar(i, this.displayPercentForPartType(partType, kLive))
-            }
-        }
-        this.drawBitmap.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsClear
-    }
+    //     this.drawBitmap.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsSolid
+    //     this.drawBitmap.Canvas.Pen.Color = ColorDefs.clBlack
+    //     this.drawBitmap.Canvas.Pen.Width = 1
+    //     this.drawBitmap.Canvas.Pen.Style = delphi_compatability.TFPPenStyle.psSolid
+    //     for (i = 0; i <= Statistics.kStatisticsPartTypeLast; i++) {
+    //         if (this.labelRects[i].Bottom <= this.graphRect.Bottom) {
+    //             partType = this.partTypeForIndex(i)
+    //             // first draw all biomass 
+    //             this.drawBitmap.Canvas.Brush.Color = ColorDefs.clBlack
+    //             this.drawBar(i, this.displayPercentForPartType(partType, kDead))
+    //             // next draw only live biomass 
+    //             this.drawBitmap.Canvas.Brush.Color = ColorDefs.clLime
+    //             this.drawBar(i, this.displayPercentForPartType(partType, kLive))
+    //         }
+    //     }
+    //     this.drawBitmap.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsClear
+    // }
     
-    drawBar(index: int, amount_pctMPB: float): void {
-        let distance: long
-        let drawRect: TRect
+    // drawBar(index: int, amount_pctMPB: float): void {
+    //     let distance: long
+    //     let drawRect: TRect
         
-        distance = this.graphRect.Left + intround(amount_pctMPB / 100.0 * (this.graphRect.Right - this.graphRect.Left))
-        drawRect = Rect(this.graphRect.Left, this.labelRects[index].Top, distance, this.labelRects[index].Bottom)
-        this.drawBitmap.Canvas.Rectangle(drawRect.Left, drawRect.Top, drawRect.Right, drawRect.Bottom)
-    }
+    //     distance = this.graphRect.Left + intround(amount_pctMPB / 100.0 * (this.graphRect.Right - this.graphRect.Left))
+    //     drawRect = Rect(this.graphRect.Left, this.labelRects[index].Top, distance, this.labelRects[index].Bottom)
+    //     this.drawBitmap.Canvas.Rectangle(drawRect.Left, drawRect.Top, drawRect.Right, drawRect.Bottom)
+    // }
     
     nameForPartType(partType: short, isSingular: boolean): string {
         let result = ""
         result = ""
         switch (partType) {
-            case utravers.kStatisticsPartTypeSeedlingLeaf:
+            case Statistics.kStatisticsPartTypeSeedlingLeaf:
                 if (isSingular) {
                     result = "seedling leaf"
                 } else {
                     result = "seedling leaves"
                 }
                 break
-            case utravers.kStatisticsPartTypeLeaf:
+            case Statistics.kStatisticsPartTypeLeaf:
                 if (isSingular) {
                     result = "leaf"
                 } else {
                     result = "leaves"
                 }
                 break
-            case utravers.kStatisticsPartTypeFemaleInflorescence:
+            case Statistics.kStatisticsPartTypeFemaleInflorescence:
                 if (isSingular) {
                     result = "primary inflorescence"
                 } else {
                     result = "primary inflorescences"
                 }
                 break
-            case utravers.kStatisticsPartTypeMaleInflorescence:
+            case Statistics.kStatisticsPartTypeMaleInflorescence:
                 if (isSingular) {
                     result = "secondary inflorescence"
                 } else {
                     result = "secondary inflorescences"
                 }
                 break
-            case utravers.kStatisticsPartTypeFemaleFlower:
+            case Statistics.kStatisticsPartTypeFemaleFlower:
                 if (isSingular) {
                     result = "primary flower"
                 } else {
                     result = "primary flowers"
                 }
                 break
-            case utravers.kStatisticsPartTypeFemaleFlowerBud:
+            case Statistics.kStatisticsPartTypeFemaleFlowerBud:
                 if (isSingular) {
                     result = "primary flower bud"
                 } else {
                     result = "primary flower buds"
                 }
                 break
-            case utravers.kStatisticsPartTypeMaleFlower:
+            case Statistics.kStatisticsPartTypeMaleFlower:
                 if (isSingular) {
                     result = "secondary flower"
                 } else {
                     result = "secondary flowers"
                 }
                 break
-            case utravers.kStatisticsPartTypeMaleFlowerBud:
+            case Statistics.kStatisticsPartTypeMaleFlowerBud:
                 if (isSingular) {
                     result = "secondary flower bud"
                 } else {
                     result = "secondary flower buds"
                 }
                 break
-            case utravers.kStatisticsPartTypeAxillaryBud:
+            case Statistics.kStatisticsPartTypeAxillaryBud:
                 if (isSingular) {
                     result = "meristem"
                 } else {
                     result = "meristems"
                 }
                 break
-            case utravers.kStatisticsPartTypeFruit:
+            case Statistics.kStatisticsPartTypeFruit:
                 if (isSingular) {
                     result = "ripe fruit"
                 } else {
                     result = "ripe fruits"
                 }
                 break
-            case utravers.kStatisticsPartTypeStem:
+            case Statistics.kStatisticsPartTypeStem:
                 if (isSingular) {
                     result = "stem internode"
                 } else {
                     result = "stem internodes"
                 }
                 break
-            case utravers.kStatisticsPartTypeUnripeFruit:
+            case Statistics.kStatisticsPartTypeUnripeFruit:
                 if (isSingular) {
                     result = "unripe fruit"
                 } else {
                     result = "unripe fruits"
                 }
                 break
-            case utravers.kStatisticsPartTypeFallenFruit:
+            case Statistics.kStatisticsPartTypeFallenFruit:
                 if (isSingular) {
                     result = "fallen fruit"
                 } else {
                     result = "fallen fruits"
                 }
                 break
-            case utravers.kStatisticsPartTypeUnallocatedNewVegetativeBiomass:
+            case Statistics.kStatisticsPartTypeUnallocatedNewVegetativeBiomass:
                 result = "unallocated vegetative"
                 break
-            case utravers.kStatisticsPartTypeUnremovedDeadVegetativeBiomass:
+            case Statistics.kStatisticsPartTypeUnremovedDeadVegetativeBiomass:
                 result = "unremoved vegetative"
                 break
-            case utravers.kStatisticsPartTypeUnallocatedNewReproductiveBiomass:
+            case Statistics.kStatisticsPartTypeUnallocatedNewReproductiveBiomass:
                 result = "unallocated reproductive"
                 break
-            case utravers.kStatisticsPartTypeUnremovedDeadReproductiveBiomass:
+            case Statistics.kStatisticsPartTypeUnremovedDeadReproductiveBiomass:
                 result = "unremoved reproductive"
                 break
-            case utravers.kStatisticsPartTypeFallenFlower:
+            case Statistics.kStatisticsPartTypeFallenFlower:
                 if (isSingular) {
                     result = "fallen flower"
                 } else {
                     result = "fallen flowers"
                 }
                 break
-            case utravers.kStatisticsPartTypeAllVegetative:
+            case Statistics.kStatisticsPartTypeAllVegetative:
                 result = "vegetative parts"
                 break
-            case utravers.kStatisticsPartTypeAllReproductive:
+            case Statistics.kStatisticsPartTypeAllReproductive:
                 result = "reproductive parts"
                 break
             default:
@@ -494,64 +471,64 @@ export class PdStatsPanel {
         result = -1
         switch (partType) {
             case 0:
-                result = utravers.kStatisticsPartTypeAllVegetative
+                result = Statistics.kStatisticsPartTypeAllVegetative
                 break
             case 1:
-                result = utravers.kStatisticsPartTypeAllReproductive
+                result = Statistics.kStatisticsPartTypeAllReproductive
                 break
             case 2:
-                result = utravers.kStatisticsPartTypeAxillaryBud
+                result = Statistics.kStatisticsPartTypeAxillaryBud
                 break
             case 3:
-                result = utravers.kStatisticsPartTypeStem
+                result = Statistics.kStatisticsPartTypeStem
                 break
             case 4:
-                result = utravers.kStatisticsPartTypeSeedlingLeaf
+                result = Statistics.kStatisticsPartTypeSeedlingLeaf
                 break
             case 5:
-                result = utravers.kStatisticsPartTypeLeaf
+                result = Statistics.kStatisticsPartTypeLeaf
                 break
             case 6:
-                result = utravers.kStatisticsPartTypeFemaleInflorescence
+                result = Statistics.kStatisticsPartTypeFemaleInflorescence
                 break
             case 7:
-                result = utravers.kStatisticsPartTypeFemaleFlowerBud
+                result = Statistics.kStatisticsPartTypeFemaleFlowerBud
                 break
             case 8:
-                result = utravers.kStatisticsPartTypeFemaleFlower
+                result = Statistics.kStatisticsPartTypeFemaleFlower
                 break
             case 9:
-                result = utravers.kStatisticsPartTypeMaleInflorescence
+                result = Statistics.kStatisticsPartTypeMaleInflorescence
                 break
             case 10:
-                result = utravers.kStatisticsPartTypeMaleFlowerBud
+                result = Statistics.kStatisticsPartTypeMaleFlowerBud
                 break
             case 11:
-                result = utravers.kStatisticsPartTypeMaleFlower
+                result = Statistics.kStatisticsPartTypeMaleFlower
                 break
             case 12:
-                result = utravers.kStatisticsPartTypeFallenFlower
+                result = Statistics.kStatisticsPartTypeFallenFlower
                 break
             case 13:
-                result = utravers.kStatisticsPartTypeUnripeFruit
+                result = Statistics.kStatisticsPartTypeUnripeFruit
                 break
             case 14:
-                result = utravers.kStatisticsPartTypeFruit
+                result = Statistics.kStatisticsPartTypeFruit
                 break
             case 15:
-                result = utravers.kStatisticsPartTypeFallenFruit
+                result = Statistics.kStatisticsPartTypeFallenFruit
                 break
             case 16:
-                result = utravers.kStatisticsPartTypeUnallocatedNewVegetativeBiomass
+                result = Statistics.kStatisticsPartTypeUnallocatedNewVegetativeBiomass
                 break
             case 17:
-                result = utravers.kStatisticsPartTypeUnremovedDeadVegetativeBiomass
+                result = Statistics.kStatisticsPartTypeUnremovedDeadVegetativeBiomass
                 break
             case 18:
-                result = utravers.kStatisticsPartTypeUnallocatedNewReproductiveBiomass
+                result = Statistics.kStatisticsPartTypeUnallocatedNewReproductiveBiomass
                 break
             case 19:
-                result = utravers.kStatisticsPartTypeUnremovedDeadReproductiveBiomass
+                result = Statistics.kStatisticsPartTypeUnremovedDeadReproductiveBiomass
                 break
             default:
                 // called by paint method, so do not raise exception 
@@ -559,6 +536,51 @@ export class PdStatsPanel {
                 break
         }
         return result
+    }
+
+    viewGraph() {
+        const graphLines = []
+        for (let i = 0; i <= Statistics.kStatisticsPartTypeLast; i++) {
+            const label = this.labelStringForPartTypeIndex(i)
+            const partType = this.partTypeForIndex(i)
+            const deadPercent = this.displayPercentForPartType(partType, kDead)
+            const livePercent = this.displayPercentForPartType(partType, kLive)
+            if (label) console.log("percent", deadPercent, livePercent) 
+            if (label) graphLines.push(
+                m("div.w-100.flex", 
+                    m("div.w-50.tr", label),
+                    m("div.w-50.flex", 
+                        (deadPercent > 0) && m("div.ba", { 
+                            title: this.nameForPartType(partType, this.statistics.count[partType] === 1) + " dead biomass: " + digitValueString(deadPercent) + "%",
+                            style: { 
+                                backgroundColor: convertColor(ColorDefs.clGray),
+                                borderColor: "black",
+                                width: "" + Math.floor(deadPercent) + "%",
+                                height: "1rem",
+                                title: "" + deadPercent + "%"
+                            } 
+                        } ),
+                        (livePercent > 0) && m("div.ba", {
+                            title: this.nameForPartType(partType, this.statistics.count[partType] === 1) + " live biomass: " + digitValueString(livePercent) + "%",
+                            style: { 
+                                backgroundColor: convertColor(ColorDefs.clLime),
+                                borderColor: "black",
+                                width: "" + Math.floor(livePercent) + "%",
+                                height: "1rem"
+                            } 
+                        } )
+                    )
+                )
+            )
+        }
+        return m("div", graphLines)
+    }
+
+    view(vnode: any) {
+        this.plant = vnode.attrs.plant
+        // TODO PDF: Optimize calculating statistics repeatedly if possible
+        this.updatePlantValues()
+        return m("div.ba.pa1", this.viewGraph(), m("div.mt1.f7", this.getHint()))
     }
     
 }

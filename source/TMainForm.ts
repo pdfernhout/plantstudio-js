@@ -24,6 +24,7 @@ import { convertColor } from "./KfDrawingSurface"
 import { Cursor, cursor_change, cursor_getCurrentCursorAsCSS, cursor_startWait, cursor_stopWait, CursorMode } from "./ucursor"
 import { customModal, ModalInputView, modalPrompt } from "./ModalInputView"
 import { TSplashForm } from "./TSplashForm"
+import { PdStatsPanel } from "./PdStatsPanel"
 
 // TODO PDF for getting to compile
 type TEdit = any
@@ -301,6 +302,8 @@ export class TMainForm {
     constructor() {
         // Any code that replaces this.plants will need to update plantManager.plants too
         this.plants = domain.plantManager.plants
+        // TOD PDF: Remove code for testing
+        setTimeout(() => { this.MenuPlantNewClick(); m.redraw() } , 100)
     }
 
     /*
@@ -5046,7 +5049,7 @@ export class TMainForm {
     
     // stats panel
     updateStatisticsPanelForFirstSelectedPlant(): void {
-        unfinished()
+       // TODO PDF: Fix or remove: unfinished()
         // if (this.statsPanel === null) {
         //     return
         // }
@@ -7640,25 +7643,14 @@ export class TMainForm {
                     ),
                 ),
             ),
-            this.currentPlantFocusTab === "Stats" && m("TScrollBox.statsScrollBox.TScrollBox.b",
-                {
-                    style: { color: plantNameColor }
-                    // Top: "334",
-                    // Left: "284",
-                    // Height: "23",
-                    // Width: "261",
-                    // Ctl3D: "True",
-                    // Font.Charset: "DEFAULT_CHARSET",
-                    // Font.Color: "clWindowText",
-                    // Font.Height: "-11",
-                    // Font.Name: "Arial",
-                    // Font.Style: "[]",
-                    // ParentCtl3D: "False",
-                    // ParentFont: "False",
-                    // TabOrder: "1",
-                    // Visible: "False",
-                },
-                plantNameLabel
+            this.currentPlantFocusTab === "Stats" && m("TScrollBox.statsScrollBox.TScrollBox",
+                m("div.statsLabel.TLabel.b",
+                    {
+                        style: { color: plantNameColor }
+                    },
+                    plantNameLabel
+                ),
+                m(PdStatsPanel, { plant })
             ),
             this.currentPlantFocusTab === "Note" && m("div.notePanel.TPanel",
                 m("div.noteLabel.TLabel.b",
