@@ -1,34 +1,20 @@
 // unit Ustats
 
 import * as m from "mithril"
-import { ColorDefs, float, int, intround, IntToStr, long, short } from "./common"
+import { ColorDefs, float, int, IntToStr, short } from "./common"
 import { PdPlant } from "./PdPlant"
 import { PdPlantStatistics, Statistics } from "./PdTraverser"
 import { TRect } from "./TRect"
-import { digitValueString, len, Rect } from "./usupport"
+import { digitValueString } from "./usupport"
 import { domain } from "./PdDomain"
-import { intMax } from "./umath"
 import { convertColor } from "./KfDrawingSurface"
-
-// from conversion_common import *
-// import ubmpsupport
-// import udomain
-// import umath
-// import usupport
-// import utravers
-// import uppanel
-// import uplant
-// import delphi_compatability
 
 const kLive = 0
 const kDead = 1
 const kBothLiveAndDead = 2
 
-const kMinGraphWidth = 50
-
 export class PdStatsPanel {
     plant: PdPlant | null = null
-    // TOD PDF: Fix or remove: drawBitmap: TBitmap = new TBitmap()
     statistics: PdPlantStatistics = new PdPlantStatistics()
     graphRect: TRect = new TRect()
     percentRect: TRect = new TRect()
@@ -44,18 +30,6 @@ export class PdStatsPanel {
             return "Parts of the plant showing counts and percent of total biomass"
         }
     }
-    
-    // maxSelectedItemIndex(): int {
-    //     let result = 0
-    //     result = uppanel.kItemNone
-    //     return result
-    // }
-    
-    // collapsedHeight(): int {
-    //     let result = 0
-    //     result = this.textHeight + uppanel.kTopBottomGap
-    //     return result
-    // }
     
     collapseOrExpand(y: int): void {
         // do nothing 
@@ -89,31 +63,8 @@ export class PdStatsPanel {
         if (this.plant === null) {
             return
         }
-        // TOD PDF: FIx or remove: this.Invalidate()
     }
-    
-    // resizeElements(): void {
-    //     let fullRect: TRect
-        
-    //     if (this.textHeight === 0) {
-    //         this.calculateTextDimensions()
-    //     }
-    //     if (this.maxLabelWidth === 0) {
-    //         this.paint()
-    //     }
-    //     fullRect = Rect(0, 0, kMinGraphWidth + this.maxLabelWidth + uppanel.kLeftRightGap * 2 + uppanel.kBetweenGap, (this.numNonZeroPlantParts() + 2) * this.textHeight + uppanel.kTopBottomGap * 2 + uppanel.kBetweenGap * 2)
-    //     this.ClientHeight = intMax(0, intMax(usupport.rHeight(fullRect), this.Parent.ClientHeight))
-    //     this.ClientWidth = intMax(0, intMax(usupport.rWidth(fullRect), this.Parent.ClientWidth))
-    //     try {
-    //         this.drawBitmap.Width = this.ClientWidth
-    //         this.drawBitmap.Height = this.ClientHeight
-    //     } catch (e) {
-    //         this.drawBitmap.Width = 1
-    //         this.drawBitmap.Height = 1
-    //     }
-    //     this.updateDisplay()
-    // }
-    
+
     labelStringForPartTypeIndex(index: short): string {
         let result = ""
         let partType: short
@@ -173,171 +124,6 @@ export class PdStatsPanel {
         }
         return result
     }
-    
-    // paint(): void {
-    //     let fullRect: TRect
-    //     let minRect: TRect = new TRect()
-    //     let maxRect: TRect
-    //     let minText: string
-    //     let maxText: string
-    //     let percentText: string
-    //     let i: short
-    //     let partType: short
-    //     let topPos: short
-    //     let labelTexts: string[] = Array(Statistics.kStatisticsPartTypeLast + 1)
-    //     let hasStuff: boolean
-        
-    //     fullRect = this.GetClientRect()
-    //     this.Canvas.Font = this.Font
-    //     if (this.textHeight === 0) {
-    //         this.calculateTextDimensions()
-    //     }
-    //     if (this.plant !== null) {
-    //         // v2.0 + ' (% of total)'
-    //         percentText = "Statistics for " + this.plant.getName()
-    //     } else {
-    //         // v2.0
-    //         percentText = "(no plants selected)"
-    //     }
-    //     this.percentRect.Top = fullRect.Top + uppanel.kTopBottomGap
-    //     this.percentRect.Bottom = this.percentRect.Top + this.textHeight
-    //     this.percentRect.Left = fullRect.Left + uppanel.kLeftRightGap
-    //     // v2.0 bold font
-    //     this.Canvas.Font.Style = {UNRESOLVED.fsBold, }
-    //     this.percentRect.Right = this.percentRect.Left + this.Canvas.TextWidth(percentText)
-    //     this.Canvas.Font.Style = {}
-    //     for (i = 0; i <= Statistics.kStatisticsPartTypeLast; i++) {
-    //         labelTexts[i] = this.labelStringForPartTypeIndex(i)
-    //     }
-    //     topPos = this.percentRect.Bottom + uppanel.kBetweenGap
-    //     this.maxLabelWidth = 0
-    //     for (i = 0; i <= Statistics.kStatisticsPartTypeLast; i++) {
-    //         this.labelRects[i] = Rect(0, 0, 0, 0)
-    //     }
-    //     for (i = 0; i <= Statistics.kStatisticsPartTypeLast; i++) {
-    //         this.labelRects[i].Left = uppanel.kLeftRightGap
-    //         this.labelRects[i].Right = this.labelRects[i].Left + this.Canvas.TextWidth(labelTexts[i])
-    //         if (this.labelRects[i].Right - this.labelRects[i].Left > this.maxLabelWidth) {
-    //             this.maxLabelWidth = this.labelRects[i].Right - this.labelRects[i].Left
-    //         }
-    //         this.labelRects[i].Top = topPos
-    //         if (labelTexts[i] === "") {
-    //             this.labelRects[i].Bottom = this.labelRects[i].Top
-    //         } else {
-    //             this.labelRects[i].Bottom = this.labelRects[i].Top + this.textHeight
-    //         }
-    //         topPos = topPos + (this.labelRects[i].Bottom - this.labelRects[i].Top)
-    //         if (this.labelRects[i].Right - this.labelRects[i].Left > this.maxLabelWidth) {
-    //             this.maxLabelWidth = this.labelRects[i].Right - this.labelRects[i].Left
-    //         }
-    //     }
-    //     for (i = 0; i <= Statistics.kStatisticsPartTypeLast; i++) {
-    //         // set all label widths equal to largest, so can right-justify them 
-    //         this.labelRects[i].Right = this.labelRects[i].Left + this.maxLabelWidth
-    //     }
-    //     this.graphRect.Left = uppanel.kLeftRightGap + this.maxLabelWidth + uppanel.kBetweenGap
-    //     this.graphRect.Right = fullRect.Right - uppanel.kLeftRightGap
-    //     this.graphRect.Top = this.percentRect.Bottom + uppanel.kBetweenGap
-    //     this.graphRect.Bottom = fullRect.Bottom - uppanel.kTopBottomGap - this.textHeight - uppanel.kBetweenGap
-    //     minText = "0"
-    //     minRect.Left = this.graphRect.Left
-    //     minRect.Right = minRect.Left + this.Canvas.TextWidth(minText)
-    //     minRect.Top = this.graphRect.Bottom
-    //     minRect.Bottom = minRect.Top + this.textHeight
-    //     maxText = "100 %"
-    //     maxRect = minRect.copy()
-    //     maxRect.Right = this.graphRect.Right
-    //     maxRect.Left = maxRect.Right - this.Canvas.TextWidth(maxText)
-    //     this.drawBitmap.Canvas.Brush.Color = ColorDefs.clBtnFace
-    //     // v1.4
-    //     this.drawBitmap.Canvas.Pen.Color = ColorDefs.clBtnFace
-    //     this.drawBitmap.Canvas.Rectangle(0, 0, this.drawBitmap.Width, this.drawBitmap.Height)
-    //     for (i = 0; i <= Statistics.kStatisticsPartTypeLast; i++) {
-    //         if (this.labelRects[i].Bottom <= this.graphRect.Bottom) {
-    //             partType = this.partTypeForIndex(i)
-    //             hasStuff = (this.statistics.liveBiomass_pctMPB[partType] + this.statistics.deadBiomass_pctMPB[partType] > 0) || (this.statistics.count[partType] > 0)
-    //             this.drawTextLabel(labelTexts[i], this.labelRects[i], hasStuff, false, false)
-    //         }
-    //     }
-    //     if (this.plant !== null) {
-    //         this.drawGraph()
-    //     }
-    //     this.drawBitmap.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsClear
-    //     if (this.plant !== null) {
-    //         this.drawBitmap.Canvas.Pen.Color = ColorDefs.clBtnText
-    //     } else {
-    //         this.drawBitmap.Canvas.Pen.Color = ColorDefs.clBtnFace
-    //     }
-    //     this.drawBitmap.Canvas.Rectangle(this.graphRect.Left, this.graphRect.Top, this.graphRect.Right, this.graphRect.Bottom)
-    //     // v2.0 top label in bold
-    //     this.Canvas.Font.Style = {UNRESOLVED.fsBold, }
-    //     this.drawTextLabel(percentText, this.percentRect, (this.plant !== null), false, false)
-    //     this.Canvas.Font.Style = {}
-    //     if (this.plant !== null) {
-    //         this.drawTextLabel(minText, minRect, true, false, false)
-    //         this.drawTextLabel(maxText, maxRect, true, false, false)
-    //     }
-    //     if (this.drawBitmap.Width > 0) {
-    //         ubmpsupport.copyBitmapToCanvasWithGlobalPalette(this.drawBitmap, this.Canvas, Rect(0, 0, 0, 0))
-    //     }
-    // }
-    
-    // drawTextLabel(text: string, drawRect: TRect, active: boolean, drawLine: boolean, drawBox: boolean): void {
-    //     if (text !== "") {
-    //         this.drawBitmap.Canvas.Font = this.Font
-    //         if (active) {
-    //             this.drawBitmap.Canvas.Font.Color = ColorDefs.clBtnText
-    //         } else {
-    //             this.drawBitmap.Canvas.Font.Color = ColorDefs.clBtnShadow
-    //         }
-    //         // changed DT_LEFT to DT_RIGHT to right-justify labels; ok because nothing else matters here 
-    //         UNRESOLVED.winprocs.drawText(this.drawBitmap.Canvas.Handle, text, len(text), drawRect, delphi_compatability.DT_RIGHT)
-    //     }
-    //     if (drawLine) {
-    //         this.drawBitmap.Canvas.Pen.Color = ColorDefs.clBtnShadow
-    //         this.drawBitmap.Canvas.MoveTo(drawRect.Left, drawRect.Bottom - 2)
-    //         this.drawBitmap.Canvas.LineTo(drawRect.Right, drawRect.Bottom - 2)
-    //     }
-    //     if (drawBox) {
-    //         this.drawBitmap.Canvas.Pen.Color = ColorDefs.clBtnShadow
-    //         this.drawBitmap.Canvas.MoveTo(drawRect.Right + 2, drawRect.Top)
-    //         this.drawBitmap.Canvas.LineTo(drawRect.Left - 2, drawRect.Top)
-    //         this.drawBitmap.Canvas.LineTo(drawRect.Left - 2, drawRect.Bottom - 2)
-    //         this.drawBitmap.Canvas.LineTo(drawRect.Right + 2, drawRect.Bottom - 2)
-    //         this.drawBitmap.Canvas.LineTo(drawRect.Right + 2, drawRect.Top)
-    //     }
-    // }
-    
-    // drawGraph(): void {
-    //     let i: long
-    //     let partType: long
-        
-    //     this.drawBitmap.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsSolid
-    //     this.drawBitmap.Canvas.Pen.Color = ColorDefs.clBlack
-    //     this.drawBitmap.Canvas.Pen.Width = 1
-    //     this.drawBitmap.Canvas.Pen.Style = delphi_compatability.TFPPenStyle.psSolid
-    //     for (i = 0; i <= Statistics.kStatisticsPartTypeLast; i++) {
-    //         if (this.labelRects[i].Bottom <= this.graphRect.Bottom) {
-    //             partType = this.partTypeForIndex(i)
-    //             // first draw all biomass 
-    //             this.drawBitmap.Canvas.Brush.Color = ColorDefs.clBlack
-    //             this.drawBar(i, this.displayPercentForPartType(partType, kDead))
-    //             // next draw only live biomass 
-    //             this.drawBitmap.Canvas.Brush.Color = ColorDefs.clLime
-    //             this.drawBar(i, this.displayPercentForPartType(partType, kLive))
-    //         }
-    //     }
-    //     this.drawBitmap.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsClear
-    // }
-    
-    // drawBar(index: int, amount_pctMPB: float): void {
-    //     let distance: long
-    //     let drawRect: TRect
-        
-    //     distance = this.graphRect.Left + intround(amount_pctMPB / 100.0 * (this.graphRect.Right - this.graphRect.Left))
-    //     drawRect = Rect(this.graphRect.Left, this.labelRects[index].Top, distance, this.labelRects[index].Bottom)
-    //     this.drawBitmap.Canvas.Rectangle(drawRect.Left, drawRect.Top, drawRect.Right, drawRect.Bottom)
-    // }
     
     nameForPartType(partType: short, isSingular: boolean): string {
         let result = ""
