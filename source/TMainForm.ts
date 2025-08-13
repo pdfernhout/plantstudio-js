@@ -4365,6 +4365,10 @@ export class TMainForm {
     }
     
     animateGrowthClick(): void {
+        if (this.animateCommand) {
+            this.stopAnimation()
+            return
+        }
         if (this.selectedPlants.length <= 0) {
             return
         }
@@ -4435,23 +4439,25 @@ export class TMainForm {
         // udebug.DebugForm.Enabled = enable
     }
     
-    /*
-
-    lifeCycleDaysEditExit(): void {
+    lifeCycleDaysEditExit(event: any): void {
         const plant = this.focusedPlant()
         if (plant === null) {
             return
         }
-        let newAge = StrToIntDef(this.lifeCycleDaysEdit.Text, 0)
+        let newAge = StrToIntDef(event.target.value, 0)
         if (newAge === plant.age) {
             return
         }
+        if (newAge < 0) {
+            newAge = 0
+        }
         if (newAge > plant.pGeneral.ageAtMaturity) {
             newAge = plant.pGeneral.ageAtMaturity
-            this.lifeCycleDaysEdit.Text = IntToStr(newAge)
         }
         this.changeSelectedPlantAges(newAge)
     }
+    
+    /*
     
     lifeCycleDaysSpinUpClick(): void {
         const plant = this.focusedPlant()
@@ -6346,6 +6352,9 @@ export class TMainForm {
         const menu = buildMenuFromSpec(this.mainMenuSpec)
         
         return m("div.sticky",
+            {
+                style: { zIndex: 2 }
+            },
             m("div.bg-light-gray",
                 m("span.green", {onclick: () => window.open("https://www.kurtz-fernhout.com/summary_plantstudio.html", "_blank") }, "PlantStudio"),
                 menu.map(menuItem => 
@@ -6930,39 +6939,17 @@ export class TMainForm {
                     // TabOrder: "0",
                 },
                 m("Group.Group.g00000002",
-                    m("input.lifeCycleDaysEdit.TEdit",
+                    "Age",
+                    m("input[type=number].lifeCycleDaysEdit.TEdit.ml1.mw3",
                         {
-                            // Top: "2",
-                            // Left: "36",
-                            // Height: "21",
-                            // Width: "29",
-                            // AutoSize: "False",
-                            // Font.Charset: "DEFAULT_CHARSET",
-                            // Font.Color: "clWindowText",
-                            // Font.Height: "-11",
-                            // Font.Name: "Arial",
-                            // Font.Style: "[]",
-                            // ParentFont: "False",
-                            // TabOrder: "0",
-                            // Text: "100",
-                            // OnExit: "lifeCycleDaysEditExit",
+                            value: plant.age,
+                            onchange: (event: any) => this.lifeCycleDaysEditExit(event),
+                            min: "0",
+                            max: "" + plant.pGeneral.ageAtMaturity
                         },
                     ),
-                    m("button.lifeCycleDaysSpin.TSpinButton",
-                        {
-                            // Top: "2",
-                            // Left: "66",
-                            // Height: "19",
-                            // Width: "15",
-                            // DownGlyph.Data: "7E040000424D7E04000000000000360400002800000009000000060000000100080000000000480000000000000000000000000100000001000000000000000080000080000000808000800000008000800080800000C0C0C000C0DCC000F0C8A4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000F0FBFF00A4A0A000808080000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303030303000000030303030003030303000000030303000000030303000000030300000000000303000000030000000000000003000000030303030303030303000000",
-                            // FocusControl: "lifeCycleDaysEdit",
-                            // TabOrder: "1",
-                            // UpGlyph.Data: "7E040000424D7E04000000000000360400002800000009000000060000000100080000000000480000000000000000000000000100000001000000000000000080000080000000808000800000008000800080800000C0C0C000C0DCC000F0C8A4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000F0FBFF00A4A0A000808080000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303030303000000030000000000000003000000030300000000000303000000030303000000030303000000030303030003030303000000030303030303030303000000",
-                            // OnDownClick: "lifeCycleDaysSpinDownClick",
-                            // OnUpClick: "lifeCycleDaysSpinUpClick",
-                        },
-                    ),
-                    m("button.animateGrowth.TSpeedButton",
+                    m("span.m.ml1", "days, " + IntToStr(intround(plant.totalBiomass_pctMPB)) + "% max size"),
+                    m("button.animateGrowth.TSpeedButton.ml3",
                         {
                             onclick: () => this.animateGrowthClick(),
                             // Top: "2",
@@ -6977,38 +6964,9 @@ export class TMainForm {
                             // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF008888888888888888820888208888208882088820888820882228882088882088222888208888208888882820282820288888222228222228888822222888208888888888882820288888888888222228888888888888208888888888888820888888888888882088888888888828202888888888882222288888888888222228",
                             // ParentFont: "False",
                         },
+                        m("img", { src: imageDir + "MainForm_animateGrowth.png" }),
                         "Animate",
                     ),
-                ),
-                m("div.ageAndSizeLabel.TLabel",
-                    {
-                        // Top: "6",
-                        // Left: "10",
-                        // Height: "14",
-                        // Width: "20",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // ParentFont: "False",
-                    },
-                    "Age",
-                ),
-                m("div.daysAndSizeLabel.TLabel",
-                    {
-                        // Top: "8",
-                        // Left: "89",
-                        // Height: "14",
-                        // Width: "98",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // ParentFont: "False",
-                    },
-                    "days, 26% max size",
                 ),
             ),
         )
@@ -7649,32 +7607,34 @@ export class TMainForm {
             this.viewMainMenu(),
             m(ModalInputView),
             // viewMainForm() 
-            m("canvas.ba", {
-                width: self.drawingBitmap.width,
-                height: self.drawingBitmap.height,
-                onupdate(vnode: m.VnodeDOM) {
-                    self.drawingPaintBox = <HTMLCanvasElement>vnode.dom
-                    self.copyDrawingBitmapToPaintBox()
-                    // TODO PDF: May need to rethink how hint is drawn
-                    if (this.hintActive && this.lastHintString) {
-                        const context = this.drawingPaintBox.getContext("2d")
-                        context.fillText(this.lastHintString, this.hintX, this.hintY)
-                    }
-                },
-                onmousedown: (event: MouseEvent) => {
-                    this.PaintBoxMouseDown(event)
-                },
-                onmousemove: (event: MouseEvent) => {
-                    this.PaintBoxMouseMove(event)
-                },
-                onmouseup: (event: MouseEvent) => {
-                    this.PaintBoxMouseUp(event)
-                },
-                style: { cursor: cursor_getCurrentCursorAsCSS() }
-            }),
-            this.animateCommand && m("div.absolute.green.ma3", 
-                { style: { bottom: 0 } },
-                "Animating day " + this.animateCommand.age + " of " + this.animateCommand.oldestAgeAtMaturity + " (click anywhere to stop)"
+            m("div.relative",
+                m("canvas.ba", {
+                    width: self.drawingBitmap.width,
+                    height: self.drawingBitmap.height,
+                    onupdate(vnode: m.VnodeDOM) {
+                        self.drawingPaintBox = <HTMLCanvasElement>vnode.dom
+                        self.copyDrawingBitmapToPaintBox()
+                        // TODO PDF: May need to rethink how hint is drawn
+                        if (this.hintActive && this.lastHintString) {
+                            const context = this.drawingPaintBox.getContext("2d")
+                            context.fillText(this.lastHintString, this.hintX, this.hintY)
+                        }
+                    },
+                    onmousedown: (event: MouseEvent) => {
+                        this.PaintBoxMouseDown(event)
+                    },
+                    onmousemove: (event: MouseEvent) => {
+                        this.PaintBoxMouseMove(event)
+                    },
+                    onmouseup: (event: MouseEvent) => {
+                        this.PaintBoxMouseUp(event)
+                    },
+                    style: { cursor: cursor_getCurrentCursorAsCSS() }
+                }),
+                this.animateCommand && m("div.absolute.green.ma3", 
+                    { style: { bottom: 0 } },
+                    "Animating day " + this.animateCommand.age + " of " + this.animateCommand.oldestAgeAtMaturity + " (click anywhere to stop)"
+                ),
             ),
             this.viewPlantList(),
             this.viewPlantFocusPanel()
