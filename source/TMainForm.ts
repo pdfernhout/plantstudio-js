@@ -6548,62 +6548,6 @@ export class TMainForm {
                     },
                     m("img", { src: imageDir + (domain.plantFileLoaded ? "MainForm_drawingAreaOnSide.png" : "MainForm_drawingAreaOnSide-disabled.png") })
                 ),
-                m("button.packPlants.TSpeedButton.ml1",
-                    {
-                        onclick: () => this.packPlantsClick(),
-                        title: "Pack plants",
-                        disabled: !this.haveMoreThanOnSelectedPlant()
-                    },
-                    m("img", { src: imageDir + (this.haveMoreThanOnSelectedPlant() ? "MainForm_packPlants.png" : "MainForm_packPlants-disabled.png")}),
-                ),
-                m("button.alignTops.TSpeedButton.ml1",
-                    {
-                        onclick: () => this.alignTopsClick(),
-                        title: "Align tops",
-                        disabled: !this.haveMoreThanOnSelectedPlant()
-                    },
-                    m("img", { src: imageDir + (this.haveMoreThanOnSelectedPlant() ? "MainForm_alignTops.png" : "MainForm_alignTops-disabled.png") })
-                ),
-                m("button.alignBottoms.TSpeedButton",
-                    {
-                        onclick: () => this.alignBottomsClick(),
-                        title: "Align bottoms",
-                        disabled: !this.haveMoreThanOnSelectedPlant()
-                    },
-                    m("img", { src: imageDir + (this.haveMoreThanOnSelectedPlant() ? "MainForm_alignBottoms.png" : "MainForm_alignBottoms-disabled.png") })
-                ),
-                m("button.alignLeft.TSpeedButton",
-                    {
-                        onclick: () => this.alignLeftClick(),
-                        title: "Align left",
-                        disabled: !this.haveMoreThanOnSelectedPlant()
-                    },
-                    m("img", { src: imageDir + (this.haveMoreThanOnSelectedPlant() ? "MainForm_alignLeft.png" : "MainForm_alignLeft-disabled.png") })
-                ),
-                m("button.alignRight.TSpeedButton",
-                    {
-                        onclick: () => this.alignRightClick(),
-                        title: "Align right",
-                        disabled: !this.haveMoreThanOnSelectedPlant()
-                    },
-                    m("img", { src: imageDir + (this.haveMoreThanOnSelectedPlant() ? "MainForm_alignRight.png" : "MainForm_alignRight-disabled.png")})
-                ),
-                m("button.makeEqualWidth.TSpeedButton.ml1",
-                    {
-                        onclick: () => this.makeEqualWidthClick(),
-                        title: "Make equal Width",
-                        disabled: !this.haveMoreThanOnSelectedPlant()
-                    },
-                    m("img", { src: imageDir + (this.haveMoreThanOnSelectedPlant() ? "MainForm_makeEqualWidth.png" : "MainForm_makeEqualWidth-disabled.png")}),
-                ),
-                m("button.makeEqualHeight.TSpeedButton",
-                    {
-                        onclick: () => this.makeEqualHeightClick(),
-                        title: "Make equal height",
-                        disabled: !this.haveMoreThanOnSelectedPlant()
-                    },
-                    m("img", { src: imageDir + (this.haveMoreThanOnSelectedPlant() ? "MainForm_makeEqualHeight.png" : "MainForm_makeEqualHeight-disabled.png")}),
-                ),
             ),
         )
     }
@@ -6812,6 +6756,49 @@ export class TMainForm {
                     ),
                     m("span.ml1", "pixels"),
                 ),
+                m("div.ml5.mt1", 
+                    m("button.alignTops.TSpeedButton",
+                        {
+                            onclick: () => this.alignTopsClick(),
+                            title: "Align tops",
+                            disabled: !this.haveMoreThanOnSelectedPlant()
+                        },
+                        m("img", { src: imageDir + (this.haveMoreThanOnSelectedPlant() ? "MainForm_alignTops.png" : "MainForm_alignTops-disabled.png") })
+                    ),
+                    m("button.alignBottoms.TSpeedButton.ml1",
+                        {
+                            onclick: () => this.alignBottomsClick(),
+                            title: "Align bottoms",
+                            disabled: !this.haveMoreThanOnSelectedPlant()
+                        },
+                        m("img", { src: imageDir + (this.haveMoreThanOnSelectedPlant() ? "MainForm_alignBottoms.png" : "MainForm_alignBottoms-disabled.png") })
+                    ),
+                    m("button.alignLeft.TSpeedButton.ml1",
+                        {
+                            onclick: () => this.alignLeftClick(),
+                            title: "Align left",
+                            disabled: !this.haveMoreThanOnSelectedPlant()
+                        },
+                        m("img", { src: imageDir + (this.haveMoreThanOnSelectedPlant() ? "MainForm_alignLeft.png" : "MainForm_alignLeft-disabled.png") })
+                    ),
+                    m("button.alignRight.TSpeedButton.ml1",
+                        {
+                            onclick: () => this.alignRightClick(),
+                            title: "Align right",
+                            disabled: !this.haveMoreThanOnSelectedPlant()
+                        },
+                        m("img", { src: imageDir + (this.haveMoreThanOnSelectedPlant() ? "MainForm_alignRight.png" : "MainForm_alignRight-disabled.png")})
+                    ),
+                    m("button.packPlants.TSpeedButton.ml2",
+                        {
+                            onclick: () => this.packPlantsClick(),
+                            title: "Pack plants",
+                            disabled: !this.haveMoreThanOnSelectedPlant()
+                        },
+                        m("img", { src: imageDir + (this.haveMoreThanOnSelectedPlant() ? "MainForm_packPlants.png" : "MainForm_packPlants-disabled.png")}),
+                        "Pack"
+                    ),
+                ),
                 m("div.mt1",
                     m("span.mr1", "Scale"),
                     m("input[type=number].drawingScaleEdit.TEdit.mw3",
@@ -6835,6 +6822,26 @@ export class TMainForm {
                         },
                     ),
                     m("span.ml1", "pixels/mm")
+                ),
+                m("div.mt1.ml5",
+                    m("button.makeEqualWidth.TSpeedButton",
+                        {
+                            onclick: () => this.makeEqualWidthClick(),
+                            title: "Make equal Width",
+                            disabled: !this.haveMoreThanOnSelectedPlant()
+                        },
+                        m("img", { src: imageDir + (this.haveMoreThanOnSelectedPlant() ? "MainForm_makeEqualWidth.png" : "MainForm_makeEqualWidth-disabled.png")}),
+                        "Equal width"
+                    ),
+                    m("button.makeEqualHeight.TSpeedButton.ml2",
+                        {
+                            onclick: () => this.makeEqualHeightClick(),
+                            title: "Make equal height",
+                            disabled: !this.haveMoreThanOnSelectedPlant()
+                        },
+                        m("img", { src: imageDir + (this.haveMoreThanOnSelectedPlant() ? "MainForm_makeEqualHeight.png" : "MainForm_makeEqualHeight-disabled.png")}),
+                        "Equal height"
+                    ),
                 ),
                 m("div.mt1",
                     m("span", "Rotation"),
@@ -6907,7 +6914,7 @@ export class TMainForm {
                             // OnExit: "zRotationEditExit",
                         },
                     ),
-                    m("div.mt1",
+                    m("div.mt1.ml4",
                         m("button.resetRotations.TSpeedButton",
                             {
                                 onclick: () => this.resetRotationsClick(),
