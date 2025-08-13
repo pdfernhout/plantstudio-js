@@ -3825,13 +3825,13 @@ export class TMainForm {
         return result
     }
     
-    xLocationEditExit(): void {
+    xLocationEditExit(event: any): void {
         const plant = this.focusedPlant()
         if (plant === null) {
             return
         }
         const oldXLocation: int = plant.basePoint_pixels().X
-        const newXLocation: int = StrToIntDef(this.xLocationEdit.Text, oldXLocation)
+        const newXLocation: int = StrToIntDef(event.target.value, oldXLocation)
         if (newXLocation !== oldXLocation) {
             const increment = newXLocation - oldXLocation
             let direction: short
@@ -3840,17 +3840,17 @@ export class TMainForm {
             } else {
                 direction = kLeft
             }
-            this.nudgeSelectedPlantsByPixelsAndDirection(increment, direction)
+            this.nudgeSelectedPlantsByPixelsAndDirection(Math.abs(increment), direction)
         }
     }
     
-    yLocationEditExit(): void {
+    yLocationEditExit(event: any): void {
         const plant = this.focusedPlant()
         if (plant === null) {
             return
         }
         const oldYLocation = plant.basePoint_pixels().Y
-        const newYLocation = StrToIntDef(this.yLocationEdit.Text, oldYLocation)
+        const newYLocation = StrToIntDef(event.target.value, oldYLocation)
         if (newYLocation !== oldYLocation) {
             const increment = newYLocation - oldYLocation
             let direction: short
@@ -3859,24 +3859,8 @@ export class TMainForm {
             } else {
                 direction = kUp
             }
-            this.nudgeSelectedPlantsByPixelsAndDirection(increment, direction)
+            this.nudgeSelectedPlantsByPixelsAndDirection(Math.abs(increment), direction)
         }
-    }
-
-    xLocationSpinDownClick(): void {
-        this.nudgeSelectedPlantsByPixelsAndDirection(domain.options.nudgeDistance, kLeft)
-    }
-    
-    xLocationSpinUpClick(): void {
-        this.nudgeSelectedPlantsByPixelsAndDirection(domain.options.nudgeDistance, kRight)
-    }
-    
-    yLocationSpinDownClick(): void {
-        this.nudgeSelectedPlantsByPixelsAndDirection(domain.options.nudgeDistance, kUp)
-    }
-    
-    yLocationSpinUpClick(): void {
-        this.nudgeSelectedPlantsByPixelsAndDirection(domain.options.nudgeDistance, kDown)
     }
     
     xRotationEditChange(): void {
@@ -3891,75 +3875,34 @@ export class TMainForm {
         this.checkRotationEditAgainstBounds(this.zRotationEdit)
     }
     
-    checkRotationEditAgainstBounds(edit: TEdit): void {
-        if (this.internalChange) {
-            return
-        }
-        let newRotation = StrToIntDef(edit.Text, 0)
-        const oldRotation = newRotation
+    checkRotationEditAgainstBounds(newRotation: number): number {
         if (newRotation < -360) {
             newRotation = 360 - (Math.abs(newRotation) - 360)
         }
         if (newRotation > 360) {
             newRotation = -360 + (newRotation - 360)
         }
-        if (newRotation !== oldRotation) {
-            this.internalChange = true
-            edit.Text = IntToStr(newRotation)
-            this.internalChange = false
-        }
+        return newRotation
     }
     
-    xRotationEditExit(): void {
-        this.changeSelectedPlantRotations(this.xRotationEdit, kRotateX, 0)
+    xRotationEditExit(event: any): void {
+        this.changeSelectedPlantRotations(event, kRotateX, 0)
     }
     
-    xRotationSpinUpClick(): void {
-        this.changeSelectedPlantRotations(this.xRotationEdit, kRotateX, domain.options.rotationIncrement)
+    yRotationEditExit(event: any): void {
+        this.changeSelectedPlantRotations(event, kRotateY, 0)
     }
     
-    xRotationSpinDownClick(): void {
-        this.changeSelectedPlantRotations(this.xRotationEdit, kRotateX, -domain.options.rotationIncrement)
+    zRotationEditExit(event: any): void {
+        this.changeSelectedPlantRotations(event, kRotateZ, 0)
     }
     
-    yRotationEditExit(): void {
-        this.changeSelectedPlantRotations(this.yRotationEdit, kRotateY, 0)
-    }
-    
-    yRotationSpinUpClick(): void {
-        this.changeSelectedPlantRotations(this.yRotationEdit, kRotateY, domain.options.rotationIncrement)
-    }
-    
-    yRotationSpinDownClick(): void {
-        this.changeSelectedPlantRotations(this.yRotationEdit, kRotateY, -domain.options.rotationIncrement)
-    }
-    
-    zRotationEditExit(): void {
-        this.changeSelectedPlantRotations(this.zRotationEdit, kRotateZ, 0)
-    }
-    
-    zRotationSpinUpClick(): void {
-        this.changeSelectedPlantRotations(this.zRotationEdit, kRotateZ, domain.options.rotationIncrement)
-    }
-    
-    zRotationSpinDownClick(): void {
-        this.changeSelectedPlantRotations(this.zRotationEdit, kRotateZ, -domain.options.rotationIncrement)
-    }
-    
-    changeSelectedPlantRotations(edit: TEdit, rotateDirection: short, changeInRotation: short): void {
+    changeSelectedPlantRotations(event: any, rotateDirection: short, changeInRotation: short): void {
         if (this.internalChange) {
             return
         }
-        let newRotation = StrToIntDef(edit.Text, 0) + changeInRotation
-        edit.Text = IntToStr(newRotation)
-        // need this? 
-        this.checkRotationEditAgainstBounds(edit)
-        // in case changed 
-        newRotation = StrToIntDef(edit.Text, 0)
-        if (this.focusedPlant() === null) {
-            //should be disabled, but
-            return
-        }
+        let newRotation = StrToIntDef(event.target.value, 0) + changeInRotation
+        newRotation = this.checkRotationEditAgainstBounds(newRotation)
         const newCommand = new PdRotateCommand(this.selectedPlants, rotateDirection, newRotation)
         this.doCommand(newCommand)
     }
@@ -3984,7 +3927,7 @@ export class TMainForm {
         this.doCommand(newCommand)
     }
     
-    drawingScaleEditExit(): void {
+    drawingScaleEditExit(event: any): void {
         const plant = this.focusedPlant()
         if (plant === null) {
             return
@@ -3992,7 +3935,7 @@ export class TMainForm {
         const oldValue = plant.drawingScale_PixelsPerMm
         let newValue: float
         try {
-            newValue = StrToFloat(this.drawingScaleEdit.Text)
+            newValue = StrToFloat(event.target.value)
         } catch (e) {
             newValue = oldValue
         }
@@ -4001,21 +3944,22 @@ export class TMainForm {
         }
     }
     
-    drawingScaleSpinUpClick(): void {
-        if (this.focusedPlant() === null) {
-            return
-        }
-        const resizeMultiplier = domain.options.resizeKeyUpMultiplierPercent / 100.0
-        this.resizeSelectedPlantsWithMultiplierOrNewAmount(resizeMultiplier, 0)
-    }
+    // TODO PDF: Using fixed 0.2 for now -- could implement special spin buttons to call these percent magnify functions
+    // drawingScaleSpinUpClick(): void {
+    //     if (this.focusedPlant() === null) {
+    //         return
+    //     }
+    //     const resizeMultiplier = domain.options.resizeKeyUpMultiplierPercent / 100.0
+    //     this.resizeSelectedPlantsWithMultiplierOrNewAmount(resizeMultiplier, 0)
+    // }
     
-    drawingScaleSpinDownClick(): void {
-        if (this.focusedPlant() === null) {
-            return
-        }
-        const resizeMultiplier = safedivExcept(1.0, domain.options.resizeKeyUpMultiplierPercent / 100.0, 0.9)
-        this.resizeSelectedPlantsWithMultiplierOrNewAmount(resizeMultiplier, 0)
-    }
+    // drawingScaleSpinDownClick(): void {
+    //     if (this.focusedPlant() === null) {
+    //         return
+    //     }
+    //     const resizeMultiplier = safedivExcept(1.0, domain.options.resizeKeyUpMultiplierPercent / 100.0, 0.9)
+    //     this.resizeSelectedPlantsWithMultiplierOrNewAmount(resizeMultiplier, 0)
+    // }
 
     makeEqualWidthClick(): void {
         const plant = this.focusedPlant()
@@ -6054,8 +5998,6 @@ export class TMainForm {
     // TODO: PDF fix tabSet stub
     tabSet: any = {}
     lifeCycleDaysEdit: any = {}
-    xLocationEdit: any = {}
-    yLocationEdit: any = {}
     xRotationEdit: any = {}
     yRotationEdit: any = {}
     zRotationEdit: any = {}
@@ -6774,8 +6716,12 @@ export class TMainForm {
     }
 
     viewPlantFocusPanel() {
+        const plant = this.focusedPlant()
+        if (!plant) {
+            return m("div.plantFocusPanel.TPanel.ba", "No plant selected")
+        }
         const { plantNameLabel, plantNameColor } = this.plantNameLabelAndColorForTab(this.currentPlantFocusTab)
-        return m("div.plantFocusPanel.TPanel.ba",
+        return m("div.plantFocusPanel.TPanel.ba.pa1",
             {
                 // Top: "38",
                 // Left: "158",
@@ -6800,7 +6746,7 @@ export class TMainForm {
                     // TabOrder: "4",
                     // Visible: "False",
                 },
-                m("div.arrangementPlantName.TLabel",
+                m("div.arrangementPlantName.TLabel.mb1",
                     {
                         style: { color: plantNameColor }
                         // Top: "4",
@@ -6818,9 +6764,14 @@ export class TMainForm {
                     },
                     plantNameLabel,
                 ),
-                m("Group.Group.g00000032",
-                    m("input.xLocationEdit.TEdit",
+                m("Group.Location.g00000032",
+                    "Location",
+                    m("span.ml2.mr1", "X"),
+                    m("input[type=number].xLocationEdit.TEdit.mw3",
                         {
+                            value: plant.basePoint_pixels().X,
+                            step: domain.options.nudgeDistance,
+                            onchange: (event: Event) => this.xLocationEditExit(event)
                             // Top: "32",
                             // Left: "66",
                             // Height: "21",
@@ -6837,8 +6788,12 @@ export class TMainForm {
                             // OnExit: "xLocationEditExit",
                         },
                     ),
-                    m("input.yLocationEdit.TEdit",
+                    m("span.ml2.mr1", "Y"),
+                    m("input[type=number].yLocationEdit.TEdit.mw3",
                         {
+                            value: plant.basePoint_pixels().Y,
+                            step: domain.options.nudgeDistance,
+                            onchange: (event: Event) => this.yLocationEditExit(event)
                             // Top: "32",
                             // Left: "144",
                             // Height: "21",
@@ -6855,98 +6810,15 @@ export class TMainForm {
                             // OnExit: "yLocationEditExit",
                         },
                     ),
-                    m("Group.Group.g00000033",
-                        m("button.xLocationSpin.TSpinButton",
-                            {
-                                // Top: "33",
-                                // Left: "108",
-                                // Height: "19",
-                                // Width: "15",
-                                // DownGlyph.Data: "7E040000424D7E04000000000000360400002800000009000000060000000100080000000000480000000000000000000000000100000001000000000000000080000080000000808000800000008000800080800000C0C0C000C0DCC000F0C8A4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000F0FBFF00A4A0A000808080000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303030303000000030303030003030303000000030303000000030303000000030300000000000303000000030000000000000003000000030303030303030303000000",
-                                // TabOrder: "9",
-                                // UpGlyph.Data: "7E040000424D7E04000000000000360400002800000009000000060000000100080000000000480000000000000000000000000100000001000000000000000080000080000000808000800000008000800080800000C0C0C000C0DCC000F0C8A4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000F0FBFF00A4A0A000808080000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303030303000000030000000000000003000000030300000000000303000000030303000000030303000000030303030003030303000000030303030303030303000000",
-                                // OnDownClick: "xLocationSpinDownClick",
-                                // OnUpClick: "xLocationSpinUpClick",
-                            },
-                        ),
-                        m("button.yLocationSpin.TSpinButton",
-                            {
-                                // Top: "33",
-                                // Left: "187",
-                                // Height: "19",
-                                // Width: "15",
-                                // DownGlyph.Data: "7E040000424D7E04000000000000360400002800000009000000060000000100080000000000480000000000000000000000000100000001000000000000000080000080000000808000800000008000800080800000C0C0C000C0DCC000F0C8A4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000F0FBFF00A4A0A000808080000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303030303000000030303030003030303000000030303000000030303000000030300000000000303000000030000000000000003000000030303030303030303000000",
-                                // TabOrder: "11",
-                                // UpGlyph.Data: "7E040000424D7E04000000000000360400002800000009000000060000000100080000000000480000000000000000000000000100000001000000000000000080000080000000808000800000008000800080800000C0C0C000C0DCC000F0C8A4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000F0FBFF00A4A0A000808080000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303030303000000030000000000000003000000030300000000000303000000030303000000030303000000030303030003030303000000030303030303030303000000",
-                                // OnDownClick: "yLocationSpinDownClick",
-                                // OnUpClick: "yLocationSpinUpClick",
-                            },
-                        ),
-                    ),
-                    m("div.locationLabel.TLabel",
+                    m("span.ml1", "pixels"),
+                ),
+                m("div.mt1",
+                    m("span.mr1", "Scale"),
+                    m("input[type=number].drawingScaleEdit.TEdit.mw3",
                         {
-                            // Top: "34",
-                            // Left: "9",
-                            // Height: "14",
-                            // Width: "41",
-                            // Font.Charset: "DEFAULT_CHARSET",
-                            // Font.Color: "clWindowText",
-                            // Font.Height: "-11",
-                            // Font.Name: "Arial",
-                            // Font.Style: "[]",
-                            // ParentFont: "False",
-                        },
-                        "Location",
-                    ),
-                    m("Group.Group.g00000035",
-                        m("div.xLocationLabel.TLabel",
-                            {
-                                // Top: "35",
-                                // Left: "57",
-                                // Height: "14",
-                                // Width: "7",
-                                // Font.Charset: "DEFAULT_CHARSET",
-                                // Font.Color: "clWindowText",
-                                // Font.Height: "-11",
-                                // Font.Name: "Arial",
-                                // Font.Style: "[]",
-                                // ParentFont: "False",
-                            },
-                            "X",
-                        ),
-                        m("div.yLocationLabel.TLabel",
-                            {
-                                // Top: "35",
-                                // Left: "134",
-                                // Height: "14",
-                                // Width: "8",
-                                // Font.Charset: "DEFAULT_CHARSET",
-                                // Font.Color: "clWindowText",
-                                // Font.Height: "-11",
-                                // Font.Name: "Arial",
-                                // Font.Style: "[]",
-                                // ParentFont: "False",
-                            },
-                            "Y",
-                        ),
-                        m("div.locationPixelsLabel.TLabel",
-                            {
-                                // Top: "35",
-                                // Left: "209",
-                                // Height: "14",
-                                // Width: "28",
-                                // Font.Charset: "DEFAULT_CHARSET",
-                                // Font.Color: "clWindowText",
-                                // Font.Height: "-11",
-                                // Font.Name: "Arial",
-                                // Font.Style: "[]",
-                                // ParentFont: "False",
-                            },
-                            "pixels",
-                        ),
-                    ),
-                    m("input.drawingScaleEdit.TEdit",
-                        {
+                            value: plant.drawingScale_PixelsPerMm,
+                            step: "0.2",
+                            onchange: (event: Event) => this.drawingScaleEditExit(event)
                             // Top: "100",
                             // Left: "61",
                             // Height: "22",
@@ -6962,232 +6834,97 @@ export class TMainForm {
                             // OnExit: "drawingScaleEditExit",
                         },
                     ),
-                    m("button.drawingScaleSpin.TSpinButton",
+                    m("span.ml1", "pixels/mm")
+                ),
+                m("div.mt1",
+                    m("span", "Rotation"),
+                    m("span.ml2.mr1", "X"),
+                    m("input[type=number].xRotationEdit.TEdit.mw3",
                         {
-                            // Top: "101",
-                            // Left: "105",
+                            value: plant.xRotation,
+                            step: domain.options.rotationIncrement,
+                            onchange: (event: Event) => this.xRotationEditExit(event)
+                            // Top: "174",
+                            // Left: "69",
                             // Height: "21",
-                            // Width: "15",
-                            // Ctl3D: "True",
-                            // DownGlyph.Data: "BA000000424DBA000000000000004200000028000000090000000600000001001000030000007800000000000000000000000000000000000000007C0000E00300001F000000004200420042004200420042004200420042000000420042004200420000004200420042004200000042004200420000000000000042004200420000004200420000000000000000000000420042000000420000000000000000000000000000004200000042004200420042004200420042004200420000",
-                            // FocusControl: "drawingScaleEdit",
-                            // ParentCtl3D: "False",
-                            // TabOrder: "7",
-                            // UpGlyph.Data: "BA000000424DBA000000000000004200000028000000090000000600000001001000030000007800000000000000000000000000000000000000007C0000E00300001F000000004200420042004200420042004200420042000000420000000000000000000000000000004200000042004200000000000000000000004200420000004200420042000000000000004200420042000000420042004200420000004200420042004200000042004200420042004200420042004200420000",
-                            // OnDownClick: "drawingScaleSpinDownClick",
-                            // OnUpClick: "drawingScaleSpinUpClick",
-                        },
-                    ),
-                    m("Group.Group.g00000104",
-                        m("div.sizingLabel.TLabel",
-                            {
-                                // Top: "104",
-                                // Left: "29",
-                                // Height: "14",
-                                // Width: "21",
-                                // Font.Charset: "DEFAULT_CHARSET",
-                                // Font.Color: "clWindowText",
-                                // Font.Height: "-11",
-                                // Font.Name: "Arial",
-                                // Font.Style: "[]",
-                                // ParentFont: "False",
-                            },
-                            "Size",
-                        ),
-                        m("div.drawingScalePixelsPerMmLabel.TLabel",
-                            {
-                                // Top: "104",
-                                // Left: "126",
-                                // Height: "14",
-                                // Width: "47",
-                                // Font.Charset: "DEFAULT_CHARSET",
-                                // Font.Color: "clWindowText",
-                                // Font.Height: "-11",
-                                // Font.Name: "Arial",
-                                // Font.Style: "[]",
-                                // ParentFont: "False",
-                            },
-                            "pixels/mm",
-                        ),
-                    ),
-                    m("Group.Group.g00000174",
-                        m("input.xRotationEdit.TEdit",
-                            {
-                                // Top: "174",
-                                // Left: "69",
-                                // Height: "21",
-                                // Width: "30",
-                                // AutoSize: "False",
-                                // Font.Charset: "DEFAULT_CHARSET",
-                                // Font.Color: "clWindowText",
-                                // Font.Height: "-11",
-                                // Font.Name: "Arial",
-                                // Font.Style: "[]",
-                                // ParentFont: "False",
-                                // TabOrder: "0",
-                                // Text: "-360",
-                                // OnChange: "xRotationEditChange",
-                                // OnExit: "xRotationEditExit",
-                            },
-                        ),
-                        m("input.yRotationEdit.TEdit",
-                            {
-                                // Top: "174",
-                                // Left: "133",
-                                // Height: "21",
-                                // Width: "30",
-                                // AutoSize: "False",
-                                // Font.Charset: "DEFAULT_CHARSET",
-                                // Font.Color: "clWindowText",
-                                // Font.Height: "-11",
-                                // Font.Name: "Arial",
-                                // Font.Style: "[]",
-                                // ParentFont: "False",
-                                // TabOrder: "2",
-                                // Text: "-360",
-                                // OnChange: "yRotationEditChange",
-                                // OnExit: "yRotationEditExit",
-                            },
-                        ),
-                        m("input.zRotationEdit.TEdit",
-                            {
-                                // Top: "174",
-                                // Left: "198",
-                                // Height: "21",
-                                // Width: "30",
-                                // AutoSize: "False",
-                                // Font.Charset: "DEFAULT_CHARSET",
-                                // Font.Color: "clWindowText",
-                                // Font.Height: "-11",
-                                // Font.Name: "Arial",
-                                // Font.Style: "[]",
-                                // ParentFont: "False",
-                                // TabOrder: "4",
-                                // Text: "-360",
-                                // OnChange: "zRotationEditChange",
-                                // OnExit: "zRotationEditExit",
-                            },
-                        ),
-                    ),
-                    m("Group.Group.g00000175",
-                        m("button.xRotationSpin.TSpinButton",
-                            {
-                                // Top: "175",
-                                // Left: "99",
-                                // Height: "19",
-                                // Width: "15",
-                                // DownGlyph.Data: "7E040000424D7E04000000000000360400002800000009000000060000000100080000000000480000000000000000000000000100000001000000000000000080000080000000808000800000008000800080800000C0C0C000C0DCC000F0C8A4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000F0FBFF00A4A0A000808080000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303030303000000030303030003030303000000030303000000030303000000030300000000000303000000030000000000000003000000030303030303030303000000",
-                                // TabOrder: "1",
-                                // UpGlyph.Data: "7E040000424D7E04000000000000360400002800000009000000060000000100080000000000480000000000000000000000000100000001000000000000000080000080000000808000800000008000800080800000C0C0C000C0DCC000F0C8A4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000F0FBFF00A4A0A000808080000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303030303000000030000000000000003000000030300000000000303000000030303000000030303000000030303030003030303000000030303030303030303000000",
-                                // OnDownClick: "xRotationSpinDownClick",
-                                // OnUpClick: "xRotationSpinUpClick",
-                            },
-                        ),
-                        m("button.yRotationSpin.TSpinButton",
-                            {
-                                // Top: "175",
-                                // Left: "164",
-                                // Height: "19",
-                                // Width: "15",
-                                // DownGlyph.Data: "7E040000424D7E04000000000000360400002800000009000000060000000100080000000000480000000000000000000000000100000001000000000000000080000080000000808000800000008000800080800000C0C0C000C0DCC000F0C8A4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000F0FBFF00A4A0A000808080000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303030303000000030303030003030303000000030303000000030303000000030300000000000303000000030000000000000003000000030303030303030303000000",
-                                // TabOrder: "3",
-                                // UpGlyph.Data: "7E040000424D7E04000000000000360400002800000009000000060000000100080000000000480000000000000000000000000100000001000000000000000080000080000000808000800000008000800080800000C0C0C000C0DCC000F0C8A4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000F0FBFF00A4A0A000808080000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303030303000000030000000000000003000000030300000000000303000000030303000000030303000000030303030003030303000000030303030303030303000000",
-                                // OnDownClick: "yRotationSpinDownClick",
-                                // OnUpClick: "yRotationSpinUpClick",
-                            },
-                        ),
-                        m("button.zRotationSpin.TSpinButton",
-                            {
-                                // Top: "175",
-                                // Left: "229",
-                                // Height: "19",
-                                // Width: "15",
-                                // DownGlyph.Data: "7E040000424D7E04000000000000360400002800000009000000060000000100080000000000480000000000000000000000000100000001000000000000000080000080000000808000800000008000800080800000C0C0C000C0DCC000F0C8A4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000F0FBFF00A4A0A000808080000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303030303000000030303030003030303000000030303000000030303000000030300000000000303000000030000000000000003000000030303030303030303000000",
-                                // TabOrder: "5",
-                                // UpGlyph.Data: "7E040000424D7E04000000000000360400002800000009000000060000000100080000000000480000000000000000000000000100000001000000000000000080000080000000808000800000008000800080800000C0C0C000C0DCC000F0C8A4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000F0FBFF00A4A0A000808080000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303030303000000030000000000000003000000030300000000000303000000030303000000030303000000030303030003030303000000030303030303030303000000",
-                                // OnDownClick: "zRotationSpinDownClick",
-                                // OnUpClick: "zRotationSpinUpClick",
-                            },
-                        ),
-                    ),
-                    m("div.rotationLabel.TLabel",
-                        {
-                            // Top: "176",
-                            // Left: "11",
-                            // Height: "14",
-                            // Width: "39",
+                            // Width: "30",
+                            // AutoSize: "False",
                             // Font.Charset: "DEFAULT_CHARSET",
                             // Font.Color: "clWindowText",
                             // Font.Height: "-11",
                             // Font.Name: "Arial",
                             // Font.Style: "[]",
                             // ParentFont: "False",
+                            // TabOrder: "0",
+                            // Text: "-360",
+                            // OnChange: "xRotationEditChange",
+                            // OnExit: "xRotationEditExit",
                         },
-                        "Rotation",
                     ),
-                    m("Group.Group.g00000177",
-                        m("div.xRotationLabel.TLabel",
-                            {
-                                // Top: "177",
-                                // Left: "59",
-                                // Height: "14",
-                                // Width: "7",
-                                // Font.Charset: "DEFAULT_CHARSET",
-                                // Font.Color: "clWindowText",
-                                // Font.Height: "-11",
-                                // Font.Name: "Arial",
-                                // Font.Style: "[]",
-                                // ParentFont: "False",
-                            },
-                            "X",
-                        ),
-                        m("div.yRotationLabel.TLabel",
-                            {
-                                // Top: "177",
-                                // Left: "123",
-                                // Height: "14",
-                                // Width: "8",
-                                // Font.Charset: "DEFAULT_CHARSET",
-                                // Font.Color: "clWindowText",
-                                // Font.Height: "-11",
-                                // Font.Name: "Arial",
-                                // Font.Style: "[]",
-                                // ParentFont: "False",
-                            },
-                            "Y",
-                        ),
-                        m("div.zRotationLabel.TLabel",
-                            {
-                                // Top: "177",
-                                // Left: "188",
-                                // Height: "14",
-                                // Width: "7",
-                                // Font.Charset: "DEFAULT_CHARSET",
-                                // Font.Color: "clWindowText",
-                                // Font.Height: "-11",
-                                // Font.Name: "Arial",
-                                // Font.Style: "[]",
-                                // ParentFont: "False",
-                            },
-                            "Z",
-                        ),
-                    ),
-                    m("button.resetRotations.TSpeedButton",
+                    m("span.ml2.mr1", "Y"),
+                    m("input[type=number].yRotationEdit.TEdit.mw3",
                         {
-                            onclick: () => this.resetRotationsClick(),
-                            // Top: "200",
-                            // Left: "66",
-                            // Height: "25",
-                            // Width: "109",
+                            value: plant.yRotation,
+                            step: domain.options.rotationIncrement,
+                            onchange: (event: Event) => this.yRotationEditExit(event)
+                            // Top: "174",
+                            // Left: "133",
+                            // Height: "21",
+                            // Width: "30",
+                            // AutoSize: "False",
                             // Font.Charset: "DEFAULT_CHARSET",
                             // Font.Color: "clWindowText",
                             // Font.Height: "-11",
                             // Font.Name: "Arial",
                             // Font.Style: "[]",
-                            // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF008888888888888888888880000088888888800CCCCC008888880CC88888CC088880CC8888888CC0888CC888000888C088C088808880888C08C088808880888C08C088808880888888C088808880888888C0888800080000088C0888888880CC088CC0888888880C0888CC08888800CC08888CC00000CC880888888CCCCC888888",
                             // ParentFont: "False",
+                            // TabOrder: "2",
+                            // Text: "-360",
+                            // OnChange: "yRotationEditChange",
+                            // OnExit: "yRotationEditExit",
                         },
-                        "Reset Rotations",
+                    ),
+                    m("span.ml2.mr1", "Z"),
+                    m("input[type=number].zRotationEdit.TEdit.mw3",
+                        {
+                            value: plant.zRotation,
+                            step: domain.options.rotationIncrement,
+                            onchange: (event: Event) => this.zRotationEditExit(event)
+                            // Top: "174",
+                            // Left: "198",
+                            // Height: "21",
+                            // Width: "30",
+                            // AutoSize: "False",
+                            // Font.Charset: "DEFAULT_CHARSET",
+                            // Font.Color: "clWindowText",
+                            // Font.Height: "-11",
+                            // Font.Name: "Arial",
+                            // Font.Style: "[]",
+                            // ParentFont: "False",
+                            // TabOrder: "4",
+                            // Text: "-360",
+                            // OnChange: "zRotationEditChange",
+                            // OnExit: "zRotationEditExit",
+                        },
+                    ),
+                    m("div.mt1",
+                        m("button.resetRotations.TSpeedButton",
+                            {
+                                onclick: () => this.resetRotationsClick(),
+                                // Top: "200",
+                                // Left: "66",
+                                // Height: "25",
+                                // Width: "109",
+                                // Font.Charset: "DEFAULT_CHARSET",
+                                // Font.Color: "clWindowText",
+                                // Font.Height: "-11",
+                                // Font.Name: "Arial",
+                                // Font.Style: "[]",
+                                // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF008888888888888888888880000088888888800CCCCC008888880CC88888CC088880CC8888888CC0888CC888000888C088C088808880888C08C088808880888C08C088808880888888C088808880888888C0888800080000088C0888888880CC088CC0888888880C0888CC08888800CC08888CC00000CC880888888CCCCC888888",
+                                // ParentFont: "False",
+                            },
+                            "Reset Rotations",
+                        ),
                     ),
                 ),
             ),
