@@ -334,7 +334,7 @@ export class PdStatsPanel {
             if (label) console.log("percent", deadPercent, livePercent) 
             if (label) graphLines.push(
                 m("div.w-100.flex", 
-                    m("div.w-50.tr", label),
+                    m("div.w-50.tr.mr1", label),
                     m("div.w-50.flex", 
                         (deadPercent > 0) && m("div.ba", { 
                             title: this.nameForPartType(partType, this.statistics.count[partType] === 1) + " dead biomass: " + digitValueString(deadPercent) + "%",
@@ -359,14 +359,14 @@ export class PdStatsPanel {
                 )
             )
         }
-        return m("div", graphLines)
+        return m("div.ba.pa1", graphLines)
     }
 
     view(vnode: any) {
         this.plant = vnode.attrs.plant
         // TODO PDF: Optimize calculating statistics repeatedly if possible
         this.updatePlantValues()
-        return m("div.ba.pa1", this.viewGraph(), m("div.mt1.f7", this.getHint()))
+        return m("div.pa1", this.viewGraph(), m("div.mt1.f7", this.getHint()))
     }
     
 }
