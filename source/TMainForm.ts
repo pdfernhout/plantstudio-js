@@ -6806,6 +6806,7 @@ export class TMainForm {
                         {
                             onclick: () => this.resetRotationsClick(),
                         },
+                        m("img.mr1", { src: imageDir + "MainForm_resetRotations.png" }),
                         "Reset Rotations",
                     ),
                 ),
@@ -6964,7 +6965,7 @@ export class TMainForm {
                             // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF008888888888888888820888208888208882088820888820882228882088882088222888208888208888882820282820288888222228222228888822222888208888888888882820288888888888222228888888888888208888888888888820888888888888882088888888888828202888888888882222288888888888222228",
                             // ParentFont: "False",
                         },
-                        m("img", { src: imageDir + "MainForm_animateGrowth.png" }),
+                        m("img.mr1", { src: imageDir + "MainForm_animateGrowth.png" }),
                         "Animate",
                     ),
                 ),
