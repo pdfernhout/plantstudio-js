@@ -6799,7 +6799,7 @@ export class TMainForm {
                     // TabOrder: "3",
                     // Visible: "False",
                 },
-                m("div.parametersPlantName.TLabel",
+                m("div.parametersPlantName.TLabel.b",
                     {
                         style: { color: plantNameColor }
                         // Top: "8",
@@ -6860,7 +6860,7 @@ export class TMainForm {
                     // TabOrder: "0",
                     // Visible: "False",
                 },
-                m("div.selectedPlantNameLabel.TLabel",
+                m("div.selectedPlantNameLabel.TLabel.b",
                     {
                         style: { color: plantNameColor }
                         // Top: "4",
@@ -7035,7 +7035,7 @@ export class TMainForm {
                     // TabOrder: "6",
                     // Visible: "False",
                 },
-                m("div.posingPlantName.TLabel",
+                m("div.posingPlantName.TLabel.b",
                     {
                         style: { color: plantNameColor }
                         // Top: "4",
@@ -7640,7 +7640,7 @@ export class TMainForm {
                     ),
                 ),
             ),
-            this.currentPlantFocusTab === "Stats" && m("TScrollBox.statsScrollBox.TScrollBox",
+            this.currentPlantFocusTab === "Stats" && m("TScrollBox.statsScrollBox.TScrollBox.b",
                 {
                     style: { color: plantNameColor }
                     // Top: "334",
@@ -7661,70 +7661,22 @@ export class TMainForm {
                 plantNameLabel
             ),
             this.currentPlantFocusTab === "Note" && m("div.notePanel.TPanel",
-                {
-                    // Top: "360",
-                    // Left: "286",
-                    // Height: "48",
-                    // Width: "258",
-                    // BevelInner: "bvLowered",
-                    // BevelOuter: "bvNone",
-                    // TabOrder: "5",
-                    // Visible: "False",
-                },
-                m("button.noteEdit.TSpeedButton",
-                    {
-                        onclick: () => this.noteEditClick(),
-                        // Top: "4",
-                        // Left: "182",
-                        // Height: "25",
-                        // Width: "54",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // Glyph.Data: "76010000424D76010000000000007600000028000000200000001000000001000400000000000001000000000000000000001000000010000000000000000000800000800000008080008000000080008000808000007F7F7F00BFBFBF000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00333333333333333333333333FF3333333333333C0C333333333333F777F3333333333CC0F0C3333333333777377F33333333C30F0F0C333333337F737377F333333C00FFF0F0C33333F7773337377F333CC0FFFFFF0F0C3337773F33337377F3C30F0FFFFFF0F0C37F7373F33337377F00FFF0FFFFFF0F0C7733373F333373770FFFFF0FFFFFF0F073F33373F333373730FFFFF0FFFFFF03373F33373F333F73330FFFFF0FFF00333373F33373FF77333330FFFFF000333333373F333777333333330FFF03333333333373FF73333333333330003333333333333777333333333333333333333333333333333333333333333333333333333333333333333333",
-                        // Margin: "4",
-                        // NumGlyphs: "2",
-                        // ParentFont: "False",
-                    },
-                    caption("E&dit"),
-                ),
-                m("div.noteLabel.TLabel",
+                m("div.noteLabel.TLabel.b",
                     {
                         style: { color: plantNameColor }
-                        // Top: "8",
-                        // Left: "8",
-                        // Height: "14",
-                        // Width: "76",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[fsBold]",
-                        // ParentFont: "False",
                     },
                     plantNameLabel,
                 ),
-                m("textarea.noteMemo.TMemo",
+                m("div.noteMemo.TMemo.ba",
+                    plant.noteLines.map(line => m("div", { style: { minHeight: "1rem" }}, line))
+                ),
+                m("button.noteEdit.TSpeedButton.mt1",
                     {
-                        // Top: "30",
-                        // Left: "12",
-                        // Height: "15",
-                        // Width: "237",
-                        // Color: "clBtnFace",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // HideSelection: "False",
-                        // ParentFont: "False",
-                        // ReadOnly: "True",
-                        // ScrollBars: "ssVertical",
-                        // TabOrder: "0",
-                        // WantReturns: "False",
+                        onclick: () => this.noteEditClick(),
                     },
+                    // TODO PDF: noteEdit Disabled image may never get used here
+                    m("img", { src: imageDir + ( plant ? "MainForm_noteEdit.png" : "MainForm_noteEdit-disabled.png") }),
+                    caption("E&dit"),
                 ),
             )
         )
