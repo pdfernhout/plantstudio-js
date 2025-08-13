@@ -6644,10 +6644,11 @@ export class TMainForm {
     viewPlantFocusPanel() {
         const plant = this.focusedPlant()
         if (!plant) {
-            return m("div.plantFocusPanel.TPanel.ba", "No plant selected")
+            return m("div.plantFocusPanel.TPanel.ba", { style: { height: "15rem" } }, "No plant selected")
         }
         const { plantNameLabel, plantNameColor } = this.plantNameLabelAndColorForTab(this.currentPlantFocusTab)
         return m("div.plantFocusPanel.TPanel.ba.pa1",
+            { style: { height: "15rem" } },
             m("div.TTabSet.tabSet.TTabSet",
                 plantFocusTabs.map(
                     tab => m("div.ml1.br--top.bl.bt.br.bw1.br2.dib" + (this.currentPlantFocusTab === tab ? ".bg-green" : ""), {
