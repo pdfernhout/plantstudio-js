@@ -4466,7 +4466,7 @@ export class TMainForm {
     lifeCycleDraggerMouseDown(event: MouseEvent): void {
         const X = event.offsetX
         const Y = event.offsetY
-        if (event.button !== MouseButton.mbLeft || this.focusedPlant() === null || !this.lifeCycleDraggerRect.contains(Point(X, Y))) {
+        if (this.animateCommand || event.button !== MouseButton.mbLeft || this.focusedPlant() === null || !this.lifeCycleDraggerRect.contains(Point(X, Y))) {
             (event as any).redraw = false
             return
         }
@@ -4477,7 +4477,7 @@ export class TMainForm {
     }
     
     lifeCycleDraggerMouseMove(event: MouseEvent): void {
-        if (!this.lifeCycleDragging || event.button !== MouseButton.mbLeft) {
+        if (this.animateCommand || !this.lifeCycleDragging || event.button !== MouseButton.mbLeft) {
             (event as any).redraw = false
             return
         }
