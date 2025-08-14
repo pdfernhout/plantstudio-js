@@ -70,6 +70,8 @@ const kOffscreenMargin = 20
 const kSelectNoPosedPartString = "< Select None >"
 const kNoPartSelected = "Selected part: (none)"
 
+const lifeCycleDraggerWidth = 10
+
 let pictureFileSaveAttemptsThisSession: short = 0
 let nozzleFileSaveAttemptsThisSession: short = 0
 let exportTo3DFileSaveAttemptsThisSession: short[] = Array(7) // Array(ExportFormats.k3DExportTypeLast + 1)
@@ -269,10 +271,14 @@ export class TMainForm {
     cursorModeForDrawing: short = CursorMode.kCursorModeSelectDrag
     actionInProgress: boolean = false
     mouseMoveActionInProgress: boolean = false
-    // lifeCycleDragging: boolean = false
-    // lifeCycleDraggingNeedToRedraw: boolean = false
-    // lifeCycleDraggingStartPos: short = 0
-    // lifeCycleDraggingLastDrawPos: short = 0
+
+    lifeCycleDragging: boolean = false
+    lifeCycleDraggingNeedToRedraw: boolean = false
+    lifeCycleDraggingOffset: short = 0
+    lifeCycleDraggingLastDrawPos: short = 0
+    lifeCycleDraggerRect: TRect = new TRect()
+    lifeCycleImageRect: TRect = new TRect()
+
     // cursorPosInDrawingPaintBox: TPoint = new TPoint()
     // horizontalSplitterDragging: boolean = false
     // verticalSplitterDragging: boolean = false
@@ -4457,51 +4463,55 @@ export class TMainForm {
         this.changeSelectedPlantAges(newAge)
     }
     
-    /*
-    
-    lifeCycleDraggerMouseDown(Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
-        if (this.focusedPlant() !== null) {
-            this.lifeCycleDragging = true
-            this.lifeCycleDraggingStartPos = X
-            this.lifeCycleDraggingLastDrawPos = -1
-            this.lifeCycleDraggingNeedToRedraw = true
+    lifeCycleDraggerMouseDown(event: MouseEvent): void {
+        const X = event.offsetX
+        const Y = event.offsetY
+        if (event.button !== MouseButton.mbLeft || this.focusedPlant() === null || !this.lifeCycleDraggerRect.contains(Point(X, Y))) {
+            (event as any).redraw = false
+            return
         }
+        this.lifeCycleDragging = true
+        this.lifeCycleDraggingOffset = X - this.lifeCycleDraggerRect.Left
+        this.lifeCycleDraggingLastDrawPos = X - this.lifeCycleDraggingOffset
+        this.lifeCycleDraggingNeedToRedraw = true
     }
     
-    lifeCycleDraggerMouseMove(Shift: TShiftState, X: int, Y: int): void {
-        if (this.lifeCycleDragging && (this.lifeCycleDragger.Left + X >= this.lifeCycleGraphImage.Left) && (this.lifeCycleDragger.Left + X < this.lifeCycleGraphImage.Left + this.lifeCycleGraphImage.Width)) {
-            this.undrawLifeCycleDraggerLine()
-            this.lifeCycleDraggingLastDrawPos = this.drawLifeCycleDraggerLine(X)
+    lifeCycleDraggerMouseMove(event: MouseEvent): void {
+        if (!this.lifeCycleDragging || event.button !== MouseButton.mbLeft) {
+            (event as any).redraw = false
+            return
         }
-    }
-    
-    lifeCycleDraggerMouseUp(Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
+        const X = event.offsetX - this.lifeCycleDraggingOffset
+        const Y = event.offsetY
         if (this.lifeCycleDragging) {
-            this.undrawLifeCycleDraggerLine()
-            this.lifeCycleDragger.Left = this.lifeCycleDragger.Left - (this.lifeCycleDraggingStartPos - X)
-            if (this.lifeCycleDragger.Left < this.lifeCycleGraphImage.Left) {
-                this.lifeCycleDragger.Left = this.lifeCycleGraphImage.Left
-            }
-            if (this.lifeCycleDragger.Left + this.lifeCycleDragger.Width > this.lifeCycleGraphImage.Left + this.lifeCycleGraphImage.Width) {
-                this.lifeCycleDragger.Left = this.lifeCycleGraphImage.Left + this.lifeCycleGraphImage.Width - this.lifeCycleDragger.Width
-            }
+            this.lifeCycleDraggingLastDrawPos = Math.max(0, Math.min(X, this.lifeCycleImageRect.width - lifeCycleDraggerWidth))
+        }
+    }
+    
+    lifeCycleDraggerMouseUp(event: MouseEvent): void {
+        if (!this.lifeCycleDragging) {
+            (event as any).redraw = false
+            return
+        }
+        const X = event.offsetX - this.lifeCycleDraggingOffset
+        const Y = event.offsetY
+        const isShift = event.shiftKey
+        const isCtrl = event.ctrlKey
+        if (this.lifeCycleDragging) {
             const firstPlant = this.focusedPlant()
             if (firstPlant === null) {
                 throw new Error("Problem: First plant is nil during drag in method TMainForm.lifeCycleDraggerMouseUp.")
             }
             let newAge: int
-            if ((this.lifeCycleGraphImage.Width - this.lifeCycleDragger.Width) !== 0) {
-                newAge = intround(firstPlant.pGeneral.ageAtMaturity * (this.lifeCycleDragger.Left - this.lifeCycleGraphImage.Left) / (this.lifeCycleGraphImage.Width - this.lifeCycleDragger.Width))
+            if ((this.lifeCycleImageRect.Left - this.lifeCycleImageRect.Right) !== 0) {
+                newAge = intround(firstPlant.pGeneral.ageAtMaturity * (this.lifeCycleDraggingLastDrawPos - this.lifeCycleImageRect.Left) / (this.lifeCycleImageRect.width - lifeCycleDraggerWidth))
             } else {
                 newAge = 0
             }
             this.changeSelectedPlantAges(newAge)
-            this.resizePanelsToVerticalSplitter()
             this.lifeCycleDragging = false
         }
     }
-
-    */
 
     changeSelectedPlantAges(newAge: short): void {
         if (this.selectedPlants.length <= 0) {
@@ -4521,8 +4531,8 @@ export class TMainForm {
         const context = canvas.getContext("2d")
         if (!context) return
 
-        const bounds = Rect(0, 0, canvas.width, canvas.height)
-        const sCurveError = this.drawSCurveOrCheckForError(context, bounds, true)
+        this.lifeCycleImageRect = Rect(0, 0, canvas.width, canvas.height)
+        const sCurveError = this.drawSCurveOrCheckForError(context, this.lifeCycleImageRect, true)
         if (sCurveError && (this.focusedPlant() !== null)) {
             // error - do something, should be caught by parameter panel 
             console.log("redrawLifeCycleGraph sCurveError", sCurveError)
@@ -4596,10 +4606,16 @@ export class TMainForm {
                 }
             }
             
-            const lifeCycleDraggerWidth = 10
             const x = intround(((aRect.Right - aRect.Left) - lifeCycleDraggerWidth) * fractionOfMaxAge)
             context.fillStyle = convertColor(lifeCycleDraggerColor)
+            this.lifeCycleDraggerRect = Rect(x, 1, lifeCycleDraggerWidth, aRect.Bottom - aRect.Top - 2)
             context.fillRect(x, 1, lifeCycleDraggerWidth, aRect.Bottom - aRect.Top - 2)
+
+            if (this.lifeCycleDragging) {
+                context.fillStyle = convertColor(ColorDefs.clGray)
+                const tempRect = Rect(this.lifeCycleDraggingLastDrawPos, 1, lifeCycleDraggerWidth, aRect.Bottom - aRect.Top - 2)
+                context.fillRect(tempRect.Left, tempRect.Top, tempRect.width, tempRect.height)
+            }
         }
         failed = false
         return failed
@@ -6882,7 +6898,16 @@ export class TMainForm {
                         this.lifeCycleGraphImage = vnode.dom
                         const canvas = <HTMLCanvasElement>vnode.dom
                         self.drawLifeCycleGraph(canvas)
-                    }
+                    },
+                    onmousedown: (event: MouseEvent) => {
+                        this.lifeCycleDraggerMouseDown(event)
+                    },
+                    onmousemove: (event: MouseEvent) => {
+                        this.lifeCycleDraggerMouseMove(event)
+                    },
+                    onmouseup: (event: MouseEvent) => {
+                        this.lifeCycleDraggerMouseUp(event)
+                    },
                 }),
             ),
             m("div.timeLabel.TLabel.ml6.f6",
