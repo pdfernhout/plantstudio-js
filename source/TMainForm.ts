@@ -29,6 +29,18 @@ import { PdStatsPanel } from "./PdStatsPanel"
 // TODO PDF for getting to compile
 type TEdit = any
 
+type PosingField = 
+    "hide" // posingHidePart
+    | "rotate" // posingAddExtraRotation
+    | "X rotation" // posingXRotationEdit
+    | "Y rotation" // posingYRotationEdit
+    | "Z rotation" // posingZRotationEdit
+    | "scale" // posingMultiplyScale
+    | "scale above" // posingMultiplyScaleAllPartsAfter
+    | "3D object scale" // posingScaleMultiplierEdit
+    | "line length" // posingLengthMultiplierEdit
+    | "line width" // posingWidthMultiplierEdit
+
 const Application_Title = "PlantStudio"
 
 const kMinWidthOnScreen = 100
@@ -5241,18 +5253,6 @@ export class TMainForm {
         this.changeSelectedPose(this.posingLineColor)
     }
     
-    posingRotationSpinUp(): void {
-        if ((Sender !== null) && (Sender instanceof delphi_compatability.TSpinButton)) {
-            this.spinPoseRotationBy((Sender).focusControl, domain.options.rotationIncrement)
-        }
-    }
-    
-    posingRotationSpinDown(): void {
-        if ((Sender !== null) && (Sender instanceof delphi_compatability.TSpinButton)) {
-            this.spinPoseRotationBy((Sender).focusControl, -domain.options.rotationIncrement)
-        }
-    }
-    
     spinPoseRotationBy(amount: int): void {
         // TODO sender was event or component sending event
         if ((sender !== null) && (sender instanceof delphi_compatability.TEdit)) {
@@ -5306,79 +5306,53 @@ export class TMainForm {
     */
     
     // ------------------------------------------------------------------------------------- *posing - commands 
-    changeSelectedPose(event: MouseEvent): void {
-        unfinished()
-        // // TODO sender was event or component sending event
-        // if (this.internalChange) {
-        //     return
-        // }
-        // this.updateForDependenciesWithinPoseInfo()
-        // const plant = this.focusedPlant()
-        // if (plant === null) {
-        //     return
-        // }
-        // // command will take ownership of this and free it if necessary
-        // const newAmendment = new PdPlantDrawingAmendment()
-        // const partID = this.selectedPartIDInAmendedPartsList()
-        // const currentAmendment: PdPlantDrawingAmendment | null = plant.amendmentForPartID(partID)
-        // if (currentAmendment === null) {
-        //     return
-        // }
-        // let field: string
-        // if ((Sender === this.posingHidePart)) {
-        //     field = "hide"
-        // } else if ((Sender === this.posingAddExtraRotation)) {
-        //     field = "rotate"
-        // } else if (((Sender === this.posingXRotationEdit) || (Sender === this.posingXRotationSpin))) {
-        //     field = "X rotation"
-        // } else if (((Sender === this.posingYRotationEdit) || (Sender === this.posingYRotationSpin))) {
-        //     field = "Y rotation"
-        // } else if (((Sender === this.posingZRotationEdit) || (Sender === this.posingZRotationSpin))) {
-        //     field = "Z rotation"
-        // } else if ((Sender === this.posingMultiplyScale)) {
-        //     field = "scale"
-        // } else if ((Sender === this.posingMultiplyScaleAllPartsAfter)) {
-        //     field = "scale above"
-        // } else if (((Sender === this.posingScaleMultiplierEdit) || (Sender === this.posingScaleMultiplierSpin))) {
-        //     field = "3D object scale"
-        // } else if (((Sender === this.posingLengthMultiplierEdit) || (Sender === this.posingLengthMultiplierSpin))) {
-        //     field = "line length"
-        // } else if (((Sender === this.posingWidthMultiplierEdit) || (Sender === this.posingWidthMultiplierSpin))) {
-        //     field = "line width"
-        // } else {
-        //     field = ""
-        // }
-        // //   cfk if bring back color finish these
-        // //    posingChangeColors: TCheckBox;
-        // //    posingChangeAllColorsAfter: TCheckBox;
-        // //    posingLineColor: TPanel;
-        // //    posingFrontfaceColor: TPanel;
-        // //    posingBackfaceColor: TPanel;
-        // //    posingLineColorLabel: TLabel;
-        // //    posingFrontfaceColorLabel: TLabel;
-        // //    posingBackfaceColorLabel: TLabel;
-        // //    
-        // newAmendment.partID = this.partIDForFullDescription(this.posedPlantParts.Text)
-        // newAmendment.typeOfPart = this.partTypeForFullDescription(this.posedPlantParts.Text)
-        // newAmendment.hide = this.posingHidePart.Checked
-        // //
-        // //    changeColors := posingChangeColors.checked;
-        // //    faceColor := posingFrontfaceColor.color;
-        // //    backfaceColor := posingBackfaceColor.color;
-        // //    lineColor := posingLineColor.color;
-        // //    propagateColors := posingChangeAllColorsAfter.checked;
-        // //    
-        // newAmendment.addRotations = this.posingAddExtraRotation.Checked
-        // newAmendment.xRotation = intMax(-360, intMin(360, StrToIntDef(this.posingXRotationEdit.Text, intround(currentAmendment.xRotation))))
-        // newAmendment.yRotation = intMax(-360, intMin(360, StrToIntDef(this.posingYRotationEdit.Text, intround(currentAmendment.yRotation))))
-        // newAmendment.zRotation = intMax(-360, intMin(360, StrToIntDef(this.posingZRotationEdit.Text, intround(currentAmendment.zRotation))))
-        // newAmendment.multiplyScale = this.posingMultiplyScale.Checked
-        // newAmendment.propagateScale = this.posingMultiplyScaleAllPartsAfter.Checked
-        // newAmendment.scaleMultiplier_pct = intMax(0, intMin(1000, StrToIntDef(this.posingScaleMultiplierEdit.Text, currentAmendment.scaleMultiplier_pct)))
-        // newAmendment.lengthMultiplier_pct = intMax(0, intMin(1000, StrToIntDef(this.posingLengthMultiplierEdit.Text, currentAmendment.lengthMultiplier_pct)))
-        // newAmendment.widthMultiplier_pct = intMax(0, intMin(1000, StrToIntDef(this.posingWidthMultiplierEdit.Text, currentAmendment.widthMultiplier_pct)))
-        // const newCommand = new PdEditAmendmentCommand(plant, newAmendment, field)
-        // this.doCommand(newCommand)
+    changeSelectedPose(newValue: any, field: PosingField): void {
+        if (this.internalChange) {
+            return
+        }
+        this.updateForDependenciesWithinPoseInfo()
+        const plant = this.focusedPlant()
+        if (plant === null) {
+            return
+        }
+        // command will take ownership of this and free it if necessary
+        const newAmendment = new PdPlantDrawingAmendment()
+        const partID = this.selectedPartIDInAmendedPartsList()
+        const currentAmendment: PdPlantDrawingAmendment | null = plant.amendmentForPartID(partID)
+        if (currentAmendment === null) {
+            return
+        }
+        // cfk if bring back color finish these
+        //    posingChangeColors: TCheckBox;
+        //    posingChangeAllColorsAfter: TCheckBox;
+        //    posingLineColor: TPanel;
+        //    posingFrontfaceColor: TPanel;
+        //    posingBackfaceColor: TPanel;
+        //    posingLineColorLabel: TLabel;
+        //    posingFrontfaceColorLabel: TLabel;
+        //    posingBackfaceColorLabel: TLabel;
+        //    
+        newAmendment.partID = this.partIDForFullDescription(this.posedPlantParts.Text)
+        newAmendment.typeOfPart = this.partTypeForFullDescription(this.posedPlantParts.Text)
+        newAmendment.hide = (field === "hide") ? newValue : currentAmendment.hide
+        //
+        //    changeColors := posingChangeColors.checked;
+        //    faceColor := posingFrontfaceColor.color;
+        //    backfaceColor := posingBackfaceColor.color;
+        //    lineColor := posingLineColor.color;
+        //    propagateColors := posingChangeAllColorsAfter.checked;
+        //    
+        newAmendment.addRotations = (field === "rotate") ? newValue : currentAmendment.addRotations
+        newAmendment.xRotation = (field === "X rotation") ? intMax(-360, intMin(360, StrToIntDef(newValue, intround(currentAmendment.xRotation)))) : currentAmendment.xRotation
+        newAmendment.yRotation = (field === "Y rotation") ? intMax(-360, intMin(360, StrToIntDef(newValue, intround(currentAmendment.yRotation)))) : currentAmendment.yRotation
+        newAmendment.zRotation = (field === "Z rotation") ? intMax(-360, intMin(360, StrToIntDef(newValue, intround(currentAmendment.zRotation)))) : currentAmendment.zRotation
+        newAmendment.multiplyScale = (field === "scale") ? newValue : currentAmendment.multiplyScale
+        newAmendment.propagateScale = (field === "scale above") ? newValue : currentAmendment.propagateScale
+        newAmendment.scaleMultiplier_pct = (field === "3D object scale") ? intMax(0, intMin(1000, StrToIntDef(newValue, currentAmendment.scaleMultiplier_pct))) : newAmendment.scaleMultiplier_pct
+        newAmendment.lengthMultiplier_pct = (field === "line length") ? intMax(0, intMin(1000, StrToIntDef(newValue, currentAmendment.lengthMultiplier_pct))) : newAmendment.lengthMultiplier_pct
+        newAmendment.widthMultiplier_pct = (field === "line width") ? intMax(0, intMin(1000, StrToIntDef(newValue, currentAmendment.widthMultiplier_pct))) : newAmendment.widthMultiplier_pct
+        const newCommand = new PdEditAmendmentCommand(plant, newAmendment, field)
+        this.doCommand(newCommand)
     }
     
     posingPosePartClick(): void {
@@ -5393,7 +5367,6 @@ export class TMainForm {
             // only one amendment per part id
             return
         }
-        // command will take ownership of this and free it if necessary
         const newAmendment = new PdPlantDrawingAmendment()
         newAmendment.partID = this.selectedPlantPartID
         newAmendment.typeOfPart = this.selectedPlantPartType
@@ -5443,7 +5416,7 @@ export class TMainForm {
     
     // ------------------------------------------------------------------------------------- *posing - supporting 
     partDescriptionForIDAndType(id: long, typeName: string): string {
-        let result = ""
+        let result = IntToStr(id) + ' (' + typeName + ')'
         return result
     }
     
@@ -6823,55 +6796,35 @@ export class TMainForm {
     }
 
     viewPosingPanel(plant: PdPlant): m.Children {
+        const ammendment: PdPlantDrawingAmendment | null = plant.amendmentForPartID(this.selectedPlantPartID)
+        const posingDisabled = ammendment || this.selectedPlantPartID < 0
+        const unposingDisabled = !ammendment
         return m("div.posingPanel.TPanel",
-            {
-                // Top: "6",
-                // Left: "284",
-                // Height: "326",
-                // Width: "261",
-                // BevelInner: "bvLowered",
-                // BevelOuter: "bvNone",
-                // TabOrder: "6",
-                // Visible: "False",
-            },
             m("Group.Group.g00000018",
                 m("button.posingHighlight.TSpeedButton",
                     {
                         onclick: () => this.posingHighlightClick(),
-                        // Top: "18",
-                        // Left: "170",
-                        // Height: "25",
-                        // Width: "25",
-                        // AllowAllUp: "True",
-                        // GroupIndex: "101",
-                        // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00FFFFFFFFFFFFFFFFFF222FFFFFFFFFFFFF222FFFFFFFFFFFFF222FFFFFFFFFFFFF222FFFFFFFFFFFFF222CCFFFFFFFFFFF222CCCCCFFFFFFFF222FCCCCCFFFFFFF222FFCCCCCFFFFFF222FFCCCCCFFFFFF222FFFCCCCCFFFFF222FFFFCCCCFFFFF222FFFFFCCCCFFFF222FFFFFFFFCFFFF222FFFFFFFFFFFFFFFFFFFFFFFFFFF",
+                        title: "Posing highlight",
                     },
+                    m("img", { src: imageDir + "MainForm_posingHighlight.png" })
                 ),
-                m("button.posingGhost.TSpeedButton",
+                m("button.posingGhost.TSpeedButton.ml1",
                     {
                         onclick: () => this.posingGhostClick(),
-                        // Top: "18",
-                        // Left: "199",
-                        // Height: "25",
-                        // Width: "25",
-                        // AllowAllUp: "True",
-                        // GroupIndex: "102",
-                        // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00FFFFFFFFFFFFFFFFFF222FFFFFFFFFFFFF222FFFFFFFFFFFFF222FFFFFFFFFFFFF222FFFFFFFFFFFFF22277FFFFFFFFFFF22277777FFFFFFFF222F77777FFFFFFF222FF77777FFFFFF222FF77777FFFFFF222FFF77777FFFFF222FFFF7777FFFFF222FFFFF7777FFFF222FFFFFFFF7FFFF222FFFFFFFFFFFFFFFFFFFFFFFFFFF",
+                        title: "Posing ghost",
                     },
+                    m("img", { src: imageDir + "MainForm_posingGhost.png" })
                 ),
-                m("button.posingNotShown.TSpeedButton",
+                m("button.posingNotShown.TSpeedButton.ml1",
                     {
                         onclick:() => this. posingNotShownClick(),
-                        // Top: "18",
-                        // Left: "228",
-                        // Height: "25",
-                        // Width: "25",
-                        // AllowAllUp: "True",
-                        // GroupIndex: "103",
-                        // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00FFFF99999999FFFFFF999999999999FFFF999FFFFFF999FFF9922FFFFFFF999F99922FFFFFF9999999222CCFF9999F9999222CCC9999FF9999222FC999CFFF9999222F999CCCFF9999229999CCCCFF999929999FCCCCCF9999999FFFFCCCC999F9992FFFFFCCC99FFF999FFFFFF999FFFF999999999999FFFFFF99999999FFFF",
+                        title: "Posing not shown",
                     },
+                    m("img", { src: imageDir + "MainForm_posingNotShown.png" })
                 ),
             ),
+            m("br"),
+            m("span.mr1", "Posed parts"),
             m("select.posedPlantParts.TComboBox",
                 {
                     // Top: "20",
@@ -6890,536 +6843,124 @@ export class TMainForm {
                     // OnChange: "posedPlantPartsChange",
                 },
             ),
-            m("div.posedPartsLabel.TLabel",
-                {
-                    // Top: "26",
-                    // Left: "4",
-                    // Height: "14",
-                    // Width: "58",
-                    // Font.Charset: "DEFAULT_CHARSET",
-                    // Font.Color: "clWindowText",
-                    // Font.Height: "-11",
-                    // Font.Name: "Arial",
-                    // Font.Style: "[]",
-                    // ParentFont: "False",
-                },
-                "Posed parts",
-            ),
+            m("br"),
             m("div.selectedPartLabel.TLabel",
-                {
-                    // Top: "48",
-                    // Left: "5",
-                    // Height: "14",
-                    // Width: "117",
-                    // Font.Charset: "DEFAULT_CHARSET",
-                    // Font.Color: "clWindowText",
-                    // Font.Height: "-11",
-                    // Font.Name: "Arial",
-                    // Font.Style: "[]",
-                    // ParentFont: "False",
-                },
-                "Part 999 (inflorescence)",
+                this.partDescriptionForIDAndType(ammendment?.partID || -1, ammendment?.typeOfPart || "N/A")
             ),
             m("Group.Group.g00000064",
                 m("button.posingPosePart.TSpeedButton",
                     {
                         onclick: () => this.posingPosePartClick(),
-                        // Top: "64",
-                        // Left: "5",
-                        // Height: "22",
-                        // Width: "58",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // Glyph.Data: "76010000424D760100000000000076000000280000002000000010000000010004000000000000010000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF0088888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888CC888888888888887788888888888888CC888888888888887788888888888888CC888888888888887788888888888CCCCCCCC888888887777777788888888CCCCCCCC888888887777777788888888888CC888888888888887788888888888888CC888888888888887788888888888888CC88888888888888778888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888",
-                        // NumGlyphs: "2",
-                        // ParentFont: "False",
                     },
+                    m("img", { src: imageDir + (posingDisabled ? "MainForm_posingPosePart-disabled.png" : "MainForm_posingPosePart.png") }),
                     caption("&Pose"),
                 ),
-                m("button.posingUnposePart.TSpeedButton",
+                m("button.posingUnposePart.TSpeedButton.ml1",
                     {
                         onclick: () => this.posingUnposePartClick(),
-                        // Top: "64",
-                        // Left: "68",
-                        // Height: "22",
-                        // Width: "69",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // Glyph.Data: "76010000424D760100000000000076000000280000002000000010000000010004000000000000010000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF0088888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888CCCCCCCC888888887777777788888888CCCCCCCC88888888777777778888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888",
-                        // NumGlyphs: "2",
-                        // ParentFont: "False",
                     },
+                    m("img", { src: imageDir + (unposingDisabled ? "MainForm_posingUnposePart-disabled.png" : "MainForm_posingUnposePart.png") }),
                     caption("&Unpose"),
                 ),
             ),
             m("div.posingDetailsPanel.TPanel",
-                {
-                    // Top: "90",
-                    // Left: "4",
-                    // Height: "230",
-                    // Width: "252",
-                    // BevelInner: "bvRaised",
-                    // BevelOuter: "bvLowered",
-                    // TabOrder: "0",
-                    // Visible: "False",
-                },
                 m("label.checkbox-inline.posingHidePart.TCheckBox", m("input[type=checkbox]",
                     {
-                        onclick: (event: MouseEvent) => this.changeSelectedPose(event),
-                        // Top: "6",
-                        // Left: "8",
-                        // Height: "17",
-                        // Width: "233",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // ParentFont: "False",
-                        // TabOrder: "0",
-                    },),
-                    "Hide this part and all parts that depend on it",
+                        disabled: !ammendment,
+                        checked: ammendment?.hide,
+                        onclick: (event: any) => this.changeSelectedPose(event.target.checked, "hide"),
+                    }),
+                    "Hide this part and all parts that depend on it (up to the next posed part with dependents)",
                 ),
-                m("div.hideExtraLabel.TLabel",
-                    {
-                        // Top: "23",
-                        // Left: "26",
-                        // Height: "14",
-                        // Width: "213",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // ParentFont: "False",
-                    },
-                    "(up to the next posed part with dependents)",
-                ),
+                m("br"),
                 m("label.checkbox-inline.posingAddExtraRotation.TCheckBox", m("input[type=checkbox]",
                     {
-                        onclick: (event: MouseEvent) => this.changeSelectedPose(event),
-                        // Top: "45",
-                        // Left: "8",
-                        // Height: "17",
-                        // Width: "209",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // ParentFont: "False",
-                        // TabOrder: "7",
-                    },),
+                        disabled: !ammendment,
+                        checked: ammendment?.addRotations,
+                        onclick: (event: MouseEvent) => this.changeSelectedPose(event, "rotate"),
+                    }),
                     "Add an extra rotation to this part of",
                 ),
                 m("Group.Group.g00000065",
-                    m("input.posingXRotationEdit.TEdit",
+                    m("span.ml1", "X"),
+                    m("input[type=number].posingXRotationEdit.TEdit.ml.mw3",
                         {
-                            // Top: "65",
-                            // Left: "27",
-                            // Height: "21",
-                            // Width: "30",
-                            // AutoSize: "False",
-                            // Font.Charset: "DEFAULT_CHARSET",
-                            // Font.Color: "clWindowText",
-                            // Font.Height: "-11",
-                            // Font.Name: "Arial",
-                            // Font.Style: "[]",
-                            // ParentFont: "False",
-                            // TabOrder: "1",
-                            // Text: "0",
-                            // OnChange: "changeSelectedPose",
-                            // OnExit: "changeSelectedPose",
+                            disabled: !ammendment,
+                            value: ammendment?.xRotation,
+                            step: domain.options.rotationIncrement,
+                            onchange: (event: any) => this.changeSelectedPose(event.target.value, "X rotation")
                         },
                     ),
-                    m("input.posingYRotationEdit.TEdit",
+                    m("span.ml1", "Y"),
+                    m("input[type=number].posingYRotationEdit.TEdit.ml1.mw3",
                         {
-                            // Top: "65",
-                            // Left: "92",
-                            // Height: "21",
-                            // Width: "30",
-                            // AutoSize: "False",
-                            // Font.Charset: "DEFAULT_CHARSET",
-                            // Font.Color: "clWindowText",
-                            // Font.Height: "-11",
-                            // Font.Name: "Arial",
-                            // Font.Style: "[]",
-                            // ParentFont: "False",
-                            // TabOrder: "3",
-                            // Text: "0",
-                            // OnChange: "changeSelectedPose",
-                            // OnExit: "changeSelectedPose",
+                            disabled: !ammendment,
+                            value: ammendment?.yRotation,
+                            step: domain.options.rotationIncrement,
+                            onchange: (event: any) => this.changeSelectedPose(event.target.value, "Y rotation")
                         },
                     ),
-                    m("input.posingZRotationEdit.TEdit",
+                    m("span.ml1", "Z"),
+                    m("input[type=number].posingZRotationEdit.TEdit.ml1.mw3",
                         {
-                            // Top: "65",
-                            // Left: "157",
-                            // Height: "21",
-                            // Width: "30",
-                            // AutoSize: "False",
-                            // Font.Charset: "DEFAULT_CHARSET",
-                            // Font.Color: "clWindowText",
-                            // Font.Height: "-11",
-                            // Font.Name: "Arial",
-                            // Font.Style: "[]",
-                            // ParentFont: "False",
-                            // TabOrder: "5",
-                            // Text: "0",
-                            // OnChange: "changeSelectedPose",
-                            // OnExit: "changeSelectedPose",
+                            disabled: !ammendment,
+                            value: ammendment?.zRotation,
+                            step: domain.options.rotationIncrement,
+                            onchange: (event: any) => this.changeSelectedPose(event.target.value, "Z rotation")
                         },
                     ),
-                    m("button.posingZRotationSpin.TSpinButton",
-                        {
-                            // Top: "65",
-                            // Left: "189",
-                            // Height: "19",
-                            // Width: "15",
-                            // DownGlyph.Data: "7E040000424D7E04000000000000360400002800000009000000060000000100080000000000480000000000000000000000000100000001000000000000000080000080000000808000800000008000800080800000C0C0C000C0DCC000F0C8A4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000F0FBFF00A4A0A000808080000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303030303000000030303030003030303000000030303000000030303000000030300000000000303000000030000000000000003000000030303030303030303000000",
-                            // FocusControl: "posingZRotationEdit",
-                            // TabOrder: "6",
-                            // UpGlyph.Data: "7E040000424D7E04000000000000360400002800000009000000060000000100080000000000480000000000000000000000000100000001000000000000000080000080000000808000800000008000800080800000C0C0C000C0DCC000F0C8A4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000F0FBFF00A4A0A000808080000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303030303000000030000000000000003000000030300000000000303000000030303000000030303000000030303030003030303000000030303030303030303000000",
-                            // OnDownClick: "posingRotationSpinDown",
-                            // OnUpClick: "posingRotationSpinUp",
-                        },
-                    ),
+                    m("span.ml1", "degrees")
                 ),
-                m("Group.Group.g00000066",
-                    m("button.posingXRotationSpin.TSpinButton",
-                        {
-                            // Top: "66",
-                            // Left: "58",
-                            // Height: "19",
-                            // Width: "15",
-                            // DownGlyph.Data: "7E040000424D7E04000000000000360400002800000009000000060000000100080000000000480000000000000000000000000100000001000000000000000080000080000000808000800000008000800080800000C0C0C000C0DCC000F0C8A4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000F0FBFF00A4A0A000808080000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303030303000000030303030003030303000000030303000000030303000000030300000000000303000000030000000000000003000000030303030303030303000000",
-                            // FocusControl: "posingXRotationEdit",
-                            // TabOrder: "2",
-                            // UpGlyph.Data: "7E040000424D7E04000000000000360400002800000009000000060000000100080000000000480000000000000000000000000100000001000000000000000080000080000000808000800000008000800080800000C0C0C000C0DCC000F0C8A4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000F0FBFF00A4A0A000808080000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303030303000000030000000000000003000000030300000000000303000000030303000000030303000000030303030003030303000000030303030303030303000000",
-                            // OnDownClick: "posingRotationSpinDown",
-                            // OnUpClick: "posingRotationSpinUp",
-                        },
-                    ),
-                    m("button.posingYRotationSpin.TSpinButton",
-                        {
-                            // Top: "66",
-                            // Left: "123",
-                            // Height: "19",
-                            // Width: "15",
-                            // DownGlyph.Data: "7E040000424D7E04000000000000360400002800000009000000060000000100080000000000480000000000000000000000000100000001000000000000000080000080000000808000800000008000800080800000C0C0C000C0DCC000F0C8A4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000F0FBFF00A4A0A000808080000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303030303000000030303030003030303000000030303000000030303000000030300000000000303000000030000000000000003000000030303030303030303000000",
-                            // FocusControl: "posingYRotationEdit",
-                            // TabOrder: "4",
-                            // UpGlyph.Data: "7E040000424D7E04000000000000360400002800000009000000060000000100080000000000480000000000000000000000000100000001000000000000000080000080000000808000800000008000800080800000C0C0C000C0DCC000F0C8A4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000F0FBFF00A4A0A000808080000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303030303000000030000000000000003000000030300000000000303000000030303000000030303000000030303030003030303000000030303030303030303000000",
-                            // OnDownClick: "posingRotationSpinDown",
-                            // OnUpClick: "posingRotationSpinUp",
-                        },
-                    ),
-                ),
-                m("div.rotationDegreesLabel.TLabel",
-                    {
-                        // Top: "67",
-                        // Left: "208",
-                        // Height: "14",
-                        // Width: "40",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // ParentFont: "False",
-                    },
-                    "degrees",
-                ),
-                m("Group.Group.g00000068",
-                    m("div.posingXRotationLabel.TLabel",
-                        {
-                            // Top: "68",
-                            // Left: "17",
-                            // Height: "14",
-                            // Width: "7",
-                            // Font.Charset: "DEFAULT_CHARSET",
-                            // Font.Color: "clWindowText",
-                            // Font.Height: "-11",
-                            // Font.Name: "Arial",
-                            // Font.Style: "[]",
-                            // ParentFont: "False",
-                        },
-                        "X",
-                    ),
-                    m("div.posingYRotationLabel.TLabel",
-                        {
-                            // Top: "68",
-                            // Left: "82",
-                            // Height: "14",
-                            // Width: "8",
-                            // Font.Charset: "DEFAULT_CHARSET",
-                            // Font.Color: "clWindowText",
-                            // Font.Height: "-11",
-                            // Font.Name: "Arial",
-                            // Font.Style: "[]",
-                            // ParentFont: "False",
-                        },
-                        "Y",
-                    ),
-                    m("div.posingZRotationLabel.TLabel",
-                        {
-                            // Top: "68",
-                            // Left: "147",
-                            // Height: "14",
-                            // Width: "7",
-                            // Font.Charset: "DEFAULT_CHARSET",
-                            // Font.Color: "clWindowText",
-                            // Font.Height: "-11",
-                            // Font.Name: "Arial",
-                            // Font.Style: "[]",
-                            // ParentFont: "False",
-                        },
-                        "Z",
-                    ),
-                ),
+                m("br"),
                 m("label.checkbox-inline.posingMultiplyScale.TCheckBox", m("input[type=checkbox]",
                     {
-                        onclick: (event: MouseEvent) => this.changeSelectedPose(event),
-                        // Top: "96",
-                        // Left: "8",
-                        // Height: "17",
-                        // Width: "110",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // ParentFont: "False",
-                        // TabOrder: "8",
-                    },),
+                        disabled: !ammendment,
+                        checked: ammendment?.multiplyScale,
+                        onclick: (event: MouseEvent) => this.changeSelectedPose(event, "scale"),
+                    }),
                     "Multiply this part's",
                 ),
-                m("input.posingScaleMultiplierEdit.TEdit",
+                m("br"),
+                m("span.ml3.mr1", "3D object scale by"),
+                m("input[type=number].posingScaleMultiplierEdit.TEdit.mw3",
                     {
-                        // Top: "116",
-                        // Left: "118",
-                        // Height: "21",
-                        // Width: "40",
-                        // AutoSize: "False",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // ParentFont: "False",
-                        // TabOrder: "10",
-                        // Text: "0",
-                        // OnChange: "changeSelectedPose",
-                        // OnExit: "changeSelectedPose",
+                        disabled: !ammendment,
+                        value: ammendment?.scaleMultiplier_pct,
+                        step: domain.options.resizeKeyUpMultiplierPercent - 100,
+                        onchange: (event: any) => this.changeSelectedPose(event.target.value, "3D object scale")
                     },
                 ),
-                m("button.posingScaleMultiplierSpin.TSpinButton",
+                m("span.ml1.mr1", "%"),
+                m("br"),
+                m("span.ml3.mr1", "line length by"),
+                m("input[type=number].posingLengthMultiplierEdit.TEdit.mw3",
                     {
-                        // Top: "117",
-                        // Left: "160",
-                        // Height: "19",
-                        // Width: "15",
-                        // DownGlyph.Data: "7E040000424D7E04000000000000360400002800000009000000060000000100080000000000480000000000000000000000000100000001000000000000000080000080000000808000800000008000800080800000C0C0C000C0DCC000F0C8A4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000F0FBFF00A4A0A000808080000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303030303000000030303030003030303000000030303000000030303000000030300000000000303000000030000000000000003000000030303030303030303000000",
-                        // FocusControl: "posingScaleMultiplierEdit",
-                        // TabOrder: "11",
-                        // UpGlyph.Data: "7E040000424D7E04000000000000360400002800000009000000060000000100080000000000480000000000000000000000000100000001000000000000000080000080000000808000800000008000800080800000C0C0C000C0DCC000F0C8A4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000F0FBFF00A4A0A000808080000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303030303000000030000000000000003000000030300000000000303000000030303000000030303000000030303030003030303000000030303030303030303000000",
-                        // OnDownClick: "posingScaleMultiplierSpinDownClick",
-                        // OnUpClick: "posingScaleMultiplierSpinUpClick",
+                        disabled: !ammendment,
+                        value: ammendment?.lengthMultiplier_pct,
+                        step: domain.options.resizeKeyUpMultiplierPercent - 100,
+                        onchange: (event: any) => this.changeSelectedPose(event.target.value, "line length")
                     },
                 ),
-                m("div.posingScaleMultiplierLabel.TLabel",
+                m("span.ml1", "%"),
+                m("br"),
+                m("span.ml3.mr1", "line width by"),
+                m("input[type=number].posingWidthMultiplierEdit.TEdit.mw3",
                     {
-                        // Top: "119",
-                        // Left: "24",
-                        // Height: "14",
-                        // Width: "89",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // ParentFont: "False",
-                    },
-                    "3D object scale by",
-                ),
-                m("div.posingScaleMultiplierPercent.TLabel",
-                    {
-                        // Top: "121",
-                        // Left: "179",
-                        // Height: "14",
-                        // Width: "13",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // ParentFont: "False",
-                    },
-                    "% ",
-                ),
-                m("input.posingLengthMultiplierEdit.TEdit",
-                    {
-                        // Top: "140",
-                        // Left: "118",
-                        // Height: "21",
-                        // Width: "40",
-                        // AutoSize: "False",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // ParentFont: "False",
-                        // TabOrder: "12",
-                        // Text: "0",
-                        // OnChange: "changeSelectedPose",
-                        // OnExit: "changeSelectedPose",
+                        disabled: !ammendment,
+                        value: ammendment?.widthMultiplier_pct,
+                        step: domain.options.resizeKeyUpMultiplierPercent - 100,
+                        onchange: (event: any) => this.changeSelectedPose(event.target.value, "line width")
                     },
                 ),
-                m("button.posingLengthMultiplierSpin.TSpinButton",
-                    {
-                        // Top: "141",
-                        // Left: "160",
-                        // Height: "19",
-                        // Width: "15",
-                        // DownGlyph.Data: "7E040000424D7E04000000000000360400002800000009000000060000000100080000000000480000000000000000000000000100000001000000000000000080000080000000808000800000008000800080800000C0C0C000C0DCC000F0C8A4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000F0FBFF00A4A0A000808080000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303030303000000030303030003030303000000030303000000030303000000030300000000000303000000030000000000000003000000030303030303030303000000",
-                        // FocusControl: "posingLengthMultiplierEdit",
-                        // TabOrder: "13",
-                        // UpGlyph.Data: "7E040000424D7E04000000000000360400002800000009000000060000000100080000000000480000000000000000000000000100000001000000000000000080000080000000808000800000008000800080800000C0C0C000C0DCC000F0C8A4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000F0FBFF00A4A0A000808080000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303030303000000030000000000000003000000030300000000000303000000030303000000030303000000030303030003030303000000030303030303030303000000",
-                        // OnDownClick: "posingScaleMultiplierSpinDownClick",
-                        // OnUpClick: "posingScaleMultiplierSpinUpClick",
-                    },
-                ),
-                m("div.posingLengthMultiplierLabel.TLabel",
-                    {
-                        // Top: "143",
-                        // Left: "50",
-                        // Height: "14",
-                        // Width: "63",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // ParentFont: "False",
-                    },
-                    "line length by",
-                ),
-                m("div.posingLengthMultiplierPercent.TLabel",
-                    {
-                        // Top: "144",
-                        // Left: "179",
-                        // Height: "14",
-                        // Width: "13",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // ParentFont: "False",
-                    },
-                    "% ",
-                ),
-                m("input.posingWidthMultiplierEdit.TEdit",
-                    {
-                        // Top: "164",
-                        // Left: "118",
-                        // Height: "21",
-                        // Width: "40",
-                        // AutoSize: "False",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // ParentFont: "False",
-                        // TabOrder: "14",
-                        // Text: "0",
-                        // OnChange: "changeSelectedPose",
-                        // OnExit: "changeSelectedPose",
-                    },
-                ),
-                m("button.posingWidthMultiplierSpin.TSpinButton",
-                    {
-                        // Top: "165",
-                        // Left: "160",
-                        // Height: "19",
-                        // Width: "15",
-                        // DownGlyph.Data: "7E040000424D7E04000000000000360400002800000009000000060000000100080000000000480000000000000000000000000100000001000000000000000080000080000000808000800000008000800080800000C0C0C000C0DCC000F0C8A4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000F0FBFF00A4A0A000808080000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303030303000000030303030003030303000000030303000000030303000000030300000000000303000000030000000000000003000000030303030303030303000000",
-                        // FocusControl: "posingWidthMultiplierEdit",
-                        // TabOrder: "15",
-                        // UpGlyph.Data: "7E040000424D7E04000000000000360400002800000009000000060000000100080000000000480000000000000000000000000100000001000000000000000080000080000000808000800000008000800080800000C0C0C000C0DCC000F0C8A4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000F0FBFF00A4A0A000808080000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303030303000000030000000000000003000000030300000000000303000000030303000000030303000000030303030003030303000000030303030303030303000000",
-                        // OnDownClick: "posingScaleMultiplierSpinDownClick",
-                        // OnUpClick: "posingScaleMultiplierSpinUpClick",
-                    },
-                ),
-                m("div.posingWidthMultiplierLabel.TLabel",
-                    {
-                        // Top: "166",
-                        // Left: "52",
-                        // Height: "14",
-                        // Width: "61",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // ParentFont: "False",
-                    },
-                    "line width by",
-                ),
-                m("div.posingWidthMultiplierPercent.TLabel",
-                    {
-                        // Top: "167",
-                        // Left: "179",
-                        // Height: "14",
-                        // Width: "13",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // ParentFont: "False",
-                    },
-                    "% ",
-                ),
+                m("span.ml1", "%"),
+                m("br"),
                 m("label.checkbox-inline.posingMultiplyScaleAllPartsAfter.TCheckBox", m("input[type=checkbox]",
                     {
-                        onclick: (event: MouseEvent) => this.changeSelectedPose(event),
-                        // Top: "189",
-                        // Left: "26",
-                        // Height: "17",
-                        // Width: "225",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // ParentFont: "False",
-                        // TabOrder: "9",
+                        disabled: !ammendment,
+                        checked: ammendment?.propagateScale,
+                        onclick: (event: any) => this.changeSelectedPose(event.target.checked, "scale above"),
                     },),
-                    "Keep doing this up to the next posed part",
-                ),
-                m("div.posingMultiplyScaleAllPartsAfterLabel.TLabel",
-                    {
-                        // Top: "205",
-                        // Left: "44",
-                        // Height: "14",
-                        // Width: "81",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // ParentFont: "False",
-                    },
-                    "with dependents",
+                    "Keep doing this up to the next posed part with dependents",
                 ),
             ),
         )
