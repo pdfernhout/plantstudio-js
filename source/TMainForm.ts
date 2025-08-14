@@ -4500,26 +4500,7 @@ export class TMainForm {
             this.lifeCycleDragging = false
         }
     }
-    
-    drawLifeCycleDraggerLine(pos: int): int {
-        const theDC: HDC = UNRESOLVED.getDC(0)
-        const result = this.ClientOrigin.X + this.plantFocusPanel.Left + this.lifeCyclePanel.Left + this.lifeCycleDragger.Left + pos + 2
-        UNRESOLVED.patBlt(theDC, result, this.ClientOrigin.Y + this.plantFocusPanel.Top + this.lifeCyclePanel.Top + this.lifeCycleDragger.Top, 1, this.lifeCycleDragger.Height, delphi_compatability.DSTINVERT)
-        UNRESOLVED.releaseDC(0, theDC)
-        this.lifeCycleDraggingNeedToRedraw = true
-        return result
-    }
-    
-    undrawLifeCycleDraggerLine(): void {
-        if (!this.lifeCycleDraggingNeedToRedraw) {
-            return
-        }
-        const theDC: HDC = UNRESOLVED.getDC(0)
-        UNRESOLVED.patBlt(theDC, this.lifeCycleDraggingLastDrawPos, this.ClientOrigin.Y + this.plantFocusPanel.Top + this.lifeCyclePanel.Top + this.lifeCycleDragger.Top, 1, this.lifeCycleDragger.Height, delphi_compatability.DSTINVERT)
-        UNRESOLVED.releaseDC(0, theDC)
-        this.lifeCycleDraggingNeedToRedraw = false
-    }
-    
+
     */
 
     changeSelectedPlantAges(newAge: short): void {
@@ -4530,21 +4511,26 @@ export class TMainForm {
         this.doCommand(newCommand)
     }
     
-    /*
 
     // life cycle panel drawing and mouse handling 
-    redrawLifeCycleGraph(): void {
-        this.lifeCycleGraphImage.Picture.Bitmap.Canvas.Brush.Color = ColorDefs.clBtnFace
-        this.lifeCycleGraphImage.Picture.Bitmap.Canvas.Rectangle(0, 0, this.lifeCycleGraphImage.ClientWidth, this.lifeCycleGraphImage.ClientHeight)
-        const sCurveError = this.drawSCurveOrCheckForError(this.lifeCycleGraphImage.Picture.Bitmap.Canvas, Rect(0, 0, this.lifeCycleGraphImage.ClientWidth, this.lifeCycleGraphImage.ClientHeight), true, false)
+
+    drawLifeCycleGraph(canvas: HTMLCanvasElement): void {
+        // Clear the canvas
+        canvas.width = canvas.width
+
+        const context = canvas.getContext("2d")
+        if (!context) return
+
+        const bounds = Rect(0, 0, canvas.width, canvas.height)
+        const sCurveError = this.drawSCurveOrCheckForError(context, bounds, true)
         if (sCurveError && (this.focusedPlant() !== null)) {
             // error - do something, should be caught by parameter panel 
-            // PDF PORT -- put in NIL
-            null
+            console.log("redrawLifeCycleGraph sCurveError", sCurveError)
         }
     }
 
-    drawSCurveOrCheckForError(aCanvas: TCanvas, aRect: TRect, draw: boolean, failed: boolean): boolean {
+    drawSCurveOrCheckForError(context: CanvasRenderingContext2D, aRect: TRect, draw: boolean): boolean {
+        let failed = false
         const firstPlant = this.focusedPlant()
         if (firstPlant === null) {
             return failed
@@ -4557,6 +4543,10 @@ export class TMainForm {
         curve.y1 = firstPlant.pGeneral.growthSCurve.y1
         curve.x2 = firstPlant.pGeneral.growthSCurve.x2
         curve.y2 = firstPlant.pGeneral.growthSCurve.y2
+        if (draw) {
+            context.fillStyle = convertColor(ColorDefs.clBtnText)
+            context.beginPath()
+        }
         try {
             failed = calcSCurveCoeffsWithResult(curve, failed)
             if (failed) {
@@ -4565,13 +4555,13 @@ export class TMainForm {
             for (let i = 0; i <= numPoints - 1; i++) {
                 // delphi 2.0 wants this 
                 let x = 0.0
-                let y = 0.0
                 try {
                     x = 1.0 * i / numPoints
                 } catch (e) {
                     return failed
                 }
-                y = scurveWithResult(x, curve.c1, curve.c2)
+                const [y, failedNew] = scurveWithResult(x, curve.c1, curve.c2)
+                failed = failedNew
                 if (failed) {
                     return failed
                 }
@@ -4580,18 +4570,42 @@ export class TMainForm {
                     thisPoint.X = aRect.Left + intround(x * (aRect.Right - aRect.Left))
                     thisPoint.Y = aRect.Top + intround((1.0 - y) * (aRect.Bottom - aRect.Top))
                     if (i === 0) {
-                        aCanvas.MoveTo(thisPoint.X, thisPoint.Y)
+                        context.moveTo(thisPoint.X, thisPoint.Y)
                     } else {
-                        aCanvas.LineTo(thisPoint.X, thisPoint.Y)
+                        context.lineTo(thisPoint.X, thisPoint.Y)
                     }
                 }
             }
         } catch (e) {
             return failed
         }
+        if (draw) {
+            context.strokeStyle = convertColor(ColorDefs.clBtnShadow)
+            context.stroke()
+
+            // draw lifeCycleDragger
+            const firstPlant = this.focusedPlant()
+            let fractionOfMaxAge = 0.0
+            let lifeCycleDraggerColor = ColorDefs.clGray
+            if (firstPlant !== null) {
+                lifeCycleDraggerColor = ColorDefs.clRed
+                try {
+                    fractionOfMaxAge = firstPlant.age / firstPlant.pGeneral.ageAtMaturity
+                } catch (e) {
+                    fractionOfMaxAge = 0.0
+                }
+            }
+            
+            const lifeCycleDraggerWidth = 10
+            const x = intround(((aRect.Right - aRect.Left) - lifeCycleDraggerWidth) * fractionOfMaxAge)
+            context.fillStyle = convertColor(lifeCycleDraggerColor)
+            context.fillRect(x, 1, lifeCycleDraggerWidth, aRect.Bottom - aRect.Top - 2)
+        }
         failed = false
         return failed
     }
+
+    /*
     
     // ----------------------------------------------------------------------------- *parameters panel 
     sectionsComboBoxDrawItem(Control: TWinControl, index: int, Rect: TRect, State: TOwnerDrawState): void {
@@ -6635,7 +6649,7 @@ export class TMainForm {
         }
         const { plantNameLabel, plantNameColor } = this.plantNameLabelAndColorForTab(this.currentPlantFocusTab)
         return m("div.plantFocusPanel.TPanel.ba.pa1",
-            { style: { height: "15rem" } },
+            // { style: { height: "20rem" } },
             m("div.TTabSet.tabSet.TTabSet",
                 plantFocusTabs.map(
                     tab => m("div.ml1.br--top.bl.bt.br.bw1.br2.dib.pa1" + (this.currentPlantFocusTab === tab ? ".bg-green" : ""), {
@@ -6841,6 +6855,7 @@ export class TMainForm {
     }
 
     viewAgePanel(plant: PdPlant): m.Children {
+        const self = this
         return m("div.lifeCyclePanel.TPanel",
             {
                 // Top: "318",
@@ -6853,18 +6868,27 @@ export class TMainForm {
                 // TabOrder: "0",
                 // Visible: "False",
             },
-            m("img.lifeCycleGraphImage.TImage",
-                {
-                    // Top: "20",
-                    // Left: "36",
-                    // Height: "25",
-                    // Width: "213",
-                },
+            m("div.lifeCycleGraphImage.TImage.flex.items-center",
+                m("span.f6", "%max"),
+                m("canvas.ba.ma1", {
+                    style: { height: "300px", width: "400px" },
+                    oncreate(vnode: m.VnodeDOM) {
+                        const canvas = <HTMLCanvasElement>vnode.dom
+                        canvas.width = 400
+                        canvas.height = 300
+                        self.drawLifeCycleGraph(canvas)
+                    },
+                    onupdate(vnode: m.VnodeDOM) {
+                        this.lifeCycleGraphImage = vnode.dom
+                        const canvas = <HTMLCanvasElement>vnode.dom
+                        self.drawLifeCycleGraph(canvas)
+                    }
+                }),
+            ),
+            m("div.timeLabel.TLabel.ml6.f6",
+                "time (days)",
             ),
             m("Group.Group.g00000024",
-                m("div.maxSizeAxisLabel.TLabel",
-                    "%max",
-                ),
                 m("div.lifeCycleDragger.TPanel",
                     {
                         // Top: "24",
@@ -6882,10 +6906,7 @@ export class TMainForm {
                     },
                 ),
             ),
-            m("div.timeLabel.TLabel",
-                "time (days)",
-            ),
-            m("div.lifeCycleEditPanel.TPanel",
+            m("div.lifeCycleEditPanel.TPanel.mt2",
                 m("Group.Group.g00000002",
                     "Age",
                     m("input[type=number].lifeCycleDaysEdit.TEdit.ml1.mw3",

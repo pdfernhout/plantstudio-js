@@ -27,16 +27,16 @@ export function convertColorNoCache(color: number): string {
 }
 
 export function rgbForColor(color: number): ColorMap {
-    var b = (color >> 16) & 255;
+    var r = (color >> 16) & 255;
     var g = (color >> 8) & 255
-    var r = color & 255
+    var b = color & 255
     return {r, g, b}
 }
 
 export function colorForRGB(rgb: ColorMap) {
-    var b = (rgb.b & 255) << 16;
+    var r = (rgb.b & 255) << 16;
     var g = (rgb.g & 255) << 8
-    var r = (rgb.r & 255)
+    var b = (rgb.r & 255)
     return r + g + b
 }
 
