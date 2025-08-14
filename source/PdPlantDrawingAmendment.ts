@@ -25,9 +25,9 @@ export class PdPlantDrawingAmendment extends PdStreamableObject {
     zRotation: float = 0.0
     multiplyScale: boolean = false
     propagateScale: boolean = false
-    scaleMultiplier_pct: short = 0
-    lengthMultiplier_pct: short = 0
-    widthMultiplier_pct: short = 0
+    scaleMultiplier_pct: short = 100
+    lengthMultiplier_pct: short = 100
+    widthMultiplier_pct: short = 100
     applyAtAge: short = 0
 
     readFromTextFile(inputFile: TextFile): void {

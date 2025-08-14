@@ -36,10 +36,10 @@ type PosingField =
     | "Y rotation" // posingYRotationEdit
     | "Z rotation" // posingZRotationEdit
     | "scale" // posingMultiplyScale
-    | "scale above" // posingMultiplyScaleAllPartsAfter
     | "3D object scale" // posingScaleMultiplierEdit
     | "line length" // posingLengthMultiplierEdit
     | "line width" // posingWidthMultiplierEdit
+    | "scale above" // posingMultiplyScaleAllPartsAfter
 
 const Application_Title = "PlantStudio"
 
@@ -5254,6 +5254,7 @@ export class TMainForm {
         // command will take ownership of this and free it if necessary
         const newAmendment = new PdPlantDrawingAmendment()
         const partID = this.selectedPlantPartID
+
         const currentAmendment: PdPlantDrawingAmendment | null = plant.amendmentForPartID(partID)
         if (currentAmendment === null) {
             return
@@ -5284,9 +5285,9 @@ export class TMainForm {
         newAmendment.zRotation = (field === "Z rotation") ? intMax(-360, intMin(360, StrToIntDef(newValue, intround(currentAmendment.zRotation)))) : currentAmendment.zRotation
         newAmendment.multiplyScale = (field === "scale") ? newValue : currentAmendment.multiplyScale
         newAmendment.propagateScale = (field === "scale above") ? newValue : currentAmendment.propagateScale
-        newAmendment.scaleMultiplier_pct = (field === "3D object scale") ? intMax(0, intMin(1000, StrToIntDef(newValue, currentAmendment.scaleMultiplier_pct))) : newAmendment.scaleMultiplier_pct
-        newAmendment.lengthMultiplier_pct = (field === "line length") ? intMax(0, intMin(1000, StrToIntDef(newValue, currentAmendment.lengthMultiplier_pct))) : newAmendment.lengthMultiplier_pct
-        newAmendment.widthMultiplier_pct = (field === "line width") ? intMax(0, intMin(1000, StrToIntDef(newValue, currentAmendment.widthMultiplier_pct))) : newAmendment.widthMultiplier_pct
+        newAmendment.scaleMultiplier_pct = (field === "3D object scale") ? intMax(0, intMin(1000, StrToIntDef(newValue, currentAmendment.scaleMultiplier_pct))) : currentAmendment.scaleMultiplier_pct
+        newAmendment.lengthMultiplier_pct = (field === "line length") ? intMax(0, intMin(1000, StrToIntDef(newValue, currentAmendment.lengthMultiplier_pct))) : currentAmendment.lengthMultiplier_pct
+        newAmendment.widthMultiplier_pct = (field === "line width") ? intMax(0, intMin(1000, StrToIntDef(newValue, currentAmendment.widthMultiplier_pct))) : currentAmendment.widthMultiplier_pct
         const newCommand = new PdEditAmendmentCommand(plant, newAmendment, field)
         this.doCommand(newCommand)
     }
@@ -6784,7 +6785,7 @@ export class TMainForm {
                     {
                         disabled: !amendment,
                         checked: amendment?.addRotations,
-                        onclick: (event: MouseEvent) => this.changeSelectedPose(event, "rotate"),
+                        onclick: (event: any) => this.changeSelectedPose(event.target.checked, "rotate"),
                     }),
                     "Add an extra rotation to this part of",
                 ),
@@ -6823,7 +6824,7 @@ export class TMainForm {
                     {
                         disabled: !amendment,
                         checked: amendment?.multiplyScale,
-                        onclick: (event: MouseEvent) => this.changeSelectedPose(event, "scale"),
+                        onclick: (event: any) => this.changeSelectedPose(event.target.checked, "scale"),
                     }),
                     "Multiply this part's",
                 ),
