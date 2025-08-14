@@ -757,7 +757,6 @@ export class PdEditAmendmentCommand extends PdCommand {
         this.plant.addAmendment(this.newAmendment)
         this.plant.recalculateBounds(kDrawNow)
         MainForm.invalidateDrawingRect(this.plant.boundsRect_pixels())
-        MainForm.updatePoseInfo()
     }
     
     undoCommand(): void {
@@ -769,7 +768,6 @@ export class PdEditAmendmentCommand extends PdCommand {
         }
         this.plant.recalculateBounds(kDrawNow)
         MainForm.invalidateDrawingRect(this.plant.boundsRect_pixels())
-        MainForm.updatePoseInfo()
     }
     
     description(): string {

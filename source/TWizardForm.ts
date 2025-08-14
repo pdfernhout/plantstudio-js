@@ -1217,7 +1217,7 @@ export class TWizardForm {
                 tdo.draw(turtle, 0.20, "", "", 0, 0)
                 turtle.drawingSurface.recordingStop()
                 turtle.drawingSurface.recordingDraw()
-                turtle.drawingSurface.clearTriangles()
+                // TODO PDF: Use or remove: turtle.drawingSurface.clearTriangles()
                 turtle.pop()
             } catch (e: any) {
                 messageForExceptionType(e, "TWizardForm.drawTdo")

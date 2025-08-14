@@ -97,6 +97,7 @@ export class KfDrawingSurface {
     // ----------------------- KfDrawingSurface managing triangles
 
     clearTriangles(): void {
+        console.log("clear triangles")
         this.numTrianglesUsed = 0
     }
     

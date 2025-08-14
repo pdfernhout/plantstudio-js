@@ -345,7 +345,7 @@ export class PdTdoParameterPanel extends PdParameterPanel {
                 this.tdo.draw(turtle, this.scale, "", "", 0, 0)
                 turtle.drawingSurface.recordingStop()
                 turtle.drawingSurface.recordingDraw()
-                turtle.drawingSurface.clearTriangles()
+                // TODO PDF: Use or remove: turtle.drawingSurface.clearTriangles()
                 turtle.pop()
             } catch (e: any) {
                 messageForExceptionType(e, "PdTdoParameterPanel.drawTdo")

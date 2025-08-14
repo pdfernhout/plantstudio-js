@@ -920,6 +920,7 @@ export class PdPlant extends PdStreamableObject {
     }
     
     drawOn(destCanvas: CanvasRenderingContext2D | null): void {
+        console.log("plant drawOn")
         let realBasePoint_pixels: TPoint
         
         this.turtle = KfTurtle.defaultStartUsing()
@@ -941,7 +942,7 @@ export class PdPlant extends PdStreamableObject {
                     this.draw()
                     this.turtle.drawingSurface.recordingStop()
                     this.turtle.drawingSurface.recordingDraw()
-                    this.turtle.drawingSurface.clearTriangles()
+                    // TODO PDF: Use or remove: this.turtle.drawingSurface.clearTriangles()
                 } else {
                     this.draw()
                 }
@@ -1102,6 +1103,7 @@ export class PdPlant extends PdStreamableObject {
     }
     
     fakeDrawToGetBounds(): void {
+        console.log("plant fakeDrawToGetBounds")
         this.computeBounds = true
         this.turtle = KfTurtle.defaultStartUsing()
         try {

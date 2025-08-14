@@ -1,7 +1,7 @@
 // unit Umain
 
 import * as m from "mithril"
-import { arrayInsert, arraySwap, caption, ColorDefs, double, ExtractFileName, float, imageDir, int, intround, IntToStr, long, mbYesNo, mbYesNoCancel, MessageDialog, MouseButton, mtConfirmation, short, ShowMessage, StrToFloat, StrToIntDef, TColorRef } from "./common"
+import { arrayInsert, arrayRemove, arraySwap, caption, ColorDefs, double, ExtractFileName, float, imageDir, int, intround, IntToStr, long, mbYesNo, mbYesNoCancel, MessageDialog, MouseButton, mtConfirmation, short, ShowMessage, StrToFloat, StrToIntDef, TColorRef } from "./common"
 import { PdCommand } from "./PdCommand"
 import { PdCommandList } from "./PdCommandList"
 import { domain, DrawMode, kAnimateByAge, kAnimateByXRotation, kExcludeInvisiblePlants, kIncludeAllPlants, kIncludeDrawingAreaContents, kIncludeNonSelectedPlants, kIncludeSelectedPlants, kIncludeVisiblePlants, kMainWindowOrientationHorizontal, kMainWindowOrientationVertical, kMaxRecentFiles, kUnsavedFileName, ViewPlants } from "./PdDomain"
@@ -112,21 +112,10 @@ function setPlantCharacteristicsForAnimationFrame(plant: PdPlant, frame: short):
     }
 }
 
-// function enableOrDisableSet(aLabel: TLabel, anEdit: TEdit, aSpin: TSpinButton, anExtraLabel: TLabel, enable: boolean): void {
-//     if (aLabel !== null) {
-//         aLabel.Enabled = enable
-//     }
-//     if (anEdit !== null) {
-//         anEdit.Enabled = enable
-//     }
-//     if (aSpin !== null) {
-//         aSpin.Visible = enable
-//     }
-//     if (anExtraLabel !== null) {
-//         anExtraLabel.Enabled = enable
-//     }
-// }
-
+type PosedPlantPart = {
+    partID: number
+    partType: string
+}
 
 export class TMainForm {
 
@@ -240,7 +229,7 @@ export class TMainForm {
     // posingFrontfaceColor: TPanel = new TPanel()
     // posingBackfaceColor: TPanel = new TPanel()
     // posedPartsLabel: TLabel = new TLabel()
-    // posedPlantParts: TComboBox = new TComboBox()
+    posedPlantParts: PosedPlantPart[] = []
     // posingHighlight: TSpeedButton = new TSpeedButton()
     // posingGhost: TSpeedButton = new TSpeedButton()
     // posingNotShown: TSpeedButton = new TSpeedButton()
@@ -3275,8 +3264,10 @@ export class TMainForm {
                 }
                 this.setCurrentPlantFocusTab("Posing")
                 plantClickedOn = domain.plantManager.findPlantAtPoint(Point(X, Y))
+                console.log("plantClickedOn", plantClickedOn, Point(X, Y))
                 if (plantClickedOn && this.isFocused(plantClickedOn)) {
                     [this.mouseDownSelectedPlantPartID, this.mouseDownSelectedPlantPartType] = plantClickedOn.getInfoForPlantPartAtPoint(Point(X, Y))
+                    console.log("plantClickedOn results", this.mouseDownSelectedPlantPartID, this.mouseDownSelectedPlantPartType)
                 } else {
                     this.mouseDownSelectedPlantPartID = -1
                 }
@@ -5120,7 +5111,8 @@ export class TMainForm {
     }
     
     updatePosingForSelectedPlantPart(): void {
-        unfinished()
+        console.log("updatePosingForSelectedPlantPart", this)
+        // TOD PDF: Fix or remove this code
         // // PDF PORT -- removed semicolon from after begin
         // this.internalChange = true
         // if (this.focusedPlant() === null) {
@@ -5148,64 +5140,6 @@ export class TMainForm {
         // this.updatePoseInfo()
     }
     
-    updatePoseInfo(): void {
-        unfinished()
-        // this.internalChange = true
-        // let amendment: PdPlantDrawingAmendment | null = null
-        // const partID = this.selectedPartIDInAmendedPartsList()
-        // if (partID >= 0) {
-        //     amendment = this.focusedPlant().amendmentForPartID(partID)
-        // }
-        // this.posingPosePart.Enabled = (!(this.selectedPartLabel.Caption === kNoPartSelected)) && (amendment === null)
-        // this.posingUnposePart.Enabled = (!(this.selectedPartLabel.Caption === kNoPartSelected)) && (!(amendment === null))
-        // this.posingDetailsPanel.Visible = amendment !== null
-        // if (amendment !== null) {
-        //     this.posingHidePart.Checked = amendment.hide
-        //     //
-        //     //    posingChangeColors.checked := changeColors;
-        //     //    posingFrontfaceColor.color := faceColor;
-        //     //    posingBackfaceColor.color := BackfaceColor;
-        //     //    posingLineColor.color := lineColor;
-        //     //    posingChangeAllColorsAfter.checked := propagateColors;
-        //     //    
-        //     this.posingAddExtraRotation.Checked = amendment.addRotations
-        //     this.posingXRotationEdit.Text = IntToStr(intround(amendment.xRotation))
-        //     this.posingYRotationEdit.Text = IntToStr(intround(amendment.yRotation))
-        //     this.posingZRotationEdit.Text = IntToStr(intround(amendment.zRotation))
-        //     this.posingMultiplyScale.Checked = amendment.multiplyScale
-        //     this.posingMultiplyScaleAllPartsAfter.Checked = amendment.propagateScale
-        //     this.posingScaleMultiplierEdit.Text = IntToStr(amendment.scaleMultiplier_pct)
-        //     this.posingLengthMultiplierEdit.Text = IntToStr(amendment.lengthMultiplier_pct)
-        //     this.posingWidthMultiplierEdit.Text = IntToStr(amendment.widthMultiplier_pct)
-        // }
-        // this.internalChange = false
-        // this.updateForDependenciesWithinPoseInfo()
-    }
-    
-    updateForDependenciesWithinPoseInfo(): void {
-        unfinished()
-        // this.internalChange = true
-        // this.posingChangeAllColorsAfter.Enabled = this.posingChangeColors.Checked
-        // this.posingMultiplyScaleAllPartsAfter.Enabled = this.posingMultiplyScale.Checked
-        // this.posingMultiplyScaleAllPartsAfterLabel.Enabled = this.posingMultiplyScaleAllPartsAfter.Enabled
-        // //
-        // //  posingLineColor.visible := posingChangeColors.checked;
-        // //  posingLineColorLabel.enabled := posingChangeColors.checked;
-        // //  posingFrontfaceColor.visible := posingChangeColors.checked;
-        // //  posingFrontfaceColorLabel.enabled := posingChangeColors.checked;
-        // //  posingBackfaceColor.visible := posingChangeColors.checked;
-        // //  posingBackfaceColorLabel.enabled := posingChangeColors.checked;
-        // //  
-        // enableOrDisableSet(this.posingXRotationLabel, this.posingXRotationEdit, this.posingXRotationSpin, null, this.posingAddExtraRotation.Checked)
-        // enableOrDisableSet(this.posingYRotationLabel, this.posingYRotationEdit, this.posingYRotationSpin, null, this.posingAddExtraRotation.Checked)
-        // enableOrDisableSet(this.posingZRotationLabel, this.posingZRotationEdit, this.posingZRotationSpin, null, this.posingAddExtraRotation.Checked)
-        // this.rotationDegreesLabel.Enabled = this.posingAddExtraRotation.Checked
-        // enableOrDisableSet(this.posingScaleMultiplierLabel, this.posingScaleMultiplierEdit, this.posingScaleMultiplierSpin, this.posingScaleMultiplierPercent, this.posingMultiplyScale.Checked)
-        // enableOrDisableSet(this.posingLengthMultiplierLabel, this.posingLengthMultiplierEdit, this.posingLengthMultiplierSpin, this.posingLengthMultiplierPercent, this.posingMultiplyScale.Checked)
-        // enableOrDisableSet(this.posingWidthMultiplierLabel, this.posingWidthMultiplierEdit, this.posingWidthMultiplierSpin, this.posingWidthMultiplierPercent, this.posingMultiplyScale.Checked)
-        // this.internalChange = false
-    }
-    
     redrawAllPlantsInViewWithAmendments(): void {
         if (this.plants.length > 0) {
             for (let i = 0; i <= this.plants.length - 1; i++) {
@@ -5220,7 +5154,7 @@ export class TMainForm {
     }
     
     // ------------------------------------------------------------------------------------- *posing - interface 
-    posedPlantPartsChange(): void { 
+    posedPlantPartsChange(index: number): void { 
         if (this.internalChange) {
             return
         }
@@ -5228,11 +5162,14 @@ export class TMainForm {
         if (plant === null) {
             return
         }
+        console.log("posedPlantPartsChange", index)
         let newCommand: PdCommand
-        if (this.posedPlantParts.ItemIndex === this.posedPlantParts.Items.Count - 1) {
+        // TODO PDF: Remove or fix for unselected posed plant part
+        if (index < 0) { // this.posedPlantParts.ItemIndex === this.posedPlantParts.Items.Count - 1) {
             newCommand = new PdSelectPosingPartCommand(plant, -1, this.selectedPlantPartID, "", this.selectedPlantPartType)
         } else {
-            newCommand = new PdSelectPosingPartCommand(plant, this.selectedPartIDInAmendedPartsList(), this.selectedPlantPartID, this.selectedPartTypeInAmendedPartsList(), this.selectedPlantPartType)
+            const part = this.posedPlantParts[index]
+            newCommand = new PdSelectPosingPartCommand(plant, part.partID, this.selectedPlantPartID, part.partType, this.selectedPlantPartType)
         }
         this.doCommand(newCommand)
     }
@@ -5310,14 +5247,13 @@ export class TMainForm {
         if (this.internalChange) {
             return
         }
-        this.updateForDependenciesWithinPoseInfo()
         const plant = this.focusedPlant()
         if (plant === null) {
             return
         }
         // command will take ownership of this and free it if necessary
         const newAmendment = new PdPlantDrawingAmendment()
-        const partID = this.selectedPartIDInAmendedPartsList()
+        const partID = this.selectedPlantPartID
         const currentAmendment: PdPlantDrawingAmendment | null = plant.amendmentForPartID(partID)
         if (currentAmendment === null) {
             return
@@ -5332,8 +5268,8 @@ export class TMainForm {
         //    posingFrontfaceColorLabel: TLabel;
         //    posingBackfaceColorLabel: TLabel;
         //    
-        newAmendment.partID = this.partIDForFullDescription(this.posedPlantParts.Text)
-        newAmendment.typeOfPart = this.partTypeForFullDescription(this.posedPlantParts.Text)
+        newAmendment.partID = partID
+        newAmendment.typeOfPart = this.selectedPlantPartType
         newAmendment.hide = (field === "hide") ? newValue : currentAmendment.hide
         //
         //    changeColors := posingChangeColors.checked;
@@ -5379,7 +5315,7 @@ export class TMainForm {
         if (plant === null) {
             return
         }
-        const amendment = plant.amendmentForPartID(this.selectedPartIDInAmendedPartsList())
+        const amendment = plant.amendmentForPartID(this.selectedPlantPartID)
         if (amendment === null) {
             return
         }
@@ -5388,68 +5324,45 @@ export class TMainForm {
     }
     
     addAmendedPartToList(partID: long, partType: string): void {
-        const newString: string = this.partDescriptionForIDAndType(partID, partType)
-        this.posedPlantParts.Items.Add(newString)
-        const indexToSave: int = this.posedPlantParts.Items.Count - 1
-        // add "select none" to end - move down if already there
-        const selectNoneIndex: int = this.posedPlantParts.Items.indexOf(kSelectNoPosedPartString)
-        if (selectNoneIndex >= 0) {
-            this.posedPlantParts.Items.Delete(selectNoneIndex)
-        }
-        this.posedPlantParts.Items.Add(kSelectNoPosedPartString)
-        this.posedPlantParts.ItemIndex = indexToSave
-        this.updatePosingForSelectedPlantPart()
+        this.posedPlantParts.push({
+            partID,
+            partType
+        })
+        // TOD PDF: Remove or Fix
+        // const newString: string = this.partDescriptionForIDAndType(partID, partType)
+        // this.posedPlantParts.Items.Add(newString)
+        // const indexToSave: int = this.posedPlantParts.Items.Count - 1
+        // // add "select none" to end - move down if already there
+        // const selectNoneIndex: int = this.posedPlantParts.Items.indexOf(kSelectNoPosedPartString)
+        // if (selectNoneIndex >= 0) {
+        //     this.posedPlantParts.Items.Delete(selectNoneIndex)
+        // }
+        // this.posedPlantParts.Items.Add(kSelectNoPosedPartString)
+        // this.posedPlantParts.ItemIndex = indexToSave
+        // this.updatePosingForSelectedPlantPart()
     }
     
     removeAmendedPartFromList(partID: long, partType: string): void {
-        const oldItemIndex: int = this.posedPlantParts.ItemIndex
-        const oldString = this.partDescriptionForIDAndType(partID, partType)
-        const index: int = this.posedPlantParts.Items.indexOf(oldString)
-        if (index >= 0) {
-            this.posedPlantParts.Items.Delete(index)
+        const part = this.posedPlantParts.find(part => part.partID === partID && part.partType === partType)
+        if (part) {
+            arrayRemove(this.posedPlantParts, part)
         }
-        if (oldItemIndex <= this.posedPlantParts.Items.Count - 1) {
-            this.posedPlantParts.ItemIndex = oldItemIndex
-        }
-        this.updatePosingForSelectedPlantPart()
+        // TOD PDF: Remove or Fix
+        // const oldItemIndex: int = this.posedPlantParts.ItemIndex
+        // const oldString = this.partDescriptionForIDAndType(partID, partType)
+        // const index: int = this.posedPlantParts.Items.indexOf(oldString)
+        // if (index >= 0) {
+        //     this.posedPlantParts.Items.Delete(index)
+        // }
+        // if (oldItemIndex <= this.posedPlantParts.Items.Count - 1) {
+        //     this.posedPlantParts.ItemIndex = oldItemIndex
+        // }
+        // this.updatePosingForSelectedPlantPart()
     }
     
     // ------------------------------------------------------------------------------------- *posing - supporting 
     partDescriptionForIDAndType(id: long, typeName: string): string {
         let result = IntToStr(id) + ' (' + typeName + ')'
-        return result
-    }
-    
-    partIDForFullDescription(aString: string): long {
-        let result = StrToIntDef(stringUpTo(aString, " ("), -1)
-        return result
-    }
-    
-    partTypeForFullDescription(aString: string): string {
-        let  result = ""
-        if (len(aString) <= 0) {
-            return result
-        }
-        result = stringBeyond(aString, "(")
-        result = stringUpTo(result, ")")
-        return result
-    }
-    
-    selectedPartIDInAmendedPartsList(): long {
-        let result = -1
-        if ((this.focusedPlant() === null) || (this.posedPlantParts.Items.Count <= 0) || (this.posedPlantParts.ItemIndex < 0)) {
-            return result
-        }
-        result = this.partIDForFullDescription(this.posedPlantParts[this.posedPlantParts.ItemIndex])
-        return result
-    }
-    
-    selectedPartTypeInAmendedPartsList(): string {
-        let result = ""
-        if ((this.focusedPlant() === null) || (this.posedPlantParts.Items.Count <= 0) || (this.posedPlantParts.ItemIndex < 0)) {
-            return result
-        }
-        result = this.partTypeForFullDescription(this.posedPlantParts[this.posedPlantParts.ItemIndex])
         return result
     }
     
@@ -5903,9 +5816,6 @@ export class TMainForm {
 
     // TODO: Temp defintions used by PdTraverser
     showDrawProgress = (value: number) => {}
-
-    // TODO: PDF fix posedPlantParts stub
-    posedPlantParts: any = {}
 
     oninit() {
         this.drawingBitmap.width = 800
@@ -6796,9 +6706,9 @@ export class TMainForm {
     }
 
     viewPosingPanel(plant: PdPlant): m.Children {
-        const ammendment: PdPlantDrawingAmendment | null = plant.amendmentForPartID(this.selectedPlantPartID)
-        const posingDisabled = ammendment || this.selectedPlantPartID < 0
-        const unposingDisabled = !ammendment
+        const amendment: PdPlantDrawingAmendment | null = plant.amendmentForPartID(this.selectedPlantPartID)
+        const posingDisabled = amendment || this.selectedPlantPartID < 0
+        const unposingDisabled = !amendment
         return m("div.posingPanel.TPanel",
             m("Group.Group.g00000018",
                 m("button.posingHighlight.TSpeedButton",
@@ -6827,25 +6737,19 @@ export class TMainForm {
             m("span.mr1", "Posed parts"),
             m("select.posedPlantParts.TComboBox",
                 {
-                    // Top: "20",
-                    // Left: "65",
-                    // Height: "22",
-                    // Width: "103",
-                    // Style: "csDropDownList",
-                    // Font.Charset: "DEFAULT_CHARSET",
-                    // Font.Color: "clWindowText",
-                    // Font.Height: "-11",
-                    // Font.Name: "Arial",
-                    // Font.Style: "[]",
-                    // ItemHeight: "14",
-                    // ParentFont: "False",
-                    // TabOrder: "1",
-                    // OnChange: "posedPlantPartsChange",
+                    onchange: (event: any) => this.posedPlantPartsChange(event.target.value)
+
                 },
+                this.posedPlantParts.map((part, index) =>
+                    m("option", {
+                        value: index,
+                        selected: ((part.partID === this.selectedPlantPartID && part.partType === this.selectedPlantPartType) ? "selected" : undefined),
+                    }, this.partDescriptionForIDAndType(part.partID, part.partType))
+                )
             ),
             m("br"),
             m("div.selectedPartLabel.TLabel",
-                this.partDescriptionForIDAndType(ammendment?.partID || -1, ammendment?.typeOfPart || "N/A")
+                this.partDescriptionForIDAndType(this.selectedPlantPartID || -1, this.selectedPlantPartType || "N/A")
             ),
             m("Group.Group.g00000064",
                 m("button.posingPosePart.TSpeedButton",
@@ -6866,8 +6770,8 @@ export class TMainForm {
             m("div.posingDetailsPanel.TPanel",
                 m("label.checkbox-inline.posingHidePart.TCheckBox", m("input[type=checkbox]",
                     {
-                        disabled: !ammendment,
-                        checked: ammendment?.hide,
+                        disabled: !amendment,
+                        checked: amendment?.hide,
                         onclick: (event: any) => this.changeSelectedPose(event.target.checked, "hide"),
                     }),
                     "Hide this part and all parts that depend on it (up to the next posed part with dependents)",
@@ -6875,8 +6779,8 @@ export class TMainForm {
                 m("br"),
                 m("label.checkbox-inline.posingAddExtraRotation.TCheckBox", m("input[type=checkbox]",
                     {
-                        disabled: !ammendment,
-                        checked: ammendment?.addRotations,
+                        disabled: !amendment,
+                        checked: amendment?.addRotations,
                         onclick: (event: MouseEvent) => this.changeSelectedPose(event, "rotate"),
                     }),
                     "Add an extra rotation to this part of",
@@ -6885,8 +6789,8 @@ export class TMainForm {
                     m("span.ml1", "X"),
                     m("input[type=number].posingXRotationEdit.TEdit.ml.mw3",
                         {
-                            disabled: !ammendment,
-                            value: ammendment?.xRotation,
+                            disabled: !amendment,
+                            value: amendment?.xRotation,
                             step: domain.options.rotationIncrement,
                             onchange: (event: any) => this.changeSelectedPose(event.target.value, "X rotation")
                         },
@@ -6894,8 +6798,8 @@ export class TMainForm {
                     m("span.ml1", "Y"),
                     m("input[type=number].posingYRotationEdit.TEdit.ml1.mw3",
                         {
-                            disabled: !ammendment,
-                            value: ammendment?.yRotation,
+                            disabled: !amendment,
+                            value: amendment?.yRotation,
                             step: domain.options.rotationIncrement,
                             onchange: (event: any) => this.changeSelectedPose(event.target.value, "Y rotation")
                         },
@@ -6903,8 +6807,8 @@ export class TMainForm {
                     m("span.ml1", "Z"),
                     m("input[type=number].posingZRotationEdit.TEdit.ml1.mw3",
                         {
-                            disabled: !ammendment,
-                            value: ammendment?.zRotation,
+                            disabled: !amendment,
+                            value: amendment?.zRotation,
                             step: domain.options.rotationIncrement,
                             onchange: (event: any) => this.changeSelectedPose(event.target.value, "Z rotation")
                         },
@@ -6914,8 +6818,8 @@ export class TMainForm {
                 m("br"),
                 m("label.checkbox-inline.posingMultiplyScale.TCheckBox", m("input[type=checkbox]",
                     {
-                        disabled: !ammendment,
-                        checked: ammendment?.multiplyScale,
+                        disabled: !amendment,
+                        checked: amendment?.multiplyScale,
                         onclick: (event: MouseEvent) => this.changeSelectedPose(event, "scale"),
                     }),
                     "Multiply this part's",
@@ -6924,8 +6828,8 @@ export class TMainForm {
                 m("span.ml3.mr1", "3D object scale by"),
                 m("input[type=number].posingScaleMultiplierEdit.TEdit.mw3",
                     {
-                        disabled: !ammendment,
-                        value: ammendment?.scaleMultiplier_pct,
+                        disabled: !amendment,
+                        value: amendment?.scaleMultiplier_pct,
                         step: domain.options.resizeKeyUpMultiplierPercent - 100,
                         onchange: (event: any) => this.changeSelectedPose(event.target.value, "3D object scale")
                     },
@@ -6935,8 +6839,8 @@ export class TMainForm {
                 m("span.ml3.mr1", "line length by"),
                 m("input[type=number].posingLengthMultiplierEdit.TEdit.mw3",
                     {
-                        disabled: !ammendment,
-                        value: ammendment?.lengthMultiplier_pct,
+                        disabled: !amendment,
+                        value: amendment?.lengthMultiplier_pct,
                         step: domain.options.resizeKeyUpMultiplierPercent - 100,
                         onchange: (event: any) => this.changeSelectedPose(event.target.value, "line length")
                     },
@@ -6946,8 +6850,8 @@ export class TMainForm {
                 m("span.ml3.mr1", "line width by"),
                 m("input[type=number].posingWidthMultiplierEdit.TEdit.mw3",
                     {
-                        disabled: !ammendment,
-                        value: ammendment?.widthMultiplier_pct,
+                        disabled: !amendment,
+                        value: amendment?.widthMultiplier_pct,
                         step: domain.options.resizeKeyUpMultiplierPercent - 100,
                         onchange: (event: any) => this.changeSelectedPose(event.target.value, "line width")
                     },
@@ -6956,8 +6860,8 @@ export class TMainForm {
                 m("br"),
                 m("label.checkbox-inline.posingMultiplyScaleAllPartsAfter.TCheckBox", m("input[type=checkbox]",
                     {
-                        disabled: !ammendment,
-                        checked: ammendment?.propagateScale,
+                        disabled: !amendment,
+                        checked: amendment?.propagateScale,
                         onclick: (event: any) => this.changeSelectedPose(event.target.checked, "scale above"),
                     },),
                     "Keep doing this up to the next posed part with dependents",
