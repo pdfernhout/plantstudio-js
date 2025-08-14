@@ -514,13 +514,11 @@ export class PdEditNoteCommand extends PdCommand {
     doCommand(): void {
         super.doCommand()
         this.plant.noteLines = this.newStrings
-        MainForm.updateForChangeToPlantNote(this.plant)
     }
     
     undoCommand(): void {
         super.undoCommand()
         this.plant.noteLines = this.oldStrings
-        MainForm.updateForChangeToPlantNote(this.plant)
     }
     
     description(): string {

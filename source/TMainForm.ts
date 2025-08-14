@@ -140,18 +140,8 @@ export class TMainForm {
     // plantListPanel: TPanel = new TPanel()
     // progressPaintBox: TPaintBox = new TPaintBox()
     // plantFocusPanel: TPanel = new TPanel()
-    // lifeCyclePanel: TPanel = new TPanel()
-    // lifeCycleGraphImage: TImage = new TImage()
     // timeLabel: TLabel = new TLabel()
     // selectedPlantNameLabel: TLabel = new TLabel()
-    // lifeCycleEditPanel: TPanel = new TPanel()
-    // daysAndSizeLabel: TLabel = new TLabel()
-    // ageAndSizeLabel: TLabel = new TLabel()
-    // lifeCycleDaysEdit: TEdit = new TEdit()
-    // lifeCycleDaysSpin: TSpinButton = new TSpinButton()
-    // lifeCycleDragger: TPanel = new TPanel()
-    // statsScrollBox: TScrollBox = new TScrollBox()
-    // tabSet: TTabSet = new TTabSet()
     // parametersPanel: TPanel = new TPanel()
     // parametersScrollBox: TScrollBox = new TScrollBox()
     // maxSizeAxisLabel: TLabel = new TLabel()
@@ -2417,21 +2407,6 @@ export class TMainForm {
             plant.recalculateBoundsForOffsetChange()
         }
     }
-    
-    updateForChangeToPlantNote(aPlant: PdPlant): void {
-        // TODO PDF: Fix or remove obsolete code
-        // let start: int = this.noteMemo.SelStart
-        // this.noteMemo.Clear()
-        // if (aPlant === null) {
-        //     return
-        // }
-        // this.internalChange = true
-        // if (this.focusedPlant() !== null) {
-        //     this.noteMemo.Lines.AddStrings(aPlant.noteLines)
-        // }
-        // this.noteMemo.SelStart = start
-        // this.internalChange = false
-    }
 
     // menu updating 
     // ---------------------------------------------------------------------------- *menu updating 
@@ -3872,18 +3847,6 @@ export class TMainForm {
         }
     }
     
-    xRotationEditChange(): void {
-        this.checkRotationEditAgainstBounds(this.xRotationEdit)
-    }
-    
-    yRotationEditChange(): void {
-        this.checkRotationEditAgainstBounds(this.yRotationEdit)
-    }
-    
-    zRotationEditChange(): void {
-        this.checkRotationEditAgainstBounds(this.zRotationEdit)
-    }
-    
     checkRotationEditAgainstBounds(newRotation: number): number {
         if (newRotation < -360) {
             newRotation = 360 - (Math.abs(newRotation) - 360)
@@ -4188,27 +4151,15 @@ export class TMainForm {
         return this.currentPlantFocusTab === "Stats"
     }
     
-    tabSetChange(NewTab: int, AllowChange: boolean): boolean {
-        unfinished(); return true
-        // this.lifeCyclePanel.Visible = (NewTab === kTabLifeCycle)
-        // this.rotationsPanel.Visible = (NewTab === kTabRotations)
-        // this.parametersPanel.Visible = (NewTab === kTabParameters)
-        // this.statsScrollBox.Visible = (NewTab === kTabStatistics)
-        // this.notePanel.Visible = (NewTab === kTabNote)
-        // this.posingPanel.Visible = (NewTab === kTabPosing)
-        // this.updateRightSidePanelForFirstSelectedPlantWithTab(NewTab)
-        // return AllowChange
-    }
-    
     updateRightSidePanelForFirstSelectedPlant(): void {
         // set tab font colors - pay attention to multiple selections 
         // v2.0 removed this
         //  tabSet.font.color := self.textColorToRepresentPlantSelection(true);
         //  tabSet.invalidate;
-        this.updateRightSidePanelForFirstSelectedPlantWithTab(this.tabSet.tabIndex)
+        this.updateRightSidePanelForFirstSelectedPlantWithTab()
     }
     
-    updateRightSidePanelForFirstSelectedPlantWithTab(newTab: int): void {
+    updateRightSidePanelForFirstSelectedPlantWithTab(): void {
         // TODO PDF: FIx or remove code
         // switch (newTab) {
         //     case kTabLifeCycle:
@@ -4395,13 +4346,8 @@ export class TMainForm {
         // called by animate command, which also sets up the pointer for the timer to call 
         domain.temporarilyHideSelectionRectangles = true
         // disable all non-modal forms 
-        // keeps space bar from affecting magnification
-        // TODO PDF: Fix or remove: this.ActiveControl = this.plantListDrawGrid
         this.enableOrDisableAllForms(kDisableAllForms)
-        // add warning about disabled forms 
-        // TODO PDF: Fix or remove: this.animatingLabel.Visible = true
-        this.tabSet.visible = false
-        // start timer 
+        // start timer
         this.animateTimerTimeoutId = setTimeout(() => this. animateTimerFired(), 100)
     }
     
@@ -4423,13 +4369,9 @@ export class TMainForm {
             clearTimeout(this.animateTimerTimeoutId)
             this.animateTimerTimeoutId = null
         }
-        // nil out pointer 
         this.animateCommand = null
         // re-enable everything 
         this.enableOrDisableAllForms(kEnableAllForms)
-        // remove warning about disabled forms 
-        // TODO PDF: Fix this: this.animatingLabel.Visible = false
-        this.tabSet.visible = true
         if (domain.options.showSelectionRectangle) {
             // if there were selection rectangles before, put them back 
             this.copyDrawingBitmapToPaintBox()
@@ -5072,17 +5014,6 @@ export class TMainForm {
     }
     
     // note panel
-    updateNoteForFirstSelectedPlant(): void { 
-        if (this.notePanel === null) {
-            return
-        }
-        if (this.noteMemo === null) {
-            return
-        }
-        const plant = this.focusedPlant()
-        if (plant === null) { return }
-        this.updateForChangeToPlantNote(plant)
-    }
     
     async noteEditClick(): Promise<void> {
         const plant = this.focusedPlant()
@@ -5107,18 +5038,6 @@ export class TMainForm {
             const newCommand = new PdEditNoteCommand(plant, commandLines)
             this.doCommand(newCommand)
         }
-    }
-    
-    NotePopupMenuCopyClick(): void {
-        this.noteMemo.CopyToClipboard()
-    }
-    
-    NotePopupMenuEditClick(): void {
-        this.noteEditClick()
-    }
-    
-    NotePopupMenuSelectAllClick(): void {
-        this.noteMemo.SelectAll()
     }
     
     MenuPlantEditNoteClick(): void {
@@ -6012,31 +5931,8 @@ export class TMainForm {
     // TODO: Temp defintions used by PdTraverser
     showDrawProgress = (value: number) => {}
 
-    // TODO: PDF fix tabSet stub
-    tabSet: any = {}
-    lifeCycleDaysEdit: any = {}
-    xRotationEdit: any = {}
-    yRotationEdit: any = {}
-    zRotationEdit: any = {}
-    drawingScaleEdit: any = {}
-    noteMemo: any = {}
-    notePanel: any = {}
-    statPanel: any = {}
+    // TODO: PDF fix posedPlantParts stub
     posedPlantParts: any = {}
-
-    // TODO: Other definitions uses by other modules
-    // doCommand = (command: PdCommand) => {}
-    // // UNNEEDED: updateMenusForUndoRedo = () => {}
-    // // UNNEEDED: MenuEditUndoClick = (Sender: any) => {}
-    // // UNNEEDED: MenuEditRedoClick = (Sender: any) => {}
-    // // UNNEEDED: updatePasteMenuForClipboardContents = () => {}
-    // standardPastePosition = () => new TPoint()
-    // invalidateDrawingRect(rect: TRect) {}
-    // updatePoseInfo() {}
-    // updateForChangeToPlantSelections() {}
-    // invalidateEntireDrawing() {}
-    // recalculateAllPlantBoundsRectsForOffsetChange() {}
-    // updateForChangeToSelectedPlantsDrawingScale() {}
 
     oninit() {
         this.drawingBitmap.width = 800
@@ -6873,17 +6769,6 @@ export class TMainForm {
     viewAgePanel(plant: PdPlant): m.Children {
         const self = this
         return m("div.lifeCyclePanel.TPanel",
-            {
-                // Top: "318",
-                // Left: "4",
-                // Height: "95",
-                // Width: "277",
-                // BevelInner: "bvLowered",
-                // BevelOuter: "bvNone",
-                // PopupMenu: "PlantPopupMenu",
-                // TabOrder: "0",
-                // Visible: "False",
-            },
             m("div.lifeCycleGraphImage.TImage.flex.items-center",
                 m("span.f6", "%max"),
                 m("canvas.ba.ma1", {
@@ -6912,24 +6797,6 @@ export class TMainForm {
             ),
             m("div.timeLabel.TLabel.ml6.f6",
                 "time (days)",
-            ),
-            m("Group.Group.g00000024",
-                m("div.lifeCycleDragger.TPanel",
-                    {
-                        // Top: "24",
-                        // Left: "168",
-                        // Height: "17",
-                        // Width: "4",
-                        // Cursor: "crHSplit",
-                        // BevelInner: "bvRaised",
-                        // BevelOuter: "bvNone",
-                        // Color: "clRed",
-                        // TabOrder: "1",
-                        // OnMouseDown: "lifeCycleDraggerMouseDown",
-                        // OnMouseMove: "lifeCycleDraggerMouseMove",
-                        // OnMouseUp: "lifeCycleDraggerMouseUp",
-                    },
-                ),
             ),
             m("div.lifeCycleEditPanel.TPanel.mt2",
                 m("Group.Group.g00000002",
