@@ -6709,6 +6709,7 @@ export class TMainForm {
         const amendment: PdPlantDrawingAmendment | null = plant.amendmentForPartID(this.selectedPlantPartID)
         const posingDisabled = amendment || this.selectedPlantPartID < 0
         const unposingDisabled = !amendment
+        const grayIfDisabled = amendment ? "" : ".gray"
         return m("div.posingPanel.TPanel",
             m("Group.Group.g00000018",
                 m("button.posingHighlight.TSpeedButton",
@@ -6754,6 +6755,7 @@ export class TMainForm {
             m("Group.Group.g00000064",
                 m("button.posingPosePart.TSpeedButton",
                     {
+                        disabled: posingDisabled,
                         onclick: () => this.posingPosePartClick(),
                     },
                     m("img", { src: imageDir + (posingDisabled ? "MainForm_posingPosePart-disabled.png" : "MainForm_posingPosePart.png") }),
@@ -6761,13 +6763,14 @@ export class TMainForm {
                 ),
                 m("button.posingUnposePart.TSpeedButton.ml1",
                     {
+                        disabled: unposingDisabled,
                         onclick: () => this.posingUnposePartClick(),
                     },
                     m("img", { src: imageDir + (unposingDisabled ? "MainForm_posingUnposePart-disabled.png" : "MainForm_posingUnposePart.png") }),
                     caption("&Unpose"),
                 ),
             ),
-            m("div.posingDetailsPanel.TPanel",
+            m("div.posingDetailsPanel.TPanel" + grayIfDisabled,
                 m("label.checkbox-inline.posingHidePart.TCheckBox", m("input[type=checkbox]",
                     {
                         disabled: !amendment,
