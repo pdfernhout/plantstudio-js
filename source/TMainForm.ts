@@ -1942,49 +1942,36 @@ export class TMainForm {
     
     MenuOptionsGhostHiddenPartsClick(): void {
         domain.options.showGhostingForHiddenParts = !domain.options.showGhostingForHiddenParts
-        this.internalChange = true
-        // TODO PDF make sure button uses this: this.posingGhost.Down = domain.options.showGhostingForHiddenParts
-        this.internalChange = false
         // cannot just redraw plants because bounds rects may have changed
         this.redrawEverything()
     }
     
     MenuOptionsHighlightPosedPartsClick(): void {
         domain.options.showHighlightingForNonHiddenPosedParts = !domain.options.showHighlightingForNonHiddenPosedParts
-        this.internalChange = true
-        // TODO PDF make sure button uses this: this.posingHighlight.Down = domain.options.showHighlightingForNonHiddenPosedParts
-        this.internalChange = false
         this.redrawAllPlantsInViewWithAmendments()
     }
     
     MenuOptionsHidePosingClick(): void {
         domain.options.showPosingAtAll = !domain.options.showPosingAtAll
-        this.internalChange = true
-        // TODO PDF make sure button uses this: this.posingNotShown.Down = !domain.options.showPosingAtAll
-        this.internalChange = false
         // cannot just redraw plants because bounds rects may have changed
         this.redrawEverything()
     }
     
     posingHighlightClick(): void {
-        unfinished()
-        // if (this.internalChange) {
-        //     return
-        // }
-        // domain.options.showHighlightingForNonHiddenPosedParts = !domain.options.showHighlightingForNonHiddenPosedParts
-        // this.posingHighlight.Down = domain.options.showHighlightingForNonHiddenPosedParts
-        // this.redrawAllPlantsInViewWithAmendments()
+        if (this.internalChange) {
+            return
+        }
+        domain.options.showHighlightingForNonHiddenPosedParts = !domain.options.showHighlightingForNonHiddenPosedParts
+        this.redrawAllPlantsInViewWithAmendments()
     }
     
     posingGhostClick(): void {
-        unfinished()
-        // if (this.internalChange) {
-        //     return
-        // }
-        // domain.options.showGhostingForHiddenParts = !domain.options.showGhostingForHiddenParts
-        // this.posingGhost.Down = domain.options.showGhostingForHiddenParts
-        // // cannot just redraw plants because bounds rects may have changed
-        // this.redrawEverything()
+        if (this.internalChange) {
+            return
+        }
+        domain.options.showGhostingForHiddenParts = !domain.options.showGhostingForHiddenParts
+        // cannot just redraw plants because bounds rects may have changed
+        this.redrawEverything()
     }
     
     posingNotShownClick(): void {
@@ -1992,7 +1979,6 @@ export class TMainForm {
             return
         }
         domain.options.showPosingAtAll = !domain.options.showPosingAtAll
-        // TODO PDF make sure button uses this: this.posingNotShown.Down = !domain.options.showPosingAtAll
         // cannot just redraw plants because bounds rects may have changed
         this.redrawEverything()
     }
@@ -2206,11 +2192,7 @@ export class TMainForm {
         // this.Font.Size = domain.options.parametersFontSize
         // this.parametersScrollBox.Font.Size = domain.options.parametersFontSize
         // this.parametersScrollBox.Invalidate()
-        // // posing
-        // this.posingGhost.Down = domain.options.showGhostingForHiddenParts
-        // this.posingHighlight.Down = domain.options.showHighlightingForNonHiddenPosedParts
-        // this.posingNotShown.Down = !domain.options.showPosingAtAll
-        // this.internalChange = false
+        this.internalChange = false
         // hint, undo
         this.updateHintPauseForOptions()
         this.commandList.setNewUndoLimit(domain.options.undoLimit)
@@ -6228,6 +6210,19 @@ export class TMainForm {
                     ? selected
                     : ""
 
+            case "posingGhost":
+                return domain.options.showGhostingForHiddenParts
+                    ? selected
+                    : ""
+            case "posingHighlight":
+                return domain.options.showHighlightingForNonHiddenPosedParts
+                    ? selected
+                    : ""
+            case "posingNotShown":
+                return !domain.options.showPosingAtAll          
+                    ? selected
+                    : ""
+
             default: {
                 throw new Error("Unexpected buttonId: " + buttonId)
             }
@@ -6237,15 +6232,6 @@ export class TMainForm {
     viewToolbar() {
         return m("div.bg-white",       
             m("div.toolbarPanel.TPanel",
-                {
-                    // Top: "3",
-                    // Left: "6",
-                    // Height: "33",
-                    // Width: "453",
-                    // BevelInner: "bvRaised",
-                    // BevelOuter: "bvLowered",
-                    // TabOrder: "0",
-                },
                 m("button.dragCursorMode.TSpeedButton" + this.backgroundForSpeedButton("dragCursorMode"),
                     {
                         onclick: () => this.dragCursorModeClick(),
@@ -6713,21 +6699,21 @@ export class TMainForm {
         const grayIfDisabled = amendment ? "" : ".gray"
         return m("div.posingPanel.TPanel",
             m("Group.Group.g00000018",
-                m("button.posingHighlight.TSpeedButton",
+                m("button.posingHighlight.TSpeedButton" + this.backgroundForSpeedButton("posingHighlight"),
                     {
                         onclick: () => this.posingHighlightClick(),
                         title: "Posing highlight",
                     },
                     m("img", { src: imageDir + "MainForm_posingHighlight.png" })
                 ),
-                m("button.posingGhost.TSpeedButton.ml1",
+                m("button.posingGhost.TSpeedButton.ml1" + this.backgroundForSpeedButton("posingGhost"),
                     {
                         onclick: () => this.posingGhostClick(),
                         title: "Posing ghost",
                     },
                     m("img", { src: imageDir + "MainForm_posingGhost.png" })
                 ),
-                m("button.posingNotShown.TSpeedButton.ml1",
+                m("button.posingNotShown.TSpeedButton.ml1" + this.backgroundForSpeedButton("posingNotShown"),
                     {
                         onclick:() => this. posingNotShownClick(),
                         title: "Posing not shown",
@@ -6790,8 +6776,8 @@ export class TMainForm {
                     "Add an extra rotation to this part of",
                 ),
                 m("Group.Group.g00000065",
-                    m("span.ml1", "X"),
-                    m("input[type=number].posingXRotationEdit.TEdit.ml.mw3",
+                    m("span.ml2.mr1", "X"),
+                    m("input[type=number].posingXRotationEdit.TEdit.mw3",
                         {
                             disabled: !amendment,
                             value: amendment?.xRotation,
@@ -6799,8 +6785,8 @@ export class TMainForm {
                             onchange: (event: any) => this.changeSelectedPose(event.target.value, "X rotation")
                         },
                     ),
-                    m("span.ml1", "Y"),
-                    m("input[type=number].posingYRotationEdit.TEdit.ml1.mw3",
+                    m("span.ml2.mr1", "Y"),
+                    m("input[type=number].posingYRotationEdit.TEdit.mw3",
                         {
                             disabled: !amendment,
                             value: amendment?.yRotation,
@@ -6808,8 +6794,8 @@ export class TMainForm {
                             onchange: (event: any) => this.changeSelectedPose(event.target.value, "Y rotation")
                         },
                     ),
-                    m("span.ml1", "Z"),
-                    m("input[type=number].posingZRotationEdit.TEdit.ml1.mw3",
+                    m("span.ml2.mr1", "Z"),
+                    m("input[type=number].posingZRotationEdit.TEdit.mw3",
                         {
                             disabled: !amendment,
                             value: amendment?.zRotation,
