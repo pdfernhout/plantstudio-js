@@ -331,7 +331,6 @@ export class PdStatsPanel {
             const partType = this.partTypeForIndex(i)
             const deadPercent = this.displayPercentForPartType(partType, kDead)
             const livePercent = this.displayPercentForPartType(partType, kLive)
-            if (label) console.log("percent", deadPercent, livePercent) 
             if (label) graphLines.push(
                 m("div.w-100.flex", 
                     m("div.w-50.tr.mr1", label),
