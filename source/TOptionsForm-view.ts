@@ -1,8 +1,8 @@
 
 // Exported from: ../../plantstudio-js/converted_source/uoptions.lfm
 
-import { m } from "mithril"
-import { caption } from "common"
+import * as m from "mithril"
+import { caption } from "./common"
 
 export function viewOptionsForm() {
     return m("OptionsForm.TOptionsForm",

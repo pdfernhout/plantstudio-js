@@ -25,6 +25,7 @@ import { Cursor, cursor_change, cursor_getCurrentCursorAsCSS, cursor_startWait, 
 import { customModal, ModalInputView, modalPrompt } from "./ModalInputView"
 import { TSplashForm } from "./TSplashForm"
 import { PdStatsPanel } from "./PdStatsPanel"
+import { TOptionsForm } from "./TOptionsForm"
 
 // TODO PDF for getting to compile
 type TEdit = any
@@ -1120,8 +1121,7 @@ export class TMainForm {
         this.doCommand(newCommand)
     }
     
-    MenuEditPreferencesClick(): void {
-        unfinished()
+    async MenuEditPreferencesClick() {
         // const optionsForm: TOptionsForm = uoptions.TOptionsForm().create(this)
         // if (optionsForm === null) {
         //     throw new Error("Problem: Could not create preferences window.")
@@ -1132,6 +1132,9 @@ export class TMainForm {
         //     const newCommand = new PdChangeDomainOptionsCommand(optionsForm.options)
         //     this.doCommand(newCommand)
         // }
+        return customModal((resolve: any) => {
+            return m(TOptionsForm, { close: () => resolve(true) } )
+        })
     }
     
     // ---------------------------------------------------------------------------- *plant menu 
