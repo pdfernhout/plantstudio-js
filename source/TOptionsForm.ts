@@ -373,8 +373,12 @@ export class TOptionsForm {
                 m("button.helpButton.TSpeedButton.ml2",
                         {
                         onclick: () => this.helpButtonClick(),
-                        src: imageDir + "OptionsForm_helpButton.png"
                         },
+                    m("img.TImage",
+                        {
+                            src: imageDir + "OptionsForm_helpButton.png"
+                        },
+                    ),
                     caption("&Help"),
                 ),
             )
