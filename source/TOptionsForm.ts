@@ -408,8 +408,7 @@ export class TOptionsForm {
                 // Height: "0",
                 // Width: "0",
             },
-            "Drawing",
-            m("TGroupBox.mainWindowDrawingOptionsBox.TGroupBox",
+            m("TGroupBox.mainWindowDrawingOptionsBox.TGroupBox.ba",
                 {
                     // Top: "4",
                     // Left: "4",
@@ -452,7 +451,7 @@ export class TOptionsForm {
                     caption("Change Custom Dra&wing Options..."),
                 ),
             ),
-            m("TGroupBox.wholeProgramBox.TGroupBox",
+            m("TGroupBox.wholeProgramBox.TGroupBox.ba",
                 {
                     // Top: "94",
                     // Left: "4",
@@ -529,8 +528,7 @@ export class TOptionsForm {
                 // Height: "0",
                 // Width: "0",
             },
-            "Selecting",
-            m("TGroupBox.GroupBox1.TGroupBox",
+            m("TGroupBox.GroupBox1.TGroupBox.ba",
                 {
                     // Top: "4",
                     // Left: "4",
@@ -597,8 +595,7 @@ export class TOptionsForm {
                 // Height: "0",
                 // Width: "0",
             },
-            "Editing",
-            m("TGroupBox.GroupBox2.TGroupBox",
+            m("TGroupBox.GroupBox2.TGroupBox.ba",
                 {
                     // Top: "4",
                     // Left: "4",
@@ -729,8 +726,7 @@ export class TOptionsForm {
                 // Height: "0",
                 // Width: "0",
             },
-            "Posing",
-            m("TGroupBox.GroupBox4.TGroupBox",
+            m("TGroupBox.GroupBox4.TGroupBox.ba",
                 {
                     // Top: "5",
                     // Left: "4",
@@ -820,8 +816,7 @@ export class TOptionsForm {
                 // Height: "0",
                 // Width: "0",
             },
-            "Undoing",
-            m("TGroupBox.GroupBox5.TGroupBox",
+            m("TGroupBox.GroupBox5.TGroupBox.ba",
                 {
                     // Top: "4",
                     // Left: "4",
@@ -886,8 +881,7 @@ export class TOptionsForm {
                 // Height: "0",
                 // Width: "0",
             },
-            "Miscellaneous",
-            m("TGroupBox.GroupBox6.TGroupBox",
+            m("TGroupBox.GroupBox6.TGroupBox.ba",
                 {
                     // Top: "4",
                     // Left: "4",
@@ -929,7 +923,7 @@ export class TOptionsForm {
                     caption("Font size for &parameter panels (6-20)"),
                 ),
             ),
-            m("TGroupBox.GroupBox7.TGroupBox",
+            m("TGroupBox.GroupBox7.TGroupBox.ba",
                 {
                     // Top: "84",
                     // Left: "4",
