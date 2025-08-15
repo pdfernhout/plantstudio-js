@@ -1134,7 +1134,7 @@ export class TMainForm {
         // }
         return customModal((resolve: any) => {
             return m(TOptionsForm, { close: () => resolve(true) } )
-        })
+        }, "width: 32rem; height: 20rem; position: relative")
     }
     
     // ---------------------------------------------------------------------------- *plant menu 
