@@ -117,6 +117,8 @@ type PosedPlantPart = {
     partType: string
 }
 
+const magnifications = ["12%","25%","50%","75%","100%","150%","200%","300%","400%","500%","600%","700%","800%","900%","1000%"]
+
 export class TMainForm {
 
     // horizontalSplitter: TPanel = new TPanel()
@@ -168,7 +170,7 @@ export class TMainForm {
     // rotationLabel: TLabel = new TLabel()
     // magnificationPercent: TComboBox = new TComboBox()
     // TODO: FIX magnificationPercent
-    magnificationPercent = { Text: "100%" }
+    magnificationPercent = "100%"
     // notePanel: TPanel = new TPanel()
     // noteMemo: TMemo = new TMemo()
     // noteLabel: TLabel = new TLabel()
@@ -469,7 +471,7 @@ export class TMainForm {
         domain.resetForEmptyPlantFile()
         this.updateForPlantFile()
         // new v1.4 reset to 100% magnification on new file
-        this.magnificationPercent.Text = "100%"
+        this.magnificationPercent = "100%"
         this.changeMagnificationWithoutClick()
     }
     
@@ -2134,7 +2136,7 @@ export class TMainForm {
             this.updateForChangeToPlantList()
             this.updateMenusForChangedPlantFile()
             this.selectedPlants= []
-            this.magnificationPercent.Text = IntToStr(intround(domain.plantDrawScale_PixelsPerMm() * 100.0)) + "%"
+            this.magnificationPercent = IntToStr(intround(domain.plantDrawScale_PixelsPerMm() * 100.0)) + "%"
             if (domain.plantManager.mainWindowOrientation !== domain.options.mainWindowOrientation) {
                 // v2.0 load and save window orientation (top or side)
                 domain.options.mainWindowOrientation = domain.plantManager.mainWindowOrientation
@@ -3672,18 +3674,15 @@ export class TMainForm {
         this.doCommand(newCommand)
     }
     
-    magnificationPercentClick(): void {
-        const newScale = this.magnifyScaleForText(this.magnificationPercent.Text)
+    magnificationPercentExit(event: any): void {
+        const newMagnificationPercent = event.target.value
+        this.magnificationPercent = newMagnificationPercent
+        const newScale = this.magnifyScaleForText(event.target.value)
+        console.log("magnificationPercentExit", newScale, newMagnificationPercent, this.magnificationPercent)
         if ((newScale !== domain.plantDrawScale_PixelsPerMm())) {
             this.changeMagnificationWithoutClick()
         }
-    }
-    
-    magnificationPercentExit(): void {
-        const newScale = this.magnifyScaleForText(this.magnificationPercent.Text)
-        if ((newScale !== domain.plantDrawScale_PixelsPerMm())) {
-            this.changeMagnificationWithoutClick()
-        }
+        console.log("magnificationPercentExit after", newScale, newMagnificationPercent, this.magnificationPercent)
     }
     
     magnifyPlusClick(): void {
@@ -3699,7 +3698,7 @@ export class TMainForm {
     // popup menu commands 
     // toolbar 
     changeMagnificationWithoutClick(): void {
-        const newCommand = new PdChangeMagnificationCommand(this.magnifyScaleForText(this.magnificationPercent.Text), Point(this.drawingPaintBox.width / 2, this.drawingPaintBox.height / 2))
+        const newCommand = new PdChangeMagnificationCommand(this.magnifyScaleForText(this.magnificationPercent), Point(this.drawingPaintBox.width / 2, this.drawingPaintBox.height / 2))
         this.doCommand(newCommand)
     }
     
@@ -3710,11 +3709,11 @@ export class TMainForm {
             let intResult: int = StrToIntDef(stringUpTo(aText, "%"), -1)
             if ((intResult <= 0)) {
                 intResult = oldIntResult
-                this.magnificationPercent.Text = IntToStr(intResult) + "%"
+                this.magnificationPercent = IntToStr(intResult) + "%"
             }
             if (intResult > kMaxMagnificationToTypeIn) {
                 intResult = kMaxMagnificationToTypeIn
-                this.magnificationPercent.Text = IntToStr(intResult) + "%"
+                this.magnificationPercent = IntToStr(intResult) + "%"
             }
             result = intResult / 100.0
         } catch (e) {
@@ -3732,10 +3731,10 @@ export class TMainForm {
         const newOffset_mm = setSinglePoint(oldOffset_mm.x + pointInNewScale_mm.x - pointInOldScale_mm.x, oldOffset_mm.y + pointInNewScale_mm.y - pointInOldScale_mm.y)
         domain.plantManager.plantDrawScale_PixelsPerMm = intround(newScale_PixelsPerMm * 100.0) / 100.0
         domain.plantManager.plantDrawOffset_mm = newOffset_mm
+        this.magnificationPercent = IntToStr(intround(newScale_PixelsPerMm * 100.0)) + "%"
         if (drawNow) {
             this.redrawEverything()
         }
-        this.magnificationPercent.Text = IntToStr(intround(domain.plantDrawScale_PixelsPerMm() * 100.0)) + "%"
     }
     
     upperLeftMostPlantBoundsRectPoint_mm(): TPoint {
@@ -6230,6 +6229,10 @@ export class TMainForm {
     }
 
     viewToolbar() {
+        const localMagnifications = magnifications.slice()
+        if (!localMagnifications.includes(this.magnificationPercent)) {
+            localMagnifications.unshift(this.magnificationPercent)
+        }
         return m("div.bg-white",       
             m("div.toolbarPanel.TPanel",
                 m("button.dragCursorMode.TSpeedButton" + this.backgroundForSpeedButton("dragCursorMode"),
@@ -6274,24 +6277,16 @@ export class TMainForm {
                 ),
                 m("select.magnificationPercent.TComboBox.w3.ml1",
                     {
-                        onclick: () => this.magnificationPercentClick(),
+                        title: "Magnification",
+                        onchange: (event: any) => this.magnificationPercentExit(event),
                         disabled: !this.havePlants()
-                        // Top: "6",
-                        // Left: "147",
-                        // Height: "22",
-                        // Width: "60",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // ItemHeight: "14",
-                        // Items.Strings: ["12%","25%","50%","75%","100%","150%","200%","300%","400%","500%","600%","700%","800%","900%","1000%"],
-                        // ParentFont: "False",
-                        // TabOrder: "0",
-                        // Text: "100%",
-                        // OnExit: "magnificationPercentExit",
                     },
+                    localMagnifications.map((magnification, index) =>
+                        m("option", {
+                            value: magnification,
+                            selected: (magnification === this.magnificationPercent) ? "selected" : undefined,
+                        }, magnification)
+                    )
                 ),
                 m("button.centerDrawing.TSpeedButton.ml1",
                     {
@@ -6726,7 +6721,6 @@ export class TMainForm {
             m("select.posedPlantParts.TComboBox",
                 {
                     onchange: (event: any) => this.posedPlantPartsChange(event.target.value)
-
                 },
                 this.posedPlantParts.map((part, index) =>
                     m("option", {

@@ -3,7 +3,7 @@
 import { short, float, TColorRef, long, StrToInt, IntToStr, ColorDefs, ShowMessage, ExtractFileName } from "./common"
 import { TPoint } from "./TPoint"
 import { TRect } from "./TRect"
-import { ExpandFileName, extensionForFileType, FileType, SinglePoint, stringBeyond, strToBool, strToFloatWithCommaCheck } from "./usupport"
+import { ExpandFileName, extensionForFileType, FileType, setSinglePoint, SinglePoint, stringBeyond, strToBool, strToFloatWithCommaCheck } from "./usupport"
 import { PdSectionManager } from "./PdSectionManager"
 import { PdParameterManager } from "./PdParameterManager"
 import { ExportFormats, FileExport3DOptionsStructure, nameFor3DExportType, ExportPart, Axis } from "./U3dexport"
@@ -315,17 +315,6 @@ export class PdDomain {
             this.exportOptionsFor3D[i] = new FileExport3DOptionsStructure()
         }
     }
-
-    // TODO: Remove stub plantDrawOffset_mm
-    plantDrawOffset_mm(): SinglePoint {
-        return new SinglePoint(0, 0)
-    }
-    
-    // TODO: Remove stub plantDrawScale_PixelsPerMm
-    plantDrawScale_PixelsPerMm(): float {
-        return 1.0
-    }
-    
 
     /* TODO Implement PdDomain methods
     
@@ -1464,11 +1453,8 @@ export class PdDomain {
         return result
     }
 
-    /*
-    
     plantDrawOffset_mm(): SinglePoint {
-        let result = new SinglePoint()
-        result = usupport.setSinglePoint(0, 0)
+        let result = setSinglePoint(0, 0)
         if (this.plantManager === null) {
             return result
         }
@@ -1477,16 +1463,13 @@ export class PdDomain {
     }
     
     plantDrawScale_PixelsPerMm(): float {
-        let result = 0.0
-        result = 1.0
+        let result = 1.0
         if (this.plantManager === null) {
             return result
         }
         result = this.plantManager.plantDrawScale_PixelsPerMm
         return result
     }
-
-    */
     
     viewPlantsInMainWindowFreeFloating(): boolean {
         return this.options.mainWindowViewMode === ViewPlants.kViewPlantsInMainWindowFreeFloating
