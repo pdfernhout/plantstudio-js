@@ -1,23 +1,10 @@
 // unit Uoptions
 
-// from conversion_common import *
-// import u3dexport
-// import ucustdrw
-// import umath
-// import usupport
-// import updform
-// import udomain
-// import delphi_compatability
-
 import * as m from "mithril"
 import { caption, float, HelpJump, imageDir, int, IntToStr, short, ShowMessage, StrToFloat, StrToIntDef, StrToIntRange } from "./common"
 import { chr, digitValueString } from "./usupport"
 import { domain, DomainOptionsStructure } from "./PdDomain"
 import { convertColorNumberToCSS, convertCSSHexColorToNumber } from "./KfDrawingSurface"
-
-// const
-const kTransferLoad = 1
-const kTransferSave = 2
 
 const tabs = [ "Drawing", "Selecting", "Editing", "Posing", "Undoing", "Miscellaneous" ]
 
@@ -31,83 +18,6 @@ export class TOptionsForm {
     optionsChanged(): boolean {
         return JSON.stringify(this.options) !== JSON.stringify(domain.options)
     }
-    
-    // transferFields(): void {
-    //     // DRAWING
-    //     this.options.memoryLimitForPlantBitmaps_MB = this.transferSmallintSpinEditBox(this.memoryLimitForPlantBitmaps_MB, this.options.memoryLimitForPlantBitmaps_MB)
-    //     this.transferColor(this.backgroundColor, this.options.backgroundColor)
-    //     this.transferColor(this.transparentColor, this.options.transparentColor)
-    //     this.options.showPlantDrawingProgress = this.transferCheckBox(this.showPlantDrawingProgress, this.options.showPlantDrawingProgress)
-    //     // SELECTING
-    //     this.transferColor(this.firstSelectionRectangleColor, this.options.firstSelectionRectangleColor)
-    //     this.transferColor(this.multiSelectionRectangleColor, this.options.multiSelectionRectangleColor)
-    //     this.options.resizeRectSize = this.transferSmallintSpinEditBox(this.resizeRectSize, this.options.resizeRectSize)
-    //     this.transferColor(this.ghostingColor, this.options.ghostingColor)
-    //     this.transferColor(this.nonHiddenPosedColor, this.options.nonHiddenPosedColor)
-    //     this.transferColor(this.selectedPosedColor, this.options.selectedPosedColor)
-    //     // EDITING
-    //     this.options.rotationIncrement = this.transferSmallintSpinEditBox(this.rotationIncrement, this.options.rotationIncrement)
-    //     this.options.nudgeDistance = this.transferSmallintSpinEditBox(this.nudgeDistance, this.options.nudgeDistance)
-    //     this.options.resizeKeyUpMultiplierPercent = this.transferSmallintSpinEditBox(this.resizeKeyUpMultiplierPercent, this.options.resizeKeyUpMultiplierPercent)
-    //     this.options.pasteRectSize = this.transferSmallintSpinEditBox(this.pasteRectSize, this.options.pasteRectSize)
-    //     // UNDOING
-    //     this.options.undoLimit = this.transferSmallintSpinEditBox(this.undoLimit, this.options.undoLimit)
-    //     this.options.undoLimitOfPlants = this.transferSmallintSpinEditBox(this.undoLimitOfPlants, this.options.undoLimitOfPlants)
-    //     // MISCELLANEOUS
-    //     this.options.openMostRecentFileAtStart = this.transferCheckBox(this.openMostRecentFileAtStart, this.options.openMostRecentFileAtStart)
-    //     // v2.1
-    //     this.options.ignoreWindowSettingsInFile = this.transferCheckBox(this.ignoreWindowSettingsInFile, this.options.ignoreWindowSettingsInFile)
-    //     this.options.useMetricUnits = this.transferCheckBox(this.useMetricUnits, this.options.useMetricUnits)
-    //     this.options.parametersFontSize = this.transferSmallintSpinEditBox(this.parametersFontSize, this.options.parametersFontSize)
-    //     this.options.pauseBeforeHint = this.transferSmallintSpinEditBox(this.pauseBeforeHint, this.options.pauseBeforeHint)
-    //     this.options.pauseDuringHint = this.transferSmallintSpinEditBox(this.pauseDuringHint, this.options.pauseDuringHint)
-    // }
-    
-    // transferColor(colorPanel: TPanel, value: TColorRef): void {
-    //     throw new Error("method transferColor had assigned to var parameter value not added to return -- fixup manually")
-    //     if (this.transferDirection === kTransferLoad) {
-    //         colorPanel.Color = value
-    //     } else if (this.transferDirection === kTransferSave) {
-    //         if (value !== colorPanel.Color) {
-    //             this.optionsChanged = true
-    //         }
-    //         value = colorPanel.Color
-    //     }
-    // }
-    
-    // backgroundColorMouseUp(Sender: TObject, Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
-    //     this.backgroundColor.Color = udomain.domain.getColorUsingCustomColors(this.backgroundColor.Color)
-    // }
-    
-    // transparentColorMouseUp(Sender: TObject, Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
-    //     // leave this enabled even if not using private bitmaps
-    //     this.transparentColor.Color = udomain.domain.getColorUsingCustomColors(this.transparentColor.Color)
-    // }
-    
-    // firstSelectionRectangleColorMouseUp(Sender: TObject, Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
-    //     this.firstSelectionRectangleColor.Color = udomain.domain.getColorUsingCustomColors(this.firstSelectionRectangleColor.Color)
-    // }
-    
-    // multiSelectionRectangleColorMouseUp(Sender: TObject, Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
-    //     this.multiSelectionRectangleColor.Color = udomain.domain.getColorUsingCustomColors(this.multiSelectionRectangleColor.Color)
-    // }
-    
-    // ghostingColorMouseUp(Sender: TObject, Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
-    //     this.ghostingColor.Color = udomain.domain.getColorUsingCustomColors(this.ghostingColor.Color)
-    // }
-    
-    // nonHiddenPosedColorMouseUp(Sender: TObject, Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
-    //     this.nonHiddenPosedColor.Color = udomain.domain.getColorUsingCustomColors(this.nonHiddenPosedColor.Color)
-    // }
-    
-    // selectedPosedColorMouseUp(Sender: TObject, Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
-    //     this.selectedPosedColor.Color = udomain.domain.getColorUsingCustomColors(this.selectedPosedColor.Color)
-    // }
-    
-    // FormKeyPress(Sender: TObject, Key: char): void {
-    //     Key = usupport.makeEnterWorkAsTab(this, this.ActiveControl, Key)
-    //     return Key
-    // }
     
     // customDrawOptionsClick(Sender: TObject): void {
     //     let customDrawForm: TCustomDrawOptionsForm
@@ -158,31 +68,6 @@ export class TOptionsForm {
 
     view() {
         return m("OptionsForm.TOptionsForm.h5",
-            {
-            // Top: "188",
-            // Left: "279",
-            // Height: "0",
-            // Width: "0",
-            // ActiveControl: "cancel",
-            // BorderIcons: "[biSystemMenu]",
-            // BorderStyle: "bsDialog",
-            // Caption: "PlantStudio Preferences",
-            // ClientHeight: "247",
-            // ClientWidth: "450",
-            // Font.Charset: "DEFAULT_CHARSET",
-            // Font.Color: "clWindowText",
-            // Font.Height: "-11",
-            // Font.Name: "Arial",
-            // Font.Style: "[]",
-            // KeyPreview: "True",
-            // Position: "poScreenCenter",
-            // Scaled: "False",
-            // OnActivate: "FormActivate",
-            // OnCreate: "FormCreate",
-            // OnKeyPress: "FormKeyPress",
-            // PixelsPerInch: "96",
-            // TextHeight: "14",
-            },
             m("TTabbedNotebook.optionsNotebook.TTabbedNotebook",
                 m("div.b.f4.mb2", "PlantStudio Preferences"),
                 m("div.TTabSet.tabSet.TTabSet",
@@ -211,24 +96,12 @@ export class TOptionsForm {
                     {
                         onclick: () => this.okClick(),
                         disabled: !this.optionsChanged()
-                        // Top: "4",
-                        // Left: "386",
-                        // Height: "21",
-                        // Width: "60",
-                        // DragCursor: "crHandPoint",
-                        // TabOrder: "1",
                     },
                     caption("&OK"),
                 ),
                 m("button.cancel.TButton.ml2",
                     {
                         onclick: () => this.cancelClick(),
-                        // Top: "27",
-                        // Left: "386",
-                        // Height: "21",
-                        // Width: "60",
-                        // Cancel: "True",
-                        // TabOrder: "2",
                     },
                     caption("&Cancel"),
                 ),
@@ -244,6 +117,7 @@ export class TOptionsForm {
                     caption("&Help"),
                 ),
             ),
+            // TODO PDF: Improve or remove OpenGL-related code
             // m("label.checkbox-inline.drawWithOpenGL.TCheckBox.db.mt1", m("input[type=checkbox].mr1",
             //     {
             //         checked: this.options.drawWithOpenGL,
