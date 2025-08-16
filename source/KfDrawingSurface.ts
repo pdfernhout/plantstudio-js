@@ -8,6 +8,14 @@ import { KfTriangle } from "./KfTriangle"
 
 let cachedColors: {[id: number]: string} = {}
 
+export function convertCSSHexColorToNumber(cssHexColor: string) {
+    return Number.parseInt(cssHexColor.slice(1), 16)
+}
+export function convertColorNumberToCSS(color: number) {
+    return convertColor(color)
+}
+
+// TODO PDF: Change all callers of this to convertColorNumberToCSS for clarity.
 export function convertColor(color: number) {
     const cachedColorString = cachedColors[color]
     if (cachedColorString !== undefined) {
