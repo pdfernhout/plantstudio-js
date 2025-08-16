@@ -4,7 +4,7 @@ import * as m from "mithril"
 import { arrayInsert, arrayRemove, arraySwap, caption, ColorDefs, double, ExtractFileName, float, imageDir, int, intround, IntToStr, long, mbYesNo, mbYesNoCancel, MessageDialog, MouseButton, mtConfirmation, short, ShowMessage, StrToFloat, StrToIntDef, TColorRef } from "./common"
 import { PdCommand } from "./PdCommand"
 import { PdCommandList } from "./PdCommandList"
-import { domain, DrawMode, kAnimateByAge, kAnimateByXRotation, kExcludeInvisiblePlants, kIncludeAllPlants, kIncludeDrawingAreaContents, kIncludeNonSelectedPlants, kIncludeSelectedPlants, kIncludeVisiblePlants, kMainWindowOrientationHorizontal, kMainWindowOrientationVertical, kMaxRecentFiles, kUnsavedFileName, ViewPlants } from "./PdDomain"
+import { domain, DomainOptionsStructure, DrawMode, kAnimateByAge, kAnimateByXRotation, kExcludeInvisiblePlants, kIncludeAllPlants, kIncludeDrawingAreaContents, kIncludeNonSelectedPlants, kIncludeSelectedPlants, kIncludeVisiblePlants, kMainWindowOrientationHorizontal, kMainWindowOrientationVertical, kMaxRecentFiles, kUnsavedFileName, ViewPlants } from "./PdDomain"
 import { FieldType } from "./PdParameter"
 import { PdParameterPanel } from "./PdParameterPanel"
 import { kCheckForUnreadParams, kDontConsiderDomainScale, kDontDrawNow, kEndNoteString, kPlantAsTextEndString, kStartNoteString, PdPlant, PdPlantUpdateEvent } from "./PdPlant"
@@ -1132,8 +1132,16 @@ export class TMainForm {
         //     const newCommand = new PdChangeDomainOptionsCommand(optionsForm.options)
         //     this.doCommand(newCommand)
         // }
-        return customModal((resolve: any) => {
-            return m(TOptionsForm, { close: () => resolve(true) } )
+        return await customModal((resolve: any) => {
+            return m(TOptionsForm, { 
+                close: (options: DomainOptionsStructure | null) => {
+                    if (options) {
+                        const newCommand = new PdChangeDomainOptionsCommand(options)
+                        this.doCommand(newCommand)
+                    }
+                    resolve(true) 
+                }
+            })
         }, "width: 32rem; height: 20rem; position: relative")
     }
     

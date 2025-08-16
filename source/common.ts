@@ -89,6 +89,14 @@ export function StrToIntDef(value: string, defaultValue: number) {
     return result
 }
 
+export function StrToIntRange(value: string, low: number, high: number) {
+    let result = parseInt(value, 10)
+    if (isNaN(result)) { return low }
+    if (result < low) result = low
+    if (result > high) result = high
+    return result
+}
+
 export function StrToInt(value: string) {
     // TODO: Maybe should handle NaN case here?
     return parseInt(value, 10)
