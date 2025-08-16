@@ -86,9 +86,9 @@ export class TOptionsForm {
                     caption("&Cancel"),
                 ),
                 m("button.helpButton.TSpeedButton.ml2",
-                        {
+                    {
                         onclick: () => this.helpButtonClick(),
-                        },
+                    },
                     m("img.TImage",
                         {
                             src: imageDir + "OptionsForm_helpButton.png"
