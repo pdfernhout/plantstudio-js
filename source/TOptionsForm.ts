@@ -401,14 +401,14 @@ export class TOptionsForm {
     }
 
     viewPage1(): m.Children {
-        return m("TTabPage.page1.TTabPage",
+        return m("div.page1.TTabPage.pa3",
             {
                 // Top: "25",
                 // Left: "4",
                 // Height: "0",
                 // Width: "0",
             },
-            m("TGroupBox.mainWindowDrawingOptionsBox.TGroupBox.ba",
+            m("TGroupBox.mainWindowDrawingOptionsBox.TGroupBox",
                 {
                     // Top: "4",
                     // Left: "4",
@@ -416,7 +416,6 @@ export class TOptionsForm {
                     // Width: "362",
                     // TabOrder: "0",
                 },
-                " Main window ",
                 m("TSpinEdit.memoryLimitForPlantBitmaps_MB.TSpinEdit",
                     {
                         // Top: "24",
@@ -451,7 +450,7 @@ export class TOptionsForm {
                     caption("Change Custom Dra&wing Options..."),
                 ),
             ),
-            m("TGroupBox.wholeProgramBox.TGroupBox.ba",
+            m("TGroupBox.wholeProgramBox.TGroupBox",
                 {
                     // Top: "94",
                     // Left: "4",
@@ -459,7 +458,6 @@ export class TOptionsForm {
                     // Width: "362",
                     // TabOrder: "1",
                 },
-                " Whole program ",
                 m("div.backgroundColor.TPanel",
                     {
                         // Top: "17",
@@ -521,14 +519,14 @@ export class TOptionsForm {
     }
 
     viewPage2(): m.Children {
-        return  m("TTabPage.page2.TTabPage",
+        return  m("div.page2.TTabPage.pa3",
             {
                 // Top: "25",
                 // Left: "4",
                 // Height: "0",
                 // Width: "0",
             },
-            m("TGroupBox.GroupBox1.TGroupBox.ba",
+            m("TGroupBox.GroupBox1.TGroupBox",
                 {
                     // Top: "4",
                     // Left: "4",
@@ -536,7 +534,6 @@ export class TOptionsForm {
                     // Width: "362",
                     // TabOrder: "0",
                 },
-                " Main window ",
                 m("div.firstSelectionRectangleColor.TPanel",
                     {
                         // Top: "18",
@@ -588,14 +585,14 @@ export class TOptionsForm {
     }
 
     viewPage3(): m.Children {
-        return m("TTabPage.page3.TTabPage",
+        return m("div.page3.TTabPage.pa3",
             {
                 // Top: "25",
                 // Left: "4",
                 // Height: "0",
                 // Width: "0",
             },
-            m("TGroupBox.GroupBox2.TGroupBox.ba",
+            m("TGroupBox.GroupBox2.TGroupBox",
                 {
                     // Top: "4",
                     // Left: "4",
@@ -603,7 +600,6 @@ export class TOptionsForm {
                     // Width: "362",
                     // TabOrder: "0",
                 },
-                " Main window ",
                 m("TSpinEdit.rotationIncrement.TSpinEdit",
                     {
                         // Top: "19",
@@ -719,14 +715,14 @@ export class TOptionsForm {
     }
 
     viewPage4(): m.Children {
-        return m("TTabPage.page4.TTabPage",
+        return m("div.page4.TTabPage.pa3",
             {
                 // Top: "25",
                 // Left: "4",
                 // Height: "0",
                 // Width: "0",
             },
-            m("TGroupBox.GroupBox4.TGroupBox.ba",
+            m("TGroupBox.GroupBox4.TGroupBox",
                 {
                     // Top: "5",
                     // Left: "4",
@@ -734,7 +730,6 @@ export class TOptionsForm {
                     // Width: "362",
                     // TabOrder: "0",
                 },
-                " Main window ",
                 m("div.ghostingColor.TPanel",
                     {
                         // Top: "20",
@@ -809,14 +804,14 @@ export class TOptionsForm {
     }
 
     viewPage5(): m.Children {
-        return m("TTabPage.page5.TTabPage",
+        return m("div.page5.TTabPage.pa3",
             {
                 // Top: "25",
                 // Left: "4",
                 // Height: "0",
                 // Width: "0",
             },
-            m("TGroupBox.GroupBox5.TGroupBox.ba",
+            m("TGroupBox.GroupBox5.TGroupBox",
                 {
                     // Top: "4",
                     // Left: "4",
@@ -824,7 +819,6 @@ export class TOptionsForm {
                     // Width: "362",
                     // TabOrder: "0",
                 },
-                " Whole program ",
                 m("TSpinEdit.undoLimit.TSpinEdit",
                     {
                         // Top: "20",
@@ -874,14 +868,14 @@ export class TOptionsForm {
     }
 
     viewPage6(): m.Children {
-        return m("TTabPage.page6.TTabPage",
+        return m("div.page6.TTabPage.pa3",
             {
                 // Top: "25",
                 // Left: "4",
                 // Height: "0",
                 // Width: "0",
             },
-            m("TGroupBox.GroupBox6.TGroupBox.ba",
+            m("TGroupBox.GroupBox6.TGroupBox",
                 {
                     // Top: "4",
                     // Left: "4",
@@ -889,7 +883,6 @@ export class TOptionsForm {
                     // Width: "362",
                     // TabOrder: "0",
                 },
-                " Main window ",
                 m("label.checkbox-inline.useMetricUnits.TCheckBox", m("input[type=checkbox]",
                     {
                         // Top: "20",
@@ -923,7 +916,7 @@ export class TOptionsForm {
                     caption("Font size for &parameter panels (6-20)"),
                 ),
             ),
-            m("TGroupBox.GroupBox7.TGroupBox.ba",
+            m("TGroupBox.GroupBox7.TGroupBox",
                 {
                     // Top: "84",
                     // Left: "4",
@@ -931,7 +924,6 @@ export class TOptionsForm {
                     // Width: "362",
                     // TabOrder: "1",
                 },
-                " Whole program ",
                 m("label.checkbox-inline.openMostRecentFileAtStart.TCheckBox", m("input[type=checkbox]",
                     {
                         // Top: "20",
