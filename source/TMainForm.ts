@@ -26,6 +26,7 @@ import { customModal, ModalInputView, modalPrompt } from "./ModalInputView"
 import { TSplashForm } from "./TSplashForm"
 import { PdStatsPanel } from "./PdStatsPanel"
 import { TOptionsForm } from "./TOptionsForm"
+import { TCustomDrawOptionsForm } from "./TCustomDrawOptionsForm"
 
 // TODO PDF for getting to compile
 type TEdit = any
@@ -1122,16 +1123,6 @@ export class TMainForm {
     }
     
     async MenuEditPreferencesClick() {
-        // const optionsForm: TOptionsForm = uoptions.TOptionsForm().create(this)
-        // if (optionsForm === null) {
-        //     throw new Error("Problem: Could not create preferences window.")
-        // }
-        // optionsForm.options = domain.options
-        // const response = optionsForm.ShowModal()
-        // if ((response === mrOK) && (optionsForm.optionsChanged)) {
-        //     const newCommand = new PdChangeDomainOptionsCommand(optionsForm.options)
-        //     this.doCommand(newCommand)
-        // }
         return await customModal((resolve: any) => {
             return m(TOptionsForm, { 
                 close: (options: DomainOptionsStructure | null) => {
@@ -1792,28 +1783,26 @@ export class TMainForm {
         }
     }
     
-    MenuOptionsCustomDrawClick(): void {
+    async MenuOptionsCustomDrawClick() {
+        console.log("MenuOptionsCustomDrawClick")
         const lastDrawSpeed = domain.options.drawSpeed
         domain.options.drawSpeed = DrawMode.kDrawCustom
-        // TODO PDF: Fix this
-        // let customDrawForm: TCustomDrawOptionsForm
-        // let response: int
-        // customDrawForm = ucustdrw.TCustomDrawOptionsForm().create(this)
-        // if (customDrawForm === null) {
-        //     throw new Error("Problem: Could not create 3D object mover window.")
-        // }
-        // customDrawForm.options = domain.options
-        // response = customDrawForm.ShowModal()
-        // if ((response === mrOK) && (customDrawForm.optionsChanged)) {
-        //     const newCommand = new PdChangeDomainOptionsCommand(customDrawForm.options)
-        //     this.doCommand(newCommand)
-        // } else {
-        //     if (lastDrawSpeed !== DrawMode.kDrawCustom) {
-        //         // escape just escapes changing options in dialog, not setting to custom, should still redraw
-        //         // v1.4 change UNLESS it was custom before.
-        //         this.updateForChangeToDrawOptions()
-        //     }
-        // }
+
+        return await customModal((resolve: any) => {
+            return m(TCustomDrawOptionsForm, { 
+                close: (options: DomainOptionsStructure | null) => {
+                    if (options) {
+                        const newCommand = new PdChangeDomainOptionsCommand(options)
+                        this.doCommand(newCommand)
+                    } else if (lastDrawSpeed !== DrawMode.kDrawCustom) {
+                        // cancel just cancels changing options in dialog, not setting to custom, should still redraw
+                        // v1.4 change UNLESS it was custom before.
+                        this.updateForChangeToDrawOptions()
+                    }
+                    resolve(true) 
+                }
+            })
+        }, "width: 32rem; height: 24rem; position: relative")
     }
     
     MenuOptionsUsePlantBitmapsClick(): void {
@@ -5964,7 +5953,7 @@ export class TMainForm {
                         m("input[type=radio].mr1", {
                             checked: menuItem.checkedFunction!(),
                             disabled,
-                            onchange: () => menuItem.action?.call(this, menuItem)
+                            onclick: () => menuItem.action?.call(this, menuItem)
                         }),
                         caption(menuItem.label)
                     )
