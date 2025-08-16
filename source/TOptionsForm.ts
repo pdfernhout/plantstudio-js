@@ -30,26 +30,6 @@ export class TOptionsForm {
     optionsChanged(): boolean {
         return JSON.stringify(this.options) !== JSON.stringify(domain.options)
     }
-
-    //$R *.DFM
-    // FormCreate(Sender: TObject): void {
-    //     this.optionsNotebook.pageIndex = 0
-    // }
-    
-    // FormActivate(Sender: TObject): void {
-    //     this.transferDirection = kTransferLoad
-    //     this.transferFields()
-    // }
-    
-    // CloseClick(Sender: TObject): void {
-    //     this.transferDirection = kTransferSave
-    //     this.transferFields()
-    //     this.ModalResult = mrOK
-    // }
-    
-    // cancelClick(Sender: TObject): void {
-    //     this.ModalResult = mrCancel
-    // }
     
     // transferFields(): void {
     //     // DRAWING
@@ -82,18 +62,6 @@ export class TOptionsForm {
     //     this.options.pauseDuringHint = this.transferSmallintSpinEditBox(this.pauseDuringHint, this.options.pauseDuringHint)
     // }
     
-    // transferCheckBox(checkBox: TCheckBox, value: boolean): void {
-    //     if (this.transferDirection === kTransferLoad) {
-    //         checkBox.Checked = value
-    //     } else if (this.transferDirection === kTransferSave) {
-    //         if (value !== checkBox.Checked) {
-    //             this.optionsChanged = true
-    //         }
-    //         value = checkBox.Checked
-    //     }
-    //     return value
-    // }
-    
     // transferColor(colorPanel: TPanel, value: TColorRef): void {
     //     throw new Error("method transferColor had assigned to var parameter value not added to return -- fixup manually")
     //     if (this.transferDirection === kTransferLoad) {
@@ -104,18 +72,6 @@ export class TOptionsForm {
     //         }
     //         value = colorPanel.Color
     //     }
-    // }
-    
-    // transferSmallintSpinEditBox(editBox: TSpinEdit, value: short): void {
-    //     if (this.transferDirection === kTransferLoad) {
-    //         editBox.Text = IntToStr(value)
-    //     } else if (this.transferDirection === kTransferSave) {
-    //         if (value !== StrToIntDef(editBox.Text, 0)) {
-    //             this.optionsChanged = true
-    //         }
-    //         value = StrToIntDef(editBox.Text, 0)
-    //     }
-    //     return value
     // }
     
     // backgroundColorMouseUp(Sender: TObject, Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
@@ -231,21 +187,6 @@ export class TOptionsForm {
             // TextHeight: "14",
             },
             m("TTabbedNotebook.optionsNotebook.TTabbedNotebook",
-                {
-                    // Top: "0",
-                    // Left: "0",
-                    // Height: "247",
-                    // Width: "379",
-                    // Align: "alLeft",
-                    // PageIndex: "2",
-                    // TabsPerRow: "5",
-                    // TabFont.Charset: "DEFAULT_CHARSET",
-                    // TabFont.Color: "clBtnText",
-                    // TabFont.Height: "-11",
-                    // TabFont.Name: "Arial",
-                    // TabFont.Style: "[]",
-                    // TabOrder: "0",
-                },
                 m("div.b.f4.mb2", "PlantStudio Preferences"),
                 m("div.TTabSet.tabSet.TTabSet",
                     tabs.map(
