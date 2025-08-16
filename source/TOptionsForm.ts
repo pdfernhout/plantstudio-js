@@ -1,8 +1,8 @@
 // unit Uoptions
 
 import * as m from "mithril"
-import { caption, float, HelpJump, imageDir, int, IntToStr, short, ShowMessage, StrToFloat, StrToIntDef, StrToIntRange } from "./common"
-import { chr, digitValueString } from "./usupport"
+import { caption, HelpJump, imageDir, int, IntToStr, short, ShowMessage, StrToIntRange } from "./common"
+import { chr } from "./usupport"
 import { domain, DomainOptionsStructure } from "./PdDomain"
 import { convertColorNumberToCSS, convertCSSHexColorToNumber } from "./KfDrawingSurface"
 
@@ -18,26 +18,6 @@ export class TOptionsForm {
     optionsChanged(): boolean {
         return JSON.stringify(this.options) !== JSON.stringify(domain.options)
     }
-    
-    // customDrawOptionsClick(Sender: TObject): void {
-    //     let customDrawForm: TCustomDrawOptionsForm
-    //     let response: int
-        
-    //     customDrawForm = ucustdrw.TCustomDrawOptionsForm().create(this)
-    //     if (customDrawForm === null) {
-    //         throw new Error("Problem: Could not create 3D object mover window.")
-    //     }
-    //     try {
-    //         customDrawForm.options = this.options
-    //         response = customDrawForm.ShowModal()
-    //         if ((response === mrOK) && (customDrawForm.optionsChanged)) {
-    //             this.options = customDrawForm.options
-    //             this.optionsChanged = true
-    //         }
-    //     } finally {
-    //         customDrawForm.free
-    //     }
-    // }
     
     Image1Click(): void {
         switch (this.messageShown) {
@@ -147,17 +127,6 @@ export class TOptionsForm {
                             max: "200"
                         },
                     ),
-                ),
-                m("button.customDrawOptions.TButton",
-                    {
-                        onclick: customDrawOptionsClick,
-                        // Top: "54",
-                        // Left: "8",
-                        // Height: "21",
-                        // Width: "202",
-                        // TabOrder: "1",
-                    },
-                    caption("Change Custom Dra&wing Options..."),
                 ),
             ),
             m("div.wholeProgramBox.TGroupBox",
