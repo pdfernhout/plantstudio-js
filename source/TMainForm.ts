@@ -1142,7 +1142,7 @@ export class TMainForm {
                     resolve(true) 
                 }
             })
-        }, "width: 32rem; height: 20rem; position: relative")
+        }, "width: 34rem; height: 20rem; position: relative")
     }
     
     // ---------------------------------------------------------------------------- *plant menu 
