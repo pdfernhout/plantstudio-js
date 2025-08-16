@@ -10,7 +10,7 @@
 // import delphi_compatability
 
 import * as m from "mithril"
-import { caption, float, imageDir, int, IntToStr, short, ShowMessage, StrToFloat, StrToIntDef, StrToIntRange } from "./common"
+import { caption, float, HelpJump, imageDir, int, IntToStr, short, ShowMessage, StrToFloat, StrToIntDef, StrToIntRange } from "./common"
 import { chr, digitValueString } from "./usupport"
 import { domain, DomainOptionsStructure } from "./PdDomain"
 import { convertColorNumberToCSS, convertCSSHexColorToNumber } from "./KfDrawingSurface"
@@ -107,10 +107,6 @@ export class TOptionsForm {
     // FormKeyPress(Sender: TObject, Key: char): void {
     //     Key = usupport.makeEnterWorkAsTab(this, this.ActiveControl, Key)
     //     return Key
-    // }
-    
-    // helpButtonClick(Sender: TObject): void {
-    //     delphi_compatability.Application.HelpJump("Changing_preferences")
     // }
     
     // customDrawOptionsClick(Sender: TObject): void {
@@ -566,7 +562,7 @@ export class TOptionsForm {
     }
 
     helpButtonClick() { 
-        console.log("helpButtonClick")
+        HelpJump("Changing_preferences")
     }
 
     oninit(vnode: any) {

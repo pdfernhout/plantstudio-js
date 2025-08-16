@@ -1,7 +1,7 @@
 // unit Umain
 
 import * as m from "mithril"
-import { arrayInsert, arrayRemove, arraySwap, caption, ColorDefs, double, ExtractFileName, float, imageDir, int, intround, IntToStr, long, mbYesNo, mbYesNoCancel, MessageDialog, MouseButton, mtConfirmation, short, ShowMessage, StrToFloat, StrToIntDef, TColorRef } from "./common"
+import { arrayInsert, arrayRemove, arraySwap, caption, ColorDefs, double, ExtractFileName, float, HelpJump, imageDir, int, intround, IntToStr, long, mbYesNo, mbYesNoCancel, MessageDialog, MouseButton, mtConfirmation, short, ShowMessage, StrToFloat, StrToIntDef, TColorRef } from "./common"
 import { PdCommand } from "./PdCommand"
 import { PdCommandList } from "./PdCommandList"
 import { domain, DomainOptionsStructure, DrawMode, kAnimateByAge, kAnimateByXRotation, kExcludeInvisiblePlants, kIncludeAllPlants, kIncludeDrawingAreaContents, kIncludeNonSelectedPlants, kIncludeSelectedPlants, kIncludeVisiblePlants, kMainWindowOrientationHorizontal, kMainWindowOrientationVertical, kMaxRecentFiles, kUnsavedFileName, ViewPlants } from "./PdDomain"
@@ -1927,7 +1927,7 @@ export class TMainForm {
     
     // ---------------------------------------------------------------------------- *help menu 
     MenuHelpTopicsClick(): void {
-        window.open("https://www.kurtz-fernhout.com/PlantStudio/help/index.htm")
+        HelpJump("")
     }
     
     async MenuHelpAboutClick() {
@@ -1937,11 +1937,11 @@ export class TMainForm {
     }
     
     MenuHelpSuperSpeedTourClick(): void {
-        window.open("https://www.kurtz-fernhout.com/PlantStudio/help/plantstudioSuperSpeed_Tour.html")
+        HelpJump("Super-Speed_Tour")
     }
     
     MenuHelpTutorialClick(): void {
-        window.open("https://www.kurtz-fernhout.com/PlantStudio/help/plantstudioTutorial.html")
+        HelpJump("Tutorial")
     }
     
     /*

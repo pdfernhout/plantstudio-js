@@ -311,3 +311,19 @@ export enum MouseButton {
     mbLeft = 0,
     mbRight = 2
 }
+
+export function HelpJump(section: string, url?: string) {
+    console.log("Opening help for section: ", section)
+    if (!url) {
+        if (!section) {
+            section = "index.htm"
+        } else {
+            const maxLength = "Breeding_plants_using_the_breede".length
+            section = section.substring(0, maxLength)
+            section = section.replaceAll("-", "")
+            section = "plantstudio" + section + ".html"
+        }
+        url = "https://www.kurtz-fernhout.com/PlantStudio/help/" + section
+    }
+    window.open(url, "_blank")
+}
