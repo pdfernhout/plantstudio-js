@@ -306,8 +306,7 @@ export class TOptionsForm {
                     caption("&Help"),
                 ),
             ),
-            // m("br"),
-            // m("label.checkbox-inline.drawWithOpenGL.TCheckBox", m("input[type=checkbox]",
+            // m("label.checkbox-inline.drawWithOpenGL.TCheckBox.dib.mt1", m("input[type=checkbox].mr1",
             //     {
             //         checked: this.options.drawWithOpenGL,
             //         onclick: (event: any) => this.options.drawWithOpenGL = event.target.checked
@@ -324,8 +323,9 @@ export class TOptionsForm {
     viewPage1(): m.Children {
         return m("div.page1.TTabPage.pa1",
             m("div.mainWindowDrawingOptionsBox.TGroupBox",
-                m("label.memoryLimitLabel.TLabel",
+                m("label.memoryLimitLabel.TLabel.dib.mt1",
                     caption("&Upper limit on memory devoted to plant bitmaps (1-200 MB)"),
+                    m("br"),
                     m("input[type=number].memoryLimitForPlantBitmaps_MB.TSpinEdit.mw3.ml1",
                         {
                             value: IntToStr(this.options.memoryLimitForPlantBitmaps_MB),
@@ -336,7 +336,6 @@ export class TOptionsForm {
                         },
                     ),
                 ),
-                m("br"),
                 m("button.customDrawOptions.TButton",
                     {
                         onclick: customDrawOptionsClick,
@@ -363,7 +362,7 @@ export class TOptionsForm {
                         // OnMouseUp: "backgroundColorMouseUp",
                     },
                 ),
-                m("div.backgroundColorLabel.TLabel",
+                m("div.backgroundColorLabel.TLabel.dib.mt1",
                     {
                         // Top: "20",
                         // Left: "34",
@@ -386,7 +385,7 @@ export class TOptionsForm {
                         // OnMouseUp: "transparentColorMouseUp",
                     },
                 ),
-                m("div.transparentColorLabel.TLabel",
+                m("div.transparentColorLabel.TLabel.dib.mt1",
                     {
                         // Top: "46",
                         // Left: "34",
@@ -396,8 +395,7 @@ export class TOptionsForm {
                     },
                     caption("&Transparent color for overlaying plants if using plant bitmaps"),
                 ),
-                m("br"),
-                m("label.checkbox-inline.showPlantDrawingProgress.TCheckBox", m("input[type=checkbox]",
+                m("label.checkbox-inline.showPlantDrawingProgress.TCheckBox.dib.mt1", m("input[type=checkbox].mr1",
                     {
                         checked: this.options.showPlantDrawingProgress,
                         onclick: (event: any) => this.options.showPlantDrawingProgress = event.target.checked
@@ -424,7 +422,7 @@ export class TOptionsForm {
                         // OnMouseUp: "firstSelectionRectangleColorMouseUp",
                     },
                 ),
-                m("div.firstSelectionRectangleColorLabel.TLabel",
+                m("div.firstSelectionRectangleColorLabel.TLabel.dib.mt1",
                     {
                         // Top: "21",
                         // Left: "32",
@@ -447,7 +445,7 @@ export class TOptionsForm {
                         // OnMouseUp: "multiSelectionRectangleColorMouseUp",
                     },
                 ),
-                m("div.multiSelectionRectangleColorLabel.TLabel",
+                m("div.multiSelectionRectangleColorLabel.TLabel.dib.mt1",
                     {
                         // Top: "43",
                         // Left: "32",
@@ -464,8 +462,9 @@ export class TOptionsForm {
     viewPage3(): m.Children {
         return m("div.page3.TTabPage.pa1",
             m("div.GroupBox2.TGroupBox",
-                m("label.rotationIncrementLabel.TLabel",
+                m("label.rotationIncrementLabel.TLabel.dib.mt1",
                     caption("&Rotation change with arrow or mouse click (1-100 degrees)"),
+                    m("br"),
                     m("input[type=number].rotationIncrement.TSpinEdit.mw3.ml1",
                         {
                             value: IntToStr(this.options.rotationIncrement),
@@ -476,10 +475,10 @@ export class TOptionsForm {
                         },
                     ),
                 ),
-                m("br"),
-                m("label.nudgeDistanceLabel.TLabel",
+                m("label.nudgeDistanceLabel.TLabel.dib.mt1",
                     // Fixed bug in Delphi version -- UI had 0-100
                     caption("Distance plant &moves with Control-arrow key (1-100 pixels)"),
+                    m("br"),
                     m("input[type=number].nudgeDistance.TSpinEdit.mw3.ml1",
                         {
                             value: IntToStr(this.options.nudgeDistance),
@@ -490,9 +489,9 @@ export class TOptionsForm {
                         },
                     ),
                 ),
-                m("br"),
-                m("label.resizeDistanceLabel.TLabel",
+                m("label.resizeDistanceLabel.TLabel.dib.mt1",
                     caption("Size &increase with Control-Shift-up-arrow key (100-200%)"),
+                    m("br"),
                     m("input[type=number].resizeKeyUpMultiplierPercent.TSpinEdit.mw3.ml1",
                         {
                             value: IntToStr(this.options.resizeKeyUpMultiplierPercent),
@@ -503,9 +502,9 @@ export class TOptionsForm {
                         },
                     ),
                 ),
-                m("br"),
-                m("label.pasteRectSizeLabel.TLabel",
+                m("label.pasteRectSizeLabel.TLabel.dib.mt1",
                     caption(" Width and height of plant &pasted from text (50-500 pixels)"),
+                    m("br"),
                     m("input[type=number].pasteRectSize.TSpinEdit.mw3.ml1",
                         {
                             value: IntToStr(this.options.pasteRectSize),
@@ -516,15 +515,9 @@ export class TOptionsForm {
                         },
                     ),
                 ),
-                m("br"),
-                m("label.resizeRectSizeLabel.TLabel",
-                    {
-                        // Top: "146",
-                        // Left: "67",
-                        // Height: "14",
-                        // Width: "238",
-                    },
+                m("label.resizeRectSizeLabel.TLabel.dib.mt1",
                     caption(" Width and height of resizing &square (2-20 pixels)"),
+                    m("br"),
                     m("input[type=number].resizeRectSize.TSpinEdit.mw3.ml1",
                         {
                             value: IntToStr(this.options.resizeRectSize),
@@ -555,7 +548,7 @@ export class TOptionsForm {
                         // OnMouseUp: "ghostingColorMouseUp",
                     },
                 ),
-                m("div.Label9.TLabel",
+                m("div.Label9.TLabel.dib.mt1",
                     {
                         // Top: "23",
                         // Left: "32",
@@ -578,7 +571,7 @@ export class TOptionsForm {
                         // OnMouseUp: "nonHiddenPosedColorMouseUp",
                     },
                 ),
-                m("div.Label10.TLabel",
+                m("div.Label10.TLabel.dib.mt1",
                     {
                         // Top: "45",
                         // Left: "32",
@@ -601,7 +594,7 @@ export class TOptionsForm {
                         // OnMouseUp: "selectedPosedColorMouseUp",
                     },
                 ),
-                m("div.Label3.TLabel",
+                m("div.Label3.TLabel.dib.mt1",
                     {
                         // Top: "69",
                         // Left: "32",
@@ -618,8 +611,9 @@ export class TOptionsForm {
     viewPage5(): m.Children {
         return m("div.page5.TTabPage.pa1",
             m("div.GroupBox5.TGroupBox",
-                m("label.undoLimitLabel.TLabel",
+                m("label.undoLimitLabel.TLabel.dib.mt1",
                     caption("&Number of actions to keep in undo list (1-1000 actions)"),
+                    m("br"),
                     m("input[type=number].undoLimit.TSpinEdit.mw3.ml1",
                         {
                             value: IntToStr(this.options.undoLimit),
@@ -630,9 +624,9 @@ export class TOptionsForm {
                         }   
                     ),
                 ),
-                m("br"),
-                m("label.undoLimitOfPlantsLabel.TLabel",
+                m("label.undoLimitOfPlantsLabel.TLabel.dib.mt1",
                     caption("Number of &plants to keep in undo list (1-500 plants)"),
+                    m("br"),
                     m("input[type=number].undoLimitOfPlants.TSpinEdit.mw3.ml1",
                         {
                             value: IntToStr(this.options.undoLimitOfPlants),
@@ -650,16 +644,16 @@ export class TOptionsForm {
     viewPage6(): m.Children {
         return m("div.page6.TTabPage.pa1",
             m("div.GroupBox6.TGroupBox",
-                m("label.checkbox-inline.useMetricUnits.TCheckBox", m("input[type=checkbox]",
+                m("label.checkbox-inline.useMetricUnits.TCheckBox.dib.mt1", m("input[type=checkbox].mr1",
                     {
                         checked: this.options.useMetricUnits,
                         onclick: (event: any) => this.options.useMetricUnits = event.target.checked
                     }),
                     caption("&Default to metric units instead of English in parameter panels"),
                 ),
-                m("br"),
-                m("label.parametersFontSizeLabel.TLabel",
+                m("label.parametersFontSizeLabel.TLabel.dib.mt1",
                     caption("Font size for &parameter panels (6-20)"),
+                    m("br"),
                     m("input[type=number].parametersFontSize.TSpinEdit.mw3.ml1",
                         {
                             value: IntToStr(this.options.parametersFontSize),
@@ -672,25 +666,23 @@ export class TOptionsForm {
                 ),
             ),
             m("div.GroupBox7.TGroupBox",
-                m("label.checkbox-inline.openMostRecentFileAtStart.TCheckBox", m("input[type=checkbox]",
+                m("label.checkbox-inline.openMostRecentFileAtStart.TCheckBox.dib.mt1", m("input[type=checkbox].mr1",
                     {
                         checked: this.options.openMostRecentFileAtStart,
                         onclick: (event: any) => this.options.openMostRecentFileAtStart = event.target.checked
                     }),
                     caption("Open most recent &file at start"),
                 ),
-                m("br"),
-                m("label.checkbox-inline.ignoreWindowSettingsInFile.TCheckBox", m("input[type=checkbox]",
+                m("label.checkbox-inline.ignoreWindowSettingsInFile.TCheckBox.dib.mt1", m("input[type=checkbox].mr1",
                     {
                         checked: this.options.ignoreWindowSettingsInFile,
                         onclick: (event: any) => this.options.ignoreWindowSettingsInFile = event.target.checked
                     }),
                     caption("&Ignore window settings (top/side, one/many) saved in file"),
                 ),
-                m("br"),
-                
-                m("label.pauseBeforeHintLabel.TLabel",
+                m("label.pauseBeforeHintLabel.TLabel.dib.mt1",
                     caption("&Show hint after mouse is still for (0-100 seconds)"),
+                    m("br"),
                     m("input[type=number].pauseBeforeHint.TSpinEdit.mw3.ml1",
                         {
                             value: IntToStr(this.options.pauseBeforeHint),
@@ -701,8 +693,7 @@ export class TOptionsForm {
                         },
                     ),
                 ),
-                m("br"),
-                m("label.pauseDuringHintLabel.TLabel",
+                m("label.pauseDuringHintLabel.TLabel.dib.mt1",
                     {
                         // Top: "92",
                         // Left: "64",
@@ -711,6 +702,7 @@ export class TOptionsForm {
                         // FocusControl: "pauseDuringHint",
                     },
                     caption("&Remove hint after (0-100 seconds)"),
+                    m("br"),
                     m("input[type=number].pauseDuringHint.TSpinEdit.mw3.ml1",
                         {
                             value: IntToStr(this.options.pauseDuringHint),
@@ -721,8 +713,8 @@ export class TOptionsForm {
                         },
                     ),
                 ),
-                m("div.Label1.TLabel",
-                    "This applies only when long button or parameter hints are on.",
+                m("div.Label1.TLabel.dib.mt1.f7.ml2",
+                    "(This applies only when long button or parameter hints are on.)",
                 ),
             ),
         )
