@@ -53,9 +53,6 @@ function hexForValue(c: number) {
     return hex.length == 1 ? "0" + hex : hex
 }
 
-// TODO: Determine if kInitialDrawingSurfaceTriangles shoudl really be 0 or as previously 1000 with JavaScript
-const kInitialDrawingSurfaceTriangles = 0
-
 export class KfDrawingSurface {
     pane: CanvasRenderingContext2D | null
     lineContrastIndex: short = 0
@@ -66,7 +63,6 @@ export class KfDrawingSurface {
     backColor: TColor = ColorDefs.clLime
     lineColor: TColor = ColorDefs.clBlack
     circleColor: TColor = ColorDefs.clOlive
-    numTrianglesUsed: long = 0
     triangles: KfTriangle[] = []
     recording: boolean = false
     lineWidth: float = 0.0
@@ -78,10 +74,6 @@ export class KfDrawingSurface {
     constructor(context: CanvasRenderingContext2D | null) {
         this.pane = context
         this.initialize()
-        for (let i = 0; i <= kInitialDrawingSurfaceTriangles; i++) {
-            // start with a bunch of triangles 
-            this.triangles.push(new KfTriangle())
-        }
     }
     
     initialize(): void {
@@ -106,13 +98,13 @@ export class KfDrawingSurface {
 
     clearTriangles(): void {
         console.log("clear triangles")
-        this.numTrianglesUsed = 0
+        this.triangles.length = 0
     }
     
     plantPartIDForPoint(point: TPoint): long {
         let closestDistanceSoFar = 0
         let closestPartID = -1
-        for (let i = 0; i < this.numTrianglesUsed; i++) {
+        for (let i = 0; i < this.triangles.length; i++) {
             const triangle = this.triangles[i]
             if (triangle.isLine) {
                 const centerX = (triangle.points[0].x + triangle.points[1].x) / 2.0
@@ -141,33 +133,17 @@ export class KfDrawingSurface {
     }
     
     allocateTriangle(): KfTriangle {
-        let result: KfTriangle
-        if (this.numTrianglesUsed < this.triangles.length) {
-            result = this.triangles[this.numTrianglesUsed]
-            // result.foreColor = ColorDefs.clGreen
-            // result.backColor = ColorDefs.clLime
-            // result.lineColor = ColorDefs.clBlack
-            // result.zForSorting = 0.0
-            // result.backFacing = false
-            // result.lineWidth = 0.0
-            // result.isLine = false
-            result.tdo = null
-            // result.points = [new KfPoint3D(), new KfPoint3D(), new KfPoint3D()]
-            // result.plantPartID = 0            
-        } else {
-            result = new KfTriangle()
-            this.triangles.push(result)
-        }
-        this.numTrianglesUsed += 1
+        const result = new KfTriangle()
+        this.triangles.push(result)
         return result
     }
     
     sortTrianglesConsideringTdos(): void {
-        if (this.numTrianglesUsed <= 1) {
+        if (this.triangles.length <= 1) {
             return
         }
         if (this.sortTdosAsOneItem) {
-            for (let i = 0; i < this.numTrianglesUsed; i++) {
+            for (let i = 0; i < this.triangles.length; i++) {
                 const triangle = this.triangles[i]
                 if (!triangle.isLine) {
                     const oldValue = triangle.zForSorting
@@ -180,8 +156,6 @@ export class KfDrawingSurface {
                             triangle.zForSorting = oldValue
                         }
                     }
-                    // have to clear out tdo pointer afterward because triangles are reused
-                    triangle.tdo = null
                 }
             }
         }
@@ -189,20 +163,15 @@ export class KfDrawingSurface {
     }
     
     sortTriangles(): void {
-        if (this.numTrianglesUsed < 2) return
-        const usedTriangles = this.triangles.slice(0, this.numTrianglesUsed)
-        const unusedTriangles = this.triangles.slice(this.numTrianglesUsed)
-        usedTriangles.sort((a, b) => a.zForSorting - b.zForSorting)
-        this.triangles = usedTriangles.concat(unusedTriangles)
+        if (this.triangles.length <= 1) return
+        this.triangles.sort((a, b) => a.zForSorting - b.zForSorting)
     }
     
     // ----------------------- KfDrawingSurface drawing
 
     trianglesDraw(): void {
-        if (this.numTrianglesUsed > 0) {
-            for (let i = 0; i < this.numTrianglesUsed; i++) {
-                this.basicDrawTriangle(this.triangles[i])
-            }
+        for (let i = 0; i < this.triangles.length; i++) {
+            this.basicDrawTriangle(this.triangles[i])
         }
     }
     
@@ -256,7 +225,7 @@ export class KfDrawingSurface {
     // drawing surface draws the last triangle allocated - and deallocates it if needed
     drawLastTriangle(): void {
         // last allocated triangle
-        const triangle = this.triangles[this.numTrianglesUsed - 1]
+        const triangle = this.triangles[this.triangles.length - 1]
         triangle.isLine = false
         triangle.updateGeometry()
         // PDF FIX - maybe should scale this?
@@ -270,7 +239,7 @@ export class KfDrawingSurface {
         } else {
             this.basicDrawTriangle(triangle)
             // deallocate it
-            this.numTrianglesUsed -= 1
+            this.triangles.length -= 1
         }
     }
     
