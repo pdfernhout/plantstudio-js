@@ -522,9 +522,9 @@ export class KfTurtle {
         // drawing surface takes over ownership of triangle
         const result = this.drawingSurface.allocateTriangle()
         this.drawingSurface.lineWidth = 1.0
-        result.points[0] = this.recordedPoints[aPointIndex - 1]
-        result.points[1] = this.recordedPoints[bPointIndex - 1]
-        result.points[2] = this.recordedPoints[cPointIndex - 1]
+        result.points[0] = new KfPoint3D(this.recordedPoints[aPointIndex - 1])
+        result.points[1] = new KfPoint3D(this.recordedPoints[bPointIndex - 1])
+        result.points[2] = new KfPoint3D(this.recordedPoints[cPointIndex - 1])
         result.plantPartID = partID
         this.drawingSurface.drawLastTriangle()
         return result
