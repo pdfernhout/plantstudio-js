@@ -96,10 +96,6 @@ export function TListCollection_streamUsingFiler(list: PdStreamableObject[], fil
     }
 }
 
-// TODO: Replace with version from umain
-export const kScaleAndMove = true
-export const kAlwaysMove = true
-
 // TODO: Remplace with version from utimeser
 export const kRecalculateScale = true
 export const kDontRecalculateScale = false

@@ -49,9 +49,9 @@ const kMinWidthOnScreen = 100
 const kMinHeightOnScreen = 100
 const kDrawNow = true
 const kDontDrawYet = false
-const kScaleAndMove = true
+export const kScaleAndMove = true
 const kJustMove = false
-const kAlwaysMove = true
+export const kAlwaysMove = true
 const kOnlyMoveIfOffTheScreen = false
 
 const kBetweenGap = 4
