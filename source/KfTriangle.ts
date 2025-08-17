@@ -1,4 +1,5 @@
 import { long, float, TColor, short, ColorDefs } from "./common"
+import { KfObject3D } from "./KfObject3D"
 import { KfPoint3D } from "./KfPoint3D"
 import { darkerColorWithSubtraction } from "./usupport"
 
@@ -12,7 +13,7 @@ export class KfTriangle {
     lineWidth: float = 0.0
     isLine: boolean = false
     points: KfPoint3D[] = [new KfPoint3D(), new KfPoint3D(), new KfPoint3D()]
-    tdo: { zForSorting: number } | null = null // TODO: Should be: KfObject3D when that is defined and importable
+    tdo: KfObject3D | null = null
     plantPartID: long = 0
     
     // ---------------------------------------------------------------------------------- KfTriangle updating 
