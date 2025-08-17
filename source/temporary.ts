@@ -5,12 +5,6 @@ import { support_rgb } from "./usupport"
 import { PdFiler } from "./PdFiler";
 import { PdStreamableObject } from "./PdStreamableObject";
 
-// TODO: Fix copied code from utdo
-export const kMaximumRecordedPoints = 10000
-export const kTdoLineContrastIndex = 10
-export const kTdoForeColor = ColorDefs.clSilver
-export const kTdoBackColor = ColorDefs.clGray
-
 // TODO: Fix PdBitmap stub
 export class PdBitmap extends PdStreamableObject {
     canvas = document.createElement("canvas")

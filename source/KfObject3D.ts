@@ -16,7 +16,7 @@ import { PdClassAndVersionInformationRecord, PdFiler } from "./PdFiler"
 import { PdStreamableObject } from "./PdStreamableObject"
 
 // const
-const kMaximumRecordedPoints = 10000
+export const kMaximumRecordedPoints = 10000
 
 export const kAdjustForOrigin = true
 export const kDontAdjustForOrigin = false
@@ -25,10 +25,10 @@ export const kEmbeddedInPlant = true
 export const kInTdoLibrary = false
 const kStandAloneFile = false
 
-const kTdoForeColor = ColorDefs.clSilver
-const kTdoBackColor = ColorDefs.clGray
+export const kTdoForeColor = ColorDefs.clSilver
+export const kTdoBackColor = ColorDefs.clGray
 
-const kTdoLineContrastIndex = 10
+export const kTdoLineContrastIndex = 10
 
 export const kStartTdoString = "start 3D object"
 const kEndTdoString = "end 3D object"

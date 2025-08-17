@@ -2,7 +2,6 @@
 
 import { short, float, long, intround, byte, TColor, ColorDefs, TColorRef } from "./common"
 import { KfPoint3D, KfPoint3D_scaleBy } from "./KfPoint3D"
-import { kTdoBackColor, kTdoForeColor, kTdoLineContrastIndex, kMaximumRecordedPoints } from "./temporary"
 import { TRealRect } from "./U3dsupport"
 import { KfDrawingSurface } from "./KfDrawingSurface"
 import { TPoint } from "./TPoint"
@@ -10,6 +9,7 @@ import { TRect } from "./TRect"
 import { KfMatrix } from "./KfMatrix"
 import { KfTriangle } from "./KfTriangle"
 import { KfFileExportSurface, KfDrawingSurfaceForPOV, KfDrawingSurfaceForDXF, KfDrawingSurfaceFor3DS, KfDrawingSurfaceForOBJ, KfDrawingSurfaceForVRML, KfDrawingSurfaceForLWO, ExportFormats } from "./U3dexport"
+import { kMaximumRecordedPoints, kTdoBackColor, kTdoForeColor, kTdoLineContrastIndex } from "./KfObject3D"
 
 // const
 const kInitialTurtleMatrixStackDepth = 250
