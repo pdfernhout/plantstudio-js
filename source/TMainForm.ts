@@ -3171,14 +3171,17 @@ export class TMainForm {
             return
         }
         let cursorChanged = false
-        if (this.cursorModeForDrawing === CursorMode.kCursorModeSelectDrag) {
+        if (this.cursorModeForDrawing === CursorMode.kCursorModeSelectDrag && !this.actionInProgress && !this.rubberBanding) {
             // show cursor that tells you that you can resize plant when mouse is in resize rect, but only in select mode
             const plantClickedOn = domain.plantManager.findPlantAtPoint(Point(X, Y))
             if ((domain.options.showSelectionRectangle) && (plantClickedOn !== null) && (plantClickedOn === this.focusedPlant()) && (plantClickedOn.pointIsInResizingRect(Point(X, Y)))) {
-                cursorChanged = cursor_change(Cursor.crSizeNS)
+                cursorChanged = cursor_change(Cursor.crSizeNE)
             } else {
                 cursorChanged = cursor_change(Cursor.crDefault)
             }
+        }
+        if (this.cursorModeForDrawing === CursorMode.kCursorModeMagnify && !this.actionInProgress) {
+            cursorChanged = cursor_change(event.shiftKey ? Cursor.crMagMinus : Cursor.crMagPlus)
         }
         if (!this.actionInProgress) {
             // show hint for plant mouse is over
@@ -3222,6 +3225,9 @@ export class TMainForm {
         if (this.plants.length <= 0) {
             return
         }
+        if (this.cursorModeForDrawing === CursorMode.kCursorModeSelectDrag) {
+            cursor_change(Cursor.crDefault)
+        }
         if ((event.button === MouseButton.mbRight) && (this.cursorModeForDrawing === CursorMode.kCursorModeSelectDrag)) {
             // show popup menu but only if in select/drag mode
             unfinished()
@@ -3247,7 +3253,6 @@ export class TMainForm {
             this.updateForPossibleChangeToDrawing()
         } finally {
             // clear out all mouse settings
-            cursor_change(Cursor.crDefault)
             this.mouseMoveActionInProgress = false
             this.commandList.rightButtonDown = false
             this.actionInProgress = false
@@ -3290,7 +3295,6 @@ export class TMainForm {
                 } else if (shift.isCtrl) {
                     result = new PdDuplicateCommand(this.selectedPlants)
                 } else if (focusedPlant !== null && focusedPlant.pointIsInResizingRect(point)) {
-                    cursor_change(Cursor.crSizeNS)
                     result = new PdResizePlantsCommand(this.selectedPlants)
                 } else {
                     result = new PdDragCommand(this.selectedPlants)
@@ -3302,7 +3306,6 @@ export class TMainForm {
             case CursorMode.kCursorModeMagnify:
                 if ((this.commandList.rightButtonDown)) {
                     // to zoom out, can do right button or shift
-                    cursor_change(Cursor.crMagMinus)
                     // TODO PDF: verify OK to use 0 here
                     const newCommand = new PdChangeMagnificationCommand(0, Point(0,0))
                     newCommand.shift = shift.isShift
@@ -3316,7 +3319,7 @@ export class TMainForm {
                 break
             case CursorMode.kCursorModeRotate:
                 if (this.commandList.rightButtonDown) {
-                    cursor_change(Cursor.crSizeWE)
+                    // cursor_change(Cursor.crSizeWE)
                 }
                 result = new PdRotateCommand(this.selectedPlants, 0, 0)
                 break
@@ -3527,6 +3530,7 @@ export class TMainForm {
         if (domain.options.showSelectionRectangle) {
             this.copyDrawingBitmapToPaintBox()
         }
+        cursor_change(Cursor.crDefault)
     }
     
     magnifyCursorModeClick(): void {
@@ -3534,6 +3538,7 @@ export class TMainForm {
         if (domain.options.showSelectionRectangle) {
             this.copyDrawingBitmapToPaintBox()
         }
+        cursor_change(Cursor.crMagPlus)
     }
     
     posingSelectionCursorModeClick(): void {
@@ -3542,6 +3547,7 @@ export class TMainForm {
         if (domain.options.showSelectionRectangle) {
             this.copyDrawingBitmapToPaintBox()
         }
+        cursor_change(Cursor.crPosingSelect)
     }
     
     scrollCursorModeClick(): void {
@@ -3549,6 +3555,7 @@ export class TMainForm {
         if (domain.options.showSelectionRectangle) {
             this.copyDrawingBitmapToPaintBox()
         }
+        cursor_change(Cursor.crDragPlant)
     }
     
     rotateCursorModeClick(): void {
@@ -3556,6 +3563,7 @@ export class TMainForm {
         if (domain.options.showSelectionRectangle) {
             this.copyDrawingBitmapToPaintBox()
         }
+        cursor_change(Cursor.crRotate)
     }
     
     centerDrawingClick(): void {

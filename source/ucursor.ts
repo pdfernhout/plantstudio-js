@@ -24,10 +24,12 @@ export enum Cursor {
     crHourGlass = 12,
     crSizeNS = 13,
     crSizeWE = 14,
+    crSizeNE = 15,
 }
 
 let waitState: number = 0
 let currentCursor: Cursor = Cursor.crDefault
+let oldCursorBeforeWaiting: Cursor = Cursor.crDefault
 
 const debugCursor = false
 
@@ -37,17 +39,18 @@ export function basic_cursor_getCurrentCursorAsCSS() {
         case Cursor.crMagMinus: return "zoom-out"
         case Cursor.crMagPlus: return "zoom-in"
         case Cursor.crScroll: return "all-scroll"
-        case Cursor.crRotate: return "default" // "FIXME"
+        case Cursor.crRotate: return "ew-resize"
         case Cursor.crDragPlant: return "grab"
         case Cursor.crAddTriangle: return "default" // "FIXME"
         case Cursor.crDeleteTriangle: return "default" // "FIXME"
         case Cursor.crFlipTriangle: return "default" // "FIXME"
         case Cursor.crDragPoint: return "grab"
         case Cursor.crDragTdo: return "grab"
-        case Cursor.crPosingSelect: return "default" // "FIXME"
+        case Cursor.crPosingSelect: return "pointer"
         case Cursor.crHourGlass: return "wait"
         case Cursor.crSizeNS: return "ns-resize"
         case Cursor.crSizeWE: return "ew-resize"
+        case Cursor.crSizeNE: return "ne-resize"
         default: throw new Error("Unexpected cursor: " + currentCursor)
     }
 }
@@ -63,6 +66,9 @@ export function cursor_getCurrentCursorAsCSS() {
 // }
 
 export function cursor_startWait(): void {
+    if (waitState === 0) {
+        oldCursorBeforeWaiting = currentCursor
+    }
     waitState += 1
     cursor_change(Cursor.crHourGlass)
 }
@@ -77,7 +83,7 @@ export function cursor_stopWait(): void {
     if (waitState > 0) {
         waitState -= 1
         if (waitState === 0) {
-            cursor_change(Cursor.crDefault)
+            cursor_change(oldCursorBeforeWaiting)
         }
     }
 }
