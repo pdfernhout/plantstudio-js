@@ -3,7 +3,7 @@
 import * as m from "mithril"
 import { TRect } from "./TRect"
 import { TPoint } from "./TPoint"
-import { TFPBrushStyle } from "./temporary"
+import { TFPBrushStyle, unfinished } from "./temporary"
 import { BreederVariation, domain, DrawMode } from "./PdDomain"
 import { intround, short, long, ColorDefs, int, IntToStr, MessageDialog, arrayRemove } from "./common"
 import { PdPlant, BreedingAndTimeSeriesOptionsStructure, kDrawNow, kDontConsiderDomainScale } from "./PdPlant"
@@ -501,18 +501,19 @@ export class TBreederForm {
 //         }
 //     }
     
-//     copyPlantToPoint(aPlant: PdPlant, x: int, y: int): void {
-//         let col: long
-//         let row: long
+    copyPlantToPoint(aPlant: PdPlant, x: int, y: int): void {
+        unfinished()
+        // let col: long
+        // let row: long
 
-//         [col, row] = this.plantsDrawGrid.MouseToCell(x, y)
-//         const plant = this.plantForRowAndColumn(row, col)
-//         if (plant === null) {
-//             return
-//         }
-//         const newCommand: PdCommand = new PdReplaceBreederPlant(aPlant, row, col)
-//         MainForm.doCommand(newCommand)
-//     }
+        // [col, row] = this.plantsDrawGrid.MouseToCell(x, y)
+        // const plant = this.plantForRowAndColumn(row, col)
+        // if (plant === null) {
+        //     return
+        // }
+        // const newCommand: PdCommand = new PdReplaceBreederPlant(aPlant, row, col)
+        // MainForm.doCommand(newCommand)
+    }
     
 //     // ------------------------------------------------------------- responding to commands 
 //     replacePlantInRow(oldPlant: PdPlant, newPlant: PdPlant, row: short): void { 
@@ -824,9 +825,9 @@ export class TBreederForm {
 //         MainForm.doCommand(newCommand)
 //     }
     
-//     fullWarning(): void {
-//         MessageDialog("The breeder is full.\n\nYou must delete some rows\nor increase the number of rows allowed in the breeder options)\n\nbefore you can breed more plants.", "mtWarning", {mbOK: true, }, 0)
-//     }
+    fullWarning(): void {
+        MessageDialog("The breeder is full.\n\nYou must delete some rows\nor increase the number of rows allowed in the breeder options)\n\nbefore you can breed more plants.", "mtWarning", {mbOK: true, }, 0)
+    }
     
 //     BreederMenuDeleteRowClick(event: any): void { 
 //         const aGeneration = this.selectedGeneration()
@@ -921,13 +922,13 @@ export class TBreederForm {
 //         this.redoCaption()
 //     }
     
-//     BreederMenuVariationCustomClick(event: any): void {
-//         this.changeBreederAndTimeSeriesOptions(kOptionTabMutation)
-//     }
+    BreederMenuVariationCustomClick(event: any): void {
+        this.changeBreederAndTimeSeriesOptions(kOptionTabMutation)
+    }
     
-//     BreederMenuOtherOptionsClick(event: any): void {
-//         this.changeBreederAndTimeSeriesOptions(kOptionTabSize)
-//     }
+    BreederMenuOtherOptionsClick(event: any): void {
+        this.changeBreederAndTimeSeriesOptions(kOptionTabSize)
+    }
     
 //     BreederMenuVaryColorsClick(event: any): void {
 //         this.BreederMenuVaryColors.checked = !this.BreederMenuVaryColors.checked
@@ -945,24 +946,25 @@ export class TBreederForm {
 //         MainForm.doCommand(newCommand)
 //     }
     
-//     changeBreederAndTimeSeriesOptions(tabIndexToShow: short): void {
-//         if (tabIndexToShow === kOptionTabMutation) {
-//             domain.breedingAndTimeSeriesOptions.variationType = BreederVariation.kBreederVariationCustom
-//             this.BreederMenuVariationCustom.checked = true
-//             this.redoCaption()
-//         }
-//         const optionsForm: TBreedingOptionsForm = ubrdopt.TBreedingOptionsForm().create(this)
-//         if (optionsForm === null) {
-//             throw new Error("Problem: Could not create breeding options window.")
-//         }
-//         optionsForm.breedingOptions.pageIndex = tabIndexToShow
-//         optionsForm.initializeWithBreedingAndTimeSeriesOptionsAndDomainOptions(domain.breedingAndTimeSeriesOptions, domain.options)
-//         const response: int = optionsForm.ShowModal()
-//         if (response === mrOK) {
-//             const newCommand: PdCommand = new PdChangeBreedingAndTimeSeriesOptionsCommand(optionsForm.options, optionsForm.domainOptions)
-//             MainForm.doCommand(newCommand)
-//         }
-//     }
+    changeBreederAndTimeSeriesOptions(tabIndexToShow: short): void {
+        unfinished()
+        // if (tabIndexToShow === kOptionTabMutation) {
+        //     domain.breedingAndTimeSeriesOptions.variationType = BreederVariation.kBreederVariationCustom
+        //     this.BreederMenuVariationCustom.checked = true
+        //     this.redoCaption()
+        // }
+        // const optionsForm: TBreedingOptionsForm = ubrdopt.TBreedingOptionsForm().create(this)
+        // if (optionsForm === null) {
+        //     throw new Error("Problem: Could not create breeding options window.")
+        // }
+        // optionsForm.breedingOptions.pageIndex = tabIndexToShow
+        // optionsForm.initializeWithBreedingAndTimeSeriesOptionsAndDomainOptions(domain.breedingAndTimeSeriesOptions, domain.options)
+        // const response: int = optionsForm.ShowModal()
+        // if (response === mrOK) {
+        //     const newCommand: PdCommand = new PdChangeBreedingAndTimeSeriesOptionsCommand(optionsForm.options, optionsForm.domainOptions)
+        //     MainForm.doCommand(newCommand)
+        // }
+    }
     
 //     variationLowClick(event: any): void {
 //         this.BreederMenuVariationLowClick(this)

@@ -27,6 +27,8 @@ import { TSplashForm } from "./TSplashForm"
 import { PdStatsPanel } from "./PdStatsPanel"
 import { TOptionsForm } from "./TOptionsForm"
 import { TCustomDrawOptionsForm } from "./TCustomDrawOptionsForm"
+import { setMainFormForTimeSeries } from "./TTimeSeriesForm"
+import { unfinished } from "./temporary"
 
 // TODO PDF for getting to compile
 type TEdit = any
@@ -48,7 +50,7 @@ const Application_Title = "PlantStudio"
 const kMinWidthOnScreen = 100
 const kMinHeightOnScreen = 100
 const kDrawNow = true
-const kDontDrawYet = false
+export const kDontDrawYet = false
 export const kScaleAndMove = true
 const kJustMove = false
 export const kAlwaysMove = true
@@ -5703,6 +5705,7 @@ export class TMainForm {
         // this.drawingPaintBox.height = 600
         setMainForm(this)
         setMainFormForCommands(this)
+        setMainFormForTimeSeries(this)
         domain.resetForEmptyPlantFile()
     }
 
@@ -6908,10 +6911,5 @@ function IntersectRect(intersection: TRect, r1: TRect, r2: TRect): boolean {
     intersection.Right = Math.max(intersection.Left, Math.min(r1.Right, r2.Right))
     intersection.Bottom = Math.max(intersection.Top, Math.min(r1.Bottom, r2.Bottom))
     return intersection.Right > intersection.Left && intersection.Bottom > intersection.Top
-}
-
-function unfinished() {
-    alert("TODO Unfinished")
-    throw new Error("Function not implemented.")
 }
 

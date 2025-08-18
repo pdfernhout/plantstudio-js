@@ -99,3 +99,8 @@ export function TListCollection_streamUsingFiler(list: PdStreamableObject[], fil
 // TODO: Remplace with version from utimeser
 export const kRecalculateScale = true
 export const kDontRecalculateScale = false
+
+export function unfinished() {
+    alert("TODO Unfinished")
+    throw new Error("Function not implemented.")
+}
