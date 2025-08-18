@@ -15,7 +15,7 @@ import { KfFileExportSurface, ExportFormats } from "./U3dexport"
 import { PdClassAndVersionInformationRecord, PdFiler } from "./PdFiler"
 import { PdStreamableObject } from "./PdStreamableObject"
 
-// const
+// v1.6b2 changed from 200 to 1000 ; v2.0 changed to 10000 (not in tdo anymore)
 export const kMaximumRecordedPoints = 10000
 
 export const kAdjustForOrigin = true
@@ -33,24 +33,13 @@ export const kTdoLineContrastIndex = 10
 export const kStartTdoString = "start 3D object"
 const kEndTdoString = "end 3D object"
 
-
-// v1.6b2 changed from 200 to 1000 ; v2.0 changed to 10000 (not in tdo anymore)
-// v1.11 moved up here
-// v1.11 moved up here
-
-// const
-const kPointAllocationIncrement = 8
-
-
 function betweenBrackets(aString: string): string {
     // lose letter and [ on front, lose ] on back 
     return aString.substring(2, aString.length - 1)
 }
 
 export class KfObject3D extends PdStreamableObject {
-    points: KfPoint3D[] = [] // delphi_compatability.MaxListSize ??
-    pointsInUse: long = 0
-    pointsAllocated: long = 0
+    points: KfPoint3D[] = []
     originPointIndex: long = 0
     triangles: KfIndexTriangle[] = []
     name: string = ""
@@ -60,17 +49,21 @@ export class KfObject3D extends PdStreamableObject {
     indexWhenRemoved: short = 0
     selectedIndexWhenRemoved: short = 0
     boundsRect: TRect = new TRect()
+
+    get pointsInUse() {
+        return this.points.length
+    }
     
     // doesn't need to be streamed, only used while drawing
 
     ensureEnoughSpaceForNewPointData(totalNumberOfPointsToBeUsed: long): void {
-        if (this.pointsAllocated >= totalNumberOfPointsToBeUsed) {
+        if (this.points.length >= totalNumberOfPointsToBeUsed) {
+            this.points.length = totalNumberOfPointsToBeUsed
             return
         }
         while (this.points.length < totalNumberOfPointsToBeUsed) {
             this.points.push(new KfPoint3D())
         }
-        this.pointsAllocated = totalNumberOfPointsToBeUsed
     }
     
     getPoint(index: int): KfPoint3D {
@@ -90,7 +83,7 @@ export class KfObject3D extends PdStreamableObject {
     }
     
     clearPoints(): void {
-        this.pointsInUse = 0
+        this.points.length = 0
         this.originPointIndex = 0
         this.triangles = []
     }
@@ -101,12 +94,9 @@ export class KfObject3D extends PdStreamableObject {
         }
         this.setName(original.name)
         this.ensureEnoughSpaceForNewPointData(original.pointsInUse)
-        if (original.pointsInUse > 0) {
-            for (let i = 0; i < original.pointsInUse; i++) {
-                this.points[i] = original.points[i]
-            }
+        for (let i = 0; i < original.pointsInUse; i++) {
+            this.points[i] = new KfPoint3D(original.points[i])
         }
-        this.pointsInUse = original.pointsInUse
         this.originPointIndex = original.originPointIndex
         this.triangles = []
         if (original.triangles.length > 0) {
@@ -169,11 +159,11 @@ export class KfObject3D extends PdStreamableObject {
     
     addPoint(aPoint: KfPoint3D): short {
         // v2.0 removed this check
-        // if pointsInUse >= kMaximumRecordedPoints then
-        //  raise Exception.create('Problem: Too many points in 3D object.');
-        this.ensureEnoughSpaceForNewPointData(this.pointsInUse + 1)
-        this.points[this.pointsInUse] = aPoint
-        this.pointsInUse += 1
+        if (this.pointsInUse >= kMaximumRecordedPoints) {
+            throw new Error("Problem: Too many points in 3D object.")
+        }
+        this.points.push(aPoint)
+        // Up by one because triangle indexes start at 1
         return this.pointsInUse
     }
     
@@ -184,8 +174,7 @@ export class KfObject3D extends PdStreamableObject {
             }
         }
         this.deletePointIndexInTriangles(point)
-        // never releasing memory until entire object freed
-        this.pointsInUse -= 1
+        this.points.length -= 1
         if (this.originPointIndex > this.pointsInUse - 1) {
             this.originPointIndex = this.pointsInUse - 1
         }
@@ -619,7 +608,7 @@ export class KfObject3D extends PdStreamableObject {
     }
     
     readFromFileStream(inputFile: TextFile, embeddedInPlant: boolean): void {
-        this.pointsInUse = 0
+        this.points.length = 0
         this.originPointIndex = 0
         this.triangles = []
         if (embeddedInPlant) {
@@ -683,7 +672,7 @@ export class KfObject3D extends PdStreamableObject {
         let newTriangleIndexes: int[] = [0, 0, 0]
         let pointsRead: int
         
-        this.pointsInUse = 0
+        this.points.length = 0
         this.originPointIndex = 0
         pointsRead = 0
         this.triangles = []
@@ -758,7 +747,7 @@ export class KfObject3D extends PdStreamableObject {
     readFromMemo(aMemo: string[], readingMemoLine: long): number {
         let stream: KfStringStream
         
-        this.pointsInUse = 0
+        this.points.length = 0
         this.originPointIndex = 0
         this.triangles = []
         let inputLine: string = aMemo[readingMemoLine]
@@ -819,7 +808,7 @@ export class KfObject3D extends PdStreamableObject {
 
     readFromInputString(aString: string, doAdjustForOrigin: boolean): void {
         // format is n[name],p[# # #],p[# # #],p[# # #],t[# # #],t[# # #],t[# # #] 
-        this.pointsInUse = 0
+        this.points.length = 0
         this.originPointIndex = 0
         this.triangles = []
 
@@ -855,9 +844,9 @@ export class KfObject3D extends PdStreamableObject {
         
         super.streamDataWithFiler(filer, cvir)
         this.name = filer.streamShortString(this.name)
-        this.pointsInUse = filer.streamLongint(this.pointsInUse)
+        const pointsInUse = filer.streamLongint(this.pointsInUse)
         this.originPointIndex = filer.streamLongint(this.originPointIndex)
-        this.ensureEnoughSpaceForNewPointData(this.pointsInUse)
+        this.ensureEnoughSpaceForNewPointData(pointsInUse)
         if (this.pointsInUse > 0) {
             for (let i = 0; i < this.pointsInUse; i++) {
                 tempPoint = this.points[i]
@@ -884,7 +873,7 @@ export class KfObject3D extends PdStreamableObject {
                 result = result + this.triangles[i].instanceSize
             }
         }
-        result = result + this.pointsAllocated * 12 // size of KfPoint3D
+        result = result + this.points.length * 12 // size of KfPoint3D
         return result
     }
     
