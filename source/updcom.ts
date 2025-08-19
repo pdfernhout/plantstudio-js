@@ -16,15 +16,7 @@ import { KfObject3D } from "./KfObject3D"
 import { PdGeneration } from "./PdGeneration"
 import { cursor_startWait, cursor_stopWait } from "./ucursor"
 import { kAlwaysMove, kScaleAndMove, TMainForm } from "./TMainForm"
-
-let MainForm: TMainForm
-export function setMainFormForCommands(aForm: any) {
-    MainForm = aForm
-}
-
-// TODO: temporary fix BreederForm and TimeSeriesForm
-const BreederForm: any = undefined
-const TimeSeriesForm: any = undefined
+import { BreederForm, MainForm, TimeSeriesForm } from "./PdForms"
 
 // const
 const kRotateNotInitialized = 0
@@ -3412,8 +3404,8 @@ export class PdBreedFromParentsCommand extends PdCommand {
             generationBred.secondParent = generationBred.secondSelectedPlant()
         }
         // add and select the new generation in the breeder 
-        BreederForm.addGeneration(this.newGeneration)
-        BreederForm.selectGeneration(this.newGeneration)
+        BreederForm.addGeneration(this.newGeneration!)
+        BreederForm.selectGeneration(this.newGeneration!)
         BreederForm.updateForChangeToGenerations()
     }
     
@@ -3474,12 +3466,12 @@ export class PdReplaceBreederPlant extends PdCommand {
     
     undoCommand(): void {
         super.undoCommand()
-        BreederForm.replacePlantInRow(this.newPlant, this.originalPlant, this.row)
+        BreederForm.replacePlantInRow(this.newPlant!, this.originalPlant!, this.row)
     }
     
     redoCommand(): void {
         super.doCommand()
-        BreederForm.replacePlantInRow(this.originalPlant, this.newPlant, this.row)
+        BreederForm.replacePlantInRow(this.originalPlant!, this.newPlant!, this.row)
     }
     
     description(): string {
@@ -3527,7 +3519,7 @@ export class PdMakeTimeSeriesCommand extends PdCommand {
                 this.oldPlants.push(TimeSeriesForm.plants[i])
             }
         }
-        TimeSeriesForm.plants.clearPointersWithoutDeletingObjects()
+        TimeSeriesForm.plants = []
         // redraws in updateForChangeToPlants
         TimeSeriesForm.initializeWithPlant(this.newPlant, kDontDrawNow)
         if (TimeSeriesForm.plants.length > 0) {
@@ -3540,7 +3532,7 @@ export class PdMakeTimeSeriesCommand extends PdCommand {
     
     undoCommand(): void {
         super.undoCommand()
-        TimeSeriesForm.plants.clearPointersWithoutDeletingObjects()
+        TimeSeriesForm.plants = []
         if (this.oldPlants.length > 0) {
             for (let i = 0; i <= this.oldPlants.length - 1; i++) {
                 TimeSeriesForm.plants.push(this.oldPlants[i])
@@ -3551,7 +3543,7 @@ export class PdMakeTimeSeriesCommand extends PdCommand {
     
     redoCommand(): void {
         super.doCommand()
-        TimeSeriesForm.plants.clearPointersWithoutDeletingObjects()
+        TimeSeriesForm.plants = []
         if (this.newPlants.length > 0) {
             for (let i = 0; i <= this.newPlants.length - 1; i++) {
                 TimeSeriesForm.plants.push(this.newPlants[i])
@@ -3643,7 +3635,7 @@ export class PdDeleteBreederGenerationCommand extends PdCommand {
     
     doCommand(): void {
         super.doCommand()
-        const index = BreederForm.generations.indexOf(this.generation)
+        const index = BreederForm.generations.indexOf(this.generation!)
         arrayRemove(BreederForm.generations, this.generation)
         if (index > 0) {
             BreederForm.selectedRow = index - 1
@@ -3654,7 +3646,7 @@ export class PdDeleteBreederGenerationCommand extends PdCommand {
     undoCommand(): void {
         super.undoCommand()
         arrayInsert(BreederForm.generations, this.row, this.generation)
-        BreederForm.selectedRow = BreederForm.generations.indexOf(this.generation)
+        BreederForm.selectedRow = BreederForm.generations.indexOf(this.generation!)
         BreederForm.updateForChangeToGenerations()
     }
     
@@ -3691,7 +3683,7 @@ export class PdDeleteAllBreederGenerationsCommand extends PdCommand {
     
     doCommand(): void {
         super.doCommand()
-        BreederForm.generations.clearPointersWithoutDeletingObjects()
+        BreederForm.generations = []
         BreederForm.updateForChangeToGenerations()
     }
     
@@ -3769,7 +3761,7 @@ export class PdDeleteTimeSeriesCommand extends PdCommand {
     
     doCommand(): void {
         super.doCommand()
-        TimeSeriesForm.plants.clearPointersWithoutDeletingObjects()
+        TimeSeriesForm.plants = []
         TimeSeriesForm.updateForChangeToPlants(kDontRecalculateScale)
     }
     

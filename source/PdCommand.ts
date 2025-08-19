@@ -1,6 +1,6 @@
 // PdCommand was in unit Ucommand
 
-import { getMainForm } from "./TMainFormInterface"
+import { MainForm } from "./PdForms"
 import { TPoint } from "./TPoint"
 import { long } from "./common"
 
@@ -17,8 +17,8 @@ export class PdCommand {
     doCommand(): void {
         this.done = true
         if (this.commandChangesPlantFile) {
-            this.plantFileChangedBeforeCommand = getMainForm().plantFileChanged
-            getMainForm().setPlantFileChanged(true)
+            this.plantFileChangedBeforeCommand = MainForm.plantFileChanged
+            MainForm.setPlantFileChanged(true)
         }
         // subclass should override and call inherited
     }
@@ -26,7 +26,7 @@ export class PdCommand {
     undoCommand(): void {
         this.done = false
         if (this.commandChangesPlantFile) {
-            getMainForm().setPlantFileChanged(this.plantFileChangedBeforeCommand)
+            MainForm.setPlantFileChanged(this.plantFileChangedBeforeCommand)
         }
         // subclass should override and call inherited
     }

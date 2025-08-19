@@ -16,10 +16,9 @@ import { TPoint } from "./TPoint"
 import { TRect } from "./TRect"
 import { ExportFormats, fileTypeFor3DExportType } from "./U3dexport"
 import { intMax, intMin, max, safedivExcept } from "./umath"
-import { kBringForward, kChangeHeight, kChangeWidth, kCopyToClipboard, kDontCopyToClipboard, kDown, kHide, kLeft, kRight, kRotateX, kRotateY, kRotateZ, kSendBackward, kShow, kUp, PdAlignPlantsCommand, PdAnimatePlantCommand, PdBooleanValue, PdBreedFromParentsCommand, PdCenterDrawingCommand, PdChangeDomain3DOptionsCommand, PdChangeDomainOptionsCommand, PdChangeMagnificationCommand, PdChangeMainWindowOrientationCommand, PdChangeMainWindowViewingOptionCommand, PdChangePlantAgeCommand, PdChangeSelectedPlantsCommand, PdCreateAmendmentCommand, PdDeleteAmendmentCommand, PdDragCommand, PdDuplicateCommand, PdEditAmendmentCommand, PdEditNoteCommand, PdHideOrShowCommand, PdMakeTimeSeriesCommand, PdNewCommand, PdPackPlantsCommand, PdPasteCommand, PdRandomizeCommand, PdRemoveCommand, PdRenameCommand, PdResetRotationsCommand, PdResizePlantsCommand, PdResizePlantsToSameWidthOrHeightCommand, PdRotateCommand, PdScrollCommand, PdSelectOrDeselectAllCommand, PdSelectPosingPartCommand, PdSendBackwardOrForwardCommand, setMainFormForCommands } from "./updcom"
+import { kBringForward, kChangeHeight, kChangeWidth, kCopyToClipboard, kDontCopyToClipboard, kDown, kHide, kLeft, kRight, kRotateX, kRotateY, kRotateZ, kSendBackward, kShow, kUp, PdAlignPlantsCommand, PdAnimatePlantCommand, PdBooleanValue, PdBreedFromParentsCommand, PdCenterDrawingCommand, PdChangeDomain3DOptionsCommand, PdChangeDomainOptionsCommand, PdChangeMagnificationCommand, PdChangeMainWindowOrientationCommand, PdChangeMainWindowViewingOptionCommand, PdChangePlantAgeCommand, PdChangeSelectedPlantsCommand, PdCreateAmendmentCommand, PdDeleteAmendmentCommand, PdDragCommand, PdDuplicateCommand, PdEditAmendmentCommand, PdEditNoteCommand, PdHideOrShowCommand, PdMakeTimeSeriesCommand, PdNewCommand, PdPackPlantsCommand, PdPasteCommand, PdRandomizeCommand, PdRemoveCommand, PdRenameCommand, PdResetRotationsCommand, PdResizePlantsCommand, PdResizePlantsToSameWidthOrHeightCommand, PdRotateCommand, PdScrollCommand, PdSelectOrDeselectAllCommand, PdSelectPosingPartCommand, PdSendBackwardOrForwardCommand } from "./updcom"
 import { chr, cleanUpAfterFileSave, createSaveFileNamesStructure, FileType, found, getFileSaveInfo, IDCANCEL, IDNO, IDYES, kAskForFileName, kDontAskForFileName, len, lowercase, mrCancel, mrOK, nameStringForFileType, Point, pos, Rect, removeItem, rHeight, rWidth, SaveFileNamesStructure, setSinglePoint, startFileSave, stringBeyond, stringUpTo, trim, uppercase } from "./usupport"
 import { viewMainForm } from "./TMainForm-view"
-import { setMainForm } from "./TMainFormInterface"
 import { convertColor } from "./KfDrawingSurface"
 import { Cursor, cursor_change, cursor_getCurrentCursorAsCSS, cursor_startWait, cursor_stopWait, CursorMode } from "./ucursor"
 import { customModal, ModalInputView, modalPrompt } from "./ModalInputView"
@@ -27,9 +26,10 @@ import { TSplashForm } from "./TSplashForm"
 import { PdStatsPanel } from "./PdStatsPanel"
 import { TOptionsForm } from "./TOptionsForm"
 import { TCustomDrawOptionsForm } from "./TCustomDrawOptionsForm"
-import { setMainFormForTimeSeries, TTimeSeriesForm } from "./TTimeSeriesForm"
+import { TTimeSeriesForm } from "./TTimeSeriesForm"
 import { unfinished } from "./temporary"
 import { TBreederForm } from "./TBreederForm"
+import { setMainForm } from "./PdForms"
 
 type PosingField = 
     "hide" // posingHidePart
@@ -610,8 +610,8 @@ export class TMainForm {
         // domain.mainWindowRect = Rect(this.Left, this.Top, this.Width, this.Height)
         // domain.horizontalSplitterPos = this.horizontalSplitter.Top
         // domain.verticalSplitterPos = this.verticalSplitter.Left
-        // domain.breederWindowRect = Rect(ubreedr.BreederForm.Left, ubreedr.BreederForm.Top, ubreedr.BreederForm.Width, ubreedr.BreederForm.Height)
-        // domain.timeSeriesWindowRect = Rect(utimeser.TimeSeriesForm.Left, utimeser.TimeSeriesForm.Top, utimeser.TimeSeriesForm.Width, utimeser.TimeSeriesForm.Height)
+        // domain.breederWindowRect = Rect(BreederForm.Left, BreederForm.Top, BreederForm.Width, BreederForm.Height)
+        // domain.timeSeriesWindowRect = Rect(TimeSeriesForm.Left, TimeSeriesForm.Top, TimeSeriesForm.Width, TimeSeriesForm.Height)
         // domain.debugWindowRect = Rect(udebug.DebugForm.Left, udebug.DebugForm.Top, udebug.DebugForm.Width, udebug.DebugForm.Height)
         // if (domain.useIniFile) {
         //     const okayToQuit = this.storeIniFile()
@@ -1241,11 +1241,11 @@ export class TMainForm {
         // if (this.selectedPlants.length <= 0) {
         //     return
         // }
-        // if (ubreedr.BreederForm.selectedRow >= domain.breedingAndTimeSeriesOptions.maxGenerations - 2) {
+        // if (BreederForm.selectedRow >= domain.breedingAndTimeSeriesOptions.maxGenerations - 2) {
         //     // check if there is room in the breeder - this command will make two new generations 
-        //     ubreedr.BreederForm.fullWarning()
+        //     BreederForm.fullWarning()
         // } else {
-        //     const newCommand = new PdBreedFromParentsCommand(ubreedr.BreederForm.generations, this.focusedPlant(), this.firstUnfocusedPlant(), -1, domain.breedingAndTimeSeriesOptions.percentMaxAge / 100.0, kCreateFirstGeneration)
+        //     const newCommand = new PdBreedFromParentsCommand(BreederForm.generations, this.focusedPlant(), this.firstUnfocusedPlant(), -1, domain.breedingAndTimeSeriesOptions.percentMaxAge / 100.0, kCreateFirstGeneration)
         //     this.doCommand(newCommand)
         // }
     }
@@ -1889,19 +1889,19 @@ export class TMainForm {
     // --------------------------------------------------------------------------- *window menu 
     MenuWindowBreederClick(): void {
         unfinished()
-        // ubreedr.BreederForm.Show()
-        // ubreedr.BreederForm.BringToFront()
-        // if (ubreedr.BreederForm.WindowState === delphi_compatability.TWindowState.wsMinimized) {
-        //     ubreedr.BreederForm.WindowState = delphi_compatability.TWindowState.wsNormal
+        // BreederForm.Show()
+        // BreederForm.BringToFront()
+        // if (BreederForm.WindowState === delphi_compatability.TWindowState.wsMinimized) {
+        //     BreederForm.WindowState = delphi_compatability.TWindowState.wsNormal
         // }
     }
     
     MenuWindowTimeSeriesClick(): void {
         unfinished()
-        // utimeser.TimeSeriesForm.Show()
-        // utimeser.TimeSeriesForm.BringToFront()
-        // if (utimeser.TimeSeriesForm.WindowState === delphi_compatability.TWindowState.wsMinimized) {
-        //     utimeser.TimeSeriesForm.WindowState = delphi_compatability.TWindowState.wsNormal
+        // TimeSeriesForm.Show()
+        // TimeSeriesForm.BringToFront()
+        // if (TimeSeriesForm.WindowState === delphi_compatability.TWindowState.wsMinimized) {
+        //     TimeSeriesForm.WindowState = delphi_compatability.TWindowState.wsNormal
         // }
     }
     
@@ -2089,11 +2089,11 @@ export class TMainForm {
         this.commandList.setNewUndoLimit(domain.options.undoLimit)
         this.commandList.setNewObjectUndoLimit(domain.options.undoLimitOfPlants)
         // TODO PDF: Fix this or remove
-        // if (ubreedr.BreederForm !== null) {
-        //     ubreedr.BreederForm.updateForChangeToDomainOptions()
+        // if (BreederForm !== null) {
+        //     BreederForm.updateForChangeToDomainOptions()
         // }
-        // if (utimeser.TimeSeriesForm !== null) {
-        //     utimeser.TimeSeriesForm.updateForChangeToDomainOptions()
+        // if (TimeSeriesForm !== null) {
+        //     TimeSeriesForm.updateForChangeToDomainOptions()
         // }
         if (this.lifeCycleShowing()) {
             //because max drawing scale might have changed
@@ -2109,18 +2109,18 @@ export class TMainForm {
     updateForChangeToDrawOptions(): void {
         this.redrawEverything()
         // TODO PDF: Fix this for other forms
-        // if (ubreedr.BreederForm !== null) {
-        //     if ((ubreedr.BreederForm.Visible) && (ubreedr.BreederForm.WindowState !== delphi_compatability.TWindowState.wsMinimized)) {
-        //         ubreedr.BreederForm.redrawPlants(ubreedr.kDontConsiderIfPreviewCacheIsUpToDate)
+        // if (BreederForm !== null) {
+        //     if ((BreederForm.Visible) && (BreederForm.WindowState !== delphi_compatability.TWindowState.wsMinimized)) {
+        //         BreederForm.redrawPlants(ubreedr.kDontConsiderIfPreviewCacheIsUpToDate)
         //     } else {
-        //         ubreedr.BreederForm.needToRedrawFromChangeToDrawOptions = true
+        //         BreederForm.needToRedrawFromChangeToDrawOptions = true
         //     }
         // }
-        // if (utimeser.TimeSeriesForm !== null) {
-        //     if ((utimeser.TimeSeriesForm.Visible) && (utimeser.TimeSeriesForm.WindowState !== delphi_compatability.TWindowState.wsMinimized)) {
-        //         utimeser.TimeSeriesForm.redrawPlants()
+        // if (TimeSeriesForm !== null) {
+        //     if ((TimeSeriesForm.Visible) && (TimeSeriesForm.WindowState !== delphi_compatability.TWindowState.wsMinimized)) {
+        //         TimeSeriesForm.redrawPlants()
         //     } else {
-        //         utimeser.TimeSeriesForm.needToRedrawFromChangeToDrawOptions = true
+        //         TimeSeriesForm.needToRedrawFromChangeToDrawOptions = true
         //     }
         // }
     }
@@ -2287,19 +2287,19 @@ export class TMainForm {
     updateMenusForUndoRedo(): void {
         // TODO PDF: Fix this
         // this.UndoMenuEditUndoRedoList.enabled = (this.commandList.isUndoEnabled()) || (this.commandList.isRedoEnabled())
-        // if (ubreedr.BreederForm !== null) {
-        //     ubreedr.BreederForm.BreederMenuUndo.enabled = this.MenuEditUndo.enabled
-        //     ubreedr.BreederForm.BreederMenuUndo.caption = this.MenuEditUndo.caption
-        //     ubreedr.BreederForm.BreederMenuRedo.enabled = this.MenuEditRedo.enabled
-        //     ubreedr.BreederForm.BreederMenuRedo.caption = this.MenuEditRedo.caption
-        //     ubreedr.BreederForm.BreederMenuUndoRedoList.enabled = this.UndoMenuEditUndoRedoList.enabled
+        // if (BreederForm !== null) {
+        //     BreederForm.BreederMenuUndo.enabled = this.MenuEditUndo.enabled
+        //     BreederForm.BreederMenuUndo.caption = this.MenuEditUndo.caption
+        //     BreederForm.BreederMenuRedo.enabled = this.MenuEditRedo.enabled
+        //     BreederForm.BreederMenuRedo.caption = this.MenuEditRedo.caption
+        //     BreederForm.BreederMenuUndoRedoList.enabled = this.UndoMenuEditUndoRedoList.enabled
         // }
-        // if (utimeser.TimeSeriesForm !== null) {
-        //     utimeser.TimeSeriesForm.TimeSeriesMenuUndo.enabled = this.MenuEditUndo.enabled
-        //     utimeser.TimeSeriesForm.TimeSeriesMenuUndo.caption = this.MenuEditUndo.caption
-        //     utimeser.TimeSeriesForm.TimeSeriesMenuRedo.enabled = this.MenuEditRedo.enabled
-        //     utimeser.TimeSeriesForm.TimeSeriesMenuRedo.caption = this.MenuEditRedo.caption
-        //     utimeser.TimeSeriesForm.TimeSeriesMenuUndoRedoList.enabled = this.UndoMenuEditUndoRedoList.enabled
+        // if (TimeSeriesForm !== null) {
+        //     TimeSeriesForm.TimeSeriesMenuUndo.enabled = this.MenuEditUndo.enabled
+        //     TimeSeriesForm.TimeSeriesMenuUndo.caption = this.MenuEditUndo.caption
+        //     TimeSeriesForm.TimeSeriesMenuRedo.enabled = this.MenuEditRedo.enabled
+        //     TimeSeriesForm.TimeSeriesMenuRedo.caption = this.MenuEditRedo.caption
+        //     TimeSeriesForm.TimeSeriesMenuUndoRedoList.enabled = this.UndoMenuEditUndoRedoList.enabled
         // }
     }
 
@@ -2360,11 +2360,11 @@ export class TMainForm {
     updatePasteMenuForClipboardContents(): void {
         // TODO PDF: Fix this or remove  obsolete code
         // this.PopupMenuPaste.enabled = this.MenuEditPaste.enabled
-        // if (ubreedr.BreederForm !== null) {
-        //     ubreedr.BreederForm.updatePasteMenuForClipboardContents()
+        // if (BreederForm !== null) {
+        //     BreederForm.updatePasteMenuForClipboardContents()
         // }
-        // if (utimeser.TimeSeriesForm !== null) {
-        //     utimeser.TimeSeriesForm.updatePasteMenuForClipboardContents()
+        // if (TimeSeriesForm !== null) {
+        //     TimeSeriesForm.updatePasteMenuForClipboardContents()
         // }
     }
     
@@ -2962,7 +2962,7 @@ export class TMainForm {
     }
     
     plantListDrawGridDragOver(Source: TObject, X: int, Y: int, State: TDragState, Accept: boolean): void {
-        Accept = (Source !== null) && (Sender !== null) && ((ubreedr.BreederForm !== null) && (Source === ubreedr.BreederForm.plantsDrawGrid) || (utimeser.TimeSeriesForm !== null) && (Source === utimeser.TimeSeriesForm.grid))
+        Accept = (Source !== null) && (Sender !== null) && ((BreederForm !== null) && (Source === BreederForm.plantsDrawGrid) || (TimeSeriesForm !== null) && (Source === TimeSeriesForm.grid))
         return Accept
     }
     
@@ -2970,9 +2970,9 @@ export class TMainForm {
         if ((Target !== null) && (Target instanceof delphi_compatability.TDrawGrid)) {
             if (this.focusedPlant() !== null) {
                 if (((Target).owner instanceof ubreedr.TBreederForm)) {
-                    ubreedr.BreederForm.copyPlantToPoint(this.focusedPlant(), X, Y)
+                    BreederForm.copyPlantToPoint(this.focusedPlant(), X, Y)
                 } else if (((Target).owner instanceof utimeser.TTimeSeriesForm)) {
-                    utimeser.TimeSeriesForm.copyPlantToPoint(this.focusedPlant(), X, Y)
+                    TimeSeriesForm.copyPlantToPoint(this.focusedPlant(), X, Y)
                 }
             }
         }
@@ -3262,7 +3262,7 @@ export class TMainForm {
     /*
 
     PaintBoxDragOver(Source: TObject, X: int, Y: int, State: TDragState, Accept: boolean): void {
-        Accept = (Source !== null) && (Sender !== null) && ((ubreedr.BreederForm !== null) && (Source === ubreedr.BreederForm.plantsDrawGrid) || (utimeser.TimeSeriesForm !== null) && (Source === utimeser.TimeSeriesForm.grid))
+        Accept = (Source !== null) && (Sender !== null) && ((BreederForm !== null) && (Source === BreederForm.plantsDrawGrid) || (TimeSeriesForm !== null) && (Source === TimeSeriesForm.grid))
         return Accept
     }
     
@@ -3271,9 +3271,9 @@ export class TMainForm {
             const plantClickedOn = domain.plantManager.findPlantAtPoint(this.commandList.anchorPoint)
             if (plantClickedOn !== null) {
                 if (((Target).owner instanceof ubreedr.TBreederForm)) {
-                    ubreedr.BreederForm.copyPlantToPoint(plantClickedOn, X, Y)
+                    BreederForm.copyPlantToPoint(plantClickedOn, X, Y)
                 } else if (((Target).owner instanceof utimeser.TTimeSeriesForm)) {
-                    utimeser.TimeSeriesForm.copyPlantToPoint(plantClickedOn, X, Y)
+                    TimeSeriesForm.copyPlantToPoint(plantClickedOn, X, Y)
                 }
             }
             // command undoes itself when it starts the drag 
@@ -4263,8 +4263,8 @@ export class TMainForm {
         // TODO PDF: Fix or remove obsolete code
         // // cfk note: put any new NON-MODAL forms here 
         // this.Enabled = enable
-        // ubreedr.BreederForm.Enabled = enable
-        // utimeser.TimeSeriesForm.Enabled = enable
+        // BreederForm.Enabled = enable
+        // TimeSeriesForm.Enabled = enable
         // udebug.DebugForm.Enabled = enable
     }
     
@@ -5702,8 +5702,6 @@ export class TMainForm {
         // this.drawingPaintBox.width = 800
         // this.drawingPaintBox.height = 600
         setMainForm(this)
-        setMainFormForCommands(this)
-        setMainFormForTimeSeries(this)
         domain.resetForEmptyPlantFile()
     }
 

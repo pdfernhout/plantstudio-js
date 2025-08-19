@@ -14,6 +14,7 @@ import { kDontDrawYet, TMainForm } from "./TMainForm"
 import { kCreateFirstGeneration, PdBreedFromParentsCommand, PdDeleteTimeSeriesCommand, PdMakeTimeSeriesCommand, PdPasteCommand } from "./updcom"
 import { TBreederForm } from "./TBreederForm"
 import { unfinished } from "./temporary"
+import { BreederForm, MainForm, setTimeSeriesForm } from "./PdForms"
 
 // from conversion_common import *
 // import ubmpsupport
@@ -30,29 +31,10 @@ import { unfinished } from "./temporary"
 // import updform
 // import delphi_compatability
 
-// const
 const kRecalculateScale = true
 const kDontRecalculateScale = false
 const kMaxTimeSeriesStages = 100
-
-
-// var
-let TimeSeriesForm: TTimeSeriesForm
-
-
-// const
 const kStageNumberTextHeight = 16
-
-
-let MainForm: TMainForm
-export function setMainFormForTimeSeries(aForm: TMainForm) {
-    MainForm = aForm
-}
-
-let BreederForm: TBreederForm
-export function setBreederFormForTimeSeries(aForm: TBreederForm) {
-    BreederForm = aForm
-}
 
 export class TTimeSeriesForm {
     // grid: TDrawGrid = new TDrawGrid()
@@ -621,6 +603,10 @@ export class TTimeSeriesForm {
     
     TimeSeriesMenuOptionsCustomDrawClick(): void {
         MainForm.MenuOptionsCustomDrawClick()
+    }
+
+    oninit() {
+        setTimeSeriesForm(this)
     }
 
     view() {

@@ -9,7 +9,7 @@ import { PdPlantPart } from "./PdPlantPart"
 import { PdInternode } from "./PdInternode"
 import { ExportPart } from "./U3dexport"
 import { PdFiler } from "./PdFiler"
-import { getMainForm } from "./TMainFormInterface"
+import { MainForm } from "./PdForms"
 
 export enum TraverseDirection {
     kTraverseNone = 0,
@@ -302,8 +302,8 @@ export class PdTraverser {
                 if (this.totalPlantParts % 4 !== 0) {
                     continue
                 }
-                if (getMainForm().drawing) {
-                    getMainForm().showDrawProgress(this.plantPartsDrawnAtStart + this.totalPlantParts)
+                if (MainForm.drawing) {
+                    MainForm.showDrawProgress(this.plantPartsDrawnAtStart + this.totalPlantParts)
                 }
             }
         }

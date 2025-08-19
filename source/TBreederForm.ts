@@ -11,8 +11,7 @@ import { PdGeneration } from "./PdGeneration"
 import { PdCommand } from "./PdCommand"
 import { PdBreedFromParentsCommand, PdMakeTimeSeriesCommand, PdDeleteBreederGenerationCommand, PdDeleteAllBreederGenerationsCommand, PdRandomizeCommand, PdChangeBreedingAndTimeSeriesOptionsCommand, PdPasteCommand, PdReplaceBreederPlant } from "./updcom"
 import { cursor_stopWait } from "./ucursor"
-
-// let BreederForm: TBreederForm
+import { setBreederForm } from "./PdForms"
 
 const kRedrawPlants = true
 const kDontRedrawPlants = false
@@ -179,7 +178,8 @@ export class TBreederForm {
 //     }
     
 //     // -------------------------------------------------------------------------------------- grid 
-//     updateForChangeToDomainOptions(): void {
+    updateForChangeToDomainOptions(): void {
+        // TODO PDF: Fix this
 //         if (this.plantsDrawGrid.ColCount !== domain.breedingAndTimeSeriesOptions.plantsPerGeneration + 1) {
 //             this.plantsDrawGrid.ColCount = domain.breedingAndTimeSeriesOptions.plantsPerGeneration + 1
 //         }
@@ -239,7 +239,7 @@ export class TBreederForm {
 //         if (atLeastOnePlantHasChangedAge) {
 //             this.redrawPlants(kDontConsiderIfPreviewCacheIsUpToDate)
 //         }
-//     }
+    }
     
 //     redrawPlants(considerIfPreviewCacheIsUpToDate: boolean): void {
 //         if (!considerIfPreviewCacheIsUpToDate) {
@@ -416,7 +416,7 @@ export class TBreederForm {
 //         let col: long
 //         let row: long
 
-//         Accept = (Source !== null) && (Sender !== null) && ((Sender === Source) || (Source === MainForm.drawingPaintBox) || (Source === MainForm.plantListDrawGrid) || (Source === utimeser.TimeSeriesForm.grid))
+//         Accept = (Source !== null) && (Sender !== null) && ((Sender === Source) || (Source === MainForm.drawingPaintBox) || (Source === MainForm.plantListDrawGrid) || (Source === TimeSeriesForm.grid))
 //         if ((Accept)) {
 //             const plant = this.plantAtMouse(X, Y)
 //             if (plant === null) {
@@ -473,8 +473,8 @@ export class TBreederForm {
 //                 cursor_stopWait()
 //             }
 //             // command will free plant if paste is undone
-//         } else if (Target === utimeser.TimeSeriesForm.grid) {
-//             utimeser.TimeSeriesForm.copyPlantToPoint(plant, X, Y)
+//         } else if (Target === TimeSeriesForm.grid) {
+//             TimeSeriesForm.copyPlantToPoint(plant, X, Y)
 //         } else if (Target === Sender) {
 //             // get plant being replaced 
 //             let col: long
@@ -515,52 +515,53 @@ export class TBreederForm {
         // MainForm.doCommand(newCommand)
     }
     
-//     // ------------------------------------------------------------- responding to commands 
-//     replacePlantInRow(oldPlant: PdPlant, newPlant: PdPlant, row: short): void { 
-//         const generation = this.generationForIndex(row)
-//         if (generation === null) {
-//             throw new Error("Problem: Invalid row in method TBreederForm.replacePlantInRow.")
-//         }
-//         generation.replacePlant(oldPlant, newPlant)
-//         this.updateForChangeToPlant(newPlant)
-//     }
+    // ------------------------------------------------------------- responding to commands 
+    replacePlantInRow(oldPlant: PdPlant, newPlant: PdPlant, row: short): void { 
+        const generation = this.generationForIndex(row)
+        if (generation === null) {
+            throw new Error("Problem: Invalid row in method TBreederForm.replacePlantInRow.")
+        }
+        generation.replacePlant(oldPlant, newPlant)
+        this.updateForChangeToPlant(newPlant)
+    }
     
-//     forgetGenerationsListBelowRow(aRow: short): void {
-//         while (this.generations.length - 1 > aRow) {
-//             this.forgetLastGeneration()
-//         }
-//     }
+    forgetGenerationsListBelowRow(aRow: short): void {
+        while (this.generations.length - 1 > aRow) {
+            this.forgetLastGeneration()
+        }
+    }
     
-//     addGenerationsFromListBelowRow(aRow: short, aGenerationsList: PdGeneration[]): void {
-//         if (aRow + 1 <= aGenerationsList.length - 1) {
-//             for (let i = aRow + 1; i < aGenerationsList.length; i++) {
-//                 this.addGeneration(aGenerationsList[i])
-//             }
-//         }
-//     }
+    addGenerationsFromListBelowRow(aRow: short, aGenerationsList: PdGeneration[]): void {
+        if (aRow + 1 <= aGenerationsList.length - 1) {
+            for (let i = aRow + 1; i < aGenerationsList.length; i++) {
+                this.addGeneration(aGenerationsList[i])
+            }
+        }
+    }
     
-//     addGeneration(newGeneration: PdGeneration): void {
-//         this.generations.push(newGeneration)
-//     }
+    addGeneration(newGeneration: PdGeneration): void {
+        this.generations.push(newGeneration)
+    }
     
-//     forgetLastGeneration(): void { 
-//         if (this.generations.length <= 0) {
-//             return
-//         }
-//         const lastGeneration: PdGeneration = this.generations[this.generations.length - 1]
-//         arrayRemove(this.generations, lastGeneration)
-//     }
+    forgetLastGeneration(): void { 
+        if (this.generations.length <= 0) {
+            return
+        }
+        const lastGeneration: PdGeneration = this.generations[this.generations.length - 1]
+        arrayRemove(this.generations, lastGeneration)
+    }
     
-//     selectGeneration(aGeneration: PdGeneration): void {
-//         this.selectedRow = this.generations.indexOf(aGeneration)
-//         const lastFullyVisibleRow: short = this.plantsDrawGrid.TopRow + this.plantsDrawGrid.VisibleRowCount - 1
-//         if (this.selectedRow > lastFullyVisibleRow) {
-//             this.plantsDrawGrid.TopRow = this.plantsDrawGrid.TopRow + (this.selectedRow - lastFullyVisibleRow)
-//         }
-//         if (this.selectedRow < this.plantsDrawGrid.TopRow) {
-//             this.plantsDrawGrid.TopRow = this.selectedRow
-//         }
-//     }
+    selectGeneration(aGeneration: PdGeneration): void {
+        this.selectedRow = this.generations.indexOf(aGeneration)
+        // TODO PDF: Fix this
+        // const lastFullyVisibleRow: short = this.plantsDrawGrid.TopRow + this.plantsDrawGrid.VisibleRowCount - 1
+        // if (this.selectedRow > lastFullyVisibleRow) {
+        //     this.plantsDrawGrid.TopRow = this.plantsDrawGrid.TopRow + (this.selectedRow - lastFullyVisibleRow)
+        // }
+        // if (this.selectedRow < this.plantsDrawGrid.TopRow) {
+        //     this.plantsDrawGrid.TopRow = this.selectedRow
+        // }
+    }
     
 //     deselectAllGenerations(): void {
 //         this.selectedRow = -1
@@ -570,7 +571,8 @@ export class TBreederForm {
 //         }
 //     }
     
-//     updateForChangeToGenerations(): void {
+    updateForChangeToGenerations(): void {
+        // TODO PDF: Fix this
 //         this.updateMenusForChangeToGenerations()
 //         this.internalChange = true
 //         if (!this.Visible) {
@@ -593,9 +595,10 @@ export class TBreederForm {
 //         } else {
 //             this.emptyWarningPanel.SendToBack()
 //         }
-//     }
+    }
     
-//     updateForChangeToPlant(aPlant: PdPlant): void {
+    updateForChangeToPlant(aPlant: PdPlant): void {
+        // TODO PDF: Fix this
 //         for (let genCount = 0; genCount <= this.generations.length - 1; genCount++) {
 //             const generation: PdGeneration = this.generations[genCount]
 //             if (generation.plants.length > 0) {
@@ -609,7 +612,7 @@ export class TBreederForm {
 //                 }
 //             }
 //         }
-//     }
+    }
     
 //     updateForChangeToSelections(selectionIsInFirstColumn: boolean): void {
 //         let i: int
@@ -1051,13 +1054,13 @@ export class TBreederForm {
         return this.generations[index]
     }
     
-//     plantForRowAndColumn(row: short, column: short): PdPlant | null {
-//         const generation = this.generationForIndex(row)
-//         if (generation === null) {
-//             return null
-//         }
-//         return generation.plantForIndex(column - 1)
-//     }
+    plantForRowAndColumn(row: short, column: short): PdPlant | null {
+        const generation = this.generationForIndex(row)
+        if (generation === null) {
+            return null
+        }
+        return generation.plantForIndex(column - 1)
+    }
     
 //     // ---------------------------------------------------------------------------- resizing 
 //     FormResize(event: any): void {
@@ -1122,6 +1125,10 @@ export class TBreederForm {
         if (plant === this.firstSelectedPlant) return ".bw2.b--green"
         if (plant === this.secondSelectedPlant) return ".bw2.b--blue"
         return ".bw2.b--black"
+    }
+
+    oninit() {
+        setBreederForm(this)
     }
 
     view(vnode: any) {

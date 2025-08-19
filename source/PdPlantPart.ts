@@ -18,7 +18,7 @@ import { PdStreamableObject } from "./PdStreamableObject"
 import { PdClassAndVersionInformationRecord, PdFiler } from "./PdFiler"
 import { DebugPrint } from "./udebug"
 import { kRotateX, kRotateY, kRotateZ } from "./updcom"
-import { getMainForm } from "./TMainFormInterface"
+import { MainForm } from "./PdForms"
 
 // const
 const kAddingBiomassToPlant = true
@@ -538,7 +538,7 @@ export class PdPlantPart extends PdStreamableObject {
         myParentHasAnAmendment = this.parentAmendment !== null && this.parentAmendment.changeColors
         myAmendmentSaysIAmHidden = (this.amendment !== null) && (this.amendment.hide)
         myParentsAmendmentSaysIAmHidden = (this.parentAmendment !== null) && (this.parentAmendment.hide)
-        iAmSelectedInTheMainWindow = (this.partID === getMainForm().selectedPlantPartID) && (getMainForm().focusedPlant() === this.plant)
+        iAmSelectedInTheMainWindow = (this.partID === MainForm.selectedPlantPartID) && (MainForm.focusedPlant() === this.plant)
         showHighlights = domain.options.showHighlightingForNonHiddenPosedParts && (this.plant.turtle.writingTo === ExportFormats.kScreen) && (!domain.drawingToMakeCopyBitmap) && (!this.plant.drawingIntoPreviewCache)
         if (iHaveAnAmendment || myParentHasAnAmendment) {
             result = false

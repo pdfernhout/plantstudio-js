@@ -10,7 +10,7 @@ import { ExportFormats, FileExport3DOptionsStructure, nameFor3DExportType, Expor
 import { BreedingAndTimeSeriesOptionsStructure, kMaxBreedingSections } from "./PdPlant"
 import { PdPlantManager } from "./PdPlantManager"
 import { KfObject3D } from "./KfObject3D"
-import { getMainForm } from "./TMainFormInterface"
+import { MainForm } from "./PdForms"
 
 // const
 const kMaxWizardQuestions = 30
@@ -1222,7 +1222,7 @@ export class PdDomain {
                 throw new Error("Unfinished")
                 this.plantManager.loadPlantsFromFile(fileName, kNotInPlantMover, "")
                 this.plantFileLoaded = true
-                getMainForm().setPlantFileChanged(false)
+                MainForm.setPlantFileChanged(false)
                 this.lastOpenedPlantFileName = this.plantFileName
                 this.lastOpenedPlantFileName = this.lastOpenedPlantFileName.trim()
                 // v1.60
@@ -1271,7 +1271,7 @@ export class PdDomain {
             }
         }
             // PDF PORTING -- maybe syntax error in original -- had empty parens -- unless intended as procedure or function call from pointer? Probably not
-        getMainForm().updateFileMenuForOtherRecentFiles()
+        MainForm.updateFileMenuForOtherRecentFiles()
     }
 
     resetForEmptyPlantFile(): void {
@@ -1279,7 +1279,7 @@ export class PdDomain {
         this.plantFileLoaded = true
         this.plantFileName = kUnsavedFileName + "." + extensionForFileType(FileType.kFileTypePlant)
         this.lastOpenedPlantFileName = ""
-        getMainForm().setPlantFileChanged(false)
+        MainForm.setPlantFileChanged(false)
     }
     
     resetForNoPlantFile(): void {
@@ -1287,7 +1287,7 @@ export class PdDomain {
         this.plantFileLoaded = false
         this.plantFileName = ""
         this.lastOpenedPlantFileName = ""
-        getMainForm().setPlantFileChanged(false)
+        MainForm.setPlantFileChanged(false)
     }
     
     checkForExistingDefaultTdoLibrary(): boolean {
