@@ -862,43 +862,43 @@ export class TTimeSeriesForm {
                     "The time series window is empty. To fill it, select a plant in the main window and choose Make Time Series from the Plant menu.",
                 ),
             ),
-            m("ul.TimeSeriesPopupMenu.TPopupMenu",
-                {
-                    // Top: "38",
-                    // Left: "468",
-                    // Height: "0",
-                    // Width: "0",
-                },
-                m("li.TimeSeriesPopupMenuCopy.TMenuItem",
-                    {
-                        onclick: () => this.TimeSeriesPopupMenuCopyClick(),
-                    },
-                    caption("&Copy"),
-                ),
-                m("li.TimeSeriesPopupMenuPaste.TMenuItem",
-                    {
-                        onclick: () => this.TimeSeriesPopupMenuPasteClick(),
-                    },
-                    caption("&Paste"),
-                ),
-                m("li.TimeSeriesPopupMenuSendCopy.TMenuItem",
-                    {
-                        onclick: () => this.TimeSeriesMenuSendCopyClick(),
-                    },
-                    caption("&Send Copy to Main Window"),
-                ),
-                m("li.N2.TMenuItem",
-                    {
-                    },
-                    "-",
-                ),
-                m("li.TimeSeriesPopupMenuBreed.TMenuItem",
-                    {
-                        onclick: () => this.TimeSeriesPopupMenuBreedClick(),
-                    },
-                    "Breed",
-                ),
-            ),
+            // m("ul.TimeSeriesPopupMenu.TPopupMenu",
+            //     {
+            //         // Top: "38",
+            //         // Left: "468",
+            //         // Height: "0",
+            //         // Width: "0",
+            //     },
+            //     m("li.TimeSeriesPopupMenuCopy.TMenuItem",
+            //         {
+            //             onclick: () => this.TimeSeriesPopupMenuCopyClick(),
+            //         },
+            //         caption("&Copy"),
+            //     ),
+            //     m("li.TimeSeriesPopupMenuPaste.TMenuItem",
+            //         {
+            //             onclick: () => this.TimeSeriesPopupMenuPasteClick(),
+            //         },
+            //         caption("&Paste"),
+            //     ),
+            //     m("li.TimeSeriesPopupMenuSendCopy.TMenuItem",
+            //         {
+            //             onclick: () => this.TimeSeriesMenuSendCopyClick(),
+            //         },
+            //         caption("&Send Copy to Main Window"),
+            //     ),
+            //     m("li.N2.TMenuItem",
+            //         {
+            //         },
+            //         "-",
+            //     ),
+            //     m("li.TimeSeriesPopupMenuBreed.TMenuItem",
+            //         {
+            //             onclick: () => this.TimeSeriesPopupMenuBreedClick(),
+            //         },
+            //         "Breed",
+            //     ),
+            // ),
         )
     }
 
