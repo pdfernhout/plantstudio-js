@@ -350,59 +350,63 @@ export class TTimeSeriesForm {
     }
     
     // -------------------------------------------------------------------------------------- grid 
-    // gridDrawCell(Col: long, Row: long, Rect: TRect, State: TGridDrawState): void {
-    //     let textDrawRect: TRect = new TRect()
-    //     let textToDraw: string
+    gridDrawCell(context: CanvasRenderingContext2D, Col: long): void {
+        let textDrawRect: TRect = new TRect()
+        let textToDraw: string
         
-    //     this.grid.Canvas.Brush.Color = ColorDefs.clWhite
-    //     this.grid.Canvas.Pen.Width = 1
-    //     if ((this.plants.length > 0) && (Row === 0)) {
-    //         this.grid.Canvas.Pen.Color = ColorDefs.clSilver
-    //     } else {
-    //         this.grid.Canvas.Pen.Color = ColorDefs.clWhite
-    //     }
-    //     this.grid.Canvas.Rectangle(Rect.Left, Rect.Top, Rect.Right, Rect.Bottom)
-    //     if (Row === 1) {
-    //         if (this.plants.length <= 0) {
-    //             return
-    //         }
-    //         textToDraw = IntToStr(this.ages[Col])
-    //         if (rWidth(Rect) > 50) {
-    //             // 50 is fixed size
-    //             textToDraw = textToDraw + " days"
-    //         }
-    //         textDrawRect.Left = Rect.Left + rWidth(Rect) / 2 - this.grid.Canvas.TextWidth(textToDraw) / 2
-    //         textDrawRect.Top = Rect.Top + rHeight(Rect) / 2 - this.grid.Canvas.TextHeight("0") / 2
-    //         this.grid.Canvas.TextOut(textDrawRect.Left, textDrawRect.Top, textToDraw)
-    //         return
-    //     }
-    //     const plant = this.plantForIndex(Col)
-    //     if (plant === null) {
-    //         return
-    //     }
-    //     if (!plant.previewCacheUpToDate) {
-    //         // draw plant 
-    //         // draw gray solid box to show delay for drawing plant cache
-    //         this.grid.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsSolid
-    //         this.grid.Canvas.Brush.Color = ColorDefs.clSilver
-    //         this.grid.Canvas.Pen.Color = ColorDefs.clSilver
-    //         //FIX unresolved WITH expression: Rect
-    //         this.grid.Canvas.Rectangle(this.Left + 1, this.Top + 1, UNRESOLVED.right, UNRESOLVED.bottom)
-    //         plant.drawPreviewIntoCache(Point(this.grid.DefaultColWidth, this.grid.DefaultRowHeight), kDontConsiderDomainScale, umain.kDrawNow)
-    //     }
-    //     plant.previewCache.Transparent = false
-    //     ubmpsupport.copyBitmapToCanvasWithGlobalPalette(plant.previewCache, this.grid.Canvas, Rect)
-    //     // draw selection rectangle 
-    //     this.grid.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsClear
-    //     this.grid.Canvas.Pen.Width = 2
-    //     if (plant === this.selectedPlant) {
-    //         this.grid.Canvas.Pen.Color = domain.options.firstSelectionRectangleColor
-    //     } else {
-    //         this.grid.Canvas.Pen.Color = ColorDefs.clSilver
-    //     }
-    //     //FIX unresolved WITH expression: Rect
-    //     this.grid.Canvas.Rectangle(this.Left + 1, this.Top + 1, UNRESOLVED.right, UNRESOLVED.bottom)
-    // }
+        // this.grid.Canvas.Brush.Color = ColorDefs.clWhite
+        // this.grid.Canvas.Pen.Width = 1
+        // if ((this.plants.length > 0) && (Row === 0)) {
+        //     this.grid.Canvas.Pen.Color = ColorDefs.clSilver
+        // } else {
+        //     this.grid.Canvas.Pen.Color = ColorDefs.clWhite
+        // }
+        // this.grid.Canvas.Rectangle(Rect.Left, Rect.Top, Rect.Right, Rect.Bottom)
+        // if (Row === 1) {
+        //     if (this.plants.length <= 0) {
+        //         return
+        //     }
+        //     textToDraw = IntToStr(this.ages[Col])
+        //     if (rWidth(Rect) > 50) {
+        //         // 50 is fixed size
+        //         textToDraw = textToDraw + " days"
+        //     }
+        //     textDrawRect.Left = Rect.Left + rWidth(Rect) / 2 - this.grid.Canvas.TextWidth(textToDraw) / 2
+        //     textDrawRect.Top = Rect.Top + rHeight(Rect) / 2 - this.grid.Canvas.TextHeight("0") / 2
+        //     this.grid.Canvas.TextOut(textDrawRect.Left, textDrawRect.Top, textToDraw)
+        //     return
+        // }
+        const plant = this.plantForIndex(Col)
+        if (plant === null) {
+            return
+        }
+        if (!plant.previewCacheUpToDate) {
+            // draw plant 
+            // draw gray solid box to show delay for drawing plant cache
+            // this.grid.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsSolid
+            // this.grid.Canvas.Brush.Color = ColorDefs.clSilver
+            // this.grid.Canvas.Pen.Color = ColorDefs.clSilver
+            // //FIX unresolved WITH expression: Rect
+            // this.grid.Canvas.Rectangle(this.Left + 1, this.Top + 1, UNRESOLVED.right, UNRESOLVED.bottom)
+
+            // Clear cache
+            plant.previewCache.Width = plant.previewCache.Width
+
+            plant.drawPreviewIntoCache(Point(this.grid.DefaultColWidth, this.grid.DefaultRowHeight), kDontConsiderDomainScale, kDrawNow)
+        }
+        plant.previewCache.Transparent = false
+        context.drawImage(plant.previewCache.canvas, 0, 0)
+        // draw selection rectangle 
+        // this.grid.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsClear
+        // this.grid.Canvas.Pen.Width = 2
+        // if (plant === this.selectedPlant) {
+        //     this.grid.Canvas.Pen.Color = domain.options.firstSelectionRectangleColor
+        // } else {
+        //     this.grid.Canvas.Pen.Color = ColorDefs.clSilver
+        // }
+        //FIX unresolved WITH expression: Rect
+        // this.grid.Canvas.Rectangle(this.Left + 1, this.Top + 1, UNRESOLVED.right, UNRESOLVED.bottom)
+    }
     
     // gridMouseDown(Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
     //     this.selectedPlant = this.plantAtMouse(X, Y)
@@ -615,6 +619,7 @@ export class TTimeSeriesForm {
     }
 
     view() {
+        const self = this
         return m("TimeSeriesForm.TTimeSeriesForm",
             {
             // Top: "184",
@@ -789,7 +794,7 @@ export class TTimeSeriesForm {
                     ),
                 ),
             ),
-            m("TDrawGrid.grid.TDrawGrid",
+            m("TDrawGrid.grid.TDrawGrid.flex",
                 {
                     // Top: "4",
                     // Left: "8",
@@ -809,8 +814,34 @@ export class TTimeSeriesForm {
                     // OnEndDrag: "gridEndDrag",
                     // OnMouseDown: "gridMouseDown",
                 },
+                this.plants.map((plant: PdPlant, column: number) =>
+                    m("div.ba"  + this.borderIfSelected(plant),
+                        m("canvas", {
+                            key: plant.uuid,
+                            width: "" + self.DefaultColWidth + "px",
+                            height: "" + self.DefaultColWidth + "px",
+                            oncreate(vnode: m.VnodeDOM) {
+                                const canvas = <HTMLCanvasElement>vnode.dom
+                                canvas.width = self.DefaultColWidth
+                                canvas.height = self.DefaultColWidth
+                                const context = canvas.getContext("2d")
+                                if (!context) return
+                                self.gridDrawCell(context, column)
+                                if (plant) context.drawImage(plant.previewCache.canvas, 0, 0)
+                            },
+                            onupdate(vnode: m.VnodeDOM) {
+                                const canvas = <HTMLCanvasElement>vnode.dom
+                                // Clear the canvas
+                                canvas.width = canvas.width
+                                const context = canvas.getContext("2d")
+                                if (!context) return
+                                if (plant) context.drawImage(plant.previewCache.canvas, 0, 0)
+                            },
+                        })
+                    ),
+                ),
             ),
-            m("div.emptyWarningPanel.TPanel",
+            m("div.emptyWarningPanel.TPanel" + ((this.plants.length <= 0) ? "" : ".hidden"),
                 {
                     // Top: "10",
                     // Left: "206",
@@ -879,5 +910,12 @@ export class TTimeSeriesForm {
         // TODO PDF: Fix or remove: throw new Error("Method not implemented.")
     }
     Visible = true
+
+    DefaultColWidth = 64
+
+    borderIfSelected(plant: PdPlant) {
+        if (plant === this.selectedPlant) return ".bw2.b--green"
+        return ".bw2.b--black"
+    }
 }
 
