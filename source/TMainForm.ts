@@ -27,11 +27,9 @@ import { TSplashForm } from "./TSplashForm"
 import { PdStatsPanel } from "./PdStatsPanel"
 import { TOptionsForm } from "./TOptionsForm"
 import { TCustomDrawOptionsForm } from "./TCustomDrawOptionsForm"
-import { setMainFormForTimeSeries } from "./TTimeSeriesForm"
+import { setMainFormForTimeSeries, TTimeSeriesForm } from "./TTimeSeriesForm"
 import { unfinished } from "./temporary"
-
-// TODO PDF for getting to compile
-type TEdit = any
+import { TBreederForm } from "./TBreederForm"
 
 type PosingField = 
     "hide" // posingHidePart
@@ -6816,7 +6814,9 @@ export class TMainForm {
                 ),
             ),
             this.viewPlantList(),
-            this.viewPlantFocusPanel()
+            this.viewPlantFocusPanel(),
+            m(TTimeSeriesForm),
+            m(TBreederForm)
         )
     }   
 }

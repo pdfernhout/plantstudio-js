@@ -622,6 +622,10 @@ export class TTimeSeriesForm {
     TimeSeriesMenuOptionsCustomDrawClick(): void {
         MainForm.MenuOptionsCustomDrawClick()
     }
+
+    view() {
+        return m("div", "TTimeSeriesForm UNFINISHED")
+    }
     
 }
 
