@@ -82,7 +82,7 @@ export class KfDrawingSurface {
         //  lineColor := clLtGray;
         this.lineWidth = 1.0
         this.recording = false
-        this.clearTriangles()
+        this.triangles = []
         /* TODO: Maybe not needed as fillingTriangles is used when drawing
         if (this.pane !== null) {
             if (this.fillingTriangles) {
@@ -97,7 +97,6 @@ export class KfDrawingSurface {
     // ----------------------- KfDrawingSurface managing triangles
 
     clearTriangles(): void {
-        console.log("clear triangles")
         this.triangles.length = 0
     }
     
