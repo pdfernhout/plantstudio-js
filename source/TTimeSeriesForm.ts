@@ -85,7 +85,13 @@ export class TTimeSeriesForm {
     needToRedrawFromChangeToDrawOptions: boolean = false
 
     // Temp for testing
-    grid: any = {}
+    grid = {
+        DefaultColWidth: 32,
+        DefaultRowHeight: 32,
+        Invalidate() { console.log("Invalidate") },
+        RowHeights: [] as any,
+        ColCount: 0
+    }
     
     // //$R *.DFM
     // FormCreate(): void {
@@ -139,6 +145,7 @@ export class TTimeSeriesForm {
     // }
     
     initializeWithPlant(aPlant: PdPlant, drawNow: boolean): void {
+        console.log("initializeWithPlant", aPlant)
         if (aPlant === null) {
             return
         }
@@ -157,6 +164,7 @@ export class TTimeSeriesForm {
                 this.ages[i] = intround(Math.max(0.0, Math.min(1.0, this.percentsOfMaxAge[i] / 100.0)) * newPlant.pGeneral.ageAtMaturity)
                 newPlant.setAge(this.ages[i])
                 this.plants.push(newPlant)
+                console.log("adding new plant at age", newPlant.age)
             }
         } finally {
             cursor_stopWait()
@@ -212,19 +220,15 @@ export class TTimeSeriesForm {
             this.parentPlant = null
         }
         this.updateMenusForChangeToSelectedPlant()
-        // TODO PDF: Fix or remove commented code on show and bring to front and WindowState
-        // if (!this.Visible) {
-        //     this.Show()
-        // }
-        // this.BringToFront()
-        // if (this.WindowState === delphi_compatability.TWindowState.wsMinimized) {
-        //     this.WindowState = delphi_compatability.TWindowState.wsNormal
-        // }
+        if (!this.Visible) {
+            this.Show()
+        }
+        this.BringToFront()
         this.redrawPlants()
     }
     
     updateMenusForChangeToSelectedPlant(): void {
-        unfinished()
+        // TODO PDF: Fix or remove menu enabling
         // this.TimeSeriesMenuCopy.enabled = (this.selectedPlant !== null)
         // this.TimeSeriesPopupMenuCopy.enabled = this.TimeSeriesMenuCopy.enabled
         // this.TimeSeriesMenuBreed.enabled = (this.selectedPlant !== null)
@@ -232,7 +236,7 @@ export class TTimeSeriesForm {
     }
     
     updatePasteMenuForClipboardContents(): void {
-        unfinished()
+        // TODO PDF: Fix or remove menu enabling
         // this.TimeSeriesMenuPaste.enabled = (domain.plantManager.privatePlantClipboard.length > 0)
         // this.TimeSeriesPopupMenuPaste.enabled = (domain.plantManager.privatePlantClipboard.length > 0)
     }
@@ -607,11 +611,20 @@ export class TTimeSeriesForm {
 
     oninit() {
         setTimeSeriesForm(this)
+        this.updateForChangeToDomainOptions()
     }
 
     view() {
-        return m("div", "TTimeSeriesForm UNFINISHED")
+        return m("div", "TTimeSeriesForm UNFINISHED ", this.parentPlant?.getName(), "this.parentPlant === null? ", JSON.stringify(this.parentPlant === null), " ", "plants length: " + this.plants.length)
     }
-    
+
+    // TODO PDF: Decide what to do about this deli-compatiblility window stuff
+    BringToFront() {
+        // TODO PDF: Fix or remove: throw new Error("Method not implemented.")
+    }
+    Show() {
+        // TODO PDF: Fix or remove: throw new Error("Method not implemented.")
+    }
+    Visible = true
 }
 

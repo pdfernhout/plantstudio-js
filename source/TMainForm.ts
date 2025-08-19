@@ -29,7 +29,7 @@ import { TCustomDrawOptionsForm } from "./TCustomDrawOptionsForm"
 import { TTimeSeriesForm } from "./TTimeSeriesForm"
 import { unfinished } from "./temporary"
 import { TBreederForm } from "./TBreederForm"
-import { setMainForm } from "./PdForms"
+import { BreederForm, setMainForm, TimeSeriesForm } from "./PdForms"
 
 type PosingField = 
     "hide" // posingHidePart
@@ -1889,29 +1889,19 @@ export class TMainForm {
     // --------------------------------------------------------------------------- *window menu 
     MenuWindowBreederClick(): void {
         unfinished()
-        // BreederForm.Show()
-        // BreederForm.BringToFront()
-        // if (BreederForm.WindowState === delphi_compatability.TWindowState.wsMinimized) {
-        //     BreederForm.WindowState = delphi_compatability.TWindowState.wsNormal
-        // }
+        BreederForm.Show()
+        BreederForm.BringToFront()
     }
     
     MenuWindowTimeSeriesClick(): void {
-        unfinished()
-        // TimeSeriesForm.Show()
-        // TimeSeriesForm.BringToFront()
-        // if (TimeSeriesForm.WindowState === delphi_compatability.TWindowState.wsMinimized) {
-        //     TimeSeriesForm.WindowState = delphi_compatability.TWindowState.wsNormal
-        // }
+        TimeSeriesForm.Show()
+        TimeSeriesForm.BringToFront()
     }
     
     MenuWindowNumericalExceptionsClick(): void {
         unfinished()
         // udebug.DebugForm.Show()
         // udebug.DebugForm.BringToFront()
-        // if (udebug.DebugForm.WindowState === delphi_compatability.TWindowState.wsMinimized) {
-        //     udebug.DebugForm.WindowState = delphi_compatability.TWindowState.wsNormal
-        // }
     }
     
     // ---------------------------------------------------------------------------- *help menu 
@@ -5255,9 +5245,6 @@ export class TMainForm {
         // let splitterWidthOrHeight: short
         // let windowLock: boolean
         
-        // if (this.WindowState === delphi_compatability.TWindowState.wsMinimized) {
-        //     return
-        // }
         // if (domain === null) {
         //     return
         // }

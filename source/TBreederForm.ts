@@ -580,9 +580,6 @@ export class TBreederForm {
 //             this.Show()
 //         }
 //         this.BringToFront()
-//         if (this.WindowState === delphi_compatability.TWindowState.wsMinimized) {
-//             this.WindowState = delphi_compatability.TWindowState.wsNormal
-//         }
 //         this.internalChange = false
 //         if (this.plantsDrawGrid.RowCount < this.generations.length) {
 //             this.plantsDrawGrid.RowCount = this.generations.length
@@ -1208,4 +1205,13 @@ export class TBreederForm {
             ))
         )
     }
+
+    // TODO PDF: Decide what to do about this deli-compatiblility window stuff
+    BringToFront() {
+        // TODO PDF: Fix or remove: throw new Error("Method not implemented.")
+    }
+    Show() {
+        // TODO PDF: Fix or remove: throw new Error("Method not implemented.")
+    }
+    Visible = true
 }
