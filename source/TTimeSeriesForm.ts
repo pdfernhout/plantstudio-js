@@ -14,7 +14,7 @@ import { kDontDrawYet, TMainForm } from "./TMainForm"
 import { kCreateFirstGeneration, PdBreedFromParentsCommand, PdDeleteTimeSeriesCommand, PdMakeTimeSeriesCommand, PdPasteCommand } from "./updcom"
 import { TBreederForm } from "./TBreederForm"
 import { unfinished } from "./temporary"
-import { BreederForm, MainForm, setTimeSeriesForm } from "./FormHolder"
+import { activeForm, BreederForm, MainForm, setTimeSeriesForm } from "./FormHolder"
 
 // from conversion_common import *
 // import ubmpsupport
@@ -619,6 +619,7 @@ export class TTimeSeriesForm {
     }
 
     view() {
+        if (activeForm && activeForm !== "TimeSeriesForm") return []
         const self = this
         return m("TimeSeriesForm.TTimeSeriesForm",
             {

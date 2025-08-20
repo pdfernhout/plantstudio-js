@@ -17,3 +17,9 @@ export function setBreederForm(form: TBreederForm) {
 export function setTimeSeriesForm(form: TTimeSeriesForm) {
     TimeSeriesForm = form
 }
+
+type Form = "MainForm" | "BreederForm" | "TimeSeriesForm"
+export let activeForm: "MainForm" | "BreederForm" | "TimeSeriesForm"
+export function setActiveForm(form: Form) {
+    activeForm = form
+}

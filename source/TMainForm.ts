@@ -29,7 +29,7 @@ import { TCustomDrawOptionsForm } from "./TCustomDrawOptionsForm"
 import { TTimeSeriesForm } from "./TTimeSeriesForm"
 import { unfinished } from "./temporary"
 import { TBreederForm } from "./TBreederForm"
-import { BreederForm, setMainForm, TimeSeriesForm } from "./FormHolder"
+import { activeForm, BreederForm, setActiveForm, setMainForm, TimeSeriesForm } from "./FormHolder"
 
 type PosingField = 
     "hide" // posingHidePart
@@ -1886,13 +1886,20 @@ export class TMainForm {
     }
     
     // --------------------------------------------------------------------------- *window menu 
+    MenuWindowMainClick(): void {
+        setActiveForm("MainForm")
+        BreederForm.Show()
+        BreederForm.BringToFront()
+    }
+
     MenuWindowBreederClick(): void {
-        unfinished()
+        setActiveForm("BreederForm")
         BreederForm.Show()
         BreederForm.BringToFront()
     }
     
     MenuWindowTimeSeriesClick(): void {
+        setActiveForm("TimeSeriesForm")
         TimeSeriesForm.Show()
         TimeSeriesForm.BringToFront()
     }
@@ -5862,8 +5869,9 @@ export class TMainForm {
             "checkbox", "MenuOptionsUsePlantBitmaps", "Use Plant &Bitmaps", this.MenuOptionsUsePlantBitmapsClick, () => domain.options.cachePlantBitmaps,
         ],
         "MenuWindow", "&Window", [
-            "MenuWindowBreeder", "&Breeder", this.MenuWindowBreederClick,
-            "MenuWindowTimeSeries", "&Time Series", this.MenuWindowTimeSeriesClick,
+            "radio", "MenuWindowMain", "&Main", this.MenuWindowMainClick, () => activeForm === "MainForm",
+            "radio", "MenuWindowBreeder", "&Breeder", this.MenuWindowBreederClick, () => activeForm === "BreederForm",
+            "radio", "MenuWindowTimeSeries", "&Time Series", this.MenuWindowTimeSeriesClick, () => activeForm === "TimeSeriesForm",
             "-",
             "MenuFileMove", "&Move", [
                 "MenuFilePlantMover", "&Plant Mover...", this.MenuFilePlantMoverClick,
@@ -6759,6 +6767,7 @@ export class TMainForm {
     }
 
     view() {
+        if (activeForm && activeForm !== "MainForm") return []
         const self = this
         return m("div.relative", {
                 onclick: (event: any) => {
@@ -6798,9 +6807,7 @@ export class TMainForm {
                 ),
             ),
             this.viewPlantList(),
-            this.viewPlantFocusPanel(),
-            m(TTimeSeriesForm),
-            m(TBreederForm)
+            this.viewPlantFocusPanel()
         )
     }   
 }

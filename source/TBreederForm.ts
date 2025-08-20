@@ -11,7 +11,7 @@ import { PdGeneration } from "./PdGeneration"
 import { PdCommand } from "./PdCommand"
 import { PdBreedFromParentsCommand, PdMakeTimeSeriesCommand, PdDeleteBreederGenerationCommand, PdDeleteAllBreederGenerationsCommand, PdRandomizeCommand, PdChangeBreedingAndTimeSeriesOptionsCommand, PdPasteCommand, PdReplaceBreederPlant, kDontCreateFirstGeneration } from "./updcom"
 import { cursor_startWait, cursor_stopWait } from "./ucursor"
-import { MainForm, setBreederForm } from "./FormHolder"
+import { activeForm, MainForm, setBreederForm } from "./FormHolder"
 
 const kRedrawPlants = true
 const kDontRedrawPlants = false
@@ -1176,6 +1176,7 @@ export class TBreederForm {
     }
 
     view(vnode: any) {
+        if (activeForm && activeForm !== "BreederForm") return []
         const self = this
         return m("div",
             m("TDrawGrid.plantsDrawGrid", {
