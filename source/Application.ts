@@ -4,12 +4,17 @@ import { PdDomain, domain } from "../source/PdDomain"
 import { TBreederForm } from "./TBreederForm"
 import { TTimeSeriesForm } from "./TTimeSeriesForm"
 import { setActiveForm } from "./FormHolder"
+import { resetDroppedDownMenuId } from "./menu"
 
 PdDomain.createDefault()
 domain.defaultTdoLibraryFileName = "../plants/3D object library.tdo"
 
 const Application = { 
-    view: () => m("div.overflow-auto.h-100",
+    view: () => m("div.overflow-auto.h-100", {
+            onclick: (event: any) => {
+                resetDroppedDownMenuId()
+            },
+        },
         m(TMainForm),
         m(TBreederForm),
         m(TTimeSeriesForm),
