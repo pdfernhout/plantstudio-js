@@ -5,12 +5,12 @@ import { TRect } from "./TRect"
 import { TPoint } from "./TPoint"
 import { TFPBrushStyle, unfinished } from "./temporary"
 import { BreederVariation, domain, DrawMode } from "./PdDomain"
-import { intround, short, long, ColorDefs, int, IntToStr, MessageDialog, arrayRemove } from "./common"
+import { intround, short, long, ColorDefs, int, IntToStr, MessageDialog, arrayRemove, HelpJump } from "./common"
 import { PdPlant, BreedingAndTimeSeriesOptionsStructure, kDrawNow, kDontConsiderDomainScale } from "./PdPlant"
 import { PdGeneration } from "./PdGeneration"
 import { PdCommand } from "./PdCommand"
-import { PdBreedFromParentsCommand, PdMakeTimeSeriesCommand, PdDeleteBreederGenerationCommand, PdDeleteAllBreederGenerationsCommand, PdRandomizeCommand, PdChangeBreedingAndTimeSeriesOptionsCommand, PdPasteCommand, PdReplaceBreederPlant } from "./updcom"
-import { cursor_stopWait } from "./ucursor"
+import { PdBreedFromParentsCommand, PdMakeTimeSeriesCommand, PdDeleteBreederGenerationCommand, PdDeleteAllBreederGenerationsCommand, PdRandomizeCommand, PdChangeBreedingAndTimeSeriesOptionsCommand, PdPasteCommand, PdReplaceBreederPlant, kDontCreateFirstGeneration } from "./updcom"
+import { cursor_startWait, cursor_stopWait } from "./ucursor"
 import { MainForm, setBreederForm } from "./FormHolder"
 
 const kRedrawPlants = true
@@ -33,6 +33,8 @@ const kOptionTabTdos = 4
 
 export class TBreederForm {
 //     plantsDrawGrid: TDrawGrid = new TDrawGrid()
+    // TODO PDF: Fix -- temp for testing plantsDrawGrid
+    plantsDrawGrid: any = {}
 //     /*
 //     BreederMenu: TMainMenu = new TMainMenu()
 //     BreederMenuEdit: TMenuItem = new TMenuItem()
@@ -102,7 +104,7 @@ export class TBreederForm {
         DefaultRowHeight = 200
 //     dragPlantStartPoint: TPoint = new TPoint()
 //     lightUpCell: TPoint = new TPoint()
-//     numBreederPlantsCopiedThisSession: long = 0
+    numBreederPlantsCopiedThisSession: long = 0
 //     internalChange: boolean = false
 //     drawing: boolean = false
 //     needToRedrawFromChangeToDrawOptions: boolean = false
@@ -110,6 +112,8 @@ export class TBreederForm {
 //     TBreederForm.prototype = new PdForm()
 //     TBreederForm.prototype.constructor = TBreederForm
 //     */
+
+        Caption: string = "Breeder"
 
         firstSelectedPlant: PdPlant | null = null
         secondSelectedPlant: PdPlant | null = null
@@ -131,7 +135,7 @@ export class TBreederForm {
     
 //     //$R *.DFM
 //     // ---------------------------------------------------------------------------- creation/destruction 
-//     FormCreate(event: any): void {
+//     FormCreate(): void {
 //         this.generations = ucollect.TListCollection().Create()
 //         this.plantsDrawGrid.DragCursor = ucursor.crDragPlant
 //         this.Position = delphi_compatability.TPosition.poDesigned
@@ -168,7 +172,7 @@ export class TBreederForm {
 //         this.emptyWarningPanel.SendToBack()
 //     }
     
-//     FormActivate(event: any): void {
+//     FormActivate(): void {
 //         if (this.generations.length <= 0) {
 //             this.emptyWarningPanel.BringToFront()
 //         } else if (this.needToRedrawFromChangeToDrawOptions) {
@@ -368,8 +372,8 @@ export class TBreederForm {
 //         // had selection here, moved to mouse down because double-click makes extra mouse up, seems okay so far
 //     }
     
-//     plantsDrawGridDblClick(event: any): void {
-//         this.BreederMenuBreedClick(this)
+//     plantsDrawGridDblClick(): void {
+//         this.BreederMenuBreedClick()
 //     }
     
 //     // ------------------------------------------------------------------------ dragging 
@@ -412,7 +416,7 @@ export class TBreederForm {
 //         this.plantsDrawGrid.BeginDrag(false)
 //     }
     
-//     plantsDrawGridDragOver(Sender: any, Source: TObject, X: int, Y: int, State: TDragState, Accept: boolean): void {
+//     plantsDrawGridDragOver(Source: TObject, X: int, Y: int, State: TDragState, Accept: boolean): void {
 //         let col: long
 //         let row: long
 
@@ -611,340 +615,340 @@ export class TBreederForm {
 //         }
     }
     
-//     updateForChangeToSelections(selectionIsInFirstColumn: boolean): void {
-//         let i: int
-//         let plant: PdPlant
+    updateForChangeToSelections(selectionIsInFirstColumn: boolean): void {
+        let i: int
+        let plant: PdPlant
         
-//         this.updateMenusForChangeToSelection()
-//         //
-//         //  if selectedPlants.count > 0 then
-//         //    for i := 0 to selectedPlants.count - 1 do
-//         //      begin
-//         //      plant := PdPlant(selectedPlants.items[i]);
-//         //      self.updateForChangeToPlant(plant);
-//         //      end;
-//         //      
-//         //if selectionIsInFirstColumn then
-//         this.plantsDrawGrid.Invalidate()
-//     }
+        this.updateMenusForChangeToSelection()
+        //
+        //  if selectedPlants.count > 0 then
+        //    for i := 0 to selectedPlants.count - 1 do
+        //      begin
+        //      plant := PdPlant(selectedPlants.items[i]);
+        //      self.updateForChangeToPlant(plant);
+        //      end;
+        //      
+        //if selectionIsInFirstColumn then
+        this.plantsDrawGrid.Invalidate()
+    }
     
-//     //
-//     //procedure TBreederForm.updateForChangeToSelections;
-//     //  begin
-//     //  for genCount := 0 to generations.count - 1 do
-//     //    begin
-//     //    generation := PdGeneration(generations.items[genCount]);
-//     //    if generation.plants.count > 0 then for plCount := 0 to generation.plants.count - 1 do
-//     //      begin
-//     //      plant := PdPlant(generation.plants.items[plCount]);
-//     //      if generation.plantWasSelected(plant) then
-//     //        self.plantsDrawGridDrawCell(self, plCount+1, genCount, plantsDrawGrid.cellRect(plCount+1, genCount), []);
-//     //      if generation.plantIsSelected(plant) then
-//     //        self.plantsDrawGridDrawCell(self, plCount+1, genCount, plantsDrawGrid.cellRect(plCount+1, genCount), []);
-//     //      end;
-//     //    end;
-//     //  end;
-//     //    
-//     redoCaption(): void {
-//         if (this.generations.length === 1) {
-//             // new v1.4
-//             this.Caption = "Breeder (1 generation)"
-//         } else {
-//             this.Caption = "Breeder (" + IntToStr(this.generations.length) + " generations)"
-//         }
-//         //
-//         //  self.caption := self.caption + ', numbers ';
-//         //  case domain.breedingAndTimeSeriesOptions.variationType of
-//         //    kBreederVariationNoNumeric: self.caption := self.caption + none ;
-//         //    kBreederVariationLow:     self.caption := self.caption + 'low' ;
-//         //    kBreederVariationMedium:  self.caption := self.caption + 'medium' ;
-//         //    kBreederVariationHigh:    self.caption := self.caption + 'high' ;
-//         //    kBreederVariationCustom:  self.caption := self.caption + 'custom' ;
-//         //    end;
-//         //  if domain.breedingAndTimeSeriesOptions.mutateAndBlendColorValues then
-//         //    self.caption := self.caption + ', colors on'
-//         //  else
-//         //    self.caption := self.caption + ', colors off'
-//         //  if domain.breedingAndTimeSeriesOptions.chooseTdosRandomlyFromCurrentLibrary then
-//         //    self.caption := self.caption + ', 3D objects on'
-//         //  else
-//         //    self.caption := self.caption + ', 3D objects off'
-//         //    
-//     }
+    //
+    //procedure TBreederForm.updateForChangeToSelections;
+    //  begin
+    //  for genCount := 0 to generations.count - 1 do
+    //    begin
+    //    generation := PdGeneration(generations.items[genCount]);
+    //    if generation.plants.count > 0 then for plCount := 0 to generation.plants.count - 1 do
+    //      begin
+    //      plant := PdPlant(generation.plants.items[plCount]);
+    //      if generation.plantWasSelected(plant) then
+    //        self.plantsDrawGridDrawCell(self, plCount+1, genCount, plantsDrawGrid.cellRect(plCount+1, genCount), []);
+    //      if generation.plantIsSelected(plant) then
+    //        self.plantsDrawGridDrawCell(self, plCount+1, genCount, plantsDrawGrid.cellRect(plCount+1, genCount), []);
+    //      end;
+    //    end;
+    //  end;
+    //    
+    redoCaption(): void {
+        if (this.generations.length === 1) {
+            // new v1.4
+            this.Caption = "Breeder (1 generation)"
+        } else {
+            this.Caption = "Breeder (" + IntToStr(this.generations.length) + " generations)"
+        }
+        //
+        //  self.caption := self.caption + ', numbers ';
+        //  case domain.breedingAndTimeSeriesOptions.variationType of
+        //    kBreederVariationNoNumeric: self.caption := self.caption + none ;
+        //    kBreederVariationLow:     self.caption := self.caption + 'low' ;
+        //    kBreederVariationMedium:  self.caption := self.caption + 'medium' ;
+        //    kBreederVariationHigh:    self.caption := self.caption + 'high' ;
+        //    kBreederVariationCustom:  self.caption := self.caption + 'custom' ;
+        //    end;
+        //  if domain.breedingAndTimeSeriesOptions.mutateAndBlendColorValues then
+        //    self.caption := self.caption + ', colors on'
+        //  else
+        //    self.caption := self.caption + ', colors off'
+        //  if domain.breedingAndTimeSeriesOptions.chooseTdosRandomlyFromCurrentLibrary then
+        //    self.caption := self.caption + ', 3D objects on'
+        //  else
+        //    self.caption := self.caption + ', 3D objects off'
+        //    
+    }
     
-//     updateMenusForChangeToGenerations(): void {
-//         let havePlants: boolean
+    updateMenusForChangeToGenerations(): void {
+        let havePlants: boolean
         
-//         havePlants = this.generations.length > 0
-//         this.BreederMenuDeleteAll.enabled = havePlants
-//         this.BreederMenuRandomizeAll.enabled = havePlants
-//         this.updateMenusForChangeToSelection()
-//     }
+        havePlants = this.generations.length > 0
+        // TODO PDF: Fix enabling/disabling: this.BreederMenuDeleteAll.enabled = havePlants
+        // TODO PDF: Fix enabling/disabling: this.BreederMenuRandomizeAll.enabled = havePlants
+        this.updateMenusForChangeToSelection()
+    }
     
-//     updateMenusForChangeToSelection(): void {
-//         let haveSelection: boolean
+    updateMenusForChangeToSelection(): void {
+        let haveSelection: boolean
         
-//         haveSelection = (this.primarySelectedPlant() !== null)
-//         this.BreederMenuRandomize.enabled = haveSelection
-//         this.BreederMenuDeleteRow.enabled = haveSelection
-//         this.BreederPopupMenuDeleteRow.enabled = haveSelection
-//         this.BreederMenuBreed.enabled = haveSelection
-//         this.BreederMenuMakeTimeSeries.enabled = haveSelection
-//         this.BreederMenuCopy.enabled = haveSelection
-//         this.BreederPopupMenuBreed.enabled = this.BreederMenuBreed.enabled
-//         this.breedButton.Enabled = this.BreederMenuBreed.enabled
-//         this.BreederPopupMenuMakeTimeSeries.enabled = this.BreederMenuMakeTimeSeries.enabled
-//         this.BreederPopupMenuCopy.enabled = this.BreederMenuCopy.enabled
-//         this.BreederPopupMenuRandomize.enabled = this.BreederMenuRandomize.enabled
-//         this.updatePasteMenuForClipboardContents()
-//         // must paste onto a selected plant 
-//         this.BreederMenuPaste.enabled = this.BreederMenuPaste.enabled && haveSelection
-//         this.BreederPopupMenuPaste.enabled = this.BreederMenuPaste.enabled
-//     }
+        haveSelection = (this.primarySelectedPlant() !== null)
+        // TODO PDF: Fix enabling/disabling: this.BreederMenuRandomize.enabled = haveSelection
+        // TODO PDF: Fix enabling/disabling: this.BreederMenuDeleteRow.enabled = haveSelection
+        // TODO PDF: Fix enabling/disabling: this.BreederPopupMenuDeleteRow.enabled = haveSelection
+        // TODO PDF: Fix enabling/disabling: this.BreederMenuBreed.enabled = haveSelection
+        // TODO PDF: Fix enabling/disabling: this.BreederMenuMakeTimeSeries.enabled = haveSelection
+        // TODO PDF: Fix enabling/disabling: this.BreederMenuCopy.enabled = haveSelection
+        // TODO PDF: Fix enabling/disabling: this.BreederPopupMenuBreed.enabled = this.BreederMenuBreed.enabled
+        // TODO PDF: Fix enabling/disabling: this.breedButton.Enabled = this.BreederMenuBreed.enabled
+        // TODO PDF: Fix enabling/disabling: this.BreederPopupMenuMakeTimeSeries.enabled = this.BreederMenuMakeTimeSeries.enabled
+        // TODO PDF: Fix enabling/disabling: this.BreederPopupMenuCopy.enabled = this.BreederMenuCopy.enabled
+        // TODO PDF: Fix enabling/disabling: this.BreederPopupMenuRandomize.enabled = this.BreederMenuRandomize.enabled
+        this.updatePasteMenuForClipboardContents()
+        // must paste onto a selected plant 
+        // TODO PDF: Fix enabling/disabling: this.BreederMenuPaste.enabled = this.BreederMenuPaste.enabled && haveSelection
+        // TODO PDF: Fix enabling/disabling: this.BreederPopupMenuPaste.enabled = this.BreederMenuPaste.enabled
+    }
     
-//     updatePasteMenuForClipboardContents(): void {
-//         this.BreederMenuPaste.enabled = (this.primarySelectedPlant() !== null) && (domain.plantManager.privatePlantClipboard.length > 0)
-//         this.BreederPopupMenuPaste.enabled = this.BreederMenuPaste.enabled
-//     }
+    updatePasteMenuForClipboardContents(): void {
+        // TODO PDF: Fix enabling/disabling: this.BreederMenuPaste.enabled = (this.primarySelectedPlant() !== null) && (domain.plantManager.privatePlantClipboard.length > 0)
+        // TODO PDF: Fix enabling/disabling: this.BreederPopupMenuPaste.enabled = this.BreederMenuPaste.enabled
+    }
     
-//     selectedGeneration(): PdGeneration | null {
-//         if ((this.selectedRow < 0) || (this.selectedRow > this.generations.length - 1)) {
-//             return null
-//         }
-//         return this.generations[this.selectedRow]
-//     }
+    selectedGeneration(): PdGeneration | null {
+        if ((this.selectedRow < 0) || (this.selectedRow > this.generations.length - 1)) {
+            return null
+        }
+        return this.generations[this.selectedRow]
+    }
     
-//     primarySelectedPlant(): PdPlant | null {
-//         const generation = this.selectedGeneration()
-//         if (generation === null) {
-//             return null
-//         }
-//         return generation.firstSelectedPlant()
-//     }
+    primarySelectedPlant(): PdPlant | null {
+        const generation = this.selectedGeneration()
+        if (generation === null) {
+            return null
+        }
+        return generation.firstSelectedPlant()
+    }
     
-//     plantAtMouse(x: short, y: short): PdPlant | null {
-//         let col: long
-//         let row: long
+    plantAtMouse(x: short, y: short): PdPlant | null {
+        let col: long
+        let row: long
         
-//         [col, row] = this.plantsDrawGrid.MouseToCell(x, y)
-//         if (!this.inGrid(row, col)) {
-//             return null
-//         }
-//         return this.plantForRowAndColumn(row, col)
-//     }
+        [col, row] = this.plantsDrawGrid.MouseToCell(x, y)
+        if (!this.inGrid(row, col)) {
+            return null
+        }
+        return this.plantForRowAndColumn(row, col)
+    }
     
-//     // ----------------------------------------------------------------------------- menu 
-//     BreederMenuUndoClick(event: any): void {
-//         MainForm.MenuEditUndoClick(event)
-//     }
+    // ----------------------------------------------------------------------------- menu 
+    BreederMenuUndoClick(): void {
+        MainForm.MenuEditUndoClick()
+    }
     
-//     BreederMenuRedoClick(event: any): void {
-//         MainForm.MenuEditRedoClick(event)
-//     }
+    BreederMenuRedoClick(): void {
+        MainForm.MenuEditRedoClick()
+    }
     
-//     BreederMenuCopyClick(event: any): void {
-//         const plant = this.primarySelectedPlant()
-//         if (plant === null) {
-//             return
-//         }
-//         const copyList: PdPlant[] = []
-//         copyList.push(plant)
-//         // temporarily change plant name to make copy, then put back 
-//         const saveName = plant.getName()
-//         this.numBreederPlantsCopiedThisSession += 1
-//         plant.setName("Breeder plant " + IntToStr(this.numBreederPlantsCopiedThisSession))
-//         domain.plantManager.copyPlantsInListToPrivatePlantClipboard(copyList)
-//         plant.setName(saveName)
-//         //sets our paste menu also
-//         MainForm.updatePasteMenuForClipboardContents()
-//     }
+    BreederMenuCopyClick(): void {
+        const plant = this.primarySelectedPlant()
+        if (plant === null) {
+            return
+        }
+        const copyList: PdPlant[] = []
+        copyList.push(plant)
+        // temporarily change plant name to make copy, then put back 
+        const saveName = plant.getName()
+        this.numBreederPlantsCopiedThisSession += 1
+        plant.setName("Breeder plant " + IntToStr(this.numBreederPlantsCopiedThisSession))
+        domain.plantManager.copyPlantsInListToPrivatePlantClipboard(copyList)
+        plant.setName(saveName)
+        //sets our paste menu also
+        MainForm.updatePasteMenuForClipboardContents()
+    }
     
-//     BreederMenuSendCopyToMainWindowClick(event: any): void {
-//         this.BreederMenuCopyClick(this)
-//         MainForm.MenuEditPasteClick(MainForm)
-//     }
+    BreederMenuSendCopyToMainWindowClick(): void {
+        this.BreederMenuCopyClick()
+        MainForm.MenuEditPasteClick()
+    }
     
-//     BreederMenuUndoRedoListClick(event: any): void {
-//         MainForm.UndoMenuEditUndoRedoListClick(MainForm)
-//     }
+    BreederMenuUndoRedoListClick(): void {
+        MainForm.UndoMenuEditUndoRedoListClick()
+    }
     
-//     BreederMenuPasteClick(event: any): void {
-//         let newPlant: PdPlant
-//         let newCommand: PdCommand
-//         let column: short
+    BreederMenuPasteClick(): void {
+        let newPlant: PdPlant
+        let newCommand: PdCommand
+        let column: short
         
-//         if (domain.plantManager.privatePlantClipboard.length <= 0) {
-//             return
-//         }
-//         const generation = this.selectedGeneration()
-//         if (generation === null) {
-//             return
-//         }
-//         const plant = generation.firstSelectedPlant()
-//         if (plant === null) {
-//             return
-//         }
-//         column = generation.plants.indexOf(plant) + 1
-//         newPlant = new PdPlant()
-//         domain.plantManager.pasteFirstPlantFromPrivatePlantClipboardToPlant(newPlant)
-//         newCommand = new PdReplaceBreederPlant(newPlant, this.selectedRow, column)
-//         MainForm.doCommand(newCommand)
-//         //command will free plant if paste is undone
-//     }
+        if (domain.plantManager.privatePlantClipboard.length <= 0) {
+            return
+        }
+        const generation = this.selectedGeneration()
+        if (generation === null) {
+            return
+        }
+        const plant = generation.firstSelectedPlant()
+        if (plant === null) {
+            return
+        }
+        column = generation.plants.indexOf(plant) + 1
+        newPlant = new PdPlant()
+        domain.plantManager.pasteFirstPlantFromPrivatePlantClipboardToPlant(newPlant)
+        newCommand = new PdReplaceBreederPlant(newPlant, this.selectedRow, column)
+        MainForm.doCommand(newCommand)
+        //command will free plant if paste is undone
+    }
     
-//     BreederMenuBreedClick(event: any): void {
-//         let generationToBreed: PdGeneration
-//         let newCommand: PdCommand
+    BreederMenuBreedClick(): void {
+        let generationToBreed: PdGeneration
+        let newCommand: PdCommand
         
-//         if ((this.selectedRow < 0) || (this.selectedRow > this.generations.length - 1)) {
-//             return
-//         }
-//         if (this.selectedRow >= domain.breedingAndTimeSeriesOptions.maxGenerations - 1) {
-//             // check if there is room in the breeder - this command will make one new generation 
-//             this.fullWarning()
-//             return
-//         }
-//         generationToBreed = this.generations[this.selectedRow]
-//         if (generationToBreed.selectedPlants.length <= 0) {
-//             return
-//         }
-//         newCommand = new PdBreedFromParentsCommand(this.generations, generationToBreed.firstSelectedPlant(), generationToBreed.secondSelectedPlant(), this.selectedRow, domain.breedingAndTimeSeriesOptions.percentMaxAge / 100.0, kDontCreateFirstGeneration)
-//         generationToBreed.firstParent = generationToBreed.firstSelectedPlant()
-//         generationToBreed.secondParent = generationToBreed.secondSelectedPlant()
-//         MainForm.doCommand(newCommand)
-//     }
+        if ((this.selectedRow < 0) || (this.selectedRow > this.generations.length - 1)) {
+            return
+        }
+        if (this.selectedRow >= domain.breedingAndTimeSeriesOptions.maxGenerations - 1) {
+            // check if there is room in the breeder - this command will make one new generation 
+            this.fullWarning()
+            return
+        }
+        generationToBreed = this.generations[this.selectedRow]
+        if (generationToBreed.selectedPlants.length <= 0) {
+            return
+        }
+        newCommand = new PdBreedFromParentsCommand(this.generations, generationToBreed.firstSelectedPlant(), generationToBreed.secondSelectedPlant(), this.selectedRow, domain.breedingAndTimeSeriesOptions.percentMaxAge / 100.0, kDontCreateFirstGeneration)
+        generationToBreed.firstParent = generationToBreed.firstSelectedPlant()
+        generationToBreed.secondParent = generationToBreed.secondSelectedPlant()
+        MainForm.doCommand(newCommand)
+    }
     
-//     BreederMenuMakeTimeSeriesClick(event: any): void {
-//         let newCommand: PdCommand
+    BreederMenuMakeTimeSeriesClick(): void {
+        let newCommand: PdCommand
 
-//         const aPlant = this.primarySelectedPlant()
-//         if (aPlant === null) {
-//             return
-//         }
-//         newCommand = new PdMakeTimeSeriesCommand(aPlant)
-//         MainForm.doCommand(newCommand)
-//     }
+        const aPlant = this.primarySelectedPlant()
+        if (aPlant === null) {
+            return
+        }
+        newCommand = new PdMakeTimeSeriesCommand(aPlant)
+        MainForm.doCommand(newCommand)
+    }
     
     fullWarning(): void {
         MessageDialog("The breeder is full.\n\nYou must delete some rows\nor increase the number of rows allowed in the breeder options)\n\nbefore you can breed more plants.", "mtWarning", {mbOK: true, }, 0)
     }
     
-//     BreederMenuDeleteRowClick(event: any): void { 
-//         const aGeneration = this.selectedGeneration()
-//         if (aGeneration === null) {
-//             return
-//         }
-//         const newCommand: PdCommand = new PdDeleteBreederGenerationCommand(aGeneration)
-//         MainForm.doCommand(newCommand)
-//     }
+    BreederMenuDeleteRowClick(): void { 
+        const aGeneration = this.selectedGeneration()
+        if (aGeneration === null) {
+            return
+        }
+        const newCommand: PdCommand = new PdDeleteBreederGenerationCommand(aGeneration)
+        MainForm.doCommand(newCommand)
+    }
     
-//     BreederMenuDeleteAllClick(event: any): void { 
-//         if (this.generations.length <= 0) {
-//             return
-//         }
-//         const newCommand: PdCommand = new PdDeleteAllBreederGenerationsCommand()
-//         MainForm.doCommand(newCommand)
-//     }
+    BreederMenuDeleteAllClick(): void { 
+        if (this.generations.length <= 0) {
+            return
+        }
+        const newCommand: PdCommand = new PdDeleteAllBreederGenerationsCommand()
+        MainForm.doCommand(newCommand)
+    }
     
-//     BreederMenuRandomizeClick(event: any): void {
-//         const aGeneration = this.selectedGeneration()
-//         if (aGeneration === null) {
-//             return
-//         }
-//         if (aGeneration.selectedPlants.length <= 0) {
-//             return
-//         }
-//         const randomizeList: PdPlant[] = []
-//         try {
-//             for (let i = 0; i < aGeneration.selectedPlants.length; i++) {
-//                 const plant = aGeneration.selectedPlants[i]
-//                 randomizeList.push(plant)
-//             }
-//             const newCommand = new PdRandomizeCommand(randomizeList)
-//             newCommand.isInBreeder = true
-//             cursor_startWait()
-//             MainForm.doCommand(newCommand)
-//         } finally {
-//             cursor_stopWait()
-//         }
-//     }
+    BreederMenuRandomizeClick(): void {
+        const aGeneration = this.selectedGeneration()
+        if (aGeneration === null) {
+            return
+        }
+        if (aGeneration.selectedPlants.length <= 0) {
+            return
+        }
+        const randomizeList: PdPlant[] = []
+        try {
+            for (let i = 0; i < aGeneration.selectedPlants.length; i++) {
+                const plant = aGeneration.selectedPlants[i]
+                randomizeList.push(plant)
+            }
+            const newCommand = new PdRandomizeCommand(randomizeList)
+            newCommand.isInBreeder = true
+            cursor_startWait()
+            MainForm.doCommand(newCommand)
+        } finally {
+            cursor_stopWait()
+        }
+    }
     
-//     BreederMenuRandomizeAllClick(event: any): void {
-//         if (this.generations.length <= 0) {
-//             return
-//         }
-//         try {
-//             cursor_startWait()
-//             const randomizeList: PdPlant[] = []
-//             if (this.generations.length > 0) {
-//                 for (let i = 0; i <= this.generations.length - 1; i++) {
-//                     const generation: PdGeneration = this.generations[i]
-//                     if (generation.plants.length > 0) {
-//                         for (let j = 0; j <= generation.plants.length - 1; j++) {
-//                             randomizeList.push(generation.plants[j])
-//                         }
-//                     }
-//                 }
-//             }
-//             const newCommand = new PdRandomizeCommand(randomizeList)
-//             newCommand.isInBreeder = true
-//             newCommand.isRandomizeAllInBreeder = true
-//             MainForm.doCommand(newCommand)
-//         } finally {
-//             cursor_stopWait()
-//         }
-//     }
+    BreederMenuRandomizeAllClick(): void {
+        if (this.generations.length <= 0) {
+            return
+        }
+        try {
+            cursor_startWait()
+            const randomizeList: PdPlant[] = []
+            if (this.generations.length > 0) {
+                for (let i = 0; i <= this.generations.length - 1; i++) {
+                    const generation: PdGeneration = this.generations[i]
+                    if (generation.plants.length > 0) {
+                        for (let j = 0; j <= generation.plants.length - 1; j++) {
+                            randomizeList.push(generation.plants[j])
+                        }
+                    }
+                }
+            }
+            const newCommand = new PdRandomizeCommand(randomizeList)
+            newCommand.isInBreeder = true
+            newCommand.isRandomizeAllInBreeder = true
+            MainForm.doCommand(newCommand)
+        } finally {
+            cursor_stopWait()
+        }
+    }
     
-//     BreederMenuVariationNoneClick(event: any): void {
-//         domain.breedingAndTimeSeriesOptions.variationType = BreederVariation.kBreederVariationNoNumeric
-//         this.BreederMenuVariationNone.checked = true
-//         this.redoCaption()
-//     }
+    BreederMenuVariationNoneClick(): void {
+        domain.breedingAndTimeSeriesOptions.variationType = BreederVariation.kBreederVariationNoNumeric
+        // TODO PDF: Fix enabling/disabling: this.BreederMenuVariationNone.checked = true
+        this.redoCaption()
+    }
     
-//     BreederMenuVariationLowClick(event: any): void {
-//         domain.breedingAndTimeSeriesOptions.variationType = BreederVariation.kBreederVariationLow
-//         this.BreederMenuVariationLow.checked = true
-//         this.redoCaption()
-//     }
+    BreederMenuVariationLowClick(): void {
+        domain.breedingAndTimeSeriesOptions.variationType = BreederVariation.kBreederVariationLow
+        // TODO PDF: Fix enabling/disabling: this.BreederMenuVariationLow.checked = true
+        this.redoCaption()
+    }
     
-//     BreederMenuVariationMediumClick(event: any): void {
-//         domain.breedingAndTimeSeriesOptions.variationType = BreederVariation.kBreederVariationMedium
-//         this.BreederMenuVariationMedium.checked = true
-//         this.redoCaption()
-//     }
+    BreederMenuVariationMediumClick(): void {
+        domain.breedingAndTimeSeriesOptions.variationType = BreederVariation.kBreederVariationMedium
+        // TODO PDF: Fix enabling/disabling: this.BreederMenuVariationMedium.checked = true
+        this.redoCaption()
+    }
     
-//     BreederMenuVariationHighClick(event: any): void {
-//         domain.breedingAndTimeSeriesOptions.variationType = BreederVariation.kBreederVariationHigh
-//         // this is to deal with if it was turned off by not having a library
-//         // v2.0 removed - this is separate now
-//         // domain.breedingAndTimeSeriesOptions.chooseTdosRandomlyFromCurrentLibrary := true;
-//         this.BreederMenuVariationHigh.checked = true
-//         this.redoCaption()
-//     }
+    BreederMenuVariationHighClick(): void {
+        domain.breedingAndTimeSeriesOptions.variationType = BreederVariation.kBreederVariationHigh
+        // this is to deal with if it was turned off by not having a library
+        // v2.0 removed - this is separate now
+        // domain.breedingAndTimeSeriesOptions.chooseTdosRandomlyFromCurrentLibrary := true;
+        // TODO PDF: Fix enabling/disabling: this.BreederMenuVariationHigh.checked = true
+        this.redoCaption()
+    }
     
-    BreederMenuVariationCustomClick(event: any): void {
+    BreederMenuVariationCustomClick(): void {
         this.changeBreederAndTimeSeriesOptions(kOptionTabMutation)
     }
     
-    BreederMenuOtherOptionsClick(event: any): void {
+    BreederMenuOtherOptionsClick(): void {
         this.changeBreederAndTimeSeriesOptions(kOptionTabSize)
     }
     
-//     BreederMenuVaryColorsClick(event: any): void {
-//         this.BreederMenuVaryColors.checked = !this.BreederMenuVaryColors.checked
-//         const options: BreedingAndTimeSeriesOptionsStructure = domain.breedingAndTimeSeriesOptions
-//         options.mutateAndBlendColorValues = this.BreederMenuVaryColors.checked
-//         const newCommand: PdCommand = new PdChangeBreedingAndTimeSeriesOptionsCommand(options, domain.options)
-//         MainForm.doCommand(newCommand)
-//     }
+    BreederMenuVaryColorsClick(): void {
+        // TODO PDF: Fix enabling/disabling: this.BreederMenuVaryColors.checked = !this.BreederMenuVaryColors.checked
+        const options: BreedingAndTimeSeriesOptionsStructure = domain.breedingAndTimeSeriesOptions
+        options.mutateAndBlendColorValues = !options.mutateAndBlendColorValues
+        const newCommand: PdCommand = new PdChangeBreedingAndTimeSeriesOptionsCommand(options, domain.options)
+        MainForm.doCommand(newCommand)
+    }
     
-//     BreederMenuVary3DObjectsClick(event: any): void {
-//         this.BreederMenuVary3DObjects.checked = !this.BreederMenuVary3DObjects.checked
-//         const options: BreedingAndTimeSeriesOptionsStructure = domain.breedingAndTimeSeriesOptions
-//         options.chooseTdosRandomlyFromCurrentLibrary = this.BreederMenuVary3DObjects.checked
-//         const newCommand: PdCommand = new PdChangeBreedingAndTimeSeriesOptionsCommand(options, domain.options)
-//         MainForm.doCommand(newCommand)
-//     }
+    BreederMenuVary3DObjectsClick(): void {
+        // TODO PDF: Fix enabling/disabling: this.BreederMenuVary3DObjects.checked = !this.BreederMenuVary3DObjects.checked
+        const options: BreedingAndTimeSeriesOptionsStructure = domain.breedingAndTimeSeriesOptions
+        options.chooseTdosRandomlyFromCurrentLibrary = !options.chooseTdosRandomlyFromCurrentLibrary
+        const newCommand: PdCommand = new PdChangeBreedingAndTimeSeriesOptionsCommand(options, domain.options)
+        MainForm.doCommand(newCommand)
+    }
     
     changeBreederAndTimeSeriesOptions(tabIndexToShow: short): void {
         unfinished()
@@ -966,77 +970,77 @@ export class TBreederForm {
         // }
     }
     
-//     variationLowClick(event: any): void {
-//         this.BreederMenuVariationLowClick(this)
-//     }
+    variationLowClick(): void {
+        this.BreederMenuVariationLowClick()
+    }
     
-//     variationNoneNumericClick(event: any): void {
-//         this.BreederMenuVariationNoneClick(this)
-//     }
+    variationNoneNumericClick(): void {
+        this.BreederMenuVariationNoneClick()
+    }
     
-//     variationMediumClick(event: any): void {
-//         this.BreederMenuVariationMediumClick(this)
-//     }
+    variationMediumClick(): void {
+        this.BreederMenuVariationMediumClick()
+    }
     
-//     variationHighClick(event: any): void {
-//         this.BreederMenuVariationHighClick(this)
-//     }
+    variationHighClick(): void {
+        this.BreederMenuVariationHighClick()
+    }
     
-//     variationCustomClick(event: any): void {
-//         this.BreederMenuVariationCustomClick(this)
-//     }
+    variationCustomClick(): void {
+        this.BreederMenuVariationCustomClick()
+    }
     
-//     varyColorsClick(event: any): void {
-//         this.BreederMenuVaryColorsClick(this)
-//     }
+    varyColorsClick(): void {
+        this.BreederMenuVaryColorsClick()
+    }
     
-//     vary3DObjectsClick(event: any): void {
-//         this.BreederMenuVary3DObjectsClick(this)
-//     }
+    vary3DObjectsClick(): void {
+        this.BreederMenuVary3DObjectsClick()
+    }
     
-//     BreederPopupMenuRandomizeClick(event: any): void {
-//         this.BreederMenuRandomizeClick(this)
-//     }
+    BreederPopupMenuRandomizeClick(): void {
+        this.BreederMenuRandomizeClick()
+    }
     
-//     BreederPopupMenuBreedClick(event: any): void {
-//         this.BreederMenuBreedClick(this)
-//     }
+    BreederPopupMenuBreedClick(): void {
+        this.BreederMenuBreedClick()
+    }
     
-//     breedButtonClick(event: any): void {
-//         this.BreederMenuBreedClick(this)
-//     }
+    breedButtonClick(): void {
+        this.BreederMenuBreedClick()
+    }
     
-//     BreederPopupMenuMakeTimeSeriesClick(event: any): void {
-//         this.BreederMenuMakeTimeSeriesClick(this)
-//     }
+    BreederPopupMenuMakeTimeSeriesClick(): void {
+        this.BreederMenuMakeTimeSeriesClick()
+    }
     
-//     BreederPopupMenuCopyClick(event: any): void {
-//         this.BreederMenuCopyClick(this)
-//     }
+    BreederPopupMenuCopyClick(): void {
+        this.BreederMenuCopyClick()
+    }
     
-//     BreederPopupMenuPasteClick(event: any): void {
-//         this.BreederMenuPasteClick(this)
-//     }
+    BreederPopupMenuPasteClick(): void {
+        this.BreederMenuPasteClick()
+    }
     
-//     BreederPopupMenuSendCopytoMainWindowClick(event: any): void {
-//         this.BreederMenuSendCopyToMainWindowClick(this)
-//     }
+    BreederPopupMenuSendCopytoMainWindowClick(): void {
+        this.BreederMenuSendCopyToMainWindowClick()
+    }
     
-//     BreederPopupMenuDeleteRowClick(event: any): void {
-//         this.BreederMenuDeleteRowClick(this)
-//     }
+    BreederPopupMenuDeleteRowClick(): void {
+        this.BreederMenuDeleteRowClick()
+    }
     
-//     // --------------------------------------------------------------------------- utilities 
-//     inGrid(row: short, column: short): boolean {
-//         let result = true
-//         if ((row < 0) || (row > this.generations.length - 1)) {
-//             result = false
-//         }
-//         if ((column < 1) || (column - 1 > this.plantsDrawGrid.ColCount - 1)) {
-//             result = false
-//         }
-//         return result
-//     }
+    // --------------------------------------------------------------------------- utilities 
+    inGrid(row: short, column: short): boolean {
+        let result = true
+        if ((row < 0) || (row > this.generations.length - 1)) {
+            result = false
+        }
+        if ((column < 1) || (column - 1 > this.plantsDrawGrid.ColCount - 1)) {
+            result = false
+        }
+        return result
+    }
     
     generationForIndex(index: short): PdGeneration | null {
         if (index < 0) {
@@ -1060,7 +1064,7 @@ export class TBreederForm {
     }
     
 //     // ---------------------------------------------------------------------------- resizing 
-//     FormResize(event: any): void {
+//     FormResize(): void {
 //         if (this.generations === null) {
 //             return
 //         }
@@ -1077,33 +1081,33 @@ export class TBreederForm {
 //         UNRESOLVED.ptMinTrackSize.y = 150
 //     }
     
-//     helpButtonClick(event: any): void {
-//         delphi_compatability.Application.HelpJump("Breeding_plants_using_the_breeder")
-//     }
+    helpButtonClick(): void {
+        HelpJump("Breeding_plants_using_the_breeder")
+    }
     
-//     BreederMenuHelpOnBreedingClick(event: any): void {
-//         delphi_compatability.Application.HelpJump("Breeding_plants_using_the_breeder")
-//     }
+    BreederMenuHelpOnBreedingClick(): void {
+        HelpJump("Breeding_plants_using_the_breeder")
+    }
     
-//     BreederMenuHelpTopicsClick(event: any): void {
-//         delphi_compatability.Application.HelpCommand(UNRESOLVED.HELP_FINDER, 0)
-//     }
+    BreederMenuHelpTopicsClick(): void {
+        HelpJump("")
+    }
     
-//     BreederMenuOptionsFastDrawClick(event: any): void {
-//         MainForm.MenuOptionsFastDrawClick(MainForm)
-//     }
+    BreederMenuOptionsFastDrawClick(): void {
+        MainForm.MenuOptionsFastDrawClick()
+    }
     
-//     BreederMenuOptionsMediumDrawClick(event: any): void {
-//         MainForm.MenuOptionsMediumDrawClick(MainForm)
-//     }
+    BreederMenuOptionsMediumDrawClick(): void {
+        MainForm.MenuOptionsMediumDrawClick()
+    }
     
-//     BreederMenuOptionsBestDrawClick(event: any): void {
-//         MainForm.MenuOptionsBestDrawClick(MainForm)
-//     }
+    BreederMenuOptionsBestDrawClick(): void {
+        MainForm.MenuOptionsBestDrawClick()
+    }
     
-//     BreederMenuOptionsCustomDrawClick(event: any): void {
-//         MainForm.MenuOptionsCustomDrawClick(MainForm)
-//     }
+    BreederMenuOptionsCustomDrawClick(): void {
+        MainForm.MenuOptionsCustomDrawClick()
+    }
 
     viewEmptyIfNeeded(vnode: any) {
         if (this.generations.length <= 0) {
@@ -1152,7 +1156,120 @@ export class TBreederForm {
                 // OnEndDrag: "plantsDrawGridEndDrag",
                 // OnMouseDown: "plantsDrawGridMouseDown",
                 // OnMouseUp: "plantsDrawGridMouseUp",
-            }, 
+            },
+            m("div.breederToolbarPanel.TPanel",
+                {
+                    // Top: "10",
+                    // Left: "2",
+                    // Height: "33",
+                    // Width: "339",
+                    // BevelInner: "bvRaised",
+                    // BevelOuter: "bvLowered",
+                    // TabOrder: "2",
+                },
+                m("button.breedButton.TSpeedButton",
+                    {
+                        onclick: () => this.breedButtonClick(),
+                        // Top: "4",
+                        // Left: "5",
+                        // Height: "25",
+                        // Width: "25",
+                        // Glyph.Data: "76010000424D760100000000000076000000280000002000000010000000010004000000000000010000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF0088888888888888888888888888888888888888888888888888888888888888888CCCCCC8CCCCCC8887777778777777888CFFFFC8CFFFFC8887888878788887888CFF2FC8CF2FFC8887887878787887888CF2FFC8CFF2FC8887878878788787888CFFFFC8CFFFFC8887888878788887888CCCCCC8CCCCCC888777777877777788888888888888888888888888888888888CCCCCC88888888887777778888888888CFFFFC88888888887888878888888888CF22FC88888888887877878888888888CF2FFC88888888887878878888888888CFFFFC88888888887888878888888888CCCCCC888888888877777788888888888888888888888888888888888888888",
+                        // NumGlyphs: "2",
+                    },
+                ),
+                m("button.variationNoneNumeric.TSpeedButton",
+                    {
+                        onclick: () => this.variationNoneNumericClick(),
+                        // Top: "4",
+                        // Left: "47",
+                        // Height: "25",
+                        // Width: "25",
+                        // GroupIndex: "1",
+                        // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888888888888888888888888888888C888888888888888C888888888888888C888888888888888C888888888888888C888888888888888C888888888888888C888888888888888C888888888888888C888888888888888C888888888888888C888888888888888C888888888888888C888888888888888C88888888",
+                    },
+                ),
+                m("button.variationLow.TSpeedButton",
+                    {
+                        onclick: () => this.variationLowClick(),
+                        // Top: "4",
+                        // Left: "74",
+                        // Height: "25",
+                        // Width: "25",
+                        // GroupIndex: "1",
+                        // Down: "True",
+                        // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF008888888888888888888888888888888888888CCCCC88888888888CCCCC88888888888CCCCC88888888888CCCCC888888888888CCC8888888888888CCC8888888888888CCC8888888888888CCC88888888888888C888888888888888C888888888888888C888888888888888C888888888888888C888888888888888C88888888",
+                    },
+                ),
+                m("button.variationMedium.TSpeedButton",
+                    {
+                        onclick: () => this.variationMediumClick(),
+                        // Top: "4",
+                        // Left: "102",
+                        // Height: "25",
+                        // Width: "25",
+                        // GroupIndex: "1",
+                        // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF0088888888888888888888888888888888888CCCCCCCCC8888888CCCCCCCCC8888888CCCCCCCCC88888888CCCCCCC888888888CCCCCCC8888888888CCCCC88888888888CCCCC888888888888CCC8888888888888CCC88888888888888C888888888888888C888888888888888C888888888888888C888888888888888C88888888",
+                    },
+                ),
+                m("button.variationHigh.TSpeedButton",
+                    {
+                        onclick: () => this.variationHighClick(),
+                        // Top: "4",
+                        // Left: "129",
+                        // Height: "25",
+                        // Width: "25",
+                        // GroupIndex: "1",
+                        // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888888888888888888888888CCCCCCCCCCCCC888CCCCCCCCCCCCC888CCCCCCCCCCCCC8888CCCCCCCCCCC888888CCCCCCCCC88888888CCCCCCC888888888CCCCCCC8888888888CCCCC888888888888CCC88888888888888C888888888888888C888888888888888C888888888888888C888888888888888C88888888",
+                    },
+                ),
+                m("button.variationCustom.TSpeedButton",
+                    {
+                        onclick: () => this.variationCustomClick(),
+                        // Top: "4",
+                        // Left: "156",
+                        // Height: "25",
+                        // Width: "25",
+                        // GroupIndex: "1",
+                        // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888888888888888888888888CCC88CCC88CCC888CCC88CCC88CCC888CCCC8CCC8CCCC8888CCC8CCC8CCC888888CCCCCCCCC88888888CCCCCCC888888888CCCCCCC8888888888CCCCC888888888888CCC88888888888888C888888888888888C888888888888888C888888888888888C888888888888888C88888888",
+                    },
+                ),
+                m("button.varyColors.TSpeedButton",
+                    {
+                        onclick: () => this.varyColorsClick(),
+                        // Top: "4",
+                        // Left: "207",
+                        // Height: "25",
+                        // Width: "25",
+                        // AllowAllUp: "True",
+                        // GroupIndex: "2",
+                        // Down: "True",
+                        // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888888888888888888888888C999AAADDDEEC888C999AAADDDEEC888C999AAADDDEEC8888C99AAADDDEC888888C9AAADDDC88888888CAAADDC888888888CAAADDC8888888888CAADC888888888888CAC88888888888888C888888888888888C888888888888888C888888888888888C888888888888888C88888888",
+                    },
+                ),
+                m("button.vary3DObjects.TSpeedButton",
+                    {
+                        onclick: () => this.vary3DObjectsClick(),
+                        // Top: "4",
+                        // Left: "239",
+                        // Height: "25",
+                        // Width: "25",
+                        // AllowAllUp: "True",
+                        // GroupIndex: "3",
+                        // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888888888888888888888888C8CCCCC8CCC8C888C88CCC88CCC8C888C888C888CCC8C8888C888888888C888888C8888888C88888888C88888C888888888C88888C8888888888C888C888888888888CCC88888888888888C888888888888888C888888888888888C888888888888888C888888888888888C88888888",
+                    },
+                ),
+                m("button.helpButton.TSpeedButton",
+                    {
+                        onclick: () => this.helpButtonClick(),
+                        // Top: "4",
+                        // Left: "310",
+                        // Height: "25",
+                        // Width: "25",
+                        // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888888888888888888888888888880C08888888888888CCC88888888888880C0888888888888888888888888888888C888888888888888C088888888888888CC888888888888888CC888888888800880CC888888888CC880CC888888888CC080CC8888888888CCCCC888888888888CCC88888888888888888888888",
+                    },
+                ),
+            ),
             this.viewEmptyIfNeeded(vnode),
             m("div",
                 this.generations.map((generation: PdGeneration, row: number) => m("div.flex.flex-row",
