@@ -6650,6 +6650,15 @@ export class TMainForm {
                 m("canvas.ba", {
                     width: self.drawingBitmap.width,
                     height: self.drawingBitmap.height,
+                    oncreate(vnode: m.VnodeDOM) {
+                        self.drawingPaintBox = <HTMLCanvasElement>vnode.dom
+                        self.copyDrawingBitmapToPaintBox()
+                        // TODO PDF: May need to rethink how hint is drawn
+                        if (this.hintActive && this.lastHintString) {
+                            const context = this.drawingPaintBox.getContext("2d")
+                            context.fillText(this.lastHintString, this.hintX, this.hintY)
+                        }
+                    },
                     onupdate(vnode: m.VnodeDOM) {
                         self.drawingPaintBox = <HTMLCanvasElement>vnode.dom
                         self.copyDrawingBitmapToPaintBox()
