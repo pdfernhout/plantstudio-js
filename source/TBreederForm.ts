@@ -5,7 +5,7 @@ import { TRect } from "./TRect"
 import { TPoint } from "./TPoint"
 import { TFPBrushStyle, unfinished } from "./temporary"
 import { BreederVariation, domain, DrawMode } from "./PdDomain"
-import { intround, short, long, ColorDefs, int, IntToStr, MessageDialog, arrayRemove, HelpJump } from "./common"
+import { intround, short, long, ColorDefs, int, IntToStr, MessageDialog, arrayRemove, HelpJump, imageDir } from "./common"
 import { PdPlant, BreedingAndTimeSeriesOptionsStructure, kDrawNow, kDontConsiderDomainScale } from "./PdPlant"
 import { PdGeneration } from "./PdGeneration"
 import { PdCommand } from "./PdCommand"
@@ -684,11 +684,13 @@ export class TBreederForm {
         // TODO PDF: Fix enabling/disabling: this.BreederMenuRandomizeAll.enabled = havePlants
         this.updateMenusForChangeToSelection()
     }
+
+    haveSelection(): boolean {
+        return (this.primarySelectedPlant() !== null)
+    }
     
     updateMenusForChangeToSelection(): void {
-        let haveSelection: boolean
-        
-        haveSelection = (this.primarySelectedPlant() !== null)
+        let haveSelection = this.haveSelection()
         // TODO PDF: Fix enabling/disabling: this.BreederMenuRandomize.enabled = haveSelection
         // TODO PDF: Fix enabling/disabling: this.BreederMenuDeleteRow.enabled = haveSelection
         // TODO PDF: Fix enabling/disabling: this.BreederPopupMenuDeleteRow.enabled = haveSelection
@@ -951,7 +953,8 @@ export class TBreederForm {
     }
     
     changeBreederAndTimeSeriesOptions(tabIndexToShow: short): void {
-        unfinished()
+        // PODF TODO: Fix thie
+        alert("UNFINISHED")
         // if (tabIndexToShow === kOptionTabMutation) {
         //     domain.breedingAndTimeSeriesOptions.variationType = BreederVariation.kBreederVariationCustom
         //     this.BreederMenuVariationCustom.checked = true
@@ -1132,6 +1135,46 @@ export class TBreederForm {
         setBreederForm(this)
     }
 
+    backgroundForSpeedButton(buttonId: string) {
+        const selected = ".bg-blue"
+        switch(buttonId) {
+            case "variationNoneNumeric":
+                return domain.breedingAndTimeSeriesOptions.variationType === BreederVariation.kBreederVariationNoNumeric
+                    ? selected
+                    : ""
+            case "variationLow":
+                return domain.breedingAndTimeSeriesOptions.variationType === BreederVariation.kBreederVariationLow
+                    ? selected
+                    : ""
+            case "variationMedium":
+                return domain.breedingAndTimeSeriesOptions.variationType === BreederVariation.kBreederVariationMedium
+                    ? selected
+                    : ""
+            case "variationHigh":
+                return domain.breedingAndTimeSeriesOptions.variationType === BreederVariation.kBreederVariationHigh
+                    ? selected
+                    : ""
+            case "variationCustom":
+                return domain.breedingAndTimeSeriesOptions.variationType === BreederVariation.kBreederVariationCustom
+                    ? selected
+                    : ""
+
+            case "varyColors":
+                return domain.breedingAndTimeSeriesOptions.mutateAndBlendColorValues
+                    ? selected
+                    : ""
+
+            case "vary3DObjects":
+                return domain.breedingAndTimeSeriesOptions.chooseTdosRandomlyFromCurrentLibrary
+                    ? selected
+                    : ""
+
+            default: {
+                throw new Error("Unexpected buttonId: " + buttonId)
+            }
+        }
+    }
+
     view(vnode: any) {
         const self = this
         return m("div",
@@ -1170,104 +1213,66 @@ export class TBreederForm {
                 m("button.breedButton.TSpeedButton",
                     {
                         onclick: () => this.breedButtonClick(),
-                        // Top: "4",
-                        // Left: "5",
-                        // Height: "25",
-                        // Width: "25",
-                        // Glyph.Data: "76010000424D760100000000000076000000280000002000000010000000010004000000000000010000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF0088888888888888888888888888888888888888888888888888888888888888888CCCCCC8CCCCCC8887777778777777888CFFFFC8CFFFFC8887888878788887888CFF2FC8CF2FFC8887887878787887888CF2FFC8CFF2FC8887878878788787888CFFFFC8CFFFFC8887888878788887888CCCCCC8CCCCCC888777777877777788888888888888888888888888888888888CCCCCC88888888887777778888888888CFFFFC88888888887888878888888888CF22FC88888888887877878888888888CF2FFC88888888887878878888888888CFFFFC88888888887888878888888888CCCCCC888888888877777788888888888888888888888888888888888888888",
-                        // NumGlyphs: "2",
+                        disabled: !this.haveSelection(),
+                        title: "Breed",
                     },
+                    m("img", { src: imageDir + (this.haveSelection() ? "BreederForm_breedButton.png" :  "BreederForm_breedButton-disabled.png" )})
                 ),
-                m("button.variationNoneNumeric.TSpeedButton",
+                m("button.variationNoneNumeric.TSpeedButton" + this.backgroundForSpeedButton("variationNoneNumeric"),
                     {
                         onclick: () => this.variationNoneNumericClick(),
-                        // Top: "4",
-                        // Left: "47",
-                        // Height: "25",
-                        // Width: "25",
-                        // GroupIndex: "1",
-                        // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888888888888888888888888888888C888888888888888C888888888888888C888888888888888C888888888888888C888888888888888C888888888888888C888888888888888C888888888888888C888888888888888C888888888888888C888888888888888C888888888888888C888888888888888C88888888",
+                        title: "Variation none",
                     },
+                    m("img", { src: imageDir + "BreederForm_variationNoneNumeric.png" })
                 ),
-                m("button.variationLow.TSpeedButton",
+                m("button.variationLow.TSpeedButton" + this.backgroundForSpeedButton("variationLow"),
                     {
                         onclick: () => this.variationLowClick(),
-                        // Top: "4",
-                        // Left: "74",
-                        // Height: "25",
-                        // Width: "25",
-                        // GroupIndex: "1",
-                        // Down: "True",
-                        // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF008888888888888888888888888888888888888CCCCC88888888888CCCCC88888888888CCCCC88888888888CCCCC888888888888CCC8888888888888CCC8888888888888CCC8888888888888CCC88888888888888C888888888888888C888888888888888C888888888888888C888888888888888C888888888888888C88888888",
+                        title: "Variation low",
                     },
+                    m("img", { src: imageDir + "BreederForm_variationLow.png" })
                 ),
-                m("button.variationMedium.TSpeedButton",
+                m("button.variationMedium.TSpeedButton" + this.backgroundForSpeedButton("variationMedium"),
                     {
                         onclick: () => this.variationMediumClick(),
-                        // Top: "4",
-                        // Left: "102",
-                        // Height: "25",
-                        // Width: "25",
-                        // GroupIndex: "1",
-                        // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF0088888888888888888888888888888888888CCCCCCCCC8888888CCCCCCCCC8888888CCCCCCCCC88888888CCCCCCC888888888CCCCCCC8888888888CCCCC88888888888CCCCC888888888888CCC8888888888888CCC88888888888888C888888888888888C888888888888888C888888888888888C888888888888888C88888888",
+                        title: "Variation medium",
                     },
+                    m("img", { src: imageDir + "BreederForm_variationMedium.png" })
                 ),
-                m("button.variationHigh.TSpeedButton",
+                m("button.variationHigh.TSpeedButton" + this.backgroundForSpeedButton("variationHigh"),
                     {
                         onclick: () => this.variationHighClick(),
-                        // Top: "4",
-                        // Left: "129",
-                        // Height: "25",
-                        // Width: "25",
-                        // GroupIndex: "1",
-                        // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888888888888888888888888CCCCCCCCCCCCC888CCCCCCCCCCCCC888CCCCCCCCCCCCC8888CCCCCCCCCCC888888CCCCCCCCC88888888CCCCCCC888888888CCCCCCC8888888888CCCCC888888888888CCC88888888888888C888888888888888C888888888888888C888888888888888C888888888888888C88888888",
+                        title: "Variation hight",
                     },
+                    m("img", { src: imageDir + "BreederForm_variationHigh.png" })
                 ),
-                m("button.variationCustom.TSpeedButton",
+                m("button.variationCustom.TSpeedButton" + this.backgroundForSpeedButton("variationCustom"),
                     {
                         onclick: () => this.variationCustomClick(),
-                        // Top: "4",
-                        // Left: "156",
-                        // Height: "25",
-                        // Width: "25",
-                        // GroupIndex: "1",
-                        // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888888888888888888888888CCC88CCC88CCC888CCC88CCC88CCC888CCCC8CCC8CCCC8888CCC8CCC8CCC888888CCCCCCCCC88888888CCCCCCC888888888CCCCCCC8888888888CCCCC888888888888CCC88888888888888C888888888888888C888888888888888C888888888888888C888888888888888C88888888",
+                        title: "Variation custom",
                     },
+                    m("img", { src: imageDir + "BreederForm_variationCustom.png" })
                 ),
-                m("button.varyColors.TSpeedButton",
+                m("button.varyColors.TSpeedButton" + this.backgroundForSpeedButton("varyColors"),
                     {
                         onclick: () => this.varyColorsClick(),
-                        // Top: "4",
-                        // Left: "207",
-                        // Height: "25",
-                        // Width: "25",
-                        // AllowAllUp: "True",
-                        // GroupIndex: "2",
-                        // Down: "True",
-                        // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888888888888888888888888C999AAADDDEEC888C999AAADDDEEC888C999AAADDDEEC8888C99AAADDDEC888888C9AAADDDC88888888CAAADDC888888888CAAADDC8888888888CAADC888888888888CAC88888888888888C888888888888888C888888888888888C888888888888888C888888888888888C88888888",
+                        title: "Vary colors",
                     },
+                    m("img", { src: imageDir + "BreederForm_varyColors.png" })
                 ),
-                m("button.vary3DObjects.TSpeedButton",
+                m("button.vary3DObjects.TSpeedButton" + this.backgroundForSpeedButton("vary3DObjects"),
                     {
                         onclick: () => this.vary3DObjectsClick(),
-                        // Top: "4",
-                        // Left: "239",
-                        // Height: "25",
-                        // Width: "25",
-                        // AllowAllUp: "True",
-                        // GroupIndex: "3",
-                        // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888888888888888888888888C8CCCCC8CCC8C888C88CCC88CCC8C888C888C888CCC8C8888C888888888C888888C8888888C88888888C88888C888888888C88888C8888888888C888C888888888888CCC88888888888888C888888888888888C888888888888888C888888888888888C888888888888888C88888888",
+                        title: "Variation 3D objects",
                     },
+                    m("img", { src: imageDir + "BreederForm_vary3DObjects.png" })
                 ),
                 m("button.helpButton.TSpeedButton",
                     {
                         onclick: () => this.helpButtonClick(),
-                        // Top: "4",
-                        // Left: "310",
-                        // Height: "25",
-                        // Width: "25",
-                        // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888888888888888888888888888880C08888888888888CCC88888888888880C0888888888888888888888888888888C888888888888888C088888888888888CC888888888888888CC888888888800880CC888888888CC880CC888888888CC080CC8888888888CCCCC888888888888CCC88888888888888888888888",
+                        title: "Help",
                     },
+                    m("img", { src: imageDir + "BreederForm_helpButton.png" })
                 ),
             ),
             this.viewEmptyIfNeeded(vnode),
