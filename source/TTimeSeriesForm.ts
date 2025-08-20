@@ -14,7 +14,9 @@ import { kDontDrawYet, TMainForm } from "./TMainForm"
 import { kCreateFirstGeneration, PdBreedFromParentsCommand, PdDeleteTimeSeriesCommand, PdMakeTimeSeriesCommand, PdPasteCommand } from "./updcom"
 import { TBreederForm } from "./TBreederForm"
 import { unfinished } from "./temporary"
-import { activeForm, BreederForm, MainForm, setTimeSeriesForm } from "./FormHolder"
+import { activeForm, BreederForm, MainForm, setActiveForm, setTimeSeriesForm, TimeSeriesForm } from "./FormHolder"
+import { resetDroppedDownMenuId, viewMainMenu } from "./menu"
+import { ModalInputView } from "./ModalInputView"
 
 // from conversion_common import *
 // import ubmpsupport
@@ -586,7 +588,7 @@ export class TTimeSeriesForm {
     // }
     
     TimeSeriesMenuHelpTopicsClick(): void {
-        HelpJump("Making_time_series")
+        HelpJump("")
     }
     
     TimeSeriesMenuHelpOnTimeSeriesClick(): void {
@@ -618,183 +620,56 @@ export class TTimeSeriesForm {
         this.updateForChangeToDomainOptions()
     }
 
+    haveSelectedPlant(): boolean {
+        return this.selectedPlant !== null
+    }
+
+    mainMenuSpec: any = [
+        // [type = radio/checkbox, ] ID, label, items or action [, checked function][, enabled function]
+        "MenuEdit", "&Edit", [
+            "MenuEditUndo", () => MainForm.menuUndoCaption(), this.TimeSeriesMenuUndoClick, () => false, () => MainForm.commandList.isUndoEnabled(),
+            "MenuEditRedo", () => MainForm.menuRedoCaption(), this.TimeSeriesMenuRedoClick, () => false, () => MainForm.commandList.isRedoEnabled(),
+            "MenuEditUndoRedoList", "Undo/Redo &List...", this.TimeSeriesMenuUndoRedoListClick,
+            "-",
+            "MenuEditCopy", "C&opy", this.TimeSeriesMenuCopyClick, () => false, () => this.haveSelectedPlant(),
+            "MenuEditPaste", "&Paste", this.TimeSeriesMenuPasteClick, () => false, () => MainForm.havePrivateClipboardPlants(),
+            "MenuEditSendCopy", "&Send Copy to Main Window", this.TimeSeriesMenuSendCopyClick, () => false, () => this.haveSelectedPlant(),
+            "-",
+            "MenuEditBreed", "&Breed", this.TimeSeriesMenuBreedClick, () => false, () => this.haveSelectedPlant(),
+            "-",
+            "MenuEditDelete", "&Delete Time Series", this.TimeSeriesMenuDeleteClick
+        ],
+        "MenuOptions", "&Options", [
+            "MenuOptionsDrawAs", "&Draw Using", [
+                "radio", "MenuOptionsFastDraw", "&Bounding Boxes", this.TimeSeriesMenuOptionsFastDrawClick, () => domain.options.drawSpeed === DrawMode.kDrawFast,
+                "radio", "MenuOptionsMediumDraw", "&Wire Frames", this.TimeSeriesMenuOptionsMediumDrawClick, () => domain.options.drawSpeed === DrawMode.kDrawMedium,
+                "radio", "MenuOptionsBestDraw", "&Solids", this.TimeSeriesMenuOptionsBestDrawClick, () => domain.options.drawSpeed === DrawMode.kDrawBest,
+                "radio", "MenuOptionsCustomDraw", "&Custom...", this.TimeSeriesMenuOptionsCustomDrawClick, () => domain.options.drawSpeed === DrawMode.kDrawCustom,
+            ],
+            "MenuOptionsStages", "&More Options...", this.TimeSeriesMenuOptionsStagesClick,
+        ],
+        "MenuWindow", "&Window", [
+            "radio", "MenuWindowMain", "&Main", () => setActiveForm("MainForm"), () => activeForm === "MainForm", () => MainForm !== undefined,
+            "radio", "MenuWindowBreeder", "&Breeder", () => setActiveForm("BreederForm"), () => activeForm === "BreederForm", () => BreederForm !== undefined,
+            "radio", "MenuWindowTimeSeries", "&Time Series", () => setActiveForm("TimeSeriesForm"), () => activeForm === "TimeSeriesForm", () => TimeSeriesForm !== undefined,
+        ],
+        "MenuHelp", "&Help", [
+            "MenuHelpSuperSpeedTour", "Help on &Time Series", this.TimeSeriesMenuHelpOnTimeSeriesClick,
+            "-",
+            "MenuHelpTopics", "&Help Topics", this.TimeSeriesMenuHelpTopicsClick,
+        ],
+    ]
+
     view() {
         if (activeForm && activeForm !== "TimeSeriesForm") return []
         const self = this
-        return m("TimeSeriesForm.TTimeSeriesForm",
-            {
-            // Top: "184",
-            // Left: "366",
-            // Height: "119",
-            // Width: "520",
-            // Caption: "Time series",
-            // Font.Charset: "DEFAULT_CHARSET",
-            // Font.Color: "clWindowText",
-            // Font.Height: "-11",
-            // Font.Name: "Arial",
-            // Font.Style: "[]",
-            // Menu: "MainMenu1",
-            // Position: "poScreenCenter",
-            // Scaled: "False",
-            // OnActivate: "FormActivate",
-            // OnCreate: "FormCreate",
-            // OnDestroy: "FormDestroy",
-            // OnResize: "FormResize",
-            // PixelsPerInch: "96",
-            // TextHeight: "14",
-            },
-            m("TMainMenu.MainMenu1.TMainMenu",
-                {
-                    // Top: "2",
-                    // Left: "478",
-                    // Height: "0",
-                    // Width: "0",
+        return m("TimeSeriesForm.TTimeSeriesForm.relative", {
+                onclick: (event: any) => {
+                    resetDroppedDownMenuId()
                 },
-                m("li.TimeSeriesMenuEdit.TMenuItem",
-                    {
-                    },
-                    caption("&Edit"),
-                    m("li.TimeSeriesMenuUndo.TMenuItem",
-                        {
-                            onclick: () => this.TimeSeriesMenuUndoClick(),
-                            // ShortCut: "16474",
-                        },
-                        caption("&Undo"),
-                    ),
-                    m("li.TimeSeriesMenuRedo.TMenuItem",
-                        {
-                            onclick: () => this.TimeSeriesMenuRedoClick(),
-                            // ShortCut: "24666",
-                        },
-                        caption("&Redo"),
-                    ),
-                    m("li.TimeSeriesMenuUndoRedoList.TMenuItem",
-                        {
-                            onclick: () => this.TimeSeriesMenuUndoRedoListClick(),
-                        },
-                        caption("Undo/Redo &List..."),
-                    ),
-                    m("li.N1.TMenuItem",
-                        {
-                        },
-                        "-",
-                    ),
-                    m("li.TimeSeriesMenuCopy.TMenuItem",
-                        {
-                            onclick: () => this.TimeSeriesMenuCopyClick(),
-                            // ShortCut: "16451",
-                        },
-                        caption("&Copy"),
-                    ),
-                    m("li.TimeSeriesMenuPaste.TMenuItem",
-                        {
-                            onclick: () => this.TimeSeriesMenuPasteClick(),
-                            // ShortCut: "16470",
-                        },
-                        caption("&Paste"),
-                    ),
-                    m("li.TimeSeriesMenuSendCopy.TMenuItem",
-                        {
-                            onclick: () => this.TimeSeriesMenuSendCopyClick(),
-                        },
-                        caption("&Send Copy to Main Window"),
-                    ),
-                    m("li.N3.TMenuItem",
-                        {
-                        },
-                        "-",
-                    ),
-                    m("li.TimeSeriesMenuBreed.TMenuItem",
-                        {
-                            onclick: () => this.TimeSeriesMenuBreedClick(),
-                            // ShortCut: "16450",
-                        },
-                        caption("&Breed"),
-                    ),
-                    m("li.N4.TMenuItem",
-                        {
-                        },
-                        "-",
-                    ),
-                    m("li.TimeSeriesMenuDelete.TMenuItem",
-                        {
-                            onclick: () => this.TimeSeriesMenuDeleteClick(),
-                            // ShortCut: "46",
-                        },
-                        caption("&Delete Time Series"),
-                    ),
-                ),
-                m("li.TimeSeriesMenuOptions.TMenuItem",
-                    {
-                    },
-                    caption("&Options"),
-                    m("li.TimeSeriesMenuOptionsDrawAs.TMenuItem",
-                        {
-                        },
-                        caption("&Draw Using"),
-                        m("li.TimeSeriesMenuOptionsFastDraw.TMenuItem",
-                            {
-                                onclick: () => this.TimeSeriesMenuOptionsFastDrawClick(),
-                                // GroupIndex: "10",
-                                // RadioItem: "True",
-                            },
-                            caption("&Bounding Boxes"),
-                        ),
-                        m("li.TimeSeriesMenuOptionsMediumDraw.TMenuItem",
-                            {
-                                onclick: () => this.TimeSeriesMenuOptionsMediumDrawClick(),
-                                // GroupIndex: "10",
-                                // RadioItem: "True",
-                            },
-                            caption("&Wire Frames"),
-                        ),
-                        m("li.TimeSeriesMenuOptionsBestDraw.TMenuItem",
-                            {
-                                onclick: () => this.TimeSeriesMenuOptionsBestDrawClick(),
-                                // GroupIndex: "10",
-                                // RadioItem: "True",
-                            },
-                            caption("&Solids"),
-                        ),
-                        m("li.TimeSeriesMenuOptionsCustomDraw.TMenuItem",
-                            {
-                                onclick: () => this.TimeSeriesMenuOptionsCustomDrawClick(),
-                                // GroupIndex: "10",
-                                // RadioItem: "True",
-                            },
-                            caption("&Custom..."),
-                        ),
-                    ),
-                    m("li.TimeSeriesMenuOptionsStages.TMenuItem",
-                        {
-                            onclick: () => this.TimeSeriesMenuOptionsStagesClick(),
-                        },
-                        caption("&More Options..."),
-                    ),
-                ),
-                m("li.TimeSeriesMenuHelp.TMenuItem",
-                    {
-                    },
-                    caption("&Help"),
-                    m("li.TimeSeriesMenuHelpOnTimeSeries.TMenuItem",
-                        {
-                            onclick: () => this.TimeSeriesMenuHelpOnTimeSeriesClick(),
-                        },
-                        caption("Help on &Time Series"),
-                    ),
-                    m("li.N5.TMenuItem",
-                        {
-                        },
-                        "-",
-                    ),
-                    m("li.TimeSeriesMenuHelpTopics.TMenuItem",
-                        {
-                            onclick: () => this.TimeSeriesMenuHelpTopicsClick(),
-                        },
-                        caption("&Help Topics"),
-                    ),
-                ),
-            ),
+            },
+            viewMainMenu(this.mainMenuSpec, this, () => []),
+            m(ModalInputView),
             m("TDrawGrid.grid.TDrawGrid.flex",
                 {
                     // Top: "4",
@@ -843,23 +718,7 @@ export class TTimeSeriesForm {
                 ),
             ),
             m("div.emptyWarningPanel.TPanel" + ((this.plants.length <= 0) ? "" : ".hidden"),
-                {
-                    // Top: "10",
-                    // Left: "206",
-                    // Height: "57",
-                    // Width: "241",
-                    // BevelOuter: "bvNone",
-                    // Color: "clWindow",
-                    // TabOrder: "1",
-                },
                 m("div.Label1.TLabel",
-                    {
-                        // Top: "8",
-                        // Left: "8",
-                        // Height: "42",
-                        // Width: "221",
-                        // WordWrap: "True",
-                    },
                     "The time series window is empty. To fill it, select a plant in the main window and choose Make Time Series from the Plant menu.",
                 ),
             ),
