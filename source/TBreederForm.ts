@@ -11,7 +11,7 @@ import { PdGeneration } from "./PdGeneration"
 import { PdCommand } from "./PdCommand"
 import { PdBreedFromParentsCommand, PdMakeTimeSeriesCommand, PdDeleteBreederGenerationCommand, PdDeleteAllBreederGenerationsCommand, PdRandomizeCommand, PdChangeBreedingAndTimeSeriesOptionsCommand, PdPasteCommand, PdReplaceBreederPlant } from "./updcom"
 import { cursor_stopWait } from "./ucursor"
-import { setBreederForm } from "./PdForms"
+import { MainForm, setBreederForm } from "./PdForms"
 
 const kRedrawPlants = true
 const kDontRedrawPlants = false
@@ -1109,7 +1109,7 @@ export class TBreederForm {
         if (this.generations.length <= 0) {
             return m("div.ba.bw2.b--green", 
                 "The breeder is empty. Please add a plant to get started.",
-                m("button", { onclick: () => {
+                !MainForm && m("button", { onclick: () => {
                     this.generations.push(new PdGeneration(vnode.attrs.plant, null, 1.0))
                 }}, "Add Plant")
             )
@@ -1190,7 +1190,7 @@ export class TBreederForm {
                                     return
                                 }
                                 this.selectPlant(plant, event.shiftKey || event.ctrlKey)
-                                vnode.attrs.setPlant(plant)
+                                vnode.attrs.setPlant && vnode.attrs.setPlant(plant)
                             },
                             ondblclick: () => {
                                 // Breed plant
