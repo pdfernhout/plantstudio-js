@@ -30,6 +30,7 @@ import { TTimeSeriesForm } from "./TTimeSeriesForm"
 import { unfinished } from "./temporary"
 import { TBreederForm } from "./TBreederForm"
 import { activeForm, BreederForm, MainForm, setActiveForm, setMainForm, TimeSeriesForm } from "./FormHolder"
+import { resetDroppedDownMenuId, viewMainMenu } from "./menu"
 
 type PosingField = 
     "hide" // posingHidePart
@@ -1256,6 +1257,7 @@ export class TMainForm {
         }
         const newCommand = new PdMakeTimeSeriesCommand(plant)
         this.doCommand(newCommand)
+        setActiveForm("TimeSeriesForm")
     }
     
     /*
@@ -1886,21 +1888,6 @@ export class TMainForm {
     }
     
     // --------------------------------------------------------------------------- *window menu 
-    MenuWindowMainClick(): void {
-        setActiveForm("MainForm")
-    }
-
-    MenuWindowBreederClick(): void {
-        setActiveForm("BreederForm")
-        BreederForm.Show()
-        BreederForm.BringToFront()
-    }
-    
-    MenuWindowTimeSeriesClick(): void {
-        setActiveForm("TimeSeriesForm")
-        TimeSeriesForm.Show()
-        TimeSeriesForm.BringToFront()
-    }
     
     MenuWindowNumericalExceptionsClick(): void {
         unfinished()
@@ -5767,7 +5754,7 @@ export class TMainForm {
         "MenuEdit", "&Edit", [
             "MenuEditUndo", () => this.menuUndoCaption(), this.MenuEditUndoClick, () => false, () => this.commandList.isUndoEnabled(),
             "MenuEditRedo", () => this.menuRedoCaption(), this.MenuEditRedoClick, () => false, () => this.commandList.isRedoEnabled(),
-            "UndoMenuEditUndoRedoList", "Undo/Redo &List...", this.UndoMenuEditUndoRedoListClick,
+            "MenuEditUndoRedoList", "Undo/Redo &List...", this.UndoMenuEditUndoRedoListClick,
             "-",
             "MenuEditCut", "&Cut", this.MenuEditCutClick, () => false, () => this.haveSelectedPlants(),
             "MenuEditCopy", "C&opy", this.MenuEditCopyClick, () => false, () => this.haveSelectedPlants(),
@@ -5867,9 +5854,9 @@ export class TMainForm {
             "checkbox", "MenuOptionsUsePlantBitmaps", "Use Plant &Bitmaps", this.MenuOptionsUsePlantBitmapsClick, () => domain.options.cachePlantBitmaps,
         ],
         "MenuWindow", "&Window", [
-            "radio", "MenuWindowMain", "&Main", this.MenuWindowMainClick, () => activeForm === "MainForm", () => MainForm !== undefined,
-            "radio", "MenuWindowBreeder", "&Breeder", this.MenuWindowBreederClick, () => activeForm === "BreederForm", () => BreederForm !== undefined,
-            "radio", "MenuWindowTimeSeries", "&Time Series", this.MenuWindowTimeSeriesClick, () => activeForm === "TimeSeriesForm", () => TimeSeriesForm !== undefined,
+            "radio", "MenuWindowMain", "&Main", () => setActiveForm("MainForm"), () => activeForm === "MainForm", () => MainForm !== undefined,
+            "radio", "MenuWindowBreeder", "&Breeder", () => setActiveForm("BreederForm"), () => activeForm === "BreederForm", () => BreederForm !== undefined,
+            "radio", "MenuWindowTimeSeries", "&Time Series", () => setActiveForm("TimeSeriesForm"), () => activeForm === "TimeSeriesForm", () => TimeSeriesForm !== undefined,
             "-",
             "MenuFileMove", "&Move", [
                 "MenuFilePlantMover", "&Plant Mover...", this.MenuFilePlantMoverClick,
@@ -5916,72 +5903,6 @@ export class TMainForm {
         // "PopupMenuZeroRotations", "Re&set Rotations", this.PopupMenuZeroRotationsClick,
     ]
 
-    viewMenuItem(menuItem: MenuItem) {
-        const disabled = menuItem.enabledFunction ? !menuItem.enabledFunction() : false
-        switch(menuItem.type) {
-            case "dash":
-                return m("div.bt.mt1.mb1")
-            case "menu":
-                return m("div.nowrap.pl1.pr1" + (disabled ? ".gray.disabled" : ".hover-bg-green"),
-                    m("span.menuItem", {
-                        tabindex: disabled ? undefined: "0",
-                        onclick: () => menuItem.action?.call(this, menuItem),
-                        onkeydown: (event: any) => {
-                            if (event.key === "Enter") {
-                                event.stopPropagation()
-                                menuItem.action?.call(this, menuItem)
-                            }
-                        }
-                    }, caption(menuItem.label)))
-            case "checkbox":
-                return m("div.nowrap.pl1.pr1" + (disabled ? ".gray.disabled" : ".hover-bg-green"),
-                    m("label.menuItem",
-                        { tabindex: disabled ? undefined : "0" },
-                        m("input[type=checkbox].mr1", {
-                            checked: menuItem.checkedFunction!(),
-                            disabled,
-                            onchange: () => menuItem.action?.call(this, menuItem),
-                        }),
-                        caption(menuItem.label)
-                    )
-                )
-            case "radio":
-                return m("div.nowrap.pl1.pr1" + (disabled ? ".gray.disabled" : ".hover-bg-green"),
-                    m("label.menuItem",
-                        { tabindex: disabled ? undefined : "0" },
-                        m("input[type=radio].mr1", {
-                            checked: menuItem.checkedFunction!(),
-                            disabled,
-                            onclick: () => menuItem.action?.call(this, menuItem)
-                        }),
-                        caption(menuItem.label)
-                    )
-                )
-            default:
-                return m("div", "Unsupported MenuItem.type: " + menuItem.type)
-        }
-    }
-
-    //  recursive
-    viewMenu(menu: MenuItem[]): any {
-        return m("div", 
-            menu.map(menuItem => {
-                const disabled = menuItem.enabledFunction ? !menuItem.enabledFunction() : false
-                return m("div",
-                    menuItem.submenu
-                        ? m("div.nowrap.mt1.mb1", 
-                            m("span.i.ml1"  + (disabled ? ".gray.disabled" : ""), 
-                            caption(menuItem.label)), 
-                            m("div.ml2", this.viewMenu(menuItem.submenu))
-                        )
-                        : this.viewMenuItem(menuItem)
-                    )
-                }
-        ))
-    }
-
-    droppedDownMenuId = ""
-
     // TODO MAYBE: 
     // sendTabKey() {
     //     // const newEvent = new KeyboardEvent("keydown", {
@@ -6005,56 +5926,6 @@ export class TMainForm {
     //     }, 10)
     // }
 
-    viewMainMenu() {
-        const menu = buildMenuFromSpec(this.mainMenuSpec)
-        
-        return m("div.sticky",
-            {
-                style: { zIndex: 2 }
-            },
-            m("div.bg-light-gray",
-                m("span.green", {onclick: () => window.open("https://www.kurtz-fernhout.com/summary_plantstudio.html", "_blank") }, "PlantStudio"),
-                menu.map(menuItem => 
-                    m("span.relative", {
-                            tabindex: "0",
-                            onkeydown: (event: any) => {
-                                if (event.key === "Escape") {
-                                    this.droppedDownMenuId = ""
-                                    event.stopPropagation()
-                                } else if (event.key === "Enter") {
-                                    this.droppedDownMenuId === menuItem.id
-                                        ? this.droppedDownMenuId == ""
-                                        : this.droppedDownMenuId = menuItem.id
-                                    event.stopPropagation()
-                                } else if (event.key === "ArrowDown" && this.droppedDownMenuId !== menuItem.id) {
-                                    this.droppedDownMenuId = menuItem.id
-                                    // event.stopPropagation()
-                                    // TODO MAYBE: this.sendTabKey()
-                                } else if (event.key === "ArrowDown" && this.droppedDownMenuId === menuItem.id) {
-                                    // event.stopPropagation()
-                                    // TODO MAYBE: this.sendTabKey()
-                                // } else if (event.key === "ArrowRight") {
-                                //     this.droppedDownMenuId = menuItem.id
-                                //     event.stopPropagation()
-                                }
-                            }
-                        }, 
-                        m("span.hover-bg-green.b.ml2" + (this.droppedDownMenuId === menuItem.id ? ".ba" : ""), {
-                            onclick: (event: any) => {
-                                this.droppedDownMenuId === menuItem.id 
-                                    ? this.droppedDownMenuId = ""
-                                    : this.droppedDownMenuId = menuItem.id
-                                event.stopPropagation()
-                            }
-                        }, caption(menuItem.label)),
-                        menuItem.submenu ? null : "MISSING SUBMENU for: " + menuItem.label,
-                        this.droppedDownMenuId === menuItem.id && m("div.absolute.ba.bg-light-gray.pb1", { id: "droppedDownMenu", style: { left: 0 } }, this.viewMenu(menuItem.submenu || []))
-                    )
-                ),
-            ),
-            this.viewToolbar(),
-        )
-    }
 
     backgroundForSpeedButton(buttonId: string) {
         const selected = ".bg-blue"
@@ -6769,10 +6640,10 @@ export class TMainForm {
         const self = this
         return m("div.relative", {
                 onclick: (event: any) => {
-                    this.droppedDownMenuId = ""
+                    resetDroppedDownMenuId()
                 },
             },
-            this.viewMainMenu(),
+            viewMainMenu(this.mainMenuSpec, this, () => this.viewToolbar()),
             m(ModalInputView),
             // viewMainForm() 
             m("div.relative",
@@ -6808,59 +6679,6 @@ export class TMainForm {
             this.viewPlantFocusPanel()
         )
     }   
-}
-
-interface MenuItem {
-    type: string
-    id: string
-    label: string | (() => string)
-    action?: (menuItem: MenuItem) => void
-    submenu?: MenuItem[]
-    checkedFunction?: () => boolean
-    enabledFunction?: () => boolean
-}
-
-// recursive
-function buildMenuFromSpec(specOriginal: any[]): MenuItem[] {
-    const result: MenuItem[] = []
-
-    const spec = specOriginal.slice()
-
-    while (spec.length) {
-        let type = spec.shift()
-        if (!type) break
-        if (type === "-") {
-            result.push({type: "dash", id: "", label: ""})
-            continue
-        }
-        let id
-        if (!["radio", "checkbox"].includes(type)) {
-            id = type
-            type = "menu"
-        } else {
-            id = spec.shift()
-        }
-        const label = spec.shift()
-        const actionOrMenuSpec = spec.shift()
-        let checkedFunction = spec.shift()
-        if (typeof checkedFunction !== "function") {
-            spec.unshift(checkedFunction)
-            checkedFunction = undefined
-        }
-        let enabledFunction = spec.shift()
-        if (typeof enabledFunction !== "function") {
-            spec.unshift(enabledFunction)
-            enabledFunction = undefined
-        }
-        if (typeof actionOrMenuSpec !== "function") {
-            const submenu = buildMenuFromSpec(actionOrMenuSpec)
-            result.push({type, id, label, submenu, checkedFunction, enabledFunction})
-        } else {
-            const action = actionOrMenuSpec
-            result.push({type, id, label, action, checkedFunction, enabledFunction})
-        }
-    }
-    return result
 }
 
 /// Unfinished Stub Function
