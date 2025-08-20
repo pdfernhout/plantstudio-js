@@ -29,7 +29,7 @@ import { TCustomDrawOptionsForm } from "./TCustomDrawOptionsForm"
 import { TTimeSeriesForm } from "./TTimeSeriesForm"
 import { unfinished } from "./temporary"
 import { TBreederForm } from "./TBreederForm"
-import { activeForm, BreederForm, setActiveForm, setMainForm, TimeSeriesForm } from "./FormHolder"
+import { activeForm, BreederForm, MainForm, setActiveForm, setMainForm, TimeSeriesForm } from "./FormHolder"
 
 type PosingField = 
     "hide" // posingHidePart
@@ -1888,8 +1888,6 @@ export class TMainForm {
     // --------------------------------------------------------------------------- *window menu 
     MenuWindowMainClick(): void {
         setActiveForm("MainForm")
-        BreederForm.Show()
-        BreederForm.BringToFront()
     }
 
     MenuWindowBreederClick(): void {
@@ -5869,9 +5867,9 @@ export class TMainForm {
             "checkbox", "MenuOptionsUsePlantBitmaps", "Use Plant &Bitmaps", this.MenuOptionsUsePlantBitmapsClick, () => domain.options.cachePlantBitmaps,
         ],
         "MenuWindow", "&Window", [
-            "radio", "MenuWindowMain", "&Main", this.MenuWindowMainClick, () => activeForm === "MainForm",
-            "radio", "MenuWindowBreeder", "&Breeder", this.MenuWindowBreederClick, () => activeForm === "BreederForm",
-            "radio", "MenuWindowTimeSeries", "&Time Series", this.MenuWindowTimeSeriesClick, () => activeForm === "TimeSeriesForm",
+            "radio", "MenuWindowMain", "&Main", this.MenuWindowMainClick, () => activeForm === "MainForm", () => MainForm !== undefined,
+            "radio", "MenuWindowBreeder", "&Breeder", this.MenuWindowBreederClick, () => activeForm === "BreederForm", () => BreederForm !== undefined,
+            "radio", "MenuWindowTimeSeries", "&Time Series", this.MenuWindowTimeSeriesClick, () => activeForm === "TimeSeriesForm", () => TimeSeriesForm !== undefined,
             "-",
             "MenuFileMove", "&Move", [
                 "MenuFilePlantMover", "&Plant Mover...", this.MenuFilePlantMoverClick,
