@@ -34,6 +34,7 @@ const kOptionTabNonNumeric = 3
 const kOptionTabTdos = 4
 
 export class TBreederForm {
+    windowName = "Breeder"
 //     plantsDrawGrid: TDrawGrid = new TDrawGrid()
     // TODO PDF: Fix -- temp for testing plantsDrawGrid
     plantsDrawGrid: any = {}

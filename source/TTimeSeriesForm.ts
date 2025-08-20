@@ -39,6 +39,7 @@ const kMaxTimeSeriesStages = 100
 const kStageNumberTextHeight = 16
 
 export class TTimeSeriesForm {
+    windowName = "Time Series"
     // grid: TDrawGrid = new TDrawGrid()
     // MainMenu1: TMainMenu = new TMainMenu()
     // TimeSeriesMenuEdit: TMenuItem = new TMenuItem()

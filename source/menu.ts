@@ -143,6 +143,7 @@ export function viewMainMenu(mainMenuSpec: any, self: any, viewToolbar: () => an
             },
             m("div.bg-light-gray",
                 m("span.green", {onclick: () => window.open("https://www.kurtz-fernhout.com/summary_plantstudio.html", "_blank") }, "PlantStudio"),
+                m("span.ml1.i", self.windowName),
                 menu.map(menuItem => 
                     m("span.relative", {
                             tabindex: "0",
