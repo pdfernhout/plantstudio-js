@@ -5785,7 +5785,6 @@ export class TMainForm {
             "MenuPlantAnimate", () => this.animateCommand ? "Stop &Animate through Life Cycle" : "&Animate through Life Cycle", this.MenuPlantAnimateClick, () => false, () => this.haveSelectedPlants(),
             "MenuPlantBreed", "&Breed", this.MenuPlantBreedClick, () => false, () => this.haveSelectedPlants(),
             "MenuPlantMakeTimeSeries", "Make &Time Series", this.MenuPlantMakeTimeSeriesClick, () => false, () => this.haveSelectedPlants(),
-
         ],
         "MenuLayout", "&Layout", [
             "MenuLayoutScaleToFit", "Scale to &Fit", this.MenuLayoutScaleToFitClick, () => false, () => this.havePlants(),
@@ -6639,7 +6638,7 @@ export class TMainForm {
     view() {
         if (activeForm && activeForm !== "MainForm") return []
         const self = this
-        return m("div.relative", {
+        return m("div.MainForm.relative", {
                 onclick: (event: any) => {
                     resetDroppedDownMenuId()
                 },

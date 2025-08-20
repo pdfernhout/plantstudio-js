@@ -663,7 +663,7 @@ export class TTimeSeriesForm {
     view() {
         if (activeForm && activeForm !== "TimeSeriesForm") return []
         const self = this
-        return m("TimeSeriesForm.TTimeSeriesForm.relative", {
+        return m("div.TimeSeriesForm.relative", {
                 onclick: (event: any) => {
                     resetDroppedDownMenuId()
                 },

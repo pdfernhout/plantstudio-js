@@ -11,7 +11,9 @@ import { PdGeneration } from "./PdGeneration"
 import { PdCommand } from "./PdCommand"
 import { PdBreedFromParentsCommand, PdMakeTimeSeriesCommand, PdDeleteBreederGenerationCommand, PdDeleteAllBreederGenerationsCommand, PdRandomizeCommand, PdChangeBreedingAndTimeSeriesOptionsCommand, PdPasteCommand, PdReplaceBreederPlant, kDontCreateFirstGeneration } from "./updcom"
 import { cursor_startWait, cursor_stopWait } from "./ucursor"
-import { activeForm, MainForm, setBreederForm } from "./FormHolder"
+import { activeForm, BreederForm, MainForm, setActiveForm, setBreederForm, TimeSeriesForm } from "./FormHolder"
+import { resetDroppedDownMenuId, viewMainMenu } from "./menu"
+import { ModalInputView } from "./ModalInputView"
 
 const kRedrawPlants = true
 const kDontRedrawPlants = false
@@ -677,11 +679,6 @@ export class TBreederForm {
     }
     
     updateMenusForChangeToGenerations(): void {
-        let havePlants: boolean
-        
-        havePlants = this.generations.length > 0
-        // TODO PDF: Fix enabling/disabling: this.BreederMenuDeleteAll.enabled = havePlants
-        // TODO PDF: Fix enabling/disabling: this.BreederMenuRandomizeAll.enabled = havePlants
         this.updateMenusForChangeToSelection()
     }
 
@@ -690,27 +687,11 @@ export class TBreederForm {
     }
     
     updateMenusForChangeToSelection(): void {
-        let haveSelection = this.haveSelection()
-        // TODO PDF: Fix enabling/disabling: this.BreederMenuRandomize.enabled = haveSelection
-        // TODO PDF: Fix enabling/disabling: this.BreederMenuDeleteRow.enabled = haveSelection
-        // TODO PDF: Fix enabling/disabling: this.BreederPopupMenuDeleteRow.enabled = haveSelection
-        // TODO PDF: Fix enabling/disabling: this.BreederMenuBreed.enabled = haveSelection
-        // TODO PDF: Fix enabling/disabling: this.BreederMenuMakeTimeSeries.enabled = haveSelection
-        // TODO PDF: Fix enabling/disabling: this.BreederMenuCopy.enabled = haveSelection
-        // TODO PDF: Fix enabling/disabling: this.BreederPopupMenuBreed.enabled = this.BreederMenuBreed.enabled
-        // TODO PDF: Fix enabling/disabling: this.breedButton.Enabled = this.BreederMenuBreed.enabled
-        // TODO PDF: Fix enabling/disabling: this.BreederPopupMenuMakeTimeSeries.enabled = this.BreederMenuMakeTimeSeries.enabled
-        // TODO PDF: Fix enabling/disabling: this.BreederPopupMenuCopy.enabled = this.BreederMenuCopy.enabled
-        // TODO PDF: Fix enabling/disabling: this.BreederPopupMenuRandomize.enabled = this.BreederMenuRandomize.enabled
         this.updatePasteMenuForClipboardContents()
         // must paste onto a selected plant 
-        // TODO PDF: Fix enabling/disabling: this.BreederMenuPaste.enabled = this.BreederMenuPaste.enabled && haveSelection
-        // TODO PDF: Fix enabling/disabling: this.BreederPopupMenuPaste.enabled = this.BreederMenuPaste.enabled
     }
     
     updatePasteMenuForClipboardContents(): void {
-        // TODO PDF: Fix enabling/disabling: this.BreederMenuPaste.enabled = (this.primarySelectedPlant() !== null) && (domain.plantManager.privatePlantClipboard.length > 0)
-        // TODO PDF: Fix enabling/disabling: this.BreederPopupMenuPaste.enabled = this.BreederMenuPaste.enabled
     }
     
     selectedGeneration(): PdGeneration | null {
@@ -903,28 +884,21 @@ export class TBreederForm {
     
     BreederMenuVariationNoneClick(): void {
         domain.breedingAndTimeSeriesOptions.variationType = BreederVariation.kBreederVariationNoNumeric
-        // TODO PDF: Fix enabling/disabling: this.BreederMenuVariationNone.checked = true
         this.redoCaption()
     }
     
     BreederMenuVariationLowClick(): void {
         domain.breedingAndTimeSeriesOptions.variationType = BreederVariation.kBreederVariationLow
-        // TODO PDF: Fix enabling/disabling: this.BreederMenuVariationLow.checked = true
         this.redoCaption()
     }
     
     BreederMenuVariationMediumClick(): void {
         domain.breedingAndTimeSeriesOptions.variationType = BreederVariation.kBreederVariationMedium
-        // TODO PDF: Fix enabling/disabling: this.BreederMenuVariationMedium.checked = true
         this.redoCaption()
     }
     
     BreederMenuVariationHighClick(): void {
         domain.breedingAndTimeSeriesOptions.variationType = BreederVariation.kBreederVariationHigh
-        // this is to deal with if it was turned off by not having a library
-        // v2.0 removed - this is separate now
-        // domain.breedingAndTimeSeriesOptions.chooseTdosRandomlyFromCurrentLibrary := true;
-        // TODO PDF: Fix enabling/disabling: this.BreederMenuVariationHigh.checked = true
         this.redoCaption()
     }
     
@@ -937,7 +911,6 @@ export class TBreederForm {
     }
     
     BreederMenuVaryColorsClick(): void {
-        // TODO PDF: Fix enabling/disabling: this.BreederMenuVaryColors.checked = !this.BreederMenuVaryColors.checked
         const options: BreedingAndTimeSeriesOptionsStructure = domain.breedingAndTimeSeriesOptions
         options.mutateAndBlendColorValues = !options.mutateAndBlendColorValues
         const newCommand: PdCommand = new PdChangeBreedingAndTimeSeriesOptionsCommand(options, domain.options)
@@ -945,7 +918,6 @@ export class TBreederForm {
     }
     
     BreederMenuVary3DObjectsClick(): void {
-        // TODO PDF: Fix enabling/disabling: this.BreederMenuVary3DObjects.checked = !this.BreederMenuVary3DObjects.checked
         const options: BreedingAndTimeSeriesOptionsStructure = domain.breedingAndTimeSeriesOptions
         options.chooseTdosRandomlyFromCurrentLibrary = !options.chooseTdosRandomlyFromCurrentLibrary
         const newCommand: PdCommand = new PdChangeBreedingAndTimeSeriesOptionsCommand(options, domain.options)
@@ -953,7 +925,7 @@ export class TBreederForm {
     }
     
     changeBreederAndTimeSeriesOptions(tabIndexToShow: short): void {
-        // PODF TODO: Fix thie
+        // PDF TODO: Fix thie
         alert("UNFINISHED")
         // if (tabIndexToShow === kOptionTabMutation) {
         //     domain.breedingAndTimeSeriesOptions.variationType = BreederVariation.kBreederVariationCustom
@@ -1175,36 +1147,141 @@ export class TBreederForm {
         }
     }
 
+    havePlants(): boolean {
+        return this.generations.length > 0
+    }
+
+    mainMenuSpec: any = [
+        // [type = radio/checkbox, ] ID, label, items or action [, checked function][, enabled function]
+        "MenuEdit", "&Edit", [
+            "MenuEditUndo", () => MainForm.menuUndoCaption(), this.BreederMenuUndoClick, () => false, () => MainForm.commandList.isUndoEnabled(),
+            "MenuEditRedo", () => MainForm.menuRedoCaption(), this.BreederMenuRedoClick, () => false, () => MainForm.commandList.isRedoEnabled(),
+            "MenuEditUndoRedoList", "Undo/Redo &List...", this.BreederMenuUndoRedoListClick,
+            "-",
+            "MenuEditCopy", "C&opy", this.BreederMenuCopyClick, () => false, () => this.haveSelection(),
+            "MenuEditPaste", "&Paste", this.BreederMenuPasteClick, () => false, () => MainForm.havePrivateClipboardPlants() && this.haveSelection(),
+            "MenuEditSendCopy", "&Send Copy to Main Window", this.BreederMenuSendCopyToMainWindowClick, () => false, () => this.haveSelection(),
+        ],
+        "MenuPlant", "&Breed", [
+            "MenuBreedBreed", "&Breed", this.BreederMenuBreedClick, () => false, () => this.haveSelection(),
+            "MenuBreedMakeTimeSeries", "Make &Time Series", this.BreederMenuMakeTimeSeriesClick, () => false, () => this.haveSelection(),
+            "-",
+            "MenuBreedDeleteRow", "Delete &Generation", this.BreederMenuDeleteRowClick, () => false, () => this.haveSelection(),
+            "MenuBreedDeleteAll", "Delete &All", this.BreederMenuDeleteAllClick, () => false, () => this.havePlants(),
+            "-",
+            "MenuBreedRandomize", "&Randomize", this.BreederMenuRandomizeClick, () => false, () => this.haveSelection(),
+            "MenuBreedRandomizeAll", "Randomize A&ll", this.BreederMenuRandomizeAllClick, () => false, () => this.havePlants(),
+        ],
+        "MenuOptions", "&Options", [
+            "MenuOptionsDrawAs", "&Draw Using", [
+                "radio", "MenuOptionsFastDraw", "&Bounding Boxes", this.BreederMenuOptionsFastDrawClick, () => domain.options.drawSpeed === DrawMode.kDrawFast,
+                "radio", "MenuOptionsMediumDraw", "&Wire Frames", this.BreederMenuOptionsMediumDrawClick, () => domain.options.drawSpeed === DrawMode.kDrawMedium,
+                "radio", "MenuOptionsBestDraw", "&Solids", this.BreederMenuOptionsBestDrawClick, () => domain.options.drawSpeed === DrawMode.kDrawBest,
+                "radio", "MenuOptionsCustomDraw", "&Custom...", this.BreederMenuOptionsCustomDrawClick, () => domain.options.drawSpeed === DrawMode.kDrawCustom,
+            ],
+            "MenuOptionsDrawAs", "Vary &Numbers", [
+                "radio", "MenuVariationNone", "&None", this.BreederMenuVariationNoneClick, () => domain.breedingAndTimeSeriesOptions.variationType === BreederVariation.kBreederVariationNoNumeric,
+                "radio", "MenuVariationLow", "&Low", this.BreederMenuVariationLowClick, () => domain.breedingAndTimeSeriesOptions.variationType === BreederVariation.kBreederVariationLow,
+                "radio", "MenuVariationMedium", "&Medium", this.BreederMenuVariationMediumClick, () => domain.breedingAndTimeSeriesOptions.variationType === BreederVariation.kBreederVariationMedium,
+                "radio", "BreederMenuVariationHigh", "&High", this.BreederMenuVariationHighClick, () => domain.breedingAndTimeSeriesOptions.variationType === BreederVariation.kBreederVariationHigh,
+                "radio", "MenuVariationCustom", "&Custom...", this.BreederMenuVariationCustomClick, () => domain.breedingAndTimeSeriesOptions.variationType === BreederVariation.kBreederVariationCustom,
+            ],
+            "checkbox", "MenuVaryColors", "Vary &Colors", this.BreederMenuVaryColorsClick, () => domain.breedingAndTimeSeriesOptions.mutateAndBlendColorValues,
+            "checkbox", "MenuVary3DObjects", "Vary &3D Objects", this.BreederMenuVary3DObjectsClick, () => domain.breedingAndTimeSeriesOptions.chooseTdosRandomlyFromCurrentLibrary,
+            "-",
+            "MenuOptionsStages", "&More Options...", this.BreederMenuOtherOptionsClick,
+        ],
+        "MenuWindow", "&Window", [
+            "radio", "MenuWindowMain", "&Main", () => setActiveForm("MainForm"), () => activeForm === "MainForm", () => MainForm !== undefined,
+            "radio", "MenuWindowBreeder", "&Breeder", () => setActiveForm("BreederForm"), () => activeForm === "BreederForm", () => BreederForm !== undefined,
+            "radio", "MenuWindowTimeSeries", "&Time Series", () => setActiveForm("TimeSeriesForm"), () => activeForm === "TimeSeriesForm", () => TimeSeriesForm !== undefined,
+        ],
+        "MenuHelp", "&Help", [
+            "MenuHelpSuperSpeedTour", "Help on &Breeding", this.BreederMenuHelpOnBreedingClick,
+            "-",
+            "MenuHelpTopics", "&Help Topics", this.BreederMenuHelpTopicsClick,
+        ],
+    ]
+
+    viewToolbar() {
+        return m("div.breederToolbarPanel.TPanel",
+            m("button.breedButton.TSpeedButton",
+                {
+                    onclick: () => this.breedButtonClick(),
+                    disabled: !this.haveSelection(),
+                    title: "Breed",
+                },
+                m("img", { src: imageDir + (this.haveSelection() ? "BreederForm_breedButton.png" :  "BreederForm_breedButton-disabled.png" )})
+            ),
+            m("button.variationNoneNumeric.TSpeedButton" + this.backgroundForSpeedButton("variationNoneNumeric"),
+                {
+                    onclick: () => this.variationNoneNumericClick(),
+                    title: "Variation none",
+                },
+                m("img", { src: imageDir + "BreederForm_variationNoneNumeric.png" })
+            ),
+            m("button.variationLow.TSpeedButton" + this.backgroundForSpeedButton("variationLow"),
+                {
+                    onclick: () => this.variationLowClick(),
+                    title: "Variation low",
+                },
+                m("img", { src: imageDir + "BreederForm_variationLow.png" })
+            ),
+            m("button.variationMedium.TSpeedButton" + this.backgroundForSpeedButton("variationMedium"),
+                {
+                    onclick: () => this.variationMediumClick(),
+                    title: "Variation medium",
+                },
+                m("img", { src: imageDir + "BreederForm_variationMedium.png" })
+            ),
+            m("button.variationHigh.TSpeedButton" + this.backgroundForSpeedButton("variationHigh"),
+                {
+                    onclick: () => this.variationHighClick(),
+                    title: "Variation hight",
+                },
+                m("img", { src: imageDir + "BreederForm_variationHigh.png" })
+            ),
+            m("button.variationCustom.TSpeedButton" + this.backgroundForSpeedButton("variationCustom"),
+                {
+                    onclick: () => this.variationCustomClick(),
+                    title: "Variation custom",
+                },
+                m("img", { src: imageDir + "BreederForm_variationCustom.png" })
+            ),
+            m("button.varyColors.TSpeedButton" + this.backgroundForSpeedButton("varyColors"),
+                {
+                    onclick: () => this.varyColorsClick(),
+                    title: "Vary colors",
+                },
+                m("img", { src: imageDir + "BreederForm_varyColors.png" })
+            ),
+            m("button.vary3DObjects.TSpeedButton" + this.backgroundForSpeedButton("vary3DObjects"),
+                {
+                    onclick: () => this.vary3DObjectsClick(),
+                    title: "Variation 3D objects",
+                },
+                m("img", { src: imageDir + "BreederForm_vary3DObjects.png" })
+            ),
+            m("button.helpButton.TSpeedButton",
+                {
+                    onclick: () => this.helpButtonClick(),
+                    title: "Help",
+                },
+                m("img", { src: imageDir + "BreederForm_helpButton.png" })
+            ),
+        )
+    }
+
     view(vnode: any) {
         if (activeForm && activeForm !== "BreederForm") return []
         const self = this
-        return m("div",
-            m("BreederForm.TBreederForm",
-                {
-                // Top: "163",
-                // Left: "315",
-                // Height: "0",
-                // Width: "0",
-                // AutoScroll: "False",
-                // Caption: "Breeder",
-                // ClientHeight: "191",
-                // ClientWidth: "427",
-                // Font.Charset: "DEFAULT_CHARSET",
-                // Font.Color: "clWindowText",
-                // Font.Height: "-11",
-                // Font.Name: "Arial",
-                // Font.Style: "[]",
-                // KeyPreview: "True",
-                // Menu: "BreederMenu",
-                // Position: "poDefaultPosOnly",
-                // Scaled: "False",
-                // OnActivate: "FormActivate",
-                // OnCreate: "FormCreate",
-                // OnDestroy: "FormDestroy",
-                // OnResize: "FormResize",
-                // PixelsPerInch: "96",
-                // TextHeight: "14",
+        return m("div.BreederForm.relative", {
+                onclick: (event: any) => {
+                    resetDroppedDownMenuId()
                 },
+            },
+            viewMainMenu(this.mainMenuSpec, this, () => this.viewToolbar()),
+            m(ModalInputView),
                 // m("ul.BreederPopupMenu.TPopupMenu",
                 //     {
                 //         // Top: "12",
@@ -1270,258 +1347,8 @@ export class TBreederForm {
                 //         caption("Delete &generation"),
                 //     ),
                 // ),
-                m("TMainMenu.BreederMenu.TMainMenu",
-                    {
-                        // Top: "16",
-                        // Left: "360",
-                        // Height: "0",
-                        // Width: "0",
-                    },
-                    m("li.BreederMenuEdit.TMenuItem",
-                        {
-                        },
-                        caption("&Edit"),
-                        m("li.BreederMenuUndo.TMenuItem",
-                            {
-                                onclick: () => this.BreederMenuUndoClick(),
-                                // ShortCut: "16474",
-                            },
-                            caption("&Undo"),
-                        ),
-                        m("li.BreederMenuRedo.TMenuItem",
-                            {
-                                onclick: () => this.BreederMenuRedoClick(),
-                                // ShortCut: "24666",
-                            },
-                            caption("&Redo"),
-                        ),
-                        m("li.BreederMenuUndoRedoList.TMenuItem",
-                            {
-                                onclick: () => this.BreederMenuUndoRedoListClick(),
-                            },
-                            caption("Undo/Redo &List..."),
-                        ),
-                        m("li.N2.TMenuItem",
-                            {
-                            },
-                            "-",
-                        ),
-                        m("li.BreederMenuCopy.TMenuItem",
-                            {
-                                onclick: () => this.BreederMenuCopyClick(),
-                                // ShortCut: "16451",
-                            },
-                            caption("&Copy"),
-                        ),
-                        m("li.BreederMenuPaste.TMenuItem",
-                            {
-                                onclick: () => this.BreederMenuPasteClick(),
-                                // ShortCut: "16470",
-                            },
-                            caption("&Paste"),
-                        ),
-                        m("li.BreederMenuSendCopyToMainWindow.TMenuItem",
-                            {
-                                onclick: () => this.BreederMenuSendCopyToMainWindowClick(),
-                            },
-                            caption("&Send Copy to Main Window"),
-                        ),
-                    ),
-                    m("li.BreederMenuPlant.TMenuItem",
-                        {
-                        },
-                        caption("&Breed"),
-                        m("li.BreederMenuBreed.TMenuItem",
-                            {
-                                onclick: () => this.BreederMenuBreedClick(),
-                                // ShortCut: "16450",
-                            },
-                            caption("&Breed"),
-                        ),
-                        m("li.BreederMenuMakeTimeSeries.TMenuItem",
-                            {
-                                onclick: () => this.BreederMenuMakeTimeSeriesClick(),
-                                // ShortCut: "16468",
-                            },
-                            caption("Make &Time Series"),
-                        ),
-                        m("li.N1.TMenuItem",
-                            {
-                            },
-                            "-",
-                        ),
-                        m("li.BreederMenuDeleteRow.TMenuItem",
-                            {
-                                onclick: () => this.BreederMenuDeleteRowClick(),
-                                // ShortCut: "46",
-                            },
-                            caption("Delete &Generation"),
-                        ),
-                        m("li.BreederMenuDeleteAll.TMenuItem",
-                            {
-                                onclick: () => this.BreederMenuDeleteAllClick(),
-                            },
-                            caption("Delete &All"),
-                        ),
-                        m("li.N4.TMenuItem",
-                            {
-                            },
-                            "-",
-                        ),
-                        m("li.BreederMenuRandomize.TMenuItem",
-                            {
-                                onclick: () => this.BreederMenuRandomizeClick(),
-                                // ShortCut: "16466",
-                            },
-                            caption("&Randomize"),
-                        ),
-                        m("li.BreederMenuRandomizeAll.TMenuItem",
-                            {
-                                onclick: () => this.BreederMenuRandomizeAllClick(),
-                                // ShortCut: "16449",
-                            },
-                            caption("Randomize A&ll"),
-                        ),
-                    ),
-                    m("li.BreederMenuOptions.TMenuItem",
-                        {
-                        },
-                        caption("&Options"),
-                        m("li.BreederMenuOptionsDrawAs.TMenuItem",
-                            {
-                            },
-                            caption("&Draw Using"),
-                            m("li.BreederMenuOptionsFastDraw.TMenuItem",
-                                {
-                                    onclick: () => this.BreederMenuOptionsFastDrawClick(),
-                                    // Checked: "True",
-                                    // GroupIndex: "10",
-                                    // RadioItem: "True",
-                                },
-                                caption("&Bounding Boxes"),
-                            ),
-                            m("li.BreederMenuOptionsMediumDraw.TMenuItem",
-                                {
-                                    onclick: () => this.BreederMenuOptionsMediumDrawClick(),
-                                    // GroupIndex: "10",
-                                    // RadioItem: "True",
-                                },
-                                caption("&Wire Frames"),
-                            ),
-                            m("li.BreederMenuOptionsBestDraw.TMenuItem",
-                                {
-                                    onclick: () => this.BreederMenuOptionsBestDrawClick(),
-                                    // GroupIndex: "10",
-                                    // RadioItem: "True",
-                                },
-                                caption("&Solids"),
-                            ),
-                            m("li.BreederMenuOptionsCustomDraw.TMenuItem",
-                                {
-                                    onclick: () => this.BreederMenuOptionsCustomDrawClick(),
-                                    // GroupIndex: "10",
-                                    // RadioItem: "True",
-                                },
-                                caption("&Custom..."),
-                            ),
-                        ),
-                        m("li.BreederMenuVariation.TMenuItem",
-                            {
-                            },
-                            caption("Vary &Numbers"),
-                            m("li.BreederMenuVariationNone.TMenuItem",
-                                {
-                                    onclick: () => this.BreederMenuVariationNoneClick(),
-                                    // GroupIndex: "1",
-                                    // RadioItem: "True",
-                                },
-                                caption("&None"),
-                            ),
-                            m("li.BreederMenuVariationLow.TMenuItem",
-                                {
-                                    onclick: () => this.BreederMenuVariationLowClick(),
-                                    // GroupIndex: "1",
-                                    // RadioItem: "True",
-                                },
-                                caption("&Low"),
-                            ),
-                            m("li.BreederMenuVariationMedium.TMenuItem",
-                                {
-                                    onclick: () => this.BreederMenuVariationMediumClick(),
-                                    // Checked: "True",
-                                    // GroupIndex: "1",
-                                    // RadioItem: "True",
-                                },
-                                caption("&Medium"),
-                            ),
-                            m("li.BreederMenuVariationHigh.TMenuItem",
-                                {
-                                    onclick: () => this.BreederMenuVariationHighClick(),
-                                    // GroupIndex: "1",
-                                    // RadioItem: "True",
-                                },
-                                caption("&High"),
-                            ),
-                            m("li.BreederMenuVariationCustom.TMenuItem",
-                                {
-                                    onclick: () => this.BreederMenuVariationCustomClick(),
-                                    // GroupIndex: "1",
-                                    // RadioItem: "True",
-                                },
-                                caption("&Custom..."),
-                            ),
-                        ),
-                        m("li.BreederMenuVaryColors.TMenuItem",
-                            {
-                                onclick: () => this.BreederMenuVaryColorsClick(),
-                                // GroupIndex: "1",
-                            },
-                            caption("Vary &Colors"),
-                        ),
-                        m("li.BreederMenuVary3DObjects.TMenuItem",
-                            {
-                                onclick: () => this.BreederMenuVary3DObjectsClick(),
-                                // GroupIndex: "1",
-                            },
-                            caption("Vary &3D Objects"),
-                        ),
-                        m("li.N6.TMenuItem",
-                            {
-                            },
-                            "-",
-                        ),
-                        m("li.BreederMenuOtherOptions.TMenuItem",
-                            {
-                                onclick: () => this.BreederMenuOtherOptionsClick(),
-                            },
-                            caption("&More Options..."),
-                        ),
-                    ),
-                    m("li.MenuBreederHelp.TMenuItem",
-                        {
-                        },
-                        caption("&Help"),
-                        m("li.BreederMenuHelpOnBreeding.TMenuItem",
-                            {
-                                onclick: () => this.BreederMenuHelpOnBreedingClick(),
-                            },
-                            caption("Help on &Breeding"),
-                        ),
-                        m("li.N3.TMenuItem",
-                            {
-                            },
-                            "-",
-                        ),
-                        m("li.BreederMenuHelpTopics.TMenuItem",
-                            {
-                                onclick: () => this.BreederMenuHelpTopicsClick(),
-                            },
-                            caption("&Help Topics"),
-                        ),
-                    ),
-                ),
-            ),
-            m("TDrawGrid.plantsDrawGrid", {
+            this.viewEmptyIfNeeded(vnode),
+            m("div.TDrawGrid.plantsDrawGrid", {
                 // Top: "48",
                 // Left: "2",
                 // Height: "141",
@@ -1543,83 +1370,6 @@ export class TBreederForm {
                 // OnMouseDown: "plantsDrawGridMouseDown",
                 // OnMouseUp: "plantsDrawGridMouseUp",
             },
-            m("div.breederToolbarPanel.TPanel",
-                {
-                    // Top: "10",
-                    // Left: "2",
-                    // Height: "33",
-                    // Width: "339",
-                    // BevelInner: "bvRaised",
-                    // BevelOuter: "bvLowered",
-                    // TabOrder: "2",
-                },
-                m("button.breedButton.TSpeedButton",
-                    {
-                        onclick: () => this.breedButtonClick(),
-                        disabled: !this.haveSelection(),
-                        title: "Breed",
-                    },
-                    m("img", { src: imageDir + (this.haveSelection() ? "BreederForm_breedButton.png" :  "BreederForm_breedButton-disabled.png" )})
-                ),
-                m("button.variationNoneNumeric.TSpeedButton" + this.backgroundForSpeedButton("variationNoneNumeric"),
-                    {
-                        onclick: () => this.variationNoneNumericClick(),
-                        title: "Variation none",
-                    },
-                    m("img", { src: imageDir + "BreederForm_variationNoneNumeric.png" })
-                ),
-                m("button.variationLow.TSpeedButton" + this.backgroundForSpeedButton("variationLow"),
-                    {
-                        onclick: () => this.variationLowClick(),
-                        title: "Variation low",
-                    },
-                    m("img", { src: imageDir + "BreederForm_variationLow.png" })
-                ),
-                m("button.variationMedium.TSpeedButton" + this.backgroundForSpeedButton("variationMedium"),
-                    {
-                        onclick: () => this.variationMediumClick(),
-                        title: "Variation medium",
-                    },
-                    m("img", { src: imageDir + "BreederForm_variationMedium.png" })
-                ),
-                m("button.variationHigh.TSpeedButton" + this.backgroundForSpeedButton("variationHigh"),
-                    {
-                        onclick: () => this.variationHighClick(),
-                        title: "Variation hight",
-                    },
-                    m("img", { src: imageDir + "BreederForm_variationHigh.png" })
-                ),
-                m("button.variationCustom.TSpeedButton" + this.backgroundForSpeedButton("variationCustom"),
-                    {
-                        onclick: () => this.variationCustomClick(),
-                        title: "Variation custom",
-                    },
-                    m("img", { src: imageDir + "BreederForm_variationCustom.png" })
-                ),
-                m("button.varyColors.TSpeedButton" + this.backgroundForSpeedButton("varyColors"),
-                    {
-                        onclick: () => this.varyColorsClick(),
-                        title: "Vary colors",
-                    },
-                    m("img", { src: imageDir + "BreederForm_varyColors.png" })
-                ),
-                m("button.vary3DObjects.TSpeedButton" + this.backgroundForSpeedButton("vary3DObjects"),
-                    {
-                        onclick: () => this.vary3DObjectsClick(),
-                        title: "Variation 3D objects",
-                    },
-                    m("img", { src: imageDir + "BreederForm_vary3DObjects.png" })
-                ),
-                m("button.helpButton.TSpeedButton",
-                    {
-                        onclick: () => this.helpButtonClick(),
-                        title: "Help",
-                    },
-                    m("img", { src: imageDir + "BreederForm_helpButton.png" })
-                ),
-            ),
-            this.viewEmptyIfNeeded(vnode),
-            m("div",
                 this.generations.map((generation: PdGeneration, row: number) => m("div.flex.flex-row",
                     generation.plants.map((plant: PdPlant, column: number) =>
                         m("div.ba"  + this.borderIfSelected(plant),
@@ -1667,7 +1417,7 @@ export class TBreederForm {
                         })),
                     )
                 )),
-            ))
+            )
         )
     }
 
