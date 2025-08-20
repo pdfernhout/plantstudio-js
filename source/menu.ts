@@ -1,5 +1,6 @@
 import * as m from "mithril"
-import { caption } from "./common"
+import { caption, HelpJump } from "./common"
+import { nextForm } from "./FormHolder"
 
 // export const menuHoverColor = ".hover-bg-orange"
 
@@ -143,7 +144,7 @@ export function viewMainMenu(mainMenuSpec: any, self: any, viewToolbar: () => an
             },
             m("div.bg-light-gray",
                 m("span.green", {onclick: () => window.open("https://www.kurtz-fernhout.com/summary_plantstudio.html", "_blank") }, "PlantStudio"),
-                m("span.ml1.i", self.windowName),
+                m("span.ml1.i.br.pr1.bw2", { onclick: () => nextForm() }, self.windowName),
                 menu.map(menuItem => 
                     m("span.relative", {
                             tabindex: "0",
