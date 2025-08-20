@@ -1107,8 +1107,8 @@ export class TBreederForm {
 
     viewEmptyIfNeeded(vnode: any) {
         if (this.generations.length <= 0) {
-            return m("div.ba.bw2.b--green", 
-                "The breeder is empty. Please add a plant to get started.",
+            return m("div.emptyWarningPanel.ba.bw2.b--green", 
+                "The breeder is empty. To make some breeder plants, select a plant (or two plants) in the main window and choose Breed from the Plant menu.",
                 !MainForm && m("button", { onclick: () => {
                     this.generations.push(new PdGeneration(vnode.attrs.plant, null, 1.0))
                 }}, "Add Plant")

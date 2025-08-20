@@ -459,27 +459,6 @@ export function viewBreederForm() {
                 ),
             ),
         ),
-        m("div.emptyWarningPanel.TPanel",
-            {
-                // Top: "46",
-                // Left: "362",
-                // Height: "93",
-                // Width: "183",
-                // BevelOuter: "bvNone",
-                // Color: "clWindow",
-                // TabOrder: "1",
-            },
-            m("div.Label1.TLabel",
-                {
-                    // Top: "8",
-                    // Left: "10",
-                    // Height: "70",
-                    // Width: "152",
-                    // WordWrap: "True",
-                },
-                "The breeder is empty. To make some breeder plants, select a plant (or two plants) in the main window and choose Breed from the Plant menu.",
-            ),
-        ),
     )
 }
 
