@@ -1247,6 +1247,7 @@ export class TMainForm {
         } else {
             const newCommand = new PdBreedFromParentsCommand(BreederForm.generations, this.focusedPlant(), this.firstUnfocusedPlant(), -1, domain.breedingAndTimeSeriesOptions.percentMaxAge / 100.0, kCreateFirstGeneration)
             this.doCommand(newCommand)
+            setActiveForm("BreederForm")
         }
     }
     
