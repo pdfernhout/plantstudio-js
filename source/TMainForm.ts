@@ -29,7 +29,7 @@ import { TCustomDrawOptionsForm } from "./TCustomDrawOptionsForm"
 import { TTimeSeriesForm } from "./TTimeSeriesForm"
 import { unfinished } from "./temporary"
 import { TBreederForm } from "./TBreederForm"
-import { BreederForm, setMainForm, TimeSeriesForm } from "./PdForms"
+import { BreederForm, setMainForm, TimeSeriesForm } from "./FormHolder"
 
 type PosingField = 
     "hide" // posingHidePart

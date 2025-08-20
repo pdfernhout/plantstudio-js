@@ -14,7 +14,7 @@ import { kDontDrawYet, TMainForm } from "./TMainForm"
 import { kCreateFirstGeneration, PdBreedFromParentsCommand, PdDeleteTimeSeriesCommand, PdMakeTimeSeriesCommand, PdPasteCommand } from "./updcom"
 import { TBreederForm } from "./TBreederForm"
 import { unfinished } from "./temporary"
-import { BreederForm, MainForm, setTimeSeriesForm } from "./PdForms"
+import { BreederForm, MainForm, setTimeSeriesForm } from "./FormHolder"
 
 // from conversion_common import *
 // import ubmpsupport

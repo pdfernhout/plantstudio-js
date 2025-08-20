@@ -11,7 +11,7 @@ import { PdGeneration } from "./PdGeneration"
 import { PdCommand } from "./PdCommand"
 import { PdBreedFromParentsCommand, PdMakeTimeSeriesCommand, PdDeleteBreederGenerationCommand, PdDeleteAllBreederGenerationsCommand, PdRandomizeCommand, PdChangeBreedingAndTimeSeriesOptionsCommand, PdPasteCommand, PdReplaceBreederPlant } from "./updcom"
 import { cursor_stopWait } from "./ucursor"
-import { MainForm, setBreederForm } from "./PdForms"
+import { MainForm, setBreederForm } from "./FormHolder"
 
 const kRedrawPlants = true
 const kDontRedrawPlants = false

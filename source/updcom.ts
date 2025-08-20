@@ -16,7 +16,7 @@ import { KfObject3D } from "./KfObject3D"
 import { PdGeneration } from "./PdGeneration"
 import { cursor_startWait, cursor_stopWait } from "./ucursor"
 import { kAlwaysMove, kScaleAndMove, TMainForm } from "./TMainForm"
-import { BreederForm, MainForm, TimeSeriesForm } from "./PdForms"
+import { BreederForm, MainForm, TimeSeriesForm } from "./FormHolder"
 
 // const
 const kRotateNotInitialized = 0

@@ -10,7 +10,7 @@ import { ExportFormats, FileExport3DOptionsStructure, nameFor3DExportType, Expor
 import { BreedingAndTimeSeriesOptionsStructure, kMaxBreedingSections } from "./PdPlant"
 import { PdPlantManager } from "./PdPlantManager"
 import { KfObject3D } from "./KfObject3D"
-import { MainForm } from "./PdForms"
+import { MainForm } from "./FormHolder"
 
 // const
 const kMaxWizardQuestions = 30

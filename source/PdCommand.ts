@@ -1,6 +1,6 @@
 // PdCommand was in unit Ucommand
 
-import { MainForm } from "./PdForms"
+import { MainForm } from "./FormHolder"
 import { TPoint } from "./TPoint"
 import { long } from "./common"
 

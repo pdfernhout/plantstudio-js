@@ -25,7 +25,7 @@ import { PdStreamableObject } from "./PdStreamableObject"
 import { PdClassAndVersionInformationRecord, PdFiler } from "./PdFiler"
 import { DebugPrint } from "./udebug"
 import { cursor_startWait, cursor_stopWait, CursorMode } from "./ucursor"
-import { MainForm, TimeSeriesForm } from "./PdForms"
+import { MainForm, TimeSeriesForm } from "./FormHolder"
 
 // const
 export enum Gender {

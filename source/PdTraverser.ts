@@ -9,7 +9,7 @@ import { PdPlantPart } from "./PdPlantPart"
 import { PdInternode } from "./PdInternode"
 import { ExportPart } from "./U3dexport"
 import { PdFiler } from "./PdFiler"
-import { MainForm } from "./PdForms"
+import { MainForm } from "./FormHolder"
 
 export enum TraverseDirection {
     kTraverseNone = 0,

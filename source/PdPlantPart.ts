@@ -18,7 +18,7 @@ import { PdStreamableObject } from "./PdStreamableObject"
 import { PdClassAndVersionInformationRecord, PdFiler } from "./PdFiler"
 import { DebugPrint } from "./udebug"
 import { kRotateX, kRotateY, kRotateZ } from "./updcom"
-import { MainForm } from "./PdForms"
+import { MainForm } from "./FormHolder"
 
 // const
 const kAddingBiomassToPlant = true
