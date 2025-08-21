@@ -942,7 +942,7 @@ export class TBreederForm {
                 },
                 pageIndex: tabIndexToShow
             })
-        }, "width: 32rem; height: 24rem; position: relative")
+        }, "width: 32rem; height: 26rem; position: relative")
     }
     
     variationLowClick(): void {
