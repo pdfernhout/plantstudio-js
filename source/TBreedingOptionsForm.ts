@@ -2,7 +2,7 @@
 import * as m from "mithril"
 import { domain, DomainOptionsStructure } from "./PdDomain"
 import { BreedingAndTimeSeriesOptionsStructure, FromPlant, kMutation, kWeight } from "./PdPlant"
-import { byte, caption, HelpJump, int, IntToStr, short, StrToIntRange } from "./common"
+import { byte, caption, HelpJump, imageDir, int, IntToStr, short, StrToIntRange } from "./common"
 import { PdSection } from "./PdSection"
 import { len } from "./usupport"
 import { unfinished } from "./temporary"
@@ -635,36 +635,20 @@ export class TBreedingOptionsForm {
                     {
                         onclick: () => this.okClick(),
                         disabled: !this.optionsChanged()
-                        // Top: "4",
-                        // Left: "356",
-                        // Height: "21",
-                        // Width: "60",
-                        // Default: "True",
-                        // TabOrder: "1",
                     },
                     "OK",
                 ),
                 m("button.cancel.TButton.ml2",
                     {
                         onclick: () => this.cancelClick(),
-                        // Top: "27",
-                        // Left: "356",
-                        // Height: "21",
-                        // Width: "60",
-                        // Cancel: "True",
-                        // TabOrder: "2",
                     },
                     "Cancel",
                 ),
                 m("button.helpButton.TSpeedButton.ml2",
                     {
                         onclick: () => this.helpButtonClick(),
-                        // Top: "63",
-                        // Left: "356",
-                        // Height: "25",
-                        // Width: "60",
-                        // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888888888888888888888888888880C08888888888888CCC88888888888880C0888888888888888888888888888888C888888888888888C088888888888888CC888888888888888CC888888888800880CC888888888CC880CC888888888CC080CC8888888888CCCCC888888888888CCC88888888888888888888888",
                     },
+                    m("img.TImage", { src: imageDir + "BreedingOptionsForm_helpButton.png" } ),
                     caption("&Help"),
                 ),
                 m("img.downImage.TImage",
@@ -695,12 +679,6 @@ export class TBreedingOptionsForm {
 
     viewPage1(): m.Children {
         return m("TTabPage.page1.TTabPage",
-            {
-                // Top: "25",
-                // Left: "4",
-                // Height: "0",
-                // Width: "0",
-            },
             "General",
             m("TGroupBox.GroupBox1.TGroupBox",
                 {
@@ -935,12 +913,6 @@ export class TBreedingOptionsForm {
 
     viewPage2(): m.Children {
         return m("TTabPage.page2.TTabPage",
-            {
-                // Top: "25",
-                // Left: "4",
-                // Height: "0",
-                // Width: "0",
-            },
             "Mutation",
             m("div.mutationLabel.TLabel",
                 {
@@ -1061,12 +1033,6 @@ export class TBreedingOptionsForm {
 
     viewPage3(): m.Children {
         return m("TTabPage.page3.TTabPage",
-            {
-                // Top: "25",
-                // Left: "4",
-                // Height: "0",
-                // Width: "0",
-            },
             "Blending",
             m("div.weightLabel.TLabel",
                 {
@@ -1187,12 +1153,6 @@ export class TBreedingOptionsForm {
 
     viewPage4(): m.Children {
         return m("TTabPage.page4.TTabPage",
-            {
-                // Top: "25",
-                // Left: "4",
-                // Height: "0",
-                // Width: "0",
-            },
             "Non-numeric",
             m("div.nonNumericLabel.TLabel",
                 {
@@ -1284,12 +1244,6 @@ export class TBreedingOptionsForm {
 
     viewPage5(): m.Children {
         return m("TTabPage.page5.TTabPage",
-            {
-                // Top: "25",
-                // Left: "4",
-                // Height: "0",
-                // Width: "0",
-            },
             "Colors and 3D objects",
             m("label.checkbox-inline.treatColorsAsNumbers.TCheckBox", m("input[type=checkbox]",
                 {
@@ -1316,12 +1270,8 @@ export class TBreedingOptionsForm {
             m("button.changeTdoLibrary.TSpeedButton",
                 {
                     onclick: () => this.changeTdoLibraryClick(),
-                    // Top: "80",
-                    // Left: "257",
-                    // Height: "24",
-                    // Width: "84",
-                    // Glyph.Data: "F6000000424DF6000000000000007600000028000000100000001000000001000400000000008000000000000000000000001000000010000000000000000000800000800000008080008000000080008000808000007F7F7F00BFBFBF000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF0080888888888888888088888888888888808800000800800880000BBB0888888880880BB00888888880888008888888888088888888888888808800000800800880000BBB0888888880880BB0088888888088800888888888808888888888888800000800800088880BBB0888888888880BB00888888888888008888888888888",
                 },
+                m("img.TImage", { src: imageDir + "BreedingOptionsForm_changeTdoLibrary.png" } ),
                 caption("&Change..."),
             ),
             m("input.currentTdoLibraryFileName.TEdit",
