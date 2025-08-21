@@ -83,8 +83,8 @@ export const kDontConsiderDomainScale = false
 export const kDrawNow = true
 export const kDontDrawNow = false
 
-const kMutation = 0
-const kWeight = 1
+export const kMutation = 0
+export const kWeight = 1
 
 export const kMaxBreedingSections = 20
 
