@@ -13,7 +13,8 @@ import { PdBreedFromParentsCommand, PdMakeTimeSeriesCommand, PdDeleteBreederGene
 import { cursor_startWait, cursor_stopWait } from "./ucursor"
 import { activeForm, BreederForm, MainForm, setActiveForm, setBreederForm, TimeSeriesForm } from "./FormHolder"
 import { resetDroppedDownMenuId, viewMainMenu } from "./menu"
-import { ModalInputView } from "./ModalInputView"
+import { customModal, ModalInputView } from "./ModalInputView"
+import { TBreedingOptionsForm } from "./TBreedingOptionsForm"
 
 const kRedrawPlants = true
 const kDontRedrawPlants = false
@@ -925,25 +926,23 @@ export class TBreederForm {
         MainForm.doCommand(newCommand)
     }
     
-    changeBreederAndTimeSeriesOptions(tabIndexToShow: short): void {
-        // PDF TODO: Fix thie
-        alert("UNFINISHED")
-        // if (tabIndexToShow === kOptionTabMutation) {
-        //     domain.breedingAndTimeSeriesOptions.variationType = BreederVariation.kBreederVariationCustom
-        //     this.BreederMenuVariationCustom.checked = true
-        //     this.redoCaption()
-        // }
-        // const optionsForm: TBreedingOptionsForm = ubrdopt.TBreedingOptionsForm().create(this)
-        // if (optionsForm === null) {
-        //     throw new Error("Problem: Could not create breeding options window.")
-        // }
-        // optionsForm.breedingOptions.pageIndex = tabIndexToShow
-        // optionsForm.initializeWithBreedingAndTimeSeriesOptionsAndDomainOptions(domain.breedingAndTimeSeriesOptions, domain.options)
-        // const response: int = optionsForm.ShowModal()
-        // if (response === mrOK) {
-        //     const newCommand: PdCommand = new PdChangeBreedingAndTimeSeriesOptionsCommand(optionsForm.options, optionsForm.domainOptions)
-        //     MainForm.doCommand(newCommand)
-        // }
+    async changeBreederAndTimeSeriesOptions(tabIndexToShow: short): Promise<unknown> {
+        if (tabIndexToShow === kOptionTabMutation) {
+            domain.breedingAndTimeSeriesOptions.variationType = BreederVariation.kBreederVariationCustom
+            this.redoCaption()
+        }
+        return await customModal((resolve: any) => {
+            return m(TBreedingOptionsForm, { 
+                close: (optionsForm: TBreedingOptionsForm | null) => {
+                    if (optionsForm) {
+                        const newCommand = new PdChangeBreedingAndTimeSeriesOptionsCommand(optionsForm.options, optionsForm.domainOptions)
+                        MainForm.doCommand(newCommand)
+                    }
+                    resolve(true) 
+                },
+                pageIndex: tabIndexToShow
+            })
+        }, "width: 32rem; height: 24rem; position: relative")
     }
     
     variationLowClick(): void {
