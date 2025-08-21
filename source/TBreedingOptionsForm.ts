@@ -2,9 +2,11 @@
 import * as m from "mithril"
 import { domain, DomainOptionsStructure } from "./PdDomain"
 import { BreedingAndTimeSeriesOptionsStructure, FromPlant, kMutation, kWeight } from "./PdPlant"
-import { caption, HelpJump, IntToStr, short } from "./common"
+import { byte, caption, HelpJump, int, IntToStr, short, StrToIntRange } from "./common"
 import { PdSection } from "./PdSection"
 import { len } from "./usupport"
+import { unfinished } from "./temporary"
+import { TRect } from "./TRect"
 
 // from conversion_common import *
 // import ucursor
@@ -19,6 +21,14 @@ import { len } from "./usupport"
 // import ubrstrat
 // import uplant
 // import delphi_compatability
+
+// TOD PDF: used to get to compile
+type TWinControl = any
+type TOwnerDrawState = any
+type KfWinSlider = any
+type TLabel = any
+type TRadioButton = any
+type TShiftState = any
 
 const kBetweenGap = 4
 const kMaxPlantNameLength = 20
@@ -116,57 +126,56 @@ export class TBreedingOptionsForm {
     
     // ------------------------------------------------------------------------------- buttons 
     okClick(): void {
-        this.ModalResult = mrOK
+        // TOD PDF: Fix or remove: this.ModalResult = mrOK
     }
     
     cancelClick(): void {
-        this.ModalResult = mrCancel
+        // TOD PDF: Fix or remove: this.ModalResult = mrCancel
     }
     
     // ---------------------------------------------------------------------------- reading breeding options 
     updateComponentsFromOptions(): void {
-        this.mutationSections.Invalidate()
-        this.weightSections.Invalidate()
+        // TOD PDF: Fix or remove: this.mutationSections.Invalidate()
+        // TOD PDF: Fix or remove: this.weightSections.Invalidate()
         this.mutationSectionsClick()
         this.weightSectionsClick()
         if (this.radioButtonForChoiceIndex(this.options.getNonNumericalParametersFrom) !== null) {
             this.radioButtonForChoiceIndex(this.options.getNonNumericalParametersFrom).Checked = true
         }
-        this.treatColorsAsNumbers.Checked = this.options.mutateAndBlendColorValues
-        this.chooseTdosRandomly.Checked = this.options.chooseTdosRandomlyFromCurrentLibrary
+        // TOD PDF: Fix or remove: this.treatColorsAsNumbers.Checked = this.options.mutateAndBlendColorValues
+        // TOD PDF: Fix or remove: this.chooseTdosRandomly.Checked = this.options.chooseTdosRandomlyFromCurrentLibrary
         // v2.0
-        this.plantsPerGeneration.Value = this.options.plantsPerGeneration
-        this.thumbnailWidth.Value = this.options.thumbnailWidth
-        this.thumbnailHeight.Value = this.options.thumbnailHeight
-        this.maxGenerations.Value = this.options.maxGenerations
-        this.numTimeSeriesStages.Value = this.options.numTimeSeriesStages
-        this.percentMaxAge.Value = this.options.percentMaxAge
+        // TOD PDF: Fix or remove: this.plantsPerGeneration.Value = this.options.plantsPerGeneration
+        // TOD PDF: Fix or remove: this.thumbnailWidth.Value = this.options.thumbnailWidth
+        // TOD PDF: Fix or remove: this.thumbnailHeight.Value = this.options.thumbnailHeight
+        // TOD PDF: Fix or remove: this.maxGenerations.Value = this.options.maxGenerations
+        // TOD PDF: Fix or remove: this.numTimeSeriesStages.Value = this.options.numTimeSeriesStages
+        // TOD PDF: Fix or remove: this.percentMaxAge.Value = this.options.percentMaxAge
         // v2.0 domain options moved from main options dialog
-        this.maxPartsPerPlant_thousands.Value = this.domainOptions.maxPartsPerPlant_thousands
-        this.updateTimeSeriesPlantsOnParameterChange.Checked = this.domainOptions.updateTimeSeriesPlantsOnParameterChange
+        // TOD PDF: Fix or remove: this.maxPartsPerPlant_thousands.Value = this.domainOptions.maxPartsPerPlant_thousands
+        // TOD PDF: Fix or remove: this.updateTimeSeriesPlantsOnParameterChange.Checked = this.domainOptions.updateTimeSeriesPlantsOnParameterChange
     }
     
-    radioButtonForChoiceIndex(index: short): TRadioButton {
-        let result = new TRadioButton()
-        result = null
+    radioButtonForChoiceIndex(index: short): TRadioButton | null {
+        let result = null
         switch (index) {
             case FromPlant.kFromFirstPlant:
-                result = this.alwaysCopyFromFirstPlant
+                // TOD PDF: Fix or remove: result = this.alwaysCopyFromFirstPlant
                 break
             case FromPlant.kFromSecondPlant:
-                result = this.alwaysCopyFromSecondPlant
+                // TOD PDF: Fix or remove: result = this.alwaysCopyFromSecondPlant
                 break
             case FromPlant.kFromProbabilityBasedOnWeightsForSection:
-                result = this.copyRandomlyBasedOnWeights
+                // TOD PDF: Fix or remove: result = this.copyRandomlyBasedOnWeights
                 break
             case FromPlant.kFromPlantWithGreaterWeightForSectionIfEqualFirstPlant:
-                result = this.copyBasedOnWeightsIfEqualFirstPlant
+                // TOD PDF: Fix or remove: result = this.copyBasedOnWeightsIfEqualFirstPlant
                 break
             case FromPlant.kFromPlantWithGreaterWeightForSectionIfEqualSecondPlant:
-                result = this.copyBasedOnWeightsIfEqualSecondPlant
+                // TOD PDF: Fix or remove: result = this.copyBasedOnWeightsIfEqualSecondPlant
                 break
             case FromPlant.kFromPlantWithGreaterWeightForSectionIfEqualChooseRandomly:
-                result = this.copyBasedOnWeightsIfEqualChooseRandomly
+                // TOD PDF: Fix or remove: result = this.copyBasedOnWeightsIfEqualChooseRandomly
                 break
         }
         return result
@@ -175,19 +184,20 @@ export class TBreedingOptionsForm {
     choiceIndexForRadioButton(radio: TRadioButton): short {
         let result = 0
         result = 0
-        if (radio === this.alwaysCopyFromFirstPlant) {
-            result = FromPlant.kFromFirstPlant
-        } else if (radio === this.alwaysCopyFromSecondPlant) {
-            result = FromPlant.kFromSecondPlant
-        } else if (radio === this.copyRandomlyBasedOnWeights) {
-            result = FromPlant.kFromProbabilityBasedOnWeightsForSection
-        } else if (radio === this.copyBasedOnWeightsIfEqualFirstPlant) {
-            result = FromPlant.kFromPlantWithGreaterWeightForSectionIfEqualFirstPlant
-        } else if (radio === this.copyBasedOnWeightsIfEqualSecondPlant) {
-            result = FromPlant.kFromPlantWithGreaterWeightForSectionIfEqualSecondPlant
-        } else if (radio === this.copyBasedOnWeightsIfEqualChooseRandomly) {
-            result = FromPlant.kFromPlantWithGreaterWeightForSectionIfEqualChooseRandomly
-        }
+        // TOD PDF: Fix or remove: 
+        // if (radio === this.alwaysCopyFromFirstPlant) {
+        //     result = FromPlant.kFromFirstPlant
+        // } else if (radio === this.alwaysCopyFromSecondPlant) {
+        //     result = FromPlant.kFromSecondPlant
+        // } else if (radio === this.copyRandomlyBasedOnWeights) {
+        //     result = FromPlant.kFromProbabilityBasedOnWeightsForSection
+        // } else if (radio === this.copyBasedOnWeightsIfEqualFirstPlant) {
+        //     result = FromPlant.kFromPlantWithGreaterWeightForSectionIfEqualFirstPlant
+        // } else if (radio === this.copyBasedOnWeightsIfEqualSecondPlant) {
+        //     result = FromPlant.kFromPlantWithGreaterWeightForSectionIfEqualSecondPlant
+        // } else if (radio === this.copyBasedOnWeightsIfEqualChooseRandomly) {
+        //     result = FromPlant.kFromPlantWithGreaterWeightForSectionIfEqualChooseRandomly
+        // }
         return result
     }
     
@@ -200,18 +210,18 @@ export class TBreedingOptionsForm {
     
     mutationSliderMouseMove(): void {
         if (this.draggingMutationSlider) {
-            this.mutationAmountLabel.Caption = IntToStr(this.mutationSlider.CurrentValue) + "%"
-            this.updateMutationOrWeightFromSlider(kMutation, this.mutationSectionsOpen, this.mutationSections, this.mutationSlider)
+            // TOD PDF: Fix or remove: this.mutationAmountLabel.Caption = IntToStr(this.mutationSlider.CurrentValue) + "%"
+            // TOD PDF: Fix or remove: this.updateMutationOrWeightFromSlider(kMutation, this.mutationSectionsOpen, this.mutationSections, this.mutationSlider)
         }
     }
     
     mutationSliderMouseUp(): void {
         this.draggingMutationSlider = false
-        this.updateMutationOrWeightFromSlider(kMutation, this.mutationSectionsOpen, this.mutationSections, this.mutationSlider)
+        // TOD PDF: Fix or remove: this.updateMutationOrWeightFromSlider(kMutation, this.mutationSectionsOpen, this.mutationSections, this.mutationSlider)
     }
     
-    mutationSliderKeyUp(Key: byte, Shift: TShiftState): void {
-        this.updateMutationOrWeightFromSlider(kMutation, this.mutationSectionsOpen, this.mutationSections, this.mutationSlider)
+    mutationSliderKeyUp(Key: byte, Shift: TShiftState): byte {
+        // TOD PDF: Fix or remove: this.updateMutationOrWeightFromSlider(kMutation, this.mutationSectionsOpen, this.mutationSections, this.mutationSlider)
         return Key
     }
     
@@ -223,17 +233,17 @@ export class TBreedingOptionsForm {
     
     weightSliderMouseMove(): void {
         if (this.draggingWeightSlider) {
-            this.weightAmountLabel.Caption = IntToStr(this.weightSlider.CurrentValue) + "%"
+            // TOD PDF: Fix or remove: this.weightAmountLabel.Caption = IntToStr(this.weightSlider.CurrentValue) + "%"
         }
     }
     
     weightSliderMouseUp(): void {
         this.draggingWeightSlider = false
-        this.updateMutationOrWeightFromSlider(kWeight, this.weightSectionsOpen, this.weightSections, this.weightSlider)
+        // TOD PDF: Fix or remove: this.updateMutationOrWeightFromSlider(kWeight, this.weightSectionsOpen, this.weightSections, this.weightSlider)
     }
     
-    weightSliderKeyUp(Key: byte, Shift: TShiftState): void {
-        this.updateMutationOrWeightFromSlider(kWeight, this.weightSectionsOpen, this.weightSections, this.weightSlider)
+    weightSliderKeyUp(Key: byte, Shift: TShiftState): byte {
+        // TOD PDF: Fix or remove: this.updateMutationOrWeightFromSlider(kWeight, this.weightSectionsOpen, this.weightSections, this.weightSlider)
         return Key
     }
     
@@ -249,7 +259,7 @@ export class TBreedingOptionsForm {
                 }
             }
         }
-        aListBox.Invalidate()
+        // TOD PDF: Fix or remove: aListBox.Invalidate()
     }
     
     alwaysCopyFromFirstPlantClick(): void {
@@ -277,26 +287,27 @@ export class TBreedingOptionsForm {
     }
     
     updateOptionsForNonNumericChoice(): void {
-        if (this.breedingOptions.controlCount > 0) {
-            for (let i = 1; i <= this.breedingOptions.controlCount - 1; i++) {
-                if ((this.breedingOptions.controls[i] instanceof delphi_compatability.TRadioButton)) {
-                    // this will work so long as there are no other radio buttons on the notebook
-                    const radio: TRadioButton = (this.breedingOptions.controls[i])
-                    if (radio.Checked) {
-                        this.options.getNonNumericalParametersFrom = this.choiceIndexForRadioButton(radio)
-                    }
-                    break
-                }
-            }
-        }
+        // TOD PDF: Fix or remove: 
+        // if (this.breedingOptions.controlCount > 0) {
+        //     for (let i = 1; i <= this.breedingOptions.controlCount - 1; i++) {
+        //         if ((this.breedingOptions.controls[i] instanceof delphi_compatability.TRadioButton)) {
+        //             // this will work so long as there are no other radio buttons on the notebook
+        //             const radio: TRadioButton = (this.breedingOptions.controls[i])
+        //             if (radio.Checked) {
+        //                 this.options.getNonNumericalParametersFrom = this.choiceIndexForRadioButton(radio)
+        //             }
+        //             break
+        //         }
+        //     }
+        // }
     }
     
     treatColorsAsNumbersClick(): void {
-        this.options.mutateAndBlendColorValues = this.treatColorsAsNumbers.Checked
+        // TOD PDF: Fix or remove: this.options.mutateAndBlendColorValues = this.treatColorsAsNumbers.Checked
     }
     
     chooseTdosRandomlyClick(): void {
-        this.options.chooseTdosRandomlyFromCurrentLibrary = this.chooseTdosRandomly.Checked
+        // TOD PDF: Fix or remove: this.options.chooseTdosRandomlyFromCurrentLibrary = this.chooseTdosRandomly.Checked
     }
     
     // ------------------------------------------------------------------ sections list boxes 
@@ -324,51 +335,52 @@ export class TBreedingOptionsForm {
     }
     
     drawSectionsListBoxItem(Control: TWinControl, index: int, Rect: TRect, State: TOwnerDrawState): void {
-        if (delphi_compatability.Application.terminated) {
-            return
-        }
-        const sectionsListBox: SectionWrapper[] = Control
-        if (sectionsListBox === null) {
-            return
-        }
-        if ((sectionsListBox.length <= 0) || (index < 0) || (index > sectionsListBox.length - 1)) {
-            return
-        }
-        const selected: boolean = (delphi_compatability.TOwnerDrawStateType.odSelected in State)
-        // set up section pointer 
-        const section: PdSection = sectionsListBox[index].section
-        if (section === null) {
-            return
-        }
-        sectionsListBox.Canvas.Font = sectionsListBox.Font
-        if (selected) {
-            sectionsListBox.Canvas.Brush.Color = UNRESOLVED.clHighlight
-            sectionsListBox.Canvas.Font.Color = UNRESOLVED.clHighlightText
-        } else {
-            sectionsListBox.Canvas.Brush.Color = sectionsListBox.Color
-            sectionsListBox.Canvas.Font.Color = UNRESOLVED.clBtnText
-        }
-        sectionsListBox.Canvas.FillRect(Rect)
-        let cText: string
-        if (sectionsListBox === this.mutationSections) {
-            cText = section.getName() + " " + IntToStr(this.options.mutationStrengths[index]) + "%"
-        } else {
-            cText = section.getName() + " " + IntToStr(this.options.firstPlantWeights[index]) + "/" + IntToStr(100 - this.options.firstPlantWeights[index])
-        }
-        // margin for text 
-        Rect.left = Rect.left + 2
-        UNRESOLVED.winprocs.drawText(sectionsListBox.Canvas.Handle, cText, len(cText), Rect, delphi_compatability.DT_LEFT)
+        unfinished()
+        // if (delphi_compatability.Application.terminated) {
+        //     return
+        // }
+        // const sectionsListBox: SectionWrapper[] = Control
+        // if (sectionsListBox === null) {
+        //     return
+        // }
+        // if ((sectionsListBox.length <= 0) || (index < 0) || (index > sectionsListBox.length - 1)) {
+        //     return
+        // }
+        // const selected: boolean = (delphi_compatability.TOwnerDrawStateType.odSelected in State)
+        // // set up section pointer 
+        // const section: PdSection = sectionsListBox[index].section
+        // if (section === null) {
+        //     return
+        // }
+        // sectionsListBox.Canvas.Font = sectionsListBox.Font
+        // if (selected) {
+        //     sectionsListBox.Canvas.Brush.Color = UNRESOLVED.clHighlight
+        //     sectionsListBox.Canvas.Font.Color = UNRESOLVED.clHighlightText
+        // } else {
+        //     sectionsListBox.Canvas.Brush.Color = sectionsListBox.Color
+        //     sectionsListBox.Canvas.Font.Color = UNRESOLVED.clBtnText
+        // }
+        // sectionsListBox.Canvas.FillRect(Rect)
+        // let cText: string
+        // if (sectionsListBox === this.mutationSections) {
+        //     cText = section.getName() + " " + IntToStr(this.options.mutationStrengths[index]) + "%"
+        // } else {
+        //     cText = section.getName() + " " + IntToStr(this.options.firstPlantWeights[index]) + "/" + IntToStr(100 - this.options.firstPlantWeights[index])
+        // }
+        // // margin for text 
+        // Rect.left = Rect.left + 2
+        // UNRESOLVED.winprocs.drawText(sectionsListBox.Canvas.Handle, cText, len(cText), Rect, delphi_compatability.DT_LEFT)
     }
     
     mutationSectionsClick(): void {
-        this.updateSliderForSelectedSections(kMutation, this.mutationSectionsOpen, this.mutationSlider, this.mutationSections, this.mutationAmountLabel)
+        // TOD PDF: Fix or remove: this.updateSliderForSelectedSections(kMutation, this.mutationSectionsOpen, this.mutationSlider, this.mutationSections, this.mutationAmountLabel)
     }
     
     weightSectionsClick(): void {
-        this.updateSliderForSelectedSections(kWeight, this.weightSectionsOpen, this.weightSlider, this.weightSections, this.weightAmountLabel)
+        // TOD PDF: Fix or remove: this.updateSliderForSelectedSections(kWeight, this.weightSectionsOpen, this.weightSlider, this.weightSections, this.weightAmountLabel)
     }
     
-    updateSliderForSelectedSections(which: short, isOpen: boolean, aSlider: KfWinSlider, aListBox: TListBox, aLabel: TLabel): void {
+    updateSliderForSelectedSections(which: short, isOpen: boolean, aSlider: KfWinSlider, aListBox: SectionWrapper[], aLabel: TLabel): void {
         let firstSelectedIndex: short
         
         if (isOpen) {
@@ -411,41 +423,41 @@ export class TBreedingOptionsForm {
     mutationShowSectionsClick(): void {
         this.mutationSectionsOpen = !this.mutationSectionsOpen
         if (this.mutationSectionsOpen) {
-            this.mutationShowSections.Glyph = this.upImage.Picture.Bitmap
-            this.mutationSections.Visible = true
-            this.mutationSelectAll.Visible = true
-            this.mutationSelectNone.Visible = true
+            // TOD PDF: Fix or remove: this.mutationShowSections.Glyph = this.upImage.Picture.Bitmap
+            // TOD PDF: Fix or remove: this.mutationSections.Visible = true
+            // TOD PDF: Fix or remove: this.mutationSelectAll.Visible = true
+            // TOD PDF: Fix or remove: this.mutationSelectNone.Visible = true
             // select all 
             this.mutationSelectAllClick()
             this.mutationSectionsClick()
         } else {
-            this.mutationSections.Visible = false
-            this.mutationSelectAll.Visible = false
-            this.mutationSelectNone.Visible = false
-            this.mutationShowSections.Glyph = this.downImage.Picture.Bitmap
+            // TOD PDF: Fix or remove: this.mutationSections.Visible = false
+            // TOD PDF: Fix or remove: this.mutationSelectAll.Visible = false
+            // TOD PDF: Fix or remove: this.mutationSelectNone.Visible = false
+            // TOD PDF: Fix or remove: this.mutationShowSections.Glyph = this.downImage.Picture.Bitmap
             this.mutationSectionsClick()
         }
-        this.mutationSections.Visible = this.mutationSectionsOpen
+        // TOD PDF: Fix or remove: this.mutationSections.Visible = this.mutationSectionsOpen
     }
     
     weightShowSectionsClick(): void {
         this.weightSectionsOpen = !this.weightSectionsOpen
         if (this.weightSectionsOpen) {
-            this.weightShowSections.Glyph = this.upImage.Picture.Bitmap
-            this.weightSections.Visible = true
-            this.weightSelectAll.Visible = true
-            this.weightSelectNone.Visible = true
+            // TOD PDF: Fix or remove: this.weightShowSections.Glyph = this.upImage.Picture.Bitmap
+            // TOD PDF: Fix or remove: this.weightSections.Visible = true
+            // TOD PDF: Fix or remove: this.weightSelectAll.Visible = true
+            // TOD PDF: Fix or remove: this.weightSelectNone.Visible = true
             // select all 
             this.weightSelectAllClick()
             this.weightSectionsClick()
         } else {
-            this.weightSections.Visible = false
-            this.weightSelectAll.Visible = false
-            this.weightSelectNone.Visible = false
-            this.weightShowSections.Glyph = this.downImage.Picture.Bitmap
+            // TOD PDF: Fix or remove: this.weightSections.Visible = false
+            // TOD PDF: Fix or remove: this.weightSelectAll.Visible = false
+            // TOD PDF: Fix or remove: this.weightSelectNone.Visible = false
+            // TOD PDF: Fix or remove: this.weightShowSections.Glyph = this.downImage.Picture.Bitmap
             this.weightSectionsClick()
         }
-        this.weightSections.Visible = this.weightSectionsOpen
+        // TOD PDF: Fix or remove: this.weightSections.Visible = this.weightSectionsOpen
     }
     
     mutationSelectAllClick(): void {
@@ -473,84 +485,85 @@ export class TBreedingOptionsForm {
     }
     
     changeTdoLibraryClick(): void {
-        const fileNameWithPat: stringh = usupport.getFileOpenInfo(usupport.kFileTypeTdo, domain.defaultTdoLibraryFileName, "Choose a 3D object library (tdo) file")
-        if (fileNameWithPath === "") {
-            return
-        }
-        this.currentTdoLibraryFileName.Text = fileNameWithPath
-        domain.defaultTdoLibraryFileName = this.currentTdoLibraryFileName.Text
-        this.currentTdoLibraryFileName.SelStart = len(this.currentTdoLibraryFileName.Text)
+        unfinished()
+        // const fileNameWithPath: string = usupport.getFileOpenInfo(usupport.kFileTypeTdo, domain.defaultTdoLibraryFileName, "Choose a 3D object library (tdo) file")
+        // if (fileNameWithPath === "") {
+        //     return
+        // }
+        // this.currentTdoLibraryFileName.Text = fileNameWithPath
+        // domain.defaultTdoLibraryFileName = this.currentTdoLibraryFileName.Text
+        // this.currentTdoLibraryFileName.SelStart = len(this.currentTdoLibraryFileName.Text)
     }
     
     helpButtonClick(): void {
         HelpJump("Changing_breeding_options")
     }
     
-    plantsPerGenerationChange(): void {
+    plantsPerGenerationChange(event: any): void {
         const oldValue = this.options.plantsPerGeneration
         try {
-            this.options.plantsPerGeneration = this.plantsPerGeneration.Value
+            this.options.plantsPerGeneration = StrToIntRange(event.target.value, 1, 10)
         } catch (e) {
             this.options.plantsPerGeneration = oldValue
         }
     }
     
-    thumbnailWidthChange(): void {
+    thumbnailWidthChange(event: any): void {
         const oldValue = this.options.thumbnailWidth
         try {
-            this.options.thumbnailWidth = this.thumbnailWidth.Value
+            this.options.thumbnailWidth = StrToIntRange(event.target.value, 1, 256)
         } catch (e) {
             this.options.thumbnailWidth = oldValue
         }
     }
     
-    thumbnailHeightChange(): void {
+    thumbnailHeightChange(event: any): void {
         const oldValue = this.options.thumbnailHeight
         try {
-            this.options.thumbnailHeight = this.thumbnailHeight.Value
+            this.options.thumbnailHeight = StrToIntRange(event.target.value, 1, 256)
         } catch (e) {
             this.options.thumbnailHeight = oldValue
         }
     }
     
-    maxGenerationsChange(): void {
+    maxGenerationsChange(event: any): void {
         const oldValue = this.options.maxGenerations
         try {
-            this.options.maxGenerations = this.maxGenerations.Value
+            this.options.maxGenerations = StrToIntRange(event.target.value, 1, 256)
         } catch (e) {
             this.options.maxGenerations = oldValue
         }
     }
     
-    numTimeSeriesStagesChange(): void {
+    numTimeSeriesStagesChange(event: any): void {
         const oldValue = this.options.numTimeSeriesStages
         try {
-            this.options.numTimeSeriesStages = this.numTimeSeriesStages.Value
+            this.options.numTimeSeriesStages = StrToIntRange(event.target.value, 1, 100)
         } catch (e) {
             this.options.numTimeSeriesStages = oldValue
         }
     }
     
-    percentMaxAgeChange(): void {
+    percentMaxAgeChange(event: any): void {
         const oldValue = this.options.percentMaxAge
         try {
-            this.options.percentMaxAge = this.percentMaxAge.Value
+            this.options.percentMaxAge = StrToIntRange(event.target.value, 1, 100)
         } catch (e) {
             this.options.percentMaxAge = oldValue
         }
     }
     
-    maxPartsPerPlant_thousandsChange(): void {
+    maxPartsPerPlant_thousandsChange(event: any): void {
         const oldValue = this.domainOptions.maxPartsPerPlant_thousands
         try {
-            this.domainOptions.maxPartsPerPlant_thousands = this.maxPartsPerPlant_thousands.Value
+            this.domainOptions.maxPartsPerPlant_thousands = StrToIntRange(event.target.value, 1, 100)
         } catch (e) {
             this.domainOptions.maxPartsPerPlant_thousands = oldValue
         }
     }
     
-    updateTimeSeriesPlantsOnParameterChangeClick(): void {
-        this.domainOptions.updateTimeSeriesPlantsOnParameterChange = this.updateTimeSeriesPlantsOnParameterChange.Checked
+    updateTimeSeriesPlantsOnParameterChangeClick(event: any): void {
+        this.domainOptions.updateTimeSeriesPlantsOnParameterChange = event.target.checked
     }
 
     viewBreedingOptionsForm() {
@@ -816,7 +829,7 @@ export class TBreedingOptionsForm {
                     ),
                     m("label.checkbox-inline.updateTimeSeriesPlantsOnParameterChange.TCheckBox", m("input[type=checkbox]",
                         {
-                            onclick: updateTimeSeriesPlantsOnParameterChangeClick,
+                            onclick: (event: any) => this.updateTimeSeriesPlantsOnParameterChangeClick(event),
                             // Top: "46",
                             // Left: "10",
                             // Height: "17",
@@ -902,7 +915,7 @@ export class TBreedingOptionsForm {
                 m("Group.Group.g00000058",
                     m("button.mutationShowSections.TSpeedButton",
                         {
-                            onclick: mutationShowSectionsClick,
+                            onclick: () => this.mutationShowSectionsClick(),
                             // Top: "58",
                             // Left: "10",
                             // Height: "24",
@@ -913,7 +926,7 @@ export class TBreedingOptionsForm {
                     ),
                     m("TListBox.mutationSections.TListBox",
                         {
-                            onclick: mutationSectionsClick,
+                            onclick: () => this.mutationSectionsClick(),
                             // Top: "58",
                             // Left: "95",
                             // Height: "240",
@@ -929,7 +942,7 @@ export class TBreedingOptionsForm {
                 ),
                 m("button.mutationSelectAll.TButton",
                     {
-                        onclick: mutationSelectAllClick,
+                        onclick: () => this.mutationSelectAllClick(),
                         // Top: "94",
                         // Left: "10",
                         // Height: "24",
@@ -940,7 +953,7 @@ export class TBreedingOptionsForm {
                 ),
                 m("button.mutationSelectNone.TButton",
                     {
-                        onclick: mutationSelectNoneClick,
+                        onclick: () => this.mutationSelectNoneClick(),
                         // Top: "122",
                         // Left: "10",
                         // Height: "24",
@@ -1025,7 +1038,7 @@ export class TBreedingOptionsForm {
                 m("Group.Group.g00000059",
                     m("button.weightShowSections.TSpeedButton",
                         {
-                            onclick: weightShowSectionsClick,
+                            onclick: () => this.weightShowSectionsClick(),
                             // Top: "59",
                             // Left: "10",
                             // Height: "24",
@@ -1036,7 +1049,7 @@ export class TBreedingOptionsForm {
                     ),
                     m("TListBox.weightSections.TListBox",
                         {
-                            onclick: weightSectionsClick,
+                            onclick: () => this.weightSectionsClick(),
                             // Top: "59",
                             // Left: "95",
                             // Height: "240",
@@ -1052,7 +1065,7 @@ export class TBreedingOptionsForm {
                 ),
                 m("button.weightSelectAll.TButton",
                     {
-                        onclick: weightSelectAllClick,
+                        onclick: () => this.weightSelectAllClick(),
                         // Top: "95",
                         // Left: "10",
                         // Height: "24",
@@ -1063,7 +1076,7 @@ export class TBreedingOptionsForm {
                 ),
                 m("button.weightSelectNone.TButton",
                     {
-                        onclick: weightSelectNoneClick,
+                        onclick: () => this.weightSelectNoneClick(),
                         // Top: "123",
                         // Left: "10",
                         // Height: "24",
@@ -1092,7 +1105,7 @@ export class TBreedingOptionsForm {
                 ),
                 m("input[type=radio].alwaysCopyFromFirstPlant.TRadioButton",
                     {
-                        onclick: alwaysCopyFromFirstPlantClick,
+                        onclick: () => this.alwaysCopyFromFirstPlantClick(),
                         // Top: "51",
                         // Left: "29",
                         // Height: "17",
@@ -1103,7 +1116,7 @@ export class TBreedingOptionsForm {
                 ),
                 m("input[type=radio].alwaysCopyFromSecondPlant.TRadioButton",
                     {
-                        onclick: alwaysCopyFromSecondPlantClick,
+                        onclick: () => this.alwaysCopyFromSecondPlantClick(),
                         // Top: "73",
                         // Left: "29",
                         // Height: "17",
@@ -1114,7 +1127,7 @@ export class TBreedingOptionsForm {
                 ),
                 m("input[type=radio].copyRandomlyBasedOnWeights.TRadioButton",
                     {
-                        onclick: copyRandomlyBasedOnWeightsClick,
+                        onclick: () => this.copyRandomlyBasedOnWeightsClick(),
                         // Top: "95",
                         // Left: "29",
                         // Height: "17",
@@ -1135,7 +1148,7 @@ export class TBreedingOptionsForm {
                 ),
                 m("input[type=radio].copyBasedOnWeightsIfEqualFirstPlant.TRadioButton",
                     {
-                        onclick: copyBasedOnWeightsIfEqualFirstPlantClick,
+                        onclick: () => this.copyBasedOnWeightsIfEqualFirstPlantClick(),
                         // Top: "139",
                         // Left: "49",
                         // Height: "17",
@@ -1146,7 +1159,7 @@ export class TBreedingOptionsForm {
                 ),
                 m("input[type=radio].copyBasedOnWeightsIfEqualSecondPlant.TRadioButton",
                     {
-                        onclick: copyBasedOnWeightsIfEqualSecondPlantClick,
+                        onclick: () => this.copyBasedOnWeightsIfEqualSecondPlantClick(),
                         // Top: "161",
                         // Left: "49",
                         // Height: "17",
@@ -1157,7 +1170,7 @@ export class TBreedingOptionsForm {
                 ),
                 m("input[type=radio].copyBasedOnWeightsIfEqualChooseRandomly.TRadioButton",
                     {
-                        onclick: copyBasedOnWeightsIfEqualChooseRandomlyClick,
+                        onclick: () => this.copyBasedOnWeightsIfEqualChooseRandomlyClick(),
                         // Top: "183",
                         // Left: "49",
                         // Height: "17",
@@ -1177,7 +1190,7 @@ export class TBreedingOptionsForm {
                 "Colors and 3D objects",
                 m("label.checkbox-inline.treatColorsAsNumbers.TCheckBox", m("input[type=checkbox]",
                     {
-                        onclick: treatColorsAsNumbersClick,
+                        onclick: () => this.treatColorsAsNumbersClick(),
                         // Top: "31",
                         // Left: "15",
                         // Height: "17",
@@ -1188,7 +1201,7 @@ export class TBreedingOptionsForm {
                 ),
                 m("label.checkbox-inline.chooseTdosRandomly.TCheckBox", m("input[type=checkbox]",
                     {
-                        onclick: chooseTdosRandomlyClick,
+                        onclick: () => this.chooseTdosRandomlyClick(),
                         // Top: "61",
                         // Left: "15",
                         // Height: "17",
@@ -1199,7 +1212,7 @@ export class TBreedingOptionsForm {
                 ),
                 m("button.changeTdoLibrary.TSpeedButton",
                     {
-                        onclick: changeTdoLibraryClick,
+                        onclick: () => this.changeTdoLibraryClick(),
                         // Top: "80",
                         // Left: "257",
                         // Height: "24",
@@ -1224,7 +1237,7 @@ export class TBreedingOptionsForm {
         ),
         m("button.ok.TButton",
             {
-                onclick: okClick,
+                onclick: () => this.okClick(),
                 // Top: "4",
                 // Left: "356",
                 // Height: "21",
@@ -1236,7 +1249,7 @@ export class TBreedingOptionsForm {
         ),
         m("button.cancel.TButton",
             {
-                onclick: cancelClick,
+                onclick: () => this.cancelClick(),
                 // Top: "27",
                 // Left: "356",
                 // Height: "21",
@@ -1248,7 +1261,7 @@ export class TBreedingOptionsForm {
         ),
         m("button.helpButton.TSpeedButton",
             {
-                onclick: helpButtonClick,
+                onclick: () => this.helpButtonClick(),
                 // Top: "63",
                 // Left: "356",
                 // Height: "25",
