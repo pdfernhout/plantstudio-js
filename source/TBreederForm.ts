@@ -28,7 +28,7 @@ const kSelectionIsNotInFirstColumn = false
 const kFirstColumnWidth = 20
 const kBetweenGap = 4
 
-const kOptionTabSize = 0
+export const kOptionTabSize = 0
 const kOptionTabMutation = 1
 const kOptionTabBlending = 2
 const kOptionTabNonNumeric = 3

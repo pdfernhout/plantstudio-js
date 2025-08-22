@@ -5,7 +5,6 @@ import { PdPlant, kDrawNow, kDontDrawNow, BreedingAndTimeSeriesOptionsStructure,
 import { TPoint } from "./TPoint"
 import { PdCommand, TrackPhase } from "./PdCommand"
 import { domain, DomainOptionsStructure, ViewPlants } from "./PdDomain"
-import { kDontRecalculateScale, kRecalculateScale } from "./temporary"
 import { Rect, SinglePoint, digitValueString, nameStringForFileType } from "./usupport";
 import { FileExport3DOptionsStructure, fileTypeFor3DExportType } from "./U3dexport"
 import { min, safedivExcept, intMax, max, intMin } from "./umath"
@@ -17,6 +16,7 @@ import { PdGeneration } from "./PdGeneration"
 import { cursor_startWait, cursor_stopWait } from "./ucursor"
 import { kAlwaysMove, kScaleAndMove, TMainForm } from "./TMainForm"
 import { BreederForm, MainForm, TimeSeriesForm } from "./FormHolder"
+import { kDontRecalculateScale, kRecalculateScale } from "./TTimeSeriesForm"
 
 // const
 const kRotateNotInitialized = 0

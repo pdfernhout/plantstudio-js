@@ -10,9 +10,9 @@ import { Point, rHeight, rWidth } from "./usupport"
 import { PdCommand } from "./PdCommand"
 import { domain, DrawMode } from "./PdDomain"
 import { intMax, intMin } from "./umath"
-import { kDontDrawYet, TMainForm } from "./TMainForm"
+import { kDontDrawYet } from "./TMainForm"
 import { kCreateFirstGeneration, PdBreedFromParentsCommand, PdDeleteTimeSeriesCommand, PdMakeTimeSeriesCommand, PdPasteCommand } from "./updcom"
-import { TBreederForm } from "./TBreederForm"
+import { kOptionTabSize } from "./TBreederForm"
 import { unfinished } from "./temporary"
 import { activeForm, BreederForm, MainForm, setActiveForm, setTimeSeriesForm, TimeSeriesForm } from "./FormHolder"
 import { resetDroppedDownMenuId, viewMainMenu } from "./menu"
@@ -33,8 +33,8 @@ import { ModalInputView } from "./ModalInputView"
 // import updform
 // import delphi_compatability
 
-const kRecalculateScale = true
-const kDontRecalculateScale = false
+export const kRecalculateScale = true
+export const kDontRecalculateScale = false
 const kMaxTimeSeriesStages = 100
 const kStageNumberTextHeight = 16
 
@@ -597,7 +597,7 @@ export class TTimeSeriesForm {
     }
     
     TimeSeriesMenuOptionsStagesClick(): void {
-        BreederForm.changeBreederAndTimeSeriesOptions(0)
+        BreederForm.changeBreederAndTimeSeriesOptions(kOptionTabSize)
     }
     
     TimeSeriesMenuOptionsFastDrawClick(): void {

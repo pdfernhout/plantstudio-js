@@ -661,5 +661,6 @@ export class TBreedingOptionsForm {
         this.options = JSON.parse(JSON.stringify(domain.breedingAndTimeSeriesOptions))
         this.domainOptions = JSON.parse(JSON.stringify(domain.options))
         this.loadSectionsIntoListBoxes()
+        this.currentTab = tabs[vnode.attrs.pageIndex]
     }
 }
