@@ -144,62 +144,7 @@ export class TBreedingOptionsForm {
             JSON.stringify(this.domainOptions) !== JSON.stringify(domain.options)
     }
     
-    // ---------------------------------------------------------------------------- reading breeding options 
-    updateComponentsFromOptions(): void {
-        if (this.radioButtonForChoiceIndex(this.options.getNonNumericalParametersFrom) !== null) {
-            this.radioButtonForChoiceIndex(this.options.getNonNumericalParametersFrom).Checked = true
-        }
-        // TOD PDF: Fix or remove: this.treatColorsAsNumbers.Checked = this.options.mutateAndBlendColorValues
-        // TOD PDF: Fix or remove: this.chooseTdosRandomly.Checked = this.options.chooseTdosRandomlyFromCurrentLibrary
-    }
-    
-    radioButtonForChoiceIndex(index: short): TRadioButton | null {
-        let result = null
-        switch (index) {
-            case FromPlant.kFromFirstPlant:
-                // TOD PDF: Fix or remove: result = this.alwaysCopyFromFirstPlant
-                break
-            case FromPlant.kFromSecondPlant:
-                // TOD PDF: Fix or remove: result = this.alwaysCopyFromSecondPlant
-                break
-            case FromPlant.kFromProbabilityBasedOnWeightsForSection:
-                // TOD PDF: Fix or remove: result = this.copyRandomlyBasedOnWeights
-                break
-            case FromPlant.kFromPlantWithGreaterWeightForSectionIfEqualFirstPlant:
-                // TOD PDF: Fix or remove: result = this.copyBasedOnWeightsIfEqualFirstPlant
-                break
-            case FromPlant.kFromPlantWithGreaterWeightForSectionIfEqualSecondPlant:
-                // TOD PDF: Fix or remove: result = this.copyBasedOnWeightsIfEqualSecondPlant
-                break
-            case FromPlant.kFromPlantWithGreaterWeightForSectionIfEqualChooseRandomly:
-                // TOD PDF: Fix or remove: result = this.copyBasedOnWeightsIfEqualChooseRandomly
-                break
-        }
-        return result
-    }
-    
-    choiceIndexForRadioButton(radio: TRadioButton): short {
-        let result = 0
-        result = 0
-        // TOD PDF: Fix or remove: 
-        // if (radio === this.alwaysCopyFromFirstPlant) {
-        //     result = FromPlant.kFromFirstPlant
-        // } else if (radio === this.alwaysCopyFromSecondPlant) {
-        //     result = FromPlant.kFromSecondPlant
-        // } else if (radio === this.copyRandomlyBasedOnWeights) {
-        //     result = FromPlant.kFromProbabilityBasedOnWeightsForSection
-        // } else if (radio === this.copyBasedOnWeightsIfEqualFirstPlant) {
-        //     result = FromPlant.kFromPlantWithGreaterWeightForSectionIfEqualFirstPlant
-        // } else if (radio === this.copyBasedOnWeightsIfEqualSecondPlant) {
-        //     result = FromPlant.kFromPlantWithGreaterWeightForSectionIfEqualSecondPlant
-        // } else if (radio === this.copyBasedOnWeightsIfEqualChooseRandomly) {
-        //     result = FromPlant.kFromPlantWithGreaterWeightForSectionIfEqualChooseRandomly
-        // }
-        return result
-    }
-    
     // ------------------------------------------------------------ changing breeding strategy 
-    
     
     updateMutationOrWeightFromSlider(which: short, isOpen: boolean, aListBox: SectionWrapper[], aSliderValue: number): void {
         if (aListBox.length > 0) {
@@ -213,46 +158,6 @@ export class TBreedingOptionsForm {
                 }
             }
         }
-    }
-    
-    alwaysCopyFromFirstPlantClick(): void {
-        this.updateOptionsForNonNumericChoice()
-    }
-    
-    alwaysCopyFromSecondPlantClick(): void {
-        this.updateOptionsForNonNumericChoice()
-    }
-    
-    copyRandomlyBasedOnWeightsClick(): void {
-        this.updateOptionsForNonNumericChoice()
-    }
-    
-    copyBasedOnWeightsIfEqualFirstPlantClick(): void {
-        this.updateOptionsForNonNumericChoice()
-    }
-    
-    copyBasedOnWeightsIfEqualSecondPlantClick(): void {
-        this.updateOptionsForNonNumericChoice()
-    }
-    
-    copyBasedOnWeightsIfEqualChooseRandomlyClick(): void {
-        this.updateOptionsForNonNumericChoice()
-    }
-    
-    updateOptionsForNonNumericChoice(): void {
-        // TOD PDF: Fix or remove: 
-        // if (this.breedingOptions.controlCount > 0) {
-        //     for (let i = 1; i <= this.breedingOptions.controlCount - 1; i++) {
-        //         if ((this.breedingOptions.controls[i] instanceof delphi_compatability.TRadioButton)) {
-        //             // this will work so long as there are no other radio buttons on the notebook
-        //             const radio: TRadioButton = (this.breedingOptions.controls[i])
-        //             if (radio.Checked) {
-        //                 this.options.getNonNumericalParametersFrom = this.choiceIndexForRadioButton(radio)
-        //             }
-        //             break
-        //         }
-        //     }
-        // }
     }
     
     treatColorsAsNumbersClick(): void {
@@ -806,90 +711,59 @@ export class TBreedingOptionsForm {
 
     viewPage4(): m.Children {
         return m("TTabPage.page4.TTabPage",
-            "Non-numeric",
+            // "Non-numeric",
             m("div.nonNumericLabel.TLabel",
-                {
-                    // Top: "31",
-                    // Left: "17",
-                    // Height: "14",
-                    // Width: "186",
-                },
-                " Where to get non-numeric parameters",
+                "Where to get non-numeric parameters:",
             ),
-            m("input[type=radio].alwaysCopyFromFirstPlant.TRadioButton",
+            m("label", m("input[type=radio].mr1.alwaysCopyFromFirstPlant.TRadioButton",
                 {
-                    onclick: () => this.alwaysCopyFromFirstPlantClick(),
-                    // Top: "51",
-                    // Left: "29",
-                    // Height: "17",
-                    // Width: "168",
-                    // TabOrder: "0",
-                },
+                    onclick: () => this.options.getNonNumericalParametersFrom = FromPlant.kFromFirstPlant,
+                    checked: this.options.getNonNumericalParametersFrom === FromPlant.kFromFirstPlant
+                }),
                 caption("get from &first parent"),
             ),
-            m("input[type=radio].alwaysCopyFromSecondPlant.TRadioButton",
+            m("br"),
+            m("label.mt1", m("input[type=radio].mr1.alwaysCopyFromSecondPlant.TRadioButton",
                 {
-                    onclick: () => this.alwaysCopyFromSecondPlantClick(),
-                    // Top: "73",
-                    // Left: "29",
-                    // Height: "17",
-                    // Width: "194",
-                    // TabOrder: "1",
-                },
+                    onclick: () => this.options.getNonNumericalParametersFrom = FromPlant.kFromSecondPlant,
+                    checked: this.options.getNonNumericalParametersFrom === FromPlant.kFromSecondPlant
+                }),
                 caption("get from &second parent"),
             ),
-            m("input[type=radio].copyRandomlyBasedOnWeights.TRadioButton",
+            m("br"),
+            m("label.mt1", m("input[type=radio].mr1.copyRandomlyBasedOnWeights.TRadioButton",
                 {
-                    onclick: () => this.copyRandomlyBasedOnWeightsClick(),
-                    // Top: "95",
-                    // Left: "29",
-                    // Height: "17",
-                    // Width: "258",
-                    // Tag: "1",
-                    // TabOrder: "2",
-                },
+                    onclick: () => this.options.getNonNumericalParametersFrom = FromPlant.kFromProbabilityBasedOnWeightsForSection,
+                    checked: this.options.getNonNumericalParametersFrom === FromPlant.kFromProbabilityBasedOnWeightsForSection,
+                }),
                 caption("choose randomly using &weights as probabilities"),
             ),
-            m("div.firstPlantIfEqualLabel.TLabel",
+            m("br"),
+
+            m("label.TLabel.mt1", "get from parent with higher weight; if 50/50:"),
+
+            m("br"),
+            m("label.ml2", m("input[type=radio].mr1.copyBasedOnWeightsIfEqualFirstPlant.TRadioButton",
                 {
-                    // Top: "117",
-                    // Left: "29",
-                    // Height: "14",
-                    // Width: "212",
-                },
-                "get from parent with higher weight; if 50/50,",
-            ),
-            m("input[type=radio].copyBasedOnWeightsIfEqualFirstPlant.TRadioButton",
-                {
-                    onclick: () => this.copyBasedOnWeightsIfEqualFirstPlantClick(),
-                    // Top: "139",
-                    // Left: "49",
-                    // Height: "17",
-                    // Width: "237",
-                    // TabOrder: "3",
-                },
+                    onclick: () => this.options.getNonNumericalParametersFrom = FromPlant.kFromPlantWithGreaterWeightForSectionIfEqualFirstPlant,
+                    checked: this.options.getNonNumericalParametersFrom === FromPlant.kFromPlantWithGreaterWeightForSectionIfEqualFirstPlant,
+                }),
                 caption("get from the f&irst parent"),
             ),
-            m("input[type=radio].copyBasedOnWeightsIfEqualSecondPlant.TRadioButton",
+            m("br"),
+            m("label.ml2", m("input[type=radio].mr1.copyBasedOnWeightsIfEqualSecondPlant.TRadioButton",
                 {
-                    onclick: () => this.copyBasedOnWeightsIfEqualSecondPlantClick(),
-                    // Top: "161",
-                    // Left: "49",
-                    // Height: "17",
-                    // Width: "237",
-                    // TabOrder: "4",
-                },
+                    onclick: () => this.options.getNonNumericalParametersFrom = FromPlant.kFromPlantWithGreaterWeightForSectionIfEqualSecondPlant,
+                    checked: this.options.getNonNumericalParametersFrom === FromPlant.kFromPlantWithGreaterWeightForSectionIfEqualSecondPlant,
+                }),
                 caption("get from the s&econd parent"),
             ),
-            m("input[type=radio].copyBasedOnWeightsIfEqualChooseRandomly.TRadioButton",
+            m("br"),
+            m("label.ml2", m("input[type=radio].mr1.copyBasedOnWeightsIfEqualChooseRandomly.TRadioButton",
                 {
-                    onclick: () => this.copyBasedOnWeightsIfEqualChooseRandomlyClick(),
-                    // Top: "183",
-                    // Left: "49",
-                    // Height: "17",
-                    // Width: "237",
-                    // TabOrder: "5",
-                },
+                    onclick: () => this.options.getNonNumericalParametersFrom = FromPlant.kFromPlantWithGreaterWeightForSectionIfEqualChooseRandomly,
+                    checked: this.options.getNonNumericalParametersFrom === FromPlant.kFromPlantWithGreaterWeightForSectionIfEqualChooseRandomly,
+                }),
                 caption("choose &randomly"),
             ),
         )
@@ -947,6 +821,5 @@ export class TBreedingOptionsForm {
         this.options = JSON.parse(JSON.stringify(domain.breedingAndTimeSeriesOptions))
         this.domainOptions = JSON.parse(JSON.stringify(domain.options))
         this.loadSectionsIntoListBoxes()
-        this.updateComponentsFromOptions()
     }
 }

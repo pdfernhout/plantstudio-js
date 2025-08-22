@@ -134,7 +134,7 @@ const kExactAge = true
 export class BreedingAndTimeSeriesOptionsStructure {
     mutationStrengths: short[] = Array(kMaxBreedingSections + 1)
     firstPlantWeights: short[] = Array(kMaxBreedingSections + 1)
-    getNonNumericalParametersFrom: short = 0
+    getNonNumericalParametersFrom: FromPlant = 0
     mutateAndBlendColorValues: boolean = false
     chooseTdosRandomlyFromCurrentLibrary: boolean = false
     percentMaxAge: short = 0
