@@ -186,7 +186,7 @@ export class DomainOptionsStructure {
     nudgeDistance: short = 0
     resizeKeyUpMultiplierPercent: short = 0
     parametersFontSize: short = 0
-    mainWindowOrientation: short = 0
+    mainWindowOrientation: short = kMainWindowOrientationVertical
     lineContrastIndex: short = 0
     sortTdosAsOneItem: boolean = false
     circlePointSizeInTdoEditor: short = 0
@@ -665,7 +665,7 @@ export class PdDomain {
         this.options.nudgeDistance = StrToInt(this.stringForSectionAndKey(section, "Distance plant moves with Control-arrow key", "5"))
         this.options.resizeKeyUpMultiplierPercent = StrToInt(this.stringForSectionAndKey(section, "Percent size increase with Control-Shift-up-arrow key", "110"))
         this.options.parametersFontSize = StrToInt(this.stringForSectionAndKey(section, "Parameter panels font size", "8"))
-        this.options.mainWindowOrientation = StrToInt(this.stringForSectionAndKey(section, "Main window orientation (horiz/vert)", "0"))
+        this.options.mainWindowOrientation = StrToInt(this.stringForSectionAndKey(section, "Main window orientation (horiz/vert)", "1"))
         this.options.lineContrastIndex = StrToInt(this.stringForSectionAndKey(section, "Contrast index for lines on polygons", "3"))
         this.options.sortTdosAsOneItem = strToBool(this.stringForSectionAndKey(section, "Sort 3D objects as one item", "true"))
         this.options.circlePointSizeInTdoEditor = StrToInt(this.stringForSectionAndKey(section, "3D object editor point size", "8"))

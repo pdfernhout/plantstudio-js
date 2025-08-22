@@ -1753,11 +1753,11 @@ export class TMainForm {
     }
     
     drawingAreaOnTopClick(): void {
-        this.MenuLayoutHorizontalOrientationClick()
+        this.MenuLayoutVerticalOrientationClick()
     }
     
     drawingAreaOnSideClick(): void {
-        this.MenuLayoutVerticalOrientationClick()
+        this.MenuLayoutHorizontalOrientationClick()
     }
     
     // --------------------------------------------------------------------------- *options menu 
@@ -5834,8 +5834,8 @@ export class TMainForm {
                 "radio", "MenuLayoutViewOnePlantAtATime", "&One Plant at a Time", this.MenuLayoutViewOnePlantAtATimeClick, () => domain.viewPlantsInMainWindowOnePlantAtATime(), () => domain.plantFileLoaded,
             ], () => false,  () => domain.plantFileLoaded,
             "MenuLayoutDrawingAreaOn", "Place Drawing &Area", [
-                "radio", "MenuLayoutHorizontalOrientation", "On &Top", this.MenuLayoutHorizontalOrientationClick, () => domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal, () => domain.plantFileLoaded,
-                "radio", "MenuLayoutVerticalOrientation", "On &Left Side", this.MenuLayoutVerticalOrientationClick, () => domain.options.mainWindowOrientation === kMainWindowOrientationVertical, () => domain.plantFileLoaded,
+                "radio", "MenuLayoutVerticalOrientation", "On &Top", this.MenuLayoutVerticalOrientationClick, () => domain.options.mainWindowOrientation === kMainWindowOrientationVertical, () => domain.plantFileLoaded,
+                "radio", "MenuLayoutHorizontalOrientation", "On &Left Side", this.MenuLayoutVerticalOrientationClick, () => domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal, () => domain.plantFileLoaded,
             ], () => false,  () => domain.plantFileLoaded,
             "MenuOptionsDrawRectangles", "Draw &Rectangles", [
                 "checkbox", "MenuOptionsShowSelectionRectangles", "Around &Selected Plants", this.MenuOptionsShowSelectionRectanglesClick, () => domain.options.showSelectionRectangle,
@@ -5960,11 +5960,11 @@ export class TMainForm {
                     ? selected
                     : ""
             case "drawingAreaOnTop":
-                return domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal
+                return domain.options.mainWindowOrientation === kMainWindowOrientationVertical
                     ? selected
                     : ""
             case "drawingAreaOnSide":
-                return domain.options.mainWindowOrientation === kMainWindowOrientationVertical
+                return domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal
                     ? selected
                     : ""
 
@@ -6644,11 +6644,23 @@ export class TMainForm {
             },
             viewMainMenu(this.mainMenuSpec, this, () => this.viewToolbar()),
             m(ModalInputView),
-            // viewMainForm() 
-            this.viewPaintBox(),
-            this.viewPlantList(),
-            // domain.options.mainWindowOrientation === kMainWindowOrientationVertical && 
-            this.viewPlantFocusPanel()
+            // viewMainForm()
+            domain.options.mainWindowOrientation === kMainWindowOrientationVertical && m("div",
+                m("div",
+                    this.viewPaintBox(),
+                    this.viewPlantList(),
+                    this.viewPlantFocusPanel()
+                )
+            ),
+            domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal && m("div.flex.flex-row",
+                m("div",
+                    this.viewPaintBox(),
+                    this.viewPlantList(),
+                ),
+                m("div",
+                    this.viewPlantFocusPanel()
+                )
+            )
         )
     }
 
