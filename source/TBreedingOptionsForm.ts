@@ -140,31 +140,17 @@ export class TBreedingOptionsForm {
     }
 
     optionsChanged(): boolean {
-        return JSON.stringify(this.options) !== JSON.stringify(domain.breedingAndTimeSeriesOptions) &&
+        return JSON.stringify(this.options) !== JSON.stringify(domain.breedingAndTimeSeriesOptions) ||
             JSON.stringify(this.domainOptions) !== JSON.stringify(domain.options)
     }
     
     // ---------------------------------------------------------------------------- reading breeding options 
     updateComponentsFromOptions(): void {
-        // TOD PDF: Fix or remove: this.mutationSections.Invalidate()
-        // TOD PDF: Fix or remove: this.weightSections.Invalidate()
-        this.mutationSectionsClick()
-        this.weightSectionsClick()
         if (this.radioButtonForChoiceIndex(this.options.getNonNumericalParametersFrom) !== null) {
             this.radioButtonForChoiceIndex(this.options.getNonNumericalParametersFrom).Checked = true
         }
         // TOD PDF: Fix or remove: this.treatColorsAsNumbers.Checked = this.options.mutateAndBlendColorValues
         // TOD PDF: Fix or remove: this.chooseTdosRandomly.Checked = this.options.chooseTdosRandomlyFromCurrentLibrary
-        // v2.0
-        // TOD PDF: Fix or remove: this.plantsPerGeneration.Value = this.options.plantsPerGeneration
-        // TOD PDF: Fix or remove: this.thumbnailWidth.Value = this.options.thumbnailWidth
-        // TOD PDF: Fix or remove: this.thumbnailHeight.Value = this.options.thumbnailHeight
-        // TOD PDF: Fix or remove: this.maxGenerations.Value = this.options.maxGenerations
-        // TOD PDF: Fix or remove: this.numTimeSeriesStages.Value = this.options.numTimeSeriesStages
-        // TOD PDF: Fix or remove: this.percentMaxAge.Value = this.options.percentMaxAge
-        // v2.0 domain options moved from main options dialog
-        // TOD PDF: Fix or remove: this.maxPartsPerPlant_thousands.Value = this.domainOptions.maxPartsPerPlant_thousands
-        // TOD PDF: Fix or remove: this.updateTimeSeriesPlantsOnParameterChange.Checked = this.domainOptions.updateTimeSeriesPlantsOnParameterChange
     }
     
     radioButtonForChoiceIndex(index: short): TRadioButton | null {
@@ -213,64 +199,20 @@ export class TBreedingOptionsForm {
     }
     
     // ------------------------------------------------------------ changing breeding strategy 
-    mutationSliderMouseDown(): void {
-        if ((this.firstSelectedIndex(this.mutationSections) >= 0) || (!this.mutationSectionsOpen)) {
-            this.draggingMutationSlider = true
-        }
-    }
     
-    mutationSliderMouseMove(): void {
-        if (this.draggingMutationSlider) {
-            // TOD PDF: Fix or remove: this.mutationAmountLabel.Caption = IntToStr(this.mutationSlider.CurrentValue) + "%"
-            // TOD PDF: Fix or remove: this.updateMutationOrWeightFromSlider(kMutation, this.mutationSectionsOpen, this.mutationSections, this.mutationSlider)
-        }
-    }
     
-    mutationSliderMouseUp(): void {
-        this.draggingMutationSlider = false
-        // TOD PDF: Fix or remove: this.updateMutationOrWeightFromSlider(kMutation, this.mutationSectionsOpen, this.mutationSections, this.mutationSlider)
-    }
-    
-    mutationSliderKeyUp(Key: byte, Shift: TShiftState): byte {
-        // TOD PDF: Fix or remove: this.updateMutationOrWeightFromSlider(kMutation, this.mutationSectionsOpen, this.mutationSections, this.mutationSlider)
-        return Key
-    }
-    
-    weightSliderMouseDown(): void {
-        if ((this.firstSelectedIndex(this.weightSections) >= 0) || (!this.weightSectionsOpen)) {
-            this.draggingWeightSlider = true
-        }
-    }
-    
-    weightSliderMouseMove(): void {
-        if (this.draggingWeightSlider) {
-            // TOD PDF: Fix or remove: this.weightAmountLabel.Caption = IntToStr(this.weightSlider.CurrentValue) + "%"
-        }
-    }
-    
-    weightSliderMouseUp(): void {
-        this.draggingWeightSlider = false
-        // TOD PDF: Fix or remove: this.updateMutationOrWeightFromSlider(kWeight, this.weightSectionsOpen, this.weightSections, this.weightSlider)
-    }
-    
-    weightSliderKeyUp(Key: byte, Shift: TShiftState): byte {
-        // TOD PDF: Fix or remove: this.updateMutationOrWeightFromSlider(kWeight, this.weightSectionsOpen, this.weightSections, this.weightSlider)
-        return Key
-    }
-    
-    updateMutationOrWeightFromSlider(which: short, isOpen: boolean, aListBox: SectionWrapper[], aSlider: KfWinSlider): void {
+    updateMutationOrWeightFromSlider(which: short, isOpen: boolean, aListBox: SectionWrapper[], aSliderValue: number): void {
         if (aListBox.length > 0) {
             for (let i = 0; i <= aListBox.length - 1; i++) {
                 if (aListBox[i].selected || (!isOpen)) {
                     if (which === kMutation) {
-                        this.options.mutationStrengths[i] = aSlider.CurrentValue
+                        this.options.mutationStrengths[i] = aSliderValue
                     } else {
-                        this.options.firstPlantWeights[i] = aSlider.CurrentValue
+                        this.options.firstPlantWeights[i] = aSliderValue
                     }
                 }
             }
         }
-        // TOD PDF: Fix or remove: aListBox.Invalidate()
     }
     
     alwaysCopyFromFirstPlantClick(): void {
@@ -383,15 +325,51 @@ export class TBreedingOptionsForm {
         // UNRESOLVED.winprocs.drawText(sectionsListBox.Canvas.Handle, cText, len(cText), Rect, delphi_compatability.DT_LEFT)
     }
     
-    mutationSectionsClick(): void {
-        // TOD PDF: Fix or remove: this.updateSliderForSelectedSections(kMutation, this.mutationSectionsOpen, this.mutationSlider, this.mutationSections, this.mutationAmountLabel)
+    mutationSliderEnabled(): boolean {
+        const isOpen = this.mutationSectionsOpen
+        const aListBox = this.mutationSections
+
+        let firstSelectedIndex: short
+        if (isOpen) {
+            firstSelectedIndex = this.firstSelectedIndex(aListBox)
+        } else {
+            firstSelectedIndex = 0
+        }
+        return (firstSelectedIndex >= 0) || (!isOpen)
+    }
+
+    mutationSliderValue(): any {
+        return this.getSliderValueForSelectedSections(kMutation, this.mutationSectionsOpen, this.mutationSections)
+    }
+
+    mutationSliderChange(event: any): any {
+        const currentValue = StrToIntRange(event.target.value, 0, 100)
+        this.updateMutationOrWeightFromSlider(kMutation, this.mutationSectionsOpen, this.mutationSections, currentValue)
+    }
+
+    weightSliderEnabled(): boolean {
+        const isOpen = this.weightSectionsOpen
+        const aListBox = this.weightSections
+
+        let firstSelectedIndex: short
+        if (isOpen) {
+            firstSelectedIndex = this.firstSelectedIndex(aListBox)
+        } else {
+            firstSelectedIndex = 0
+        }
+        return (firstSelectedIndex >= 0) || (!isOpen)
+    }
+
+    weightSliderValue(): any {
+        return this.getSliderValueForSelectedSections(kWeight, this.weightSectionsOpen, this.weightSections)
+    }
+
+    weightSliderChange(event: any): any {
+        const currentValue = StrToIntRange(event.target.value, 0, 100)
+        this.updateMutationOrWeightFromSlider(kWeight, this.weightSectionsOpen, this.weightSections, currentValue)
     }
     
-    weightSectionsClick(): void {
-        // TOD PDF: Fix or remove: this.updateSliderForSelectedSections(kWeight, this.weightSectionsOpen, this.weightSlider, this.weightSections, this.weightAmountLabel)
-    }
-    
-    updateSliderForSelectedSections(which: short, isOpen: boolean, aSlider: KfWinSlider, aListBox: SectionWrapper[], aLabel: TLabel): void {
+    getSliderValueForSelectedSections(which: short, isOpen: boolean, aListBox: SectionWrapper[]): number {
         let firstSelectedIndex: short
         
         if (isOpen) {
@@ -399,19 +377,17 @@ export class TBreedingOptionsForm {
         } else {
             firstSelectedIndex = 0
         }
-        aSlider.Enabled = (firstSelectedIndex >= 0) || (!isOpen)
+        let currentValue
         if (firstSelectedIndex >= 0) {
             if (which === kMutation) {
-                aSlider.CurrentValue = this.options.mutationStrengths[firstSelectedIndex]
+                currentValue = this.options.mutationStrengths[firstSelectedIndex]
             } else {
-                aSlider.CurrentValue = this.options.firstPlantWeights[firstSelectedIndex]
+                currentValue = this.options.firstPlantWeights[firstSelectedIndex]
             }
         } else {
-            aSlider.CurrentValue = 0
+            currentValue = 0
         }
-        aLabel.Caption = IntToStr(aSlider.CurrentValue) + "%"
-        aLabel.Enabled = aSlider.Enabled
-        aSlider.Invalidate()
+        return currentValue
     }
     
     firstSelectedIndex(aListBox: SectionWrapper[]): short {
@@ -434,41 +410,15 @@ export class TBreedingOptionsForm {
     mutationShowSectionsClick(): void {
         this.mutationSectionsOpen = !this.mutationSectionsOpen
         if (this.mutationSectionsOpen) {
-            // TOD PDF: Fix or remove: this.mutationShowSections.Glyph = this.upImage.Picture.Bitmap
-            // TOD PDF: Fix or remove: this.mutationSections.Visible = true
-            // TOD PDF: Fix or remove: this.mutationSelectAll.Visible = true
-            // TOD PDF: Fix or remove: this.mutationSelectNone.Visible = true
-            // select all 
             this.mutationSelectAllClick()
-            this.mutationSectionsClick()
-        } else {
-            // TOD PDF: Fix or remove: this.mutationSections.Visible = false
-            // TOD PDF: Fix or remove: this.mutationSelectAll.Visible = false
-            // TOD PDF: Fix or remove: this.mutationSelectNone.Visible = false
-            // TOD PDF: Fix or remove: this.mutationShowSections.Glyph = this.downImage.Picture.Bitmap
-            this.mutationSectionsClick()
         }
-        // TOD PDF: Fix or remove: this.mutationSections.Visible = this.mutationSectionsOpen
     }
     
     weightShowSectionsClick(): void {
         this.weightSectionsOpen = !this.weightSectionsOpen
         if (this.weightSectionsOpen) {
-            // TOD PDF: Fix or remove: this.weightShowSections.Glyph = this.upImage.Picture.Bitmap
-            // TOD PDF: Fix or remove: this.weightSections.Visible = true
-            // TOD PDF: Fix or remove: this.weightSelectAll.Visible = true
-            // TOD PDF: Fix or remove: this.weightSelectNone.Visible = true
-            // select all 
             this.weightSelectAllClick()
-            this.weightSectionsClick()
-        } else {
-            // TOD PDF: Fix or remove: this.weightSections.Visible = false
-            // TOD PDF: Fix or remove: this.weightSelectAll.Visible = false
-            // TOD PDF: Fix or remove: this.weightSelectNone.Visible = false
-            // TOD PDF: Fix or remove: this.weightShowSections.Glyph = this.downImage.Picture.Bitmap
-            this.weightSectionsClick()
         }
-        // TOD PDF: Fix or remove: this.weightSections.Visible = this.weightSectionsOpen
     }
     
     mutationSelectAllClick(): void {
@@ -619,28 +569,6 @@ export class TBreedingOptionsForm {
                     m("img.TImage", { src: imageDir + "BreedingOptionsForm_helpButton.png" } ),
                     caption("&Help"),
                 ),
-                m("img.downImage.TImage",
-                    {
-                        // Top: "92",
-                        // Left: "452",
-                        // Height: "16",
-                        // Width: "16",
-                        // AutoSize: "True",
-                        // Picture.Data: "07544269746D6170F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF008888888888888888888888888888888888888888888888888888888888888888888888808888888888888800088888888888800800888888888800888008888888800888880088888800888888800888800888888888008880888888888880888888888888888888888888888888888888888888888888888888888888888888",
-                        // Visible: "False",
-                    },
-                ),
-                m("img.upImage.TImage",
-                    {
-                        // Top: "116",
-                        // Left: "452",
-                        // Height: "16",
-                        // Width: "16",
-                        // AutoSize: "True",
-                        // Picture.Data: "07544269746D6170F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF008888888888888888888888888888888888888888888888888888888888888888808888888888808880088888888800888800888888800888888008888800888888880088800888888888800800888888888888000888888888888880888888888888888888888888888888888888888888888888888888888888888888888888",
-                        // Visible: "False",
-                    },
-                ),
             ),
         )
     }
@@ -762,120 +690,58 @@ export class TBreedingOptionsForm {
 
     viewPage2(): m.Children {
         return m("TTabPage.page2.TTabPage",
-            "Mutation",
+            // "Mutation",
             m("div.mutationLabel.TLabel",
-                {
-                    // Top: "12",
-                    // Left: "8",
-                    // Height: "14",
-                    // Width: "223",
-                    // FocusControl: "mutationSlider",
-                },
                 caption("&Mutation strength (as percent of mean values)"),
-            ),
-            m("Group.Group.g00000032",
-                m("div.mutationAmountLabel.TLabel",
+                m("br"),
+                "0",
+                m("input[type=range].KfWinSlider.mutationSlider.KfWinSlider.ml1.mr1",
                     {
-                        // Top: "32",
-                        // Left: "8",
-                        // Height: "14",
-                        // Width: "22",
-                    },
-                    "50%",
-                ),
-                m("div.mutationZero.TLabel",
-                    {
-                        // Top: "32",
-                        // Left: "48",
-                        // Height: "14",
-                        // Width: "6",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // ParentFont: "False",
-                    },
-                    "0",
-                ),
-                m("KfWinSlider.mutationSlider.KfWinSlider",
-                    {
-                        // Top: "32",
-                        // Left: "60",
-                        // Height: "13",
-                        // Width: "233",
-                        // OnMouseDown: "mutationSliderMouseDown",
-                        // OnMouseMove: "mutationSliderMouseMove",
-                        // OnMouseUp: "mutationSliderMouseUp",
-                        // OnKeyUp: "mutationSliderKeyUp",
-                        // CurrentValue: "0",
+                        value: this.mutationSliderValue(),
+                        onchange: (event: any) => this.mutationSliderChange(event),
+                        min: 0,
+                        max: 100,
+                        disabled: !this.weightSliderEnabled()
                     },
                 ),
-                m("div.mutationOneHundred.TLabel",
-                    {
-                        // Top: "32",
-                        // Left: "294",
-                        // Height: "14",
-                        // Width: "18",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clWindowText",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // ParentFont: "False",
-                    },
-                    "100",
-                ),
+                "100",
+                m("br"),
+                m("div.mutationAmountLabel.TLabel.ml4", IntToStr(this.mutationSliderValue()) + "%" )
             ),
             m("Group.Group.g00000058",
                 m("button.mutationShowSections.TSpeedButton",
                     {
                         onclick: () => this.mutationShowSectionsClick(),
-                        // Top: "58",
-                        // Left: "10",
-                        // Height: "24",
-                        // Width: "79",
-                        // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF008888888888888888888888888888888888888888888888888888888888888888888888808888888888888800088888888888800800888888888800888008888888800888880088888800888888800888800888888888008880888888888880888888888888888888888888888888888888888888888888888888888888888888",
                     },
+                    m("img.mr1", { src: imageDir + (this.mutationSectionsOpen ? "BreedingOptionsForm_downImage.png" : "BreedingOptionsForm_upImage.png" )}),
                     caption("&Sections"),
                 ),
-                m("TListBox.mutationSections.TListBox",
-                    {
-                        onclick: () => this.mutationSectionsClick(),
-                        // Top: "58",
-                        // Left: "95",
-                        // Height: "240",
-                        // Width: "230",
-                        // ItemHeight: "16",
-                        // Items.Strings: ["General: 50%","Meristems: 50%","Internodes: 50%","Leaves: 50%","First leaves: 50%","Flowers (F): 50%","Flowers (M): 50%","Inflorescences (F): 50%","Inflorescences (M): 50%","Fruit: 50%","Root top: 50%"],
-                        // MultiSelect: "True",
-                        // Style: "lbOwnerDrawFixed",
-                        // TabOrder: "1",
-                        // OnDrawItem: "mutationSectionsDrawItem",
-                    },
+                this.mutationSectionsOpen && m("div.TListBox.mutationSections.TListBox.ba.pa1",
+                    this.mutationSections.map((section, index) => m("div.ml2",
+                        m("label",
+                            m("input[type=checkbox]", {
+                                checked: section.selected,
+                                onchange: (event: any) => section.selected = event.target.checked
+                            }),
+                            m("span.ml1", section.name),
+                            m("span.ml1", this.options.mutationStrengths[index] + "%")
+                        )
+                    ))
                 ),
             ),
-            m("button.mutationSelectAll.TButton",
-                {
-                    onclick: () => this.mutationSelectAllClick(),
-                    // Top: "94",
-                    // Left: "10",
-                    // Height: "24",
-                    // Width: "80",
-                    // TabOrder: "2",
-                },
-                caption("Select &all"),
-            ),
-            m("button.mutationSelectNone.TButton",
-                {
-                    onclick: () => this.mutationSelectNoneClick(),
-                    // Top: "122",
-                    // Left: "10",
-                    // Height: "24",
-                    // Width: "80",
-                    // TabOrder: "3",
-                },
-                caption("Select &none"),
+            this.mutationSectionsOpen && m("div",
+                m("button.mutationSelectAll.TButton",
+                    {
+                        onclick: () => this.mutationSelectAllClick(),
+                    },
+                    caption("Select &all"),
+                ),
+                m("button.mutationSelectNone.TButton.ml2",
+                    {
+                        onclick: () => this.mutationSelectNoneClick(),
+                    },
+                    caption("Select &none"),
+                ),
             ),
         )
     }
@@ -961,7 +827,7 @@ export class TBreedingOptionsForm {
                 ),
                 m("TListBox.weightSections.TListBox",
                     {
-                        onclick: () => this.weightSectionsClick(),
+                        // TODO PDF: Fix this: onclick: () => this.weightSectionsClick(),
                         // Top: "59",
                         // Left: "95",
                         // Height: "240",
@@ -1142,6 +1008,7 @@ export class TBreedingOptionsForm {
         this.close = vnode.attrs.close
         this.options = JSON.parse(JSON.stringify(domain.breedingAndTimeSeriesOptions))
         this.domainOptions = JSON.parse(JSON.stringify(domain.options))
+        this.loadSectionsIntoListBoxes()
         this.updateComponentsFromOptions()
     }
 }
