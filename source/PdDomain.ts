@@ -267,6 +267,8 @@ export class PdDomain {
     useIniFile: boolean = false
     defaultTdoLibraryFileName: string = ""
     defaultTdoLibrary: KfObject3D[] = []
+
+    // TODO PDF: Use or remove these window rects and splitters
     mainWindowRect: TRect = new TRect()
     horizontalSplitterPos: short = 0
     verticalSplitterPos: short = 0
@@ -275,6 +277,7 @@ export class PdDomain {
     debugWindowRect: TRect = new TRect()
     undoRedoListWindowRect: TRect = new TRect()
     tdoEditorWindowRect: TRect = new TRect()
+
     temporarilyHideSelectionRectangles: boolean = false
     drawingToMakeCopyBitmap: boolean = false
     plantDrawScaleWhenDrawingCopy_PixelsPerMm: float = 0.0
