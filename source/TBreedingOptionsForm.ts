@@ -1,37 +1,11 @@
 // unit Ubrdopt
+
 import * as m from "mithril"
 import { domain, DomainOptionsStructure } from "./PdDomain"
 import { BreedingAndTimeSeriesOptionsStructure, FromPlant, kMutation, kWeight } from "./PdPlant"
-import { byte, caption, HelpJump, imageDir, int, IntToStr, short, StrToIntRange } from "./common"
+import { caption, HelpJump, imageDir, int, IntToStr, short, StrToIntRange } from "./common"
 import { PdSection } from "./PdSection"
-import { len } from "./usupport"
 import { unfinished } from "./temporary"
-import { TRect } from "./TRect"
-
-// from conversion_common import *
-// import ucursor
-// import updcom
-// import ucommand
-// import usupport
-// import usection
-// import umain
-// import uwinsliders
-// import updform
-// import udomain
-// import ubrstrat
-// import uplant
-// import delphi_compatability
-
-// TOD PDF: used to get to compile
-type TWinControl = any
-type TOwnerDrawState = any
-type KfWinSlider = any
-type TLabel = any
-type TRadioButton = any
-type TShiftState = any
-
-const kBetweenGap = 4
-const kMaxPlantNameLength = 20
 
 type SectionWrapper = {
     name: string
@@ -43,62 +17,8 @@ type TabType = "General" | "Mutation" | "Blending" | "Non-numeric" | "Colors and
 const tabs: TabType[] = ["General", "Mutation", "Blending", "Non-numeric", "Colors and 3D objects"]
 
 export class TBreedingOptionsForm {
-    // ok: TButton = new TButton()
-    // cancel: TButton = new TButton()
-    // upImage: TImage = new TImage()
-    // downImage: TImage = new TImage()
-    breedingOptions = { pageIndex: 0 } // TTabbedNotebook = new TTabbedNotebook()
-    // treatColorsAsNumbers: TCheckBox = new TCheckBox()
-    // chooseTdosRandomly: TCheckBox = new TCheckBox()
-    // currentTdoLibraryFileName: TEdit = new TEdit()
-    // weightLabel: TLabel = new TLabel()
-    // weightAmountLabel: TLabel = new TLabel()
-    // weightZero: TLabel = new TLabel()
-    // weightSlider: KfWinSlider = new KfWinSlider()
-    // weightOneHundred: TLabel = new TLabel()
-    // weightSelectAll: TButton = new TButton()
-    // weightSelectNone: TButton = new TButton()
     weightSections: SectionWrapper[] = []
-    // mutationLabel: TLabel = new TLabel()
-    // mutationAmountLabel: TLabel = new TLabel()
-    // mutationZero: TLabel = new TLabel()
-    // mutationSlider: KfWinSlider = new KfWinSlider()
-    // mutationOneHundred: TLabel = new TLabel()
     mutationSections: SectionWrapper[] = []
-    // mutationSelectAll: TButton = new TButton()
-    // mutationSelectNone: TButton = new TButton()
-    // nonNumericLabel: TLabel = new TLabel()
-    // firstPlantIfEqualLabel: TLabel = new TLabel()
-    // alwaysCopyFromFirstPlant: TRadioButton = new TRadioButton()
-    // alwaysCopyFromSecondPlant: TRadioButton = new TRadioButton()
-    // copyRandomlyBasedOnWeights: TRadioButton = new TRadioButton()
-    // copyBasedOnWeightsIfEqualFirstPlant: TRadioButton = new TRadioButton()
-    // copyBasedOnWeightsIfEqualSecondPlant: TRadioButton = new TRadioButton()
-    // copyBasedOnWeightsIfEqualChooseRandomly: TRadioButton = new TRadioButton()
-    // helpButton: TSpeedButton = new TSpeedButton()
-    // mutationShowSections: TSpeedButton = new TSpeedButton()
-    // weightShowSections: TSpeedButton = new TSpeedButton()
-    // changeTdoLibrary: TSpeedButton = new TSpeedButton()
-    // GroupBox1: TGroupBox = new TGroupBox()
-    // Label4: TLabel = new TLabel()
-    // Label1: TLabel = new TLabel()
-    // Label2: TLabel = new TLabel()
-    // thumbnailWidth: TSpinEdit = new TSpinEdit()
-    // thumbnailHeight: TSpinEdit = new TSpinEdit()
-    // GroupBox2: TGroupBox = new TGroupBox()
-    // Label3: TLabel = new TLabel()
-    // plantsPerGeneration: TSpinEdit = new TSpinEdit()
-    // Label6: TLabel = new TLabel()
-    // maxGenerations: TSpinEdit = new TSpinEdit()
-    // Label8: TLabel = new TLabel()
-    // Label7: TLabel = new TLabel()
-    // percentMaxAge: TSpinEdit = new TSpinEdit()
-    // maxPartsPerPlant_thousands: TSpinEdit = new TSpinEdit()
-    // Label9: TLabel = new TLabel()
-    // GroupBox3: TGroupBox = new TGroupBox()
-    // numTimeSeriesStages: TSpinEdit = new TSpinEdit()
-    // Label5: TLabel = new TLabel()
-    // updateTimeSeriesPlantsOnParameterChange: TCheckBox = new TCheckBox()
     options: BreedingAndTimeSeriesOptionsStructure = new BreedingAndTimeSeriesOptionsStructure()
     domainOptions: DomainOptionsStructure = new DomainOptionsStructure()
     draggingMutationSlider: boolean = false
@@ -106,30 +26,13 @@ export class TBreedingOptionsForm {
     mutationSectionsOpen: boolean = false
     weightSectionsOpen: boolean = false
 
-    close: ((options: TBreedingOptionsForm | null) => void) | null = null
-
-        
-    currentTab: TabType = "General"
-
+    currentTab: TabType = tabs[0]
     setCurrentTab(tab: TabType) {
         this.currentTab = tab
     }
-    
-    //$R *.DFM
-    // ---------------------------------------------------------------------------------------- create/destroy 
-    // FormCreate(): void {
-    //     this.breedingOptions.pageIndex = 0
-    //     this.mutationSections.Visible = false
-    //     this.mutationSelectAll.Visible = false
-    //     this.mutationSelectNone.Visible = false
-    //     this.weightSections.Visible = false
-    //     this.weightSelectAll.Visible = false
-    //     this.weightSelectNone.Visible = false
-    //     this.loadSectionsIntoListBoxes()
-    //     this.currentTdoLibraryFileName.Text = domain.defaultTdoLibraryFileName
-    //     this.currentTdoLibraryFileName.SelStart = len(this.currentTdoLibraryFileName.Text)
-    // }
-    
+
+    close: ((options: TBreedingOptionsForm | null) => void) | null = null
+
     // ------------------------------------------------------------------------------- buttons 
     okClick() {
         this.close!(this.optionsChanged() ? this : null)
@@ -182,52 +85,6 @@ export class TBreedingOptionsForm {
                 this.weightSections.push({name: section.getName(), section, selected: false})
             }
         }
-    }
-    
-    mutationSectionsDrawItem(Control: TWinControl, index: int, Rect: TRect, State: TOwnerDrawState): void {
-        this.drawSectionsListBoxItem(Control, index, Rect, State)
-    }
-    
-    weightSectionsDrawItem(Control: TWinControl, index: int, Rect: TRect, State: TOwnerDrawState): void {
-        this.drawSectionsListBoxItem(Control, index, Rect, State)
-    }
-    
-    drawSectionsListBoxItem(Control: TWinControl, index: int, Rect: TRect, State: TOwnerDrawState): void {
-        unfinished()
-        // if (delphi_compatability.Application.terminated) {
-        //     return
-        // }
-        // const sectionsListBox: SectionWrapper[] = Control
-        // if (sectionsListBox === null) {
-        //     return
-        // }
-        // if ((sectionsListBox.length <= 0) || (index < 0) || (index > sectionsListBox.length - 1)) {
-        //     return
-        // }
-        // const selected: boolean = (delphi_compatability.TOwnerDrawStateType.odSelected in State)
-        // // set up section pointer 
-        // const section: PdSection = sectionsListBox[index].section
-        // if (section === null) {
-        //     return
-        // }
-        // sectionsListBox.Canvas.Font = sectionsListBox.Font
-        // if (selected) {
-        //     sectionsListBox.Canvas.Brush.Color = UNRESOLVED.clHighlight
-        //     sectionsListBox.Canvas.Font.Color = UNRESOLVED.clHighlightText
-        // } else {
-        //     sectionsListBox.Canvas.Brush.Color = sectionsListBox.Color
-        //     sectionsListBox.Canvas.Font.Color = UNRESOLVED.clBtnText
-        // }
-        // sectionsListBox.Canvas.FillRect(Rect)
-        // let cText: string
-        // if (sectionsListBox === this.mutationSections) {
-        //     cText = section.getName() + " " + IntToStr(this.options.mutationStrengths[index]) + "%"
-        // } else {
-        //     cText = section.getName() + " " + IntToStr(this.options.firstPlantWeights[index]) + "/" + IntToStr(100 - this.options.firstPlantWeights[index])
-        // }
-        // // margin for text 
-        // Rect.left = Rect.left + 2
-        // UNRESOLVED.winprocs.drawText(sectionsListBox.Canvas.Handle, cText, len(cText), Rect, delphi_compatability.DT_LEFT)
     }
     
     mutationSliderEnabled(): boolean {
@@ -685,7 +542,7 @@ export class TBreedingOptionsForm {
                                 onchange: (event: any) => section.selected = event.target.checked
                             }),
                             m("span.ml1", section.name),
-                            m("span.ml1", this.options.firstPlantWeights[index] + "%")
+                            m("span.ml1", section.name + " " + IntToStr(this.options.firstPlantWeights[index]) + "/" + IntToStr(100 - this.options.firstPlantWeights[index]))
                         )
                     ))
                 ),
