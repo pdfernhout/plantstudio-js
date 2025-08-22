@@ -513,7 +513,7 @@ export class TBreedingOptionsForm {
     plantsPerGenerationChange(event: any): void {
         const oldValue = this.options.plantsPerGeneration
         try {
-            this.options.plantsPerGeneration = StrToIntRange(event.target.value, 1, 10)
+            this.options.plantsPerGeneration = StrToIntRange(event.target.value, 1, 100)
         } catch (e) {
             this.options.plantsPerGeneration = oldValue
         }
@@ -522,7 +522,7 @@ export class TBreedingOptionsForm {
     thumbnailWidthChange(event: any): void {
         const oldValue = this.options.thumbnailWidth
         try {
-            this.options.thumbnailWidth = StrToIntRange(event.target.value, 1, 256)
+            this.options.thumbnailWidth = StrToIntRange(event.target.value, 30, 200)
         } catch (e) {
             this.options.thumbnailWidth = oldValue
         }
@@ -531,7 +531,7 @@ export class TBreedingOptionsForm {
     thumbnailHeightChange(event: any): void {
         const oldValue = this.options.thumbnailHeight
         try {
-            this.options.thumbnailHeight = StrToIntRange(event.target.value, 1, 256)
+            this.options.thumbnailHeight = StrToIntRange(event.target.value, 30, 200)
         } catch (e) {
             this.options.thumbnailHeight = oldValue
         }
@@ -540,7 +540,7 @@ export class TBreedingOptionsForm {
     maxGenerationsChange(event: any): void {
         const oldValue = this.options.maxGenerations
         try {
-            this.options.maxGenerations = StrToIntRange(event.target.value, 1, 256)
+            this.options.maxGenerations = StrToIntRange(event.target.value, 20, 500)
         } catch (e) {
             this.options.maxGenerations = oldValue
         }
@@ -583,8 +583,8 @@ export class TBreedingOptionsForm {
                 {
                     style: { height: "90%" }
                 },
-                m("div.b.f4.mb2", "Breeding and Time Series Options"),
-                m("div.TTabSet.tabSet.TTabSet",
+                m("div.b.f4.mb2", "Breeder and Time Series Options"),
+                m("div.TTabSet.tabSet.TTabSet.mb2",
                     tabs.map(
                         tab => m("div.ml1.br--top.bl.bt.br.bw1.br2.dib.pa1" + (this.currentTab === tab ? ".bg-green" : ""), {
                             style: { minWidth: "4rem" },
@@ -597,8 +597,8 @@ export class TBreedingOptionsForm {
                 this.currentTab === "Non-numeric" && this.viewPage4(),
                 this.currentTab === "Colors and 3D objects" && this.viewPage5(),
             ),
-            m("div.bottom.mt2",
-                { style:  { bottom: 0 }},
+            m("div.flex.items-center.mt2.absolute",
+                { style: { bottom: "0.5rem" }},
                 m("button.ok.TButton",
                     {
                         onclick: () => this.okClick(),
@@ -647,233 +647,114 @@ export class TBreedingOptionsForm {
 
     viewPage1(): m.Children {
         return m("TTabPage.page1.TTabPage",
-            "General",
-            m("TGroupBox.GroupBox1.TGroupBox",
-                {
-                    // Top: "4",
-                    // Left: "4",
-                    // Height: "71",
-                    // Width: "334",
-                    // TabOrder: "0",
-                },
-                " Breeder and time series window ",
-                m("div.Label4.TLabel",
-                    {
-                        // Top: "19",
-                        // Left: "10",
-                        // Height: "14",
-                        // Width: "114",
-                    },
-                    "Size of plant thumbnails",
-                ),
-                m("Group.Group.g00000039",
-                    m("TSpinEdit.thumbnailWidth.TSpinEdit",
-                        {
-                            // Top: "39",
-                            // Left: "29",
-                            // Height: "23",
-                            // Width: "53",
-                            // Increment: "5",
-                            // MaxValue: "200",
-                            // MinValue: "30",
-                            // TabOrder: "0",
-                            // Value: "30",
-                            // OnChange: "thumbnailWidthChange",
-                        },
-                    ),
-                    m("TSpinEdit.thumbnailHeight.TSpinEdit",
-                        {
-                            // Top: "39",
-                            // Left: "171",
-                            // Height: "23",
-                            // Width: "53",
-                            // Increment: "5",
-                            // MaxValue: "200",
-                            // MinValue: "30",
-                            // TabOrder: "1",
-                            // Value: "30",
-                            // OnChange: "thumbnailHeightChange",
-                        },
-                    ),
-                ),
+            m("div.TGroupBox.GroupBox1.TGroupBox",
                 m("Group.Group.g00000043",
                     m("div.Label1.TLabel",
+                        caption("&Width of plant thumbnails (30-200)"),
+                        m("br"),
+                        m("input[type=number].mw3.ml1.thumbnailWidth.TSpinEdit",
                         {
-                            // Top: "43",
-                            // Left: "89",
-                            // Height: "14",
-                            // Width: "72",
-                            // FocusControl: "thumbnailWidth",
+                            value: IntToStr(this.options.thumbnailWidth),
+                            onchange: (event: any) => this.thumbnailWidthChange(event),
+                            step: 5,
+                            min: "30",
+                            max: "200"
                         },
-                        caption("&width (30-200)"),
+                    ),
                     ),
                     m("div.Label2.TLabel",
+                        caption("&Height of plant thumbnails (30-200)"),
+                        m("br"),
+                        m("input[type=number].mw3.ml1.thumbnailHeight.TSpinEdit",
                         {
-                            // Top: "43",
-                            // Left: "231",
-                            // Height: "14",
-                            // Width: "74",
-                            // FocusControl: "thumbnailHeight",
+                            value: IntToStr(this.options.thumbnailHeight),
+                            onchange: (event: any) => this.thumbnailHeightChange(event),
+                            step: 5,
+                            min: "30",
+                            max: "200"
                         },
-                        caption("&height (30-200)"),
+                    ),
                     ),
                 ),
             ),
-            m("TGroupBox.GroupBox2.TGroupBox",
-                {
-                    // Top: "78",
-                    // Left: "4",
-                    // Height: "144",
-                    // Width: "334",
-                    // TabOrder: "1",
-                },
-                " Breeder ",
-                m("TSpinEdit.plantsPerGeneration.TSpinEdit",
-                    {
-                        // Top: "20",
-                        // Left: "10",
-                        // Height: "23",
-                        // Width: "51",
-                        // MaxValue: "100",
-                        // MinValue: "1",
-                        // TabOrder: "0",
-                        // Value: "5",
-                        // OnChange: "plantsPerGenerationChange",
-                    },
-                ),
+            m("div.TGroupBox.GroupBox2.TGroupBox.mt2.bt",
+                // " Breeder ",
                 m("div.Label3.TLabel",
-                    {
-                        // Top: "24",
-                        // Left: "68",
-                        // Height: "14",
-                        // Width: "187",
-                        // FocusControl: "plantsPerGeneration",
-                    },
-                    caption("Plants to &create per generation (1-100)"),
-                ),
-                m("TSpinEdit.maxGenerations.TSpinEdit",
-                    {
-                        // Top: "49",
-                        // Left: "10",
-                        // Height: "23",
-                        // Width: "51",
-                        // Increment: "10",
-                        // MaxValue: "500",
-                        // MinValue: "20",
-                        // TabOrder: "1",
-                        // Value: "50",
-                        // OnChange: "maxGenerationsChange",
-                    },
+                    caption("Plants to &create per Breeder generation (1-100)"),
+                    m("br"),
+                    m("input[type=number].mw3.ml1.plantsPerGeneration.TSpinEdit",
+                        {
+                            value: IntToStr(this.options.plantsPerGeneration),
+                            onchange: (event: any) => this.plantsPerGenerationChange(event),
+                            step: 5,
+                            min: "1",
+                            max: "100"
+                        },
+                    ),
                 ),
                 m("div.Label6.TLabel",
-                    {
-                        // Top: "53",
-                        // Left: "68",
-                        // Height: "14",
-                        // Width: "190",
-                        // FocusControl: "maxGenerations",
-                    },
-                    caption("&Maximum breeder generations (20-500)"),
-                ),
-                m("div.Label8.TLabel",
-                    {
-                        // Top: "67",
-                        // Left: "79",
-                        // Height: "14",
-                        // Width: "157",
-                        // FocusControl: "maxGenerations",
-                    },
-                    "(to avoid running out of memory)",
-                ),
-                m("TSpinEdit.percentMaxAge.TSpinEdit",
-                    {
-                        // Top: "83",
-                        // Left: "10",
-                        // Height: "23",
-                        // Width: "51",
-                        // MaxValue: "100",
-                        // MinValue: "1",
-                        // TabOrder: "2",
-                        // Value: "100",
-                        // OnChange: "percentMaxAgeChange",
-                    },
+                    caption("&Maximum Breeder generations (20-500)"),
+                    m("br"),
+                    m("input[type=number].mw3.ml1.maxGenerations.TSpinEdit",
+                        {
+                            value: IntToStr(this.options.maxGenerations),
+                            onchange: (event: any) => this.maxGenerationsChange(event),
+                            step: 10,
+                            min: "20",
+                            max: "500"
+                        },
+                    ),
+                    // m("br"),
+                    // "(to avoid running out of memory)",
                 ),
                 m("div.Label7.TLabel",
-                    {
-                        // Top: "87",
-                        // Left: "68",
-                        // Height: "14",
-                        // Width: "202",
-                        // FocusControl: "percentMaxAge",
-                    },
-                    caption("&Age of breeder plants (as % of maximum)"),
-                ),
-                m("TSpinEdit.maxPartsPerPlant_thousands.TSpinEdit",
-                    {
-                        // Top: "113",
-                        // Left: "10",
-                        // Height: "23",
-                        // Width: "51",
-                        // MaxValue: "100",
-                        // MinValue: "1",
-                        // TabOrder: "3",
-                        // Value: "1",
-                        // OnChange: "maxPartsPerPlant_thousandsChange",
-                    },
+                    caption("&Age of Breeder plants (as % of maximum)"),
+                    m("br"),
+                    m("input[type=number].mw3.ml1.percentMaxAge.TSpinEdit",
+                        {
+                            value: IntToStr(this.options.percentMaxAge),
+                            onchange: (event: any) => this.percentMaxAgeChange(event),
+                            step: 1,
+                            min: "1",
+                            max: "100"
+                        },
+                    ),
                 ),
                 m("div.Label9.TLabel",
-                    {
-                        // Top: "117",
-                        // Left: "68",
-                        // Height: "14",
-                        // Width: "245",
-                        // FocusControl: "maxPartsPerPlant_thousands",
-                    },
-                    caption("Ma&ximum parts per breeder plant (1-100 thousand)"),
+                    caption("Ma&ximum parts per Breeder plant (1-100 thousand)"),
+                    m("br"),
+                    m("input[type=number].mw3.ml1.maxPartsPerPlant_thousands.TSpinEdit",
+                        {
+                            value: IntToStr(this.domainOptions.maxPartsPerPlant_thousands),
+                            onchange: (event: any) => this.maxPartsPerPlant_thousandsChange(event),
+                            step: 1,
+                            min: "1",
+                            max: "100"
+                        },
+                    ),
                 ),
             ),
-            m("TGroupBox.GroupBox3.TGroupBox",
-                {
-                    // Top: "226",
-                    // Left: "4",
-                    // Height: "69",
-                    // Width: "334",
-                    // TabOrder: "2",
-                },
-                " Time series ",
-                m("TSpinEdit.numTimeSeriesStages.TSpinEdit",
-                    {
-                        // Top: "17",
-                        // Left: "10",
-                        // Height: "23",
-                        // Width: "51",
-                        // MaxValue: "100",
-                        // MinValue: "1",
-                        // TabOrder: "0",
-                        // Value: "5",
-                        // OnChange: "numTimeSeriesStagesChange",
-                    },
-                ),
+            m("div.TGroupBox.GroupBox3.TGroupBox.mt2.bt",
+                // " Time series ",
                 m("div.Label5.TLabel",
-                    {
-                        // Top: "22",
-                        // Left: "68",
-                        // Height: "14",
-                        // Width: "116",
-                        // FocusControl: "numTimeSeriesStages",
-                    },
-                    caption("&Stages to show (1-100)"),
+                    caption("Time Series &stages to show(1-100)"),
+                    m("br"),
+                    m("input[type=number].mw3.ml1.numTimeSeriesStages.TSpinEdit",
+                        {
+                            value: IntToStr(this.options.numTimeSeriesStages),
+                            onchange: (event: any) => this.numTimeSeriesStagesChange(event),
+                            step: 1,
+                            min: "1",
+                            max: "100"
+                        },
+                ),
                 ),
                 m("label.checkbox-inline.updateTimeSeriesPlantsOnParameterChange.TCheckBox", m("input[type=checkbox]",
                     {
+                        checked: this.domainOptions.updateTimeSeriesPlantsOnParameterChange,
                         onclick: (event: any) => this.updateTimeSeriesPlantsOnParameterChangeClick(event),
-                        // Top: "46",
-                        // Left: "10",
-                        // Height: "17",
-                        // Width: "267",
-                        // TabOrder: "1",
-                    },),
-                    caption("Update &time series when change plant parameter"),
+                    }),
+                    caption("Update &Time Series when change plant parameter"),
                 ),
             ),
         )
