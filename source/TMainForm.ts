@@ -6637,7 +6637,6 @@ export class TMainForm {
 
     view() {
         if (activeForm && activeForm !== "MainForm") return []
-        const self = this
         return m("div.MainForm.relative", {
                 onclick: (event: any) => {
                     resetDroppedDownMenuId()
@@ -6646,48 +6645,54 @@ export class TMainForm {
             viewMainMenu(this.mainMenuSpec, this, () => this.viewToolbar()),
             m(ModalInputView),
             // viewMainForm() 
-            m("div.relative",
-                m("canvas.ba", {
-                    width: self.drawingBitmap.width,
-                    height: self.drawingBitmap.height,
-                    oncreate(vnode: m.VnodeDOM) {
-                        self.drawingPaintBox = <HTMLCanvasElement>vnode.dom
-                        self.copyDrawingBitmapToPaintBox()
-                        // TODO PDF: May need to rethink how hint is drawn
-                        if (this.hintActive && this.lastHintString) {
-                            const context = this.drawingPaintBox.getContext("2d")
-                            context.fillText(this.lastHintString, this.hintX, this.hintY)
-                        }
-                    },
-                    onupdate(vnode: m.VnodeDOM) {
-                        self.drawingPaintBox = <HTMLCanvasElement>vnode.dom
-                        self.copyDrawingBitmapToPaintBox()
-                        // TODO PDF: May need to rethink how hint is drawn
-                        if (this.hintActive && this.lastHintString) {
-                            const context = this.drawingPaintBox.getContext("2d")
-                            context.fillText(this.lastHintString, this.hintX, this.hintY)
-                        }
-                    },
-                    onmousedown: (event: MouseEvent) => {
-                        this.PaintBoxMouseDown(event)
-                    },
-                    onmousemove: (event: MouseEvent) => {
-                        this.PaintBoxMouseMove(event)
-                    },
-                    onmouseup: (event: MouseEvent) => {
-                        this.PaintBoxMouseUp(event)
-                    },
-                    style: { cursor: cursor_getCurrentCursorAsCSS() }
-                }),
-                this.animateCommand && m("div.absolute.green.ma3", 
-                    { style: { bottom: 0 } },
-                    "Animating day " + this.animateCommand.age + " of " + this.animateCommand.oldestAgeAtMaturity + " (click anywhere to stop)"
-                ),
-            ),
+            this.viewPaintBox(),
             this.viewPlantList(),
+            // domain.options.mainWindowOrientation === kMainWindowOrientationVertical && 
             this.viewPlantFocusPanel()
         )
-    }   
+    }
+
+    viewPaintBox(): m.Children {
+        const self = this
+        return m("div.relative",
+            m("canvas.ba", {
+                width: self.drawingBitmap.width,
+                height: self.drawingBitmap.height,
+                oncreate(vnode: m.VnodeDOM) {
+                    self.drawingPaintBox = <HTMLCanvasElement>vnode.dom
+                    self.copyDrawingBitmapToPaintBox()
+                    // TODO PDF: May need to rethink how hint is drawn
+                    if (this.hintActive && this.lastHintString) {
+                        const context = this.drawingPaintBox.getContext("2d")
+                        context.fillText(this.lastHintString, this.hintX, this.hintY)
+                    }
+                },
+                onupdate(vnode: m.VnodeDOM) {
+                    self.drawingPaintBox = <HTMLCanvasElement>vnode.dom
+                    self.copyDrawingBitmapToPaintBox()
+                    // TODO PDF: May need to rethink how hint is drawn
+                    if (this.hintActive && this.lastHintString) {
+                        const context = this.drawingPaintBox.getContext("2d")
+                        context.fillText(this.lastHintString, this.hintX, this.hintY)
+                    }
+                },
+                onmousedown: (event: MouseEvent) => {
+                    this.PaintBoxMouseDown(event)
+                },
+                onmousemove: (event: MouseEvent) => {
+                    this.PaintBoxMouseMove(event)
+                },
+                onmouseup: (event: MouseEvent) => {
+                    this.PaintBoxMouseUp(event)
+                },
+                style: { cursor: cursor_getCurrentCursorAsCSS() }
+            }),
+            this.animateCommand && m("div.absolute.green.ma3", 
+                { style: { bottom: 0 } },
+                "Animating day " + this.animateCommand.age + " of " + this.animateCommand.oldestAgeAtMaturity + " (click anywhere to stop)"
+            ),
+        )
+    }
 }
 
 /// Unfinished Stub Function
