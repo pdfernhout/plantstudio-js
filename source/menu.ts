@@ -242,7 +242,7 @@ function viewMenu(menu: MenuItem[], self: any): any {
                 menuItem.submenu
                     ? m("div.nowrap.mt1.mb1", 
                         m("span.i.ml1"  + (disabled ? ".gray.disabled" : ""), 
-                        caption(menuItem.label)), 
+                        caption(menuItem.label) + ":"), 
                         m("div.ml2", viewMenu(menuItem.submenu, self))
                     )
                     : viewMenuItem(menuItem, self)
