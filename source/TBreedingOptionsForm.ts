@@ -160,12 +160,12 @@ export class TBreedingOptionsForm {
         }
     }
     
-    treatColorsAsNumbersClick(): void {
-        // TOD PDF: Fix or remove: this.options.mutateAndBlendColorValues = this.treatColorsAsNumbers.Checked
+    treatColorsAsNumbersClick(event: any): void {
+        this.options.mutateAndBlendColorValues = event.target.checked
     }
     
-    chooseTdosRandomlyClick(): void {
-        // TOD PDF: Fix or remove: this.options.chooseTdosRandomlyFromCurrentLibrary = this.chooseTdosRandomly.Checked
+    chooseTdosRandomlyClick(event: any): void {
+        this.options.chooseTdosRandomlyFromCurrentLibrary = event.target.checked
     }
     
     // ------------------------------------------------------------------ sections list boxes 
@@ -356,9 +356,7 @@ export class TBreedingOptionsForm {
         // if (fileNameWithPath === "") {
         //     return
         // }
-        // this.currentTdoLibraryFileName.Text = fileNameWithPath
-        // domain.defaultTdoLibraryFileName = this.currentTdoLibraryFileName.Text
-        // this.currentTdoLibraryFileName.SelStart = len(this.currentTdoLibraryFileName.Text)
+        // domain.defaultTdoLibraryFileName = fileNameWithPath
     }
     
     helpButtonClick(): void {
@@ -771,47 +769,32 @@ export class TBreedingOptionsForm {
 
     viewPage5(): m.Children {
         return m("TTabPage.page5.TTabPage",
-            "Colors and 3D objects",
-            m("label.checkbox-inline.treatColorsAsNumbers.TCheckBox", m("input[type=checkbox]",
+            // "Colors and 3D objects",
+            m("label.checkbox-inline.treatColorsAsNumbers.TCheckBox", m("input[type=checkbox].mr1",
                 {
-                    onclick: () => this.treatColorsAsNumbersClick(),
-                    // Top: "31",
-                    // Left: "15",
-                    // Height: "17",
-                    // Width: "218",
-                    // TabOrder: "0",
+                    onclick: (event: any) => this.treatColorsAsNumbersClick(event),
+                    checked: this.options.mutateAndBlendColorValues,
                 },),
                 caption("mutate and blend &colors as numbers"),
             ),
-            m("label.checkbox-inline.chooseTdosRandomly.TCheckBox", m("input[type=checkbox]",
+            m("br"),
+            m("label.checkbox-inline.chooseTdosRandomly.TCheckBox", m("input[type=checkbox].mr1",
                 {
-                    onclick: () => this.chooseTdosRandomlyClick(),
-                    // Top: "61",
-                    // Left: "15",
-                    // Height: "17",
-                    // Width: "258",
-                    // TabOrder: "1",
+                    onclick: (event: any) => this.chooseTdosRandomlyClick(event),
+                    checked: this.options.chooseTdosRandomlyFromCurrentLibrary
                 },),
                 caption("choose 3D &objects randomly from current library"),
             ),
-            m("button.changeTdoLibrary.TSpeedButton",
-                {
-                    onclick: () => this.changeTdoLibraryClick(),
-                },
-                m("img.TImage", { src: imageDir + "BreedingOptionsForm_changeTdoLibrary.png" } ),
-                caption("&Change..."),
-            ),
-            m("input.currentTdoLibraryFileName.TEdit",
-                {
-                    // Top: "83",
-                    // Left: "34",
-                    // Height: "22",
-                    // Width: "217",
-                    // Color: "clBtnFace",
-                    // ReadOnly: "True",
-                    // TabOrder: "2",
-                    // Text: "currentTdoLibraryFileName",
-                },
+            m("div.currentTdoLibraryFileName.TEdit",
+                m("button.changeTdoLibrary.TSpeedButton.mr1",
+                    {
+                        onclick: () => this.changeTdoLibraryClick(),
+                    },
+                    m("img.TImage", { src: imageDir + "BreedingOptionsForm_changeTdoLibrary.png" } ),
+                    caption("&Change..."),
+                ),
+                "File name: ",
+                m("span", domain.defaultTdoLibraryFileName)
             ),
         )
     }
