@@ -649,7 +649,7 @@ export class TTimeSeriesForm {
             ],
             "MenuOptionsStages", "&More Options...", this.TimeSeriesMenuOptionsStagesClick,
         ],
-        "MenuWindow", "&Window", [
+        "MenuWindow", "&View", [
             "radio", "MenuWindowMain", "&Main", () => setActiveForm("MainForm"), () => activeForm === "MainForm", () => MainForm !== undefined,
             "radio", "MenuWindowBreeder", "&Breeder", () => setActiveForm("BreederForm"), () => activeForm === "BreederForm", () => BreederForm !== undefined,
             "radio", "MenuWindowTimeSeries", "&Time Series", () => setActiveForm("TimeSeriesForm"), () => activeForm === "TimeSeriesForm", () => TimeSeriesForm !== undefined,
