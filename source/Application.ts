@@ -5,6 +5,7 @@ import { TBreederForm } from "./TBreederForm"
 import { TTimeSeriesForm } from "./TTimeSeriesForm"
 import { setActiveForm } from "./FormHolder"
 import { resetDroppedDownMenuId } from "./menu"
+import { imageDir } from "./common"
 
 PdDomain.createDefault()
 domain.defaultTdoLibraryFileName = "../plants/3D object library.tdo"
@@ -28,14 +29,17 @@ const Application = {
                 resetDroppedDownMenuId()
             },
         },
-        m("div.ba.bw2.b--black.pa2.ma2.orange.absolute" + (waitMessage ? "" : ".dn"), 
+        m("div.ba.bw2.b--black.bg-white.pa2.ma2.orange.absolute.flex.items-center.flex-row" + (waitMessage ? "" : ".dn"), 
             { style: {
                 left: "50%",
                 top: "25%",
                 transform: "translate(-50%, 0)",
                 zIndex: 10,
             }
-        }, waitMessage),
+        },
+            m("img.mr1", { src: imageDir + "WaitForm_Image1.png"}),
+            waitMessage
+        ),
         m(TMainForm),
         m(TBreederForm),
         m(TTimeSeriesForm),
