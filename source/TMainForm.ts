@@ -4984,6 +4984,7 @@ export class TMainForm {
     }
     
     /*
+    
     posingFrontfaceColorMouseUp(Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
         this.posingFrontfaceColor.Color = domain.getColorUsingCustomColors(this.posingFrontfaceColor.Color)
         this.changeSelectedPose(this.posingFrontfaceColor)
@@ -4997,56 +4998,6 @@ export class TMainForm {
     posingLineColorMouseUp(Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
         this.posingLineColor.Color = domain.getColorUsingCustomColors(this.posingLineColor.Color)
         this.changeSelectedPose(this.posingLineColor)
-    }
-    
-    spinPoseRotationBy(amount: int): void {
-        // TODO sender was event or component sending event
-        if ((sender !== null) && (sender instanceof delphi_compatability.TEdit)) {
-            let newRotation = StrToIntDef((sender).text, 0)
-            const oldRotation = newRotation
-            newRotation = newRotation + amount
-            if (newRotation < -360) {
-                newRotation = 360 - (abs(newRotation) - 360)
-            }
-            if (newRotation > 360) {
-                newRotation = -360 + (newRotation - 360)
-            }
-            if (newRotation !== oldRotation) {
-                (sender).text = IntToStr(newRotation)
-            }
-        }
-    }
-    
-    posingScaleMultiplierSpinUpClick(): void {
-        // TODO Sender was event or component sending event
-        if ((Sender !== null) && (Sender instanceof delphi_compatability.TSpinButton)) {
-            this.spinScaleMultiplierBy((Sender).focusControl, domain.options.resizeKeyUpMultiplierPercent - 100)
-        }
-    }
-    
-    posingScaleMultiplierSpinDownClick(): void {
-        // TODO Sender was event or component sending event
-        if ((Sender !== null) && (Sender instanceof delphi_compatability.TSpinButton)) {
-            this.spinScaleMultiplierBy((Sender).focusControl, -(domain.options.resizeKeyUpMultiplierPercent - 100))
-        }
-    }
-    
-    spinScaleMultiplierBy(amount: int): void {
-        // TODO sender was event or component sending event
-        if ((sender !== null) && (sender instanceof delphi_compatability.TEdit)) {
-            let newValue = StrToIntDef((sender).text, 0)
-            const oldValue = newValue
-            newValue = newValue + amount
-            if (newValue < 0) {
-                newValue = 0
-            }
-            if (newValue > 1000) {
-                newValue = 1000
-            }
-            if (newValue !== oldValue) {
-                (sender).text = IntToStr(newValue)
-            }
-        }
     }
     
     */
@@ -5405,14 +5356,6 @@ export class TMainForm {
         //     }
         // }
         // this.lifeCycleDragger.SetBounds(this.lifeCycleGraphImage.Left + intround((this.lifeCycleGraphImage.Width - this.lifeCycleDragger.Width) * fractionOfMaxAge), this.lifeCycleGraphImage.Top + 1, this.lifeCycleDragger.Width, this.lifeCycleGraphImage.Height - 2)
-    }
-    
-    WMGetMinMaxInfo(MSG: any): void {
-        unfinished()
-        // PdForm.prototype.WMGetMinMaxInfo.call(this)
-        // //FIX unresolved WITH expression: UNRESOLVED.PMinMaxInfo(MSG.lparam).PDF_FIX_POINTER_ACCESS
-        // UNRESOLVED.ptMinTrackSize.x = 300
-        // UNRESOLVED.ptMinTrackSize.y = 300
     }
     
     /*
