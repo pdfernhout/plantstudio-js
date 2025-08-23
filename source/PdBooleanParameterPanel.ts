@@ -7,6 +7,7 @@ import { TransferDirection } from "./PdPlant"
 import { TRect } from "./TRect"
 import { PdChangeBooleanValueCommand } from "./updcom"
 import { int } from "./common"
+import { MainForm } from "./FormHolder"
 
 // from conversion_common import *
 // import udebug
@@ -248,14 +249,13 @@ export class PdBooleanParameterPanel extends PdParameterPanel {
                             value: label,
                             onchange: () => {
                                 this.currentValue = (label === "yes")
-                                // TODO: PDF fix to use MainForm command list
-                                // umain.MainForm.doCommand(updcom.PdChangeBooleanValueCommand().createCommandWithListOfPlants(umain.MainForm.selectedPlants, this.currentValue, this.param.fieldNumber, uparams.kNotArray, this.param.regrow))
                                 const aList = [this.plant]
                                 const aNewValue = this.currentValue
                                 const aFieldNumber = this.param.fieldNumber
                                 const anArrayIndex = 0
                                 const aRegrow = true
-                                new PdChangeBooleanValueCommand(aList, aNewValue, aFieldNumber, anArrayIndex, aRegrow).doCommand()
+                                const command = new PdChangeBooleanValueCommand(aList, aNewValue, aFieldNumber, anArrayIndex, aRegrow)
+                                MainForm.doCommand(command)
                             }
                         }),
                         label

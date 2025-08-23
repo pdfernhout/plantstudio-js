@@ -7,6 +7,7 @@ import { PdParameterPanel } from "./PdParameterPanel"
 import { FieldType } from "./PdParameter"
 import { TransferDirection } from "./PdPlant"
 import { PdChangeRealValueCommand } from "./updcom"
+import { MainForm } from "./FormHolder"
 
 // from conversion_common import *
 // import udebug
@@ -500,7 +501,7 @@ export class PdRealParameterPanel extends PdParameterPanel {
                     min: this.minValue,
                     max: this.maxValue,
                     value: this.currentValue, 
-                    oninput: (event: any) => {
+                    onchange: (event: any) => {
                         this.currentValue = parseInt(event.target.value)
                         // TODO: PDF fix to use MainForm command list
                         // umain.MainForm.doCommand(updcom.PdChangeRealValueCommand().createCommandWithListOfPlants(umain.MainForm.selectedPlants, this.currentValue, this.param.fieldNumber, uparams.kNotArray, this.param.regrow))
@@ -509,7 +510,8 @@ export class PdRealParameterPanel extends PdParameterPanel {
                         const aFieldNumber = this.param.fieldNumber
                         const anArrayIndex = 0
                         const aRegrow = true
-                        new PdChangeRealValueCommand(aList, aNewValue, aFieldNumber, anArrayIndex, aRegrow).doCommand()
+                        const command = new PdChangeRealValueCommand(aList, aNewValue, aFieldNumber, anArrayIndex, aRegrow)
+                        MainForm.doCommand(command)
                     }
                 }),
                 m("span.ml2", Math.round(this.currentValue * 100000) / 100000)

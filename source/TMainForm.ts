@@ -6311,7 +6311,7 @@ export class TMainForm {
                     )
                 )
             ),
-            m("TScrollBox.parametersScrollBox.TScrollBox",
+            m("TScrollBox.parametersScrollBox.TScrollBox.ml2",
                 {
                     // Top: "44",
                     // Left: "8",

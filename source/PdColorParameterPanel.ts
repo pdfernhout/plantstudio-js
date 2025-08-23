@@ -8,6 +8,7 @@ import { TransferDirection } from "./PdPlant"
 import { TRect } from "./TRect"
 import { colorForRGB, ColorMap, convertColorNoCache, rgbForColor } from "./KfDrawingSurface"
 import { PdChangeColorValueCommand } from "./updcom"
+import { MainForm } from "./FormHolder"
 
 // from conversion_common import *
 // import ubmpsupport
@@ -524,7 +525,7 @@ export class PdColorParameterPanel extends PdParameterPanel {
                             min: 0,
                             max: 255,
                             value: rgbForColor(this.currentColor)[colorComponent], 
-                            oninput: (event: any) => {
+                            onchange: (event: any) => {
                                 const rgb: ColorMap = rgbForColor(this.currentColor)
                                 rgb[colorComponent] = parseInt(event.target.value)
                                 this.currentColor = colorForRGB(rgb)
@@ -535,7 +536,8 @@ export class PdColorParameterPanel extends PdParameterPanel {
                                 const aFieldNumber = this.param.fieldNumber
                                 const anArrayIndex = 0
                                 const aRegrow = true
-                                new PdChangeColorValueCommand(aList, aNewValue, aFieldNumber, anArrayIndex, aRegrow).doCommand()
+                                const command = new PdChangeColorValueCommand(aList, aNewValue, aFieldNumber, anArrayIndex, aRegrow)
+                                MainForm.doCommand(command)
                             }
                         }),
                         m("span.ml2", rgbForColor(this.currentColor)[colorComponent])

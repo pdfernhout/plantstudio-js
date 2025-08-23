@@ -12,6 +12,7 @@ import { convertColor } from "./KfDrawingSurface"
 import { domain } from "./PdDomain"
 import { PdChangeRealValueCommand } from "./updcom"
 import { intMax } from "./umath"
+import { MainForm } from "./FormHolder"
 
 // from conversion_common import *
 // import usliders
@@ -953,6 +954,7 @@ export class PdSCurveParameterPanel extends PdParameterPanel {
                                 // TODO: PDF temp for testing
                                 this.currentValues[index] = parseFloat(event.target.value)
 
+                                // TODO PDF: Fix or remove
                                 // const points = Array(2)
                                 // points[0] = this.pointFromXY(this.currentValues[0], this.currentValues[1])
                                 // points[1] = this.pointFromXY(this.currentValues[2], this.currentValues[3])
@@ -961,7 +963,8 @@ export class PdSCurveParameterPanel extends PdParameterPanel {
                                 //     this.keepPointsFromCrossing(points[0], points[1], 1)
                                 // }
 
-                                new PdChangeRealValueCommand([this.plant], this.currentValues[index], this.param.fieldNumber, index, this.param.regrow).doCommand()
+                                const command = new PdChangeRealValueCommand([this.plant], this.currentValues[index], this.param.fieldNumber, index, this.param.regrow)
+                                MainForm.doCommand(command)
                             }
                         })
                     )

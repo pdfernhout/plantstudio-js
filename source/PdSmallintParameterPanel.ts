@@ -8,6 +8,7 @@ import { intMax } from "./umath"
 import { PdChangeSmallintValueCommand } from "./updcom"
 import { TransferDirection } from "./PdPlant"
 import { FieldType, kNotArray } from "./PdParameter"
+import { MainForm } from "./FormHolder"
 
 // from conversion_common import *
 // import udebug
@@ -412,7 +413,7 @@ export class PdSmallintParameterPanel extends PdParameterPanel {
                     min: this.minValue,
                     max: this.maxValue,
                     value: this.currentValue, 
-                    oninput: (event: any) => {
+                    onchange: (event: any) => {
                         this.currentValue = parseInt(event.target.value)
                         // TODO: PDF fix to use MainForm command list
                         // umain.MainForm.doCommand(updcom.PdChangeSmallintValueCommand().createCommandWithListOfPlants(umain.MainForm.selectedPlants, this.currentValue, this.param.fieldNumber, uparams.kNotArray, this.param.regrow))
@@ -421,7 +422,8 @@ export class PdSmallintParameterPanel extends PdParameterPanel {
                         const aFieldNumber = this.param.fieldNumber
                         const anArrayIndex = 0
                         const aRegrow = true
-                        new PdChangeSmallintValueCommand(aList, aNewValue, aFieldNumber, anArrayIndex, aRegrow).doCommand()
+                        const command = new PdChangeSmallintValueCommand(aList, aNewValue, aFieldNumber, anArrayIndex, aRegrow)
+                        MainForm.doCommand(command)
                     }
                 }),
                 m("span.ml2", this.currentValue)
