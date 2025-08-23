@@ -217,7 +217,7 @@ export class PdHeaderParameterPanel extends  PdParameterPanel {
     }
 
     view() {
-        return m("div.ba.pa1.bw1.tc.mt3", this.Caption)
+        return m("div.ba.pa1.bw1.tc", this.Caption)
     }
 }
 
