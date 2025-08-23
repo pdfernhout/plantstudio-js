@@ -33,6 +33,14 @@ import { activeForm, BreederForm, MainForm, setActiveForm, setMainForm, TimeSeri
 import { resetDroppedDownMenuId, viewMainMenu } from "./menu"
 import { TUndoRedoListForm } from "./TUndoRedoListForm"
 import { startWaitMessage, stopWaitMessage } from "./TWaitForm"
+import { PdHeaderParameterPanel } from "./PdHeaderParameterPanel"
+import { PdTdoParameterPanel } from "./PdTdoParameterPanel"
+import { PdColorParameterPanel } from "./PdColorParameterPanel"
+import { PdListParameterPanel } from "./PdListParameterPanel"
+import { PdBooleanParameterPanel } from "./PdBooleanParameterPanel"
+import { PdSCurveParameterPanel } from "./PdSCurveParameterPanel"
+import { PdSmallintParameterPanel } from "./PdSmallintParameterPanel"
+import { PdRealParameterPanel } from "./PdRealParameterPanel"
 
 type PosingField = 
     "hide" // posingHidePart
@@ -126,11 +134,13 @@ const magnifications = ["12%","25%","50%","75%","100%","150%","200%","300%","400
 
 export class TMainForm {
     windowName = "Main"
-    // horizontalSplitter: TPanel = new TPanel()
-    // verticalSplitter: TPanel = new TPanel()
     animateTimerTimeoutId: any = null
     magnificationPercent = "100%"
-    // sectionsComboBox: TComboBox = new TComboBox()
+
+    sectionsComboBox: PdSection[] = []
+    sectionsComboBox_ItemIndex = -1
+    // parametersScrollBox: TScrollBox = new TScrollBox()
+
     // posingColorsPanel: TPanel = new TPanel()
     // posingLineColorLabel: TLabel = new TLabel()
     // posingFrontfaceColorLabel: TLabel = new TLabel()
@@ -140,6 +150,7 @@ export class TMainForm {
     // posingLineColor: TPanel = new TPanel()
     // posingFrontfaceColor: TPanel = new TPanel()
     // posingBackfaceColor: TPanel = new TPanel()
+
     posedPlantParts: PosedPlantPart[] = []
     drawingBitmap: HTMLCanvasElement = document.createElement("canvas")
     commandList: PdCommandList = new PdCommandList()
@@ -170,6 +181,8 @@ export class TMainForm {
     lifeCycleDraggerRect: TRect = new TRect()
     lifeCycleImageRect: TRect = new TRect()
 
+    // horizontalSplitter: TPanel = new TPanel()
+    // verticalSplitter: TPanel = new TPanel()
     // horizontalSplitterDragging: boolean = false
     // verticalSplitterDragging: boolean = false
     // horizontalSplitterNeedToRedraw: boolean = false
@@ -180,6 +193,7 @@ export class TMainForm {
     // verticalSplitterLastDrawPos: int = 0
     // lastWidth: int = 0
     // lastHeight: int = 0
+
     hintX: int = 0
     hintY: int = 0
     hintActive: boolean = false
@@ -257,8 +271,8 @@ export class TMainForm {
     //         this.loadSectionsIntoListBox()
     //         this.updateMenusForUndoRedo()
     //         this.updatePasteMenuForClipboardContents()
-    //         if (this.sectionsComboBox.Items.Count > 0) {
-    //             this.sectionsComboBox.ItemIndex = 0
+    //         if (this.sectionsComboBox.length > 0) {
+    //             this.sectionsComboBox_ItemIndex = 0
     //             this.updateParameterPanelsForSectionChange()
     //         }
     //         //v2.0
@@ -626,7 +640,7 @@ export class TMainForm {
         // // have to clear out parameter panels before leaving, for some reason was making program crash
         // //    but only if tdo components existed at the time of leaving the program. this works for now,
         // //    but it would be better to understand why it was happening. 
-        // this.sectionsComboBox.ItemIndex = -1
+        // this.sectionsComboBox_ItemIndex = -1
         // this.updateParameterPanelsForSectionChange()
         // delphi_compatability.Application.HelpCommand(UNRESOLVED.HELP_QUIT, 0)
         // return true
@@ -761,19 +775,19 @@ export class TMainForm {
         // }
         // this.plantsAsTextMemo.Clear()
         // this.plantsAsTextMemo.PasteFromClipboard()
-        // if (this.plantsAsTextMemo.Lines.Count <= 0) {
+        // if (this.plantsAsTextMemo.Lines.length <= 0) {
         //     MessageDialog("The clipboard has no text in it.", delphi_compatability.TMsgDlgType.mtError, {mbOK, }, 0)
         //     return
         // }
         // let startLine = -1
         // let endLine = -1
-        // for (let i = 0; i <= this.plantsAsTextMemo.Lines.Count - 1; i++) {
+        // for (let i = 0; i <= this.plantsAsTextMemo.Lines.length - 1; i++) {
         //     if (pos(uplant.kPlantAsTextStartString, this.plantsAsTextMemo.Lines.Strings[i]) > 0) {
         //         startLine = i
         //         break
         //     }
         // }
-        // for (i = this.plantsAsTextMemo.Lines.Count - 1; i >= 0; i--) {
+        // for (i = this.plantsAsTextMemo.Lines.length - 1; i >= 0; i--) {
         //     if (pos(kPlantAsTextEndString, this.plantsAsTextMemo.Lines.Strings[i]) > 0) {
         //         endLine = i
         //         break
@@ -824,10 +838,10 @@ export class TMainForm {
         //                 if (pos(uppercase(kStartNoteString), uppercase(aLine)) > 0) {
         //                     // added v1.6b1 to accommodate paste from text with note
         //                     plant.noteLines.Clear()
-        //                     while (i <= this.plantsAsTextMemo.Lines.Count - 1) {
+        //                     while (i <= this.plantsAsTextMemo.Lines.length - 1) {
         //                         aLine = this.plantsAsTextMemo.Lines.Strings[i]
         //                         i += 1
-        //                         if ((pos(uppercase(kEndNoteString), uppercase(aLine)) > 0) && (plant.noteLines.Count < 5000)) {
+        //                         if ((pos(uppercase(kEndNoteString), uppercase(aLine)) > 0) && (plant.noteLines.length < 5000)) {
         //                             break
         //                         } else if (pos(";", aLine) === 1) {
         //                             continue
@@ -1096,7 +1110,7 @@ export class TMainForm {
     
     pastePlantsFromClipboard(): void {
         unfinished()
-        // if (domain.plantManager.privatePlantClipboard.Count <= 0) {
+        // if (domain.plantManager.privatePlantClipboard.length <= 0) {
         //     return
         // }
         // const newPlants: PdPlant[] = []
@@ -4026,7 +4040,7 @@ export class TMainForm {
     }
     
     updateRightSidePanelForFirstSelectedPlantWithTab(): void {
-        // TODO PDF: FIx or remove code
+        // TODO PDF: Fix or remove code
         // switch (newTab) {
         //     case kTabLifeCycle:
         //         this.updateLifeCyclePanelForFirstSelectedPlant()
@@ -4429,40 +4443,38 @@ export class TMainForm {
         return failed
     }
 
-    /*
-    
     // ----------------------------------------------------------------------------- *parameters panel 
-    sectionsComboBoxDrawItem(Control: TWinControl, index: int, Rect: TRect, State: TOwnerDrawState): void {
-        if ((this.sectionsComboBox.Items.Count <= 0) || (index < 0) || (index > this.sectionsComboBox.Items.Count - 1)) {
-            return
-        }
-        const selected: boolean = (delphi_compatability.TOwnerDrawStateType.odSelected in State)
-        // set up section pointer 
-        const section: PdSection = this.sectionsComboBox.Items.Objects[index]
-        if (section === null) {
-            return
-        }
-        this.sectionsComboBox.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsSolid
-        this.sectionsComboBox.Canvas.Font = this.sectionsComboBox.Font
-        if (selected) {
-            this.sectionsComboBox.Canvas.Brush.Color = ColorDefs.clHighlight
-            this.sectionsComboBox.Canvas.Font.Color = ColorDefs.clHighlightText
-        } else {
-            this.sectionsComboBox.Canvas.Brush.Color = this.sectionsComboBox.Color
-            this.sectionsComboBox.Canvas.Font.Color = ColorDefs.clBtnText
-        }
-        this.sectionsComboBox.Canvas.FillRect(Rect)
-        const textDrawRect = new TRect()
-        textDrawRect.Left = textDrawRect.Left + 4
-        textDrawRect.Top = textDrawRect.Top + (textDrawRect.Bottom - textDrawRect.Top) / 2 - (this.sectionsComboBox.Canvas.TextHeight("W") / 2)
-        const sectionPicture: TPicture = this.sectionPictureForSectionName(section.getName())
-        if (sectionPicture !== null) {
-            this.sectionsComboBox.Canvas.Draw(Rect.left + 4, Rect.top, sectionPicture.Graphic)
-        }
-        textDrawRect.Left = textDrawRect.Left + 32 + 4
-        const cText = this.sectionsComboBox.Items[index]
-        UNRESOLVED.winprocs.drawText(this.sectionsComboBox.Canvas.Handle, cText, len(cText), textDrawRect, delphi_compatability.DT_LEFT)
-    }
+    // sectionsComboBoxDrawItem(Control: TWinControl, index: int, Rect: TRect, State: TOwnerDrawState): void {
+    //     if ((this.sectionsComboBox.length <= 0) || (index < 0) || (index > this.sectionsComboBox.length - 1)) {
+    //         return
+    //     }
+    //     const selected: boolean = (delphi_compatability.TOwnerDrawStateType.odSelected in State)
+    //     // set up section pointer 
+    //     const section: PdSection = this.sectionsComboBox[index]
+    //     if (section === null) {
+    //         return
+    //     }
+    //     this.sectionsComboBox.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsSolid
+    //     this.sectionsComboBox.Canvas.Font = this.sectionsComboBox.Font
+    //     if (selected) {
+    //         this.sectionsComboBox.Canvas.Brush.Color = ColorDefs.clHighlight
+    //         this.sectionsComboBox.Canvas.Font.Color = ColorDefs.clHighlightText
+    //     } else {
+    //         this.sectionsComboBox.Canvas.Brush.Color = this.sectionsComboBox.Color
+    //         this.sectionsComboBox.Canvas.Font.Color = ColorDefs.clBtnText
+    //     }
+    //     this.sectionsComboBox.Canvas.FillRect(Rect)
+    //     const textDrawRect = new TRect()
+    //     textDrawRect.Left = textDrawRect.Left + 4
+    //     textDrawRect.Top = textDrawRect.Top + (textDrawRect.Bottom - textDrawRect.Top) / 2 - (this.sectionsComboBox.Canvas.TextHeight("W") / 2)
+    //     const sectionPicture: TPicture = this.sectionPictureForSectionName(section.getName())
+    //     if (sectionPicture !== null) {
+    //         this.sectionsComboBox.Canvas.Draw(Rect.left + 4, Rect.top, sectionPicture.Graphic)
+    //     }
+    //     textDrawRect.Left = textDrawRect.Left + 32 + 4
+    //     const cText = this.sectionsComboBox[index].getName()
+    //     UNRESOLVED.winprocs.drawText(this.sectionsComboBox.Canvas.Handle, cText, len(cText), textDrawRect, delphi_compatability.DT_LEFT)
+    // }
     
     sectionsComboBoxChange(): void {
         this.updateParameterPanelsForSectionChange()
@@ -4474,45 +4486,43 @@ export class TMainForm {
         if ((domain === null) || (domain.sectionManager === null)) {
             return
         }
-        this.sectionsComboBox.Clear()
-        if (domain.sectionManager.sections.Count > 0) {
-            for (let i = 0; i <= domain.sectionManager.sections.Count - 1; i++) {
-                const section: PdSection = usection.PdSection(domain.sectionManager.sections.Items[i])
+        this.sectionsComboBox.length = 0
+        if (domain.sectionManager.sections.length > 0) {
+            for (let i = 0; i <= domain.sectionManager.sections.length - 1; i++) {
+                const section: PdSection = domain.sectionManager.sections[i]
                 if (section.showInParametersWindow) {
                     if (section.name === "Primary flowers, advanced") {
                         // kludge to get around necessary ordering of new advanced floral section
                         // advanced floral params are at end of file, but want to show them
                         // in the list before inflorescences
                         // WATCH OUT: change this code if you change the names of the sections
-                        const indexOfPrimaryInflors = this.sectionsComboBox.Items.indexOf("Primary inflorescences")
-                        this.sectionsComboBox.Items.InsertObject(indexOfPrimaryInflors, section.name, section)
+                        const indexOfPrimaryInflors = this.sectionsComboBox.findIndex(section => section.getName() === "Primary inflorescences")
+                        this.sectionsComboBox.splice(indexOfPrimaryInflors, 0, section)
                     } else {
-                        this.sectionsComboBox.Items.AddObject(section.name, section)
+                        this.sectionsComboBox.push(section)
                     }
                 }
             }
         }
-        if (domain.sectionManager.orthogonalSections.Count > 0) {
-            for (let i = 0; i <= domain.sectionManager.orthogonalSections.Count - 1; i++) {
+        if (domain.sectionManager.orthogonalSections.length > 0) {
+            for (let i = 0; i <= domain.sectionManager.orthogonalSections.length - 1; i++) {
                 // v2.1 add orthogonal sections
-                const section: PdSection = new PdSection(domain.sectionManager.orthogonalSections[i])
+                const section: PdSection = domain.sectionManager.orthogonalSections[i]
                 if (section.showInParametersWindow) {
-                    this.sectionsComboBox.Items.AddObject(section.name, section)
+                    this.sectionsComboBox.push(section)
                 }
             }
         }
     }
     
-    currentSection(): PdSection {
+    currentSection(): PdSection | null {
         let result: PdSection | null = null
-        if ((this.sectionsComboBox.Items.Count <= 0) || (this.sectionsComboBox.ItemIndex < 0) || (this.sectionsComboBox.ItemIndex > this.sectionsComboBox.Items.Count - 1)) {
+        if ((this.sectionsComboBox.length <= 0) || (this.sectionsComboBox_ItemIndex < 0) || (this.sectionsComboBox_ItemIndex > this.sectionsComboBox.length - 1)) {
             return result
         }
-        result = new PdSection(this.sectionsComboBox.Items.Objects[this.sectionsComboBox.ItemIndex])
+        result = this.sectionsComboBox[this.sectionsComboBox_ItemIndex]
         return result
     }
-    
-    */
 
     sectionPictureForSectionName(aName: string): string {
         let result: string = "MISSING.ico"
@@ -4553,8 +4563,6 @@ export class TMainForm {
         return result
     }
 
-    /*
-    
     sectionHelpIDForSectionName(aName: string): string {
         let result = ""
         if (aName === "(no section)") {
@@ -4593,81 +4601,82 @@ export class TMainForm {
     }
     
     updateParameterPanelsForSectionChange(): void {
-        try {
-            cursor_startWait()
-            // clear out any earlier panels 
-            this.selectedParameterPanel = null
-            if (this.parametersScrollBox.ControlCount > 0) {
-                while (this.parametersScrollBox.ControlCount > 0) {
-                    // this is the only valid time to free a component owned by something - after it has
-                    //        been removed from the component list (owned objects) of the owner 
-                    const oldParamPanel: PdParameterPanel = uppanel.PdParameterPanel(this.parametersScrollBox.Controls[0])
-                    this.RemoveComponent(oldParamPanel)
-                    oldParamPanel.Parent = null
-                }
-            }
-            if (this.sectionsComboBox.ItemIndex < 0) {
-                // make new panels for the current section 
-                return
-            }
-            const section: PdSection = this.sectionsComboBox.Items.Objects[this.sectionsComboBox.ItemIndex]
-            if (section.numSectionItems > 0) {
-                for (let i = 0; i <= section.numSectionItems - 1; i++) {
-                    const parameter = domain.parameterManager.parameterForFieldNumber(section.sectionItems[i])
-                    if (parameter === null) {
-                        continue
-                    }
-                    let paramPanel: PdParameterPanel | null = null
-                    // note that the longint type is used to store plant positions, but should not be used
-                    //          for parameter panels 
-                    switch (parameter.fieldType) {
-                        case FieldType.kFieldHeader:
-                            paramPanel = upp_hed.PdHeaderParameterPanel().createForParameter(this, parameter)
-                            break
-                        case FieldType.kFieldEnumeratedList:
-                            paramPanel = upp_lis.PdListParameterPanel().createForParameter(this, parameter)
-                            break
-                        case FieldType.kFieldThreeDObject:
-                            paramPanel = upp_tdo.PdTdoParameterPanel().createForParameter(this, parameter)
-                            break
-                        case FieldType.kFieldColor:
-                            paramPanel = upp_col.PdColorParameterPanel().createForParameter(this, parameter)
-                            break
-                        case FieldType.kFieldSmallint:
-                            paramPanel = upp_int.PdSmallintParameterPanel().createForParameter(this, parameter)
-                            break
-                        case FieldType.kFieldFloat:
-                            if (parameter.indexCount() <= 1) {
-                                paramPanel = upp_rea.PdRealParameterPanel().createForParameter(this, parameter)
-                            } else if (parameter.indexType === uparams.kIndexTypeSCurve) {
-                                paramPanel = upp_scv.PdSCurveParameterPanel().createForParameter(this, parameter)
-                            }
-                            break
-                        case uparams.kFieldBoolean:
-                            paramPanel = upp_boo.PdBooleanParameterPanel().createForParameter(this, parameter)
-                            break
-                        default:
-                            throw new Error("Problem: Unsupported parameter type in method TMainForm.updateParameterPanelsForSectionChange.")
-                            break
-                    }
-                    if (paramPanel !== null) {
-                        paramPanel.Parent = this.parametersScrollBox
-                        //9 +
-                        paramPanel.TabOrder = i
-                        paramPanel.calculateTextDimensions()
-                        paramPanel.calculateHeight()
-                        if ((parameter.originalSectionName !== section.name) && !(paramPanel instanceof upp_hed.PdHeaderParameterPanel)) {
-                            // v2.1 add original section name to params in orthogonal sections
-                            paramPanel.Caption = paramPanel.Caption + " [" + parameter.originalSectionName + "]"
-                        }
-                    }
-                }
-            }
-            this.updateParametersPanelForFirstSelectedPlant()
-            this.repositionParameterPanels()
-        } finally {
-            cursor_stopWait()
-        }
+        // TODO PDF: Fix or remove
+        // try {
+        //     cursor_startWait()
+        //     // clear out any earlier panels 
+        //     this.selectedParameterPanel = null
+        //     if (this.parametersScrollBox.ControlCount > 0) {
+        //         while (this.parametersScrollBox.ControlCount > 0) {
+        //             // this is the only valid time to free a component owned by something - after it has
+        //             //        been removed from the component list (owned objects) of the owner 
+        //             const oldParamPanel: PdParameterPanel = uppanel.PdParameterPanel(this.parametersScrollBox.Controls[0])
+        //             this.RemoveComponent(oldParamPanel)
+        //             oldParamPanel.Parent = null
+        //         }
+        //     }
+        //     if (this.sectionsComboBox_ItemIndex < 0) {
+        //         // make new panels for the current section 
+        //         return
+        //     }
+        //     const section: PdSection = this.sectionsComboBox[this.sectionsComboBox_ItemIndex]
+        //     if (section.numSectionItems > 0) {
+        //         for (let i = 0; i <= section.numSectionItems - 1; i++) {
+        //             const parameter = domain.parameterManager.parameterForFieldNumber(section.sectionItems[i])
+        //             if (parameter === null) {
+        //                 continue
+        //             }
+        //             let paramPanel: PdParameterPanel | null = null
+        //             // note that the longint type is used to store plant positions, but should not be used
+        //             //          for parameter panels 
+        //             switch (parameter.fieldType) {
+        //                 case FieldType.kFieldHeader:
+        //                     paramPanel = upp_hed.PdHeaderParameterPanel().createForParameter(this, parameter)
+        //                     break
+        //                 case FieldType.kFieldEnumeratedList:
+        //                     paramPanel = upp_lis.PdListParameterPanel().createForParameter(this, parameter)
+        //                     break
+        //                 case FieldType.kFieldThreeDObject:
+        //                     paramPanel = upp_tdo.PdTdoParameterPanel().createForParameter(this, parameter)
+        //                     break
+        //                 case FieldType.kFieldColor:
+        //                     paramPanel = upp_col.PdColorParameterPanel().createForParameter(this, parameter)
+        //                     break
+        //                 case FieldType.kFieldSmallint:
+        //                     paramPanel = upp_int.PdSmallintParameterPanel().createForParameter(this, parameter)
+        //                     break
+        //                 case FieldType.kFieldFloat:
+        //                     if (parameter.indexCount() <= 1) {
+        //                         paramPanel = upp_rea.PdRealParameterPanel().createForParameter(this, parameter)
+        //                     } else if (parameter.indexType === uparams.kIndexTypeSCurve) {
+        //                         paramPanel = upp_scv.PdSCurveParameterPanel().createForParameter(this, parameter)
+        //                     }
+        //                     break
+        //                 case uparams.kFieldBoolean:
+        //                     paramPanel = upp_boo.PdBooleanParameterPanel().createForParameter(this, parameter)
+        //                     break
+        //                 default:
+        //                     throw new Error("Problem: Unsupported parameter type in method TMainForm.updateParameterPanelsForSectionChange.")
+        //                     break
+        //             }
+        //             if (paramPanel !== null) {
+        //                 paramPanel.Parent = this.parametersScrollBox
+        //                 //9 +
+        //                 paramPanel.TabOrder = i
+        //                 paramPanel.calculateTextDimensions()
+        //                 paramPanel.calculateHeight()
+        //                 if ((parameter.originalSectionName !== section.name) && !(paramPanel instanceof upp_hed.PdHeaderParameterPanel)) {
+        //                     // v2.1 add original section name to params in orthogonal sections
+        //                     paramPanel.Caption = paramPanel.Caption + " [" + parameter.originalSectionName + "]"
+        //                 }
+        //             }
+        //         }
+        //     }
+        //     this.updateParametersPanelForFirstSelectedPlant()
+        //     this.repositionParameterPanels()
+        // } finally {
+        //     cursor_stopWait()
+        // }
     }
     
     paramHelpIDForParamPanel(panel: PdParameterPanel): string {
@@ -4675,39 +4684,37 @@ export class TMainForm {
         if (panel === null) {
             return result
         }
-        if (panel instanceof upp_hed.PdHeaderParameterPanel) {
+        if (panel instanceof PdHeaderParameterPanel) {
             result = "Using_header_parameter_panels"
-        } else if ((panel instanceof upp_int.PdSmallintParameterPanel) || (panel instanceof upp_rea.PdRealParameterPanel)) {
+        } else if ((panel instanceof PdSmallintParameterPanel) || (panel instanceof PdRealParameterPanel)) {
             result = "Using_number_parameter_panels"
-        } else if (panel instanceof upp_scv.PdSCurveParameterPanel) {
+        } else if (panel instanceof PdSCurveParameterPanel) {
             result = "Using_S_curve_parameter_panels"
-        } else if (panel instanceof upp_boo.PdBooleanParameterPanel) {
+        } else if (panel instanceof PdBooleanParameterPanel) {
             result = "Using_yes/no_parameter_panels"
-        } else if (panel instanceof upp_lis.PdListParameterPanel) {
+        } else if (panel instanceof PdListParameterPanel) {
             result = "Using_list_parameter_panels"
-        } else if (panel instanceof upp_col.PdColorParameterPanel) {
+        } else if (panel instanceof PdColorParameterPanel) {
             result = "Using_color_parameter_panels"
-        } else if (panel instanceof upp_tdo.PdTdoParameterPanel) {
+        } else if (panel instanceof PdTdoParameterPanel) {
             result = "Using_3D_object_parameter_panels"
         }
         return result
     }
-    
-    */
 
     updateParametersPanelForFirstSelectedPlant(): void {
-        unfinished()
-        // this.updatePlantNameLabel(kTabParameters)
-        // if (this.parametersScrollBox.ControlCount > 0) {
-        //     for (let i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
-        //         if (this.parametersScrollBox.Controls[i] instanceof uppanel.PdParameterPanel) {
-        //             const paramPanel: PdParameterPanel = this.parametersScrollBox.Controls[i]
-        //             //panels check if the new plant is different from current one
-        //             paramPanel.updatePlant(this.focusedPlant())
-        //         }
-        //     }
-        // }
-        // this.repositionParameterPanels()
+        // TODO PDF: Fix or remove updateParametersPanelForFirstSelectedPlant
+    //     this.updatePlantNameLabel(kTabParameters)
+    //     if (this.parametersScrollBox.ControlCount > 0) {
+    //         for (let i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
+    //             if (this.parametersScrollBox.Controls[i] instanceof uppanel.PdParameterPanel) {
+    //                 const paramPanel: PdParameterPanel = this.parametersScrollBox.Controls[i]
+    //                 //panels check if the new plant is different from current one
+    //                 paramPanel.updatePlant(this.focusedPlant())
+    //             }
+    //         }
+    //     }
+    //     this.repositionParameterPanels()
     }
     
     enteringAParameterPanel(aPanel: PdParameterPanel): void {
@@ -4721,65 +4728,65 @@ export class TMainForm {
     }
     
     repositionParameterPanels(): void {
-        unfinished()
-        // if (this.parametersScrollBox.ControlCount > 0) {
-        //     let totalMaxWidth = 0
-        //     let lastPos = 0
-        //     const oldPosition: int = this.parametersScrollBox.VertScrollBar.Position
-        //     this.parametersScrollBox.VertScrollBar.Position = 0
-        //     const windowLock: boolean = UNRESOLVED.lockWindowUpdate(this.Handle)
-        //     const requestedWidth: int = this.parametersScrollBox.ClientWidth
-        //     for (let i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
-        //         const paramPanel: PdParameterPanel = this.parametersScrollBox.Controls[i]
-        //         paramPanel.Left = 0
-        //         paramPanel.Top = lastPos
-        //         paramPanel.calculateTextDimensions()
-        //         const panelMaxWidth = paramPanel.maxWidth()
-        //         const panelMinWidth = paramPanel.minWidth(requestedWidth)
-        //         if (panelMaxWidth <= requestedWidth) {
-        //             paramPanel.Width = panelMaxWidth
-        //         } else {
-        //             if (panelMinWidth === -1) {
-        //                 paramPanel.Width = requestedWidth
-        //             } else {
-        //                 paramPanel.Width = panelMinWidth
-        //             }
-        //         }
-        //         paramPanel.calculateHeight()
-        //         lastPos = lastPos + paramPanel.Height
-        //         if (paramPanel.Width > totalMaxWidth) {
-        //             totalMaxWidth = paramPanel.Width
-        //         }
-        //     }
-        //     lastPos = 0
-        //     for (let i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
-        //         const paramPanel: PdParameterPanel = this.parametersScrollBox.Controls[i]
-        //         paramPanel.Top = lastPos
-        //         // cfk change v2.0 final - can't remember why we had a max width - looks better this way
-        //         // paramPanel.width := totalMaxWidth;   // was this
-        //         // changed to
-        //         paramPanel.Width = this.parametersScrollBox.Width - 20
-        //         paramPanel.calculateHeight()
-        //         paramPanel.resizeElements()
-        //         lastPos = lastPos + paramPanel.Height
-        //     }
-        //     this.parametersScrollBox.VertScrollBar.Position = oldPosition
-        //     if (windowLock) {
-        //         UNRESOLVED.lockWindowUpdate(0)
-        //     }
-        // }
+        // TODO PDF: Fix or remove repositionParameterPanels 
+    //     if (this.parametersScrollBox.ControlCount > 0) {
+    //         let totalMaxWidth = 0
+    //         let lastPos = 0
+    //         const oldPosition: int = this.parametersScrollBox.VertScrollBar.Position
+    //         this.parametersScrollBox.VertScrollBar.Position = 0
+    //         const windowLock: boolean = UNRESOLVED.lockWindowUpdate(this.Handle)
+    //         const requestedWidth: int = this.parametersScrollBox.ClientWidth
+    //         for (let i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
+    //             const paramPanel: PdParameterPanel = this.parametersScrollBox.Controls[i]
+    //             paramPanel.Left = 0
+    //             paramPanel.Top = lastPos
+    //             paramPanel.calculateTextDimensions()
+    //             const panelMaxWidth = paramPanel.maxWidth()
+    //             const panelMinWidth = paramPanel.minWidth(requestedWidth)
+    //             if (panelMaxWidth <= requestedWidth) {
+    //                 paramPanel.Width = panelMaxWidth
+    //             } else {
+    //                 if (panelMinWidth === -1) {
+    //                     paramPanel.Width = requestedWidth
+    //                 } else {
+    //                     paramPanel.Width = panelMinWidth
+    //                 }
+    //             }
+    //             paramPanel.calculateHeight()
+    //             lastPos = lastPos + paramPanel.Height
+    //             if (paramPanel.Width > totalMaxWidth) {
+    //                 totalMaxWidth = paramPanel.Width
+    //             }
+    //         }
+    //         lastPos = 0
+    //         for (let i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
+    //             const paramPanel: PdParameterPanel = this.parametersScrollBox.Controls[i]
+    //             paramPanel.Top = lastPos
+    //             // cfk change v2.0 final - can't remember why we had a max width - looks better this way
+    //             // paramPanel.width := totalMaxWidth;   // was this
+    //             // changed to
+    //             paramPanel.Width = this.parametersScrollBox.Width - 20
+    //             paramPanel.calculateHeight()
+    //             paramPanel.resizeElements()
+    //             lastPos = lastPos + paramPanel.Height
+    //         }
+    //         this.parametersScrollBox.VertScrollBar.Position = oldPosition
+    //         if (windowLock) {
+    //             UNRESOLVED.lockWindowUpdate(0)
+    //         }
+    //     }
     }
     
     collapseOrExpandParameterPanelsUntilNextHeader(headerPanel: PdParameterPanel): void {
-        unfinished()
-        // let collapsing = false
-        // this.internalChange = true
+        let collapsing = false
+        this.internalChange = true
+        // TODO PDF: Fix or remove collapseOrExpandParameterPanelsUntilNextHeader
         // if (this.parametersScrollBox.ControlCount > 0) {
         //     for (let i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
         //         const paramPanel: PdParameterPanel = this.parametersScrollBox.Controls[i]
         //         if (paramPanel === headerPanel) {
         //             collapsing = true
-        //         } else if (collapsing && (paramPanel instanceof upp_hed.PdHeaderParameterPanel)) {
+        //         } else if (collapsing && (paramPanel instanceof PdHeaderParameterPanel)) {
         //             collapsing = false
         //         } else if (collapsing) {
         //             if (headerPanel.param.collapsed) {
@@ -4790,31 +4797,31 @@ export class TMainForm {
         //         }
         //     }
         // }
-        // this.internalChange = false
-        // this.repositionParameterPanels()
+        this.internalChange = false
+        this.repositionParameterPanels()
     }
     
     collapseOrExpandAllParameterPanelsInCurrentSection(doWhat: short): void {
-        unfinished()
-        // this.internalChange = true
-        // if (this.sectionsComboBox.ItemIndex < 0) {
-        //     return
-        // }
-        // const section: PdSection = this.sectionsComboBox.Items.Objects[this.sectionsComboBox.ItemIndex]
-        // if (section === null) {
-        //     return
-        // }
-        // switch (doWhat) {
-        //     case kExpand:
-        //         section.expanded = true
-        //         break
-        //     case kCollapse:
-        //         section.expanded = false
-        //         break
-        //     case kExpandOrCollapse:
-        //         section.expanded = !section.expanded
-        //         break
-        // }
+        this.internalChange = true
+        if (this.sectionsComboBox_ItemIndex < 0) {
+            return
+        }
+        const section: PdSection = this.sectionsComboBox[this.sectionsComboBox_ItemIndex]
+        if (section === null) {
+            return
+        }
+        switch (doWhat) {
+            case kExpand:
+                section.expanded = true
+                break
+            case kCollapse:
+                section.expanded = false
+                break
+            case kExpandOrCollapse:
+                section.expanded = !section.expanded
+                break
+        }
+        // TODO PDF: Fix or remove collapseOrExpandAllParameterPanelsInCurrentSection
         // if (this.parametersScrollBox.ControlCount > 0) {
         //     for (let i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
         //         const paramPanel: PdParameterPanel = this.parametersScrollBox.Controls[i]
@@ -4825,39 +4832,34 @@ export class TMainForm {
         //         }
         //     }
         // }
-        // this.internalChange = false
-        // this.repositionParameterPanels()
+        this.internalChange = false
+        this.repositionParameterPanels()
     }
     
     updateParameterValuesWithUpdateListForPlant(aPlant: PdPlant, updateList: PdPlantUpdateEvent[]): void {
-        // TODO PDF: Fix this
-        // // let i: long
-        // // let paramPanel: PdParameterPanel
-        // // let updateEvent: PdPlantUpdateEvent
-        // // let needToUpdateWholePlant: boolean
-        
-        // if (aPlant !== this.focusedPlant()) {
-        //     return
-        // }
-        // if (updateList.Count <= 0) {
-        //     return
-        // }
-        // // first look to see if the whole plant needs updated - if any do, update it 
-        // // this is for side effects in GWI - left in just in case we need it later 
-        // let needToUpdateWholePlant = false
-        // for (let i = 0; i <= updateList.length - 1; i++) {
-        //     const updateEvent: PdPlantUpdateEvent = updateList[i]
-        //     if ((updateEvent.plant !== null) && (updateEvent.plant.wholePlantUpdateNeeded)) {
-        //         needToUpdateWholePlant = true
-        //         updateEvent.plant.wholePlantUpdateNeeded = false
-        //     }
-        // }
-        // if (needToUpdateWholePlant) {
-        //     this.updateParametersPanelForFirstSelectedPlant()
-        //     return
-        // }
+        if (aPlant !== this.focusedPlant()) {
+            return
+        }
+        if (updateList.length <= 0) {
+            return
+        }
+        // first look to see if the whole plant needs updated - if any do, update it 
+        // this is for side effects in GWI - left in just in case we need it later 
+        let needToUpdateWholePlant = false
+        for (let i = 0; i <= updateList.length - 1; i++) {
+            const updateEvent: PdPlantUpdateEvent = updateList[i]
+            if ((updateEvent.plant !== null) && (updateEvent.plant.wholePlantUpdateNeeded)) {
+                needToUpdateWholePlant = true
+                updateEvent.plant.wholePlantUpdateNeeded = false
+            }
+        }
+        if (needToUpdateWholePlant) {
+            this.updateParametersPanelForFirstSelectedPlant()
+            return
+        }
+        // TODO PDF: Fix or remove
         // if (this.parametersScrollBox.ControlCount > 0) {
-        //     for (i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
+        //     for (let i = 0; i <= this.parametersScrollBox.ControlCount - 1; i++) {
         //         if (this.parametersScrollBox.Controls[i] instanceof uppanel.PdParameterPanel) {
         //             // if not updating everything, update based on list 
         //             // tell all components to look at list to see if they need updating 
@@ -5028,7 +5030,7 @@ export class TMainForm {
         console.log("posedPlantPartsChange", index)
         let newCommand: PdCommand
         // TODO PDF: Remove or fix for unselected posed plant part
-        if (index < 0) { // this.posedPlantParts.ItemIndex === this.posedPlantParts.Items.Count - 1) {
+        if (index < 0) { // this.posedPlantParts.ItemIndex === this.posedPlantParts.length - 1) {
             newCommand = new PdSelectPosingPartCommand(plant, -1, this.selectedPlantPartID, "", this.selectedPlantPartType)
         } else {
             const part = this.posedPlantParts[index]
@@ -5195,7 +5197,7 @@ export class TMainForm {
         // TOD PDF: Remove or Fix
         // const newString: string = this.partDescriptionForIDAndType(partID, partType)
         // this.posedPlantParts.Items.Add(newString)
-        // const indexToSave: int = this.posedPlantParts.Items.Count - 1
+        // const indexToSave: int = this.posedPlantParts.length - 1
         // // add "select none" to end - move down if already there
         // const selectNoneIndex: int = this.posedPlantParts.Items.indexOf(kSelectNoPosedPartString)
         // if (selectNoneIndex >= 0) {
@@ -5218,7 +5220,7 @@ export class TMainForm {
         // if (index >= 0) {
         //     this.posedPlantParts.Items.Delete(index)
         // }
-        // if (oldItemIndex <= this.posedPlantParts.Items.Count - 1) {
+        // if (oldItemIndex <= this.posedPlantParts.length - 1) {
         //     this.posedPlantParts.ItemIndex = oldItemIndex
         // }
         // this.updatePosingForSelectedPlantPart()
