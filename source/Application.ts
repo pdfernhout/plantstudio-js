@@ -9,12 +9,33 @@ import { resetDroppedDownMenuId } from "./menu"
 PdDomain.createDefault()
 domain.defaultTdoLibraryFileName = "../plants/3D object library.tdo"
 
+let waitMessage = ""
+
+// In practice, the wait messages will not display unless a redraw happens like due to a wait on a promise
+export function startWaitMessage(aString: string) {
+    waitMessage = aString
+    // console.log("startWaitMessage", aString)
+}
+
+export function stopWaitMessage() {
+    waitMessage = ""
+    // console.log("stopWaitMessage")
+}
+
 const Application = { 
-    view: () => m("div.overflow-auto.h-100", {
+    view: () => m("div.overflow-auto.h-100.relative", {
             onclick: (event: any) => {
                 resetDroppedDownMenuId()
             },
         },
+        m("div.ba.bw2.b--black.pa2.ma2.orange.absolute" + (waitMessage ? "" : ".dn"), 
+            { style: {
+                left: "50%",
+                top: "25%",
+                transform: "translate(-50%, 0)",
+                zIndex: 10,
+            }
+        }, waitMessage),
         m(TMainForm),
         m(TBreederForm),
         m(TTimeSeriesForm),

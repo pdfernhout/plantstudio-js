@@ -31,6 +31,7 @@ import { unfinished } from "./temporary"
 import { TBreederForm } from "./TBreederForm"
 import { activeForm, BreederForm, MainForm, setActiveForm, setMainForm, TimeSeriesForm } from "./FormHolder"
 import { resetDroppedDownMenuId, viewMainMenu } from "./menu"
+import { startWaitMessage, stopWaitMessage } from "./Application"
 
 type PosingField = 
     "hide" // posingHidePart
@@ -6668,6 +6669,7 @@ export class TMainForm {
                 height: self.drawingBitmap.height,
                 oncreate(vnode: m.VnodeDOM) {
                     self.drawingPaintBox = <HTMLCanvasElement>vnode.dom
+                    self.drawingPaintBox.style.background = "white"
                     self.copyDrawingBitmapToPaintBox()
                     // TODO PDF: May need to rethink how hint is drawn
                     if (this.hintActive && this.lastHintString) {
@@ -6704,14 +6706,6 @@ export class TMainForm {
 }
 
 /// Unfinished Stub Function
-
-function startWaitMessage(arg0: string) {
-    throw new Error("Function not implemented.")
-}
-
-function stopWaitMessage() {
-    throw new Error("Function not implemented.")
-}
 
 function getFileOpenInfo(kFileTypePlant: FileType, plantFileName: string, arg2: string): string {
     throw new Error("Function not implemented.")
