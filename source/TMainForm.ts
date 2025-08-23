@@ -31,6 +31,7 @@ import { unfinished } from "./temporary"
 import { TBreederForm } from "./TBreederForm"
 import { activeForm, BreederForm, MainForm, setActiveForm, setMainForm, TimeSeriesForm } from "./FormHolder"
 import { resetDroppedDownMenuId, viewMainMenu } from "./menu"
+import { TUndoRedoListForm } from "./TUndoRedoListForm"
 import { startWaitMessage, stopWaitMessage } from "./Application"
 
 type PosingField = 
@@ -684,33 +685,34 @@ export class TMainForm {
         this.updateForPossibleChangeToDrawing()
     }
     
-    UndoMenuEditUndoRedoListClick(): void {
-        unfinished()
-        // const undoRedoListForm: TUndoRedoListForm = uundo.TUndoRedoListForm().create(this)
-        // if (undoRedoListForm === null) {
-        //     throw new Error("Problem: Could not create undo/redo list window.")
-        // }
-        // undoRedoListForm.initializeWithCommandList(this.commandList)
-        // const response = undoRedoListForm.ShowModal()
-        // if (response === mrOK) {
-        //     try {
-        //         this.enableOrDisableAllForms(kDisableAllForms)
-        //         startWaitMessage("Multiple undo/redo in progress; please wait...")
-        //         if (undoRedoListForm.undoToIndex() >= 0) {
-        //             for (let i = 0; i <= undoRedoListForm.undoToIndex(); i++) {
-        //                 this.commandList.undoLast()
-        //             }
-        //         } else if (undoRedoListForm.redoToIndex() >= 0) {
-        //             for (let i = 0; i <= undoRedoListForm.redoToIndex(); i++) {
-        //                 this.commandList.redoLast()
-        //             }
-        //         }
-        //     } finally {
-        //         this.updateForPossibleChangeToDrawing()
-        //         stopWaitMessage()
-        //         this.enableOrDisableAllForms(kEnableAllForms)
-        //     }
-        // }
+    async UndoMenuEditUndoRedoListClick() {
+        return await customModal((resolve: any) => {
+            return m(TUndoRedoListForm, {
+                commandList: this.commandList,
+                close: (undoRedoListForm: TUndoRedoListForm | null) => {
+                    if (undoRedoListForm) {
+                        try {
+                            this.enableOrDisableAllForms(kDisableAllForms)
+                            startWaitMessage("Multiple undo/redo in progress; please wait...")
+                            if (undoRedoListForm.undoToIndex() >= 0) {
+                                for (let i = 0; i <= undoRedoListForm.undoToIndex(); i++) {
+                                    this.commandList.undoLast()
+                                }
+                            } else if (undoRedoListForm.redoToIndex() >= 0) {
+                                for (let i = 0; i <= undoRedoListForm.redoToIndex(); i++) {
+                                    this.commandList.redoLast()
+                                }
+                            }
+                        } finally {
+                            this.updateForPossibleChangeToDrawing()
+                            stopWaitMessage()
+                            this.enableOrDisableAllForms(kEnableAllForms)
+                        }
+                    }
+                    resolve(true) 
+                }
+            })
+        }, "width: 32rem; height: 24rem; position: relative")
     }
     
     MenuEditRedoClick(): void {

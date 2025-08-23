@@ -1,73 +1,52 @@
 // unit Uundo
 
-from conversion_common import *
-import umain
-import udomain
-import umath
-import updform
-import ucommand
-import delphi_compatability
+import * as m from "mithril"
+import { caption, HelpJump, imageDir, int } from "./common"
+import { PdCommandList } from "./PdCommandList"
 
-// const
-const kBetweenGap = 4
+type CommandWrapper = {
+    name: string
+    selected: boolean
+}
 
-
+function hasSelection(aListBox: CommandWrapper[]) {
+    return aListBox.filter(wrapper => wrapper.selected).length > 0
+}
 
 export class TUndoRedoListForm {
-    OK: TButton = new TButton()
-    cancel: TButton = new TButton()
-    helpButton: TSpeedButton = new TSpeedButton()
-    undoListLabel: TLabel = new TLabel()
-    redoListLabel: TLabel = new TLabel()
-    undoList: TListBox = new TListBox()
-    redoList: TListBox = new TListBox()
-    TUndoRedoListForm.prototype = new PdForm()
-    TUndoRedoListForm.prototype.constructor = TUndoRedoListForm
+    undoList: CommandWrapper[] = []
+    redoList: CommandWrapper[] = []
+    okCaption = "Un&do/Redo"
+    lastUndoSelection = -1
+    lastRedoSelection = -1
+
+    close: ((form: TUndoRedoListForm | null) => void) | null = null
     
-    //$R *.DFM
-    FormCreate(Sender: TObject): void {
-        let tempBoundsRect: TRect
-        
-        // keep window on screen - left corner of title bar 
-        tempBoundsRect = udomain.domain.undoRedoListWindowRect
-        if ((tempBoundsRect.Left !== 0) || (tempBoundsRect.Right !== 0) || (tempBoundsRect.Top !== 0) || (tempBoundsRect.Bottom !== 0)) {
-            if (tempBoundsRect.Left > delphi_compatability.Screen.Width - umain.kMinWidthOnScreen) {
-                tempBoundsRect.Left = delphi_compatability.Screen.Width - umain.kMinWidthOnScreen
-            }
-            if (tempBoundsRect.Top > delphi_compatability.Screen.Height - umain.kMinHeightOnScreen) {
-                tempBoundsRect.Top = delphi_compatability.Screen.Height - umain.kMinHeightOnScreen
-            }
-            this.SetBounds(tempBoundsRect.Left, tempBoundsRect.Top, tempBoundsRect.Right, tempBoundsRect.Bottom)
-        }
-        // make list boxes have horizontal scroll bars
-        UNRESOLVED.sendMessage(this.undoList.Handle, UNRESOLVED.LB_SETHORIZONTALEXTENT, 1000, 0)
-        UNRESOLVED.sendMessage(this.redoList.Handle, UNRESOLVED.LB_SETHORIZONTALEXTENT, 1000, 0)
+    isOkEnabled() {
+        return hasSelection(this.undoList) || hasSelection(this.redoList)
     }
-    
+
     initializeWithCommandList(commandList: PdCommandList): void {
-        let aList: TStringList
-        
-        aList = delphi_compatability.TStringList.create
-        try {
-            commandList.fillListWithUndoableStrings(aList)
-            this.undoList.Items.Assign(aList)
-            aList.Clear()
-            commandList.fillListWithRedoableStrings(aList)
-            this.redoList.Items.Assign(aList)
-        } finally {
-            aList.free
+        const undoListNames: string[] = []
+        commandList.fillListWithUndoableStrings(undoListNames)
+        this.undoList = []
+        for (const name of undoListNames) {
+            this.undoList.push({name, selected: false})
         }
-        this.OK.Enabled = (this.undoList.SelCount > 0) || (this.redoList.SelCount > 0)
+
+        const redoListNames: string[] = []
+        commandList.fillListWithRedoableStrings(redoListNames)
+        this.redoList = []
+        for (const name of redoListNames) {
+            this.redoList.push({name, selected: false})
+        }
     }
     
     undoToIndex(): int {
-        let result = 0
-        let i: int
-        
-        result = -1
-        if (this.undoList.Items.Count > 0) {
-            for (i = this.undoList.Items.Count - 1; i >= 0; i--) {
-                if (this.undoList.Selected[i]) {
+        let result = -1
+        if (this.undoList.length > 0) {
+            for (let i = this.undoList.length - 1; i >= 0; i--) {
+                if (this.undoList[i].selected) {
                     result = i
                     return result
                 }
@@ -77,13 +56,10 @@ export class TUndoRedoListForm {
     }
     
     redoToIndex(): int {
-        let result = 0
-        let i: int
-        
-        result = -1
-        if (this.redoList.Items.Count > 0) {
-            for (i = this.redoList.Items.Count - 1; i >= 0; i--) {
-                if (this.redoList.Selected[i]) {
+        let result = -1
+        if (this.redoList.length > 0) {
+            for (let i = this.redoList.length - 1; i >= 0; i--) {
+                if (this.redoList[i].selected) {
                     result = i
                     return result
                 }
@@ -92,166 +68,128 @@ export class TUndoRedoListForm {
         return result
     }
     
-    regulateListSelections(Sender: TObject): void {
-        let i: int
-        let thisListBox: TListBox
-        let otherListBox: TListBox
-        
-        if ((Sender === null) || (!(Sender instanceof delphi_compatability.TListBox))) {
-            throw new GeneralException.create("Problem: Wrong sender in method TUndoRedoListForm.regulateListSelections.")
-        }
-        thisListBox = Sender
-        if (Sender === this.undoList) {
+    regulateListSelections(thisListBox: CommandWrapper[]): void {
+        let otherListBox: CommandWrapper[]
+        let itemIndex = -1
+        if (thisListBox === this.undoList) {
             otherListBox = this.redoList
+            itemIndex = this.lastUndoSelection
+            this.lastRedoSelection = -1
         } else {
             otherListBox = this.undoList
+            itemIndex = this.lastRedoSelection
+            this.lastUndoSelection = -1
         }
-        if (Sender === this.undoList) {
-            this.OK.Caption = "Un&do"
+        if (thisListBox === this.undoList) {
+            this.okCaption = "Un&do"
         } else {
-            this.OK.Caption = "Re&do"
+            this.okCaption = "Re&do"
         }
-        this.OK.Enabled = (this.undoList.SelCount > 0) || (this.redoList.SelCount > 0)
-        if (thisListBox.ItemIndex >= 0) {
-            for (i = 0; i <= thisListBox.ItemIndex; i++) {
-                thisListBox.Selected[i] = true
+        if (!thisListBox[itemIndex].selected) { itemIndex-- }
+        if (itemIndex >= 0) {
+            for (let i = 0; i <= itemIndex; i++) {
+                thisListBox[i].selected = true
             }
         }
-        if (thisListBox.ItemIndex + 1 <= thisListBox.Items.Count - 1) {
-            for (i = thisListBox.ItemIndex + 1; i <= thisListBox.Items.Count - 1; i++) {
-                thisListBox.Selected[i] = false
+        if (itemIndex + 1 <= thisListBox.length - 1) {
+            for (let i = itemIndex + 1; i <= thisListBox.length - 1; i++) {
+                thisListBox[i].selected = false
             }
         }
-        if (otherListBox.Items.Count > 0) {
-            for (i = 0; i <= otherListBox.Items.Count - 1; i++) {
-                otherListBox.Selected[i] = false
+        if (otherListBox.length > 0) {
+            for (let i = 0; i <= otherListBox.length - 1; i++) {
+                otherListBox[i].selected = false
             }
         }
-        otherListBox.ItemIndex = -1
     }
     
-    OKClick(Sender: TObject): void {
-        this.ModalResult = mrOK
+    okClick(): void {
+        this.close!(this)
     }
     
-    cancelClick(Sender: TObject): void {
-        this.ModalResult = mrCancel
+    cancelClick(): void {
+        this.close!(null)
     }
     
-    FormClose(Sender: TObject, Action: TCloseAction): void {
-        udomain.domain.undoRedoListWindowRect = Rect(this.Left, this.Top, this.Width, this.Height)
+    helpButtonClick(): void {
+        HelpJump("Using_the_undo/redo_list")
     }
-    
-    helpButtonClick(Sender: TObject): void {
-        delphi_compatability.Application.HelpJump("Using_the_undo/redo_list")
-    }
-    
-    FormResize(Sender: TObject): void {
-        let listHeight: int
-        
 
     view() {
         return m("UndoRedoListForm.TUndoRedoListForm",
-            {
-            // Top: "254",
-            // Left: "384",
-            // Height: "0",
-            // Width: "0",
-            // AutoScroll: "False",
-            // Caption: "Undo/Redo List",
-            // ClientHeight: "255",
-            // ClientWidth: "467",
-            // Font.Charset: "DEFAULT_CHARSET",
-            // Font.Color: "clWindowText",
-            // Font.Height: "-11",
-            // Font.Name: "MS Sans Serif",
-            // Font.Style: "[]",
-            // Position: "poDefaultPosOnly",
-            // Scaled: "False",
-            // OnClose: "FormClose",
-            // OnCreate: "FormCreate",
-            // OnResize: "FormResize",
-            // PixelsPerInch: "96",
-            // TextHeight: "13",
-            },
-            m("Group.Group.g00000004",
-                m("div.undoListLabel.TLabel",
-                    {
-                        // Top: "4",
-                        // Left: "4",
-                        // Height: "13",
-                        // Width: "102",
-                    },
-                    caption("Things you can &Undo"),
+            m("div.b.f4.mb2", "Undo/Redo List"),
+            m("div.Group.Group.g00000004.flex.flex-row",
+                m("div.w-50",
+                    m("div.undoListLabel.TLabel",
+                        caption("Things you can &Undo"),
+                    ),
+                    m("div.undoList.ba.pa1.TListBox.h5.overflow-auto",
+                        this.undoList.map((commandWrapper, index) => m("div",
+                            m("label",
+                                m("input[type=checkbox]", {
+                                    checked: commandWrapper.selected,
+                                    onchange: (event: any) => {
+                                        commandWrapper.selected = event.target.checked
+                                        this.lastUndoSelection = index
+                                        this.regulateListSelections(this.undoList)
+                                    }
+                                }),
+                                m("span.ml1", commandWrapper.name),
+                            )
+                        ))
+                    ),
                 ),
+                m("div.w-50",
+                    m("div.redoListLabel.TLabel",
+                        caption("Things you can &Redo"),
+                    ),
+                    m("div.redoList.ba.pa1.TListBox.h5.overflow-auto",
+                        this.redoList.map((commandWrapper, index) => m("div",
+                            m("label",
+                                m("input[type=checkbox]", {
+                                    checked: commandWrapper.selected,
+                                    onchange: (event: any) => {
+                                        commandWrapper.selected = event.target.checked
+                                        this.lastRedoSelection = index
+                                        this.regulateListSelections(this.redoList)
+                                    }
+                                }),
+                                m("span.ml1", commandWrapper.name),
+                            )
+                        ))
+                    ),
+                ),
+            ),
+            m("div.flex.items-center.mt2.absolute",
+                { style: { bottom: "0.5rem" }},
                 m("button.OK.TButton",
                     {
-                        onclick: OKClick,
-                        // Top: "4",
-                        // Left: "385",
-                        // Height: "21",
-                        // Width: "80",
-                        // TabOrder: "0",
+                        onclick: () => this.okClick(),
+                        disabled: !this.isOkEnabled()
                     },
-                    caption("Un&do/Redo"),
+                    caption(this.okCaption),
+                ),
+                m("button.cancel.TButton.ml2",
+                    {
+                        onclick: () => this.cancelClick(),
+                    },
+                    caption("&Cancel"),
+                ),
+                m("button.helpButton.TSpeedButton.ml2",
+                    {
+                        onclick: () => this.helpButtonClick(),
+                    },
+                    m("img.TImage.mr1", { src: imageDir + "UndoRedoListForm_helpButton.png" } ),
+                    caption("&Help"),
                 ),
             ),
-            m("TListBox.undoList.TListBox",
-                {
-                    onclick: regulateListSelections,
-                    // Top: "20",
-                    // Left: "4",
-                    // Height: "97",
-                    // Width: "375",
-                    // ItemHeight: "13",
-                    // MultiSelect: "True",
-                    // TabOrder: "2",
-                },
-            ),
-            m("button.cancel.TButton",
-                {
-                    onclick: cancelClick,
-                    // Top: "30",
-                    // Left: "385",
-                    // Height: "21",
-                    // Width: "80",
-                    // TabOrder: "1",
-                },
-                caption("&Cancel"),
-            ),
-            m("button.helpButton.TSpeedButton",
-                {
-                    onclick: helpButtonClick,
-                    // Top: "69",
-                    // Left: "385",
-                    // Height: "25",
-                    // Width: "80",
-                    // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888888888888888888888888888880C08888888888888CCC88888888888880C0888888888888888888888888888888C888888888888888C088888888888888CC888888888888888CC888888888800880CC888888888CC880CC888888888CC080CC8888888888CCCCC888888888888CCC88888888888888888888888",
-                },
-                caption("&Help"),
-            ),
-            m("div.redoListLabel.TLabel",
-                {
-                    // Top: "122",
-                    // Left: "4",
-                    // Height: "13",
-                    // Width: "102",
-                },
-                caption("Things you can &Redo"),
-            ),
-            m("TListBox.redoList.TListBox",
-                {
-                    onclick: regulateListSelections,
-                    // Top: "140",
-                    // Left: "4",
-                    // Height: "107",
-                    // Width: "373",
-                    // ItemHeight: "13",
-                    // MultiSelect: "True",
-                    // TabOrder: "3",
-                },
-            ),
         )
+    }
+
+    oninit(vnode: any) {
+        this.close = vnode.attrs.close
+        const commandList: PdCommandList = vnode.attrs.commandList
+        this.initializeWithCommandList(commandList)
     }
 }
 
