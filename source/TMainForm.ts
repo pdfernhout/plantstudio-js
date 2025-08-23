@@ -32,7 +32,7 @@ import { TBreederForm } from "./TBreederForm"
 import { activeForm, BreederForm, MainForm, setActiveForm, setMainForm, TimeSeriesForm } from "./FormHolder"
 import { resetDroppedDownMenuId, viewMainMenu } from "./menu"
 import { TUndoRedoListForm } from "./TUndoRedoListForm"
-import { startWaitMessage, stopWaitMessage } from "./Application"
+import { startWaitMessage, stopWaitMessage } from "./TWaitForm"
 
 type PosingField = 
     "hide" // posingHidePart
