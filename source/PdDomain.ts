@@ -17,8 +17,9 @@ const kMaxWizardQuestions = 30
 const kMaxWizardColors = 2
 const kMaxWizardTdos = 3
 
-export const kMainWindowOrientationHorizontal = 0
-export const kMainWindowOrientationVertical = 1
+// vertical orientation means the plant drawing area is above the parameters, not to the left of it 
+export const kMainWindowOrientationVertical = 0
+export const kMainWindowOrientationHorizontal = 1
 const kMaxMainWindowOrientations = 1
 
 export const kIncludeSelectedPlants = 0
@@ -668,7 +669,7 @@ export class PdDomain {
         this.options.nudgeDistance = StrToInt(this.stringForSectionAndKey(section, "Distance plant moves with Control-arrow key", "5"))
         this.options.resizeKeyUpMultiplierPercent = StrToInt(this.stringForSectionAndKey(section, "Percent size increase with Control-Shift-up-arrow key", "110"))
         this.options.parametersFontSize = StrToInt(this.stringForSectionAndKey(section, "Parameter panels font size", "8"))
-        this.options.mainWindowOrientation = StrToInt(this.stringForSectionAndKey(section, "Main window orientation (horiz/vert)", "1"))
+        this.options.mainWindowOrientation = StrToInt(this.stringForSectionAndKey(section, "Main window orientation (horiz/vert)", "0"))
         this.options.lineContrastIndex = StrToInt(this.stringForSectionAndKey(section, "Contrast index for lines on polygons", "3"))
         this.options.sortTdosAsOneItem = strToBool(this.stringForSectionAndKey(section, "Sort 3D objects as one item", "true"))
         this.options.circlePointSizeInTdoEditor = StrToInt(this.stringForSectionAndKey(section, "3D object editor point size", "8"))

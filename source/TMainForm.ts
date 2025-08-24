@@ -5721,7 +5721,7 @@ export class TMainForm {
             ], () => false,  () => domain.plantFileLoaded,
             "MenuLayoutDrawingAreaOn", "Place Drawing &Area", [
                 "radio", "MenuLayoutVerticalOrientation", "On &Top", this.MenuLayoutVerticalOrientationClick, () => domain.options.mainWindowOrientation === kMainWindowOrientationVertical, () => domain.plantFileLoaded,
-                "radio", "MenuLayoutHorizontalOrientation", "On &Left Side", this.MenuLayoutVerticalOrientationClick, () => domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal, () => domain.plantFileLoaded,
+                "radio", "MenuLayoutHorizontalOrientation", "On &Left Side", this.MenuLayoutHorizontalOrientationClick, () => domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal, () => domain.plantFileLoaded,
             ], () => false,  () => domain.plantFileLoaded,
             "MenuOptionsDrawRectangles", "Draw &Rectangles", [
                 "checkbox", "MenuOptionsShowSelectionRectangles", "Around &Selected Plants", this.MenuOptionsShowSelectionRectanglesClick, () => domain.options.showSelectionRectangle,
