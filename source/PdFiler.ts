@@ -1,9 +1,9 @@
 // PdFiler was unit Ufiler
 
-import { TRect } from "./TRect"
+import type { TRect } from "./TRect"
 import { short, long, byte, float, TColorRef, TFileStream } from "./common"
-import { SinglePoint } from "./usupport";
-import { PdStreamableObject } from "./PdStreamableObject";
+import type { SinglePoint } from "./usupport";
+import type { PdStreamableObject } from "./PdStreamableObject";
 
 //  For every streamable object,
 //  	Set class number to constant from uclasses.

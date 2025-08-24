@@ -2,9 +2,9 @@
 
 import { short, float, long, intround, byte, TColor, ColorDefs, TColorRef } from "./common"
 import { KfPoint3D, KfPoint3D_scaleBy } from "./KfPoint3D"
-import { TRealRect } from "./U3dsupport"
+import type { TRealRect } from "./U3dsupport"
 import { KfDrawingSurface } from "./KfDrawingSurface"
-import { TPoint } from "./TPoint"
+import type { TPoint } from "./TPoint"
 import { TRect } from "./TRect"
 import { KfMatrix } from "./KfMatrix"
 import { KfTriangle } from "./KfTriangle"

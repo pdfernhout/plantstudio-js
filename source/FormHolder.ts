@@ -1,7 +1,7 @@
-import { TMainForm } from "./TMainForm"
-import { TBreederForm } from "./TBreederForm"
-import { TTimeSeriesForm } from "./TTimeSeriesForm"
-import { TDebugForm } from "./TDebugForm"
+import type { TMainForm } from "./TMainForm"
+import type { TBreederForm } from "./TBreederForm"
+import type { TTimeSeriesForm } from "./TTimeSeriesForm"
+import type { TDebugForm } from "./TDebugForm"
 
 export let MainForm: TMainForm
 export let BreederForm: TBreederForm
