@@ -8,6 +8,7 @@ import { resetDroppedDownMenuId } from "./menu"
 import { TWaitForm } from "./TWaitForm"
 import { TDebugForm } from "./TDebugForm"
 import { ModalInputView } from "./ModalInputView"
+import { TWizardFormDisplayingPlant } from "./TWizardForm"
 
 PdDomain.createDefault()
 domain.defaultTdoLibraryFileName = "../plants/3D object library.tdo"
@@ -23,6 +24,7 @@ const Application = {
         m(TMainForm),
         m(TBreederForm),
         m(TTimeSeriesForm),
+        m(TWizardFormDisplayingPlant),
         m(TDebugForm),
     )
 }

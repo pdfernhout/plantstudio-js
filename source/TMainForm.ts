@@ -29,7 +29,7 @@ import { TCustomDrawOptionsForm } from "./TCustomDrawOptionsForm"
 import { TTimeSeriesForm } from "./TTimeSeriesForm"
 import { unfinished } from "./temporary"
 import { TBreederForm } from "./TBreederForm"
-import { activeForm, BreederForm, DebugForm, MainForm, setActiveForm, setMainForm, TimeSeriesForm } from "./FormHolder"
+import { activeForm, BreederForm, DebugForm, MainForm, setActiveForm, setMainForm, TimeSeriesForm, WizardForm } from "./FormHolder"
 import { resetDroppedDownMenuId, viewMainMenu } from "./menu"
 import { TUndoRedoListForm } from "./TUndoRedoListForm"
 import { startWaitMessage, stopWaitMessage } from "./TWaitForm"
@@ -210,7 +210,7 @@ export class TMainForm {
         // Any code that replaces this.plants will need to update plantManager.plants too
         this.plants = domain.plantManager.plants
         // TOD PDF: Remove code for testing
-        setTimeout(() => { this.MenuPlantNewClick(); m.redraw() } , 100)
+        setTimeout(() => { this.makeTestPlant(); m.redraw() } , 100)
     }
 
     /*
@@ -1109,14 +1109,13 @@ export class TMainForm {
     }
     
     pastePlantsFromClipboard(): void {
-        unfinished()
-        // if (domain.plantManager.privatePlantClipboard.length <= 0) {
-        //     return
-        // }
-        // const newPlants: PdPlant[] = []
-        // domain.plantManager.pastePlantsFromPrivatePlantClipboardToList(newPlants)
-        // const newCommand = new PdPasteCommand(newPlants, this.selectedPlants)
-        // this.doCommand(newCommand)
+        if (domain.plantManager.privatePlantClipboard.length <= 0) {
+            return
+        }
+        const newPlants: PdPlant[] = []
+        domain.plantManager.pastePlantsFromPrivatePlantClipboardToList(newPlants)
+        const newCommand = new PdPasteCommand(newPlants, this.selectedPlants)
+        this.doCommand(newCommand)
     }
 
     standardPastePosition(): TPoint {
@@ -1155,7 +1154,8 @@ export class TMainForm {
     }
     
     // ---------------------------------------------------------------------------- *plant menu 
-    MenuPlantNewClick(): void {
+
+    makeTestPlant() {
         // TODO PDF: Temp for testing
         const plant = new PdPlant()
         plant.defaultAllParameters()
@@ -1165,11 +1165,13 @@ export class TMainForm {
         plant.basePoint_mm.x = Math.floor(Math.random() * 600)
         plant.basePoint_mm.y = 300 + Math.floor(Math.random() * 300)
         // plant.xRotation = Math.random() * 365
-        // this.plants.push(plant)
         const newCommand = new PdNewCommand(plant, this.selectedPlants)
         this.doCommand(newCommand)
-        //     this.doCommand(newCommand)
-        // TODO PDF: Fix this
+    }
+
+    MenuPlantNewClick(): void {
+        setActiveForm("WizardForm")
+        // TODO PDF: Use or remove this
         // let wizardForm: TWizardForm
 
         // try {
@@ -5750,6 +5752,7 @@ export class TMainForm {
                 "Reconcile3DObjects1", "&Reconcile 3D Objects...", this.Reconcile3DObjects1Click,
             ],
             "-",
+            // "radio", "MenuWindowWizard", "&Wizard", () => setActiveForm("WizardForm"), () => activeForm === "WizardForm", () => WizardForm !== undefined,
             "radio", "MenuWindowNumericalExceptions", "&Messages", () => setActiveForm("DebugForm"), () => activeForm === "DebugForm", () => DebugForm !== undefined,
         ],
         "MenuHelp", "&Help", [

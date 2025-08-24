@@ -7,7 +7,9 @@ import { darkerColor, messageForExceptionType } from "./usupport"
 import { domain } from "./PdDomain"
 import { KfObject3D } from "./KfObject3D"
 import { KfTurtle } from "./KfTurtle"
-import { incrementNumPlantsCreatedThisSession } from "./updcom"
+import { incrementNumPlantsCreatedThisSession, PdNewCommand } from "./updcom"
+import { activeForm, MainForm, setActiveForm, setWizardForm } from "./FormHolder"
+import { PdPlantDrawingAmendment } from "./PdPlantDrawingAmendment"
 
 function hasNoInflorescences(plant: PdPlant) {
     return plant.pGeneral.numApicalInflors === 0 && plant.pGeneral.numAxillaryInflors === 0
@@ -1144,13 +1146,13 @@ export class TWizardForm {
                         onclick: () => {
                             this.wizardChoices[choiceSpec.id] = option
                             choiceSpec.setValue(this.plant, choiceSpec.values[optionIndex], this)
-                            this.setPlantCallback!(this.plant)
+                            this.updatePlant()
                         },
                         onkeyup: (event: any) => {
                             if (event.keyCode === 13) {
                                 this.wizardChoices[choiceSpec.id] = option
                                 choiceSpec.setValue(this.plant, choiceSpec.values[optionIndex], this)
-                                this.setPlantCallback!(this.plant) 
+                                this.updatePlant()
                             }
                             // TODO: Trying to use arrow keys to navigate within a row
                             // tabindex: (!disabled && this.wizardChoices[choiceSpec.id] === option) ? "0" : "-1",
@@ -1230,15 +1232,16 @@ export class TWizardForm {
     oninit(vnode: any) {
         const plant = this.plant
         this.setPlantCallback = vnode.attrs.setPlant
-        this.setPlantCallback!(plant)
+        this.updatePlant()
     }
 
     view(vnode: any) {
+        if (activeForm && activeForm !== "WizardForm") return []
         // const plant = this.plant
         // vnode.attrs.setPlant(plant)
         const self = this
         return m("div",
-            "Plant Wizard",
+            m("span.b", "Plant Wizard"),
             pageAndChoiceSpecs.map(spec => spec.type === "page"
                 ? this.viewPage(spec)
                 : this.viewChoice(spec)
@@ -1255,4 +1258,119 @@ function fileForImage(id: string, option: string) {
 
 function capitalize(word: string) {
     return word.charAt(0).toUpperCase() + word.slice(1)
+}
+
+export class TWizardFormDisplayingPlant {
+
+    plantAge = 90
+    zoom = 10
+    amendment = new PdPlantDrawingAmendment()
+    plant: PdPlant | null = null
+
+    growPlant() {
+        // console.log("growPlant", this.plant)
+        if (!this.plant) return
+        
+        if (this.plant.age > this.plantAge) this.plant.reset()
+        // Grow the plant a bit
+        for (let i = this.plant.age; i < this.plantAge; i++) {
+            this.plant.nextDay()
+        }
+    }
+
+    randomize() {
+        if (this.plant) this.plant.randomize()
+    }
+
+    setPlant(aPlant: PdPlant) {
+        console.log("setPlant")
+        this.plant = aPlant
+        this.plant.age = this.plantAge
+        this.plant.basePoint_mm.x = 400
+        this.plant.basePoint_mm.y = 450
+        this.plant.drawingScale_PixelsPerMm = this.zoom / 10
+
+        this.amendment.partID = this.plant.firstPhytomer!.partID
+        this.amendment.addRotations = true
+        this.plant.addAmendment(this.amendment)
+        this.plant.regrow()
+        m.redraw()
+    }
+
+    oninit(vnode: any) {
+        setWizardForm(this)
+    }
+
+    view() {
+        if (activeForm && activeForm !== "WizardForm") return []
+        return m("div.flex.flex-row.h-100",
+            m("div.pa2",
+                m("button", { onclick: () => setActiveForm("MainForm") }, "Back to Main"),
+                m("canvas.ba", {
+                    width: 800,
+                    height: 500,
+                    onupdate: (vnode: m.VnodeDOM) => {
+                        const canvas = <HTMLCanvasElement>vnode.dom
+
+                        // Clear the canvas
+                        canvas.width = canvas.width
+
+                        const context = canvas.getContext("2d")
+                        if (!context) return
+
+                        if (this.plant) this.plant.drawOn(context)
+                    },
+                    onclick: () => {
+                        console.log("onclick")
+                        this.amendment.xRotation = (this.amendment.xRotation + 4) % 360
+                    }
+                }),
+                m("div", { style: "user-select: none" }, "Click canvas to rotate plant"),
+                m("br"),
+                m("div", "Plant name: ", this.plant && this.plant.name),
+                m("br"),
+                "Rotation",
+                m("input[type=range].ml2", { min: -360, max: 360, value: this.amendment.xRotation, oninput: (event: any) => {
+                    this.amendment.xRotation = parseInt(event.target.value)
+                }}),
+                m("span.ml2", this.amendment.xRotation),
+                m("br"),
+                m("br"),
+                "Age",
+                m("input[type=range].ml4", { min: 0, max: 300, value: this.plantAge, oninput: (event: any) => {
+                    // console.log("slider", event, event.target.value)
+                    this.plantAge = parseInt(event.target.value)
+                    this.growPlant()
+                }}),
+                m("span.ml2", this.plantAge),
+                m("br"),
+                m("br"),
+                "Zoom",
+                m("input[type=range].ml4", { min: 1, max: 100, value: this.zoom, oninput: (event: any) => {
+                    this.zoom = parseInt(event.target.value)
+                    if (this.plant) this.plant.drawingScale_PixelsPerMm = this.zoom / 10
+                }}),
+                m("span.ml2", this.zoom),
+                m("br"),
+                m("br"),
+                m("button", { onclick: () => this.randomize() } , "Randomize"),
+            ),
+            m("div.flex-grow.h-100.pa2.overflow-scroll",
+                m("div",
+                    m(TWizardForm, { plant: this.plant, setPlant: (plant: PdPlant) => this.setPlant(plant) }),
+                    m("div",
+                        m("button", { onclick: () => {
+                            if (!this.plant) { return }
+                            const newPlantFromWizard = new PdPlant()
+                            this.plant.copyTo(newPlantFromWizard)
+                            const newCommand = new PdNewCommand(newPlantFromWizard, MainForm.selectedPlants)
+                            MainForm.doCommand(newCommand)
+                            setActiveForm("MainForm") 
+                        }}, "Finish"),
+                         m("button.ml2", { onclick: () => setActiveForm("MainForm") }, "Cancel")
+                    )
+                )
+            )
+        )
+    }
 }

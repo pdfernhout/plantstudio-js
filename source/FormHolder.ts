@@ -2,11 +2,13 @@ import type { TMainForm } from "./TMainForm"
 import type { TBreederForm } from "./TBreederForm"
 import type { TTimeSeriesForm } from "./TTimeSeriesForm"
 import type { TDebugForm } from "./TDebugForm"
+import type { TWizardFormDisplayingPlant } from "./TWizardForm"
 
 export let MainForm: TMainForm
 export let BreederForm: TBreederForm
 export let TimeSeriesForm: TTimeSeriesForm
 export let DebugForm: TDebugForm
+export let WizardForm: TWizardFormDisplayingPlant
 
 export function setMainForm(form: TMainForm) {
     MainForm = form
@@ -24,8 +26,12 @@ export function setDebugForm(form: TDebugForm) {
     DebugForm = form
 }
 
-type Form = "MainForm" | "BreederForm" | "TimeSeriesForm" | "DebugForm"
-const forms: Form[] = ["MainForm", "BreederForm", "TimeSeriesForm", "DebugForm"]
+export function setWizardForm(form: TWizardFormDisplayingPlant) {
+    WizardForm = form
+}
+
+type Form = "MainForm" | "BreederForm" | "TimeSeriesForm" | "DebugForm" | "WizardForm"
+const forms: Form[] = ["MainForm", "BreederForm", "TimeSeriesForm", "DebugForm", "WizardForm"]
 
 export let activeForm: Form
 
