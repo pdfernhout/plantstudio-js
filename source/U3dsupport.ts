@@ -1,8 +1,7 @@
 // unit U3dsupport
 
-import { float, int, intround, byte, TColor, short, long } from "./common"
+import { float, int, intround } from "./common"
 import { TPoint } from "./TPoint"
-import { KfPoint3D } from "./KfPoint3D"
 
 export const kFastTrigArraySize = 256
 const kDirectionClockwise = 1
