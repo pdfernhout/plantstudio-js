@@ -1,7 +1,7 @@
 // KfDrawingSurface -- was unit Udrawingsurface
 
 import { TColor, short, long, float, int, intround, ColorDefs } from "./common"
-import { KfPoint3D } from "./KfPoint3D"
+import type { KfPoint3D } from "./KfPoint3D"
 import { pointInTriangle } from "./U3dsupport"
 import { TPoint } from "./TPoint"
 import { KfTriangle } from "./KfTriangle"

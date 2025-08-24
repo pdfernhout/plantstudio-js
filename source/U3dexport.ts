@@ -1,9 +1,9 @@
 import { short, int, float, long, TColorRef, IntToStr, TextFile, writeln, ExtractFileName, ExtractFilePath, byte, write, getBValue, getRValue, getGValue, ColorDefs, odd, TFileStream } from "./common"
-import { KfPoint3D } from "./KfPoint3D"
+import type { KfPoint3D } from "./KfPoint3D"
 import { FileType, valueString, stringUpTo, replacePunctuationWithUnderscores, SaveFileNamesStructure } from "./usupport"
 import { domain } from "./PdDomain"
 import { intMin } from "./umath"
-import { KfTriangle } from "./KfTriangle"
+import type { KfTriangle } from "./KfTriangle"
 import { KfDrawingSurface } from "./KfDrawingSurface"
 
 // unit U3dexport

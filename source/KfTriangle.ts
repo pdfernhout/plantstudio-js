@@ -1,5 +1,5 @@
 import { long, float, TColor, short, ColorDefs } from "./common"
-import { KfObject3D } from "./KfObject3D"
+import type { KfObject3D } from "./KfObject3D"
 import { KfPoint3D } from "./KfPoint3D"
 import { darkerColorWithSubtraction } from "./usupport"
 
