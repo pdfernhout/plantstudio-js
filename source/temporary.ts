@@ -100,3 +100,5 @@ export function unfinished() {
     alert("TODO Unfinished")
     throw new Error("Function not implemented.")
 }
+
+export const exeName = "/PlantStudio"

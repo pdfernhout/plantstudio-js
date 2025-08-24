@@ -6,20 +6,10 @@ import { AssignFile, caption, CloseFile, ExtractFilePath, HelpJump, imageDir, lo
 import { intMax } from "./umath"
 import { cleanUpAfterFileSave, createSaveFileNamesStructure, FileType, getFileSaveInfo, kAskForFileName, SaveFileNamesStructure, setDecimalSeparator } from "./usupport"
 import { TRect } from "./TRect"
-import { unfinished } from "./temporary"
-import { DebugForm, setActiveForm, setDebugForm } from "./FormHolder"
+import { exeName, unfinished } from "./temporary"
+import { activeForm, DebugForm, setActiveForm, setDebugForm } from "./FormHolder"
 
-// from conversion_common import *
-// import umain
-// import uprginfo
-// import umath
-// import usupport
-// import udomain
-// import updform
-// import delphi_compatability
-
-//$R *.DFM
-function DebugPrint(aMessage: string): void {
+export function DebugPrint(aMessage: string): void {
     if (DebugForm !== null) {
         DebugForm.print(aMessage)
     }
@@ -27,27 +17,13 @@ function DebugPrint(aMessage: string): void {
 
 export class TDebugForm {
     DebugList: string[] = []
-    // Close: TButton = new TButton()
-    // saveListAs: TButton = new TButton()
-    // clearList: TButton = new TButton()
-    // optionsPanel: TPanel = new TPanel()
-    // exceptionLabel: TLabel = new TLabel()
-    // showOnExceptionCheckBox: TCheckBox = new TCheckBox()
-    // logToFile: TCheckBox = new TCheckBox()
-    // helpButton: TSpeedButton = new TSpeedButton()
-    // supportButton: TButton = new TButton()
     outputFile: TextFile = new TextFile()
     logging: boolean = false
     
-    // TODO PDF: Use or remove
-    // FormCreate(): void {
-    //     this.showOnExceptionCheckBox.Checked = domain.options.showWindowOnException
-    //     this.logToFile.Checked = domain.options.logToFileOnException
+    // TODO PDF: Remove or improve this to perhaps use beforeunload event, but see MDN docs on limitations
+    // FormDestroy(): void {
+    //     this.stopLogging()
     // }
-    
-    FormDestroy(): void {
-        this.stopLogging()
-    }
     
     startLogging(fileName: string): void {
         let dateString: string
@@ -171,20 +147,18 @@ export class TDebugForm {
         HelpJump("Numerical_exceptions")
     }
     
-    logToFileClick(): void {
-        unfinished()
-        // domain.options.logToFileOnException = this.logToFile.Checked
-        // if (!this.logging) {
-        //     this.startLogging(ExtractFilePath(delphi_compatability.Application.exeName) + "errors.nex")
-        // } else {
-        //     this.stopLogging()
-        // }
-        // this.logging = this.logToFile.Checked
+    logToFileClick(event: any): void {
+        domain.options.logToFileOnException = event.target.checked
+        if (!this.logging) {
+            this.startLogging(ExtractFilePath(exeName) + "errors.nex")
+        } else {
+            this.stopLogging()
+        }
+        this.logging = domain.options.logToFileOnException
     }
     
-    showOnExceptionCheckBoxClick(): void {
-        unfinished()
-        // domain.options.showWindowOnException = this.showOnExceptionCheckBox.Checked
+    showOnExceptionCheckBoxClick(event: any): void {
+        domain.options.showWindowOnException = event.target.checked
     }
     
     supportButtonClick(): void {
@@ -202,143 +176,73 @@ export class TDebugForm {
 
     oninit() {
         setDebugForm(this)
+        // COmmented code for interactive testing:
+        // for (let i = 0; i < 1000; i++) {
+        //     this.DebugList.push("test error " + i)
+        // }
     }
 
     view() {
+        if (activeForm && activeForm !== "DebugForm") return []
         return m("DebugForm.TDebugForm",
-            {
-            // Top: "308",
-            // Left: "365",
-            // Height: "0",
-            // Width: "0",
-            // AutoScroll: "False",
-            // Caption: "Messages",
-            // ClientHeight: "165",
-            // ClientWidth: "427",
-            // Font.Charset: "DEFAULT_CHARSET",
-            // Font.Color: "clWindowText",
-            // Font.Height: "-11",
-            // Font.Name: "Arial",
-            // Font.Style: "[]",
-            // Position: "poDefaultPosOnly",
-            // Scaled: "False",
-            // OnCreate: "FormCreate",
-            // OnDestroy: "FormDestroy",
-            // OnResize: "FormResize",
-            // PixelsPerInch: "96",
-            // TextHeight: "14",
-            },
-            m("TListBox.DebugList.TListBox",
-                {
-                    // Top: "-110",
-                    // Left: "-136",
-                    // Height: "249",
-                    // Width: "497",
-                    // Font.Charset: "DEFAULT_CHARSET",
-                    // Font.Color: "clWindowText",
-                    // Font.Height: "-11",
-                    // Font.Name: "Arial",
-                    // Font.Style: "[]",
-                    // ItemHeight: "14",
-                    // ParentFont: "False",
-                    // TabOrder: "0",
-                },
-            ),
-            m("button.Close.TButton",
-                {
-                    onclick: () => this.CloseClick(),
-                    // Top: "4",
-                    // Left: "364",
-                    // Height: "21",
-                    // Width: "60",
-                    // Cancel: "True",
-                    // Default: "True",
-                    // TabOrder: "2",
-                },
-                caption("&Close"),
-            ),
-            m("button.saveListAs.TButton",
-                {
-                    onclick: () => this.saveListAsClick(),
-                    // Top: "39",
-                    // Left: "365",
-                    // Height: "21",
-                    // Width: "60",
-                    // TabOrder: "3",
-                },
-                caption("&Save as..."),
-            ),
-            m("button.clearList.TButton",
-                {
-                    onclick: () => this.clearListClick(),
-                    // Top: "63",
-                    // Left: "364",
-                    // Height: "21",
-                    // Width: "60",
-                    // TabOrder: "4",
-                },
-                caption("C&lear"),
-            ),
-            m("button.helpButton.TSpeedButton",
-                {
-                    onclick: () => this.helpButtonClick(),
-                },
-                m("img.TImage.mr1", { src: imageDir + "DebugForm_helpButton.png" } ),
-                caption("&Help"),
-            ),
-            m("button.supportButton.TButton",
-                {
-                    onclick: () => this.supportButtonClick(),
-                    // Top: "133",
-                    // Left: "364",
-                    // Height: "21",
-                    // Width: "60",
-                    // TabOrder: "5",
-                },
-                caption("&Info..."),
-            ),
-            m("div.optionsPanel.TPanel",
-                {
-                    // Top: "140",
-                    // Left: "0",
-                    // Height: "25",
-                    // Width: "361",
-                    // BevelInner: "bvRaised",
-                    // BevelOuter: "bvLowered",
-                    // TabOrder: "1",
-                },
-                m("div.exceptionLabel.TLabel",
+            m("div.f3.b", "Debug messages"),
+            m("div.buttonPanel.mt1",
+                m("button.Close.TButton",
                     {
-                        // Top: "5",
-                        // Left: "8",
-                        // Height: "14",
-                        // Width: "64",
+                        onclick: () => this.CloseClick(),
                     },
+                    caption("&Back to Main"),
+                ),
+                m("button.saveListAs.TButton.ml2",
+                    {
+                        onclick: () => this.saveListAsClick(),
+                    },
+                    caption("&Save as..."),
+                ),
+                m("button.clearList.TButton.ml2",
+                    {
+                        onclick: () => this.clearListClick(),
+                    },
+                    caption("C&lear"),
+                ),
+                m("button.helpButton.TSpeedButton.ml2",
+                    {
+                        onclick: () => this.helpButtonClick(),
+                    },
+                    m("img.TImage.mr1", { src: imageDir + "DebugForm_helpButton.png" } ),
+                    caption("&Help"),
+                ),
+                m("button.supportButton.TButton.ml2",
+                    {
+                        onclick: () => this.supportButtonClick(),
+                    },
+                    caption("&Info..."),
+                ),
+            ),
+            m("div.optionsPanel.TPanel.ba.pa2.mt1.mb1",
+                m("div.exceptionLabel.TLabel",
                     "On message:",
                 ),
-                m("label.checkbox-inline.showOnExceptionCheckBox.TCheckBox", m("input[type=checkbox]",
+                m("label.checkbox-inline.showOnExceptionCheckBox.TCheckBox.ml2", m("input[type=checkbox].mr1",
                     {
-                        onclick: () => this.showOnExceptionCheckBoxClick(),
-                        // Top: "5",
-                        // Left: "83",
-                        // Height: "17",
-                        // Width: "68",
-                        // TabOrder: "0",
+                        onclick: (event: any) => this.showOnExceptionCheckBoxClick(event),
+                        checked: domain.options.showWindowOnException,
                     },),
                     caption("&appear"),
                 ),
-                m("label.checkbox-inline.logToFile.TCheckBox", m("input[type=checkbox]",
+                m("br"),
+                m("label.checkbox-inline.logToFile.TCheckBox.ml2", m("input[type=checkbox].mr1",
                     {
-                        onclick: () => this.logToFileClick(),
-                        // Top: "5",
-                        // Left: "146",
-                        // Height: "17",
-                        // Width: "77",
-                        // TabOrder: "1",
+                        onclick: (event: any) => this.logToFileClick(event),
+                        checked: domain.options.logToFileOnException,
                     },),
                     caption("l&og to file"),
                 ),
             ),
+            this.DebugList.length === 0 ? m("div.b", "No debug messages") : m("div.fs3.b", "Debug message are below:"),
+            m("div.TListBox.DebugList.TListBox",
+                this.DebugList.map(item => m("div", item))
+            )
         )
     }
     
