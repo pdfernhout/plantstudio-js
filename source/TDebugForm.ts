@@ -7,6 +7,7 @@ import { intMax } from "./umath"
 import { cleanUpAfterFileSave, createSaveFileNamesStructure, FileType, getFileSaveInfo, kAskForFileName, SaveFileNamesStructure, setDecimalSeparator } from "./usupport"
 import { TRect } from "./TRect"
 import { unfinished } from "./temporary"
+import { DebugForm, setActiveForm, setDebugForm } from "./FormHolder"
 
 // from conversion_common import *
 // import umain
@@ -16,9 +17,6 @@ import { unfinished } from "./temporary"
 // import udomain
 // import updform
 // import delphi_compatability
-
-// var
-let DebugForm: TDebugForm | null = null
 
 //$R *.DFM
 function DebugPrint(aMessage: string): void {
@@ -142,7 +140,7 @@ export class TDebugForm {
     }
     
     CloseClick(): void {
-        // TODO PDF: fix or remove: this.Visible = false
+        setActiveForm("MainForm")
     }
     
     saveListAsClick(): void {
@@ -202,6 +200,10 @@ export class TDebugForm {
         // }
     }
 
+    oninit() {
+        setDebugForm(this)
+    }
+
     view() {
         return m("DebugForm.TDebugForm",
             {
@@ -244,7 +246,7 @@ export class TDebugForm {
             ),
             m("button.Close.TButton",
                 {
-                    onclick: this.CloseClick(),
+                    onclick: () => this.CloseClick(),
                     // Top: "4",
                     // Left: "364",
                     // Height: "21",
@@ -257,7 +259,7 @@ export class TDebugForm {
             ),
             m("button.saveListAs.TButton",
                 {
-                    onclick: this.saveListAsClick(),
+                    onclick: () => this.saveListAsClick(),
                     // Top: "39",
                     // Left: "365",
                     // Height: "21",
@@ -268,7 +270,7 @@ export class TDebugForm {
             ),
             m("button.clearList.TButton",
                 {
-                    onclick: this.clearListClick(),
+                    onclick: () => this.clearListClick(),
                     // Top: "63",
                     // Left: "364",
                     // Height: "21",
@@ -279,7 +281,7 @@ export class TDebugForm {
             ),
             m("button.helpButton.TSpeedButton",
                 {
-                    onclick: this.helpButtonClick(),
+                    onclick: () => this.helpButtonClick(),
                     // Top: "99",
                     // Left: "364",
                     // Height: "25",
@@ -290,7 +292,7 @@ export class TDebugForm {
             ),
             m("button.supportButton.TButton",
                 {
-                    onclick: this.supportButtonClick(),
+                    onclick: () => this.supportButtonClick(),
                     // Top: "133",
                     // Left: "364",
                     // Height: "21",
@@ -320,7 +322,7 @@ export class TDebugForm {
                 ),
                 m("label.checkbox-inline.showOnExceptionCheckBox.TCheckBox", m("input[type=checkbox]",
                     {
-                        onclick: this.showOnExceptionCheckBoxClick(),
+                        onclick: () => this.showOnExceptionCheckBoxClick(),
                         // Top: "5",
                         // Left: "83",
                         // Height: "17",
@@ -331,7 +333,7 @@ export class TDebugForm {
                 ),
                 m("label.checkbox-inline.logToFile.TCheckBox", m("input[type=checkbox]",
                     {
-                        onclick: this.logToFileClick(),
+                        onclick: () => this.logToFileClick(),
                         // Top: "5",
                         // Left: "146",
                         // Height: "17",

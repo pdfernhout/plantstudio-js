@@ -29,7 +29,7 @@ import { TCustomDrawOptionsForm } from "./TCustomDrawOptionsForm"
 import { TTimeSeriesForm } from "./TTimeSeriesForm"
 import { unfinished } from "./temporary"
 import { TBreederForm } from "./TBreederForm"
-import { activeForm, BreederForm, MainForm, setActiveForm, setMainForm, TimeSeriesForm } from "./FormHolder"
+import { activeForm, BreederForm, DebugForm, MainForm, setActiveForm, setMainForm, TimeSeriesForm } from "./FormHolder"
 import { resetDroppedDownMenuId, viewMainMenu } from "./menu"
 import { TUndoRedoListForm } from "./TUndoRedoListForm"
 import { startWaitMessage, stopWaitMessage } from "./TWaitForm"
@@ -1903,14 +1903,6 @@ export class TMainForm {
     MenuOptionsShowParameterHintsClick(): void {
         domain.options.showHintsForParameters = !domain.options.showHintsForParameters
         this.updateHintPauseForOptions()
-    }
-    
-    // --------------------------------------------------------------------------- *window menu 
-    
-    MenuWindowNumericalExceptionsClick(): void {
-        unfinished()
-        // udebug.DebugForm.Show()
-        // udebug.DebugForm.BringToFront()
     }
     
     // ---------------------------------------------------------------------------- *help menu 
@@ -4984,7 +4976,7 @@ export class TMainForm {
     }
     
     /*
-    
+
     posingFrontfaceColorMouseUp(Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
         this.posingFrontfaceColor.Color = domain.getColorUsingCustomColors(this.posingFrontfaceColor.Color)
         this.changeSelectedPose(this.posingFrontfaceColor)
@@ -5758,7 +5750,7 @@ export class TMainForm {
                 "Reconcile3DObjects1", "&Reconcile 3D Objects...", this.Reconcile3DObjects1Click,
             ],
             "-",
-            "MenuWindowNumericalExceptions", "&Messages", this.MenuWindowNumericalExceptionsClick,
+            "radio", "MenuWindowNumericalExceptions", "&Messages", () => setActiveForm("DebugForm"), () => activeForm === "DebugForm", () => DebugForm !== undefined,
         ],
         "MenuHelp", "&Help", [
             "MenuHelpTopics", "Help &Topics", this.MenuHelpTopicsClick,
