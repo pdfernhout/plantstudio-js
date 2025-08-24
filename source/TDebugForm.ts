@@ -1,6 +1,12 @@
 // unit Udebug
 
 import * as m from "mithril"
+import { domain } from "./PdDomain"
+import { AssignFile, caption, CloseFile, ExtractFilePath, HelpJump, long, Rewrite, TextFile, writeln } from "./common"
+import { intMax } from "./umath"
+import { cleanUpAfterFileSave, createSaveFileNamesStructure, FileType, getFileSaveInfo, kAskForFileName, SaveFileNamesStructure, setDecimalSeparator } from "./usupport"
+import { TRect } from "./TRect"
+import { unfinished } from "./temporary"
 
 // from conversion_common import *
 // import umain
@@ -12,8 +18,7 @@ import * as m from "mithril"
 // import delphi_compatability
 
 // var
-let DebugForm: TDebugForm
-
+let DebugForm: TDebugForm | null = null
 
 //$R *.DFM
 function DebugPrint(aMessage: string): void {
@@ -22,48 +27,27 @@ function DebugPrint(aMessage: string): void {
     }
 }
 
-// const
-const kBetweenGap = 4
-
-
-
 export class TDebugForm {
-    DebugList: TListBox = new TListBox()
-    Close: TButton = new TButton()
-    saveListAs: TButton = new TButton()
-    clearList: TButton = new TButton()
-    optionsPanel: TPanel = new TPanel()
-    exceptionLabel: TLabel = new TLabel()
-    showOnExceptionCheckBox: TCheckBox = new TCheckBox()
-    logToFile: TCheckBox = new TCheckBox()
-    helpButton: TSpeedButton = new TSpeedButton()
-    supportButton: TButton = new TButton()
+    DebugList: string[] = []
+    // Close: TButton = new TButton()
+    // saveListAs: TButton = new TButton()
+    // clearList: TButton = new TButton()
+    // optionsPanel: TPanel = new TPanel()
+    // exceptionLabel: TLabel = new TLabel()
+    // showOnExceptionCheckBox: TCheckBox = new TCheckBox()
+    // logToFile: TCheckBox = new TCheckBox()
+    // helpButton: TSpeedButton = new TSpeedButton()
+    // supportButton: TButton = new TButton()
     outputFile: TextFile = new TextFile()
     logging: boolean = false
-    TDebugForm.prototype = new PdForm()
-    TDebugForm.prototype.constructor = TDebugForm
     
-    FormCreate(Sender: TObject): void {
-        let tempBoundsRect: TRect
-        
-        // keep window on screen - left corner of title bar 
-        tempBoundsRect = udomain.domain.debugWindowRect
-        if ((tempBoundsRect.Left !== 0) || (tempBoundsRect.Right !== 0) || (tempBoundsRect.Top !== 0) || (tempBoundsRect.Bottom !== 0)) {
-            if (tempBoundsRect.Left > delphi_compatability.Screen.Width - umain.kMinWidthOnScreen) {
-                tempBoundsRect.Left = delphi_compatability.Screen.Width - umain.kMinWidthOnScreen
-            }
-            if (tempBoundsRect.Top > delphi_compatability.Screen.Height - umain.kMinHeightOnScreen) {
-                tempBoundsRect.Top = delphi_compatability.Screen.Height - umain.kMinHeightOnScreen
-            }
-            this.SetBounds(tempBoundsRect.Left, tempBoundsRect.Top, tempBoundsRect.Right, tempBoundsRect.Bottom)
-        }
-        this.showOnExceptionCheckBox.Checked = udomain.domain.options.showWindowOnException
-        this.logToFile.Checked = udomain.domain.options.logToFileOnException
-        // this will make the list box create a horizontal scroll bar 
-        UNRESOLVED.sendMessage(this.DebugList.Handle, UNRESOLVED.LB_SETHORIZONTALEXTENT, 1000, 0)
-    }
+    // TODO PDF: Use or remove
+    // FormCreate(): void {
+    //     this.showOnExceptionCheckBox.Checked = domain.options.showWindowOnException
+    //     this.logToFile.Checked = domain.options.logToFileOnException
+    // }
     
-    FormDestroy(Sender: TObject): void {
+    FormDestroy(): void {
         this.stopLogging()
     }
     
@@ -73,18 +57,19 @@ export class TDebugForm {
         if (this.logging) {
             return
         }
-        AssignFile(this.outputFile, fileName)
-        if (!FileExists(fileName)) {
-            // v1.5
-            usupport.setDecimalSeparator()
-            Rewrite(this.outputFile)
-        } else {
-            // v1.5
-            usupport.setDecimalSeparator()
-            UNRESOLVED.append(this.outputFile)
-            dateString = UNRESOLVED.formatDateTime("m/d/yyyy, h:m am/pm", UNRESOLVED.now)
-            writeln(this.outputFile, "---- log start (" + dateString + ") ----")
-        }
+        // TODO PDF: Fix or remove
+        // AssignFile(this.outputFile, fileName)
+        // if (!FileExists(fileName)) {
+        //     // v1.5
+        //     setDecimalSeparator()
+        //     Rewrite(this.outputFile)
+        // } else {
+        //     // v1.5
+        //     setDecimalSeparator()
+        //     UNRESOLVED.append(this.outputFile)
+        //     dateString = UNRESOLVED.formatDateTime("m/d/yyyy, h:m am/pm", UNRESOLVED.now)
+        //     writeln(this.outputFile, "---- log start (" + dateString + ") ----")
+        // }
         this.logging = true
     }
     
@@ -102,13 +87,11 @@ export class TDebugForm {
         
         AssignFile(this.outputFile, fileName)
         // v1.5
-        usupport.setDecimalSeparator()
+        setDecimalSeparator()
         Rewrite(this.outputFile)
         try {
-            if (this.DebugList.Items.Count > 0) {
-                for (i = 0; i <= this.DebugList.Items.Count - 1; i++) {
-                    writeln(this.outputFile, this.DebugList.Items[i])
-                }
+            for (i = 0; i <= this.DebugList.length - 1; i++) {
+                writeln(this.outputFile, this.DebugList[i])
             }
         } finally {
             CloseFile(this.outputFile)
@@ -117,15 +100,14 @@ export class TDebugForm {
     
     printNested(level: long, aString: string): void {
         let i: long
-        let prefix: ansistring
+        let prefix: string = ""
         
         if (level > 40) {
             level = 40
         }
-        prefix = ""
         if (level > 0) {
             for (i = 1; i <= level; i++) {
-                UNRESOLVED.AppendStr(prefix, "..")
+                prefix += ".."
             }
         }
         this.print(prefix + aString)
@@ -134,106 +116,90 @@ export class TDebugForm {
     print(aString: string): void {
         if (this.logging) {
             writeln(this.outputFile, aString)
-            Flush(this.outputFile)
+            // TODO PDF: fix or remove: Flush(this.outputFile)
         }
-        if (udomain.domain.options.showWindowOnException) {
-            this.Visible = true
-            this.BringToFront()
+        if (domain.options.showWindowOnException) {
+            // TODO PDF: fix or remove:
+            // this.Visible = true
+            // this.BringToFront()
         }
-        if (this.DebugList.Items.Count > 1000) {
-            this.DebugList.Items.Clear()
+        if (this.DebugList.length > 1000) {
+            this.DebugList.length = 0
         }
         try {
-            this.DebugList.Items.Add(aString)
-        } catch (EOutOfResources e) {
-            this.DebugList.Items.Clear()
+            this.DebugList.push(aString)
+        } catch (/* EOutOfResources */ e) {
+            this.DebugList.length = 0
         }
-        this.DebugList.ItemIndex = this.DebugList.Items.Count - 1
-        this.DebugList.Invalidate()
-        this.DebugList.Refresh()
+
+        // TODO PDF: Scroll to bottom of DebugList
+        // this.DebugList.ItemIndex = this.DebugList.length - 1
     }
     
     clear(): void {
-        this.Visible = false
-        this.DebugList.Items.Clear()
+        // TODO PDF: fix or remove: this.Visible = false
+        this.DebugList.length = 0
     }
     
-    CloseClick(Sender: TObject): void {
-        this.Visible = false
+    CloseClick(): void {
+        // TODO PDF: fix or remove: this.Visible = false
     }
     
-    saveListAsClick(Sender: TObject): void {
-        let fileInfo: SaveFileNamesStructure
+    saveListAsClick(): void {
+        let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
         
-        if (this.DebugList.Items.Count <= 0) {
+        if (this.DebugList.length <= 0) {
             return
         }
-        if (!usupport.getFileSaveInfo(usupport.kFileTypeExceptionList, usupport.kAskForFileName, "pstudio.nex", fileInfo)) {
+        if (!getFileSaveInfo(FileType.kFileTypeExceptionList, kAskForFileName, "pstudio.nex", fileInfo)) {
             return
         }
         try {
             this.saveExceptionListToFile(fileInfo.tempFile)
             fileInfo.writingWasSuccessful = true
         } finally {
-            usupport.cleanUpAfterFileSave(fileInfo)
+            cleanUpAfterFileSave(fileInfo)
         }
     }
     
-    clearListClick(Sender: TObject): void {
-        if (this.DebugList.Items.Count <= 0) {
+    clearListClick(): void {
+        if (this.DebugList.length <= 0) {
             return
         }
-        this.DebugList.Items.Clear()
+        this.DebugList.length = 0
     }
     
-    helpButtonClick(Sender: TObject): void {
-        delphi_compatability.Application.HelpJump("Numerical_exceptions")
+    helpButtonClick(): void {
+        HelpJump("Numerical_exceptions")
     }
     
-    FormResize(Sender: TObject): void {
-        if (delphi_compatability.Application.terminated) {
-            return
-        }
-        this.Close.Left = this.ClientWidth - this.Close.Width - kBetweenGap
-        this.saveListAs.Left = this.Close.Left
-        this.clearList.Left = this.Close.Left
-        this.helpButton.Left = this.Close.Left
-        this.supportButton.Left = this.Close.Left
-        this.DebugList.SetBounds(kBetweenGap, kBetweenGap, this.Close.Left - kBetweenGap * 2, umath.intMax(0, this.ClientHeight - this.optionsPanel.Height - kBetweenGap * 3))
-        this.optionsPanel.SetBounds(kBetweenGap, umath.intMax(0, this.ClientHeight - this.optionsPanel.Height - kBetweenGap), this.Close.Left - kBetweenGap * 2, this.optionsPanel.Height)
+    logToFileClick(): void {
+        unfinished()
+        // domain.options.logToFileOnException = this.logToFile.Checked
+        // if (!this.logging) {
+        //     this.startLogging(ExtractFilePath(delphi_compatability.Application.exeName) + "errors.nex")
+        // } else {
+        //     this.stopLogging()
+        // }
+        // this.logging = this.logToFile.Checked
     }
     
-    WMGetMinMaxInfo(MSG: Tmessage): void {
-        PdForm.prototype.WMGetMinMaxInfo.call(this)
-        //FIX unresolved WITH expression: UNRESOLVED.PMinMaxInfo(MSG.lparam).PDF_FIX_POINTER_ACCESS
-        UNRESOLVED.ptMinTrackSize.x = 350
-        UNRESOLVED.ptMinTrackSize.y = 190
+    showOnExceptionCheckBoxClick(): void {
+        unfinished()
+        // domain.options.showWindowOnException = this.showOnExceptionCheckBox.Checked
     }
     
-    logToFileClick(Sender: TObject): void {
-        udomain.domain.options.logToFileOnException = this.logToFile.Checked
-        if (!this.logging) {
-            this.startLogging(ExtractFilePath(delphi_compatability.Application.exeName) + "errors.nex")
-        } else {
-            this.stopLogging()
-        }
-        this.logging = this.logToFile.Checked
-    }
-    
-    showOnExceptionCheckBoxClick(Sender: TObject): void {
-        udomain.domain.options.showWindowOnException = this.showOnExceptionCheckBox.Checked
-    }
-    
-    supportButtonClick(Sender: TObject): void {
-        let infoForm: TProgramInfoForm
+    supportButtonClick(): void {
+        unfinished()
+        // let infoForm: TProgramInfoForm
         
-        infoForm = uprginfo.TProgramInfoForm().create(delphi_compatability.Application)
-        try {
-            infoForm.ShowModal()
-        } finally {
-            infoForm.free
-            infoForm = null
-        }
+        // infoForm = uprginfo.TProgramInfoForm().create(delphi_compatability.Application)
+        // try {
+        //     infoForm.ShowModal()
+        // } finally {
+        //     infoForm.free
+        //     infoForm = null
+        // }
     }
 
     view() {
@@ -278,7 +244,7 @@ export class TDebugForm {
             ),
             m("button.Close.TButton",
                 {
-                    onclick: CloseClick,
+                    onclick: this.CloseClick(),
                     // Top: "4",
                     // Left: "364",
                     // Height: "21",
@@ -291,7 +257,7 @@ export class TDebugForm {
             ),
             m("button.saveListAs.TButton",
                 {
-                    onclick: saveListAsClick,
+                    onclick: this.saveListAsClick(),
                     // Top: "39",
                     // Left: "365",
                     // Height: "21",
@@ -302,7 +268,7 @@ export class TDebugForm {
             ),
             m("button.clearList.TButton",
                 {
-                    onclick: clearListClick,
+                    onclick: this.clearListClick(),
                     // Top: "63",
                     // Left: "364",
                     // Height: "21",
@@ -313,7 +279,7 @@ export class TDebugForm {
             ),
             m("button.helpButton.TSpeedButton",
                 {
-                    onclick: helpButtonClick,
+                    onclick: this.helpButtonClick(),
                     // Top: "99",
                     // Left: "364",
                     // Height: "25",
@@ -324,7 +290,7 @@ export class TDebugForm {
             ),
             m("button.supportButton.TButton",
                 {
-                    onclick: supportButtonClick,
+                    onclick: this.supportButtonClick(),
                     // Top: "133",
                     // Left: "364",
                     // Height: "21",
@@ -354,7 +320,7 @@ export class TDebugForm {
                 ),
                 m("label.checkbox-inline.showOnExceptionCheckBox.TCheckBox", m("input[type=checkbox]",
                     {
-                        onclick: showOnExceptionCheckBoxClick,
+                        onclick: this.showOnExceptionCheckBoxClick(),
                         // Top: "5",
                         // Left: "83",
                         // Height: "17",
@@ -365,7 +331,7 @@ export class TDebugForm {
                 ),
                 m("label.checkbox-inline.logToFile.TCheckBox", m("input[type=checkbox]",
                     {
-                        onclick: logToFileClick,
+                        onclick: this.logToFileClick(),
                         // Top: "5",
                         // Left: "146",
                         // Height: "17",
