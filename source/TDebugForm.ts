@@ -2,7 +2,7 @@
 
 import * as m from "mithril"
 import { domain } from "./PdDomain"
-import { AssignFile, caption, CloseFile, ExtractFilePath, HelpJump, long, Rewrite, TextFile, writeln } from "./common"
+import { AssignFile, caption, CloseFile, ExtractFilePath, HelpJump, imageDir, long, Rewrite, TextFile, writeln } from "./common"
 import { intMax } from "./umath"
 import { cleanUpAfterFileSave, createSaveFileNamesStructure, FileType, getFileSaveInfo, kAskForFileName, SaveFileNamesStructure, setDecimalSeparator } from "./usupport"
 import { TRect } from "./TRect"
@@ -282,12 +282,8 @@ export class TDebugForm {
             m("button.helpButton.TSpeedButton",
                 {
                     onclick: () => this.helpButtonClick(),
-                    // Top: "99",
-                    // Left: "364",
-                    // Height: "25",
-                    // Width: "61",
-                    // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888888888888888888888888888880C08888888888888CCC88888888888880C0888888888888888888888888888888C888888888888888C088888888888888CC888888888888888CC888888888800880CC888888888CC880CC888888888CC080CC8888888888CCCCC888888888888CCC88888888888888888888888",
                 },
+                m("img.TImage.mr1", { src: imageDir + "DebugForm_helpButton.png" } ),
                 caption("&Help"),
             ),
             m("button.supportButton.TButton",
