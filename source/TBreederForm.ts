@@ -1281,7 +1281,6 @@ export class TBreederForm {
                 },
             },
             viewMainMenu(this.mainMenuSpec, this, () => this.viewToolbar()),
-            m(ModalInputView),
                 // m("ul.BreederPopupMenu.TPopupMenu",
                 //     {
                 //         // Top: "12",

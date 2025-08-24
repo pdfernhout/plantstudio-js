@@ -7,6 +7,7 @@ import { setActiveForm } from "./FormHolder"
 import { resetDroppedDownMenuId } from "./menu"
 import { TWaitForm } from "./TWaitForm"
 import { TDebugForm } from "./TDebugForm"
+import { ModalInputView } from "./ModalInputView"
 
 PdDomain.createDefault()
 domain.defaultTdoLibraryFileName = "../plants/3D object library.tdo"
@@ -17,6 +18,7 @@ const Application = {
                 resetDroppedDownMenuId()
             },
         },
+        m(ModalInputView),
         m(TWaitForm),
         m(TMainForm),
         m(TBreederForm),

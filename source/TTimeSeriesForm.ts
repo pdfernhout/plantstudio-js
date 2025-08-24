@@ -670,7 +670,6 @@ export class TTimeSeriesForm {
                 },
             },
             viewMainMenu(this.mainMenuSpec, this, () => []),
-            m(ModalInputView),
             m("TDrawGrid.grid.TDrawGrid.flex",
                 {
                     // Top: "4",

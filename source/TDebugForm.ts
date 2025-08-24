@@ -10,8 +10,10 @@ import { exeName, unfinished } from "./temporary"
 import { activeForm, DebugForm, setActiveForm, setDebugForm } from "./FormHolder"
 
 export function DebugPrint(aMessage: string): void {
-    if (DebugForm !== null) {
+    if (DebugForm) {
         DebugForm.print(aMessage)
+    } else {
+        console.log("DebugPrint called without form:", aMessage)
     }
 }
 

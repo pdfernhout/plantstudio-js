@@ -6529,7 +6529,6 @@ export class TMainForm {
                 },
             },
             viewMainMenu(this.mainMenuSpec, this, () => this.viewToolbar()),
-            m(ModalInputView),
             // viewMainForm()
             m("div.flex" + 
                 (domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal

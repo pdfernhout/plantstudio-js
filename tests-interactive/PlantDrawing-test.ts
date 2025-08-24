@@ -6,8 +6,11 @@ import { PdDomain, domain } from "../source/PdDomain"
 import { PdPlantDrawingAmendment } from "../source/PdPlantDrawingAmendment";
 import { ColorDefs } from "../source/common";
 import { PdPlantManager } from "../source/PdPlantManager";
+import { TMainForm } from "../source/TMainForm";
 
 PdDomain.createDefault()
+const fakeMainForm = new TMainForm()
+fakeMainForm.oninit()
 
 let plant: PdPlant | null = null
 const amendment = new PdPlantDrawingAmendment()
