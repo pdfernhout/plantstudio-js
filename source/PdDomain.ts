@@ -9,7 +9,7 @@ import { PdParameterManager } from "./PdParameterManager"
 import { ExportFormats, FileExport3DOptionsStructure, nameFor3DExportType, ExportPart, Axis } from "./U3dexport"
 import { BreedingAndTimeSeriesOptionsStructure, kMaxBreedingSections } from "./PdPlant"
 import { PdPlantManager } from "./PdPlantManager"
-import { KfObject3D } from "./KfObject3D"
+import type { KfObject3D } from "./KfObject3D"
 import { MainForm } from "./FormHolder"
 
 // const

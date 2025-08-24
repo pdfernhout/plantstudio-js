@@ -1,14 +1,14 @@
 // PdTraverser was unit Utravers
 
-import { float, int, short, long } from "./common"
+import type { float, int, short, long } from "./common"
 import { max, safedivExcept, min } from "./umath"
-import { PdPlant } from "./PdPlant"
+import type { PdPlant } from "./PdPlant"
 import { TPoint } from "./TPoint"
 import { messageForExceptionType } from "./usupport"
-import { PdPlantPart } from "./PdPlantPart"
-import { PdInternode } from "./PdInternode"
+import type { PdPlantPart } from "./PdPlantPart"
+import type { PdInternode } from "./PdInternode"
 import { ExportPart } from "./U3dexport"
-import { PdFiler } from "./PdFiler"
+import type { PdFiler } from "./PdFiler"
 import { MainForm } from "./FormHolder"
 
 export enum TraverseDirection {
