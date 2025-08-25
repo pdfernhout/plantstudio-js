@@ -18,21 +18,6 @@ import { activeForm, BreederForm, MainForm, setActiveForm, setTimeSeriesForm, Ti
 import { resetDroppedDownMenuId, viewMainMenu } from "./menu"
 import { ModalInputView } from "./ModalInputView"
 
-// from conversion_common import *
-// import ubmpsupport
-// import ubreedr
-// import umain
-// import ucommand
-// import updcom
-// import ucursor
-// import usupport
-// import umath
-// import udomain
-// import uplant
-// import ucollect
-// import updform
-// import delphi_compatability
-
 export const kRecalculateScale = true
 export const kDontRecalculateScale = false
 const kMaxTimeSeriesStages = 100
@@ -579,13 +564,6 @@ export class TTimeSeriesForm {
     //     }
     //     this.grid.SetBounds(0, 0, this.ClientWidth, intMax(0, this.ClientHeight))
     //     this.emptyWarningPanel.SetBounds(this.ClientWidth / 2 - this.emptyWarningPanel.Width / 2, this.ClientHeight / 2 - this.emptyWarningPanel.Height / 2, this.emptyWarningPanel.Width, this.emptyWarningPanel.Height)
-    // }
-    
-    // WMGetMinMaxInfo(MSG: Tmessage): void {
-    //     PdForm.prototype.WMGetMinMaxInfo.call(this)
-    //     //FIX unresolved WITH expression: UNRESOLVED.PMinMaxInfo(MSG.lparam).PDF_FIX_POINTER_ACCESS
-    //     UNRESOLVED.ptMinTrackSize.x = 280
-    //     UNRESOLVED.ptMinTrackSize.y = 120
     // }
     
     TimeSeriesMenuHelpTopicsClick(): void {

@@ -112,10 +112,6 @@ export class TBreederForm {
 //     internalChange: boolean = false
 //     drawing: boolean = false
 //     needToRedrawFromChangeToDrawOptions: boolean = false
-//     /* TODO: User or remove PdForm superclass
-//     TBreederForm.prototype = new PdForm()
-//     TBreederForm.prototype.constructor = TBreederForm
-//     */
 
         Caption: string = "Breeder"
 
@@ -1047,13 +1043,6 @@ export class TBreederForm {
 //         this.helpButton.SetBounds(this.breederToolbarPanel.Width - this.helpButton.Width - 4, this.helpButton.Top, this.helpButton.Width, this.helpButton.Height)
 //         this.plantsDrawGrid.SetBounds(0, this.breederToolbarPanel.Height, this.ClientWidth, this.ClientHeight - this.breederToolbarPanel.Height)
 //         this.emptyWarningPanel.SetBounds(this.ClientWidth / 2 - this.emptyWarningPanel.Width / 2, this.ClientHeight / 2 - this.emptyWarningPanel.Height / 2, this.emptyWarningPanel.Width, this.emptyWarningPanel.Height)
-//     }
-    
-//     WMGetMinMaxInfo(MSG: Tmessage): void {
-//         PdForm.prototype.WMGetMinMaxInfo.call(this)
-//         //FIX unresolved WITH expression: UNRESOLVED.PMinMaxInfo(MSG.lparam).PDF_FIX_POINTER_ACCESS
-//         UNRESOLVED.ptMinTrackSize.x = 250
-//         UNRESOLVED.ptMinTrackSize.y = 150
 //     }
     
     helpButtonClick(): void {

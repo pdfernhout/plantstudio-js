@@ -689,7 +689,6 @@ export class TWizardForm {
     // create(AOwner: TComponent): void {
     //     let i: short
         
-    //     PdForm.prototype.create.call(this, AOwner)
     //     this.leafTdoSelectedLabel.Caption = ""
     //     this.petalTdoSelectedLabel.Caption = ""
     //     this.sectionTdoSelectedLabel.Caption = ""
