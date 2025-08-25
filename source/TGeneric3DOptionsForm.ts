@@ -9,9 +9,17 @@ import { unfinished } from "./temporary"
 import { TRect } from "./TRect"
 import { PdPlant } from "./PdPlant"
 import { MainForm } from "./FormHolder"
+import { convertColorNumberToCSS } from "./KfDrawingSurface"
 
 const kTransferLoad = 1
 const kTransferSave = 2
+
+const colorsByPlantPartNames = ["Meristems", "Internodes", "Leaves", "First leaves", "Flowers (F)", "Flowers (M)", "Inflor. (F)", "Inflor. (M)", "Fruit", "Root top"]
+
+type PlantPartWrapper = {
+    name: string
+    selected: boolean
+}
 
 export class TGeneric3DOptionsForm {
     // drawWhichPlantsGroupBox: TGroupBox = new TGroupBox()
@@ -25,7 +33,7 @@ export class TGeneric3DOptionsForm {
     // colorDXFFromOneColor: TRadioButton = new TRadioButton()
     // wholePlantColor: TPanel = new TPanel()
     // colorDXFFromPlantPartType: TRadioButton = new TRadioButton()
-    // colorsByPlantPart: TListBox = new TListBox()
+    colorsByPlantPart: PlantPartWrapper[] = []
     // setPlantPartColor: TButton = new TButton()
     // povLimitsGroupBox: TGroupBox = new TGroupBox()
     // Label4: TLabel = new TLabel()
@@ -67,6 +75,7 @@ export class TGeneric3DOptionsForm {
     // pressPlantsPanel: TPanel = new TPanel()
     // pressPlants: TCheckBox = new TCheckBox()
     // directionToPressPlants: TComboBox = new TComboBox()
+    directionToPressPlants_Selected = "x"
     // Label8: TLabel = new TLabel()
     // makeTrianglesDoubleSided: TCheckBox = new TCheckBox()
     outputType: short = 0
@@ -200,8 +209,6 @@ export class TGeneric3DOptionsForm {
     }
     
     transferFields(): void {
-        let oldExportType: short
-        
         // options that work for all types
         if (this.transferDirection === kTransferLoad) {
             switch (this.options.exportType) {
@@ -222,7 +229,7 @@ export class TGeneric3DOptionsForm {
                     break
             }
         } else {
-            oldExportType = this.options.exportType
+            const oldExportType = this.options.exportType
             if (this.useSelectedPlants) {
                 this.options.exportType = kIncludeSelectedPlants
             } else if (this.useVisiblePlants) {
@@ -245,11 +252,11 @@ export class TGeneric3DOptionsForm {
         this.options.pressPlants = this.transferCheckBox(this.pressPlants, this.options.pressPlants)
         this.options.directionToPressPlants = this.transferComboBox(this.directionToPressPlants, this.options.directionToPressPlants)
         this.options.makeTrianglesDoubleSided = this.transferCheckBox(this.makeTrianglesDoubleSided, this.options.makeTrianglesDoubleSided)
-        // nothing yet
+        
+        // options for specific types
+        // do after general one to override
         switch (this.outputType) {
             case ExportFormats.kDXF:
-                // options for specific types
-                // do after general one to override
                 this.options.writeColors = this.transferCheckBox(this.dxfWriteColors, this.options.writeColors)
                 if (this.transferDirection === kTransferLoad) {
                     this.dxfWriteColorsClick(this)
@@ -258,9 +265,6 @@ export class TGeneric3DOptionsForm {
                 this.options.dxf_whereToGetColors = this.transferRadioButton(this.colorDXFFromOneColor, this.options.dxf_whereToGetColors, u3dexport.kColorDXFFromOneColor)
                 this.options.dxf_whereToGetColors = this.transferRadioButton(this.colorDXFFromPlantPartType, this.options.dxf_whereToGetColors, u3dexport.kColorDXFFromPlantPartType)
                 this.wholePlantColor.Color = u3dexport.dxfColors[this.options.dxf_wholePlantColorIndex]
-                if (this.transferDirection === kTransferLoad) {
-                    this.colorsByPlantPart.Invalidate()
-                }
                 break
             case ExportFormats.kPOV:
                 this.options.pov_minLineLengthToWrite = this.transferSingleEditBox(this.minLineLengthToWrite, this.options.pov_minLineLengthToWrite)
@@ -287,6 +291,7 @@ export class TGeneric3DOptionsForm {
                 this.options.vrml_version = this.transferRadioGroup(this.vrmlVersionRadioGroup, this.options.vrml_version)
                 break
             case ExportFormats.kLWO:
+                // nothing yet
                 break
         }
     }
@@ -382,55 +387,40 @@ export class TGeneric3DOptionsForm {
     }
     
     fillPlantPartColors(): void {
-        let i: short
-        let firstPlant: PdPlant
-        
-        this.colorsByPlantPart.Clear()
+        this.colorsByPlantPart.length = 0
         if ((domain === null) || (domain.plantManager === null) || (domain.plantManager.plants.length < 0)) {
             // use first plant to get DXF part type names - there must be at least one plant to bring up this form
             return
         }
-        firstPlant = domain.plantManager.plants[0]
+        const firstPlant = domain.plantManager.plants[0]
         if (firstPlant === null) {
             return
         }
-        for (i = 0; i <= ExportPart.kExportPartLast; i++) {
-            this.colorsByPlantPart.Items.Add(longNameForDXFPartType(i))
+        for (let i = 0; i <= ExportPart.kExportPartLast; i++) {
+            this.colorsByPlantPart.push({name: longNameForDXFPartType(i), selected: false})
         }
     }
     
-    colorsByPlantPartDrawItem(Control: TWinControl, index: int, Rect: TRect, State: TOwnerDrawState): void {
-        let selected: boolean
-        let colorRect: TRect
-        let remainderRect: TRect
-        let cText: string
-        
-        if ((this.colorsByPlantPart.Items.Count <= 0) || (index < 0) || (index > this.colorsByPlantPart.Items.Count - 1)) {
-            return
+    colorsByPlantPartView() {
+        // TODO PDF: Fix next part added for testing
+        for (let i = 0; i < this.options.dxf_plantPartColorIndexes.length; i++) {
+            this.options.dxf_plantPartColorIndexes[i] = i % dxfColors.length
         }
-        selected = (delphi_compatability.TOwnerDrawStateType.odSelected in State)
-        // set up rectangles 
-        colorRect = Rect
-        colorRect.Right = colorRect.Left + this.colorsByPlantPart.ItemHeight
-        remainderRect = Rect
-        remainderRect.Left = remainderRect.Left + this.colorsByPlantPart.ItemHeight
-        // fill first box with white, rest with clHighlight if selected 
-        this.colorsByPlantPart.Canvas.Brush.Style = delphi_compatability.TFPBrushStyle.bsSolid
-        this.colorsByPlantPart.Canvas.Brush.Color = u3dexport.dxfColors[this.options.dxf_plantPartColorIndexes[index]]
-        this.colorsByPlantPart.Canvas.FillRect(colorRect)
-        this.colorsByPlantPart.Canvas.Font = this.colorsByPlantPart.Font
-        if (selected) {
-            this.colorsByPlantPart.Canvas.Brush.Color = UNRESOLVED.clHighlight
-            this.colorsByPlantPart.Canvas.Font.Color = UNRESOLVED.clHighlightText
-        } else {
-            this.colorsByPlantPart.Canvas.Brush.Color = delphi_compatability.clWindow
-            this.colorsByPlantPart.Canvas.Font.Color = UNRESOLVED.clBtnText
-        }
-        this.colorsByPlantPart.Canvas.FillRect(remainderRect)
-        cText = this.colorsByPlantPart[index]
-        // margin for text 
-        remainderRect.Left = remainderRect.Left + 5
-        UNRESOLVED.winprocs.drawText(this.colorsByPlantPart.Canvas.Handle, cText, len(cText), remainderRect, delphi_compatability.DT_LEFT)
+
+        return m("div",
+            this.colorsByPlantPart.map((wrapper, index) => m("div",
+                m("input[type=checkbox].mr1", {
+                    checked: wrapper.selected,
+                    onchange: (event: any) => wrapper.selected = event.target.checked
+                }),
+                m("div.dib.mr1", { style: { 
+                    width: "1rem", 
+                    height: "1rem", 
+                    backgroundColor: convertColorNumberToCSS(dxfColors[this.options.dxf_plantPartColorIndexes[index]])
+                }}), 
+                wrapper.name)
+            )
+        )
     }
     
     wholePlantColorMouseUp(Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
@@ -458,11 +448,9 @@ export class TGeneric3DOptionsForm {
     
     setPlantPartColorClick(): void {
         let colorForm: TChooseDXFColorForm
-        let response: int
-        let firstColorIndex: TColorRef
-        
-        firstColorIndex = -1
-        for (let i = 0; i < this.colorsByPlantPart.Items.Count; i++) {
+        let firstColorIndex: TColorRef = -1
+
+        for (let i = 0; i < this.colorsByPlantPart.length; i++) {
             if (this.colorsByPlantPart.Selected[i]) {
                 if (firstColorIndex === -1) {
                     firstColorIndex = this.options.dxf_plantPartColorIndexes[i]
@@ -478,14 +466,13 @@ export class TGeneric3DOptionsForm {
         }
         try {
             colorForm.colorIndex = firstColorIndex
-            response = colorForm.ShowModal()
+            const response = colorForm.ShowModal()
             if (response === mrOK) {
-                for (let i = 0; i < this.colorsByPlantPart.Items.Count; i++) {
+                for (let i = 0; i < this.colorsByPlantPart.length; i++) {
                     if (this.colorsByPlantPart.Selected[i]) {
                         this.options.dxf_plantPartColorIndexes[i] = colorForm.colorIndex
                     }
                 }
-                this.colorsByPlantPart.Invalidate()
                 this.optionsChanged = true
             }
         } finally {
@@ -524,20 +511,6 @@ export class TGeneric3DOptionsForm {
             value = checkBox.Checked
         }
         return value
-    }
-    
-    transferColor(colorPanel: TPanel, value: TColorRef): void {
-        unfinished()
-        // TODO PDF: Fix this:
-        // raise "method transferColor had assigned to var parameter value not added to return -- fixup manually"
-        // if (this.transferDirection === kTransferLoad) {
-        //     colorPanel.Color = value
-        // } else if (this.transferDirection === kTransferSave) {
-        //     if (value !== colorPanel.Color) {
-        //         this.optionsChanged = true
-        //     }
-        //     value = colorPanel.Color
-        // }
     }
     
     transferSmallintSpinEditBox(editBox: TSpinEdit, value: short): void {
@@ -650,6 +623,7 @@ export class TGeneric3DOptionsForm {
         this.close = vnode.attrs.close
         this.outputType = vnode.attrs.outputType,
         this.options = JSON.parse(JSON.stringify(vnode.attrs.options))
+        this.fillPlantPartColors()
         this.rearrangeItemsForOutputType()
     }
     
@@ -782,7 +756,6 @@ export class TGeneric3DOptionsForm {
                     caption("&Set..."),
                     ),
                 ),
-                m("br"),
                 m("label.ml2",
                     m("input[type=radio].mr1.colorDXFFromPlantPartType.TRadioButton",
                         {
@@ -795,146 +768,89 @@ export class TGeneric3DOptionsForm {
                     ),
                     caption("use colors &based on type of part"),
                 ),
-                m("div.TListBox.colorsByPlantPart.TListBox",
+                m("div.TListBox.colorsByPlantPart.TListBox.ml4",
                     {
-                        // Top: "95",
-                        // Left: "27",
-                        // Height: "52",
-                        // Width: "247",
-                        // ItemHeight: "16",
-                        // Items.Strings: ["Meristems","Internodes","Leaves","First leaves","Flowers (F)","Flowers (M)","Inflor. (F)","Inflor. (M)","Fruit","Root top"],
-                        // MultiSelect: "True",
-                        // Style: "lbOwnerDrawFixed",
-                        // TabOrder: "4",
                         // OnDblClick: "colorsByPlantPartDblClick",
-                        // OnDrawItem: "colorsByPlantPartDrawItem",
                     },
+                    this.colorsByPlantPartView()
                 ),
             ),
             m("div.TGroupBox.reorientGroupBox.TGroupBox",
                 "Reorient",
-                m("TSpinEdit.xRotationBeforeDraw.TSpinEdit",
-                    {
-                        // Top: "15",
-                        // Left: "62",
-                        // Height: "23",
-                        // Width: "57",
-                        // Increment: "5",
-                        // MaxValue: "180",
-                        // MinValue: "-180",
-                        // TabOrder: "0",
-                        // Value: "0",
-                    },
-                ),
-                m("div.Group.Group.g00000019",
-                    m("div.Label1.TLabel",
+                m("br"),
+                m("label.Group.Group.g00000019.ml2",
+                    m("span.Label1.TLabel",
                         "Rotate by",
                     ),
-                    m("div.Label10.TLabel",
+                    m("input[type=number].mw3.TSpinEdit.xRotationBeforeDraw.TSpinEdit.ml1.mr1",
+                        {
+                            // Value: "0",
+                            step: 5,
+                            min: "-180",
+                            max: "180"
+                        },
+                    ),
+                    m("span.Label10.TLabel",
                         "degrees (-180 to 180)",
                     ),
                 ),
-                m("TSpinEdit.overallScalingFactor_pct.TSpinEdit",
-                    {
-                        // Top: "41",
-                        // Left: "62",
-                        // Height: "23",
-                        // Width: "57",
-                        // Increment: "5",
-                        // MaxValue: "10000",
-                        // MinValue: "1",
-                        // TabOrder: "1",
-                        // Value: "10000",
-                    },
-                ),
-                m("div.Group.Group.g00000045",
-                    m("div.Label7.TLabel",
+                m("br"),
+                m("label.Group.Group.g00000045.ml2",
+                    m("span.Label7.TLabel",
                         "Scale by",
                     ),
-                    m("div.Label9.TLabel",
+                    m("input[type=number].mw3.TSpinEdit.overallScalingFactor_pct.TSpinEdit.ml1.mr1",
+                        {
+                            // Value: "10000",
+                            step: 5,
+                            min: "1",
+                            max: "10000"
+                        },
+                    ),
+                    m("span.Label9.TLabel",
                         "percent (1-10,000)",
                     ),
                 ),
             ),
             m("div.TGroupBox.otherGroupBox.TGroupBox",
                 "Other options",
-                m("div.plantNameAndCylinderSidesPanel.TPanel",
-                    m("TSpinEdit.lengthOfShortName.TSpinEdit",
-                        {
-                            // Top: "3",
-                            // Left: "99",
-                            // Height: "23",
-                            // Width: "45",
-                            // MaxValue: "60",
-                            // MinValue: "1",
-                            // TabOrder: "0",
-                            // Value: "3",
-                        },
-                    ),
-                    m("div.Group.Group.g00000007",
-                        m("div.Label2.TLabel",
-                            {
-                                // Top: "7",
-                                // Left: "5",
-                                // Height: "14",
-                                // Width: "88",
-                                // FocusControl: "stemCylinderFaces",
-                            },
+                m("div.plantNameAndCylinderSidesPanel.TPanel.ml2",
+                    m("label.Group.Group.g00000007",
+                        m("span.Label2.TLabel",
                             caption("Limit plant &name to"),
                         ),
-                        m("div.Label3.TLabel",
+                        m("input[type=number].mw3.TSpinEdit.lengthOfShortName.TSpinEdit.ml1.mr1",
                             {
-                                // Top: "7",
-                                // Left: "151",
-                                // Height: "14",
-                                // Width: "86",
+                                // Value: "3",
+                                step: 1,
+                                min: "1",
+                                max: "60"
                             },
+                        ),
+                        m("span.Label3.TLabel",
                             "characters (1-60)",
                         ),
                     ),
-                    m("TSpinEdit.stemCylinderFaces.TSpinEdit",
-                        {
-                            // Top: "30",
-                            // Left: "153",
-                            // Height: "23",
-                            // Width: "45",
-                            // MaxValue: "20",
-                            // MinValue: "3",
-                            // TabOrder: "1",
-                            // Value: "3",
-                            // OnChange: "stemCylinderFacesChange",
-                        },
-                    ),
-                    m("div.Group.Group.g00000035",
-                        m("div.stemCylinderFacesLabel.TLabel",
-                            {
-                                // Top: "35",
-                                // Left: "5",
-                                // Height: "14",
-                                // Width: "145",
-                                // FocusControl: "stemCylinderFaces",
-                            },
+                    m("br"),
+                    m("label.Group.Group.g00000035",
+                        m("span.stemCylinderFacesLabel.TLabel",
                             caption("Draw stems as c&ylinders with"),
                         ),
-                        m("div.sidesLabel.TLabel",
+                        m("input[type=number].mw3.TSpinEdit.stemCylinderFaces.TSpinEdit.ml1.mr1",
+                            {
+                                // Value: "3",
+                                // OnChange: "stemCylinderFacesChange",
+                                step: 1,
+                                min: "3",
+                                max: "20"
+                            },
+                        ),
+                        m("span.sidesLabel.TLabel",
                             "sides (3-20)",
                         ),
                     ),
                 ),
                 m("div.pressPlantsPanel.TPanel",
-                    m("select.directionToPressPlants.TComboBox",
-                        {
-                            // Top: "3",
-                            // Left: "108",
-                            // Height: "22",
-                            // Width: "41",
-                            // Style: "csDropDownList",
-                            // ItemHeight: "14",
-                            // Items.Strings: ["x","y","z"],
-                            // TabOrder: "1",
-                        },
-                    ),
-                    m("br"),
                     m("label.checkbox-inline.pressPlants.TCheckBox", m("input[type=checkbox].mr1",
                         {
                             // Top: "8",
@@ -945,7 +861,16 @@ export class TGeneric3DOptionsForm {
                         },),
                         caption("\"Pr&ess\" plants in"),
                     ),
-                    m("div.Label8.TLabel",
+                    m("label.Label8.TLabel",
+                        m("select.directionToPressPlants.TComboBox.ml1.mr1",
+                            {
+                                onchange: (event: any) => this.directionToPressPlants_Selected = event.target.value,
+                            },
+                            ["x","y","z"].map(xyz => m("option", {
+                                value: xyz,
+                                selected: xyz === this.directionToPressPlants_Selected ? "selected" : "",
+                            }, xyz))
+                        ),
                         "dimension",
                     ),
                 ),
@@ -1112,7 +1037,7 @@ export class TGeneric3DOptionsForm {
                 },
                 "Limit small lines and 3D objects",
                 m("br"),
-                m("div.Label4.TLabel.ml2",
+                m("label.Label4.TLabel.ml2",
                     caption("&Keep lines at least this long (mm)"),
                     m("br"),
                     m("input.minLineLengthToWrite.TEdit.ml2.mw3",
@@ -1125,7 +1050,8 @@ export class TGeneric3DOptionsForm {
                         },
                     ),
                 ),
-                m("div.Label5.TLabel.ml2",
+                m("br"),
+                m("label.Label5.TLabel.ml2",
                     caption("Keep &3D objects of at least this scale"),
                     m("br"),
                     m("input.minTdoScaleToWrite.TEdit.ml2.mw3",
