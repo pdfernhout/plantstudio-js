@@ -3,7 +3,7 @@
 import * as m from "mithril"
 import { AssignFile, CloseFile, imageDir, Reset } from "./common"
 import { CompoundLeafStyle, FloralPart, Gender, LeafArrangement, PdPlant } from "./PdPlant"
-import { darkerColor, messageForExceptionType } from "./usupport"
+import { darkerColor, messageForExceptionType, SinglePoint } from "./usupport"
 import { domain } from "./PdDomain"
 import { KfObject3D } from "./KfObject3D"
 import { KfTurtle } from "./KfTurtle"
@@ -1261,7 +1261,8 @@ function capitalize(word: string) {
 }
 
 export class TWizardFormDisplayingPlant {
-
+    mainWindowScale = -1
+    mainWindowOffset: SinglePoint | null = null
     plantAge = 90
     zoom = 10
     amendment = new PdPlantDrawingAmendment()
@@ -1300,12 +1301,42 @@ export class TWizardFormDisplayingPlant {
     oninit(vnode: any) {
         setWizardForm(this)
     }
+    
+    // TODO PDF: Really should draw into cache instead and set considerDomainScale
+    saveMainWindowScaleAndOffsetIfNeeded() {
+        if (this.mainWindowScale === -1) {
+            this.mainWindowScale = domain.plantManager.plantDrawScale_PixelsPerMm
+        }
+        if (this.mainWindowOffset !== null) {
+            this.mainWindowOffset = domain.plantManager.plantDrawOffset_mm
+        }
+        domain.plantManager.plantDrawScale_PixelsPerMm = 1.0
+        domain.plantManager.plantDrawOffset_mm = new SinglePoint()
+
+    }
+
+    restoreMainWindowScaleAndOffset() {
+        if (this.mainWindowScale !== -1) {
+            domain.plantManager.plantDrawScale_PixelsPerMm = this.mainWindowScale
+        }
+        this.mainWindowScale = -1
+        if (this.mainWindowOffset !== null) {
+            domain.plantManager.plantDrawOffset_mm = new SinglePoint(this.mainWindowOffset.x, this.mainWindowOffset.y)
+        }
+        this.mainWindowOffset = null
+    }
+
+    returnToMain() {
+        this.restoreMainWindowScaleAndOffset()
+        setActiveForm("MainForm") 
+    }
 
     view() {
         if (activeForm && activeForm !== "WizardForm") return []
+        this.saveMainWindowScaleAndOffsetIfNeeded()
         return m("div.flex.flex-row.h-100",
             m("div.pa2",
-                m("button", { onclick: () => setActiveForm("MainForm") }, "Back to Main"),
+                m("button", { onclick: () => this.returnToMain() }, "Back to Main"),
                 m("canvas.ba", {
                     width: 800,
                     height: 500,
@@ -1365,9 +1396,9 @@ export class TWizardFormDisplayingPlant {
                             this.plant.copyTo(newPlantFromWizard)
                             const newCommand = new PdNewCommand(newPlantFromWizard, MainForm.selectedPlants)
                             MainForm.doCommand(newCommand)
-                            setActiveForm("MainForm") 
+                            this.returnToMain()
                         }}, "Finish"),
-                         m("button.ml2", { onclick: () => setActiveForm("MainForm") }, "Cancel")
+                         m("button.ml2", { onclick: () => this.returnToMain() }, "Cancel")
                     )
                 )
             )
