@@ -5753,7 +5753,7 @@ export class TMainForm {
             ],
             "-",
             // "radio", "MenuWindowWizard", "&Wizard", () => setActiveForm("WizardForm"), () => activeForm === "WizardForm", () => WizardForm !== undefined,
-            "radio", "MenuWindowNumericalExceptions", "&Messages", () => setActiveForm("DebugForm"), () => activeForm === "DebugForm", () => DebugForm !== undefined,
+            "MenuWindowNumericalExceptions", "&Messages", () => setActiveForm("DebugForm"), () => false, () => DebugForm !== undefined,
         ],
         "MenuHelp", "&Help", [
             "MenuHelpTopics", "Help &Topics", this.MenuHelpTopicsClick,
