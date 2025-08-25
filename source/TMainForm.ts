@@ -1304,37 +1304,37 @@ export class TMainForm {
     
     */
     
-    ExportToGeneric3DType(outputType: short): void {
+    async ExportToGeneric3DType(outputType: short) {
         let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
-        let optionsForm: TGeneric3DOptionsForm
-        let tempOptions: FileExport3DOptionsStructure
-        let fileType: short
-        let fileDescriptor: string
-        let optionsChanged: boolean
         let excludeInvisiblePlants: boolean
         let excludeNonSelectedPlants: boolean
         
-        optionsChanged = false
-        optionsForm = new TGeneric3DOptionsForm()
-        if (optionsForm === null) {
-            throw new Error("Problem: Could not create 3D export options window.")
-        }
-        optionsForm.outputType = outputType
-        optionsForm.rearrangeItemsForOutputType()
-        optionsForm.options = domain.exportOptionsFor3D[outputType]
-        const response = mrOK // TODO PDF: Fix this: optionsForm.ShowModal()
-        tempOptions = optionsForm.options
-        optionsChanged = optionsForm.optionsChanged
-        if (response !== mrOK) {
-            return
-        }
-        fileType = fileTypeFor3DExportType(outputType)
-        fileDescriptor = nameStringForFileType(fileType)
+        // let optionsForm: TGeneric3DOptionsForm | null = null
+        const optionsForm: any = await customModal((resolve: any) => {
+            return m(TGeneric3DOptionsForm, { 
+                close: (form: TGeneric3DOptionsForm | null) => {
+                    // optionsForm = form
+                    return resolve(form) 
+                },
+                outputType,
+                options: domain.exportOptionsFor3D[outputType]
+            }) as any
+        }, "width: 32rem; height: 24rem; position: relative")
+
+        // optionsForm.rearrangeItemsForOutputType()
+        if (!optionsForm) { return }
+        const tempOptions: FileExport3DOptionsStructure = optionsForm.options
+        const optionsChanged = optionsForm.optionsChanged
+        const fileType = fileTypeFor3DExportType(outputType)
+        const fileDescriptor = nameStringForFileType(fileType)
         exportTo3DFileSaveAttemptsThisSession[outputType] += 1
         const suggestedFileName = "plants" + IntToStr(exportTo3DFileSaveAttemptsThisSession[outputType]) + "." + extensionForFileType(fileType)
         if (!getFileSaveInfo(fileType, kAskForFileName, suggestedFileName, fileInfo)) {
             if (optionsChanged) {
-                if (MessageDialog(fileDescriptor + " export stopped." + chr(13) + chr(13) + "Do you want to save the changes you made" + chr(13) + "to the " + fileDescriptor + " export options?", mtConfirmation, mbYesNo, 0) === IDYES) {
+                if (MessageDialog(fileDescriptor + " export stopped." + chr(13) + chr(13) + 
+                    "Do you want to save the changes you made" + chr(13) + "to the " + fileDescriptor + 
+                    " export options?", mtConfirmation, mbYesNo, 0) === IDYES)
+                {
                     const newCommand = new PdChangeDomain3DOptionsCommand(tempOptions, outputType)
                     this.doCommand(newCommand)
                 }

@@ -1,7 +1,7 @@
 // unit uoptions3dexport
 
 import * as m from "mithril"
-import { caption, ffFixed, float, FloatToStrF, HelpJump, int, intround, IntToStr, long, MessageDialog, short, StrToFloat, StrToIntDef, TColorRef } from "./common"
+import { caption, ffFixed, float, FloatToStrF, HelpJump, int, intround, IntToStr, long, MessageDialog, mtConfirmation, short, StrToFloat, StrToIntDef, TColorRef } from "./common"
 import { domain, kIncludeAllPlants, kIncludeSelectedPlants, kIncludeVisiblePlants, kMaxOutputCylinderFaces, kMinOutputCylinderFaces } from "./PdDomain"
 import { dxfColors, ExportFormats, ExportPart, FileExport3DOptionsStructure, kMax3DFaces, kMax3DPoints, kMaxStoredMaterials, longNameForDXFPartType } from "./U3dexport"
 import { chr, len, valueString } from "./usupport"
@@ -90,6 +90,7 @@ export class TGeneric3DOptionsForm {
     totalTriangles: long = 0
     totalMaterials: long = 0
     Caption: string = "3D Export Options"
+    close: ((form: TGeneric3DOptionsForm | null) => void) | null = null
     
     //$R *.DFM
     FormActivate(): void {
@@ -105,32 +106,42 @@ export class TGeneric3DOptionsForm {
     CloseClick(): void {
         if ((this.useSelectedPlants) && (MainForm.selectedPlants.length <= 0)) {
             // do not let them complete action if no plants are selected
-            MessageDialog("You chose \"selected\" for \"Draw which plants\", but no plants are selected." + chr(13) + "You should make another choice, or click Cancel and select some plants.", delphi_compatability.TMsgDlgType.mtError, {mbOK, }, 0)
+            MessageDialog("You chose \"selected\" for \"Draw which plants\", but no plants are selected." + chr(13) + 
+            "You should make another choice, or click Cancel and select some plants.", 0 /* mtError */, 0, 0)
             return
         }
         if (this.outputType === ExportFormats.kLWO) {
             if ((this.totalPoints > kMax3DPoints) || (this.totalTriangles > kMax3DFaces)) {
                 // do not let them complete action if too many points are selected - only for LWO which holds ALL
                 // points and faces until the end of the file
-                MessageDialog("You have selected too many points or triangles for this file format." + chr(13) + "A maximum of 65,536 points or triangles can be exported to one LWO file." + chr(13) + chr(13) + "You should make another choice of plants, or click Cancel and select fewer plants," + chr(13) + "or export to another format.", mtWarning, {mbOK, }, 0)
+                MessageDialog("You have selected too many points or triangles for this file format." + chr(13) + 
+                "A maximum of 65,536 points or triangles can be exported to one LWO file." + chr(13) + chr(13) + 
+                "You should make another choice of plants, or click Cancel and select fewer plants," + chr(13) + 
+                "or export to another format.", 0, /* mtWarning */ 0, 0)
                 return
             }
         }
         switch (this.outputType) {
             case ExportFormats.kOBJ:
                 if ((this.totalPlants * (ExportPart.kExportPartLast + 1) > kMaxStoredMaterials)) {
-                    if (MessageDialog("You have selected too many materials for this file format." + chr(13) + "The number of distinct colors will be bounded at " + IntToStr(kMaxStoredMaterials) + "." + chr(13) + "Some plants may refer to non-existent colors." + chr(13) + chr(13) + "To proceed anyway, click OK.", mtWarning, {mbOK, mbCancel, }, 0) === delphi_compatability.IDCANCEL) {
-                        // warn them if the colors list will be truncated
-                        // limit of 1000 materials
+                    // warn them if the colors list will be truncated
+                    // limit of 1000 materials
+                    if (MessageDialog("You have selected too many materials for this file format." + chr(13) + 
+                        "The number of distinct colors will be bounded at " + IntToStr(kMaxStoredMaterials) + "." + chr(13) + 
+                        "Some plants may refer to non-existent colors." + chr(13) + chr(13) + 
+                        "To proceed anyway, click OK.", mtConfirmation, 0, 0) === false) {
                         return
                     }
                 }
                 break
             case ExportFormats.kLWO:
                 if ((this.totalPlants * (ExportPart.kExportPartLast + 1) > kMaxStoredMaterials)) {
-                    if (MessageDialog("You have selected too many materials for this file format." + chr(13) + "The number of distinct colors will be bounded at " + IntToStr(kMaxStoredMaterials) + "." + chr(13) + "Some plants may refer to non-existent colors." + chr(13) + chr(13) + "To proceed anyway, click OK.", mtWarning, {mbOK, mbCancel, }, 0) === delphi_compatability.IDCANCEL) {
-                        // warn them if the colors list will be truncated
-                        // limit of 1000 materials
+                    // warn them if the colors list will be truncated
+                    // limit of 1000 materials
+                    if (MessageDialog("You have selected too many materials for this file format." + chr(13) + 
+                    "The number of distinct colors will be bounded at " + IntToStr(kMaxStoredMaterials) + "." + chr(13) + 
+                    "Some plants may refer to non-existent colors." + chr(13) + chr(13) + 
+                    "To proceed anyway, click OK.", mtConfirmation, 0, 0) === false) {
                         return
                     }
                 }
@@ -138,66 +149,61 @@ export class TGeneric3DOptionsForm {
         }
         this.transferDirection = kTransferSave
         this.transferFields()
-        this.ModalResult = mrOK
+        this.close!(this)
     }
     
     cancelClick(): void {
-        this.ModalResult = mrCancel
+        this.close!(null)
     }
     
     rearrangeItemsForOutputType(): void {
-        this.ClientHeight = this.otherGroupBox.Top + this.otherGroupBox.Height + 4
-        this.ClientWidth = this.Close.Left + this.Close.Width + 4
+        // TODO PDF:  Use or remove commented code in rearrangeItemsForOutputType
         switch (this.outputType) {
             case ExportFormats.kDXF:
                 this.Caption = "Save DXF File"
-                this.writeColors.Visible = false
-                this.makeTrianglesDoubleSided.Top = this.writeColors.Top
-                this.translatePlantsToWindowPositions.Top = this.makeTrianglesDoubleSided.Top + this.makeTrianglesDoubleSided.Height + 4
-                this.otherGroupBox.Height = this.translatePlantsToWindowPositions.Top + this.translatePlantsToWindowPositions.Height + 6
-                this.dxfColorsGroupBox.SetBounds(4, this.otherGroupBox.Top + this.otherGroupBox.Height + 4, this.dxfColorsGroupBox.Width, this.dxfColorsGroupBox.Height)
-                this.dxfColorsGroupBox.Visible = true
-                this.ClientHeight = this.dxfColorsGroupBox.Top + this.dxfColorsGroupBox.Height + 4
+                // this.writeColors.Visible = false
+                // this.makeTrianglesDoubleSided.Top = this.writeColors.Top
+                // this.translatePlantsToWindowPositions.Top = this.makeTrianglesDoubleSided.Top + this.makeTrianglesDoubleSided.Height + 4
+                // this.otherGroupBox.Height = this.translatePlantsToWindowPositions.Top + this.translatePlantsToWindowPositions.Height + 6
+                // this.dxfColorsGroupBox.SetBounds(4, this.otherGroupBox.Top + this.otherGroupBox.Height + 4, this.dxfColorsGroupBox.Width, this.dxfColorsGroupBox.Height)
+                // this.dxfColorsGroupBox.Visible = true
                 break
             case ExportFormats.kPOV:
                 this.Caption = "Save POV Include (INC) File"
-                this.plantNameAndCylinderSidesPanel.Visible = false
-                this.writePlantNumberInFrontOfName.Visible = false
-                this.pressPlantsPanel.Top = 16
-                this.writeColors.Top = this.pressPlantsPanel.Top + this.pressPlantsPanel.Height
-                this.makeTrianglesDoubleSided.Top = this.writeColors.Top + this.writeColors.Height + 4
-                this.translatePlantsToWindowPositions.Top = this.makeTrianglesDoubleSided.Top + this.makeTrianglesDoubleSided.Height + 4
-                this.otherGroupBox.Height = this.translatePlantsToWindowPositions.Top + this.translatePlantsToWindowPositions.Height + 6
-                this.reorientGroupBox.SetBounds(4, this.drawWhichPlantsGroupBox.Top + this.drawWhichPlantsGroupBox.Height + 4, this.reorientGroupBox.Width, this.reorientGroupBox.Height)
-                this.otherGroupBox.SetBounds(4, this.reorientGroupBox.Top + this.reorientGroupBox.Height + 4, this.otherGroupBox.Width, this.otherGroupBox.Height)
-                this.povLimitsGroupBox.SetBounds(4, this.otherGroupBox.Top + this.otherGroupBox.Height + 4, this.povLimitsGroupBox.Width, this.povLimitsGroupBox.Height)
-                this.povLimitsGroupBox.Visible = true
-                this.nestingGroupBox.SetBounds(4, this.povLimitsGroupBox.Top + this.povLimitsGroupBox.Height + 4, this.nestingGroupBox.Width, this.nestingGroupBox.Height)
-                this.nestingGroupBox.Visible = true
-                this.ClientHeight = this.nestingGroupBox.Top + this.nestingGroupBox.Height + 4
-                this.layeringOption.Visible = false
+                // this.plantNameAndCylinderSidesPanel.Visible = false
+                // this.writePlantNumberInFrontOfName.Visible = false
+                // this.pressPlantsPanel.Top = 16
+                // this.writeColors.Top = this.pressPlantsPanel.Top + this.pressPlantsPanel.Height
+                // this.makeTrianglesDoubleSided.Top = this.writeColors.Top + this.writeColors.Height + 4
+                // this.translatePlantsToWindowPositions.Top = this.makeTrianglesDoubleSided.Top + this.makeTrianglesDoubleSided.Height + 4
+                // this.otherGroupBox.Height = this.translatePlantsToWindowPositions.Top + this.translatePlantsToWindowPositions.Height + 6
+                // this.reorientGroupBox.SetBounds(4, this.drawWhichPlantsGroupBox.Top + this.drawWhichPlantsGroupBox.Height + 4, this.reorientGroupBox.Width, this.reorientGroupBox.Height)
+                // this.otherGroupBox.SetBounds(4, this.reorientGroupBox.Top + this.reorientGroupBox.Height + 4, this.otherGroupBox.Width, this.otherGroupBox.Height)
+                // this.povLimitsGroupBox.SetBounds(4, this.otherGroupBox.Top + this.otherGroupBox.Height + 4, this.povLimitsGroupBox.Width, this.povLimitsGroupBox.Height)
+                // this.povLimitsGroupBox.Visible = true
+                // this.nestingGroupBox.SetBounds(4, this.povLimitsGroupBox.Top + this.povLimitsGroupBox.Height + 4, this.nestingGroupBox.Width, this.nestingGroupBox.Height)
+                // this.nestingGroupBox.Visible = true
+                // this.layeringOption.Visible = false
                 break
             case ExportFormats.k3DS:
                 this.Caption = "Save 3DS File"
-                this.threeDSWarningPanel.SetBounds(4, this.otherGroupBox.Top + this.otherGroupBox.Height + 4, this.threeDSWarningPanel.Width, this.threeDSWarningPanel.Height)
-                this.threeDSWarningPanel.Visible = true
-                this.ClientHeight = this.threeDSWarningPanel.Top + this.threeDSWarningPanel.Height + 4
+                // this.threeDSWarningPanel.SetBounds(4, this.otherGroupBox.Top + this.otherGroupBox.Height + 4, this.threeDSWarningPanel.Width, this.threeDSWarningPanel.Height)
+                // this.threeDSWarningPanel.Visible = true
                 break
             case ExportFormats.kOBJ:
                 this.Caption = "Save WaveFront OBJ File (ASCII)"
                 break
             case ExportFormats.kVRML:
                 this.Caption = "Save VRML File"
-                this.layeringOption.Visible = false
-                this.reorientGroupBox.SetBounds(4, this.drawWhichPlantsGroupBox.Top + this.drawWhichPlantsGroupBox.Height + 4, this.reorientGroupBox.Width, this.reorientGroupBox.Height)
-                this.otherGroupBox.SetBounds(4, this.reorientGroupBox.Top + this.reorientGroupBox.Height + 4, this.otherGroupBox.Width, this.otherGroupBox.Height)
-                this.vrmlVersionRadioGroup.SetBounds(4, this.otherGroupBox.Top + this.otherGroupBox.Height + 4, this.vrmlVersionRadioGroup.Width, this.vrmlVersionRadioGroup.Height)
-                this.vrmlVersionRadioGroup.Visible = true
-                this.nestingGroupBox.SetBounds(4, this.vrmlVersionRadioGroup.Top + this.vrmlVersionRadioGroup.Height + 4, this.nestingGroupBox.Width, this.nestingGroupBox.Height)
-                this.commentOutUnionAtEnd.Visible = false
-                this.nestingGroupBox.Height = this.nestInflorescence.Top + this.nestInflorescence.Height + 6
-                this.nestingGroupBox.Visible = true
-                this.ClientHeight = this.nestingGroupBox.Top + this.nestingGroupBox.Height + 4
+                // this.layeringOption.Visible = false
+                // this.reorientGroupBox.SetBounds(4, this.drawWhichPlantsGroupBox.Top + this.drawWhichPlantsGroupBox.Height + 4, this.reorientGroupBox.Width, this.reorientGroupBox.Height)
+                // this.otherGroupBox.SetBounds(4, this.reorientGroupBox.Top + this.reorientGroupBox.Height + 4, this.otherGroupBox.Width, this.otherGroupBox.Height)
+                // this.vrmlVersionRadioGroup.SetBounds(4, this.otherGroupBox.Top + this.otherGroupBox.Height + 4, this.vrmlVersionRadioGroup.Width, this.vrmlVersionRadioGroup.Height)
+                // this.vrmlVersionRadioGroup.Visible = true
+                // this.nestingGroupBox.SetBounds(4, this.vrmlVersionRadioGroup.Top + this.vrmlVersionRadioGroup.Height + 4, this.nestingGroupBox.Width, this.nestingGroupBox.Height)
+                // this.commentOutUnionAtEnd.Visible = false
+                // this.nestingGroupBox.Height = this.nestInflorescence.Top + this.nestInflorescence.Height + 6
+                // this.nestingGroupBox.Visible = true
                 break
             case ExportFormats.kLWO:
                 this.Caption = "Save Lightwave LWO File"
@@ -312,7 +318,7 @@ export class TGeneric3DOptionsForm {
                 if ((this.useVisiblePlants) && (plant.hidden)) {
                     continue
                 }
-                plant.countPlantPartsFor3DOutput(this.outputType, StrToIntDef(this.stemCylinderFaces.Text, 20))
+                plant.countPlantPartsFor3DOutput(this.outputType, this.options.stemCylinderFaces /* TODO PDF: Use or remove: StrToIntDef(this.stemCylinderFaces.Text, 20) */)
                 this.totalPoints = this.totalPoints + plant.total3DExportPoints
                 this.totalTriangles = this.totalTriangles + plant.total3DExportTriangles
                 this.totalParts = this.totalParts + plant.totalPlantParts
@@ -638,33 +644,17 @@ export class TGeneric3DOptionsForm {
         this.colorsByPlantPart.Visible = this.dxfWriteColors.Checked
         this.setPlantPartColor.Visible = this.dxfWriteColors.Checked
     }
+
+    oninit(vnode: any) {
+        this.close = vnode.attrs.close
+        this.outputType = vnode.attrs.outputType,
+        this.options = JSON.parse(JSON.stringify(vnode.attrs.options))
+    }
     
     view() {
-        return m("Generic3DOptionsForm.TGeneric3DOptionsForm",
-            {
-            // Top: "119",
-            // Left: "245",
-            // Height: "0",
-            // Width: "0",
-            // BorderStyle: "bsDialog",
-            // Caption: "3D Export Options",
-            // ClientHeight: "529",
-            // ClientWidth: "576",
-            // Font.Charset: "DEFAULT_CHARSET",
-            // Font.Color: "clWindowText",
-            // Font.Height: "-11",
-            // Font.Name: "Arial",
-            // Font.Style: "[]",
-            // KeyPreview: "True",
-            // Position: "poScreenCenter",
-            // Scaled: "False",
-            // OnActivate: "FormActivate",
-            // OnKeyPress: "FormKeyPress",
-            // PixelsPerInch: "96",
-            // TextHeight: "14",
-            },
-            m("Group.Group.g00000004",
-                m("TGroupBox.drawWhichPlantsGroupBox.TGroupBox",
+        return m("div.Generic3DOptionsForm.TGeneric3DOptionsForm",
+            m("div.Group.Group.g00000004",
+                m("div.TGroupBox.drawWhichPlantsGroupBox.TGroupBox",
                     " Include ",
                     m("div.Group.Group.g00000016",
                         m("input[type=radio].useSelectedPlants.TRadioButton",
@@ -728,7 +718,7 @@ export class TGeneric3DOptionsForm {
                 },
                 caption("&Help"),
             ),
-            m("TRadioGroup.layeringOption.TRadioGroup",
+            m("div.TRadioGroup.layeringOption.TRadioGroup",
                 {
                     // Top: "81",
                     // Left: "4",
@@ -742,7 +732,7 @@ export class TGeneric3DOptionsForm {
                 },
                 " Group by ",
             ),
-            m("TGroupBox.dxfColorsGroupBox.TGroupBox",
+            m("div.TGroupBox.dxfColorsGroupBox.TGroupBox",
                 {
                     // Top: "91",
                     // Left: "290",
@@ -773,7 +763,7 @@ export class TGeneric3DOptionsForm {
                     },
                     caption("use front-face &RGB colors"),
                 ),
-                m("Group.Group.g00000056",
+                m("div.Group.Group.g00000056",
                     m("input[type=radio].colorDXFFromOneColor.TRadioButton",
                         {
                             // Top: "56",
@@ -818,7 +808,7 @@ export class TGeneric3DOptionsForm {
                     },
                     caption("use colors &based on type of part"),
                 ),
-                m("TListBox.colorsByPlantPart.TListBox",
+                m("div.TListBox.colorsByPlantPart.TListBox",
                     {
                         // Top: "95",
                         // Left: "27",
@@ -834,7 +824,7 @@ export class TGeneric3DOptionsForm {
                     },
                 ),
             ),
-            m("TGroupBox.reorientGroupBox.TGroupBox",
+            m("div.TGroupBox.reorientGroupBox.TGroupBox",
                 {
                     // Top: "158",
                     // Left: "4",
@@ -856,7 +846,7 @@ export class TGeneric3DOptionsForm {
                         // Value: "0",
                     },
                 ),
-                m("Group.Group.g00000019",
+                m("div.Group.Group.g00000019",
                     m("div.Label1.TLabel",
                         {
                             // Top: "19",
@@ -889,7 +879,7 @@ export class TGeneric3DOptionsForm {
                         // Value: "10000",
                     },
                 ),
-                m("Group.Group.g00000045",
+                m("div.Group.Group.g00000045",
                     m("div.Label7.TLabel",
                         {
                             // Top: "45",
@@ -910,7 +900,7 @@ export class TGeneric3DOptionsForm {
                     ),
                 ),
             ),
-            m("TGroupBox.otherGroupBox.TGroupBox",
+            m("div.TGroupBox.otherGroupBox.TGroupBox",
                 {
                     // Top: "232",
                     // Left: "4",
@@ -940,7 +930,7 @@ export class TGeneric3DOptionsForm {
                             // Value: "3",
                         },
                     ),
-                    m("Group.Group.g00000007",
+                    m("div.Group.Group.g00000007",
                         m("div.Label2.TLabel",
                             {
                                 // Top: "7",
@@ -974,7 +964,7 @@ export class TGeneric3DOptionsForm {
                             // OnChange: "stemCylinderFacesChange",
                         },
                     ),
-                    m("Group.Group.g00000035",
+                    m("div.Group.Group.g00000035",
                         m("div.stemCylinderFacesLabel.TLabel",
                             {
                                 // Top: "35",
@@ -1078,7 +1068,7 @@ export class TGeneric3DOptionsForm {
                     caption("&Translate plants to match window positions"),
                 ),
             ),
-            m("TGroupBox.nestingGroupBox.TGroupBox",
+            m("div.TGroupBox.nestingGroupBox.TGroupBox",
                 {
                     // Top: "246",
                     // Left: "290",
@@ -1088,7 +1078,7 @@ export class TGeneric3DOptionsForm {
                     // Visible: "False",
                 },
                 " Nest ",
-                m("Group.Group.g00000018",
+                m("div.Group.Group.g00000018",
                     m("label.checkbox-inline.nestLeafAndPetiole.TCheckBox", m("input[type=checkbox]",
                         {
                             // Top: "18",
@@ -1151,7 +1141,7 @@ export class TGeneric3DOptionsForm {
                     caption("Comment out &union of plants at end"),
                 ),
             ),
-            m("TRadioGroup.vrmlVersionRadioGroup.TRadioGroup",
+            m("div.TRadioGroup.vrmlVersionRadioGroup.TRadioGroup",
                 {
                     // Top: "351",
                     // Left: "290",
@@ -1195,7 +1185,7 @@ export class TGeneric3DOptionsForm {
                     "Note: This version of the 3DS export function does not import equally well to all 3D programs. See the help system for tips on improving 3DS compatibility.",
                 ),
             ),
-            m("TGroupBox.povLimitsGroupBox.TGroupBox",
+            m("div.TGroupBox.povLimitsGroupBox.TGroupBox",
                 {
                     // Top: "449",
                     // Left: "290",
