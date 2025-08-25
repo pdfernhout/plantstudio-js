@@ -14,10 +14,10 @@ import type { PdSection } from "./PdSection"
 import { calcSCurveCoeffsWithResult, SCurveStructure, scurveWithResult } from "./SCurveStructure"
 import { TPoint } from "./TPoint"
 import { TRect } from "./TRect"
-import { ExportFormats, fileTypeFor3DExportType } from "./U3dexport"
+import { ExportFormats, FileExport3DOptionsStructure, fileTypeFor3DExportType } from "./U3dexport"
 import { intMax, intMin, max, safedivExcept } from "./umath"
 import { kBringForward, kChangeHeight, kChangeWidth, kCopyToClipboard, kCreateFirstGeneration, kDontCopyToClipboard, kDown, kHide, kLeft, kRight, kRotateX, kRotateY, kRotateZ, kSendBackward, kShow, kUp, PdAlignPlantsCommand, PdAnimatePlantCommand, PdBooleanValue, PdBreedFromParentsCommand, PdCenterDrawingCommand, PdChangeDomain3DOptionsCommand, PdChangeDomainOptionsCommand, PdChangeMagnificationCommand, PdChangeMainWindowOrientationCommand, PdChangeMainWindowViewingOptionCommand, PdChangePlantAgeCommand, PdChangeSelectedPlantsCommand, PdCreateAmendmentCommand, PdDeleteAmendmentCommand, PdDragCommand, PdDuplicateCommand, PdEditAmendmentCommand, PdEditNoteCommand, PdHideOrShowCommand, PdMakeTimeSeriesCommand, PdNewCommand, PdPackPlantsCommand, PdPasteCommand, PdRandomizeCommand, PdRemoveCommand, PdRenameCommand, PdResetRotationsCommand, PdResizePlantsCommand, PdResizePlantsToSameWidthOrHeightCommand, PdRotateCommand, PdScrollCommand, PdSelectOrDeselectAllCommand, PdSelectPosingPartCommand, PdSendBackwardOrForwardCommand } from "./updcom"
-import { chr, cleanUpAfterFileSave, createSaveFileNamesStructure, FileType, found, getFileSaveInfo, IDCANCEL, IDNO, IDYES, kAskForFileName, kDontAskForFileName, len, lowercase, mrCancel, mrOK, nameStringForFileType, Point, pos, Rect, removeItem, rHeight, rWidth, SaveFileNamesStructure, setSinglePoint, startFileSave, stringBeyond, stringUpTo, trim, uppercase } from "./usupport"
+import { chr, cleanUpAfterFileSave, createSaveFileNamesStructure, extensionForFileType, FileType, found, getFileSaveInfo, IDCANCEL, IDNO, IDYES, kAskForFileName, kDontAskForFileName, len, lowercase, mrCancel, mrOK, nameStringForFileType, Point, pos, Rect, removeItem, replacePunctuationWithUnderscores, rHeight, rWidth, SaveFileNamesStructure, setSinglePoint, startFileSave, stringBeyond, stringUpTo, trim, uppercase } from "./usupport"
 import { viewMainForm } from "./TMainForm-view"
 import { convertColor } from "./KfDrawingSurface"
 import { Cursor, cursor_change, cursor_getCurrentCursorAsCSS, cursor_startWait, cursor_stopWait, CursorMode } from "./ucursor"
@@ -41,6 +41,7 @@ import { PdBooleanParameterPanel } from "./PdBooleanParameterPanel"
 import { PdSCurveParameterPanel } from "./PdSCurveParameterPanel"
 import { PdSmallintParameterPanel } from "./PdSmallintParameterPanel"
 import { PdRealParameterPanel } from "./PdRealParameterPanel"
+import { TGeneric3DOptionsForm } from "./TGeneric3DOptionsForm"
 
 type PosingField = 
     "hide" // posingHidePart
@@ -1304,73 +1305,73 @@ export class TMainForm {
     */
     
     ExportToGeneric3DType(outputType: short): void {
-        unfinished()
-        // let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
-        // let optionsForm: TGeneric3DOptionsForm
-        // let tempOptions: FileExport3DOptionsStructure
-        // let fileType: short
-        // let fileDescriptor: string
-        // let optionsChanged: boolean
-        // let excludeInvisiblePlants: boolean
-        // let excludeNonSelectedPlants: boolean
+        let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
+        let optionsForm: TGeneric3DOptionsForm
+        let tempOptions: FileExport3DOptionsStructure
+        let fileType: short
+        let fileDescriptor: string
+        let optionsChanged: boolean
+        let excludeInvisiblePlants: boolean
+        let excludeNonSelectedPlants: boolean
         
-        // optionsChanged = false
-        // optionsForm = uoptions3dexport.TGeneric3DOptionsForm().create(this)
-        // if (optionsForm === null) {
-        //     throw new Error("Problem: Could not create 3D export options window.")
-        // }
-        // optionsForm.outputType = outputType
-        // optionsForm.rearrangeItemsForOutputType()
-        // optionsForm.options = domain.exportOptionsFor3D[outputType]
-        // const response = optionsForm.ShowModal()
-        // tempOptions = optionsForm.options
-        // optionsChanged = optionsForm.optionsChanged
-        // if (response !== mrOK) {
-        //     return
-        // }
-        // fileType = fileTypeFor3DExportType(outputType)
-        // fileDescriptor = nameStringForFileType(fileType)
-        // exportTo3DFileSaveAttemptsThisSession[outputType] += 1
-        // const suggestedFileName = "plants" + IntToStr(exportTo3DFileSaveAttemptsThisSession[outputType]) + "." + usupport.extensionForFileType(fileType)
-        // if (!getFileSaveInfo(fileType, kAskForFileName, suggestedFileName, fileInfo)) {
-        //     if (optionsChanged) {
-        //         if (MessageDialog(fileDescriptor + " export stopped." + chr(13) + chr(13) + "Do you want to save the changes you made" + chr(13) + "to the " + fileDescriptor + " export options?", mtConfirmation, mbYesNo, 0) === IDYES) {
-        //             const newCommand = new PdChangeDomain3DOptionsCommand(tempOptions, outputType)
-        //             this.doCommand(newCommand)
-        //         }
-        //     }
-        //     return
-        // }
+        optionsChanged = false
+        optionsForm = new TGeneric3DOptionsForm()
+        if (optionsForm === null) {
+            throw new Error("Problem: Could not create 3D export options window.")
+        }
+        optionsForm.outputType = outputType
+        optionsForm.rearrangeItemsForOutputType()
+        optionsForm.options = domain.exportOptionsFor3D[outputType]
+        const response = mrOK // TODO PDF: Fix this: optionsForm.ShowModal()
+        tempOptions = optionsForm.options
+        optionsChanged = optionsForm.optionsChanged
+        if (response !== mrOK) {
+            return
+        }
+        fileType = fileTypeFor3DExportType(outputType)
+        fileDescriptor = nameStringForFileType(fileType)
+        exportTo3DFileSaveAttemptsThisSession[outputType] += 1
+        const suggestedFileName = "plants" + IntToStr(exportTo3DFileSaveAttemptsThisSession[outputType]) + "." + extensionForFileType(fileType)
+        if (!getFileSaveInfo(fileType, kAskForFileName, suggestedFileName, fileInfo)) {
+            if (optionsChanged) {
+                if (MessageDialog(fileDescriptor + " export stopped." + chr(13) + chr(13) + "Do you want to save the changes you made" + chr(13) + "to the " + fileDescriptor + " export options?", mtConfirmation, mbYesNo, 0) === IDYES) {
+                    const newCommand = new PdChangeDomain3DOptionsCommand(tempOptions, outputType)
+                    this.doCommand(newCommand)
+                }
+            }
+            return
+        }
+        // TODO PDF: Fix or remove: enoughRoomToSaveFile
         // if (!this.enoughRoomToSaveFile(fileInfo.tempFile, fileDescriptor, tempOptions.fileSize)) {
         //     return
         // }
-        // if (optionsChanged) {
-        //     const newCommand = new PdChangeDomain3DOptionsCommand(tempOptions, outputType)
-        //     this.doCommand(newCommand)
-        // }
-        // try {
-        //     startFileSave(fileInfo)
-        //     if (outputType === FileType.kPOV) {
-        //         fileInfo.newFile = usupport.replacePunctuationWithUnderscores(stringUpTo(ExtractFileName(fileInfo.newFile), ".")) + ".inc"
-        //     }
-        //     startWaitMessage("Saving " + ExtractFileName(fileInfo.newFile) + "...")
-        //     excludeInvisiblePlants = false
-        //     excludeNonSelectedPlants = false
-        //     switch (tempOptions.exportType) {
-        //         case kIncludeSelectedPlants:
-        //             excludeInvisiblePlants = true
-        //             excludeNonSelectedPlants = true
-        //             break
-        //         case kIncludeVisiblePlants:
-        //             excludeInvisiblePlants = true
-        //             break
-        //     }
-        //     domain.plantManager.write3DOutputFileToFileName(this.selectedPlants, excludeInvisiblePlants, excludeNonSelectedPlants, fileInfo.tempFile, outputType)
-        //     fileInfo.writingWasSuccessful = true
-        // } finally {
-        //     stopWaitMessage()
-        //     cleanUpAfterFileSave(fileInfo)
-        // }
+        if (optionsChanged) {
+            const newCommand = new PdChangeDomain3DOptionsCommand(tempOptions, outputType)
+            this.doCommand(newCommand)
+        }
+        try {
+            startFileSave(fileInfo)
+            if (outputType === ExportFormats.kPOV) {
+                fileInfo.newFile = replacePunctuationWithUnderscores(stringUpTo(ExtractFileName(fileInfo.newFile), ".")) + ".inc"
+            }
+            startWaitMessage("Saving " + ExtractFileName(fileInfo.newFile) + "...")
+            excludeInvisiblePlants = false
+            excludeNonSelectedPlants = false
+            switch (tempOptions.exportType) {
+                case kIncludeSelectedPlants:
+                    excludeInvisiblePlants = true
+                    excludeNonSelectedPlants = true
+                    break
+                case kIncludeVisiblePlants:
+                    excludeInvisiblePlants = true
+                    break
+            }
+            domain.plantManager.write3DOutputFileToFileName(this.selectedPlants, excludeInvisiblePlants, excludeNonSelectedPlants, fileInfo.tempFile, outputType)
+            fileInfo.writingWasSuccessful = true
+        } finally {
+            stopWaitMessage()
+            cleanUpAfterFileSave(fileInfo)
+        }
     }
     
     MenuPlantExportToDXFClick(): void {
