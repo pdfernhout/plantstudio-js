@@ -1,78 +1,81 @@
 // unit uoptions3dexport
 
-from conversion_common import *
-import uplant
-import umain
-import udomain
-import udxfclr
-import usupport
-import updform
-import u3dexport
-import uturtle
-import delphi_compatability
+import * as m from "mithril"
+import { caption, float, HelpJump, int, long, MessageDialog, short, StrToFloat, StrToIntDef, TColorRef } from "./common"
+import { kMaxOutputCylinderFaces, kMinOutputCylinderFaces } from "./PdDomain"
+import { ExportFormats, FileExport3DOptionsStructure } from "./U3dexport"
+import { valueString } from "./usupport"
 
-// const
+// from conversion_common import *
+// import uplant
+// import umain
+// import udomain
+// import udxfclr
+// import usupport
+// import updform
+// import u3dexport
+// import uturtle
+// import delphi_compatability
+
 const kTransferLoad = 1
 const kTransferSave = 2
 
-
-
 export class TGeneric3DOptionsForm {
-    drawWhichPlantsGroupBox: TGroupBox = new TGroupBox()
-    useSelectedPlants: TRadioButton = new TRadioButton()
-    useVisiblePlants: TRadioButton = new TRadioButton()
-    useAllPlants: TRadioButton = new TRadioButton()
-    otherGroupBox: TGroupBox = new TGroupBox()
-    translatePlantsToWindowPositions: TCheckBox = new TCheckBox()
-    dxfColorsGroupBox: TGroupBox = new TGroupBox()
-    colorDXFFromRGB: TRadioButton = new TRadioButton()
-    colorDXFFromOneColor: TRadioButton = new TRadioButton()
-    wholePlantColor: TPanel = new TPanel()
-    colorDXFFromPlantPartType: TRadioButton = new TRadioButton()
-    colorsByPlantPart: TListBox = new TListBox()
-    setPlantPartColor: TButton = new TButton()
-    povLimitsGroupBox: TGroupBox = new TGroupBox()
-    Label4: TLabel = new TLabel()
-    Label5: TLabel = new TLabel()
-    minLineLengthToWrite: TEdit = new TEdit()
-    minTdoScaleToWrite: TEdit = new TEdit()
-    nestingGroupBox: TGroupBox = new TGroupBox()
-    nestLeafAndPetiole: TCheckBox = new TCheckBox()
-    nestCompoundLeaf: TCheckBox = new TCheckBox()
-    nestInflorescence: TCheckBox = new TCheckBox()
-    nestPedicelAndFlowerFruit: TCheckBox = new TCheckBox()
-    nestFloralLayers: TCheckBox = new TCheckBox()
-    commentOutUnionAtEnd: TCheckBox = new TCheckBox()
-    layeringOption: TRadioGroup = new TRadioGroup()
-    writeColors: TCheckBox = new TCheckBox()
-    Close: TButton = new TButton()
-    cancel: TButton = new TButton()
-    helpButton: TSpeedButton = new TSpeedButton()
-    threeDSWarningPanel: TPanel = new TPanel()
-    Label6: TLabel = new TLabel()
-    plantNameAndCylinderSidesPanel: TPanel = new TPanel()
-    Label2: TLabel = new TLabel()
-    Label3: TLabel = new TLabel()
-    stemCylinderFacesLabel: TLabel = new TLabel()
-    sidesLabel: TLabel = new TLabel()
-    lengthOfShortName: TSpinEdit = new TSpinEdit()
-    stemCylinderFaces: TSpinEdit = new TSpinEdit()
-    dxfWriteColors: TCheckBox = new TCheckBox()
-    reorientGroupBox: TGroupBox = new TGroupBox()
-    xRotationBeforeDraw: TSpinEdit = new TSpinEdit()
-    writePlantNumberInFrontOfName: TCheckBox = new TCheckBox()
-    vrmlVersionRadioGroup: TRadioGroup = new TRadioGroup()
-    Label10: TLabel = new TLabel()
-    Label1: TLabel = new TLabel()
-    overallScalingFactor_pct: TSpinEdit = new TSpinEdit()
-    Label9: TLabel = new TLabel()
-    Label7: TLabel = new TLabel()
-    estimationStringGrid: TStringGrid = new TStringGrid()
-    pressPlantsPanel: TPanel = new TPanel()
-    pressPlants: TCheckBox = new TCheckBox()
-    directionToPressPlants: TComboBox = new TComboBox()
-    Label8: TLabel = new TLabel()
-    makeTrianglesDoubleSided: TCheckBox = new TCheckBox()
+    // drawWhichPlantsGroupBox: TGroupBox = new TGroupBox()
+    // useSelectedPlants: TRadioButton = new TRadioButton()
+    // useVisiblePlants: TRadioButton = new TRadioButton()
+    // useAllPlants: TRadioButton = new TRadioButton()
+    // otherGroupBox: TGroupBox = new TGroupBox()
+    // translatePlantsToWindowPositions: TCheckBox = new TCheckBox()
+    // dxfColorsGroupBox: TGroupBox = new TGroupBox()
+    // colorDXFFromRGB: TRadioButton = new TRadioButton()
+    // colorDXFFromOneColor: TRadioButton = new TRadioButton()
+    // wholePlantColor: TPanel = new TPanel()
+    // colorDXFFromPlantPartType: TRadioButton = new TRadioButton()
+    // colorsByPlantPart: TListBox = new TListBox()
+    // setPlantPartColor: TButton = new TButton()
+    // povLimitsGroupBox: TGroupBox = new TGroupBox()
+    // Label4: TLabel = new TLabel()
+    // Label5: TLabel = new TLabel()
+    // minLineLengthToWrite: TEdit = new TEdit()
+    // minTdoScaleToWrite: TEdit = new TEdit()
+    // nestingGroupBox: TGroupBox = new TGroupBox()
+    // nestLeafAndPetiole: TCheckBox = new TCheckBox()
+    // nestCompoundLeaf: TCheckBox = new TCheckBox()
+    // nestInflorescence: TCheckBox = new TCheckBox()
+    // nestPedicelAndFlowerFruit: TCheckBox = new TCheckBox()
+    // nestFloralLayers: TCheckBox = new TCheckBox()
+    // commentOutUnionAtEnd: TCheckBox = new TCheckBox()
+    // layeringOption: TRadioGroup = new TRadioGroup()
+    // writeColors: TCheckBox = new TCheckBox()
+    // Close: TButton = new TButton()
+    // cancel: TButton = new TButton()
+    // helpButton: TSpeedButton = new TSpeedButton()
+    // threeDSWarningPanel: TPanel = new TPanel()
+    // Label6: TLabel = new TLabel()
+    // plantNameAndCylinderSidesPanel: TPanel = new TPanel()
+    // Label2: TLabel = new TLabel()
+    // Label3: TLabel = new TLabel()
+    // stemCylinderFacesLabel: TLabel = new TLabel()
+    // sidesLabel: TLabel = new TLabel()
+    // lengthOfShortName: TSpinEdit = new TSpinEdit()
+    // stemCylinderFaces: TSpinEdit = new TSpinEdit()
+    // dxfWriteColors: TCheckBox = new TCheckBox()
+    // reorientGroupBox: TGroupBox = new TGroupBox()
+    // xRotationBeforeDraw: TSpinEdit = new TSpinEdit()
+    // writePlantNumberInFrontOfName: TCheckBox = new TCheckBox()
+    // vrmlVersionRadioGroup: TRadioGroup = new TRadioGroup()
+    // Label10: TLabel = new TLabel()
+    // Label1: TLabel = new TLabel()
+    // overallScalingFactor_pct: TSpinEdit = new TSpinEdit()
+    // Label9: TLabel = new TLabel()
+    // Label7: TLabel = new TLabel()
+    // estimationStringGrid: TStringGrid = new TStringGrid()
+    // pressPlantsPanel: TPanel = new TPanel()
+    // pressPlants: TCheckBox = new TCheckBox()
+    // directionToPressPlants: TComboBox = new TComboBox()
+    // Label8: TLabel = new TLabel()
+    // makeTrianglesDoubleSided: TCheckBox = new TCheckBox()
     outputType: short = 0
     transferDirection: short = 0
     options: FileExport3DOptionsStructure = new FileExport3DOptionsStructure()
@@ -82,11 +85,9 @@ export class TGeneric3DOptionsForm {
     totalPoints: long = 0
     totalTriangles: long = 0
     totalMaterials: long = 0
-    TGeneric3DOptionsForm.prototype = new PdForm()
-    TGeneric3DOptionsForm.prototype.constructor = TGeneric3DOptionsForm
     
     //$R *.DFM
-    FormActivate(Sender: TObject): void {
+    FormActivate(): void {
         // outputType must be set before this is called
         this.transferDirection = kTransferLoad
         if (this.outputType === u3dexport.kDXF) {
@@ -96,7 +97,7 @@ export class TGeneric3DOptionsForm {
         this.updatePredictedSizeDisplay()
     }
     
-    CloseClick(Sender: TObject): void {
+    CloseClick(): void {
         if ((this.useSelectedPlants.Checked) && (umain.MainForm.selectedPlants.Count <= 0)) {
             // do not let them complete action if no plants are selected
             MessageDialog("You chose \"selected\" for \"Draw which plants\", but no plants are selected." + chr(13) + "You should make another choice, or click Cancel and select some plants.", delphi_compatability.TMsgDlgType.mtError, {mbOK, }, 0)
@@ -135,7 +136,7 @@ export class TGeneric3DOptionsForm {
         this.ModalResult = mrOK
     }
     
-    cancelClick(Sender: TObject): void {
+    cancelClick(): void {
         this.ModalResult = mrCancel
     }
     
@@ -347,26 +348,26 @@ export class TGeneric3DOptionsForm {
     estimateBytes(numPlants: long, numParts: long, numPoints: long, numTriangles: long): long {
         let result = 0
         switch (this.outputType) {
-            case u3dexport.kDXF:
+            case ExportFormats.kDXF:
                 result = numPoints * 250
                 break
-            case u3dexport.kPOV:
+            case ExportFormats.kPOV:
                 result = numPlants * 25 + numParts * 25 + numTriangles * 150
                 break
-            case u3dexport.k3DS:
+            case ExportFormats.k3DS:
                 result = numPlants * 48 + numParts * 48 + numPoints * 24 + numTriangles * 24
                 break
-            case u3dexport.kOBJ:
+            case ExportFormats.kOBJ:
                 result = numPlants * 100 + numParts * 100 + numPoints * 50 + numTriangles * 50
                 break
-            case u3dexport.kVRML:
+            case ExportFormats.kVRML:
                 result = numPlants * 100 + numParts * 100 + numPoints * 80 + numTriangles * 80
                 break
-            case u3dexport.kLWO:
+            case ExportFormats.kLWO:
                 result = numPlants * 600 + numParts * 100 + numPoints * 20 + numTriangles * 20
                 break
             default:
-                throw new GeneralException.create("Problem: Invalid 3d export type for size estimation.")
+                throw new Error("Problem: Invalid 3d export type for size estimation.")
                 break
         }
         return result
@@ -427,13 +428,13 @@ export class TGeneric3DOptionsForm {
         UNRESOLVED.winprocs.drawText(this.colorsByPlantPart.Canvas.Handle, cText, len(cText), remainderRect, delphi_compatability.DT_LEFT)
     }
     
-    wholePlantColorMouseUp(Sender: TObject, Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
+    wholePlantColorMouseUp(Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
         let colorForm: TChooseDXFColorForm
         let response: int
         
         colorForm = udxfclr.TChooseDXFColorForm().create(this)
         if (colorForm === null) {
-            throw new GeneralException.create("Problem: Could not create color window.")
+            throw new Error("Problem: Could not create color window.")
         }
         try {
             colorForm.colorIndex = this.options.dxf_wholePlantColorIndex
@@ -450,19 +451,16 @@ export class TGeneric3DOptionsForm {
         }
     }
     
-    setPlantPartColorClick(Sender: TObject): void {
+    setPlantPartColorClick(): void {
         let colorForm: TChooseDXFColorForm
         let response: int
         let firstColorIndex: TColorRef
-        let i: short
         
         firstColorIndex = -1
-        if (this.colorsByPlantPart.Items.Count > 0) {
-            for (i = 0; i <= this.colorsByPlantPart.Items.Count - 1; i++) {
-                if (this.colorsByPlantPart.Selected[i]) {
-                    if (firstColorIndex === -1) {
-                        firstColorIndex = this.options.dxf_plantPartColorIndexes[i]
-                    }
+        for (let i = 0; i < this.colorsByPlantPart.Items.Count; i++) {
+            if (this.colorsByPlantPart.Selected[i]) {
+                if (firstColorIndex === -1) {
+                    firstColorIndex = this.options.dxf_plantPartColorIndexes[i]
                 }
             }
         }
@@ -471,17 +469,15 @@ export class TGeneric3DOptionsForm {
         }
         colorForm = udxfclr.TChooseDXFColorForm().create(this)
         if (colorForm === null) {
-            throw new GeneralException.create("Problem: Could not create color window.")
+            throw new Error("Problem: Could not create color window.")
         }
         try {
             colorForm.colorIndex = firstColorIndex
             response = colorForm.ShowModal()
             if (response === mrOK) {
-                if (this.colorsByPlantPart.Items.Count > 0) {
-                    for (i = 0; i <= this.colorsByPlantPart.Items.Count - 1; i++) {
-                        if (this.colorsByPlantPart.Selected[i]) {
-                            this.options.dxf_plantPartColorIndexes[i] = colorForm.colorIndex
-                        }
+                for (let i = 0; i < this.colorsByPlantPart.Items.Count; i++) {
+                    if (this.colorsByPlantPart.Selected[i]) {
+                        this.options.dxf_plantPartColorIndexes[i] = colorForm.colorIndex
                     }
                 }
                 this.colorsByPlantPart.Invalidate()
@@ -493,7 +489,7 @@ export class TGeneric3DOptionsForm {
         }
     }
     
-    colorsByPlantPartDblClick(Sender: TObject): void {
+    colorsByPlantPartDblClick(): void {
         this.setPlantPartColorClick(this)
     }
     
@@ -577,7 +573,7 @@ export class TGeneric3DOptionsForm {
         let newValue: float
         
         if (this.transferDirection === kTransferLoad) {
-            editBox.Text = usupport.valueString(value)
+            editBox.Text = valueString(value)
         } else if (this.transferDirection === kTransferSave) {
             try {
                 newValue = StrToFloat(editBox.Text)
@@ -592,42 +588,42 @@ export class TGeneric3DOptionsForm {
         return value
     }
     
-    helpButtonClick(Sender: TObject): void {
-        delphi_compatability.Application.HelpJump("Exporting_3D_models_in_general")
+    helpButtonClick(): void {
+        HelpJump("Exporting_3D_models_in_general")
     }
     
-    FormKeyPress(Sender: TObject, Key: char): void {
+    FormKeyPress(Key: char): void {
         Key = usupport.makeEnterWorkAsTab(this, this.ActiveControl, Key)
         return Key
     }
     
-    useSelectedPlantsClick(Sender: TObject): void {
+    useSelectedPlantsClick(): void {
         this.updatePredictedSizeDisplay()
     }
     
-    useVisiblePlantsClick(Sender: TObject): void {
+    useVisiblePlantsClick(): void {
         this.updatePredictedSizeDisplay()
     }
     
-    useAllPlantsClick(Sender: TObject): void {
+    useAllPlantsClick(): void {
         this.updatePredictedSizeDisplay()
     }
     
-    stemCylinderFacesChange(Sender: TObject): void {
+    stemCylinderFacesChange(): void {
         let value: int
         
         value = StrToIntDef(this.stemCylinderFaces.Text, 5)
-        if (value < udomain.kMinOutputCylinderFaces) {
-            value = udomain.kMinOutputCylinderFaces
+        if (value < kMinOutputCylinderFaces) {
+            value = kMinOutputCylinderFaces
         }
-        if (value > udomain.kMaxOutputCylinderFaces) {
-            value = udomain.kMaxOutputCylinderFaces
+        if (value > kMaxOutputCylinderFaces) {
+            value = kMaxOutputCylinderFaces
         }
         this.stemCylinderFaces.Text = IntToStr(value)
         this.updatePredictedSizeDisplay()
     }
     
-    dxfWriteColorsClick(Sender: TObject): void {
+    dxfWriteColorsClick(): void {
         this.colorDXFFromRGB.Visible = this.dxfWriteColors.Checked
         this.colorDXFFromOneColor.Visible = this.dxfWriteColors.Checked
         this.wholePlantColor.Visible = this.dxfWriteColors.Checked
@@ -636,5 +632,656 @@ export class TGeneric3DOptionsForm {
         this.setPlantPartColor.Visible = this.dxfWriteColors.Checked
     }
     
+    view() {
+        return m("Generic3DOptionsForm.TGeneric3DOptionsForm",
+            {
+            // Top: "119",
+            // Left: "245",
+            // Height: "0",
+            // Width: "0",
+            // BorderStyle: "bsDialog",
+            // Caption: "3D Export Options",
+            // ClientHeight: "529",
+            // ClientWidth: "576",
+            // Font.Charset: "DEFAULT_CHARSET",
+            // Font.Color: "clWindowText",
+            // Font.Height: "-11",
+            // Font.Name: "Arial",
+            // Font.Style: "[]",
+            // KeyPreview: "True",
+            // Position: "poScreenCenter",
+            // Scaled: "False",
+            // OnActivate: "FormActivate",
+            // OnKeyPress: "FormKeyPress",
+            // PixelsPerInch: "96",
+            // TextHeight: "14",
+            },
+            m("Group.Group.g00000004",
+                m("TGroupBox.drawWhichPlantsGroupBox.TGroupBox",
+                    {
+                        // Top: "4",
+                        // Left: "4",
+                        // Height: "76",
+                        // Width: "280",
+                        // TabOrder: "0",
+                    },
+                    " Include ",
+                    m("Group.Group.g00000016",
+                        m("input[type=radio].useSelectedPlants.TRadioButton",
+                            {
+                                onclick: () => this.useSelectedPlantsClick(),
+                                // Top: "16",
+                                // Left: "8",
+                                // Height: "17",
+                                // Width: "96",
+                                // TabOrder: "0",
+                            },
+                            caption("se&lected plants"),
+                        ),
+                        m("input[type=radio].useVisiblePlants.TRadioButton",
+                            {
+                                onclick: () => this.useVisiblePlantsClick(),
+                                // Top: "16",
+                                // Left: "107",
+                                // Height: "17",
+                                // Width: "82",
+                                // TabOrder: "1",
+                            },
+                            caption("&visible plants"),
+                        ),
+                        m("input[type=radio].useAllPlants.TRadioButton",
+                            {
+                                onclick: () => this.useAllPlantsClick(),
+                                // Top: "16",
+                                // Left: "206",
+                                // Height: "17",
+                                // Width: "65",
+                                // TabOrder: "2",
+                            },
+                            caption("&all plants"),
+                        ),
+                    ),
+                    m("TStringGrid.estimationStringGrid.TStringGrid",
+                        {
+                            // Top: "35",
+                            // Left: "5",
+                            // Height: "35",
+                            // Width: "270",
+                            // Color: "clBtnFace",
+                            // ColCount: "6",
+                            // Ctl3D: "False",
+                            // DefaultColWidth: "42",
+                            // DefaultRowHeight: "16",
+                            // FixedColor: "clBtnHighlight",
+                            // FixedCols: "0",
+                            // RowCount: "3",
+                            // FixedRows: "2",
+                            // Font.Charset: "DEFAULT_CHARSET",
+                            // Font.Color: "clBlue",
+                            // Font.Height: "-11",
+                            // Font.Name: "Arial",
+                            // Font.Style: "[]",
+                            // Options: "[goFixedVertLine, goFixedHorzLine, goDrawFocusSelected]",
+                            // ParentCtl3D: "False",
+                            // ParentFont: "False",
+                            // ScrollBars: "ssNone",
+                            // TabOrder: "3",
+                            // ColWidths: ["","","","","",""],
+                        },
+                    ),
+                ),
+                m("button.Close.TButton",
+                    {
+                        onclick: () => this.CloseClick(),
+                        // Top: "4",
+                        // Left: "290",
+                        // Height: "21",
+                        // Width: "60",
+                        // TabOrder: "6",
+                    },
+                    caption("&Save"),
+                ),
+            ),
+            m("button.cancel.TButton",
+                {
+                    onclick: () => this.cancelClick(),
+                    // Top: "27",
+                    // Left: "290",
+                    // Height: "21",
+                    // Width: "60",
+                    // Cancel: "True",
+                    // TabOrder: "7",
+                },
+                caption("&Cancel"),
+            ),
+            m("button.helpButton.TSpeedButton",
+                {
+                    onclick: () => this.helpButtonClick(),
+                    // Top: "64",
+                    // Left: "290",
+                    // Height: "21",
+                    // Width: "60",
+                    // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888888888888888888888888888880C08888888888888CCC88888888888880C0888888888888888888888888888888C888888888888888C088888888888888CC888888888888888CC888888888800880CC888888888CC880CC888888888CC080CC8888888888CCCCC888888888888CCC88888888888888888888888",
+                },
+                caption("&Help"),
+            ),
+            m("TRadioGroup.layeringOption.TRadioGroup",
+                {
+                    // Top: "81",
+                    // Left: "4",
+                    // Height: "75",
+                    // Width: "280",
+                    // Ctl3D: "True",
+                    // ItemIndex: "0",
+                    // Items.Strings: ["&whole plant","&type of plant part","individual plant &part"],
+                    // ParentCtl3D: "False",
+                    // TabOrder: "5",
+                },
+                " Group by ",
+            ),
+            m("TGroupBox.dxfColorsGroupBox.TGroupBox",
+                {
+                    // Top: "91",
+                    // Left: "290",
+                    // Height: "152",
+                    // Width: "280",
+                    // TabOrder: "2",
+                    // Visible: "False",
+                },
+                " Colors ",
+                m("label.checkbox-inline.dxfWriteColors.TCheckBox", m("input[type=checkbox]",
+                    {
+                        onclick: () => this.dxfWriteColorsClick(),
+                        // Top: "16",
+                        // Left: "10",
+                        // Height: "17",
+                        // Width: "101",
+                        // TabOrder: "6",
+                    },),
+                    caption("Write &colors"),
+                ),
+                m("input[type=radio].colorDXFFromRGB.TRadioButton",
+                    {
+                        // Top: "35",
+                        // Left: "9",
+                        // Height: "17",
+                        // Width: "232",
+                        // TabOrder: "0",
+                    },
+                    caption("use front-face &RGB colors"),
+                ),
+                m("Group.Group.g00000056",
+                    m("input[type=radio].colorDXFFromOneColor.TRadioButton",
+                        {
+                            // Top: "56",
+                            // Left: "9",
+                            // Height: "15",
+                            // Width: "244",
+                            // TabOrder: "1",
+                        },
+                        caption("use this o&ne color         for all plant parts"),
+                    ),
+                    m("div.wholePlantColor.TPanel",
+                        {
+                            // Top: "56",
+                            // Left: "119",
+                            // Height: "14",
+                            // Width: "16",
+                            // BevelInner: "bvLowered",
+                            // BevelOuter: "bvLowered",
+                            // TabOrder: "2",
+                            // OnMouseUp: "wholePlantColorMouseUp",
+                        },
+                    ),
+                ),
+                m("button.setPlantPartColor.TButton",
+                    {
+                        onclick: () => this.setPlantPartColorClick(),
+                        // Top: "71",
+                        // Left: "221",
+                        // Height: "22",
+                        // Width: "53",
+                        // TabOrder: "5",
+                    },
+                    caption("&Set..."),
+                ),
+                m("input[type=radio].colorDXFFromPlantPartType.TRadioButton",
+                    {
+                        // Top: "77",
+                        // Left: "9",
+                        // Height: "15",
+                        // Width: "182",
+                        // TabOrder: "3",
+                    },
+                    caption("use colors &based on type of part"),
+                ),
+                m("TListBox.colorsByPlantPart.TListBox",
+                    {
+                        // Top: "95",
+                        // Left: "27",
+                        // Height: "52",
+                        // Width: "247",
+                        // ItemHeight: "16",
+                        // Items.Strings: ["Meristems","Internodes","Leaves","First leaves","Flowers (F)","Flowers (M)","Inflor. (F)","Inflor. (M)","Fruit","Root top"],
+                        // MultiSelect: "True",
+                        // Style: "lbOwnerDrawFixed",
+                        // TabOrder: "4",
+                        // OnDblClick: "colorsByPlantPartDblClick",
+                        // OnDrawItem: "colorsByPlantPartDrawItem",
+                    },
+                ),
+            ),
+            m("TGroupBox.reorientGroupBox.TGroupBox",
+                {
+                    // Top: "158",
+                    // Left: "4",
+                    // Height: "70",
+                    // Width: "281",
+                    // TabOrder: "9",
+                },
+                " Reorient ",
+                m("TSpinEdit.xRotationBeforeDraw.TSpinEdit",
+                    {
+                        // Top: "15",
+                        // Left: "62",
+                        // Height: "23",
+                        // Width: "57",
+                        // Increment: "5",
+                        // MaxValue: "180",
+                        // MinValue: "-180",
+                        // TabOrder: "0",
+                        // Value: "0",
+                    },
+                ),
+                m("Group.Group.g00000019",
+                    m("div.Label1.TLabel",
+                        {
+                            // Top: "19",
+                            // Left: "10",
+                            // Height: "14",
+                            // Width: "46",
+                        },
+                        "Rotate by",
+                    ),
+                    m("div.Label10.TLabel",
+                        {
+                            // Top: "19",
+                            // Left: "124",
+                            // Height: "14",
+                            // Width: "106",
+                        },
+                        "degrees (-180 to 180)",
+                    ),
+                ),
+                m("TSpinEdit.overallScalingFactor_pct.TSpinEdit",
+                    {
+                        // Top: "41",
+                        // Left: "62",
+                        // Height: "23",
+                        // Width: "57",
+                        // Increment: "5",
+                        // MaxValue: "10000",
+                        // MinValue: "1",
+                        // TabOrder: "1",
+                        // Value: "10000",
+                    },
+                ),
+                m("Group.Group.g00000045",
+                    m("div.Label7.TLabel",
+                        {
+                            // Top: "45",
+                            // Left: "10",
+                            // Height: "14",
+                            // Width: "42",
+                        },
+                        "Scale by",
+                    ),
+                    m("div.Label9.TLabel",
+                        {
+                            // Top: "45",
+                            // Left: "124",
+                            // Height: "14",
+                            // Width: "91",
+                        },
+                        "percent (1-10,000)",
+                    ),
+                ),
+            ),
+            m("TGroupBox.otherGroupBox.TGroupBox",
+                {
+                    // Top: "232",
+                    // Left: "4",
+                    // Height: "175",
+                    // Width: "280",
+                    // TabOrder: "1",
+                },
+                " Other options ",
+                m("div.plantNameAndCylinderSidesPanel.TPanel",
+                    {
+                        // Top: "16",
+                        // Left: "6",
+                        // Height: "56",
+                        // Width: "261",
+                        // BevelOuter: "bvNone",
+                        // TabOrder: "2",
+                    },
+                    m("TSpinEdit.lengthOfShortName.TSpinEdit",
+                        {
+                            // Top: "3",
+                            // Left: "99",
+                            // Height: "23",
+                            // Width: "45",
+                            // MaxValue: "60",
+                            // MinValue: "1",
+                            // TabOrder: "0",
+                            // Value: "3",
+                        },
+                    ),
+                    m("Group.Group.g00000007",
+                        m("div.Label2.TLabel",
+                            {
+                                // Top: "7",
+                                // Left: "5",
+                                // Height: "14",
+                                // Width: "88",
+                                // FocusControl: "stemCylinderFaces",
+                            },
+                            caption("Limit plant &name to"),
+                        ),
+                        m("div.Label3.TLabel",
+                            {
+                                // Top: "7",
+                                // Left: "151",
+                                // Height: "14",
+                                // Width: "86",
+                            },
+                            "characters (1-60)",
+                        ),
+                    ),
+                    m("TSpinEdit.stemCylinderFaces.TSpinEdit",
+                        {
+                            // Top: "30",
+                            // Left: "153",
+                            // Height: "23",
+                            // Width: "45",
+                            // MaxValue: "20",
+                            // MinValue: "3",
+                            // TabOrder: "1",
+                            // Value: "3",
+                            // OnChange: "stemCylinderFacesChange",
+                        },
+                    ),
+                    m("Group.Group.g00000035",
+                        m("div.stemCylinderFacesLabel.TLabel",
+                            {
+                                // Top: "35",
+                                // Left: "5",
+                                // Height: "14",
+                                // Width: "145",
+                                // FocusControl: "stemCylinderFaces",
+                            },
+                            caption("Draw stems as c&ylinders with"),
+                        ),
+                        m("div.sidesLabel.TLabel",
+                            {
+                                // Top: "35",
+                                // Left: "200",
+                                // Height: "14",
+                                // Width: "59",
+                            },
+                            "sides (3-20)",
+                        ),
+                    ),
+                ),
+                m("div.pressPlantsPanel.TPanel",
+                    {
+                        // Top: "69",
+                        // Left: "2",
+                        // Height: "28",
+                        // Width: "273",
+                        // BevelOuter: "bvNone",
+                        // TabOrder: "4",
+                    },
+                    m("select.directionToPressPlants.TComboBox",
+                        {
+                            // Top: "3",
+                            // Left: "108",
+                            // Height: "22",
+                            // Width: "41",
+                            // Style: "csDropDownList",
+                            // ItemHeight: "14",
+                            // Items.Strings: ["x","y","z"],
+                            // TabOrder: "1",
+                        },
+                    ),
+                    m("label.checkbox-inline.pressPlants.TCheckBox", m("input[type=checkbox]",
+                        {
+                            // Top: "8",
+                            // Left: "8",
+                            // Height: "17",
+                            // Width: "99",
+                            // TabOrder: "0",
+                        },),
+                        caption("\"Pr&ess\" plants in"),
+                    ),
+                    m("div.Label8.TLabel",
+                        {
+                            // Top: "11",
+                            // Left: "154",
+                            // Height: "14",
+                            // Width: "48",
+                        },
+                        "dimension",
+                    ),
+                ),
+                m("label.checkbox-inline.writePlantNumberInFrontOfName.TCheckBox", m("input[type=checkbox]",
+                    {
+                        // Top: "96",
+                        // Left: "10",
+                        // Height: "17",
+                        // Width: "219",
+                        // TabOrder: "3",
+                    },),
+                    caption("Write plant n&umber in front of name"),
+                ),
+                m("label.checkbox-inline.writeColors.TCheckBox", m("input[type=checkbox]",
+                    {
+                        // Top: "115",
+                        // Left: "10",
+                        // Height: "17",
+                        // Width: "101",
+                        // TabOrder: "1",
+                    },),
+                    caption("Write &colors"),
+                ),
+                m("label.checkbox-inline.makeTrianglesDoubleSided.TCheckBox", m("input[type=checkbox]",
+                    {
+                        // Top: "133",
+                        // Left: "10",
+                        // Height: "17",
+                        // Width: "181",
+                        // TabOrder: "5",
+                    },),
+                    caption("&Double polygons on 3D objects"),
+                ),
+                m("label.checkbox-inline.translatePlantsToWindowPositions.TCheckBox", m("input[type=checkbox]",
+                    {
+                        // Top: "151",
+                        // Left: "10",
+                        // Height: "17",
+                        // Width: "245",
+                        // TabOrder: "0",
+                    },),
+                    caption("&Translate plants to match window positions"),
+                ),
+            ),
+            m("TGroupBox.nestingGroupBox.TGroupBox",
+                {
+                    // Top: "246",
+                    // Left: "290",
+                    // Height: "100",
+                    // Width: "280",
+                    // TabOrder: "4",
+                    // Visible: "False",
+                },
+                " Nest ",
+                m("Group.Group.g00000018",
+                    m("label.checkbox-inline.nestLeafAndPetiole.TCheckBox", m("input[type=checkbox]",
+                        {
+                            // Top: "18",
+                            // Left: "17",
+                            // Height: "17",
+                            // Width: "122",
+                            // TabOrder: "0",
+                        },),
+                        caption("leaves with &petioles"),
+                    ),
+                    m("label.checkbox-inline.nestPedicelAndFlowerFruit.TCheckBox", m("input[type=checkbox]",
+                        {
+                            // Top: "18",
+                            // Left: "142",
+                            // Height: "17",
+                            // Width: "130",
+                            // TabOrder: "3",
+                        },),
+                        caption("&flowers with pedicels"),
+                    ),
+                ),
+                m("label.checkbox-inline.nestFloralLayers.TCheckBox", m("input[type=checkbox]",
+                    {
+                        // Top: "36",
+                        // Left: "142",
+                        // Height: "17",
+                        // Width: "118",
+                        // TabOrder: "4",
+                    },),
+                    caption("pistils and sta&mens"),
+                ),
+                m("label.checkbox-inline.nestCompoundLeaf.TCheckBox", m("input[type=checkbox]",
+                    {
+                        // Top: "37",
+                        // Left: "17",
+                        // Height: "17",
+                        // Width: "119",
+                        // TabOrder: "1",
+                    },),
+                    caption("&compound leaves"),
+                ),
+                m("label.checkbox-inline.nestInflorescence.TCheckBox", m("input[type=checkbox]",
+                    {
+                        // Top: "55",
+                        // Left: "17",
+                        // Height: "17",
+                        // Width: "97",
+                        // TabOrder: "2",
+                    },),
+                    caption("&inflorescences"),
+                ),
+                m("label.checkbox-inline.commentOutUnionAtEnd.TCheckBox", m("input[type=checkbox]",
+                    {
+                        // Top: "77",
+                        // Left: "17",
+                        // Height: "18",
+                        // Width: "207",
+                        // TabOrder: "5",
+                    },),
+                    caption("Comment out &union of plants at end"),
+                ),
+            ),
+            m("TRadioGroup.vrmlVersionRadioGroup.TRadioGroup",
+                {
+                    // Top: "351",
+                    // Left: "290",
+                    // Height: "38",
+                    // Width: "280",
+                    // Columns: "2",
+                    // Ctl3D: "True",
+                    // ItemIndex: "1",
+                    // Items.Strings: ["VRML &1.0","VRML &2.0 (VRML 97)"],
+                    // ParentCtl3D: "False",
+                    // TabOrder: "10",
+                    // Visible: "False",
+                },
+                " Version ",
+            ),
+            m("div.threeDSWarningPanel.TPanel",
+                {
+                    // Top: "394",
+                    // Left: "290",
+                    // Height: "52",
+                    // Width: "280",
+                    // BevelInner: "bvRaised",
+                    // BevelOuter: "bvLowered",
+                    // TabOrder: "8",
+                    // Visible: "False",
+                },
+                m("div.Label6.TLabel",
+                    {
+                        // Top: "4",
+                        // Left: "7",
+                        // Height: "42",
+                        // Width: "265",
+                        // Font.Charset: "DEFAULT_CHARSET",
+                        // Font.Color: "clBlue",
+                        // Font.Height: "-11",
+                        // Font.Name: "Arial",
+                        // Font.Style: "[]",
+                        // ParentFont: "False",
+                        // WordWrap: "True",
+                    },
+                    "Note: This version of the 3DS export function does not import equally well to all 3D programs. See the help system for tips on improving 3DS compatibility.",
+                ),
+            ),
+            m("TGroupBox.povLimitsGroupBox.TGroupBox",
+                {
+                    // Top: "449",
+                    // Left: "290",
+                    // Height: "74",
+                    // Width: "280",
+                    // TabOrder: "3",
+                    // Visible: "False",
+                },
+                " Limit small lines and 3D objects ",
+                m("input.minLineLengthToWrite.TEdit",
+                    {
+                        // Top: "19",
+                        // Left: "17",
+                        // Height: "22",
+                        // Width: "51",
+                        // TabOrder: "0",
+                    },
+                ),
+                m("div.Label4.TLabel",
+                    {
+                        // Top: "23",
+                        // Left: "72",
+                        // Height: "14",
+                        // Width: "158",
+                        // FocusControl: "minLineLengthToWrite",
+                    },
+                    caption("&Keep lines at least this long (mm)"),
+                ),
+                m("input.minTdoScaleToWrite.TEdit",
+                    {
+                        // Top: "45",
+                        // Left: "17",
+                        // Height: "22",
+                        // Width: "51",
+                        // TabOrder: "1",
+                    },
+                ),
+                m("div.Label5.TLabel",
+                    {
+                        // Top: "49",
+                        // Left: "72",
+                        // Height: "14",
+                        // Width: "179",
+                        // FocusControl: "minTdoScaleToWrite",
+                    },
+                    caption("Keep &3D objects of at least this scale"),
+                ),
+            ),
+        )
+    }
 }
 
