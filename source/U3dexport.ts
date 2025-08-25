@@ -8,20 +8,32 @@ import { KfDrawingSurface } from "./KfDrawingSurface"
 
 // unit U3dexport
 
+// export part types
 export enum ExportPart {
+    // meristem
     kExportPartMeristem = 0,
+
+    // internode
     kExportPartInternode = 1,
+
+    // leaf
     kExportPartSeedlingLeaf = 2,
     kExportPartLeaf = 3,
     kExportPartFirstPetiole = 4,
     kExportPartPetiole = 5,
-    kExportPartLeafStipule = 6,
+    kExportPartLeafStipule = 6, // no stipule on first leaves
+
+    // inflorescence female
     kExportPartInflorescenceStalkFemale = 7,
     kExportPartInflorescenceInternodeFemale = 8,
     kExportPartInflorescenceBractFemale = 9,
+
+    // inflorescence male
     kExportPartInflorescenceStalkMale = 10,
     kExportPartInflorescenceInternodeMale = 11,
     kExportPartInflorescenceBractMale = 12,
+
+    // flower female
     kExportPartPedicelFemale = 13,
     kExportPartFlowerBudFemale = 14,
     kExportPartStyleFemale = 15,
@@ -34,18 +46,26 @@ export enum ExportPart {
     kExportPartFourthPetalsFemale = 22,
     kExportPartFifthPetalsFemale = 23,
     kExportPartSepalsFemale = 24,
+
+    // flower male
     kExportPartPedicelMale = 25,
     kExportPartFlowerBudMale = 26,
     kExportPartFilamentMale = 27,
     kExportPartAntherMale = 28,
     kExportPartFirstPetalsMale = 29,
     kExportPartSepalsMale = 30,
+
+    // fruit
     kExportPartUnripeFruit = 31,
     kExportPartRipeFruit = 32,
+
+    // root top
     kExportPartRootTop = 33,
+
     kExportPartLast = 33,
 }
 
+// DXF
 const kLastDxfColorIndex = 10
 export const dxfColors = [ColorDefs.clRed, ColorDefs.clYellow, ColorDefs.clLime, ColorDefs.clAqua, ColorDefs.clBlue, ColorDefs.clPurple, ColorDefs.clBlack, ColorDefs.clOlive, ColorDefs.clFuchsia, ColorDefs.clTeal, ColorDefs.clGray, ]
 
@@ -53,6 +73,7 @@ const kColorDXFFromPlantPartType = 0
 const kColorDXFFromRGB = 1
 const kColorDXFFromOneColor = 3
 
+// POV
 export enum NestingType {
     kNestingTypeInflorescence = 0,
     kNestingTypeLeafAndPetiole = 1,
@@ -61,13 +82,19 @@ export enum NestingType {
     kNestingTypeFloralLayers = 4,
 }
 
-const kMaxPOVPlants = 1000
+const kMaxPOVPlants = 1000 // can't imagine anyone would save more than that
+
+// 3DS
+// OBJ, LWO
 export const kMaxStoredMaterials = 1000
 
+// VRML
 const kVRMLVersionOne = 0
 const kVRMLVersionTwo = 1
 
 // TODO: Fix constants copied from U3dexport
+
+// general
 export enum ExportFormats {
     kScreen = 0,
     kDXF = 1,
@@ -95,25 +122,6 @@ export enum Axis {
     kZ = 2,
 }
 
-
-// export part types
-// meristem
-// internode
-// leaf
-// no stipule on first leaves
-// inflorescence female
-// inflorescence male
-// flower female
-// flower male
-// fruit
-// root top
-// DXF
-// POV
-// can't imagine anyone would save more than that
-// 3DS
-// OBJ, LWO
-// VRML
-// general
 // record
 export interface Vertex {
     x: float
@@ -129,9 +137,9 @@ export interface Triangle {
     surfaceID: int
 }
 
-// generic
 // record
 export class FileExport3DOptionsStructure {
+    // generic
     exportType: short = 0
     layeringOption: short = 0
     stemCylinderFaces: short = 0
@@ -140,11 +148,13 @@ export class FileExport3DOptionsStructure {
     writePlantNumberInFrontOfName: boolean = false
     writeColors: boolean = false
     overallScalingFactor_pct: short = 0
-    fileSize: float = 0
-    xRotationBeforeDraw: short = 0
+    fileSize: float = 0 // don't save in settings file
+    xRotationBeforeDraw: short = 0 // to deal with quirks in other programs
     pressPlants: boolean = false
     directionToPressPlants: short = 0
     makeTrianglesDoubleSided: boolean = false
+    
+    // specific (keep in generic structure so one window can handle all of these)
     dxf_whereToGetColors: short = 0
     dxf_wholePlantColorIndex: short = 0
     dxf_plantPartColorIndexes: short[] = Array(ExportPart.kExportPartLast + 1)
@@ -159,9 +169,7 @@ export class FileExport3DOptionsStructure {
     vrml_version: short = 0
 }
 
-// const
 const kNumVRMLPointsPerLine = 4
-
 
 // record
 export interface SingleOverlay {
@@ -384,10 +392,6 @@ function getInfoForDXFPartType(index: short): [string, string] {
     return [longName, shortName]
 }
 
-
-// don't save in settings file
-// to deal with quirks in other programs
-// specific (keep in generic structure so one window can handle all of these)
 export class KfFileExportSurface extends KfDrawingSurface {
     fileName: string = ""
     scale: float = 0.0
