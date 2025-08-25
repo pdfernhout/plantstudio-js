@@ -140,7 +140,7 @@ const commonColors = {
 }
 
 function CssHexColorToNumber(cssColor: string) {
-    return parseInt(cssColor.substring(5,7) + cssColor.substring(3,5) + cssColor.substring(1,3), 16);
+    return parseInt(cssColor.substring(1,3) + cssColor.substring(3,5) + cssColor.substring(5,7), 16);
 }
 
 type PageSpec = {
