@@ -4830,12 +4830,15 @@ export class TMainForm {
         const changed = await customModal((resolve: any) => {
             return m("div",
                 m("h4", "Edit note for: " + plant.getName()),
-                m("textarea.pa2.w-100", { rows: 10, value: note, onchange: (event: any) => note = event.target.value }),
+                m("textarea.noteEditMemo.pa2.w-100", { rows: 10, value: note, onchange: (event: any) => note = event.target.value }),
                 m("div.ma2.flex.justify-end", 
                     m("button", { onclick: () => { resolve(false) }
                     }, "Cancel"),
                     m("button.ml2", { onclick: () => { resolve(true) }
-                    }, "OK")
+                    }, "OK"),
+                    // TODO PDF: Not sure where this help jump should go (it's in help file but not online?)
+                    // m("button.ml2", { onclick: () => { HelpJump("Editing_plant_notes") }
+                    // }, "Help")
                 )
             )
         })
