@@ -1,7 +1,7 @@
 // unit uoptions3dexport
 
 import * as m from "mithril"
-import { caption, ffFixed, float, FloatToStrF, HelpJump, int, intround, IntToStr, long, MessageDialog, mtConfirmation, short, StrToFloat, StrToIntDef, TColorRef } from "./common"
+import { caption, ffFixed, float, FloatToStrF, HelpJump, imageDir, int, intround, IntToStr, long, MessageDialog, mtConfirmation, short, StrToFloat, StrToIntDef, TColorRef } from "./common"
 import { domain, kIncludeAllPlants, kIncludeSelectedPlants, kIncludeVisiblePlants, kMaxOutputCylinderFaces, kMinOutputCylinderFaces } from "./PdDomain"
 import { dxfColors, ExportFormats, ExportPart, FileExport3DOptionsStructure, kMax3DFaces, kMax3DPoints, kMaxStoredMaterials, longNameForDXFPartType } from "./U3dexport"
 import { chr, len, valueString } from "./usupport"
@@ -100,7 +100,6 @@ export class TGeneric3DOptionsForm {
             this.fillPlantPartColors()
         }
         this.transferFields()
-        this.updatePredictedSizeDisplay()
     }
     
     CloseClick(): void {
@@ -214,16 +213,22 @@ export class TGeneric3DOptionsForm {
     transferFields(): void {
         let oldExportType: short
         
+        // options that work for all types
         if (this.transferDirection === kTransferLoad) {
             switch (this.options.exportType) {
                 case kIncludeSelectedPlants:
-                    // options that work for all types
                     this.useSelectedPlants = true
+                    this.useVisiblePlants = false
+                    this.useAllPlants = false
                     break
                 case kIncludeVisiblePlants:
+                    this.useSelectedPlants = false
                     this.useVisiblePlants = true
+                    this.useAllPlants = false
                     break
                 case kIncludeAllPlants:
+                    this.useSelectedPlants = false
+                    this.useVisiblePlants = false
                     this.useAllPlants = true
                     break
             }
@@ -296,9 +301,6 @@ export class TGeneric3DOptionsForm {
                 break
         }
     }
-    
-    updatePredictedSizeDisplay(): void {
-    }
 
     predictedSizeView() {
         this.totalPlants = 0
@@ -337,22 +339,26 @@ export class TGeneric3DOptionsForm {
             sizeAndUnit = IntToStr(intround(this.options.fileSize * 1024)) + " K"
         }
 
-        return m("table",
-            m("tr",
-                m("th", "plants"),
-                m("th", "parts"),
-                m("th", "points"),
-                m("th", "polygons"),
-                m("th", "colors"),
-                m("th", "size"),
+        return m("table.collapse",
+            m("thead",
+                m("tr",
+                    m("th.pa1.ba", "plants"),
+                    m("th.pa1.ba", "parts"),
+                    m("th.pa1.ba", "points"),
+                    m("th.pa1.ba", "polygons"),
+                    m("th.pa1.ba", "colors"),
+                    m("th.pa1.ba", "size"),
+                ),
             ),
-            m("tr",
-                m("td", IntToStr(this.totalPlants)),
-                m("td", IntToStr(this.totalParts)),
-                m("td", IntToStr(this.totalPoints)),
-                m("td", IntToStr(this.totalTriangles)),
-                m("td", IntToStr(this.totalMaterials)),
-                m("td", sizeAndUnit),
+            m("tbody",
+                m("tr",
+                    m("td.pa1.ba", IntToStr(this.totalPlants)),
+                    m("td.pa1.ba", IntToStr(this.totalParts)),
+                    m("td.pa1.ba", IntToStr(this.totalPoints)),
+                    m("td.pa1.ba", IntToStr(this.totalTriangles)),
+                    m("td.pa1.ba", IntToStr(this.totalMaterials)),
+                    m("td.pa1.ba", sizeAndUnit),
+                ),
             ),
         )
         // TODO PDF: Use or remove: this.translatePlantsToWindowPositions.Visible = (this.totalPlants > 1)
@@ -611,15 +617,21 @@ export class TGeneric3DOptionsForm {
     // }
     
     useSelectedPlantsClick(): void {
-        this.updatePredictedSizeDisplay()
+        this.useSelectedPlants = true
+        this.useVisiblePlants = false
+        this.useAllPlants = false
     }
     
     useVisiblePlantsClick(): void {
-        this.updatePredictedSizeDisplay()
+        this.useSelectedPlants = false
+        this.useVisiblePlants = true
+        this.useAllPlants = false
     }
     
     useAllPlantsClick(): void {
-        this.updatePredictedSizeDisplay()
+        this.useSelectedPlants = false
+        this.useVisiblePlants = false
+        this.useAllPlants = true
     }
     
     stemCylinderFacesChange(): void {
@@ -633,7 +645,6 @@ export class TGeneric3DOptionsForm {
             value = kMaxOutputCylinderFaces
         }
         this.stemCylinderFaces.Text = IntToStr(value)
-        this.updatePredictedSizeDisplay()
     }
     
     dxfWriteColorsClick(): void {
@@ -649,74 +660,50 @@ export class TGeneric3DOptionsForm {
         this.close = vnode.attrs.close
         this.outputType = vnode.attrs.outputType,
         this.options = JSON.parse(JSON.stringify(vnode.attrs.options))
+        this.rearrangeItemsForOutputType()
     }
     
     view() {
-        return m("div.Generic3DOptionsForm.TGeneric3DOptionsForm",
+        return m("div.Generic3DOptionsForm.TGeneric3DOptionsForm.h-100.overflow-auto",
+            m("div.fs3.b", this.Caption),
             m("div.Group.Group.g00000004",
                 m("div.TGroupBox.drawWhichPlantsGroupBox.TGroupBox",
-                    " Include ",
-                    m("div.Group.Group.g00000016",
-                        m("input[type=radio].useSelectedPlants.TRadioButton",
-                            {
-                                onclick: () => this.useSelectedPlantsClick(),
-                                checked: this.useSelectedPlants
-                            },
+                    "Include:",
+                    m("div.Group.Group.g00000016.ml2",
+                        m("label",
+                            m("input[type=radio].mr1.useSelectedPlants.TRadioButton",
+                                {
+                                    onclick: () => this.useSelectedPlantsClick(),
+                                    checked: this.useSelectedPlants
+                                },
+                            ),
                             caption("se&lected plants"),
                         ),
-                        m("input[type=radio].useVisiblePlants.TRadioButton",
-                            {
-                                onclick: () => this.useVisiblePlantsClick(),
-                                checked: this.useVisiblePlants
-                            },
+                        m("br"),
+                        m("label",
+                            m("input[type=radio].mr1.useVisiblePlants.TRadioButton",
+                                {
+                                    onclick: () => this.useVisiblePlantsClick(),
+                                    checked: this.useVisiblePlants
+                                },
+                            ),
                             caption("&visible plants"),
                         ),
-                        m("input[type=radio].useAllPlants.TRadioButton",
-                            {
-                                onclick: () => this.useAllPlantsClick(),
-                                checked: this.useAllPlants
-                            },
+                        m("br"),
+                        m("label",
+                            m("input[type=radio].mr1.useAllPlants.TRadioButton",
+                                {
+                                    onclick: () => this.useAllPlantsClick(),
+                                    checked: this.useAllPlants
+                                },
+                            ),
                             caption("&all plants"),
                         ),
                     ),
-                    m("div.TStringGrid.estimationStringGrid.TStringGrid",
+                    m("div.TStringGrid.estimationStringGrid.TStringGrid.mt1.mb1",
                         this.predictedSizeView()
                     ),
                 ),
-                m("button.Close.TButton",
-                    {
-                        onclick: () => this.CloseClick(),
-                        // Top: "4",
-                        // Left: "290",
-                        // Height: "21",
-                        // Width: "60",
-                        // TabOrder: "6",
-                    },
-                    caption("&Save"),
-                ),
-            ),
-            m("button.cancel.TButton",
-                {
-                    onclick: () => this.cancelClick(),
-                    // Top: "27",
-                    // Left: "290",
-                    // Height: "21",
-                    // Width: "60",
-                    // Cancel: "True",
-                    // TabOrder: "7",
-                },
-                caption("&Cancel"),
-            ),
-            m("button.helpButton.TSpeedButton",
-                {
-                    onclick: () => this.helpButtonClick(),
-                    // Top: "64",
-                    // Left: "290",
-                    // Height: "21",
-                    // Width: "60",
-                    // Glyph.Data: "F6000000424DF60000000000000076000000280000001000000010000000010004000000000080000000000000000000000010000000100000000000000000008000008000000080800080000000800080008080000080808000C0C0C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888888888888888888888888888880C08888888888888CCC88888888888880C0888888888888888888888888888888C888888888888888C088888888888888CC888888888888888CC888888888800880CC888888888CC880CC888888888CC080CC8888888888CCCCC888888888888CCC88888888888888888888888",
-                },
-                caption("&Help"),
             ),
             m("div.TRadioGroup.layeringOption.TRadioGroup",
                 {
@@ -1232,6 +1219,27 @@ export class TGeneric3DOptionsForm {
                         // FocusControl: "minTdoScaleToWrite",
                     },
                     caption("Keep &3D objects of at least this scale"),
+                ),
+            ),
+            m("div.button",
+                m("button.Close.TButton",
+                    {
+                        onclick: () => this.CloseClick(),
+                    },
+                    caption("&Save"),
+                ),
+                m("button.cancel.TButton.ml2",
+                    {
+                        onclick: () => this.cancelClick(),
+                    },
+                    caption("&Cancel"),
+                ),
+                m("button.helpButton.TSpeedButton.ml2",
+                    {
+                        onclick: () => this.helpButtonClick(),
+                    },
+                    m("img.mr1", { src: imageDir + "Generic_helpButton.png" }),
+                    caption("&Help"),
                 ),
             ),
         )
