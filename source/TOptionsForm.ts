@@ -91,7 +91,7 @@ export class TOptionsForm {
                     },
                     m("img.TImage",
                         {
-                            src: imageDir + "OptionsForm_helpButton.png"
+                            src: imageDir + "Generic_helpButton.png"
                         },
                     ),
                     caption("&Help"),

@@ -179,7 +179,7 @@ export class TUndoRedoListForm {
                     {
                         onclick: () => this.helpButtonClick(),
                     },
-                    m("img.TImage.mr1", { src: imageDir + "UndoRedoListForm_helpButton.png" } ),
+                    m("img.TImage.mr1", { src: imageDir + "Generic_helpButton.png" } ),
                     caption("&Help"),
                 ),
             ),

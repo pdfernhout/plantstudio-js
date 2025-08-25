@@ -326,7 +326,7 @@ export class TBreedingOptionsForm {
                     {
                         onclick: () => this.helpButtonClick(),
                     },
-                    m("img.TImage", { src: imageDir + "BreedingOptionsForm_helpButton.png" } ),
+                    m("img.TImage", { src: imageDir + "Generic_helpButton.png" } ),
                     caption("&Help"),
                 ),
             ),

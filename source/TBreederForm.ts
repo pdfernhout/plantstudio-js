@@ -1267,7 +1267,7 @@ export class TBreederForm {
                     onclick: () => this.helpButtonClick(),
                     title: "Help",
                 },
-                m("img", { src: imageDir + "BreederForm_helpButton.png" })
+                m("img", { src: imageDir + "Generic_helpButton.png" })
             ),
         )
     }

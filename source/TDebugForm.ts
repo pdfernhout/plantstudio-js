@@ -211,7 +211,7 @@ export class TDebugForm {
                     {
                         onclick: () => this.helpButtonClick(),
                     },
-                    m("img.TImage.mr1", { src: imageDir + "DebugForm_helpButton.png" } ),
+                    m("img.TImage.mr1", { src: imageDir + "Generic_helpButton.png" } ),
                     caption("&Help"),
                 ),
                 m("button.supportButton.TButton.ml2",

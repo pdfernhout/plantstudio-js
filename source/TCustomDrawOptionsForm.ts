@@ -115,7 +115,7 @@ export class TCustomDrawOptionsForm {
                     },
                     m("img.TImage",
                         {
-                            src: imageDir + "CustomDrawOptionsForm_helpButton.png"
+                            src: imageDir + "Generic_helpButton.png"
                         },
                     ),
                     caption("&Help"),
