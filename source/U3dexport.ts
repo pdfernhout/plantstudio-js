@@ -47,7 +47,7 @@ export enum ExportPart {
 }
 
 const kLastDxfColorIndex = 10
-const dxfColors = [ColorDefs.clRed, ColorDefs.clYellow, ColorDefs.clLime, ColorDefs.clAqua, ColorDefs.clBlue, ColorDefs.clPurple, ColorDefs.clBlack, ColorDefs.clOlive, ColorDefs.clFuchsia, ColorDefs.clTeal, ColorDefs.clGray, ]
+export const dxfColors = [ColorDefs.clRed, ColorDefs.clYellow, ColorDefs.clLime, ColorDefs.clAqua, ColorDefs.clBlue, ColorDefs.clPurple, ColorDefs.clBlack, ColorDefs.clOlive, ColorDefs.clFuchsia, ColorDefs.clTeal, ColorDefs.clGray, ]
 
 const kColorDXFFromPlantPartType = 0
 const kColorDXFFromRGB = 1
@@ -62,7 +62,7 @@ export enum NestingType {
 }
 
 const kMaxPOVPlants = 1000
-const kMaxStoredMaterials = 1000
+export const kMaxStoredMaterials = 1000
 
 const kVRMLVersionOne = 0
 const kVRMLVersionTwo = 1
@@ -86,8 +86,8 @@ const kLayerOutputByPlantPart = 2
 const kWriteColor = true
 const kDontWriteColor = false
 
-const kMax3DPoints = 65536
-const kMax3DFaces = 65536
+export const kMax3DPoints = 65536
+export const kMax3DFaces = 65536
 
 export enum Axis {
     kX = 0,

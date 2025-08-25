@@ -1,10 +1,14 @@
 // unit uoptions3dexport
 
 import * as m from "mithril"
-import { caption, float, HelpJump, int, long, MessageDialog, short, StrToFloat, StrToIntDef, TColorRef } from "./common"
-import { kMaxOutputCylinderFaces, kMinOutputCylinderFaces } from "./PdDomain"
-import { ExportFormats, FileExport3DOptionsStructure } from "./U3dexport"
-import { valueString } from "./usupport"
+import { caption, ffFixed, float, FloatToStrF, HelpJump, int, intround, IntToStr, long, MessageDialog, short, StrToFloat, StrToIntDef, TColorRef } from "./common"
+import { domain, kIncludeAllPlants, kIncludeSelectedPlants, kIncludeVisiblePlants, kMaxOutputCylinderFaces, kMinOutputCylinderFaces } from "./PdDomain"
+import { dxfColors, ExportFormats, ExportPart, FileExport3DOptionsStructure, kMax3DFaces, kMax3DPoints, kMaxStoredMaterials, longNameForDXFPartType } from "./U3dexport"
+import { chr, len, valueString } from "./usupport"
+import { unfinished } from "./temporary"
+import { TRect } from "./TRect"
+import { PdPlant } from "./PdPlant"
+import { MainForm } from "./FormHolder"
 
 // from conversion_common import *
 // import uplant
@@ -22,9 +26,9 @@ const kTransferSave = 2
 
 export class TGeneric3DOptionsForm {
     // drawWhichPlantsGroupBox: TGroupBox = new TGroupBox()
-    // useSelectedPlants: TRadioButton = new TRadioButton()
-    // useVisiblePlants: TRadioButton = new TRadioButton()
-    // useAllPlants: TRadioButton = new TRadioButton()
+    useSelectedPlants: boolean = true
+    useVisiblePlants: boolean = false
+    useAllPlants: boolean = false
     // otherGroupBox: TGroupBox = new TGroupBox()
     // translatePlantsToWindowPositions: TCheckBox = new TCheckBox()
     // dxfColorsGroupBox: TGroupBox = new TGroupBox()
@@ -85,12 +89,13 @@ export class TGeneric3DOptionsForm {
     totalPoints: long = 0
     totalTriangles: long = 0
     totalMaterials: long = 0
+    Caption: string = "3D Export Options"
     
     //$R *.DFM
     FormActivate(): void {
         // outputType must be set before this is called
         this.transferDirection = kTransferLoad
-        if (this.outputType === u3dexport.kDXF) {
+        if (this.outputType === ExportFormats.kDXF) {
             this.fillPlantPartColors()
         }
         this.transferFields()
@@ -98,13 +103,13 @@ export class TGeneric3DOptionsForm {
     }
     
     CloseClick(): void {
-        if ((this.useSelectedPlants.Checked) && (umain.MainForm.selectedPlants.Count <= 0)) {
+        if ((this.useSelectedPlants) && (MainForm.selectedPlants.length <= 0)) {
             // do not let them complete action if no plants are selected
             MessageDialog("You chose \"selected\" for \"Draw which plants\", but no plants are selected." + chr(13) + "You should make another choice, or click Cancel and select some plants.", delphi_compatability.TMsgDlgType.mtError, {mbOK, }, 0)
             return
         }
-        if (this.outputType === u3dexport.kLWO) {
-            if ((this.totalPoints > u3dexport.kMax3DPoints) || (this.totalTriangles > u3dexport.kMax3DFaces)) {
+        if (this.outputType === ExportFormats.kLWO) {
+            if ((this.totalPoints > kMax3DPoints) || (this.totalTriangles > kMax3DFaces)) {
                 // do not let them complete action if too many points are selected - only for LWO which holds ALL
                 // points and faces until the end of the file
                 MessageDialog("You have selected too many points or triangles for this file format." + chr(13) + "A maximum of 65,536 points or triangles can be exported to one LWO file." + chr(13) + chr(13) + "You should make another choice of plants, or click Cancel and select fewer plants," + chr(13) + "or export to another format.", mtWarning, {mbOK, }, 0)
@@ -112,18 +117,18 @@ export class TGeneric3DOptionsForm {
             }
         }
         switch (this.outputType) {
-            case u3dexport.kOBJ:
-                if ((this.totalPlants * (u3dexport.kExportPartLast + 1) > u3dexport.kMaxStoredMaterials)) {
-                    if (MessageDialog("You have selected too many materials for this file format." + chr(13) + "The number of distinct colors will be bounded at " + IntToStr(u3dexport.kMaxStoredMaterials) + "." + chr(13) + "Some plants may refer to non-existent colors." + chr(13) + chr(13) + "To proceed anyway, click OK.", mtWarning, {mbOK, mbCancel, }, 0) === delphi_compatability.IDCANCEL) {
+            case ExportFormats.kOBJ:
+                if ((this.totalPlants * (ExportPart.kExportPartLast + 1) > kMaxStoredMaterials)) {
+                    if (MessageDialog("You have selected too many materials for this file format." + chr(13) + "The number of distinct colors will be bounded at " + IntToStr(kMaxStoredMaterials) + "." + chr(13) + "Some plants may refer to non-existent colors." + chr(13) + chr(13) + "To proceed anyway, click OK.", mtWarning, {mbOK, mbCancel, }, 0) === delphi_compatability.IDCANCEL) {
                         // warn them if the colors list will be truncated
                         // limit of 1000 materials
                         return
                     }
                 }
                 break
-            case u3dexport.kLWO:
-                if ((this.totalPlants * (u3dexport.kExportPartLast + 1) > u3dexport.kMaxStoredMaterials)) {
-                    if (MessageDialog("You have selected too many materials for this file format." + chr(13) + "The number of distinct colors will be bounded at " + IntToStr(u3dexport.kMaxStoredMaterials) + "." + chr(13) + "Some plants may refer to non-existent colors." + chr(13) + chr(13) + "To proceed anyway, click OK.", mtWarning, {mbOK, mbCancel, }, 0) === delphi_compatability.IDCANCEL) {
+            case ExportFormats.kLWO:
+                if ((this.totalPlants * (ExportPart.kExportPartLast + 1) > kMaxStoredMaterials)) {
+                    if (MessageDialog("You have selected too many materials for this file format." + chr(13) + "The number of distinct colors will be bounded at " + IntToStr(kMaxStoredMaterials) + "." + chr(13) + "Some plants may refer to non-existent colors." + chr(13) + chr(13) + "To proceed anyway, click OK.", mtWarning, {mbOK, mbCancel, }, 0) === delphi_compatability.IDCANCEL) {
                         // warn them if the colors list will be truncated
                         // limit of 1000 materials
                         return
@@ -144,7 +149,7 @@ export class TGeneric3DOptionsForm {
         this.ClientHeight = this.otherGroupBox.Top + this.otherGroupBox.Height + 4
         this.ClientWidth = this.Close.Left + this.Close.Width + 4
         switch (this.outputType) {
-            case u3dexport.kDXF:
+            case ExportFormats.kDXF:
                 this.Caption = "Save DXF File"
                 this.writeColors.Visible = false
                 this.makeTrianglesDoubleSided.Top = this.writeColors.Top
@@ -154,7 +159,7 @@ export class TGeneric3DOptionsForm {
                 this.dxfColorsGroupBox.Visible = true
                 this.ClientHeight = this.dxfColorsGroupBox.Top + this.dxfColorsGroupBox.Height + 4
                 break
-            case u3dexport.kPOV:
+            case ExportFormats.kPOV:
                 this.Caption = "Save POV Include (INC) File"
                 this.plantNameAndCylinderSidesPanel.Visible = false
                 this.writePlantNumberInFrontOfName.Visible = false
@@ -172,16 +177,16 @@ export class TGeneric3DOptionsForm {
                 this.ClientHeight = this.nestingGroupBox.Top + this.nestingGroupBox.Height + 4
                 this.layeringOption.Visible = false
                 break
-            case u3dexport.k3DS:
+            case ExportFormats.k3DS:
                 this.Caption = "Save 3DS File"
                 this.threeDSWarningPanel.SetBounds(4, this.otherGroupBox.Top + this.otherGroupBox.Height + 4, this.threeDSWarningPanel.Width, this.threeDSWarningPanel.Height)
                 this.threeDSWarningPanel.Visible = true
                 this.ClientHeight = this.threeDSWarningPanel.Top + this.threeDSWarningPanel.Height + 4
                 break
-            case u3dexport.kOBJ:
+            case ExportFormats.kOBJ:
                 this.Caption = "Save WaveFront OBJ File (ASCII)"
                 break
-            case u3dexport.kVRML:
+            case ExportFormats.kVRML:
                 this.Caption = "Save VRML File"
                 this.layeringOption.Visible = false
                 this.reorientGroupBox.SetBounds(4, this.drawWhichPlantsGroupBox.Top + this.drawWhichPlantsGroupBox.Height + 4, this.reorientGroupBox.Width, this.reorientGroupBox.Height)
@@ -194,7 +199,7 @@ export class TGeneric3DOptionsForm {
                 this.nestingGroupBox.Visible = true
                 this.ClientHeight = this.nestingGroupBox.Top + this.nestingGroupBox.Height + 4
                 break
-            case u3dexport.kLWO:
+            case ExportFormats.kLWO:
                 this.Caption = "Save Lightwave LWO File"
                 break
         }
@@ -205,25 +210,25 @@ export class TGeneric3DOptionsForm {
         
         if (this.transferDirection === kTransferLoad) {
             switch (this.options.exportType) {
-                case udomain.kIncludeSelectedPlants:
+                case kIncludeSelectedPlants:
                     // options that work for all types
-                    this.useSelectedPlants.Checked = true
+                    this.useSelectedPlants = true
                     break
-                case udomain.kIncludeVisiblePlants:
-                    this.useVisiblePlants.Checked = true
+                case kIncludeVisiblePlants:
+                    this.useVisiblePlants = true
                     break
-                case udomain.kIncludeAllPlants:
-                    this.useAllPlants.Checked = true
+                case kIncludeAllPlants:
+                    this.useAllPlants = true
                     break
             }
         } else {
             oldExportType = this.options.exportType
-            if (this.useSelectedPlants.Checked) {
-                this.options.exportType = udomain.kIncludeSelectedPlants
-            } else if (this.useVisiblePlants.Checked) {
-                this.options.exportType = udomain.kIncludeVisiblePlants
-            } else if (this.useAllPlants.Checked) {
-                this.options.exportType = udomain.kIncludeAllPlants
+            if (this.useSelectedPlants) {
+                this.options.exportType = kIncludeSelectedPlants
+            } else if (this.useVisiblePlants) {
+                this.options.exportType = kIncludeVisiblePlants
+            } else if (this.useAllPlants) {
+                this.options.exportType = kIncludeAllPlants
             }
             if ((oldExportType !== this.options.exportType)) {
                 this.optionsChanged = true
@@ -242,7 +247,7 @@ export class TGeneric3DOptionsForm {
         this.options.makeTrianglesDoubleSided = this.transferCheckBox(this.makeTrianglesDoubleSided, this.options.makeTrianglesDoubleSided)
         // nothing yet
         switch (this.outputType) {
-            case u3dexport.kDXF:
+            case ExportFormats.kDXF:
                 // options for specific types
                 // do after general one to override
                 this.options.writeColors = this.transferCheckBox(this.dxfWriteColors, this.options.writeColors)
@@ -257,7 +262,7 @@ export class TGeneric3DOptionsForm {
                     this.colorsByPlantPart.Invalidate()
                 }
                 break
-            case u3dexport.kPOV:
+            case ExportFormats.kPOV:
                 this.options.pov_minLineLengthToWrite = this.transferSingleEditBox(this.minLineLengthToWrite, this.options.pov_minLineLengthToWrite)
                 this.options.pov_minTdoScaleToWrite = this.transferSingleEditBox(this.minTdoScaleToWrite, this.options.pov_minTdoScaleToWrite)
                 this.options.pov_commentOutUnionAtEnd = this.transferCheckBox(this.commentOutUnionAtEnd, this.options.pov_commentOutUnionAtEnd)
@@ -267,13 +272,13 @@ export class TGeneric3DOptionsForm {
                 this.options.nest_PedicelAndFlowerFruit = this.transferCheckBox(this.nestPedicelAndFlowerFruit, this.options.nest_PedicelAndFlowerFruit)
                 this.options.nest_FloralLayers = this.transferCheckBox(this.nestFloralLayers, this.options.nest_FloralLayers)
                 break
-            case u3dexport.k3DS:
+            case ExportFormats.k3DS:
                 // nothing special
                 break
-            case u3dexport.kOBJ:
+            case ExportFormats.kOBJ:
                 // nothing special
                 break
-            case u3dexport.kVRML:
+            case ExportFormats.kVRML:
                 this.options.nest_Inflorescence = this.transferCheckBox(this.nestInflorescence, this.options.nest_Inflorescence)
                 this.options.nest_LeafAndPetiole = this.transferCheckBox(this.nestLeafAndPetiole, this.options.nest_LeafAndPetiole)
                 this.options.nest_CompoundLeaf = this.transferCheckBox(this.nestCompoundLeaf, this.options.nest_CompoundLeaf)
@@ -281,32 +286,30 @@ export class TGeneric3DOptionsForm {
                 this.options.nest_FloralLayers = this.transferCheckBox(this.nestFloralLayers, this.options.nest_FloralLayers)
                 this.options.vrml_version = this.transferRadioGroup(this.vrmlVersionRadioGroup, this.options.vrml_version)
                 break
-            case u3dexport.kLWO:
+            case ExportFormats.kLWO:
                 break
         }
     }
     
     updatePredictedSizeDisplay(): void {
-        let i: long
-        let plant: PdPlant
-        let plantsString: string
-        let estimatedBytes: long
-        
+    }
+
+    predictedSizeView() {
         this.totalPlants = 0
         this.totalPoints = 0
         this.totalTriangles = 0
         this.totalParts = 0
         this.totalMaterials = 0
-        if (udomain.domain.plantManager.plants.Count > 0) {
-            for (i = 0; i <= udomain.domain.plantManager.plants.Count - 1; i++) {
-                plant = uplant.PdPlant(udomain.domain.plantManager.plants.Items[i])
+        if (domain.plantManager.plants.length > 0) {
+            for (let i = 0; i <= domain.plantManager.plants.length - 1; i++) {
+                const plant = domain.plantManager.plants[i]
                 if (plant === null) {
                     continue
                 }
-                if ((this.useSelectedPlants.Checked) && (!umain.MainForm.isSelected(plant))) {
+                if ((this.useSelectedPlants) && (!MainForm.isSelected(plant))) {
                     continue
                 }
-                if ((this.useVisiblePlants.Checked) && (plant.hidden)) {
+                if ((this.useVisiblePlants) && (plant.hidden)) {
                     continue
                 }
                 plant.countPlantPartsFor3DOutput(this.outputType, StrToIntDef(this.stemCylinderFaces.Text, 20))
@@ -317,32 +320,36 @@ export class TGeneric3DOptionsForm {
                 this.totalPlants += 1
             }
         }
-        estimatedBytes = this.estimateBytes(udomain.domain.plantManager.plants.Count, this.totalParts, this.totalPoints, this.totalTriangles)
+        const estimatedBytes = this.estimateBytes(domain.plantManager.plants.length, this.totalParts, this.totalPoints, this.totalTriangles)
         // in MB
         this.options.fileSize = 1.0 * estimatedBytes / (1024 * 1024)
-        this.estimationStringGrid.Cells[0, 0] = " plants"
-        this.estimationStringGrid.Cells[0, 1] = " " + IntToStr(this.totalPlants)
-        this.estimationStringGrid.ColWidths[0] = 36
-        this.estimationStringGrid.Cells[1, 0] = " parts"
-        this.estimationStringGrid.Cells[1, 1] = " " + IntToStr(this.totalParts)
-        this.estimationStringGrid.ColWidths[1] = 36
-        this.estimationStringGrid.Cells[2, 0] = " points"
-        this.estimationStringGrid.Cells[2, 1] = " " + IntToStr(this.totalPoints)
-        this.estimationStringGrid.ColWidths[2] = 44
-        this.estimationStringGrid.Cells[3, 0] = " polygons"
-        this.estimationStringGrid.Cells[3, 1] = " " + IntToStr(this.totalTriangles)
-        // polygons is the longest word
-        this.estimationStringGrid.ColWidths[3] = 50
-        this.estimationStringGrid.Cells[4, 0] = " colors"
-        this.estimationStringGrid.Cells[4, 1] = " " + IntToStr(this.totalMaterials)
-        this.estimationStringGrid.Cells[5, 0] = " size"
-        this.estimationStringGrid.ColWidths[5] = 64
+
+        let sizeAndUnit
         if (this.options.fileSize > 1.0) {
-            this.estimationStringGrid.Cells[5, 1] = " " + FloatToStrF(this.options.fileSize, UNRESOLVED.ffFixed, 7, 2) + " MB"
+            sizeAndUnit = FloatToStrF(this.options.fileSize, ffFixed, 7, 2) + " MB"
         } else {
-            this.estimationStringGrid.Cells[5, 1] = " " + IntToStr(intround(this.options.fileSize * 1024)) + " K"
+            sizeAndUnit = IntToStr(intround(this.options.fileSize * 1024)) + " K"
         }
-        this.translatePlantsToWindowPositions.Visible = (this.totalPlants > 1)
+
+        return m("table",
+            m("tr",
+                m("th", "plants"),
+                m("th", "parts"),
+                m("th", "points"),
+                m("th", "polygons"),
+                m("th", "colors"),
+                m("th", "size"),
+            ),
+            m("tr",
+                m("td", IntToStr(this.totalPlants)),
+                m("td", IntToStr(this.totalParts)),
+                m("td", IntToStr(this.totalPoints)),
+                m("td", IntToStr(this.totalTriangles)),
+                m("td", IntToStr(this.totalMaterials)),
+                m("td", sizeAndUnit),
+            ),
+        )
+        // TODO PDF: Use or remove: this.translatePlantsToWindowPositions.Visible = (this.totalPlants > 1)
     }
     
     estimateBytes(numPlants: long, numParts: long, numPoints: long, numTriangles: long): long {
@@ -378,16 +385,16 @@ export class TGeneric3DOptionsForm {
         let firstPlant: PdPlant
         
         this.colorsByPlantPart.Clear()
-        if ((udomain.domain === null) || (udomain.domain.plantManager === null) || (udomain.domain.plantManager.plants.Count < 0)) {
+        if ((domain === null) || (domain.plantManager === null) || (domain.plantManager.plants.length < 0)) {
             // use first plant to get DXF part type names - there must be at least one plant to bring up this form
             return
         }
-        firstPlant = uplant.PdPlant(udomain.domain.plantManager.plants[0])
+        firstPlant = domain.plantManager.plants[0]
         if (firstPlant === null) {
             return
         }
-        for (i = 0; i <= u3dexport.kExportPartLast; i++) {
-            this.colorsByPlantPart.Items.Add(u3dexport.longNameForDXFPartType(i))
+        for (i = 0; i <= ExportPart.kExportPartLast; i++) {
+            this.colorsByPlantPart.Items.Add(longNameForDXFPartType(i))
         }
     }
     
@@ -395,11 +402,8 @@ export class TGeneric3DOptionsForm {
         let selected: boolean
         let colorRect: TRect
         let remainderRect: TRect
-        let cText: char[] /* 255 + 1 */
+        let cText: string
         
-        if (delphi_compatability.Application.terminated) {
-            return
-        }
         if ((this.colorsByPlantPart.Items.Count <= 0) || (index < 0) || (index > this.colorsByPlantPart.Items.Count - 1)) {
             return
         }
@@ -422,7 +426,7 @@ export class TGeneric3DOptionsForm {
             this.colorsByPlantPart.Canvas.Font.Color = UNRESOLVED.clBtnText
         }
         this.colorsByPlantPart.Canvas.FillRect(remainderRect)
-        UNRESOLVED.strPCopy(cText, this.colorsByPlantPart.Items[index])
+        cText = this.colorsByPlantPart[index]
         // margin for text 
         remainderRect.Left = remainderRect.Left + 5
         UNRESOLVED.winprocs.drawText(this.colorsByPlantPart.Canvas.Handle, cText, len(cText), remainderRect, delphi_compatability.DT_LEFT)
@@ -441,7 +445,7 @@ export class TGeneric3DOptionsForm {
             response = colorForm.ShowModal()
             if (response === mrOK) {
                 this.options.dxf_wholePlantColorIndex = colorForm.colorIndex
-                this.wholePlantColor.Color = u3dexport.dxfColors[this.options.dxf_wholePlantColorIndex]
+                this.wholePlantColor.Color = dxfColors[this.options.dxf_wholePlantColorIndex]
                 this.wholePlantColor.Invalidate()
                 this.optionsChanged = true
             }
@@ -490,7 +494,7 @@ export class TGeneric3DOptionsForm {
     }
     
     colorsByPlantPartDblClick(): void {
-        this.setPlantPartColorClick(this)
+        this.setPlantPartColorClick()
     }
     
     transferRadioButton(radioButton: TRadioButton, value: short, radioIndex: short): void {
@@ -522,15 +526,17 @@ export class TGeneric3DOptionsForm {
     }
     
     transferColor(colorPanel: TPanel, value: TColorRef): void {
-        raise "method transferColor had assigned to var parameter value not added to return -- fixup manually"
-        if (this.transferDirection === kTransferLoad) {
-            colorPanel.Color = value
-        } else if (this.transferDirection === kTransferSave) {
-            if (value !== colorPanel.Color) {
-                this.optionsChanged = true
-            }
-            value = colorPanel.Color
-        }
+        unfinished()
+        // TODO PDF: Fix this:
+        // raise "method transferColor had assigned to var parameter value not added to return -- fixup manually"
+        // if (this.transferDirection === kTransferLoad) {
+        //     colorPanel.Color = value
+        // } else if (this.transferDirection === kTransferSave) {
+        //     if (value !== colorPanel.Color) {
+        //         this.optionsChanged = true
+        //     }
+        //     value = colorPanel.Color
+        // }
     }
     
     transferSmallintSpinEditBox(editBox: TSpinEdit, value: short): void {
@@ -592,10 +598,11 @@ export class TGeneric3DOptionsForm {
         HelpJump("Exporting_3D_models_in_general")
     }
     
-    FormKeyPress(Key: char): void {
-        Key = usupport.makeEnterWorkAsTab(this, this.ActiveControl, Key)
-        return Key
-    }
+    // TODO PDF: Fix or remove: makeEnterWorkAsTab
+    // FormKeyPress(Key: char): void {
+    //     Key = usupport.makeEnterWorkAsTab(this, this.ActiveControl, Key)
+    //     return Key
+    // }
     
     useSelectedPlantsClick(): void {
         this.updatePredictedSizeDisplay()
@@ -658,76 +665,32 @@ export class TGeneric3DOptionsForm {
             },
             m("Group.Group.g00000004",
                 m("TGroupBox.drawWhichPlantsGroupBox.TGroupBox",
-                    {
-                        // Top: "4",
-                        // Left: "4",
-                        // Height: "76",
-                        // Width: "280",
-                        // TabOrder: "0",
-                    },
                     " Include ",
-                    m("Group.Group.g00000016",
+                    m("div.Group.Group.g00000016",
                         m("input[type=radio].useSelectedPlants.TRadioButton",
                             {
                                 onclick: () => this.useSelectedPlantsClick(),
-                                // Top: "16",
-                                // Left: "8",
-                                // Height: "17",
-                                // Width: "96",
-                                // TabOrder: "0",
+                                checked: this.useSelectedPlants
                             },
                             caption("se&lected plants"),
                         ),
                         m("input[type=radio].useVisiblePlants.TRadioButton",
                             {
                                 onclick: () => this.useVisiblePlantsClick(),
-                                // Top: "16",
-                                // Left: "107",
-                                // Height: "17",
-                                // Width: "82",
-                                // TabOrder: "1",
+                                checked: this.useVisiblePlants
                             },
                             caption("&visible plants"),
                         ),
                         m("input[type=radio].useAllPlants.TRadioButton",
                             {
                                 onclick: () => this.useAllPlantsClick(),
-                                // Top: "16",
-                                // Left: "206",
-                                // Height: "17",
-                                // Width: "65",
-                                // TabOrder: "2",
+                                checked: this.useAllPlants
                             },
                             caption("&all plants"),
                         ),
                     ),
-                    m("TStringGrid.estimationStringGrid.TStringGrid",
-                        {
-                            // Top: "35",
-                            // Left: "5",
-                            // Height: "35",
-                            // Width: "270",
-                            // Color: "clBtnFace",
-                            // ColCount: "6",
-                            // Ctl3D: "False",
-                            // DefaultColWidth: "42",
-                            // DefaultRowHeight: "16",
-                            // FixedColor: "clBtnHighlight",
-                            // FixedCols: "0",
-                            // RowCount: "3",
-                            // FixedRows: "2",
-                            // Font.Charset: "DEFAULT_CHARSET",
-                            // Font.Color: "clBlue",
-                            // Font.Height: "-11",
-                            // Font.Name: "Arial",
-                            // Font.Style: "[]",
-                            // Options: "[goFixedVertLine, goFixedHorzLine, goDrawFocusSelected]",
-                            // ParentCtl3D: "False",
-                            // ParentFont: "False",
-                            // ScrollBars: "ssNone",
-                            // TabOrder: "3",
-                            // ColWidths: ["","","","","",""],
-                        },
+                    m("div.TStringGrid.estimationStringGrid.TStringGrid",
+                        this.predictedSizeView()
                     ),
                 ),
                 m("button.Close.TButton",

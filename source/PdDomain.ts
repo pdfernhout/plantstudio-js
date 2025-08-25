@@ -66,8 +66,8 @@ export enum DrawMode {
     kDrawCustom = 3,
 }
 
-const kMinOutputCylinderFaces = 3
-const kMaxOutputCylinderFaces = 20
+export const kMinOutputCylinderFaces = 3
+export const kMaxOutputCylinderFaces = 20
 
 const kDefaultV1IniFileName = "PlantStudio.ini"
 const kDefaultV2IniFileName = "PlantStudio2.ini"

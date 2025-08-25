@@ -58,6 +58,11 @@ export function FloatToStr(value: float) {
     return "" + value
 }
 
+export const ffFixed = true
+export function FloatToStrF(value: float, fixed: boolean, p1: Number, fractionDigits: number) {
+    return "" + value.toFixed(fractionDigits)
+}
+
 export function arrayRemove(theArray: Array<any>, item: any) {
     const index = theArray.indexOf(item)
     if (index !== -1) {
