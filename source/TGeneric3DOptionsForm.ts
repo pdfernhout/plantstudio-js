@@ -10,17 +10,6 @@ import { TRect } from "./TRect"
 import { PdPlant } from "./PdPlant"
 import { MainForm } from "./FormHolder"
 
-// from conversion_common import *
-// import uplant
-// import umain
-// import udomain
-// import udxfclr
-// import usupport
-// import updform
-// import u3dexport
-// import uturtle
-// import delphi_compatability
-
 const kTransferLoad = 1
 const kTransferSave = 2
 
@@ -823,14 +812,7 @@ export class TGeneric3DOptionsForm {
                 ),
             ),
             m("div.TGroupBox.reorientGroupBox.TGroupBox",
-                {
-                    // Top: "158",
-                    // Left: "4",
-                    // Height: "70",
-                    // Width: "281",
-                    // TabOrder: "9",
-                },
-                " Reorient ",
+                "Reorient",
                 m("TSpinEdit.xRotationBeforeDraw.TSpinEdit",
                     {
                         // Top: "15",
@@ -846,21 +828,9 @@ export class TGeneric3DOptionsForm {
                 ),
                 m("div.Group.Group.g00000019",
                     m("div.Label1.TLabel",
-                        {
-                            // Top: "19",
-                            // Left: "10",
-                            // Height: "14",
-                            // Width: "46",
-                        },
                         "Rotate by",
                     ),
                     m("div.Label10.TLabel",
-                        {
-                            // Top: "19",
-                            // Left: "124",
-                            // Height: "14",
-                            // Width: "106",
-                        },
                         "degrees (-180 to 180)",
                     ),
                 ),
@@ -879,43 +849,16 @@ export class TGeneric3DOptionsForm {
                 ),
                 m("div.Group.Group.g00000045",
                     m("div.Label7.TLabel",
-                        {
-                            // Top: "45",
-                            // Left: "10",
-                            // Height: "14",
-                            // Width: "42",
-                        },
                         "Scale by",
                     ),
                     m("div.Label9.TLabel",
-                        {
-                            // Top: "45",
-                            // Left: "124",
-                            // Height: "14",
-                            // Width: "91",
-                        },
                         "percent (1-10,000)",
                     ),
                 ),
             ),
             m("div.TGroupBox.otherGroupBox.TGroupBox",
-                {
-                    // Top: "232",
-                    // Left: "4",
-                    // Height: "175",
-                    // Width: "280",
-                    // TabOrder: "1",
-                },
-                " Other options ",
+                "Other options",
                 m("div.plantNameAndCylinderSidesPanel.TPanel",
-                    {
-                        // Top: "16",
-                        // Left: "6",
-                        // Height: "56",
-                        // Width: "261",
-                        // BevelOuter: "bvNone",
-                        // TabOrder: "2",
-                    },
                     m("TSpinEdit.lengthOfShortName.TSpinEdit",
                         {
                             // Top: "3",
@@ -974,25 +917,11 @@ export class TGeneric3DOptionsForm {
                             caption("Draw stems as c&ylinders with"),
                         ),
                         m("div.sidesLabel.TLabel",
-                            {
-                                // Top: "35",
-                                // Left: "200",
-                                // Height: "14",
-                                // Width: "59",
-                            },
                             "sides (3-20)",
                         ),
                     ),
                 ),
                 m("div.pressPlantsPanel.TPanel",
-                    {
-                        // Top: "69",
-                        // Left: "2",
-                        // Height: "28",
-                        // Width: "273",
-                        // BevelOuter: "bvNone",
-                        // TabOrder: "4",
-                    },
                     m("select.directionToPressPlants.TComboBox",
                         {
                             // Top: "3",
@@ -1017,12 +946,6 @@ export class TGeneric3DOptionsForm {
                         caption("\"Pr&ess\" plants in"),
                     ),
                     m("div.Label8.TLabel",
-                        {
-                            // Top: "11",
-                            // Left: "154",
-                            // Height: "14",
-                            // Width: "48",
-                        },
                         "dimension",
                     ),
                 ),
@@ -1175,19 +1098,6 @@ export class TGeneric3DOptionsForm {
                     // Visible: "False",
                 },
                 m("div.Label6.TLabel",
-                    {
-                        // Top: "4",
-                        // Left: "7",
-                        // Height: "42",
-                        // Width: "265",
-                        // Font.Charset: "DEFAULT_CHARSET",
-                        // Font.Color: "clBlue",
-                        // Font.Height: "-11",
-                        // Font.Name: "Arial",
-                        // Font.Style: "[]",
-                        // ParentFont: "False",
-                        // WordWrap: "True",
-                    },
                     "Note: This version of the 3DS export function does not import equally well to all 3D programs. See the help system for tips on improving 3DS compatibility.",
                 ),
             ),
@@ -1203,13 +1113,6 @@ export class TGeneric3DOptionsForm {
                 "Limit small lines and 3D objects",
                 m("br"),
                 m("div.Label4.TLabel.ml2",
-                    {
-                        // Top: "23",
-                        // Left: "72",
-                        // Height: "14",
-                        // Width: "158",
-                        // FocusControl: "minLineLengthToWrite",
-                    },
                     caption("&Keep lines at least this long (mm)"),
                     m("br"),
                     m("input.minLineLengthToWrite.TEdit.ml2.mw3",
@@ -1223,13 +1126,6 @@ export class TGeneric3DOptionsForm {
                     ),
                 ),
                 m("div.Label5.TLabel.ml2",
-                    {
-                        // Top: "49",
-                        // Left: "72",
-                        // Height: "14",
-                        // Width: "179",
-                        // FocusControl: "minTdoScaleToWrite",
-                    },
                     caption("Keep &3D objects of at least this scale"),
                     m("br"),
                     m("input.minTdoScaleToWrite.TEdit.ml2.mw3",
