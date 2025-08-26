@@ -4844,7 +4844,8 @@ export class TMainForm {
             )
         })
         if (changed) {
-            const commandLines = note.split("\n")
+            let commandLines = note.split("\n")
+            if (!note) { commandLines = [] }
             const newCommand = new PdEditNoteCommand(plant, commandLines)
             this.doCommand(newCommand)
         }
@@ -6513,10 +6514,13 @@ export class TMainForm {
     }
 
     viewNotePanel(plant: PdPlant): m.Children {
-        return m("div.notePanel.TPanel",
-            m("div.noteMemo.TMemo.ba",
-                plant.noteLines.map(line => m("div", { style: { minHeight: "1rem" }}, line))
-            ),
+            plant.noteLines.length === 0
+                ? m("div", "No note. Click Edit to add one.")
+                : m("div.noteMemo.TMemo.ba",
+                    plant.noteLines.map(line => 
+                        m("div", { style: { minHeight: "1rem" }}, line)
+                    )
+                ),
             m("button.noteEdit.TSpeedButton.mt1",
                 {
                     onclick: () => this.noteEditClick(),
