@@ -213,7 +213,11 @@ export class PdHeaderParameterPanel extends  PdParameterPanel {
 
     oninit(vnode: any) {
         super.oninit(vnode)
-        this.Caption = this.param.originalSectionName + " :: " + this.param.getName()
+        if (this.param.originalSectionName !== this.param.getName()) {
+            this.Caption = this.param.originalSectionName + ": " + this.param.getName()
+        } else {
+            this.Caption = this.param.getName()
+        }
     }
 
     view() {
