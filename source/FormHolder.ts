@@ -31,7 +31,7 @@ export function setWizardForm(form: TWizardFormDisplayingPlant) {
 }
 
 type Form = "MainForm" | "BreederForm" | "TimeSeriesForm" | "DebugForm" | "WizardForm"
-const forms: Form[] = ["MainForm", "BreederForm", "TimeSeriesForm", "DebugForm", "WizardForm"]
+const forms: Form[] = ["MainForm", "BreederForm", "TimeSeriesForm" /*, "DebugForm", "WizardForm" */]
 
 export let activeForm: Form
 
