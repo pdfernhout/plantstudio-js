@@ -1264,7 +1264,7 @@ export class TBreederForm {
     view(vnode: any) {
         if (activeForm && activeForm !== "BreederForm") return []
         const self = this
-        return m("div.BreederForm.relative", {
+        return m("div.BreederForm.relative.h-100.flex.flex-column", {
                 onclick: (event: any) => {
                     resetDroppedDownMenuId()
                 },
@@ -1336,7 +1336,8 @@ export class TBreederForm {
                 //     ),
                 // ),
             this.viewEmptyIfNeeded(vnode),
-            m("div.TDrawGrid.plantsDrawGrid", {
+            m("div.TDrawGrid.plantsDrawGrid.flex-grow-1.overflow-auto", {
+                style: "height: calc(100% - "
                 // Top: "48",
                 // Left: "2",
                 // Height: "141",

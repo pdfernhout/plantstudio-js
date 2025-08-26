@@ -14,7 +14,7 @@ PdDomain.createDefault()
 domain.defaultTdoLibraryFileName = "../plants/3D object library.tdo"
 
 const Application = { 
-    view: () => m("div.overflow-auto.h-100.relative", {
+    view: () => m("div.h-100.relative", {
             onclick: (event: any) => {
                 resetDroppedDownMenuId()
             },

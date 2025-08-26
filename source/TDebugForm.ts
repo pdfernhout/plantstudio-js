@@ -23,9 +23,9 @@ export class TDebugForm {
     logging: boolean = false
     
     // TODO PDF: Remove or improve this to perhaps use beforeunload event, but see MDN docs on limitations
-    // FormDestroy(): void {
-    //     this.stopLogging()
-    // }
+    FormDestroy(): void {
+        this.stopLogging()
+    }
     
     startLogging(fileName: string): void {
         let dateString: string
@@ -178,15 +178,15 @@ export class TDebugForm {
 
     oninit() {
         setDebugForm(this)
-        // COmmented code for interactive testing:
-        // for (let i = 0; i < 1000; i++) {
-        //     this.DebugList.push("test error " + i)
-        // }
+        // Commented code for interactive testing:
+        for (let i = 0; i < 1000; i++) {
+            this.DebugList.push("test error " + i)
+        }
     }
 
     view() {
         if (activeForm && activeForm !== "DebugForm") return []
-        return m("DebugForm.TDebugForm",
+        return m("div.DebugForm.TDebugForm.h-100.flex.flex-column.pa2",
             m("div.f3.b", "Debug messages"),
             m("div.buttonPanel.mt1",
                 m("button.Close.TButton",
@@ -242,7 +242,7 @@ export class TDebugForm {
                 ),
             ),
             this.DebugList.length === 0 ? m("div.b", "No debug messages") : m("div.fs3.b", "Debug message are below:"),
-            m("div.TListBox.DebugList.TListBox",
+            m("div.TListBox.DebugList.TListBox.flex-grow-1.overflow-auto",
                 this.DebugList.map(item => m("div", item))
             )
         )

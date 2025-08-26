@@ -5167,10 +5167,10 @@ export class TMainForm {
         // }
         // newLeft = intMax(0, intMin(this.ClientWidth - 1, newLeft))
         // newWidth = intMax(0, this.ClientWidth - newLeft - splitterWidthOrHeight)
-        // if (domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal) {
+        // if (this.isHorizontal()) {
         //     this.horizontalSplitter.SetBounds(0, newTop, this.ClientWidth, this.horizontalSplitter.Height)
         //     this.verticalSplitter.SetBounds(newLeft, newTop + this.horizontalSplitter.Height, this.verticalSplitter.Width, newHeight)
-        // } else if (domain.options.mainWindowOrientation === kMainWindowOrientationVertical) {
+        // } else if (this.isVertical()) {
         //     this.verticalSplitter.SetBounds(newLeft, this.toolbarPanel.Height, this.verticalSplitter.Width, intMax(0, this.ClientHeight - this.toolbarPanel.Height))
         //     this.horizontalSplitter.SetBounds(newLeft + this.verticalSplitter.Width, newTop, newWidth, this.horizontalSplitter.Height)
         // }
@@ -5200,10 +5200,10 @@ export class TMainForm {
         // newWidth = intMax(0, this.ClientWidth - newLeft)
         // newTop = this.horizontalSplitter.Top + this.horizontalSplitter.Height
         // newHeight = intMax(0, this.ClientHeight - newTop)
-        // if (domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal) {
+        // if (this.isHorizontal()) {
         //     this.plantListPanel.SetBounds(0, newTop, this.verticalSplitter.Left, newHeight)
         //     this.plantFocusPanel.SetBounds(newLeft, newTop, newWidth, newHeight)
-        // } else if (domain.options.mainWindowOrientation === kMainWindowOrientationVertical) {
+        // } else if (this.isVertical()) {
         //     this.plantListPanel.SetBounds(newLeft, this.toolbarPanel.Height, newWidth, this.horizontalSplitter.Top - this.toolbarPanel.Height)
         //     this.plantFocusPanel.SetBounds(newLeft, newTop, newWidth, newHeight)
         //     //don't change top here
@@ -5226,14 +5226,14 @@ export class TMainForm {
         // newWidth = intMax(0, this.ClientWidth - newLeft)
         // newTop = this.horizontalSplitter.Top + this.horizontalSplitter.Height
         // newHeight = intMax(0, this.ClientHeight - newTop)
-        // if (domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal) {
+        // if (this.isHorizontal()) {
         //     this.plantListPanel.SetBounds(0, newTop, this.verticalSplitter.Left, newHeight)
         //     //don't change left here
         //     this.verticalSplitter.SetBounds(this.verticalSplitter.Left, newTop, this.verticalSplitter.Width, newHeight)
         //     this.plantFocusPanel.SetBounds(newLeft, newTop, newWidth, newHeight)
         //     this.drawingPaintBox.SetBounds(0, this.toolbarPanel.Height, this.ClientWidth, intMax(0, this.horizontalSplitter.Top - this.toolbarPanel.Height))
         //     this.resizeDrawingBitmapIfNecessary()
-        // } else if (domain.options.mainWindowOrientation === kMainWindowOrientationVertical) {
+        // } else if (this.isVertical()) {
         //     this.plantListPanel.SetBounds(newLeft, this.toolbarPanel.Height, newWidth, this.horizontalSplitter.Top - this.toolbarPanel.Height)
         //     this.plantFocusPanel.SetBounds(newLeft, newTop, newWidth, newHeight)
         // }
@@ -5373,9 +5373,9 @@ export class TMainForm {
             return
         }
         let bottomLimit: int
-        if (domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal) {
+        if (this.isHorizontal()) {
             bottomLimit = kSplitterDragToBottomMinPixelsInHorizMode
-        } else if (domain.options.mainWindowOrientation === kMainWindowOrientationVertical) {
+        } else if (this.isVertical()) {
             bottomLimit = kSplitterDragToBottomMinPixelsInVertMode
         } else {
             bottomLimit = kSplitterDragToBottomMinPixelsInHorizMode
@@ -5391,9 +5391,9 @@ export class TMainForm {
             return
         }
         let bottomLimit: int
-        if (domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal) {
+        if (this.isHorizontal()) {
             bottomLimit = kSplitterDragToBottomMinPixelsInHorizMode
-        } else if (domain.options.mainWindowOrientation === kMainWindowOrientationVertical) {
+        } else if (this.isVertical()) {
             bottomLimit = kSplitterDragToBottomMinPixelsInVertMode
         } else {
             bottomLimit = kSplitterDragToBottomMinPixelsInHorizMode
@@ -5727,8 +5727,8 @@ export class TMainForm {
                 "radio", "MenuLayoutViewOnePlantAtATime", "&One Plant at a Time", this.MenuLayoutViewOnePlantAtATimeClick, () => domain.viewPlantsInMainWindowOnePlantAtATime(), () => domain.plantFileLoaded,
             ], () => false,  () => domain.plantFileLoaded,
             "MenuLayoutDrawingAreaOn", "Place Drawing &Area", [
-                "radio", "MenuLayoutVerticalOrientation", "On &Top", this.MenuLayoutVerticalOrientationClick, () => domain.options.mainWindowOrientation === kMainWindowOrientationVertical, () => domain.plantFileLoaded,
-                "radio", "MenuLayoutHorizontalOrientation", "On &Left Side", this.MenuLayoutHorizontalOrientationClick, () => domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal, () => domain.plantFileLoaded,
+                "radio", "MenuLayoutVerticalOrientation", "On &Top", this.MenuLayoutVerticalOrientationClick, () => this.isVertical(), () => domain.plantFileLoaded,
+                "radio", "MenuLayoutHorizontalOrientation", "On &Left Side", this.MenuLayoutHorizontalOrientationClick, () => this.isHorizontal(), () => domain.plantFileLoaded,
             ], () => false,  () => domain.plantFileLoaded,
             "MenuOptionsDrawRectangles", "Draw &Rectangles", [
                 "checkbox", "MenuOptionsShowSelectionRectangles", "Around &Selected Plants", this.MenuOptionsShowSelectionRectanglesClick, () => domain.options.showSelectionRectangle,
@@ -5854,11 +5854,11 @@ export class TMainForm {
                     ? selected
                     : ""
             case "drawingAreaOnTop":
-                return domain.options.mainWindowOrientation === kMainWindowOrientationVertical
+                return this.isVertical()
                     ? selected
                     : ""
             case "drawingAreaOnSide":
-                return domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal
+                return this.isHorizontal()
                     ? selected
                     : ""
 
@@ -5998,9 +5998,9 @@ export class TMainForm {
 
     viewPlantList() {
         return m("div.plantListPanel.TPanel.ba",
-            m("TDrawGrid.plantListDrawGrid.TDrawGrid.overflow-auto",
+            m("div.TDrawGrid.plantListDrawGrid.TDrawGrid.overflow-auto",
                 {
-                    style: "min-height: 4rem",
+                    style: { minHeight: "4rem", maxHeight: "7rem"},
                     // Top: "4",
                     // Left: "4",
                     // Height: "103",
@@ -6078,7 +6078,8 @@ export class TMainForm {
             return m("div.plantFocusPanel.TPanel.ba", { style: { height: "15rem" } }, "No plant selected")
         }
         const { plantNameLabel, plantNameColor } = this.plantNameLabelAndColorForTab(this.currentPlantFocusTab)
-        return m("div.plantFocusPanel.TPanel.ba.pa1",
+        return m("div.plantFocusPanel.TPanel.ba.pa1.h-100" + 
+            (this.isHorizontal() ? ".flex.flex-column" : ""),
             // { style: { height: "20rem" } },
             m("div.TTabSet.tabSet.TTabSet",
                 plantFocusTabs.map(
@@ -6103,7 +6104,7 @@ export class TMainForm {
     }
 
     viewArrangementPanel(plant: PdPlant): m.Children {
-        return m("div.rotationsPanel.TPanel",
+        return m("div.rotationsPanel.TPanel.flex-grow-1.overflow-auto",
             m("Group.Location.g00000032",
                 "Location",
                 m("span.ml2.mr1", "X"),
@@ -6238,7 +6239,7 @@ export class TMainForm {
     }
 
     viewParametersPanel(plant: PdPlant): m.Children {
-        return m("div.parametersPanel.TPanel.flex.flex-row",
+        return m("div.parametersPanel.TPanel.flex.flex-row.flex-grow-1.overflow-auto",
             m("div.sectionsComboBox.TComboBox.ba.overflow-auto",
                 this.sectionsComboBox.map((section, index) => 
                     m("div.flex.flex-column.items-center.bb.pa1" + (this.sectionsComboBox_ItemIndex === index ? ".bg-blue" : ".hover-bg-lightest-blue"),
@@ -6286,7 +6287,7 @@ export class TMainForm {
 
     viewAgePanel(plant: PdPlant): m.Children {
         const self = this
-        return m("div.lifeCyclePanel.TPanel",
+        return m("div.lifeCyclePanel.TPanel.flex-grow-1.overflow-auto",
             m("div.lifeCycleGraphImage.TImage.flex.items-center",
                 m("span.f6", "%max"),
                 m("canvas.ba.ma1", {
@@ -6345,7 +6346,7 @@ export class TMainForm {
         const posingDisabled = amendment || this.selectedPlantPartID < 0
         const unposingDisabled = !amendment
         const grayIfDisabled = amendment ? "" : ".gray"
-        return m("div.posingPanel.TPanel",
+        return m("div.posingPanel.TPanel.flex-grow-1.overflow-auto",
             m("Group.Group.g00000018",
                 m("button.posingHighlight.TSpeedButton" + this.backgroundForSpeedButton("posingHighlight"),
                     {
@@ -6508,12 +6509,13 @@ export class TMainForm {
     }
 
     viewStatsPanel(plant: PdPlant): m.Children {
-        return m("TScrollBox.statsScrollBox.TScrollBox",
+        return m("div.TScrollBox.statsScrollBox.TScrollBox.flex-grow-1.overflow-auto",
             m(PdStatsPanel, { plant })
         )
     }
 
     viewNotePanel(plant: PdPlant): m.Children {
+        return m("div.notePanel.TPanel.flex-grow-1.overflow-auto",
             plant.noteLines.length === 0
                 ? m("div", "No note. Click Edit to add one.")
                 : m("div.noteMemo.TMemo.ba",
@@ -6532,24 +6534,32 @@ export class TMainForm {
         )
     }
 
+    isHorizontal() {
+        return domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal
+    }
+
+    isVertical() {
+        return domain.options.mainWindowOrientation === kMainWindowOrientationVertical
+    }
+
     view() {
         if (activeForm && activeForm !== "MainForm") return []
-        return m("div.MainForm.relative", {
+        return m("div.MainForm.relative.h-100", {
                 onclick: (event: any) => {
                     resetDroppedDownMenuId()
                 },
             },
             viewMainMenu(this.mainMenuSpec, this, () => this.viewToolbar()),
             // viewMainForm()
-            m("div.flex" + 
-                (domain.options.mainWindowOrientation === kMainWindowOrientationHorizontal
+            m("div.flex.h-100" + 
+                (this.isHorizontal()
                     ? ".flex-row"
-                    : ".flex-column"),
-                m("div",
+                    : ".flex-column.overflow-auto"),
+                m("div.h-100",
                     this.viewPaintBox(),
                     this.viewPlantList(),
                 ),
-                m("div",
+                m("div.h-100",
                     this.viewPlantFocusPanel()
                 )
             )
