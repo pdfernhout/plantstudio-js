@@ -6078,8 +6078,8 @@ export class TMainForm {
             return m("div.plantFocusPanel.TPanel.ba", { style: { height: "15rem" } }, "No plant selected")
         }
         const { plantNameLabel, plantNameColor } = this.plantNameLabelAndColorForTab(this.currentPlantFocusTab)
-        return m("div.plantFocusPanel.TPanel.ba.pa1.h-100" + 
-            (this.isHorizontal() ? ".flex.flex-column" : ""),
+        return m("div.plantFocusPanel.TPanel.ba.pa1" + 
+            (this.isHorizontal() ? ".h-100.flex.flex-column" : ""),
             // { style: { height: "20rem" } },
             m("div.TTabSet.tabSet.TTabSet",
                 plantFocusTabs.map(
@@ -6239,8 +6239,9 @@ export class TMainForm {
     }
 
     viewParametersPanel(plant: PdPlant): m.Children {
-        return m("div.parametersPanel.TPanel.flex.flex-row.flex-grow-1.overflow-auto",
-            m("div.sectionsComboBox.TComboBox.ba.overflow-auto",
+        return m("div.parametersPanel.TPanel.flex-grow-1.flex.flex-row"  + (this.isHorizontal() ? ".overflow-auto" : ""),
+            { height: 0 },
+            m("div.sectionsComboBox.TComboBox.ba" + (this.isHorizontal() ? ".h-100.overflow-auto" : ""),
                 this.sectionsComboBox.map((section, index) => 
                     m("div.flex.flex-column.items-center.bb.pa1" + (this.sectionsComboBox_ItemIndex === index ? ".bg-blue" : ".hover-bg-lightest-blue"),
                         { 
@@ -6255,7 +6256,7 @@ export class TMainForm {
                     )
                 )
             ),
-            m("TScrollBox.parametersScrollBox.TScrollBox.ml2",
+            m("div.TScrollBox.parametersScrollBox.TScrollBox.ml2" + (this.isHorizontal() ? ".h-100.overflow-auto" : ""),
                 {
                     // Top: "44",
                     // Left: "8",
@@ -6544,22 +6545,23 @@ export class TMainForm {
 
     view() {
         if (activeForm && activeForm !== "MainForm") return []
-        return m("div.MainForm.relative.h-100", {
+        return m("div.MainForm.relative.h-100.flex.flex-column", {
                 onclick: (event: any) => {
                     resetDroppedDownMenuId()
                 },
             },
             viewMainMenu(this.mainMenuSpec, this, () => this.viewToolbar()),
             // viewMainForm()
-            m("div.flex.h-100" + 
+            m("div.flex-grow-1.flex" + 
                 (this.isHorizontal()
                     ? ".flex-row"
                     : ".flex-column.overflow-auto"),
-                m("div.h-100",
+                { style: "height: 0;" },
+                m("div",
                     this.viewPaintBox(),
                     this.viewPlantList(),
                 ),
-                m("div.h-100",
+                m("div" + (this.isHorizontal() ? ".h-100" : ""),
                     this.viewPlantFocusPanel()
                 )
             )
