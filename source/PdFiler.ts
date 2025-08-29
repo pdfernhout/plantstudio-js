@@ -246,7 +246,7 @@ export class PdFiler {
     
     streamSinglePoint(aPoint: SinglePoint): void {
         aPoint.x = this.streamSingle(aPoint.x)
-        aPoint.y = this.streamSingle(aPoint.x)
+        aPoint.y = this.streamSingle(aPoint.y)
     }
     
     streamRect(aRect: TRect): void {
