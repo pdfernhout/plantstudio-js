@@ -69,9 +69,9 @@ export enum ExportPart {
 const kLastDxfColorIndex = 10
 export const dxfColors = [ColorDefs.clRed, ColorDefs.clYellow, ColorDefs.clLime, ColorDefs.clAqua, ColorDefs.clBlue, ColorDefs.clPurple, ColorDefs.clBlack, ColorDefs.clOlive, ColorDefs.clFuchsia, ColorDefs.clTeal, ColorDefs.clGray, ]
 
-const kColorDXFFromPlantPartType = 0
-const kColorDXFFromRGB = 1
-const kColorDXFFromOneColor = 3
+export const kColorDXFFromPlantPartType = 0
+export const kColorDXFFromRGB = 1
+export const kColorDXFFromOneColor = 3
 
 // POV
 export enum NestingType {

@@ -54,6 +54,14 @@ export function StrToFloat(value: string): float {
     return parseFloat(value)
 }
 
+export function StrToFloatRange(value: string, low: number, high: number) {
+    let result = parseFloat(value)
+    if (isNaN(result)) { return low }
+    if (result < low) result = low
+    if (result > high) result = high
+    return result
+}
+
 export function FloatToStr(value: float) {
     return "" + value
 }
@@ -97,6 +105,14 @@ export function StrToIntDef(value: string, defaultValue: number) {
 export function StrToIntRange(value: string, low: number, high: number) {
     let result = parseInt(value, 10)
     if (isNaN(result)) { return low }
+    if (result < low) result = low
+    if (result > high) result = high
+    return result
+}
+
+export function StrToIntRangeDef(value: string, low: number, high: number, theDefault: number) {
+    let result = parseInt(value, 10)
+    if (isNaN(result)) { return theDefault }
     if (result < low) result = low
     if (result > high) result = high
     return result

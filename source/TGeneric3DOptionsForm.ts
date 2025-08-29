@@ -1,13 +1,10 @@
 // unit uoptions3dexport
 
 import * as m from "mithril"
-import { caption, ffFixed, float, FloatToStrF, HelpJump, imageDir, int, intround, IntToStr, long, MessageDialog, mtConfirmation, short, StrToFloat, StrToIntDef, TColorRef } from "./common"
+import { caption, ffFixed, float, FloatToStrF, HelpJump, imageDir, int, intround, IntToStr, long, MessageDialog, mtConfirmation, short, StrToFloat, StrToFloatRange, StrToIntDef, StrToIntRange, StrToIntRangeDef, TColorRef } from "./common"
 import { domain, kIncludeAllPlants, kIncludeSelectedPlants, kIncludeVisiblePlants, kMaxOutputCylinderFaces, kMinOutputCylinderFaces } from "./PdDomain"
-import { dxfColors, ExportFormats, ExportPart, FileExport3DOptionsStructure, kMax3DFaces, kMax3DPoints, kMaxStoredMaterials, longNameForDXFPartType } from "./U3dexport"
-import { chr, len, valueString } from "./usupport"
-import { unfinished } from "./temporary"
-import { TRect } from "./TRect"
-import { PdPlant } from "./PdPlant"
+import { dxfColors, ExportFormats, ExportPart, FileExport3DOptionsStructure, kColorDXFFromOneColor, kColorDXFFromPlantPartType, kColorDXFFromRGB, kMax3DFaces, kMax3DPoints, kMaxStoredMaterials, longNameForDXFPartType } from "./U3dexport"
+import { chr } from "./usupport"
 import { MainForm } from "./FormHolder"
 import { convertColorNumberToCSS } from "./KfDrawingSurface"
 
@@ -28,7 +25,6 @@ export class TGeneric3DOptionsForm {
     useAllPlants: boolean = false
     // otherGroupBox: TGroupBox = new TGroupBox()
     // translatePlantsToWindowPositions: TCheckBox = new TCheckBox()
-    // dxfColorsGroupBox: TGroupBox = new TGroupBox()
     // colorDXFFromRGB: TRadioButton = new TRadioButton()
     // colorDXFFromOneColor: TRadioButton = new TRadioButton()
     // wholePlantColor: TPanel = new TPanel()
@@ -261,9 +257,9 @@ export class TGeneric3DOptionsForm {
                 if (this.transferDirection === kTransferLoad) {
                     this.dxfWriteColorsClick(this)
                 }
-                this.options.dxf_whereToGetColors = this.transferRadioButton(this.colorDXFFromRGB, this.options.dxf_whereToGetColors, u3dexport.kColorDXFFromRGB)
-                this.options.dxf_whereToGetColors = this.transferRadioButton(this.colorDXFFromOneColor, this.options.dxf_whereToGetColors, u3dexport.kColorDXFFromOneColor)
-                this.options.dxf_whereToGetColors = this.transferRadioButton(this.colorDXFFromPlantPartType, this.options.dxf_whereToGetColors, u3dexport.kColorDXFFromPlantPartType)
+                this.options.dxf_whereToGetColors = this.transferRadioButton(this.colorDXFFromRGB, this.options.dxf_whereToGetColors, kColorDXFFromRGB)
+                this.options.dxf_whereToGetColors = this.transferRadioButton(this.colorDXFFromOneColor, this.options.dxf_whereToGetColors, kColorDXFFromOneColor)
+                this.options.dxf_whereToGetColors = this.transferRadioButton(this.colorDXFFromPlantPartType, this.options.dxf_whereToGetColors, kColorDXFFromPlantPartType)
                 this.wholePlantColor.Color = u3dexport.dxfColors[this.options.dxf_wholePlantColorIndex]
                 break
             case ExportFormats.kPOV:
@@ -423,7 +419,7 @@ export class TGeneric3DOptionsForm {
         )
     }
     
-    wholePlantColorMouseUp(Button: TMouseButton, Shift: TShiftState, X: int, Y: int): void {
+    wholePlantColorMouseUp(): void {
         let colorForm: TChooseDXFColorForm
         let response: int
         
@@ -485,89 +481,6 @@ export class TGeneric3DOptionsForm {
         this.setPlantPartColorClick()
     }
     
-    transferRadioButton(radioButton: TRadioButton, value: short, radioIndex: short): void {
-        if (this.transferDirection === kTransferLoad) {
-            if (value === radioIndex) {
-                radioButton.Checked = true
-            }
-        } else if (this.transferDirection === kTransferSave) {
-            if ((radioButton.Checked) && (value !== radioIndex)) {
-                this.optionsChanged = true
-            }
-            if (radioButton.Checked) {
-                value = radioIndex
-            }
-        }
-        return value
-    }
-    
-    transferCheckBox(checkBox: TCheckBox, value: boolean): void {
-        if (this.transferDirection === kTransferLoad) {
-            checkBox.Checked = value
-        } else if (this.transferDirection === kTransferSave) {
-            if (value !== checkBox.Checked) {
-                this.optionsChanged = true
-            }
-            value = checkBox.Checked
-        }
-        return value
-    }
-    
-    transferSmallintSpinEditBox(editBox: TSpinEdit, value: short): void {
-        if (this.transferDirection === kTransferLoad) {
-            editBox.Text = IntToStr(value)
-        } else if (this.transferDirection === kTransferSave) {
-            if (value !== StrToIntDef(editBox.Text, 0)) {
-                this.optionsChanged = true
-            }
-            value = StrToIntDef(editBox.Text, 0)
-        }
-        return value
-    }
-    
-    transferRadioGroup(radioGroup: TRadioGroup, value: short): void {
-        if (this.transferDirection === kTransferLoad) {
-            radioGroup.ItemIndex = value
-        } else if (this.transferDirection === kTransferSave) {
-            if (value !== radioGroup.ItemIndex) {
-                this.optionsChanged = true
-            }
-            value = radioGroup.ItemIndex
-        }
-        return value
-    }
-    
-    transferComboBox(comboBox: TComboBox, value: short): void {
-        if (this.transferDirection === kTransferLoad) {
-            comboBox.ItemIndex = value
-        } else if (this.transferDirection === kTransferSave) {
-            if (value !== comboBox.ItemIndex) {
-                this.optionsChanged = true
-            }
-            value = comboBox.ItemIndex
-        }
-        return value
-    }
-    
-    transferSingleEditBox(editBox: TEdit, value: float): void {
-        let newValue: float
-        
-        if (this.transferDirection === kTransferLoad) {
-            editBox.Text = valueString(value)
-        } else if (this.transferDirection === kTransferSave) {
-            try {
-                newValue = StrToFloat(editBox.Text)
-            } catch (e) {
-                newValue = value
-            }
-            if (newValue !== value) {
-                this.optionsChanged = true
-            }
-            value = newValue
-        }
-        return value
-    }
-    
     helpButtonClick(): void {
         // HelpJump("Exporting_3D_models_in_general")
         HelpJump("Exporting_to_DXF")
@@ -597,26 +510,8 @@ export class TGeneric3DOptionsForm {
         this.useAllPlants = true
     }
     
-    stemCylinderFacesChange(): void {
-        let value: int
-        
-        value = StrToIntDef(this.stemCylinderFaces.Text, 5)
-        if (value < kMinOutputCylinderFaces) {
-            value = kMinOutputCylinderFaces
-        }
-        if (value > kMaxOutputCylinderFaces) {
-            value = kMaxOutputCylinderFaces
-        }
-        this.stemCylinderFaces.Text = IntToStr(value)
-    }
-    
-    dxfWriteColorsClick(): void {
-        this.colorDXFFromRGB.Visible = this.dxfWriteColors.Checked
-        this.colorDXFFromOneColor.Visible = this.dxfWriteColors.Checked
-        this.wholePlantColor.Visible = this.dxfWriteColors.Checked
-        this.colorDXFFromPlantPartType.Visible = this.dxfWriteColors.Checked
-        this.colorsByPlantPart.Visible = this.dxfWriteColors.Checked
-        this.setPlantPartColor.Visible = this.dxfWriteColors.Checked
+    dxfWriteColorsClick(event: any): void {
+        this.options.writeColors = event.target.checked
     }
 
     oninit(vnode: any) {
@@ -683,97 +578,71 @@ export class TGeneric3DOptionsForm {
                 },
                 " Group by ",
             ),
-            m("div.TGroupBox.dxfColorsGroupBox.TGroupBox",
-                {
-                    // Top: "91",
-                    // Left: "290",
-                    // Height: "152",
-                    // Width: "280",
-                    // TabOrder: "2",
-                    // Visible: "False",
-                },
+            this.outputType === ExportFormats.kDXF && m("div.TGroupBox.dxfColorsGroupBox.TGroupBox",
                 "Colors",
                 m("br"),
                 m("label.checkbox-inline.dxfWriteColors.TCheckBox.ml2", m("input[type=checkbox].mr1",
                     {
-                        onclick: () => this.dxfWriteColorsClick(),
-                        // Top: "16",
-                        // Left: "10",
-                        // Height: "17",
-                        // Width: "101",
-                        // TabOrder: "6",
-                    },),
+                        checked: this.options.writeColors,
+                        onchange: (event: any) => this.dxfWriteColorsClick(event)
+                    }),
                     caption("Write &colors"),
                 ),
                 m("br"),
-                m("label.ml2",
-                    m("input[type=radio].mr1.colorDXFFromRGB.TRadioButton",
-                        {
-                            // Top: "35",
-                            // Left: "9",
-                            // Height: "17",
-                            // Width: "232",
-                            // TabOrder: "0",
-                        },
-                    ),
-                    caption("use front-face &RGB colors"),
-                ),
-                m("br"),
-                m("div.Group.Group.g00000056.ml2",
-                    m("label",
-                        m("input[type=radio].mr1.colorDXFFromOneColor.TRadioButton",
+                this.options.writeColors && m("div.dxfWriteColorsPanel",
+                    m("label.ml2",
+                        m("input[type=radio].mr1.colorDXFFromRGB.TRadioButton",
                             {
-                                // Top: "56",
-                                // Left: "9",
-                                // Height: "15",
-                                // Width: "244",
-                                // TabOrder: "1",
+                                onclick: () => this.options.dxf_whereToGetColors = kColorDXFFromRGB,
+                                checked: this.options.dxf_whereToGetColors === kColorDXFFromRGB
                             },
                         ),
-                        caption("use this o&ne color for all plant parts"),
+                        caption("use front-face &RGB colors"),
                     ),
-                    m("div.wholePlantColor.TPanel",
+                    m("br"),
+                    m("div.Group.Group.g00000056.ml2",
+                        m("label",
+                            m("input[type=radio].mr1.colorDXFFromOneColor.TRadioButton",
+                                {
+                                    onclick: () => this.options.dxf_whereToGetColors = kColorDXFFromOneColor,
+                                    checked: this.options.dxf_whereToGetColors === kColorDXFFromOneColor
+                                }
+                            ),
+                            caption("use this o&ne color for all plant parts"),
+                        ),
+                        m("div.wholePlantColor.dib.TPanel.ml2",
+                            {
+                                onclick: () => this.wholePlantColorMouseUp(),
+                                style: {
+                                    width: "16px",
+                                    height: "14px",
+                                    backgroundColor: convertColorNumberToCSS(dxfColors[this.options.dxf_wholePlantColorIndex])
+                                }
+                            },
+                        ),
+                        m("button.setPlantPartColor.TButton.ml1",
+                            {
+                                onclick: () => this.setPlantPartColorClick(),
+                            },
+                            caption("&Set..."),
+                        ),
+                    ),
+                    m("label.ml2",
+                        m("input[type=radio].mr1.colorDXFFromPlantPartType.TRadioButton",
+                            {
+                                onclick: () => this.options.dxf_whereToGetColors = kColorDXFFromPlantPartType,
+                                checked: this.options.dxf_whereToGetColors === kColorDXFFromPlantPartType
+                            },
+                        ),
+                        caption("use colors &based on type of part"),
+                    ),
+                    m("div.TListBox.colorsByPlantPart.TListBox.ml4",
                         {
-                            // Top: "56",
-                            // Left: "119",
-                            // Height: "14",
-                            // Width: "16",
-                            // BevelInner: "bvLowered",
-                            // BevelOuter: "bvLowered",
-                            // TabOrder: "2",
-                            // OnMouseUp: "wholePlantColorMouseUp",
+                            // OnDblClick: "colorsByPlantPartDblClick",
                         },
+                        this.colorsByPlantPartView()
                     ),
-                    m("button.setPlantPartColor.TButton",
-                        {
-                            onclick: () => this.setPlantPartColorClick(),
-                            // Top: "71",
-                            // Left: "221",
-                            // Height: "22",
-                            // Width: "53",
-                            // TabOrder: "5",
-                        },
-                    caption("&Set..."),
-                    ),
-                ),
-                m("label.ml2",
-                    m("input[type=radio].mr1.colorDXFFromPlantPartType.TRadioButton",
-                        {
-                            // Top: "77",
-                            // Left: "9",
-                            // Height: "15",
-                            // Width: "182",
-                            // TabOrder: "3",
-                        },
-                    ),
-                    caption("use colors &based on type of part"),
-                ),
-                m("div.TListBox.colorsByPlantPart.TListBox.ml4",
-                    {
-                        // OnDblClick: "colorsByPlantPartDblClick",
-                    },
-                    this.colorsByPlantPartView()
-                ),
+                )
             ),
             m("div.TGroupBox.reorientGroupBox.TGroupBox",
                 "Reorient",
@@ -782,9 +651,10 @@ export class TGeneric3DOptionsForm {
                     m("span.Label1.TLabel",
                         "Rotate by",
                     ),
-                    m("input[type=number].mw3.TSpinEdit.xRotationBeforeDraw.TSpinEdit.ml1.mr1",
+                    m("input[type=number].mw3.TSpinEdit.xRotationBeforeDraw.ml1.mr1",
                         {
-                            // Value: "0",
+                            value: IntToStr(this.options.xRotationBeforeDraw),
+                            onchange: (event: any) => this.options.xRotationBeforeDraw = StrToIntRange(event.target.value, -180, 180),
                             step: 5,
                             min: "-180",
                             max: "180"
@@ -799,9 +669,10 @@ export class TGeneric3DOptionsForm {
                     m("span.Label7.TLabel",
                         "Scale by",
                     ),
-                    m("input[type=number].mw3.TSpinEdit.overallScalingFactor_pct.TSpinEdit.ml1.mr1",
+                    m("input[type=number].mw3.TSpinEdit.overallScalingFactor_pct.ml1.mr1",
                         {
-                            // Value: "10000",
+                            value: IntToStr(this.options.overallScalingFactor_pct),
+                            onchange: (event: any) => this.options.overallScalingFactor_pct = StrToIntRange(event.target.value, 1, 10000),
                             step: 5,
                             min: "1",
                             max: "10000"
@@ -819,9 +690,10 @@ export class TGeneric3DOptionsForm {
                         m("span.Label2.TLabel",
                             caption("Limit plant &name to"),
                         ),
-                        m("input[type=number].mw3.TSpinEdit.lengthOfShortName.TSpinEdit.ml1.mr1",
+                        m("input[type=number].mw3.TSpinEdit.lengthOfShortName.ml1.mr1",
                             {
-                                // Value: "3",
+                                onchange: (event: any) => this.options.lengthOfShortName = StrToIntRange(event.target.value, 1, 60),
+                                value: IntToStr(this.options.lengthOfShortName),
                                 step: 1,
                                 min: "1",
                                 max: "60"
@@ -836,29 +708,26 @@ export class TGeneric3DOptionsForm {
                         m("span.stemCylinderFacesLabel.TLabel",
                             caption("Draw stems as c&ylinders with"),
                         ),
-                        m("input[type=number].mw3.TSpinEdit.stemCylinderFaces.TSpinEdit.ml1.mr1",
+                        m("input[type=number].mw3.TSpinEdit.stemCylinderFaces.ml1.mr1",
                             {
-                                // Value: "3",
-                                // OnChange: "stemCylinderFacesChange",
+                                value: IntToStr(this.options.stemCylinderFaces),
+                                onchange: (event: any) => this.options.stemCylinderFaces = StrToIntRangeDef(event.target.value, kMinOutputCylinderFaces, kMaxOutputCylinderFaces, 5),
                                 step: 1,
-                                min: "3",
-                                max: "20"
+                                min: "" + kMinOutputCylinderFaces,
+                                max: "" + kMaxOutputCylinderFaces
                             },
                         ),
                         m("span.sidesLabel.TLabel",
-                            "sides (3-20)",
+                            "sides (" + kMinOutputCylinderFaces + "-" + kMaxOutputCylinderFaces + ")",
                         ),
                     ),
                 ),
                 m("div.pressPlantsPanel.TPanel",
                     m("label.checkbox-inline.pressPlants.TCheckBox", m("input[type=checkbox].mr1",
                         {
-                            // Top: "8",
-                            // Left: "8",
-                            // Height: "17",
-                            // Width: "99",
-                            // TabOrder: "0",
-                        },),
+                            checked: this.options.pressPlants,
+                            onchange: (event: any) => this.options.pressPlants = event.target.checked
+                        }),
                         caption("\"Pr&ess\" plants in"),
                     ),
                     m("label.Label8.TLabel",
@@ -876,122 +745,84 @@ export class TGeneric3DOptionsForm {
                 ),
                 m("label.checkbox-inline.writePlantNumberInFrontOfName.TCheckBox", m("input[type=checkbox].mr1",
                     {
-                        // Top: "96",
-                        // Left: "10",
-                        // Height: "17",
-                        // Width: "219",
-                        // TabOrder: "3",
-                    },),
+                        checked: this.options.writePlantNumberInFrontOfName,
+                        onchange: (event: any) => this.options.writePlantNumberInFrontOfName = event.target.checked
+                    }),
                     caption("Write plant n&umber in front of name"),
                 ),
                 m("br"),
                 m("label.checkbox-inline.writeColors.TCheckBox", m("input[type=checkbox].mr1",
                     {
-                        // Top: "115",
-                        // Left: "10",
-                        // Height: "17",
-                        // Width: "101",
-                        // TabOrder: "1",
+                        checked: this.options.writeColors,
+                        onchange: (event: any) => this.options.writeColors = event.target.checked
                     },),
                     caption("Write &colors"),
                 ),
                 m("br"),
                 m("label.checkbox-inline.makeTrianglesDoubleSided.TCheckBox", m("input[type=checkbox].mr1",
                     {
-                        // Top: "133",
-                        // Left: "10",
-                        // Height: "17",
-                        // Width: "181",
-                        // TabOrder: "5",
-                    },),
+                        checked: this.options.makeTrianglesDoubleSided,
+                        onchange: (event: any) => this.options.makeTrianglesDoubleSided = event.target.any
+                    }),
                     caption("&Double polygons on 3D objects"),
                 ),
                 m("br"),
                 m("label.checkbox-inline.translatePlantsToWindowPositions.TCheckBox", m("input[type=checkbox].mr1",
                     {
-                        // Top: "151",
-                        // Left: "10",
-                        // Height: "17",
-                        // Width: "245",
-                        // TabOrder: "0",
-                    },),
+                        checked: this.options.translatePlantsToWindowPositions,
+                        onchange: (event: any) => this.options.translatePlantsToWindowPositions = event.target.checked
+                    }),
                     caption("&Translate plants to match window positions"),
                 ),
             ),
-            m("div.TGroupBox.nestingGroupBox.TGroupBox",
-                {
-                    // Top: "246",
-                    // Left: "290",
-                    // Height: "100",
-                    // Width: "280",
-                    // TabOrder: "4",
-                    // Visible: "False",
-                },
+            (this.outputType === ExportFormats.kPOV || this.outputType === ExportFormats.kVRML) && m("div.TGroupBox.nestingGroupBox.TGroupBox",
                 "Nest",
                 m("div.Group.Group.g00000018.ml2",
                     m("label.checkbox-inline.nestLeafAndPetiole.TCheckBox", m("input[type=checkbox].mr1",
                         {
-                            // Top: "18",
-                            // Left: "17",
-                            // Height: "17",
-                            // Width: "122",
-                            // TabOrder: "0",
-                        },),
+                            checked: this.options.nest_LeafAndPetiole,
+                            onchange: (event: any) => this.options.nest_LeafAndPetiole = event.target.checked
+                        }),
                         caption("leaves with &petioles"),
                     ),
                     m("br"),
                     m("label.checkbox-inline.nestPedicelAndFlowerFruit.TCheckBox", m("input[type=checkbox].mr1",
                         {
-                            // Top: "18",
-                            // Left: "142",
-                            // Height: "17",
-                            // Width: "130",
-                            // TabOrder: "3",
-                        },),
+                            checked: this.options.nest_PedicelAndFlowerFruit,
+                            onchange: (event: any) => this.options.nest_PedicelAndFlowerFruit = event.target.checked
+                        }),
                         caption("&flowers with pedicels"),
                     ),
                 ),
                 m("label.checkbox-inline.nestFloralLayers.TCheckBox.ml2", m("input[type=checkbox].mr1",
                     {
-                        // Top: "36",
-                        // Left: "142",
-                        // Height: "17",
-                        // Width: "118",
-                        // TabOrder: "4",
-                    },),
+                        checked: this.options.nest_FloralLayers,
+                        onchange: (event: any) => this.options.nest_FloralLayers = event.target.checked
+                    }),
                     caption("pistils and sta&mens"),
                 ),
                 m("br"),
                 m("label.checkbox-inline.nestCompoundLeaf.TCheckBox.ml2", m("input[type=checkbox].mr1",
                     {
-                        // Top: "37",
-                        // Left: "17",
-                        // Height: "17",
-                        // Width: "119",
-                        // TabOrder: "1",
-                    },),
+                        checked: this.options.nest_CompoundLeaf,
+                        onchange: (event: any) => this.options.nest_CompoundLeaf = event.target.checked
+                    }),
                     caption("&compound leaves"),
                 ),
                 m("br"),
                 m("label.checkbox-inline.nestInflorescence.TCheckBox.ml2", m("input[type=checkbox].mr1",
                     {
-                        // Top: "55",
-                        // Left: "17",
-                        // Height: "17",
-                        // Width: "97",
-                        // TabOrder: "2",
-                    },),
+                        checked: this.options.nest_Inflorescence,
+                        onchange: (event: any) => this.options.nest_Inflorescence = event.target.checked
+                    }),
                     caption("&inflorescences"),
                 ),
                 m("br"),
                 m("label.checkbox-inline.commentOutUnionAtEnd.TCheckBox", m("input[type=checkbox].mr1",
                     {
-                        // Top: "77",
-                        // Left: "17",
-                        // Height: "18",
-                        // Width: "207",
-                        // TabOrder: "5",
-                    },),
+                        checked: this.options.pov_commentOutUnionAtEnd,
+                        onchange: (event: any) => this.options.pov_commentOutUnionAtEnd = event.target.checked
+                    }),
                     caption("Comment out &union of plants at end"),
                 ),
             ),
@@ -1011,56 +842,38 @@ export class TGeneric3DOptionsForm {
                 },
                 "Version",
             ),
-            m("div.threeDSWarningPanel.TPanel",
-                {
-                    // Top: "394",
-                    // Left: "290",
-                    // Height: "52",
-                    // Width: "280",
-                    // BevelInner: "bvRaised",
-                    // BevelOuter: "bvLowered",
-                    // TabOrder: "8",
-                    // Visible: "False",
-                },
+            this.outputType === ExportFormats.k3DS && m("div.threeDSWarningPanel.TPanel",
                 m("div.Label6.TLabel",
                     "Note: This version of the 3DS export function does not import equally well to all 3D programs. See the help system for tips on improving 3DS compatibility.",
                 ),
             ),
-            m("div.TGroupBox.povLimitsGroupBox.TGroupBox",
-                {
-                    // Top: "449",
-                    // Left: "290",
-                    // Height: "74",
-                    // Width: "280",
-                    // TabOrder: "3",
-                    // Visible: "False",
-                },
+            this.outputType === ExportFormats.kPOV && m("div.TGroupBox.povLimitsGroupBox.TGroupBox",
                 "Limit small lines and 3D objects",
                 m("br"),
                 m("label.Label4.TLabel.ml2",
-                    caption("&Keep lines at least this long (mm)"),
+                    caption("&Keep lines at least this long (0-100 mm)"),
                     m("br"),
                     m("input.minLineLengthToWrite.TEdit.ml2.mw3",
                         {
-                            // Top: "19",
-                            // Left: "17",
-                            // Height: "22",
-                            // Width: "51",
-                            // TabOrder: "0",
+                            value: IntToStr(this.options.pov_minLineLengthToWrite),
+                            onchange: (event: any) => this.options.pov_minLineLengthToWrite = StrToIntRange(event.target.value, 0, 1000),
+                            step: 1,
+                            min: "0",
+                            max: "100",
                         },
                     ),
                 ),
                 m("br"),
                 m("label.Label5.TLabel.ml2",
-                    caption("Keep &3D objects of at least this scale"),
+                    caption("Keep &3D objects of at least this scale (0-100)"),
                     m("br"),
                     m("input.minTdoScaleToWrite.TEdit.ml2.mw3",
                         {
-                            // Top: "45",
-                            // Left: "17",
-                            // Height: "22",
-                            // Width: "51",
-                            // TabOrder: "1",
+                            value: IntToStr(this.options.pov_minTdoScaleToWrite),
+                            onchange: (event: any) => this.options.pov_minTdoScaleToWrite = StrToFloatRange(event.target.value, 0, 100),
+                            step: 1,
+                            min: "0",
+                            max: "100",
                         },
                     ),
                 ),
