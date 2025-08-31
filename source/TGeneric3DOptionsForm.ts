@@ -527,7 +527,7 @@ export class TGeneric3DOptionsForm {
             m("div.fs3.b", this.Caption),
             m("div.Group.Group.g00000004",
                 m("div.TGroupBox.drawWhichPlantsGroupBox.TGroupBox",
-                    "Include:",
+                    "Include",
                     m("div.Group.Group.g00000016.ml2",
                         m("label",
                             m("input[type=radio].mr1.useSelectedPlants.TRadioButton",
@@ -564,19 +564,22 @@ export class TGeneric3DOptionsForm {
                     ),
                 ),
             ),
-            m("div.TRadioGroup.layeringOption.TRadioGroup",
-                {
-                    // Top: "81",
-                    // Left: "4",
-                    // Height: "75",
-                    // Width: "280",
-                    // Ctl3D: "True",
-                    // ItemIndex: "0",
-                    // Items.Strings: ["&whole plant","&type of plant part","individual plant &part"],
-                    // ParentCtl3D: "False",
-                    // TabOrder: "5",
-                },
-                " Group by ",
+            m("div.TRadioGroup.layeringOption",
+                m("div", "Group by"),
+                ["&whole plant","&type of plant part","individual plant &part"].map((option, index) =>
+                    [
+                            m("label.ml2",
+                            m("input[type=radio].mr1.TRadioButton",
+                                {
+                                    onclick: () => this.options.layeringOption = index,
+                                    checked: this.options.layeringOption === index
+                                },
+                            ),
+                            caption(option),
+                        ),
+                        m("br")
+                    ],
+                )
             ),
             this.outputType === ExportFormats.kDXF && m("div.TGroupBox.dxfColorsGroupBox.TGroupBox",
                 "Colors",
@@ -826,21 +829,22 @@ export class TGeneric3DOptionsForm {
                     caption("Comment out &union of plants at end"),
                 ),
             ),
-            m("div.TRadioGroup.vrmlVersionRadioGroup.TRadioGroup",
-                {
-                    // Top: "351",
-                    // Left: "290",
-                    // Height: "38",
-                    // Width: "280",
-                    // Columns: "2",
-                    // Ctl3D: "True",
-                    // ItemIndex: "1",
-                    // Items.Strings: ["VRML &1.0","VRML &2.0 (VRML 97)"],
-                    // ParentCtl3D: "False",
-                    // TabOrder: "10",
-                    // Visible: "False",
-                },
-                "Version",
+            m("div.TRadioGroup.vrmlVersionRadioGroup",
+                m("div", "VRML Version"),
+                ["VRML &1.0","VRML &2.0 (VRML 97)"].map((version, index) =>
+                    [
+                            m("label.ml2",
+                            m("input[type=radio].mr1.TRadioButton",
+                                {
+                                    onclick: () => this.options.vrml_version = index,
+                                    checked: this.options.vrml_version === index
+                                },
+                            ),
+                            caption(version),
+                        ),
+                        m("br")
+                    ],
+                )
             ),
             this.outputType === ExportFormats.k3DS && m("div.threeDSWarningPanel.TPanel",
                 m("div.Label6.TLabel",
