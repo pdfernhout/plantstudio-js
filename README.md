@@ -1,3 +1,13 @@
+This is a work-in-progress port of PlantStudio from Delphi Pascal to TypeScript for the web under the AGPL license. 
+
+The PlantStudio application workes well enough to be played with to create and breed plants. Some big missing features not yet ported include exporting plants and editing Three-D Objects (TDOs).
+
+You can donate to help us continue this work (donations are not tax-dedutible): https://www.paypal.com/donate?hosted_button_id=JCJS6AYH3CDN8
+
+![PlantStudio-js main form](screenshots/PlantStudio-js%20main%20form%20Screenshot%202026-02-26%202.24.11%20PM.png)
+
+==== More details from the Readme of the Delphi version repo: https://github.com/pdfernhout/plantstudio
+
 The PlantStudio program as released around 1997 was originally developed under Delphi Pascal for Windows. Much earlier versions were also for a time before that developed in VisualBasic, C++, and Smalltalk as well but would be of little general interest compared to this code.
 
 The PlantStudio software was developed by Cynthia Kurtz and Paul Fernhout working together as "Kurtz-Fernhout Software", who jointly hold the copyright to that code.
