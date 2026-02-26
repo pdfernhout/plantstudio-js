@@ -10,6 +10,6 @@ Some historical details on the project can be found in the Readme for the earlie
 
 This project shows how people can create a diversity of plants without "generative AI". That is done by building humanly-understandable hand-crafted models from a deep understanding of a subject and then creating user interfaces to vary and select from possible outputs of those models.
 
---Paul Fernhout and Cynthia Kurtz
+--Paul Fernhout and Cynthia Kurtz  
 February 26, 2026
 
