@@ -7,16 +7,18 @@ import { KfIndexTriangle } from "./KfIndexTriangle"
 import { KfTriangle } from "./KfTriangle"
 import { TRect } from "./TRect"
 import { TPoint } from "./TPoint"
-import { KfTurtle } from "./KfTurtle"
+import type { KfTurtle } from "./KfTurtle"
 import { KfStringStream } from "./KfStringStream"
 import { stringUpTo, digitValueString, replacePunctuationWithUnderscores } from "./usupport"
 import { ClassId } from "./uclasses"
 import { KfFileExportSurface, ExportFormats } from "./U3dexport"
 import { PdClassAndVersionInformationRecord, PdFiler } from "./PdFiler"
 import { PdStreamableObject } from "./PdStreamableObject"
+import { kMaximumRecordedPoints, kTdoBackColor, kTdoForeColor, kTdoLineContrastIndex } from "./Kf3DConstants"
+
+export { kMaximumRecordedPoints, kTdoBackColor, kTdoForeColor, kTdoLineContrastIndex } from "./Kf3DConstants"
 
 // v1.6b2 changed from 200 to 1000 ; v2.0 changed to 10000 (not in tdo anymore)
-export const kMaximumRecordedPoints = 10000
 
 export const kAdjustForOrigin = true
 export const kDontAdjustForOrigin = false
@@ -24,11 +26,6 @@ export const kDontAdjustForOrigin = false
 export const kEmbeddedInPlant = true
 export const kInTdoLibrary = false
 const kStandAloneFile = false
-
-export const kTdoForeColor = ColorDefs.clSilver
-export const kTdoBackColor = ColorDefs.clGray
-
-export const kTdoLineContrastIndex = 10
 
 export const kStartTdoString = "start 3D object"
 const kEndTdoString = "end 3D object"

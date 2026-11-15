@@ -11,7 +11,7 @@
     "copy-lib": "mkdir -p dist/source/lib && cp node_modules/systemjs/dist/system.src.js node_modules/tachyons/css/tachyons.css node_modules/mithril/mithril.js node_modules/lz-string/libs/lz-string.js dist/source/lib/",
     "copy-data": "mkdir -p dist/source/data/media && cp data/*.wld data/*.json dist/source/data/ && cp data/media/* dist/source/data/media/",
     "copy-index": "mkdir -p dist/source && cp source/index.html dist/source/",
-    "copy-resources": "mkdir -p dist/source/resources && cp resources/*.bmp dist/source/resources/",
+    "copy-resources": "mkdir -p dist/source/resources && cp source/resources/*.png source/resources/*.ico dist/source/resources/",
     "copy-resources-more": "mkdir -p dist/source/resources && cp source/resources/*.png source/resources/*.ico source/resources/template.html dist/source/resources/"
   },
   "contributors": [
