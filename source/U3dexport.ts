@@ -129,6 +129,11 @@ export interface Vertex {
     z: float
 }
 
+export interface ExportedFile {
+    fileName: string
+    contents: string | Uint8Array
+}
+
 // record
 export interface Triangle {
     vertex1: int
@@ -404,7 +409,7 @@ export class KfFileExportSurface extends KfDrawingSurface {
     currentPlantIndex: short = 0
     currentGroupingString: string = ""
     currentColor: TColorRef = 0
-    plantPartCounts: short[] = Array(ExportPart.kExportPartLast + 1)
+    plantPartCounts: short[] = Array(ExportPart.kExportPartLast + 1).fill(0)
     numPoints: int = 0
     points: Vertex[] = Array(kMax3DPoints + 1)
     numFaces: int = 0
@@ -427,6 +432,10 @@ export class KfFileExportSurface extends KfDrawingSurface {
 
     fileContents(): string | Uint8Array {
         throw new Error("subclasses must provide exported file contents")
+    }
+
+    exportedFiles(): ExportedFile[] {
+        return [{ fileName: this.fileName, contents: this.fileContents() }]
     }
     
     startPlant(aLongName: string, aPlantIndex: short): void {
@@ -1327,6 +1336,7 @@ export class KfDrawingSurfaceForOBJ extends KfTextFileExportSurface {
     materialColors: TColorRef[] /* kMaxStoredMaterials + 1 */ = Array(kMaxStoredMaterials + 1)
     materialNames: string[] /* kMaxStoredMaterials + 1 */ = Array(kMaxStoredMaterials + 1)
     materialsFileName: string = ""
+    materialsFile: TextFile = new TextFile()
     
     // ----------------------------------------------------------------------------- KfDrawingSurfaceForOBJ 
     startFile(): void {
@@ -1381,58 +1391,25 @@ export class KfDrawingSurfaceForOBJ extends KfTextFileExportSurface {
     }
     
     writeMaterialDescriptionsToFile(): void {
-        let materialsFile: TextFile
-        let i: short
-        let colorString: string
-        let fileInfo: SaveFileNamesStructure
-        
-        if (this.numMaterialsStored <= 0) {
-            return
+        this.materialsFile = new TextFile()
+        writeln(this.materialsFile, "# Materials for " + ExtractFileName(this.fileName))
+        for (let i = 1; i <= this.numMaterialsStored; i++) {
+            writeln(this.materialsFile, "newmtl " + this.materialNames[i])
+            const colorString = valueString(getRValue(this.materialColors[i]) / 255.0) + " " +
+                valueString(getGValue(this.materialColors[i]) / 255.0) + " " +
+                valueString(getBValue(this.materialColors[i]) / 255.0)
+            writeln(this.materialsFile, "Ka " + colorString)
+            writeln(this.materialsFile, "Kd " + colorString)
+            writeln(this.materialsFile, "Ks " + colorString)
+            writeln(this.materialsFile, "d 1.0")
+            writeln(this.materialsFile, "illum 1")
+            writeln(this.materialsFile)
         }
-        // TODO: Unfinished writeMaterialDescriptionsToFile
-        alert("TODO: Unfinished writeMaterialDescriptionsToFile")
-        /*
-        if (usupport.getFileSaveInfo(FileType.kFileTypeMTL, usupport.kDontAskForFileName, this.materialsFileName, fileInfo)) {
-            AssignFile(materialsFile, fileInfo.tempFile)
-            try {
-                usupport.setDecimalSeparator()
-                Rewrite(materialsFile)
-                usupport.startFileSave(fileInfo)
-                writeln(materialsFile, "# Materials for file " + stringUpTo(ExtractFileName(this.materialsFileName), ".") + ".obj")
-                writeln(materialsFile, "# Created by PlantStudio http://www.kurtz-fernhout.com")
-                writeln(materialsFile, "# These files must be in the same directory for the materials to be read correctly.")
-                for (i = 0; i < this.numMaterialsStored; i++) {
-                    if (this.materialNames[i] === "") {
-                        //newmtl name
-                        //Ka  0.1 0.0 0.0
-                        //Kd  0.4 0.0 0.0
-                        //Ks  0.4 0.0 0.0
-                        //Ns  20
-                        //d  1.0 (0 transparent 1 opaque)
-                        //illum 1
-                        continue
-                    }
-                    writeln(materialsFile, "newmtl " + this.materialNames[i])
-                    colorString = valueString(getRValue(this.materialColors[i]) / 255.0) + " " + valueString(getGValue(this.materialColors[i]) / 255.0) + " " + valueString(getBValue(this.materialColors[i]) / 255.0)
-                    writeln(materialsFile, "Ka  " + colorString)
-                    writeln(materialsFile, "Kd  " + colorString)
-                    writeln(materialsFile, "Ks  " + colorString)
-                    writeln(materialsFile, "d 1.0")
-                    writeln(materialsFile, "illum 1")
-                    writeln(materialsFile)
-                }
-                fileInfo.writingWasSuccessful = true
-            } finally {
-                CloseFile(materialsFile)
-                usupport.cleanUpAfterFileSave(fileInfo)
-            }
-        }
-        */
     }
     
     storeMaterialDescription(aName: string, aColor: TColorRef): void {
         if (this.numMaterialsStored > 0) {
-            for (let i = 0; i < this.numMaterialsStored; i++) {
+            for (let i = 1; i <= this.numMaterialsStored; i++) {
                 if (this.materialNames[i] === aName) {
                     return
                 }
@@ -1450,6 +1427,14 @@ export class KfDrawingSurfaceForOBJ extends KfTextFileExportSurface {
         writeln(this.outputFile)
         writeln(this.outputFile, "g " + aName)
         writeln(this.outputFile, "s off")
+    }
+
+    exportedFiles(): ExportedFile[] {
+        const files = super.exportedFiles()
+        if (this.options.writeColors) {
+            files.push({ fileName: this.materialsFileName, contents: this.materialsFile.contents })
+        }
+        return files
     }
     
     startColor(aColor: TColorRef, aMaterialName: string): void {

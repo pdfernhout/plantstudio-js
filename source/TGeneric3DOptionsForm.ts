@@ -459,6 +459,8 @@ export class TGeneric3DOptionsForm {
     view() {
         return m("div.Generic3DOptionsForm.TGeneric3DOptionsForm.h-100.overflow-auto",
             m("div.fs3.b", this.Caption),
+            this.outputType === ExportFormats.kOBJ && this.options.writeColors &&
+                m("p", "The OBJ and its MTL color file will download together as a ZIP."),
             m("div.Group.Group.g00000004",
                 m("div.TGroupBox.drawWhichPlantsGroupBox.TGroupBox",
                     "Include",

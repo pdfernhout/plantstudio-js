@@ -5,10 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "tsc -p tsconfig-test.json && cd dist-test && ../node_modules/ospec/bin/ospec",
+    "test:exports": "npm run build && node scripts/test-export-downloads.cjs",
     "test-interactive": "tsc --watch & echo \"browse to: http://localhost:8080/tests-interactive/\" && http-server -c-1 && fg",
     "build": "npm run copy-lib && npm run copy-index && npm run copy-resources && tsc",
     "build-with-data": "npm run copy-lib && npm run copy-data && npm run copy-index && npm run copy-resources && tsc",
-    "copy-lib": "mkdir -p dist/source/lib && cp node_modules/systemjs/dist/system.src.js node_modules/tachyons/css/tachyons.css node_modules/mithril/mithril.js node_modules/lz-string/libs/lz-string.js dist/source/lib/",
+    "copy-lib": "mkdir -p dist/source/lib && cp node_modules/systemjs/dist/system.src.js node_modules/tachyons/css/tachyons.css node_modules/mithril/mithril.js node_modules/lz-string/libs/lz-string.js dist/source/lib/ && cp node_modules/fflate/umd/index.js dist/source/lib/fflate.js",
     "copy-data": "mkdir -p dist/source/data/media && cp data/*.wld data/*.json dist/source/data/ && cp data/media/* dist/source/data/media/",
     "copy-index": "mkdir -p dist/source && cp source/index.html dist/source/",
     "copy-resources": "mkdir -p dist/source/resources && cp source/resources/*.png source/resources/*.ico dist/source/resources/",
@@ -23,12 +24,15 @@
     "@types/lz-string": "^1.3.34",
     "@types/mithril": "^2.2.7",
     "@types/node": "^9.6.61",
+    "assimpjs": "0.0.10",
     "eslint": "^9.24.0",
     "http-server": "^14.1.1",
     "ospec": "^4.2.1",
+    "playwright": "1.65.1",
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "fflate": "0.8.2",
     "lz-string": "^1.5.0",
     "mithril": "^2.2.15",
     "systemjs": "^0.21.6",

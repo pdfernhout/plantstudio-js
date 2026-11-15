@@ -93,8 +93,8 @@ function standardModal(promptText: string, modalType: ModalType, defaultText: st
     })
 }
 
-export function customModal(drawFunction: any, style?: any) {
-    return new Promise((resolve, reject) => {
+export function customModal<T = unknown>(drawFunction: any, style?: any): Promise<T> {
+    return new Promise<T>((resolve, reject) => {
         setModalCallback(() => m("div.mt5.ml-auto.mr-auto.bg-near-white.pa3.br3",
             { key: "customModal", style: style || "width: 32rem" },
             drawFunction(

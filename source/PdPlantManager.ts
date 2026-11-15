@@ -9,6 +9,7 @@ import { TRect } from "./TRect"
 import { kPasteMoveDistance } from "./updcom"
 import { SinglePoint, SaveFileNamesStructure, rWidth, rHeight, stringBetween, setDecimalSeparator, strToBool, stringBeyond, stringUpTo, singlePointToString, digitValueString, boolToStr, FileType, setSinglePoint, pos, stringToSinglePoint, kDontAskForFileName, tolerantReadln } from "./usupport"
 import { KfObject3D, kInTdoLibrary, kStartTdoString } from "./KfObject3D"
+import type { ExportedFile } from "./U3dexport"
 
 export function checkVersionNumberInPlantNameLine(aLine: string): void {
     let versionNumberString: string
@@ -491,7 +492,7 @@ export class PdPlantManager {
         }
     }
     
-    write3DOutputFileToFileName(selectedPlants: PdPlant[], excludeInvisiblePlants: boolean, excludeNonSelectedPlants: boolean, fileName: string, outputType: short): void {
+    write3DOutputFileToFileName(selectedPlants: PdPlant[], excludeInvisiblePlants: boolean, excludeNonSelectedPlants: boolean, fileName: string, outputType: short): ExportedFile[] {
         let includePlant: boolean
         let includeRect: TRect
         let includedPlants: PdPlant[] = []
@@ -500,7 +501,7 @@ export class PdPlantManager {
         setDecimalSeparator()
         includeRect = this.combinedPlantBoundsRects(selectedPlants, excludeInvisiblePlants, excludeNonSelectedPlants)
         if ((rWidth(includeRect) <= 0) || (rHeight(includeRect) <= 0)) {
-            return
+            return []
         }
         const turtle = new KfTurtle()
         turtle.createFor3DOutput(outputType, fileName)
@@ -531,12 +532,19 @@ export class PdPlantManager {
             if (includedPlants.length > 0) {
                 for (let i = 0; i <= includedPlants.length - 1; i++) {
                     // iterate over included plants
-                    includedPlants[i].saveToGlobal3DOutputFile(i, translatePlants, includeRect, outputType, turtle)
+                    const plant = includedPlants[i]
+                    const previousTurtle = plant.turtle
+                    try {
+                        plant.saveToGlobal3DOutputFile(i, translatePlants, includeRect, outputType, turtle)
+                    } finally {
+                        plant.turtle = previousTurtle
+                    }
                 }
             }
         } finally {
             turtle.end3DExportFile()
         }
+        return turtle.exportedFiles()
     }
     
     combinedPlantBoundsRects(selectedPlants: PdPlant[], excludeInvisiblePlants: boolean, excludeNonSelectedPlants: boolean): TRect {

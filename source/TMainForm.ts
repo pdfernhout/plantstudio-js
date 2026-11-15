@@ -42,6 +42,7 @@ import { PdSCurveParameterPanel } from "./PdSCurveParameterPanel"
 import { PdSmallintParameterPanel } from "./PdSmallintParameterPanel"
 import { PdRealParameterPanel } from "./PdRealParameterPanel"
 import { TGeneric3DOptionsForm } from "./TGeneric3DOptionsForm"
+import { downloadFiles } from "./FileDownload"
 
 type PosingField = 
     "hide" // posingHidePart
@@ -100,7 +101,7 @@ const lifeCycleDraggerWidth = 10
 
 let pictureFileSaveAttemptsThisSession: short = 0
 let nozzleFileSaveAttemptsThisSession: short = 0
-let exportTo3DFileSaveAttemptsThisSession: short[] = Array(7) // Array(ExportFormats.k3DExportTypeLast + 1)
+let exportTo3DFileSaveAttemptsThisSession: short[] = Array(ExportFormats.k3DExportTypeLast + 1).fill(0)
 
 type TShiftState = {
     isShift: boolean
@@ -1305,15 +1306,12 @@ export class TMainForm {
     */
     
     async ExportToGeneric3DType(outputType: short) {
-        let fileInfo: SaveFileNamesStructure = createSaveFileNamesStructure()
         let excludeInvisiblePlants: boolean
         let excludeNonSelectedPlants: boolean
         
-        // let optionsForm: TGeneric3DOptionsForm | null = null
-        const optionsForm: any = await customModal((resolve: any) => {
+        const optionsForm = await customModal<TGeneric3DOptionsForm | null>((resolve: any) => {
             return m(TGeneric3DOptionsForm, { 
                 close: (form: TGeneric3DOptionsForm | null) => {
-                    // optionsForm = form
                     return resolve(form) 
                 },
                 outputType,
@@ -1321,40 +1319,21 @@ export class TMainForm {
             }) as any
         }, "width: 32rem; height: 24rem; position: relative")
 
-        // optionsForm.rearrangeItemsForOutputType()
         if (!optionsForm) { return }
         const tempOptions: FileExport3DOptionsStructure = optionsForm.options
         const optionsChanged = optionsForm.optionsChanged
         const fileType = fileTypeFor3DExportType(outputType)
-        const fileDescriptor = nameStringForFileType(fileType)
         exportTo3DFileSaveAttemptsThisSession[outputType] += 1
-        const suggestedFileName = "plants" + IntToStr(exportTo3DFileSaveAttemptsThisSession[outputType]) + "." + extensionForFileType(fileType)
-        if (!getFileSaveInfo(fileType, kAskForFileName, suggestedFileName, fileInfo)) {
-            if (optionsChanged) {
-                if (MessageDialog(fileDescriptor + " export stopped." + chr(13) + chr(13) + 
-                    "Do you want to save the changes you made" + chr(13) + "to the " + fileDescriptor + 
-                    " export options?", mtConfirmation, mbYesNo, 0) === IDYES)
-                {
-                    const newCommand = new PdChangeDomain3DOptionsCommand(tempOptions, outputType)
-                    this.doCommand(newCommand)
-                }
-            }
-            return
-        }
-        // TODO PDF: Fix or remove: enoughRoomToSaveFile
-        // if (!this.enoughRoomToSaveFile(fileInfo.tempFile, fileDescriptor, tempOptions.fileSize)) {
-        //     return
-        // }
+        let suggestedFileName = "plants" + IntToStr(exportTo3DFileSaveAttemptsThisSession[outputType]) + "." + extensionForFileType(fileType)
         if (optionsChanged) {
             const newCommand = new PdChangeDomain3DOptionsCommand(tempOptions, outputType)
             this.doCommand(newCommand)
         }
         try {
-            startFileSave(fileInfo)
             if (outputType === ExportFormats.kPOV) {
-                fileInfo.newFile = replacePunctuationWithUnderscores(stringUpTo(ExtractFileName(fileInfo.newFile), ".")) + ".inc"
+                suggestedFileName = replacePunctuationWithUnderscores(stringUpTo(ExtractFileName(suggestedFileName), ".")) + ".inc"
             }
-            startWaitMessage("Saving " + ExtractFileName(fileInfo.newFile) + "...")
+            startWaitMessage("Exporting " + suggestedFileName + "...")
             excludeInvisiblePlants = false
             excludeNonSelectedPlants = false
             switch (tempOptions.exportType) {
@@ -1366,11 +1345,14 @@ export class TMainForm {
                     excludeInvisiblePlants = true
                     break
             }
-            domain.plantManager.write3DOutputFileToFileName(this.selectedPlants, excludeInvisiblePlants, excludeNonSelectedPlants, fileInfo.tempFile, outputType)
-            fileInfo.writingWasSuccessful = true
+            const files = domain.plantManager.write3DOutputFileToFileName(
+                this.selectedPlants, excludeInvisiblePlants, excludeNonSelectedPlants, suggestedFileName, outputType,
+            )
+            downloadFiles(files)
+        } catch (error: any) {
+            ShowMessage(error?.message || "PlantStudio could not export this file.")
         } finally {
             stopWaitMessage()
-            cleanUpAfterFileSave(fileInfo)
         }
     }
     
