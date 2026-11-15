@@ -424,6 +424,10 @@ export class KfFileExportSurface extends KfDrawingSurface {
     endFile(): void {
         throw new Error("subclasses must override")
     }
+
+    fileContents(): string | Uint8Array {
+        throw new Error("subclasses must provide exported file contents")
+    }
     
     startPlant(aLongName: string, aPlantIndex: short): void {
         this.currentPlantIndex = aPlantIndex
@@ -471,9 +475,14 @@ export class KfFileExportSurface extends KfDrawingSurface {
         if (this.numPoints >= kMax3DPoints) {
             throw new Error("Problem: Too many points in 3D export.")
         }
-        this.points[this.numPoints].x = this.pressedOrNot(this.scale * point.x, Axis.kX)
-        this.points[this.numPoints].y = this.pressedOrNot(this.scale * point.y, Axis.kY)
-        this.points[this.numPoints].z = this.pressedOrNot(this.scale * point.z, Axis.kZ)
+        // Each format applies scaling and pressing when it writes coordinates.
+        // Store a copy so neither a reused input point nor a second scale pass
+        // changes the buffered geometry.
+        this.points[this.numPoints] = {
+            x: point.x,
+            y: point.y,
+            z: point.z,
+        }
         this.numPoints += 1
     }
     
@@ -491,9 +500,7 @@ export class KfFileExportSurface extends KfDrawingSurface {
         if (this.numFaces >= kMax3DFaces) {
             throw new Error("Problem: Too many faces in 3D export.")
         }
-        this.faces[this.numFaces].vertex1 = a
-        this.faces[this.numFaces].vertex2 = b
-        this.faces[this.numFaces].vertex3 = c
+        this.faces[this.numFaces] = { vertex1: a, vertex2: b, vertex3: c, surfaceID: 0 }
         this.numFaces += 1
     }
     
@@ -598,6 +605,10 @@ export class KfTextFileExportSurface extends KfFileExportSurface {
     
     endFile(): void {
         // TODO: Use or remove: CloseFile(this.outputFile)
+    }
+
+    fileContents(): string {
+        return this.outputFile.contents
     }
     
 }
@@ -1478,6 +1489,13 @@ export class KfBinaryFileExportSurface extends KfFileExportSurface {
     endFile(): void {
         throw new Error("subclasses must override")
     }
+
+    fileContents(): Uint8Array {
+        if (!this.stream) {
+            return new Uint8Array()
+        }
+        return this.stream.contents.slice(0, this.stream.contentsLengthUsed)
+    }
     
     writeStringZ(value: string): void {
         // TODO: CONVERT: writeStringZ assumes plain ASCII characters
@@ -1499,47 +1517,25 @@ export class KfBinaryFileExportSurface extends KfFileExportSurface {
     }
     
     writeWord(value: byte): void {
-        let swappedBytes: byte[] = [0, 0]
-        
-        if (this.isLittleEndian()) {
-            this.stream!.WriteBuffer(value, 2)
-        } else {
-            swappedBytes[1] = value && 255
-            swappedBytes[0] = value >> 8
-            this.stream!.WriteBuffer(swappedBytes, 2)
-        }
+        const bytes: byte[] = this.isLittleEndian()
+            ? [value & 0xFF, (value >>> 8) & 0xFF]
+            : [(value >>> 8) & 0xFF, value & 0xFF]
+        this.stream!.WriteBuffer(bytes, bytes.length)
     }
     
     writeDword(value: long): void {
-        let swappedBytes: byte[] = [0, 0, 0, 0]
-        
-        if (this.isLittleEndian()) {
-            this.stream!.WriteBuffer(value, 4)
-        } else {
-            swappedBytes[3] = value && 255
-            swappedBytes[2] = (value >> 8) && 255
-            swappedBytes[1] = (value >> 16) && 255
-            swappedBytes[0] = (value >> 24) && 255
-            this.stream!.WriteBuffer(swappedBytes, 4)
-        }
+        const bytes: byte[] = this.isLittleEndian()
+            ? [value & 0xFF, (value >>> 8) & 0xFF, (value >>> 16) & 0xFF, (value >>> 24) & 0xFF]
+            : [(value >>> 24) & 0xFF, (value >>> 16) & 0xFF, (value >>> 8) & 0xFF, value & 0xFF]
+        this.stream!.WriteBuffer(bytes, bytes.length)
     }
     
     writeFloat(value: float): void {
-        let convert: SingleOverlay
-        let swappedBytes: byte[] = [0, 0, 0, 0]
-        
-        if (this.isLittleEndian()) {
-            this.stream!.WriteBuffer(value, 4)
-        } else {
-            /* TODO: PORT -- Implement writeFloat correctly for endianness
-            convert.numeric = value
-            swappedBytes[3] = convert.bytes[0]
-            swappedBytes[2] = convert.bytes[1]
-            swappedBytes[1] = convert.bytes[2]
-            swappedBytes[0] = convert.bytes[3]
-            this.stream.WriteBuffer(swappedBytes, 4)
-            */
-        }
+        const buffer = new ArrayBuffer(4)
+        const view = new DataView(buffer)
+        view.setFloat32(0, value, this.isLittleEndian())
+        const bytes = Array.from(new Uint8Array(buffer))
+        this.stream!.WriteBuffer(bytes, bytes.length)
     }
     
     isLittleEndian(): boolean {
@@ -1645,7 +1641,7 @@ export class KfDrawingSurfaceFor3DS extends KfBinaryFileExportSurface {
     }
     
     popChunkStartAndFixupChunkSize(): void {
-        const totalSize: int = this.stream!.Size
+        const totalSize: int = this.stream!.Position
         const lastIndex: int = this.chunkStartStack.length - 1
         if (lastIndex < 0) {
             // should check if -1
@@ -1856,10 +1852,12 @@ export class KfDrawingSurfaceForLWO extends KfBinaryFileExportSurface {
         if (this.numFaces >= kMax3DFaces) {
             throw new Error("Problem: Too many faces in LWO; in method KfDrawingSurfaceFor3DS.addTriangle.")
         }
-        this.faces[this.numFaces].vertex1 = a
-        this.faces[this.numFaces].vertex2 = b
-        this.faces[this.numFaces].vertex3 = c
-        this.faces[this.numFaces].surfaceID = this.currentSurfaceID
+        this.faces[this.numFaces] = {
+            vertex1: a,
+            vertex2: b,
+            vertex3: c,
+            surfaceID: this.currentSurfaceID,
+        }
         this.numFaces += 1
     }
     
@@ -1869,7 +1867,7 @@ export class KfDrawingSurfaceForLWO extends KfBinaryFileExportSurface {
     }
     
     popChunkStartAndFixupChunkSize(): void {
-        const totalSize: int = this.stream!.Size
+        const totalSize: int = this.stream!.Position
         const lastIndex = this.chunkStartStack.length - 1
         if (lastIndex < 0) {
             // should check if -1
