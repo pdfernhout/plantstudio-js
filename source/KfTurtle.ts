@@ -9,7 +9,8 @@ import { TRect } from "./TRect"
 import { KfMatrix } from "./KfMatrix"
 import { KfTriangle } from "./KfTriangle"
 import { KfFileExportSurface, KfDrawingSurfaceForPOV, KfDrawingSurfaceForDXF, KfDrawingSurfaceFor3DS, KfDrawingSurfaceForOBJ, KfDrawingSurfaceForVRML, KfDrawingSurfaceForLWO, ExportFormats } from "./U3dexport"
-import { kMaximumRecordedPoints, kTdoBackColor, kTdoForeColor, kTdoLineContrastIndex } from "./KfObject3D"
+import { kMaximumRecordedPoints, kTdoBackColor, kTdoForeColor, kTdoLineContrastIndex } from "./Kf3DConstants"
+import type { ExportedFile } from "./U3dexport"
 
 // const
 const kInitialTurtleMatrixStackDepth = 250
@@ -131,6 +132,20 @@ export class KfTurtle {
         if ((this.drawingSurface !== null) && (this.drawingSurface instanceof KfFileExportSurface)) {
             this.drawingSurface.endFile()
         }
+    }
+
+    exportedFileContents(): string | Uint8Array {
+        if (this.drawingSurface instanceof KfFileExportSurface) {
+            return this.drawingSurface.fileContents()
+        }
+        throw new Error("The turtle is not configured for file export.")
+    }
+
+    exportedFiles(): ExportedFile[] {
+        if (this.drawingSurface instanceof KfFileExportSurface) {
+            return this.drawingSurface.exportedFiles()
+        }
+        throw new Error("The turtle is not configured for file export.")
     }
     
     // -------------------------------------------------------------------------- KfTurtle initializing and setting values 

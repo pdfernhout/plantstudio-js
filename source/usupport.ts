@@ -320,37 +320,19 @@ export function limitString(aString: string, maxChars: short): string {
 */
 
 export function replacePunctuationWithUnderscores(aString: string): string {
-    let lowerCaseString: string
-    let isAlpha: boolean
-    
     let result = ""
-    lowerCaseString = aString.toLowerCase()
-    if (aString.length > 0) {
-        for (let i = 1; i <= aString.length; i++) {
-            isAlpha = (ord(lowerCaseString[i]) >= ord("a")) && (ord(lowerCaseString[i]) <= ord("z")) || (ord(lowerCaseString[i]) >= ord("0")) && (ord(lowerCaseString[i]) <= ord("9"))
-            if (isAlpha) {
-                result = result + aString[i]
-            } else {
-                result = result + "_"
-            }
-        }
+    for (let i = 0; i < aString.length; i++) {
+        const character = aString[i]
+        const lowerCaseCharacter = character.toLowerCase()
+        const isAlphaNumeric = (lowerCaseCharacter >= "a" && lowerCaseCharacter <= "z") ||
+            (lowerCaseCharacter >= "0" && lowerCaseCharacter <= "9")
+        result += isAlphaNumeric ? character : "_"
     }
     return result
 }
 
 export function replaceCommasWithPeriods(aString: string): string {
-    let result = ""
-    if (aString.length > 0) {
-        for (let i = 1; i <= aString.length; i++) {
-            const isComma = aString[i] === ","
-            if (!isComma) {
-                result = result + aString[i]
-            } else {
-                result = result + "."
-            }
-        }
-    }
-    return result
+    return aString.replace(/,/g, ".")
 }
 
 export function found(substring: string, fullString: string): boolean {

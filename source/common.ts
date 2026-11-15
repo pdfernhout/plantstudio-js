@@ -244,8 +244,7 @@ export class TFileStream {
         if (fileMode === TFileStream.fmOpenRead) {
             this.loadFile(fileName)
         } else {
-            // TODO: Sloppy coding to have big array to avoid resizing
-            this.contents = new Uint8Array(new Array(1000000))
+            this.contents = new Uint8Array(1024)
         }
     }
 
@@ -269,20 +268,25 @@ export class TFileStream {
 
     WriteBuffer(buffer: number | number[], length: number) {
         if (Array.isArray(buffer)) {
+            this.ensureCapacity(this.position + Math.min(buffer.length, length))
             for (let i = 0; i < Math.min(buffer.length, length); i++) {
-                if (this.position >= this.contents.length) {
-                    throw new Error("Writing past end of file: " + this.position + " >= " + this.contents.length)
-                }
                 this.contents[this.position++] = buffer[i] & 255
                 this.contentsLengthUsed = Math.max(this.contentsLengthUsed, this.position)
             } 
         } else {
-            if (this.position >= this.contents.length) {
-                throw new Error("Writing past end of file: " + this.position + " >= " + this.contents.length)
-            }
+            this.ensureCapacity(this.position + 1)
             this.contents[this.position++] = buffer & 255
             this.contentsLengthUsed =  Math.max(this.contentsLengthUsed, this.position)
         }
+    }
+
+    private ensureCapacity(requiredLength: number): void {
+        if (requiredLength <= this.contents.length) return
+        let newLength = Math.max(1024, this.contents.length)
+        while (newLength < requiredLength) newLength *= 2
+        const expandedContents = new Uint8Array(newLength)
+        expandedContents.set(this.contents)
+        this.contents = expandedContents
     }
 
     ReadBytes(length: number) {
@@ -301,7 +305,7 @@ export class TFileStream {
     }
 
     get Size() {
-        return this.contents.length
+        return this.contentsLengthUsed
     }
 
     Seek(offset: number, origin: number) {
@@ -310,7 +314,7 @@ export class TFileStream {
         } else if (origin === TFileStream.soFromCurrent) {
             this.position = this.position + offset
         } else if (origin === TFileStream.soFromEnd) {
-            this.position = this.contents.length + offset
+            this.position = this.contentsLengthUsed + offset
         } else {
             throw new Error("Unexpected Seek origin: " + origin)
         }
@@ -344,7 +348,7 @@ export function HelpJump(section: string, url?: string) {
         } else {
             const maxLength = "Breeding_plants_using_the_breede".length
             section = section.substring(0, maxLength)
-            section = section.replaceAll("-", "")
+            section = section.replace(/-/g, "")
             section = "plantstudio" + section + ".html"
         }
         url = "https://www.kurtz-fernhout.com/PlantStudio/help/" + section

@@ -85,6 +85,7 @@ export class TGeneric3DOptionsForm {
     totalMaterials: long = 0
     Caption: string = "3D Export Options"
     close: ((form: TGeneric3DOptionsForm | null) => void) | null = null
+    initialOptionsJSON: string = ""
     
     //$R *.DFM
     FormActivate(): void {
@@ -142,6 +143,7 @@ export class TGeneric3DOptionsForm {
         }
         this.transferDirection = kTransferSave
         this.transferFields()
+        this.optionsChanged = this.optionsChanged || JSON.stringify(this.options) !== this.initialOptionsJSON
         this.close!(this)
     }
     
@@ -205,7 +207,9 @@ export class TGeneric3DOptionsForm {
     }
     
     transferFields(): void {
-        // options that work for all types
+        // The web form binds controls directly to the options object. Only the
+        // three mutually-exclusive plant filters need a small adapter because
+        // they are exposed as booleans in the view and an enum in the model.
         if (this.transferDirection === kTransferLoad) {
             switch (this.options.exportType) {
                 case kIncludeSelectedPlants:
@@ -236,59 +240,6 @@ export class TGeneric3DOptionsForm {
             if ((oldExportType !== this.options.exportType)) {
                 this.optionsChanged = true
             }
-        }
-        this.options.layeringOption = this.transferRadioGroup(this.layeringOption, this.options.layeringOption)
-        this.options.stemCylinderFaces = this.transferSmallintSpinEditBox(this.stemCylinderFaces, this.options.stemCylinderFaces)
-        this.options.lengthOfShortName = this.transferSmallintSpinEditBox(this.lengthOfShortName, this.options.lengthOfShortName)
-        this.options.xRotationBeforeDraw = this.transferSmallintSpinEditBox(this.xRotationBeforeDraw, this.options.xRotationBeforeDraw)
-        this.options.translatePlantsToWindowPositions = this.transferCheckBox(this.translatePlantsToWindowPositions, this.options.translatePlantsToWindowPositions)
-        this.options.writePlantNumberInFrontOfName = this.transferCheckBox(this.writePlantNumberInFrontOfName, this.options.writePlantNumberInFrontOfName)
-        this.options.writeColors = this.transferCheckBox(this.writeColors, this.options.writeColors)
-        this.options.overallScalingFactor_pct = this.transferSmallintSpinEditBox(this.overallScalingFactor_pct, this.options.overallScalingFactor_pct)
-        this.options.pressPlants = this.transferCheckBox(this.pressPlants, this.options.pressPlants)
-        this.options.directionToPressPlants = this.transferComboBox(this.directionToPressPlants, this.options.directionToPressPlants)
-        this.options.makeTrianglesDoubleSided = this.transferCheckBox(this.makeTrianglesDoubleSided, this.options.makeTrianglesDoubleSided)
-        
-        // options for specific types
-        // do after general one to override
-        switch (this.outputType) {
-            case ExportFormats.kDXF:
-                this.options.writeColors = this.transferCheckBox(this.dxfWriteColors, this.options.writeColors)
-                if (this.transferDirection === kTransferLoad) {
-                    this.dxfWriteColorsClick(this)
-                }
-                this.options.dxf_whereToGetColors = this.transferRadioButton(this.colorDXFFromRGB, this.options.dxf_whereToGetColors, kColorDXFFromRGB)
-                this.options.dxf_whereToGetColors = this.transferRadioButton(this.colorDXFFromOneColor, this.options.dxf_whereToGetColors, kColorDXFFromOneColor)
-                this.options.dxf_whereToGetColors = this.transferRadioButton(this.colorDXFFromPlantPartType, this.options.dxf_whereToGetColors, kColorDXFFromPlantPartType)
-                this.wholePlantColor.Color = u3dexport.dxfColors[this.options.dxf_wholePlantColorIndex]
-                break
-            case ExportFormats.kPOV:
-                this.options.pov_minLineLengthToWrite = this.transferSingleEditBox(this.minLineLengthToWrite, this.options.pov_minLineLengthToWrite)
-                this.options.pov_minTdoScaleToWrite = this.transferSingleEditBox(this.minTdoScaleToWrite, this.options.pov_minTdoScaleToWrite)
-                this.options.pov_commentOutUnionAtEnd = this.transferCheckBox(this.commentOutUnionAtEnd, this.options.pov_commentOutUnionAtEnd)
-                this.options.nest_Inflorescence = this.transferCheckBox(this.nestInflorescence, this.options.nest_Inflorescence)
-                this.options.nest_LeafAndPetiole = this.transferCheckBox(this.nestLeafAndPetiole, this.options.nest_LeafAndPetiole)
-                this.options.nest_CompoundLeaf = this.transferCheckBox(this.nestCompoundLeaf, this.options.nest_CompoundLeaf)
-                this.options.nest_PedicelAndFlowerFruit = this.transferCheckBox(this.nestPedicelAndFlowerFruit, this.options.nest_PedicelAndFlowerFruit)
-                this.options.nest_FloralLayers = this.transferCheckBox(this.nestFloralLayers, this.options.nest_FloralLayers)
-                break
-            case ExportFormats.k3DS:
-                // nothing special
-                break
-            case ExportFormats.kOBJ:
-                // nothing special
-                break
-            case ExportFormats.kVRML:
-                this.options.nest_Inflorescence = this.transferCheckBox(this.nestInflorescence, this.options.nest_Inflorescence)
-                this.options.nest_LeafAndPetiole = this.transferCheckBox(this.nestLeafAndPetiole, this.options.nest_LeafAndPetiole)
-                this.options.nest_CompoundLeaf = this.transferCheckBox(this.nestCompoundLeaf, this.options.nest_CompoundLeaf)
-                this.options.nest_PedicelAndFlowerFruit = this.transferCheckBox(this.nestPedicelAndFlowerFruit, this.options.nest_PedicelAndFlowerFruit)
-                this.options.nest_FloralLayers = this.transferCheckBox(this.nestFloralLayers, this.options.nest_FloralLayers)
-                this.options.vrml_version = this.transferRadioGroup(this.vrmlVersionRadioGroup, this.options.vrml_version)
-                break
-            case ExportFormats.kLWO:
-                // nothing yet
-                break
         }
     }
 
@@ -398,11 +349,6 @@ export class TGeneric3DOptionsForm {
     }
     
     colorsByPlantPartView() {
-        // TODO PDF: Fix next part added for testing
-        for (let i = 0; i < this.options.dxf_plantPartColorIndexes.length; i++) {
-            this.options.dxf_plantPartColorIndexes[i] = i % dxfColors.length
-        }
-
         return m("div",
             this.colorsByPlantPart.map((wrapper, index) => m("div",
                 m("input[type=checkbox].mr1", {
@@ -420,34 +366,25 @@ export class TGeneric3DOptionsForm {
     }
     
     wholePlantColorMouseUp(): void {
-        let colorForm: TChooseDXFColorForm
-        let response: int
-        
-        colorForm = udxfclr.TChooseDXFColorForm().create(this)
-        if (colorForm === null) {
-            throw new Error("Problem: Could not create color window.")
-        }
-        try {
-            colorForm.colorIndex = this.options.dxf_wholePlantColorIndex
-            response = colorForm.ShowModal()
-            if (response === mrOK) {
-                this.options.dxf_wholePlantColorIndex = colorForm.colorIndex
-                this.wholePlantColor.Color = dxfColors[this.options.dxf_wholePlantColorIndex]
-                this.wholePlantColor.Invalidate()
-                this.optionsChanged = true
-            }
-        } finally {
-            colorForm.free
-            colorForm = null
+        const value = window.prompt(
+            `Choose a DXF palette index (0-${dxfColors.length - 1})`,
+            IntToStr(this.options.dxf_wholePlantColorIndex),
+        )
+        if (value !== null) {
+            this.options.dxf_wholePlantColorIndex = StrToIntRangeDef(
+                value,
+                0,
+                dxfColors.length - 1,
+                this.options.dxf_wholePlantColorIndex,
+            )
         }
     }
     
     setPlantPartColorClick(): void {
-        let colorForm: TChooseDXFColorForm
-        let firstColorIndex: TColorRef = -1
+        let firstColorIndex = -1
 
         for (let i = 0; i < this.colorsByPlantPart.length; i++) {
-            if (this.colorsByPlantPart.Selected[i]) {
+            if (this.colorsByPlantPart[i].selected) {
                 if (firstColorIndex === -1) {
                     firstColorIndex = this.options.dxf_plantPartColorIndexes[i]
                 }
@@ -456,24 +393,17 @@ export class TGeneric3DOptionsForm {
         if (firstColorIndex < 0) {
             return
         }
-        colorForm = udxfclr.TChooseDXFColorForm().create(this)
-        if (colorForm === null) {
-            throw new Error("Problem: Could not create color window.")
-        }
-        try {
-            colorForm.colorIndex = firstColorIndex
-            const response = colorForm.ShowModal()
-            if (response === mrOK) {
-                for (let i = 0; i < this.colorsByPlantPart.length; i++) {
-                    if (this.colorsByPlantPart.Selected[i]) {
-                        this.options.dxf_plantPartColorIndexes[i] = colorForm.colorIndex
-                    }
+        const value = window.prompt(
+            `Choose a DXF palette index (0-${dxfColors.length - 1})`,
+            IntToStr(firstColorIndex),
+        )
+        if (value !== null) {
+            const colorIndex = StrToIntRangeDef(value, 0, dxfColors.length - 1, firstColorIndex)
+            for (let i = 0; i < this.colorsByPlantPart.length; i++) {
+                if (this.colorsByPlantPart[i].selected) {
+                    this.options.dxf_plantPartColorIndexes[i] = colorIndex
                 }
-                this.optionsChanged = true
             }
-        } finally {
-            colorForm.free
-            colorForm = null
         }
     }
     
@@ -516,8 +446,12 @@ export class TGeneric3DOptionsForm {
 
     oninit(vnode: any) {
         this.close = vnode.attrs.close
-        this.outputType = vnode.attrs.outputType,
+        this.outputType = vnode.attrs.outputType
         this.options = JSON.parse(JSON.stringify(vnode.attrs.options))
+        this.initialOptionsJSON = JSON.stringify(this.options)
+        this.directionToPressPlants_Selected = ["x", "y", "z"][this.options.directionToPressPlants] || "x"
+        this.transferDirection = kTransferLoad
+        this.transferFields()
         this.fillPlantPartColors()
         this.rearrangeItemsForOutputType()
     }
@@ -525,6 +459,8 @@ export class TGeneric3DOptionsForm {
     view() {
         return m("div.Generic3DOptionsForm.TGeneric3DOptionsForm.h-100.overflow-auto",
             m("div.fs3.b", this.Caption),
+            this.outputType === ExportFormats.kOBJ && this.options.writeColors &&
+                m("p", "The OBJ and its MTL color file will download together as a ZIP."),
             m("div.Group.Group.g00000004",
                 m("div.TGroupBox.drawWhichPlantsGroupBox.TGroupBox",
                     "Include",
@@ -736,7 +672,10 @@ export class TGeneric3DOptionsForm {
                     m("label.Label8.TLabel",
                         m("select.directionToPressPlants.TComboBox.ml1.mr1",
                             {
-                                onchange: (event: any) => this.directionToPressPlants_Selected = event.target.value,
+                                onchange: (event: any) => {
+                                    this.directionToPressPlants_Selected = event.target.value
+                                    this.options.directionToPressPlants = ["x", "y", "z"].indexOf(event.target.value)
+                                },
                             },
                             ["x","y","z"].map(xyz => m("option", {
                                 value: xyz,
@@ -763,9 +702,9 @@ export class TGeneric3DOptionsForm {
                 ),
                 m("br"),
                 m("label.checkbox-inline.makeTrianglesDoubleSided.TCheckBox", m("input[type=checkbox].mr1",
-                    {
-                        checked: this.options.makeTrianglesDoubleSided,
-                        onchange: (event: any) => this.options.makeTrianglesDoubleSided = event.target.any
+                        {
+                            checked: this.options.makeTrianglesDoubleSided,
+                            onchange: (event: any) => this.options.makeTrianglesDoubleSided = event.target.checked
                     }),
                     caption("&Double polygons on 3D objects"),
                 ),
@@ -821,7 +760,7 @@ export class TGeneric3DOptionsForm {
                     caption("&inflorescences"),
                 ),
                 m("br"),
-                m("label.checkbox-inline.commentOutUnionAtEnd.TCheckBox", m("input[type=checkbox].mr1",
+                this.outputType === ExportFormats.kPOV && m("label.checkbox-inline.commentOutUnionAtEnd.TCheckBox", m("input[type=checkbox].mr1",
                     {
                         checked: this.options.pov_commentOutUnionAtEnd,
                         onchange: (event: any) => this.options.pov_commentOutUnionAtEnd = event.target.checked
@@ -829,7 +768,7 @@ export class TGeneric3DOptionsForm {
                     caption("Comment out &union of plants at end"),
                 ),
             ),
-            m("div.TRadioGroup.vrmlVersionRadioGroup",
+            this.outputType === ExportFormats.kVRML && m("div.TRadioGroup.vrmlVersionRadioGroup",
                 m("div", "VRML Version"),
                 ["VRML &1.0","VRML &2.0 (VRML 97)"].map((version, index) =>
                     [

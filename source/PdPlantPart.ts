@@ -304,6 +304,7 @@ export class PdPlantPart extends PdStreamableObject {
         let endWidth: float
         let startPortionWidth: float
         let endPortionWidth: float
+        let previousEndPoints: KfPoint3D[] = []
         let isLastSegment: boolean
         let realLength: float
         let realWidth: float
@@ -381,7 +382,9 @@ export class PdPlantPart extends PdStreamableObject {
             turtle.rotateY(segmentTurnY)
             turtle.rotateZ(segmentTurnZ)
             if (turtle.exportingToFile()) {
-                this.write3DExportLine(this.partID, segmentLength, startPortionWidth, endPortionWidth, i)
+                previousEndPoints = this.write3DExportLine(
+                    this.partID, segmentLength, startPortionWidth, endPortionWidth, i, previousEndPoints,
+                )
             } else {
                 const triangleMade = turtle.drawInMillimeters(segmentLength, this.partID)
                 if ((turtle.drawOptions.sortTdosAsOneItem) && (triangleMade !== null)) {
@@ -392,7 +395,7 @@ export class PdPlantPart extends PdStreamableObject {
         turtle.ifExporting_endStemSegment()
     }
     
-    write3DExportLine(partID: short, length: float, startWidth: float, endWidth: float, segmentNumber: short): void {
+    write3DExportLine(partID: short, length: float, startWidth: float, endWidth: float, segmentNumber: short, previousEndPoints: KfPoint3D[] = []): KfPoint3D[] {
         let turtle: KfTurtle
         let angle: float
         let pipeRadius: float
@@ -402,17 +405,17 @@ export class PdPlantPart extends PdStreamableObject {
         let endPoints: KfPoint3D[] = new Array(kMaxLineOutputPoints + 1)
         
         if (this.plant.turtle === null) {
-            return
+            return []
         }
         turtle = this.plant.turtle
         if (turtle.writingToPOV()) {
             // POV draws cylinders directly, not with faces
             turtle.drawInMillimeters(length, partID)
-            return
+            return []
         }
         const faces = turtle.ifExporting_stemCylinderFaces()
         if (faces === 0) {
-            return
+            return []
         }
         if (segmentNumber <= 0) {
             // get startWidth points; if done before, copy from last endWidth points
@@ -427,7 +430,7 @@ export class PdPlantPart extends PdStreamableObject {
             }
         } else {
             for (let i = 0; i < faces; i++) {
-                startPoints[i] = endPoints[i]
+                startPoints[i] = previousEndPoints[i]
             }
         }
         turtle.moveInMillimeters(length)
@@ -443,6 +446,7 @@ export class PdPlantPart extends PdStreamableObject {
         }
         // draw pipe faces from stored points
         turtle.drawFileExportPipeFaces(startPoints, endPoints, faces, segmentNumber)
+        return endPoints
     }
     
     tdoToSortLinesWith(): KfObject3D | null {
